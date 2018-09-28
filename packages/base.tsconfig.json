@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "composite": true,
+
+        "target": "es2017",
+        "module": "commonjs",
+        "lib": ["es2017"],
+        "types": ["node"],
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+
+        "pretty": true,
+
+        "strict": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitUseStrict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true
+    }
+}

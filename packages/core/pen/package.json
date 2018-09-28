@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "name": "pen",
+    "version": "0.0.1",
+    "description": "",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p .",
+        "clean": "rimraf dist/"
+    },
+    "license": "MIT",
+    "dependencies": {
+    },
+    "devDependencies": {
+    }
+}
