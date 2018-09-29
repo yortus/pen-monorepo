@@ -1,0 +1,32 @@
+
+
+/*
+ * egs:
+ *      2 + 3 * 5
+ *      42 * (333 - 2)
+ */
+
+
+start       = expr (WS END)
+expr        = add | sub | term
+add         = {type = 'add', (WS) lhs = expr, (WS ADD WS) rhs = term}
+sub         = {type = 'sub', (WS) lhs = expr, (WS SUB WS) rhs = term}
+
+term        = mul | div | factor
+mul         = {type = 'mul', (WS) lhs = term, (WS MUL WS) rhs = factor}
+div         = {type = 'div', (WS) lhs = term, (WS DIV WS) rhs = factor}
+
+factor      = number   |   (WS LP WS) expr (WS RP)
+number      = "[0-9]+"
+
+
+// Rule names starting with an upper-case letter are always treated as source-only expressions.
+// They are thus both strings and source-idioms. This means the `-"  "-` delimiters may be omitted
+ADD         = [+]
+SUB         = [-]
+MUL         = [*]
+DIV         = [/]
+LP          = [(]
+RP          = [)]
+WS          = [ \t]*
+END         = !.
