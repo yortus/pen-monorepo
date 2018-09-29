@@ -43,13 +43,6 @@ export interface BindingDeclaration {
     value: Expression;
 }
 
-// Expression
-// SelectExpression
-// ConcatExpression
-// RecordExpression
-// Identifier
-// StringLiteral
-// StringPattern
 export type Expression =
     | SelectExpression
     | ConcatExpression
@@ -96,12 +89,12 @@ export interface StringLiteral {
 
 export interface StringPattern {
     type: 'StringPattern';
-    atoms: Array<QuantifiedTextAtom | TextAtom>;
+    atoms: Array<QuantifiedText | TextAtom>;
 }
 
 
-export interface QuantifiedTextAtom {
-    type: 'QuantifiedTextAtom';
+export interface QuantifiedText {
+    type: 'QuantifiedText';
     value: TextAtom;
     min: number;
     max?: number;
@@ -111,8 +104,8 @@ export type TextAtom = StringLiteral | CharClass | CharWildcard;
 
 export interface CharClass {
     type: 'CharClass';
-    // TODO: ...
-    // - range or single char (literal or escaped)
+    parts: Array<string | [string, string]>;
+    // TODO: support isNegated?
 }
 
 export interface CharWildcard {
