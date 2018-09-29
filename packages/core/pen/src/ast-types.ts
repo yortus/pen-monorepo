@@ -59,7 +59,7 @@ export interface SelectExpression {
 export interface ConcatExpression {
     type: 'ConcatExpression';
     leading: Expression[]; // only strings and/or predicates
-    value: Expression;
+    core: Expression;
     trailing: Expression[]; // only strings and/or predicates
 }
 
