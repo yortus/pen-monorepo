@@ -7,26 +7,38 @@
  */
 
 
-start       = expr (WS END)
-expr        = add | sub | term
-add         = {type = 'add', (WS) lhs = expr, (WS ADD WS) rhs = term}
-sub         = {type = 'sub', (WS) lhs = expr, (WS SUB WS) rhs = term}
+Start       = <Expr> ws end
+Expr        = Add | Sub | Term
+Add         = {type: 'add', lhs: ws <Expr>, rhs: ws add ws <Term>}
+Sub         = {type: 'sub', lhs: ws <Expr>, rhs: ws sub ws <Term>}
 
-term        = mul | div | factor
-mul         = {type = 'mul', (WS) lhs = term, (WS MUL WS) rhs = factor}
-div         = {type = 'div', (WS) lhs = term, (WS DIV WS) rhs = factor}
+Term        = Mul | Div | Factor
+Mul         = {type: 'mul', lhs: ws <Term>, rhs: ws mul ws <Factor>}
+Div         = {type: 'div', lhs: ws <Term>, rhs: ws div ws <Factor>}
 
-factor      = number   |   (WS LP WS) expr (WS RP)
-number      = "[0-9]+"
+Factor      = Number | ParenExpr
+Number      = {type: 'number', value: ws </[0-9]+/>}
+ParenExpr   = {type: 'paren', expr: ws lp ws <Expr> ws rp}
 
 
 // Rule names starting with an upper-case letter are always treated as source-only expressions.
 // They are thus both strings and source-idioms. This means the `-"  "-` delimiters may be omitted
-ADD         = [+]
-SUB         = [-]
-MUL         = [*]
-DIV         = [/]
-LP          = [(]
-RP          = [)]
-WS          = [ \t]*
-END         = !.
+add         = "+"
+sub         = "-"
+mul         = "*"
+div         = "/"
+lp          = "("
+rp          = ")"
+ws          = /[ \t]*/
+end         = !/./
+
+
+
+// TODO...
+'..'    ast-only string
+".."    literal string
+/../    string pattern (simplified regex)
+a <b> c   means:
+    a: precondition(s), leading source marker(s)
+    b: transcoded content
+    c: postcondition(s), trailing source marker(s)

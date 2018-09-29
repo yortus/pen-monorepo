@@ -12,8 +12,23 @@
 //     [ ] 1..M
 //     [ ] 0..M
 //   [ ] wildcard '.'
-// [ ] not predicate
+// [ ] not predicate / negative lookahead
 // [ ] parenthesised expression
+// [ ] leadng/trailing text
+// [ ] precondition / postcondition
+
+
+
+// TODO: node summary:
+// Program
+// NameBinding
+// CompositeExpr with name bindings
+// Selection / Select / Union / Alternation / Option / Choice / Switch / Sum / Enum / Decision / Disjunction / Branch
+// Sequence  / Series / Concat / a <b> c / Ordering / Consecution / Conjunction / Succession
+// Record & Field
+// StringLiteral (ast-only with '' or transcoded with "")
+// StringPattern / regex-like
+
 
 
 
@@ -28,19 +43,36 @@ export interface BindingDeclaration {
     value: Expression;
 }
 
+// Expression
+// SelectExpression
+// ConcatExpression
+// RecordExpression
+// Identifier
+// StringLiteral
+// StringPattern
 export type Expression =
-    | SelectionExpression
+    | SelectExpression
+    | ConcatExpression
     | RecordExpression
-    | StringExpression;
+    | Identifier
+    | StringLiteral
+    | StringPattern;
 
-export interface SelectionExpression {
-    type: 'SelectionExpression';
+export interface SelectExpression {
+    type: 'SelectExpression';
     alternatives: Expression[];
+}
+
+export interface ConcatExpression {
+    type: 'ConcatExpression';
+    leading: Expression[]; // only strings and/or predicates
+    value: Expression;
+    trailing: Expression[]; // only strings and/or predicates
 }
 
 export interface RecordExpression {
     type: 'RecordExpression';
-    elements: Array<RecordField | SourceIdiom>;
+    fields: RecordField[];
 }
 
 export interface RecordField {
@@ -49,57 +81,40 @@ export interface RecordField {
     value: Expression;
 }
 
-export interface SourceIdiom {
-    type: 'SourceIdiom';
-    value: StringExpression;
+export interface Identifier {
+    type: 'Identifier';
+    name: string;
 }
 
-
-
-
-
-// Text ~~ String ~~ Char      }- Terminology??
-export interface StringExpression {
-    type: 'StringExpression';
-    concatenands: CharSequence[];
-}
-
-type CharSequence =
-    | CharLiteral
-    | CharClass
-    | CharWildcard
-    | CharNegation
-    | CharRepetition;
-
-export interface CharLiteral {
-    type: 'CharLiteral';
+export interface StringLiteral {
+    type: 'StringLiteral';
     value: string;
-    escape?: string;
+    isAstOnly: boolean;
+    // TODO: preserve escape sequences? eg raw/cooked props?
+    //       how does babel etc handle this in its AST?
 }
+
+export interface StringPattern {
+    type: 'StringPattern';
+    atoms: Array<QuantifiedTextAtom | TextAtom>;
+}
+
+
+export interface QuantifiedTextAtom {
+    type: 'QuantifiedTextAtom';
+    value: TextAtom;
+    min: number;
+    max?: number;
+}
+
+export type TextAtom = StringLiteral | CharClass | CharWildcard;
 
 export interface CharClass {
     type: 'CharClass';
-    alternatives: Array<CharLiteral | CharRange>;
-}
-
-export interface CharRange {
-    type: 'CharRange';
-    min: CharLiteral;
-    max: CharLiteral;
+    // TODO: ...
+    // - range or single char (literal or escaped)
 }
 
 export interface CharWildcard {
     type: 'CharWildcard';
-}
-
-export interface CharNegation {
-    type: 'CharNegation';
-    value: CharSequence;
-}
-
-export interface CharRepetition {
-    type: 'CharRepetition';
-    value: CharSequence;
-    min: number;
-    max: number;
 }
