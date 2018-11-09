@@ -1,6 +1,7 @@
 {
     "files": [],
     "references": [
-        { "path": "core/pen" }
+        { "path": "core/pen" },
+        { "path": "usage-tests/math" }
     ]
 }

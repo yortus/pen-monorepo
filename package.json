@@ -13,7 +13,7 @@
         "clean": "lerna run clean && lerna clean --yes && rimraf node_modules",
         "rebuild": "yarn clean && yarn bootstrap && yarn build",
         "lint": "tslint packages/*/*/src/**/*.ts",
-        "start": "node ."
+        "test": "node packages/usage-tests/math/dist/index.js"
     },
     "devDependencies": {
         "@types/node": "^8.0.0",

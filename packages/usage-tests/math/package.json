@@ -1,16 +1,15 @@
 {
     "private": true,
-    "name": "pen",
+    "name": "math",
     "version": "0.0.1",
     "description": "",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "scripts": {
         "build": "tsc -p src",
-        "postbuild": "pegjs -o dist/grammar.js src/grammar.pegjs",
         "clean": "rimraf dist/"
     },
-    "devDependencies": {
-        "pegjs": "^0.10.0"
+    "dependencies": {
+        "pen": "^0.0.1"
     }
 }

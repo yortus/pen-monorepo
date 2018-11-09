@@ -1,0 +1,11 @@
+Todo:
+    [ ] add UMD build using webpack, as per how `multimethods` does it
+    [x] add math expression grammar as test fixture
+    [x] add API function to parse a grammar and return AST (temporary)
+    add API function to parse a grammar and spit out source for a `parse()` function:
+        [ ] add internal function to visit all AST nodes depth-first (preorder or postorder?)
+        [ ] add internal emitter backend function that generates `parse()` source code
+        [ ] ...profit?
+    [ ] add API function to parse a grammar and spit out source for an `unparse()` function
+  
+
