@@ -1,69 +1,110 @@
 Start
-    = Program
+    = Module
 
-Program
-    = WS   bindings:(WS   BindingDeclaration)*   WS   !.
-    { return {type: 'Program', bindings: bindings.map(el => el[1])}; }
+Module
+    = WS   bindings:(WS   Binding)*   WS   !.
+    { return {type: 'Module', bindings: bindings.map(el => el[1])}; }
 
-BindingDeclaration
-    = name:ID   WS   EQ   WS   value:Expression
-    { return {type: 'BindingDeclaration', name, value}; }
+Binding
+    = id:Identifier   WS   EQ   WS   value:Expression
+    { return {type: 'Binding', id, value}; }
 
-Expression
-    = SelectExpression
 
-SelectExpression
-    = h:ConcatExpression   t:(WS   PIPE   WS   ConcatExpression)*
-    { return t.length > 0 ? {type: 'SelectExpression', alternatives: [h].concat(t.map(el => el[3]))} : h; }
 
-ConcatExpression
-    = leading:ConcatLeading?   WS   core:PrimaryExpression   WS   trailing:ConcatTrailing?
-    { return leading || trailing ? {type: 'ConcatExpression', leading, core, trailing} : core; }
 
-ConcatLeading
-    = items:(WS   PrimaryExpression)*   WS   LANGLE
-    { return items.map(item => item[1]); }
+// NB: precedence is defined here:
+Expression = Selection / ExpressionBelowSelection
+ExpressionBelowSelection = Sequence / ExpressionBelowSequence
+ExpressionBelowSequence = Application / ExpressionBelowApplication
+ExpressionBelowApplication = Record / Identifier / StringLiteral / ParenthesizedExpression
 
-ConcatTrailing
-    = RANGLE   items:(WS   PrimaryExpression)*
-    { return items.map(item => item[1]); }
 
-PrimaryExpression
-    = RecordExpression
-    / Identifier
-    / StringLiteral
-    // TODO: StringPattern
 
-RecordExpression
-    = LBRACE   WS   h:RecordField   t:(WS   COMMA   WS   RecordField)*   WS   RBRACE
-    { return {type: 'RecordExpression', fields: [h].concat(t.map(t => t[3]))}; }
+
+Selection
+    = h:ExpressionBelowSelection   t:(WS   PIPE   WS   ExpressionBelowSelection)+
+    { return {type: 'Selection', expressions: [h].concat(t.map(el => el[3]))}; }
+
+Sequence
+    = h:ExpressionBelowSequence   t:(WS   !(Identifier WS EQ)   ExpressionBelowSequence)+
+    { return {type: 'Sequence', expressions: [h].concat(t.map(el => el[2]))}; }
+
+Application
+    = id:Identifier   WS   LANGLE   WS   args:ApplicationArguments?   WS   RANGLE
+    { return {type: 'Application', id, arguments: args || []}; }
+
+ApplicationArguments
+    = h:Expression   t:(WS   COMMA   WS   Expression)*
+    { return [h].concat(t.map(el => el[3])); }
+
+Record
+    = LBRACE   WS   fields:RecordFields?   WS   RBRACE
+    { return {type: 'Record', fields: fields || []}; }
+
+RecordFields
+    = h:RecordField   t:(WS   COMMA   WS   RecordField)*
+    { return [h].concat(t.map(el => el[3])); }
 
 RecordField
-   = name:ID   WS   COLON   WS   value:Expression
-   { return {type: 'RecordField', name, value}; }
+    = id:Identifier   WS   COLON   WS   value:Expression
+    { return {type: 'RecordField', id, value}; }
 
 Identifier
-    = name:ID   !(WS   EQ)
-    { return {type: 'Identifier', name } }
+    = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
+    { return {type: 'Identifier', name}; }
 
 StringLiteral
-    = SQUOTE   text:[^'\r\n]*   SQUOTE
-    { return {type: 'StringLiteral', value: text.join(''), isAstOnly: true}; }
+    = SQUOTE   text:[^'\\\r\n]*   SQUOTE
+    { return {type: 'StringLiteral', value: text.join(''), onlyIn: 'ast'}; }
 
-    / DQUOTE   text:[^"\r\n]*   DQUOTE
-    { return {type: 'StringLiteral', value: text.join(''), isAstOnly: false}; }
+    / BTICK   text:[^`\\\r\n]*   BTICK
+    { return {type: 'StringLiteral', value: text.join(''), onlyIn: 'text'}; }
 
+ParenthesizedExpression
+    = LPAREN   WS   expression:Expression   WS   RPAREN
+    { return {type: 'ParenthesizedExpression', expression}; }
+
+
+
+
+// Identifier
+//     = name:IDENT   !(WS   EQ)
+//     { return {type: 'Identifier', name } }
+
+// NumberLiteral
+//     = 'int32'
+
+// AnyChar
+//     = DOT
+//     { return {type: 'AnyChar'}; }
+
+
+
+
+IDENT   = [_a-z]i   [_a-z0-9]i*   { return text(); }
+
+BTICK   = '`'
 COLON   = ':'
 COMMA   = ','
-DQUOTE  = '"'
+// DOT     = '.'
+// DQUOTE  = '"'
 EQ      = '='
-ID      = [_a-z]i   [_a-z0-9]i*   { return text(); }
+// FSLASH  = '/'
 LANGLE  = '<'
 LBRACE  = '{'
 LPAREN  = '('
+// LSQBR   = '['
 PIPE    = '|'
+// PLUS    = '+'
+// QMARK   = '?'
 RANGLE  = '>'
 RBRACE  = '}'
 RPAREN  = ')'
+// RSQBR   = ']'
 SQUOTE  = "'"
-WS      = [ \t\r\n]*
+// STAR    = '*'
+
+WS                      = (WS_CHAR / WS_SINGLE_LINE_COMMENT / WS_MULTI_LINE_COMMENT)*
+WS_CHAR                 = [ \t\r\n]
+WS_SINGLE_LINE_COMMENT  = '//'   (![\r\n] .)*
+WS_MULTI_LINE_COMMENT   = '/*'   (!'*/' .)*   '*/'

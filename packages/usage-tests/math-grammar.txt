@@ -2,43 +2,36 @@
 
 /*
  * egs:
- *      2 + 3 * 5
- *      42 * (333 - 2)
+ *      2+3*5
+ *      42*(333-2)
  */
 
+Start = Expr
 
-Start       = <Expr> ws end
-Expr        = Add | Sub | Term
-Add         = {type: 'add', lhs: ws <Expr>, rhs: ws add ws <Term>}
-Sub         = {type: 'sub', lhs: ws <Expr>, rhs: ws sub ws <Term>}
+Expr = Add | Sub | Term
+Add = {type: 'add', lhs: Memo<Expr>, rhs: ADD Term}
+Sub = {type: 'sub', lhs: Memo<Expr>, rhs: SUB Term}
 
-Term        = Mul | Div | Factor
-Mul         = {type: 'mul', lhs: ws <Term>, rhs: ws mul ws <Factor>}
-Div         = {type: 'div', lhs: ws <Term>, rhs: ws div ws <Factor>}
+Term = Mul | Div | Factor
+Mul = {type: 'mul', lhs: Memo<Term>, rhs: MUL Factor}
+Div = {type: 'sub', lhs: Memo<Term>, rhs: DIV Factor}
 
-Factor      = Number | ParenExpr
-Number      = {type: 'number', value: ws </[0-9]+/>}
-ParenExpr   = {type: 'paren', expr: ws lp ws <Expr> ws rp}
+Factor = i32 | LP Expr RP
 
+ADD = `+`
+SUB = `-`
+MUL = `*`
+DIV = `/`
+LP  = `(`
+RP  = `)`
 
-// Rule names starting with an upper-case letter are always treated as source-only expressions.
-// They are thus both strings and source-idioms. This means the `-"  "-` delimiters may be omitted
-add         = "+"
-sub         = "-"
-mul         = "*"
-div         = "/"
-lp          = "("
-rp          = ")"
-ws          = /[ \t]*/
-end         = !/./
-
-
-
-// TODO...
-'..'    ast-only string
-".."    literal string
-/../    string pattern (simplified regex)
-a <b> c   means:
-    a: precondition(s), leading source marker(s)
-    b: transcoded content
-    c: postcondition(s), trailing source marker(s)
+/*
+ * TODO...
+ * '..'    ast-only string
+ * ".."    literal string
+ * /../    string pattern (simplified regex)
+ * a <b> c   means:
+ *     a: precondition(s), leading source marker(s)
+ *     b: transcoded content
+ *     c: postcondition(s), trailing source marker(s)
+ */

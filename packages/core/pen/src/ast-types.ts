@@ -1,76 +1,47 @@
-// TODO:
-// [x] program
-// [x] selection
-// [x] name binding
-// [ ] record / properties
-// [ ] ast-only text
-// [ ] source-only text / source-idiom
-// [ ] string
-//   [ ] char literal
-//   [ ] char class incl ranges
-//   [ ] repetition
-//     [ ] 1..M
-//     [ ] 0..M
-//   [ ] wildcard '.'
-// [ ] not predicate / negative lookahead
-// [ ] parenthesised expression
-// [ ] leadng/trailing text
-// [ ] precondition / postcondition
-
-
-
-// TODO: node summary:
-// Program
-// NameBinding
-// CompositeExpr with name bindings
-// Selection / Select / Union / Alternation / Option / Choice / Switch / Sum / Enum / Decision / Disjunction / Branch
-// Sequence  / Series / Concat / a <b> c / Ordering / Consecution / Conjunction / Succession
-// Record & Field
-// StringLiteral (ast-only with '' or transcoded with "")
-// StringPattern / regex-like
-
-
-
-
-export interface Program {
-    type: 'Program';
-    bindings: BindingDeclaration[];
+export interface Module {
+    type: 'Module';
+    bindings: Binding[];
 }
 
-export interface BindingDeclaration {
-    type: 'BindingDeclaration';
-    name: string;
+export interface Binding {
+    type: 'Binding';
+    id: Identifier;
     value: Expression;
 }
 
 export type Expression =
-    | SelectExpression
-    | ConcatExpression
-    | RecordExpression
+    | Selection
+    | Sequence
+    | Application
+    | Record
     | Identifier
     | StringLiteral
-    | StringPattern;
+    | ParenthesizedExpression;
 
-export interface SelectExpression {
-    type: 'SelectExpression';
-    alternatives: Expression[];
+export interface Selection {
+    type: 'Selection';
+    expressions: Expression[];
 }
 
-export interface ConcatExpression {
-    type: 'ConcatExpression';
-    leading: Expression[]; // only strings and/or predicates
-    core: Expression;
-    trailing: Expression[]; // only strings and/or predicates
+export interface Sequence {
+    type: 'Sequence';
+    expressions: Expression[];
 }
 
-export interface RecordExpression {
-    type: 'RecordExpression';
+export interface Application {
+    type: 'Application';
+    id: Identifier;
+    arguments: Expression[];
+}
+
+export interface Record {
+    type: 'Record';
     fields: RecordField[];
 }
 
 export interface RecordField {
     type: 'RecordField';
-    name: string;
+    id: Identifier;
     value: Expression;
 }
 
@@ -82,32 +53,12 @@ export interface Identifier {
 export interface StringLiteral {
     type: 'StringLiteral';
     value: string;
-    isAstOnly: boolean;
+    onlyIn?: 'ast' | 'text'; // TODO: settle on official term for non-dual / non-transcoded
     // TODO: preserve escape sequences? eg raw/cooked props?
     //       how does babel etc handle this in its AST?
 }
 
-export interface StringPattern {
-    type: 'StringPattern';
-    atoms: Array<QuantifiedText | TextAtom>;
-}
-
-
-export interface QuantifiedText {
-    type: 'QuantifiedText';
-    value: TextAtom;
-    min: number;
-    max?: number;
-}
-
-export type TextAtom = StringLiteral | CharClass | CharWildcard;
-
-export interface CharClass {
-    type: 'CharClass';
-    parts: Array<string | [string, string]>;
-    // TODO: support isNegated?
-}
-
-export interface CharWildcard {
-    type: 'CharWildcard';
+export interface ParenthesizedExpression {
+    type: 'ParenthesizedExpression';
+    expression: Expression;
 }
