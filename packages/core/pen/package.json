@@ -10,6 +10,9 @@
         "postbuild": "pegjs -o dist/grammar.js src/grammar.pegjs",
         "clean": "rimraf dist/"
     },
+    "dependencies": {
+        "typescript": "next"
+    },
     "devDependencies": {
         "pegjs": "^0.10.0"
     }

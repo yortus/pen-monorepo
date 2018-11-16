@@ -8,13 +8,13 @@
 
 Start = Expr
 
-Expr = Add | Sub | Term
-Add = {type: 'add', lhs: Memo<Expr>, rhs: ADD Term}
-Sub = {type: 'sub', lhs: Memo<Expr>, rhs: SUB Term}
+Expr = leftRec<Add | Sub | Term>
+Add = {type: 'add', lhs: Expr, rhs: ADD Term}
+Sub = {type: 'sub', lhs: Expr, rhs: SUB Term}
 
-Term = Mul | Div | Factor
-Mul = {type: 'mul', lhs: Memo<Term>, rhs: MUL Factor}
-Div = {type: 'sub', lhs: Memo<Term>, rhs: DIV Factor}
+Term = leftRec<Mul | Div | Factor>
+Mul = {type: 'mul', lhs: Term, rhs: MUL Factor}
+Div = {type: 'sub', lhs: Term, rhs: DIV Factor}
 
 Factor = i32 | LP Expr RP
 

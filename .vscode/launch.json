@@ -11,6 +11,11 @@
             "program": "${workspaceFolder}/packages/usage-tests/math/dist/index.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**",
+                "${workspaceRoot}/node_modules/**/*.js",
+                "${workspaceRoot}/packages/*/*/node_modules/**/*.js",
             ]
         }
     ]

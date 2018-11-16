@@ -9,15 +9,6 @@ export interface Binding {
     value: Expression;
 }
 
-export type Expression =
-    | Selection
-    | Sequence
-    | Application
-    | Record
-    | Identifier
-    | StringLiteral
-    | ParenthesizedExpression;
-
 export interface Selection {
     type: 'Selection';
     expressions: Expression[];
@@ -62,3 +53,27 @@ export interface ParenthesizedExpression {
     type: 'ParenthesizedExpression';
     expression: Expression;
 }
+
+
+
+
+export type Node =
+    | Module
+    | Binding
+    | Selection
+    | Sequence
+    | Application
+    | Record
+    | RecordField
+    | Identifier
+    | StringLiteral
+    | ParenthesizedExpression;
+
+export type Expression =
+    | Selection
+    | Sequence
+    | Application
+    | Record
+    | Identifier
+    | StringLiteral
+    | ParenthesizedExpression;
