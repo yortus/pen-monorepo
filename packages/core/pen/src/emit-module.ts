@@ -8,29 +8,52 @@ import {Record} from './ast-types';
 import {Selection} from './ast-types';
 import {Sequence} from './ast-types';
 import {StringLiteral} from './ast-types';
-// import {visitEachChild} from './visit-each-child';
 
 
 
 
-export function emitModule(module: Module) {
-    let varStmts = module.bindings.map(binding => {
-        let stmt = ts.createVariableStatement(
-            /*modifiers*/undefined,
-            ts.createVariableDeclarationList(
-                [
-                    ts.createVariableDeclaration(
-                        /*name*/ binding.id.name,
-                        /*type*/ undefined,
-                        /*initializer*/ emitExpression(binding.value)
+export function emitModule(module: Module): ts.Statement[] {
+    let stmts = [] as ts.Statement[];
+    for (let {id, value} of module.bindings) {
+        let funcDecl = ts.createFunctionDeclaration(
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ id.name,
+            /*typeParameters*/ undefined,
+            /*parameters*/ [ts.createParameter(undefined, undefined, undefined, 'pos')],
+            /*type*/ undefined,
+            /*body*/ ts.createBlock(
+                /*statements*/ [
+                    ts.createReturn(
+                        ts.createCall(
+                            /*expression*/ ts.createPropertyAccess(
+                                ts.createIdentifier(id.name),
+                                'start'
+                            ),
+                            /*typeArguments*/ undefined,
+                            /*argumentsArray*/ [ts.createIdentifier('pos')]
+                        )
                     ),
                 ],
-                ts.NodeFlags.Const
+                /*multiline*/ true
             )
         );
-        return stmt;
-    });
-    return varStmts;
+
+        let propStmt = ts.createExpressionStatement(
+            ts.createAssignment(
+                /*left*/ ts.createPropertyAccess(
+                    ts.createIdentifier(id.name),
+                    'start'
+                ),
+                /*right*/ emitExpression(value)
+            )
+        );
+
+        ts.addSyntheticLeadingComment(funcDecl, ts.SyntaxKind.SingleLineCommentTrivia, ` ${id.name}`, true);
+        stmts.push(funcDecl, propStmt);
+    }
+    return stmts;
 }
 
 function emitExpression(expr: Expression): ts.Expression {
@@ -67,30 +90,34 @@ function emitParenthesizedExpression(expr: ParenthesizedExpression) {
 }
 
 function emitRecord(expr: Record) {
-    return ts.createObjectLiteral(
-        /*properties*/ expr.fields.map(field => {
-            return ts.createPropertyAssignment(
-                /*name*/ field.id.name,
-                /*initializer*/ emitExpression(field.value)
-            );
-        }),
-        /*multiline*/ true
+    return ts.createCall(
+        ts.createIdentifier('Record'),
+        /*typeArguments*/ undefined,
+        /*argumentsArray*/ [
+            ts.createObjectLiteral(
+                /*properties*/ expr.fields.map(field => {
+                    return ts.createPropertyAssignment(
+                        /*name*/ field.id.name,
+                        /*initializer*/ emitExpression(field.value)
+                    );
+                }),
+                /*multiline*/ true
+            ),
+        ]
     );
-    // type TT = ts.ObjectLiteralElementLike;
-
 }
 
 function emitSelection(expr: Selection) {
     return ts.createCall(
-        ts.createIdentifier('selection'),
+        ts.createIdentifier('Selection'),
         /*typeArguments*/ undefined,
-        /*argumentsArray*/ expr.expressions.map(emitExpression),
+        /*argumentsArray*/ expr.expressions.map(emitExpression)
     );
 }
 
 function emitSequence(expr: Sequence) {
     return ts.createCall(
-        ts.createIdentifier('sequence'),
+        ts.createIdentifier('Sequence'),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ expr.expressions.map(emitExpression)
     );
@@ -98,7 +125,7 @@ function emitSequence(expr: Sequence) {
 
 function emitStringLiteral(expr: StringLiteral) {
     return ts.createCall(
-        ts.createIdentifier('stringLiteral'),
+        ts.createIdentifier('StringLiteral'),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ [
             ts.createStringLiteral(expr.value),
@@ -108,19 +135,3 @@ function emitStringLiteral(expr: StringLiteral) {
         ]
     );
 }
-
-
-
-
-
-
-
-    // visitEachChild(module, function visitor(child) {
-    //     switch (child.type) {
-    //         case 'StringLiteral':
-    //             strLits.push(child);
-    //             break;
-    //         default: break;
-    //     }
-    //     visitEachChild(child, visitor); // recurse
-    // });

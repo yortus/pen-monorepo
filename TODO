@@ -9,3 +9,13 @@ Todo:
     [ ] add API function to parse a grammar and spit out source for an `unparse()` function
   
 
+
+24 Nov:
+    [ ] way to add newline spacing between decls in emitted TS?
+    [ ] only need `start` prop if binding value isn't a combinator factory call (eg string lits, simple delegation)
+        [ ] `function isCombinator(astNode) {...}`
+    revise lingo:
+        [ ] <...check how used by other projects/papers...>
+        [ ] combinator --> (parse/unparse) primitive -or- primitive parser/unparser
+        [ ] combinator factory/constructor --> (parser/unparser) combinator
+    [ ] doc resemblence of combinators to generic types that need 'instantiation' to make types

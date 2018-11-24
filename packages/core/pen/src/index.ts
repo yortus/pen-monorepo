@@ -16,7 +16,7 @@ export * from './ast-types';
 
 export function getParser(grammar: string) {
     let ast = parse(grammar);
-    let varStmts = emitModule(ast);
+    let moduleStmts = emitModule(ast);
 
     // Parse a file
     let sourceFile = ts.createSourceFile(
@@ -43,7 +43,7 @@ export function getParser(grammar: string) {
     let placeholder = findPlaceholderNode(sourceFile);
     placeholder.block.statements = ts.createNodeArray([
         ...placeholder.block.statements.slice(0, placeholder.index),
-        ...varStmts,
+        ...moduleStmts,
         ...placeholder.block.statements.slice(placeholder.index + 1),
     ]);
 

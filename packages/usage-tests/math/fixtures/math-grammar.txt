@@ -1,4 +1,10 @@
 
+// temp testing... this one works...
+// start = A
+// A = LeftRec<A `b` | `a`>    // accepts a, ab, abb, abbb, ...
+
+
+
 
 /*
  * egs:
@@ -6,17 +12,17 @@
  *      42*(333-2)
  */
 
-Start = Expr
+start = expr
 
-Expr = leftRec<Add | Sub | Term>
-Add = {type: 'add', lhs: Expr, rhs: ADD Term}
-Sub = {type: 'sub', lhs: Expr, rhs: SUB Term}
+expr = LeftRec<add | sub | term>
+add = {type: 'add', lhs: expr, rhs: ADD term}
+sub = {type: 'sub', lhs: expr, rhs: SUB term}
 
-Term = leftRec<Mul | Div | Factor>
-Mul = {type: 'mul', lhs: Term, rhs: MUL Factor}
-Div = {type: 'sub', lhs: Term, rhs: DIV Factor}
+term = LeftRec<mul | div | factor>
+mul = {type: 'mul', lhs: term, rhs: MUL factor}
+div = {type: 'div', lhs: term, rhs: DIV factor}
 
-Factor = i32 | LP Expr RP
+factor = i32 | LP expr RP
 
 ADD = `+`
 SUB = `-`
