@@ -1,13 +1,21 @@
-type Parser = (pos: number) => boolean;
+const Unit = Symbol('unit');
+type Unit = typeof Unit;
+const Fail = Symbol('fail');
+type Fail = typeof Fail;
+type Node = string | number | object;
+type ParseResult = Node | Unit | Fail;
+type Parser = () => ParseResult; // side-effect: changes `pos`
 declare const start: Parser;
 
 
 
 
 export function parse(text: string) {
-    let len = 0;        // these two are additional parser return values
-    let ast: unknown;   // "   "
-    const NOTHING = Symbol('nothing');
+
+    // these two fns just make reading the code a bit easier. Will be more important when there is more state beside pos
+    function consume(count: number) { position += count; }
+    function restore(pos: number) { position = pos; }
+    let position = 0;
 
 
 
@@ -18,9 +26,11 @@ export function parse(text: string) {
 
 
     debugger;
-    if (!start(0)) throw new Error(`parse failed`);
-    if (len < text.length) throw new Error(`parse didn't consume entire input`);
-    return ast;
+    let result = start();
+    if (result === Fail) throw new Error(`parse failed`);
+    if (position < text.length) throw new Error(`parse didn't consume entire input`);
+    if (result === Unit) throw new Error(`parse didn't return a value`);
+    return result;
 
 
 
@@ -29,29 +39,28 @@ export function parse(text: string) {
     function LeftRec(expr: Parser): Parser {
         interface Memo {
             resolved: boolean;
-            success: boolean;
-            len: number;
-            ast: unknown;
+            consumed: number;
+            result: ParseResult;
         }
         const memos = new Map<number, Memo>();
 
-        return pos => {
-            let memo = memos.get(pos);
+        return () => {
+            let memo = memos.get(position);
             if (!memo) {
                 // TODO: ...
                 // Memo has just been created...
                 // transduce and memoize the inner expession using a cycle-tolerant algorithm...
-                memo = {resolved: false, success: false, len: 0, ast: undefined};
-                memos.set(pos, memo);
+                memo = {resolved: false, consumed: 0, result: Unit};
+                memos.set(position, memo);
 
                 // TODO: ...
-                let result = expr(pos); // recurse... the memo will be updated...
+                let startPos = position;
+                let result = expr(); // recurse... the memo will be updated...
 
                 // We now have a fully resolved memo.
                 memo.resolved = true;
-                memo.success = result;
-                memo.len = len;
-                memo.ast = ast;
+                memo.consumed = position - startPos;
+                memo.result = result;
 
                 // TODO: If the preceding call to Transduce() succeeded...
                 // Re-transduce from our initial position until we meet a stopping condition.
@@ -61,19 +70,20 @@ export function parse(text: string) {
                 // position now. The method uses this memo and returns immediately, and transduction continues
                 // beyond the left-cycle. We stop the re-transduction loop when it either fails or consumes no
                 // further input (which could be due to right-cycles).
-                while (result) {
+                while (result !== Fail) {
                     // NB: backtrack before re-parsing...
-                    result = expr(pos);
+                    restore(startPos);
+                    result = expr();
 
                     // If the re-transduction positively progressed, update the memo and re-transduce again
-                    if (result && len > memo.len) {
-                        memo.len = len;
-                        memo.ast = ast;
-                        continue;
+                    if (position - startPos <= memo.consumed) {
+                        restore(startPos);
+                        result = Fail;
                     }
-
-                    // Otherwise, go back to the last one that worked and stop...
-                    break;
+                    if (result !== Fail) {
+                        memo.consumed = position - startPos;
+                        memo.result = result;
+                    }
                 }
             }
 
@@ -82,14 +92,13 @@ export function parse(text: string) {
                 // We have re-entered this function at the same input position as the original call,
                 // so we must have encountered a left-cycle. We simply flag the presence of the left-cycle
                 // and return false, as explained in the previous switch case.
-                return false;
+                return Fail;
             }
 
             // TODO: ...
             // If we get here, Memo is established - use it for the translation
-            len = memo.len;
-            ast = memo.ast;
-            return memo.success;
+            consume(memo.consumed);
+            return memo.result;
         };
     }
 
@@ -97,82 +106,78 @@ export function parse(text: string) {
 
 
     // ---------- built-in parsers ----------
-    function i32(pos: number) {
+    function i32() {
         // TODO: parse up to MaxInt (how?)
         // TODO: negative ints
         // TODO: exponents
         const ZERO = '0'.charCodeAt(0);
         const NINE = '9'.charCodeAt(0);
-        let c = text.charCodeAt(pos);
+        let c = text.charCodeAt(position);
         if (c >= ZERO && c <= NINE) {
-            len = 1;
-            ast = c - ZERO;
-            return true;
+            consume(1);
+            return c - ZERO;
         }
         else {
-            return false;
+            return Fail;
         }
     }
 
     // ---------- built-in combinators ----------
     function Selection(...expressions: Parser[]): Parser {
-        return pos => {
-            for (let expr of expressions) {
-                if (expr(pos)) return true;
+        return () => {
+            let result: ParseResult = Fail;
+            for (let i = 0; i < expressions.length && result === Fail; ++i) {
+                result = expressions[i]();
             }
-            return false;
+            return result;
         };
     }
 
     function Sequence(...expressions: Parser[]): Parser {
-        return pos => {
-            let pos0 = pos;
-            let astn: unknown = NOTHING;
-            for (let expr of expressions) {
-                if (!expr(pos)) return false;
-                pos += len;
-                astn = ast === NOTHING ? astn : ast;
+        return () => {
+            let startPos = position;
+            let result: ParseResult = Unit;
+            for (let i = 0; i < expressions.length && result !== Fail; ++i) {
+                let next = expressions[i]();
+                result = result === Unit ? next : result; // TODO: fix properly...
             }
-            len = pos - pos0;
-            ast = astn;
-            return true;
+            if (result === Fail) restore(startPos);
+            return result;
         };
     }
 
     function Record(fields: {[id: string]: Parser}): Parser {
         // TODO: doc... relies on prop order being preserved...
-        return pos => {
-            let pos0 = pos;
+        const fieldIds = Object.keys(fields);
+        return () => {
+            let startPos = position;
             let obj = {};
-            for (let id in fields) {
-                if (!fields.hasOwnProperty(id)) continue;
-                let value = fields[id];
-                if (!value(pos)) return false;
-                pos += len;
-                obj[id] = ast;
+            let result: ParseResult = Unit;
+            for (let i = 0; i < fieldIds.length && result !== Fail; ++i) {
+                let id = fieldIds[i];
+                result = obj[id] = fields[id]();
             }
-            len = pos - pos0;
-            ast = obj;
-            return true;
+            if (result !== Fail) return obj;
+            restore(startPos);
+            return Fail;
         };
     }
 
     function Identifier(name: string): Parser {
         // TODO: ...
-        return () => false;
+        return () => Fail;
     }
 
     function StringLiteral(value: string, onlyIn?: 'ast' | 'text'): Parser {
-        return pos => {
-            len = value.length;
+        const len = value.length;
+        return () => {
             if (onlyIn !== 'ast') {
                 for (let i = 0; i < len; ++i) {
-                    if (text.charCodeAt(pos + i) !== value.charCodeAt(i)) return false;
+                    if (text.charCodeAt(position + i) !== value.charCodeAt(i)) return Fail;
                 }
             }
-            len = onlyIn === 'ast' ? 0 : len;
-            ast = onlyIn === 'text' ? NOTHING : value;
-            return true;
+            consume(onlyIn === 'ast' ? 0 : len);
+            return onlyIn === 'text' ? Unit : value;
         };
     }
 }
