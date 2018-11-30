@@ -12,10 +12,14 @@ declare const start: Parser;
 
 export function parse(text: string) {
 
+    // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
+    // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
+    // an offset. It is also reasonably performant, since most JS runtimes (including V8) optimise string slicing
+    // like the kind done here. E.g. see https://jsperf.com/consuming-a-long-string
+    // This could be revisited later to increase performance, but it should be measured to see if it's worth it.
     // these two fns just make reading the code a bit easier. Will be more important when there is more state beside pos
-    function consume(count: number) { position += count; }
-    function restore(pos: number) { position = pos; }
-    let position = 0;
+    function consume(count: number) { text = text.slice(count); }
+    function restore(_text: string) { text = _text; }
 
 
 
@@ -28,7 +32,7 @@ export function parse(text: string) {
     debugger;
     let ast = start();
     if (ast === Fail) throw new Error(`parse failed`);
-    if (position < text.length) throw new Error(`parse didn't consume entire input`);
+    if (text.length > 0) throw new Error(`parse didn't consume entire input`);
     if (ast === Unit) throw new Error(`parse didn't return a value`);
     return ast;
 
@@ -42,24 +46,24 @@ export function parse(text: string) {
             consumed: number;
             result: ParseResult;
         }
-        const memos = new Map<number, Memo>();
+        const memos = new Map<string, Memo>();
 
         return () => {
-            let memo = memos.get(position);
+            let memo = memos.get(text);
             if (!memo) {
                 // TODO: ...
                 // Memo has just been created...
                 // transduce and memoize the inner expession using a cycle-tolerant algorithm...
                 memo = {resolved: false, consumed: 0, result: Unit};
-                memos.set(position, memo);
+                memos.set(text, memo);
 
                 // TODO: ...
-                let startPos = position;
+                let startText = text;
                 let result = expr(); // recurse... the memo will be updated...
 
                 // We now have a fully resolved memo.
                 memo.resolved = true;
-                memo.consumed = position - startPos;
+                memo.consumed = startText.length - text.length;
                 memo.result = result;
 
                 // TODO: If the preceding call to Transduce() succeeded...
@@ -72,16 +76,16 @@ export function parse(text: string) {
                 // further input (which could be due to right-cycles).
                 while (result !== Fail) {
                     // NB: backtrack before re-parsing...
-                    restore(startPos);
+                    restore(startText);
                     result = expr();
 
                     // If the re-transduction positively progressed, update the memo and re-transduce again
-                    if (position - startPos <= memo.consumed) {
-                        restore(startPos);
+                    if (startText.length - text.length <= memo.consumed) {
+                        restore(startText);
                         result = Fail;
                     }
                     if (result !== Fail) {
-                        memo.consumed = position - startPos;
+                        memo.consumed = startText.length - text.length;
                         memo.result = result;
                     }
                 }
@@ -118,13 +122,13 @@ export function parse(text: string) {
 
     function Sequence(...expressions: Parser[]): Parser {
         return () => {
-            let startPos = position;
+            let startText = text;
             let result: ParseResult = Unit;
             for (let i = 0; i < expressions.length && result !== Fail; ++i) {
                 let next = expressions[i]();
                 result = result === Unit ? next : result; // TODO: fix properly...
             }
-            if (result === Fail) restore(startPos);
+            if (result === Fail) restore(startText);
             return result;
         };
     }
@@ -133,7 +137,7 @@ export function parse(text: string) {
         // TODO: doc... relies on prop order being preserved...
         const fieldIds = Object.keys(fields);
         return () => {
-            let startPos = position;
+            let startText = text;
             let obj = {};
             let result: ParseResult = Unit;
             for (let i = 0; i < fieldIds.length && result !== Fail; ++i) {
@@ -141,7 +145,7 @@ export function parse(text: string) {
                 result = obj[id] = fields[id]();
             }
             if (result !== Fail) return obj;
-            restore(startPos);
+            restore(startText);
             return Fail;
         };
     }
@@ -156,14 +160,11 @@ export function parse(text: string) {
     }
 
     function StringLiteral(value: string, onlyIn?: 'ast' | 'text'): Parser {
-        const len = value.length;
         return () => {
             if (onlyIn !== 'ast') {
-                for (let i = 0; i < len; ++i) {
-                    if (text.charCodeAt(position + i) !== value.charCodeAt(i)) return Fail;
-                }
+                if (text.slice(0, value.length) !== value) return Fail;
             }
-            consume(onlyIn === 'ast' ? 0 : len);
+            consume(onlyIn === 'ast' ? 0 : value.length);
             return onlyIn === 'text' ? Unit : value;
         };
     }
@@ -173,7 +174,6 @@ export function parse(text: string) {
 
     // ---------- other built-ins ----------
     function i32() {
-
         // TODO: negative ints
         // TODO: exponents
 
@@ -182,17 +182,17 @@ export function parse(text: string) {
         const NINE = '9'.charCodeAt(0);
         const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
-        let startPos = position;
+        let startText = text;
         let n = 0;
-        while (true) {
+        while (text.length > 0) {
 
             // Read a digit
-            let c = text.charCodeAt(position);
+            let c = text.charCodeAt(0);
             if (c < ZERO || c > NINE) break;
 
             // Check for overflow
             if (n > ONE_TENTH_MAXINT32) {
-                restore(startPos);
+                restore(startText);
                 return Fail;
             }
 
@@ -203,7 +203,7 @@ export function parse(text: string) {
         }
 
         // Check that we parsed at least one digit
-        if (position === startPos) {
+        if (text === startText) {
             return Fail;
         }
 
