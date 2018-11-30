@@ -17,7 +17,7 @@ else {
     console.log(src.javaScriptSource);
     const {parse} = loadModule(src.javaScriptSource) as {parse(text: string): void};
 
-    let ast = parse(`1+2+(3+4)*3-7/(9+8)`);
+    let ast = parse(`111+20+(3+4)*3-7/(99999999+8)`);
     console.log(JSON.stringify(ast, null, 2));
 }
 

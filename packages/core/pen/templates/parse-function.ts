@@ -26,11 +26,11 @@ export function parse(text: string) {
 
 
     debugger;
-    let result = start();
-    if (result === Fail) throw new Error(`parse failed`);
+    let ast = start();
+    if (ast === Fail) throw new Error(`parse failed`);
     if (position < text.length) throw new Error(`parse didn't consume entire input`);
-    if (result === Unit) throw new Error(`parse didn't return a value`);
-    return result;
+    if (ast === Unit) throw new Error(`parse didn't return a value`);
+    return ast;
 
 
 
@@ -105,24 +105,7 @@ export function parse(text: string) {
 
 
 
-    // ---------- built-in parsers ----------
-    function i32() {
-        // TODO: parse up to MaxInt (how?)
-        // TODO: negative ints
-        // TODO: exponents
-        const ZERO = '0'.charCodeAt(0);
-        const NINE = '9'.charCodeAt(0);
-        let c = text.charCodeAt(position);
-        if (c >= ZERO && c <= NINE) {
-            consume(1);
-            return c - ZERO;
-        }
-        else {
-            return Fail;
-        }
-    }
-
-    // ---------- built-in combinators ----------
+    // ---------- built-in parser combinators ----------
     function Selection(...expressions: Parser[]): Parser {
         return () => {
             let result: ParseResult = Fail;
@@ -163,6 +146,10 @@ export function parse(text: string) {
         };
     }
 
+
+
+
+    // ---------- built-in parser factories ----------
     function Identifier(name: string): Parser {
         // TODO: ...
         return () => Fail;
@@ -179,5 +166,51 @@ export function parse(text: string) {
             consume(onlyIn === 'ast' ? 0 : len);
             return onlyIn === 'text' ? Unit : value;
         };
+    }
+
+
+
+
+    // ---------- other built-ins ----------
+    function i32() {
+
+        // TODO: negative ints
+        // TODO: exponents
+
+        // TODO: would be better not to calc these on every call
+        const ZERO = '0'.charCodeAt(0);
+        const NINE = '9'.charCodeAt(0);
+        const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+
+        let startPos = position;
+        let n = 0;
+        while (true) {
+
+            // Read a digit
+            let c = text.charCodeAt(position);
+            if (c < ZERO || c > NINE) break;
+
+            // Check for overflow
+            if (n > ONE_TENTH_MAXINT32) {
+                restore(startPos);
+                return Fail;
+            }
+
+            // Update parsed number
+            n *= 10;
+            n += (c - ZERO);
+            consume(1);
+        }
+
+        // Check that we parsed at least one digit
+        if (position === startPos) {
+            return Fail;
+        }
+
+        // TODO: sanity check over/under-flow. See eg:
+        // https://github.com/dotnet/coreclr/blob/cdff8b0babe5d82737058ccdae8b14d8ae90160d/src/mscorlib/src/System/Number.cs#L518-L532
+
+        // Success
+        return n;
     }
 }
