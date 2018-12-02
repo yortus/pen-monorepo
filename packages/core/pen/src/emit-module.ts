@@ -57,7 +57,7 @@ export function emitModule(module: Module): ts.Statement[] {
 }
 
 function emitExpression(expr: Expression): ts.Expression {
-    switch (expr.type) {
+    switch (expr.nodeType) {
         case 'Application': return emitApplication(expr);
         case 'Identifier': return emitIdentifier(expr);
         case 'ParenthesizedExpression': return emitParenthesizedExpression(expr);

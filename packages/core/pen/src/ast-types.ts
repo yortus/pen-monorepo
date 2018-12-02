@@ -1,48 +1,48 @@
 export interface Module {
-    type: 'Module';
+    nodeType: 'Module';
     bindings: Binding[];
 }
 
 export interface Binding {
-    type: 'Binding';
+    nodeType: 'Binding';
     id: Identifier;
     value: Expression;
 }
 
 export interface Selection {
-    type: 'Selection';
+    nodeType: 'Selection';
     expressions: Expression[];
 }
 
 export interface Sequence {
-    type: 'Sequence';
+    nodeType: 'Sequence';
     expressions: Expression[];
 }
 
 export interface Application {
-    type: 'Application';
+    nodeType: 'Application';
     id: Identifier;
     arguments: Expression[];
 }
 
 export interface Record {
-    type: 'Record';
+    nodeType: 'Record';
     fields: RecordField[];
 }
 
 export interface RecordField {
-    type: 'RecordField';
+    nodeType: 'RecordField';
     id: Identifier;
     value: Expression;
 }
 
 export interface Identifier {
-    type: 'Identifier';
+    nodeType: 'Identifier';
     name: string;
 }
 
 export interface StringLiteral {
-    type: 'StringLiteral';
+    nodeType: 'StringLiteral';
     value: string;
     onlyIn?: 'ast' | 'text'; // TODO: settle on official term for non-dual / non-transcoded
     // TODO: preserve escape sequences? eg raw/cooked props?
@@ -50,7 +50,7 @@ export interface StringLiteral {
 }
 
 export interface ParenthesizedExpression {
-    type: 'ParenthesizedExpression';
+    nodeType: 'ParenthesizedExpression';
     expression: Expression;
 }
 

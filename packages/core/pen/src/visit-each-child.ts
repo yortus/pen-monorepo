@@ -4,7 +4,7 @@ import {Node} from './ast-types';
 
 
 export function visitEachChild(node: Node, visitor: Visitor) {
-    switch (node.type) {
+    switch (node.nodeType) {
         case 'Application': return visitNodes(visitor, node.id, ...node.arguments);
         case 'Binding': return visitNodes(visitor, node.id, node.value);
         case 'Identifier': return;
