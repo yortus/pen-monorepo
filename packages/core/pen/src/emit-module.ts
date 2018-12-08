@@ -128,14 +128,12 @@ function emitSequence(expr: Sequence) {
 }
 
 function emitStringLiteral(expr: StringLiteral) {
+    const kind = expr.onlyIn ? (expr.onlyIn === 'ast' ? 'Abstract' : 'Concrete') : 'Uniform';
     return ts.createCall(
-        ts.createIdentifier('StringLiteral'),
+        ts.createIdentifier(`${kind}StringLiteral`),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ [
             ts.createStringLiteral(expr.value),
-            expr.onlyIn === undefined
-                ? ts.createVoidZero()
-                : ts.createStringLiteral(expr.onlyIn),
         ]
     );
 }

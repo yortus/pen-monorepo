@@ -81,7 +81,7 @@ export function parse(text: string) {
                 // beyond the left-cycle. We stop the re-transduction loop when it either fails or consumes no
                 // further input (which could be due to right-cycles).
                 while (stateᐟ !== NO_MATCH) {
-// REVIEW FROM HERE... ===>
+// TODO: REVIEW FROM HERE... ===>
                     stateᐟ = expr(state);
 
                     // If the re-transduction positively progressed, update the memo and re-transduce again
@@ -159,23 +159,23 @@ export function parse(text: string) {
         return state => NO_MATCH;
     }
 
-    function StringLiteral(value: string, onlyIn?: 'ast' | 'text'): Transcoder {
-        if (onlyIn === 'ast') {
-            return state => {
-                if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
-                assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
-                return {S: state.S, N: value};
-            };
-        }
+    function AbstractStringLiteral(value: string): Transcoder {
+        return state => {
+            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
+            return {S: state.S, N: value};
+        };
+    }
 
-        if (onlyIn === 'text') {
-            return state => {
-                if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
-                if (!state.S.startsWith(value)) return NO_MATCH;
-                return {S: state.S.slice(value.length), N: state.N};
-            };
-        }
+    function ConcreteStringLiteral(value: string): Transcoder {
+        return state => {
+            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            if (!state.S.startsWith(value)) return NO_MATCH;
+            return {S: state.S.slice(value.length), N: state.N};
+        };
+    }
 
+    function UniformStringLiteral(value: string): Transcoder {
         return state => {
             if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
             assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
