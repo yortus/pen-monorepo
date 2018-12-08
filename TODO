@@ -4,8 +4,8 @@ Todo:
     [x] add API function to parse a grammar and spit out source for a `parse()` function:
     [ ] add API function to parse a grammar and spit out source for an `unparse()` function
     [x] `i32`: get it working for natural numbers (ie no sign)
-    [ ] `i32`: support negative integers
-    [ ] `i32`: are exponents normally supported for int literals? What do other langs do?
+    [x] `i32`: support negative integers
+    [x] `i32`: are exponents normally supported for int literals? What do other langs do? ANS: no exponents on int lits
     [ ] `i32`: if int is too large, we return `Fail`, but probably better to be some kind of error. What to do?
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
     [ ] statically error on sequences that don't produce a single node (and remove assert()s from template code)

@@ -13,7 +13,7 @@ export function parse(text: string) {
 
     // TODO: misc precomputed values...
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10; // 214748364.7
 
     // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
     // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
@@ -174,9 +174,14 @@ export function parse(text: string) {
     function i32({S, N}: Duad): Duad {
         if (N !== EMPTY_NODE) return null; // an i32 can't augment another node
 
-        // TODO: allow leading '+' or '-' sign, followed by one or more [0-9] digits. No exponents.
+        // Parse optional leading '-' sign...
+        let isNegative = false;
+        if (S.charAt(0) === '-') {
+            isNegative = true;
+            S = S.slice(1);
+        }
 
-
+        // ...followed by one or more decimal digits. (NB: no exponents).
         N = 0;
         let digits = 0;
         while (S.length > 0) {
@@ -197,11 +202,15 @@ export function parse(text: string) {
             ++digits;
         }
 
-        // Check that we parsed at least one digit
+        // Check that we parsed at least one digit.
         if (digits === 0) return null;
 
-        // TODO: sanity check over/under-flow. See eg:
-        // https://github.com/dotnet/coreclr/blob/cdff8b0babe5d82737058ccdae8b14d8ae90160d/src/mscorlib/src/System/Number.cs#L518-L532
+        // Apply the sign.
+        if (isNegative) N = -N;
+
+        // Check for over/under-flow.
+        // tslint:disable-next-line:no-bitwise
+        if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
 
         // Success
         return {S, N};
