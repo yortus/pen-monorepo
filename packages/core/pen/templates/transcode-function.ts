@@ -3,9 +3,8 @@ const EMPTY_NODE = Symbol('EmptyNode');
 type EmptyNode = typeof EMPTY_NODE;
 type Node = EmptyNode | string | number | object;
 interface Duad { S: Span; N: Node; }
-type Transcoder = (t: Duad) => Duad;
+type Transcoder = (t: Duad) => Duad | null;
 declare const start: Transcoder;
-const NO_MATCH: Duad = {S: '__nomatch__', N: '__nomatch__'};
 
 
 
@@ -39,7 +38,7 @@ export function parse(text: string) {
 
     debugger;
     let ast = start({S: text, N: EMPTY_NODE});
-    if (ast === NO_MATCH) throw new Error(`parse failed`);
+    if (ast === null) throw new Error(`parse failed`);
     if (ast.S.length > 0) throw new Error(`parse didn't consume entire input`);
     if (ast.N === EMPTY_NODE) throw new Error(`parse didn't return a value`);
     return ast.N;
@@ -51,7 +50,7 @@ export function parse(text: string) {
     function LeftRec(expr: Transcoder): Transcoder {
         interface Memo {
             resolved: boolean;
-            result: Duad;
+            result: Duad | null;
         }
         const memos = new Map<string, Memo>();
 
@@ -61,7 +60,7 @@ export function parse(text: string) {
                 // TODO: ...
                 // Memo has just been created...
                 // transduce and memoize the inner expession using a cycle-tolerant algorithm...
-                memo = {resolved: false, result: NO_MATCH};
+                memo = {resolved: false, result: null};
                 memos.set(state.S, memo);
 
                 // TODO: ...
@@ -80,12 +79,12 @@ export function parse(text: string) {
                 // position now. The method uses this memo and returns immediately, and transduction continues
                 // beyond the left-cycle. We stop the re-transduction loop when it either fails or consumes no
                 // further input (which could be due to right-cycles).
-                while (stateᐟ !== NO_MATCH) {
+                while (stateᐟ !== null) {
 // TODO: REVIEW FROM HERE... ===>
                     stateᐟ = expr(state);
 
                     // If the re-transduction positively progressed, update the memo and re-transduce again
-                    if (stateᐟ === NO_MATCH) return memo.result;
+                    if (stateᐟ === null) return memo.result;
                     if (stateᐟ.S.length >= memo.result.S.length) return memo.result;
                     memo.result = stateᐟ;
 // ...TO HERE ===>
@@ -97,7 +96,7 @@ export function parse(text: string) {
                 // We have re-entered this function at the same input position as the original call,
                 // so we must have encountered a left-cycle. We simply flag the presence of the left-cycle
                 // and return false, as explained in the previous switch case.
-                return NO_MATCH;
+                return null;
             }
 
             // TODO: ...
@@ -112,8 +111,8 @@ export function parse(text: string) {
     // ---------- built-in parser combinators ----------
     function Selection(...expressions: Transcoder[]): Transcoder {
         return state => {
-            let stateᐟ = NO_MATCH;
-            for (let i = 0; i < expressions.length && stateᐟ === NO_MATCH; ++i) {
+            let stateᐟ = null;
+            for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
                 stateᐟ = expressions[i](state);
             }
             return stateᐟ;
@@ -122,10 +121,10 @@ export function parse(text: string) {
 
     function Sequence(...expressions: Transcoder[]): Transcoder {
         return state => {
-            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
             assert(state.N === EMPTY_NODE); // TODO: check... can sequences augment any existing node? eg when nested?
             let stateᐟ = state;
-            for (let i = 0; i < expressions.length && stateᐟ !== NO_MATCH; ++i) {
+            for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
                 stateᐟ = expressions[i](stateᐟ);
             }
             return stateᐟ;
@@ -136,13 +135,13 @@ export function parse(text: string) {
         // TODO: doc... relies on prop order being preserved...
         const fieldIds = Object.keys(fields);
         return state => {
-            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
             assert(state.N === EMPTY_NODE); // TODO: explain... records can't augment any existing node
             let S = state.S;
             let N = {};
             for (let id of fieldIds) {
                 let result = fields[id]({S, N: EMPTY_NODE});
-                if (result === NO_MATCH) return NO_MATCH;
+                if (result === null) return null;
                 S = result.S;
                 N[id] = result.N;
             }
@@ -156,12 +155,12 @@ export function parse(text: string) {
     // ---------- built-in parser factories ----------
     function Identifier(name: string): Transcoder {
         // TODO: ...
-        return state => NO_MATCH;
+        return state => null;
     }
 
     function AbstractStringLiteral(value: string): Transcoder {
         return state => {
-            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
             assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
             return {S: state.S, N: value};
         };
@@ -169,17 +168,17 @@ export function parse(text: string) {
 
     function ConcreteStringLiteral(value: string): Transcoder {
         return state => {
-            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
-            if (!state.S.startsWith(value)) return NO_MATCH;
+            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
+            if (!state.S.startsWith(value)) return null;
             return {S: state.S.slice(value.length), N: state.N};
         };
     }
 
     function UniformStringLiteral(value: string): Transcoder {
         return state => {
-            if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
             assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
-            if (!state.S.startsWith(value)) return NO_MATCH;
+            if (!state.S.startsWith(value)) return null;
             return {S: state.S.slice(value.length), N: value};
         };
     }
@@ -189,7 +188,7 @@ export function parse(text: string) {
 
     // ---------- other built-ins ----------
     function i32(state: Duad): Duad {
-        if (state === NO_MATCH) return NO_MATCH; // TODO: really want this atop every transcoder? why? why not?
+        if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
         assert(state.N === EMPTY_NODE); // TODO: explain... i32 can't augment any existing node
 
         // TODO: negative ints
@@ -210,7 +209,7 @@ export function parse(text: string) {
 
             // Check for overflow
             if (N > ONE_TENTH_MAXINT32) {
-                return NO_MATCH;
+                return null;
             }
 
             // Update parsed number
@@ -220,7 +219,7 @@ export function parse(text: string) {
         }
 
         // Check that we parsed at least one digit
-        if (S === state.S) return NO_MATCH;
+        if (S === state.S) return null;
 
         // TODO: sanity check over/under-flow. See eg:
         // https://github.com/dotnet/coreclr/blob/cdff8b0babe5d82737058ccdae8b14d8ae90160d/src/mscorlib/src/System/Number.cs#L518-L532
