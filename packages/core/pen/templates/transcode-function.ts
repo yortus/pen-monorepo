@@ -56,7 +56,6 @@ export function parse(text: string) {
                 memos.set(state.S, memo);
 
                 // TODO: ...
-                let S0 = state.S;
                 let stateᐟ = expr(state); // recurse... the memo will be updated...
 
                 // We now have a fully resolved memo.
@@ -113,8 +112,6 @@ export function parse(text: string) {
 
     // function Sequence(...expressions: Transcoder[]): Transcoder {
     //     return state => {
-    //         if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-    //         assert(state.N === EMPTY_NODE); // TODO: check... can sequences augment any existing node? eg when nested?
     //         let stateᐟ = state;
     //         for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
     //             stateᐟ = expressions[i](stateᐟ);
@@ -127,8 +124,7 @@ export function parse(text: string) {
         // TODO: doc... relies on prop order being preserved...
         const fieldIds = Object.keys(fields);
         return state => {
-            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-            assert(state.N === EMPTY_NODE); // TODO: explain... records can't augment any existing node
+            assert(state.N === EMPTY_NODE); // a record can't augment another node
             let S = state.S;
             let N = {};
             for (let id of fieldIds) {
@@ -145,33 +141,30 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser factories ----------
-    function Identifier(name: string): Transcoder {
-        // TODO: ...
-        return state => null;
-    }
+    // function Identifier(name: string): Transcoder {
+    //     // TODO: ...
+    //     return state => null;
+    // }
 
     function AbstractStringLiteral(value: string): Transcoder {
-        return state => {
-            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-            assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
-            return {S: state.S, N: value};
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
+            return {S, N: N === EMPTY_NODE ? value : (N + value)};
         };
     }
 
     function ConcreteStringLiteral(value: string): Transcoder {
-        return state => {
-            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-            if (!state.S.startsWith(value)) return null;
-            return {S: state.S.slice(value.length), N: state.N};
+        return ({S, N}) => {
+            if (!S.startsWith(value)) return null;
+            return {S: S.slice(value.length), N};
         };
     }
 
     function UniformStringLiteral(value: string): Transcoder {
-        return state => {
-            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-            assert(state.N === EMPTY_NODE); // TODO: remove this limitation, augmentation should work
-            if (!state.S.startsWith(value)) return null;
-            return {S: state.S.slice(value.length), N: value};
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
+            if (!S.startsWith(value)) return null;
+            return {S: S.slice(value.length), N: N === EMPTY_NODE ? value : (N + value)};
         };
     }
 
@@ -180,8 +173,7 @@ export function parse(text: string) {
 
     // ---------- other built-ins ----------
     function i32(state: Duad): Duad {
-        if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-        assert(state.N === EMPTY_NODE); // TODO: explain... i32 can't augment any existing node
+        if (state.N !== EMPTY_NODE) return null; // TODO: explain... i32 can't augment any existing node
 
         // TODO: negative ints
         // TODO: exponents

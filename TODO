@@ -8,6 +8,7 @@ Todo:
     [ ] `i32`: are exponents normally supported for int literals? What do other langs do?
     [ ] `i32`: if int is too large, we return `Fail`, but probably better to be some kind of error. What to do?
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
+    [ ] statically error on sequences that don't produce a single node (and remove assert()s from template code)
     [ ] way to add newline spacing between decls in emitted TS?
     [ ] only need `start` prop if binding value isn't a combinator factory call (eg string lits, simple delegation)
         [ ] `function isCombinator(astNode) {...}`
