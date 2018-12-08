@@ -28,14 +28,6 @@ export function parse(text: string) {
 
 
 
-    // let S = '';
-    // let N = EmptyNode;
-    // let Sᐟ = '';
-    // let Nᐟ = EmptyNode;
-
-
-
-
     debugger;
     let ast = start({S: text, N: EMPTY_NODE});
     if (ast === null) throw new Error(`parse failed`);
@@ -109,27 +101,27 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser combinators ----------
-    function Selection(...expressions: Transcoder[]): Transcoder {
-        return state => {
-            let stateᐟ = null;
-            for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
-                stateᐟ = expressions[i](state);
-            }
-            return stateᐟ;
-        };
-    }
+    // function Selection(...expressions: Transcoder[]): Transcoder {
+    //     return state => {
+    //         let stateᐟ = null;
+    //         for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
+    //             stateᐟ = expressions[i](state);
+    //         }
+    //         return stateᐟ;
+    //     };
+    // }
 
-    function Sequence(...expressions: Transcoder[]): Transcoder {
-        return state => {
-            if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
-            assert(state.N === EMPTY_NODE); // TODO: check... can sequences augment any existing node? eg when nested?
-            let stateᐟ = state;
-            for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
-                stateᐟ = expressions[i](stateᐟ);
-            }
-            return stateᐟ;
-        };
-    }
+    // function Sequence(...expressions: Transcoder[]): Transcoder {
+    //     return state => {
+    //         if (state === null) return null; // TODO: really want this atop every transcoder? why? why not?
+    //         assert(state.N === EMPTY_NODE); // TODO: check... can sequences augment any existing node? eg when nested?
+    //         let stateᐟ = state;
+    //         for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
+    //             stateᐟ = expressions[i](stateᐟ);
+    //         }
+    //         return stateᐟ;
+    //     };
+    // }
 
     function Record(fields: {[id: string]: Transcoder}): Transcoder {
         // TODO: doc... relies on prop order being preserved...
