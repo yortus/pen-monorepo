@@ -13,7 +13,7 @@ export function parse(text: string) {
 
     // TODO: misc precomputed values...
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10; // 214748364.7
+    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
     // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
     // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
@@ -208,7 +208,7 @@ export function parse(text: string) {
         // Apply the sign.
         if (isNegative) N = -N;
 
-        // Check for over/under-flow.
+        // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
         // tslint:disable-next-line:no-bitwise
         if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
 
