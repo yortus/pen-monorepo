@@ -57,6 +57,9 @@ StringLiteral
     = SQUOTE   text:[^'\\\r\n]*   SQUOTE
     { return {nodeType: 'StringLiteral', value: text.join(''), onlyIn: 'ast'}; }
 
+    / DQUOTE   text:[^"\\\r\n]*   DQUOTE
+    { return {nodeType: 'StringLiteral', value: text.join('')}; }
+
     / BTICK   text:[^`\\\r\n]*   BTICK
     { return {nodeType: 'StringLiteral', value: text.join(''), onlyIn: 'text'}; }
 
@@ -87,7 +90,7 @@ BTICK   = '`'
 COLON   = ':'
 COMMA   = ','
 // DOT     = '.'
-// DQUOTE  = '"'
+DQUOTE  = '"'
 EQ      = '='
 // FSLASH  = '/'
 LANGLE  = '<'

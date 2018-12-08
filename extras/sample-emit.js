@@ -9,10 +9,10 @@ const NO_MATCH = { S: '__nomatch__', N: '__nomatch__' };
 function parse(text) {
 
     // start
-    start.start = expr;
     function start(state) {
         return start.start(state);
     }
+    start.start = expr;
 
     // expr
     function expr(state) {
