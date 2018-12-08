@@ -11,6 +11,10 @@ declare const start: Transcoder;
 
 export function parse(text: string) {
 
+    // TODO: misc precomputed values...
+    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
+    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+
     // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
     // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
     // an offset. It is also reasonably performant, since most JS runtimes (including V8) optimise string slicing
@@ -167,23 +171,19 @@ export function parse(text: string) {
 
 
     // ---------- other built-ins ----------
-    function i32(state: Duad): Duad {
-        if (state.N !== EMPTY_NODE) return null; // an i32 can't augment another node
+    function i32({S, N}: Duad): Duad {
+        if (N !== EMPTY_NODE) return null; // an i32 can't augment another node
 
         // TODO: allow leading '+' or '-' sign, followed by one or more [0-9] digits. No exponents.
 
-        // TODO: would be better not to calc these on every call
-        const ZERO = '0'.charCodeAt(0);
-        const NINE = '9'.charCodeAt(0);
-        const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
-        let S = state.S;
-        let N = 0;
+        N = 0;
+        let digits = 0;
         while (S.length > 0) {
 
             // Read a digit
             let c = S.charCodeAt(0);
-            if (c < ZERO || c > NINE) break;
+            if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
 
             // Check for overflow
             if (N > ONE_TENTH_MAXINT32) {
@@ -192,12 +192,13 @@ export function parse(text: string) {
 
             // Update parsed number
             N *= 10;
-            N += (c - ZERO);
+            N += (c - UNICODE_ZERO_DIGIT);
             S = S.slice(1);
+            ++digits;
         }
 
         // Check that we parsed at least one digit
-        if (S === state.S) return null;
+        if (digits === 0) return null;
 
         // TODO: sanity check over/under-flow. See eg:
         // https://github.com/dotnet/coreclr/blob/cdff8b0babe5d82737058ccdae8b14d8ae90160d/src/mscorlib/src/System/Number.cs#L518-L532

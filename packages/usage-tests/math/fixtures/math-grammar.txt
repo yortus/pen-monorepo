@@ -15,17 +15,18 @@
 start = expr
 
 // TODO: temp testing...
-expr = LP (A | B) A A A RP
-A = "a"
-B = "b"
-// expr = LeftRec<add | term>
-// add = {type: 'add', lhs: expr, rhs: ADD term}
-// term = i32
+//expr = LP (A | B) A A A RP
+//A = "a"
+//B = "b"
+
+//expr = LeftRec<add | term>
+//add = {type: 'add', lhs: expr, rhs: ADD term}
+//term = i32
 
 
 
 
-//expr = LeftRec<add | sub | term>
+expr = LeftRec<add | sub | term>
 add = {type: 'add', lhs: expr, rhs: ADD term}
 sub = {type: 'sub', lhs: expr, rhs: SUB term}
 
