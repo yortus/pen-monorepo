@@ -27,5 +27,5 @@ TODO: clarify terminology:
         - so `Identifier` and `StringLiteral`
 
     'AST' vs 'text':
-        - 'ast' alternatives: node, nodes
-        - 'text' alternatives: document, string, stream, chars, article, script, file
+        - 'ast', consisting of nodes, one node
+        - 'text', consisting of spans, one span

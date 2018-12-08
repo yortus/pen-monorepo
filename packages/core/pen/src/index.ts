@@ -21,7 +21,7 @@ export function getParser(grammar: string) {
     // Parse a file
     let sourceFile = ts.createSourceFile(
         'test.ts',
-        fs.readFileSync(path.join(__dirname, '../templates/parse-function.ts'), 'utf8'),
+        fs.readFileSync(path.join(__dirname, '../templates/transcode-function.ts'), 'utf8'),
         ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
     );

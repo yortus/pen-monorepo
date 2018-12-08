@@ -21,7 +21,9 @@ export function emitModule(module: Module): ts.Statement[] {
             /*asteriskToken*/ undefined,
             /*name*/ id.name,
             /*typeParameters*/ undefined,
-            /*parameters*/ [],
+            /*parameters*/ [
+                ts.createParameter(undefined, undefined, undefined, 'state'),
+            ],
             /*type*/ undefined,
             /*body*/ ts.createBlock(
                 /*statements*/ [
@@ -32,7 +34,9 @@ export function emitModule(module: Module): ts.Statement[] {
                                 'start'
                             ),
                             /*typeArguments*/ undefined,
-                            /*argumentsArray*/ []
+                            /*argumentsArray*/ [
+                                ts.createIdentifier('state'),
+                            ]
                         )
                     ),
                 ],
