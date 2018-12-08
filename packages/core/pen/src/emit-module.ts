@@ -1,4 +1,3 @@
-import * as assert from 'assert';
 import * as ts from 'typescript';
 import {Application} from './ast-types';
 import {Expression} from './ast-types';
@@ -113,82 +112,19 @@ function emitRecord(expr: Record) {
 }
 
 function emitSelection(expr: Selection) {
-    assert(expr.expressions.length > 0);
-    let lhs: ts.Expression = ts.createCall(
-        emitExpression(expr.expressions[0]),
+    return ts.createCall(
+        ts.createIdentifier('Selection'),
         /*typeArguments*/ undefined,
-        /*argumentsArray*/ [ts.createIdentifier('s')]
+        /*argumentsArray*/ expr.expressions.map(emitExpression)
     );
-
-    for (let rhs of expr.expressions.slice(1)) {
-        lhs = ts.createLogicalOr(
-            lhs,
-            ts.createCall(
-                emitExpression(rhs),
-                /*typeArguments*/ undefined,
-                /*argumentsArray*/ [ts.createIdentifier('s')]
-            )
-        );
-    }
-
-    return ts.createArrowFunction(
-        /*modifiers*/ undefined,
-        /*typeParameters*/ undefined,
-        /*parameters*/[ts.createParameter(undefined, undefined, undefined, 's')],
-        /*type*/ undefined,
-        undefined,
-        /*body*/ lhs
-    );
-
-    // TODO: was...
-    // return ts.createCall(
-    //     ts.createIdentifier('Selection'),
-    //     /*typeArguments*/ undefined,
-    //     /*argumentsArray*/ expr.expressions.map(emitExpression)
-    // );
 }
 
 function emitSequence(expr: Sequence) {
-    assert(expr.expressions.length > 0);
-
-    let lhs: ts.Expression = ts.createAssignment(
-        ts.createIdentifier('s'),
-        ts.createCall(
-            emitExpression(expr.expressions[0]),
-            /*typeArguments*/ undefined,
-            /*argumentsArray*/ [ts.createIdentifier('s')]
-        )
+    return ts.createCall(
+        ts.createIdentifier('Sequence'),
+        /*typeArguments*/ undefined,
+        /*argumentsArray*/ expr.expressions.map(emitExpression)
     );
-
-    for (let rhs of expr.expressions.slice(1)) {
-        lhs = ts.createLogicalAnd(
-            lhs,
-            ts.createAssignment(
-                ts.createIdentifier('s'),
-                ts.createCall(
-                    emitExpression(rhs),
-                    /*typeArguments*/ undefined,
-                    /*argumentsArray*/ [ts.createIdentifier('s')]
-                )
-            )
-        );
-    }
-
-    return ts.createArrowFunction(
-        /*modifiers*/ undefined,
-        /*typeParameters*/ undefined,
-        /*parameters*/[ts.createParameter(undefined, undefined, undefined, 's')],
-        /*type*/ undefined,
-        undefined,
-        /*body*/ lhs
-    );
-
-    // TODO: was...
-    // return ts.createCall(
-    //     ts.createIdentifier('Sequence'),
-    //     /*typeArguments*/ undefined,
-    //     /*argumentsArray*/ expr.expressions.map(emitExpression)
-    // );
 }
 
 function emitStringLiteral(expr: StringLiteral) {

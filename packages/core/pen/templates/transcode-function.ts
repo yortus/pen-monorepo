@@ -44,7 +44,7 @@ export function parse(text: string) {
             resolved: boolean;
             result: Duad | null;
         }
-        const memos = new Map<string, Memo>();
+        const memos = new Map<string, Memo>(); // TODO: WeakMap better?
 
         return state => {
             let memo = memos.get(state.S); // TODO: what about state.N, should that form part of memo's key? Investigate...
@@ -100,25 +100,25 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser combinators ----------
-    // function Selection(...expressions: Transcoder[]): Transcoder {
-    //     return state => {
-    //         let stateᐟ = null;
-    //         for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
-    //             stateᐟ = expressions[i](state);
-    //         }
-    //         return stateᐟ;
-    //     };
-    // }
+    function Selection(...expressions: Transcoder[]): Transcoder {
+        return state => {
+            let stateᐟ = null;
+            for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
+                stateᐟ = expressions[i](state);
+            }
+            return stateᐟ;
+        };
+    }
 
-    // function Sequence(...expressions: Transcoder[]): Transcoder {
-    //     return state => {
-    //         let stateᐟ = state;
-    //         for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
-    //             stateᐟ = expressions[i](stateᐟ);
-    //         }
-    //         return stateᐟ;
-    //     };
-    // }
+    function Sequence(...expressions: Transcoder[]): Transcoder {
+        return state => {
+            let stateᐟ = state;
+            for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
+                stateᐟ = expressions[i](stateᐟ);
+            }
+            return stateᐟ;
+        };
+    }
 
     function Record(fields: {[id: string]: Transcoder}): Transcoder {
         // TODO: doc... relies on prop order being preserved...
@@ -141,11 +141,6 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser factories ----------
-    // function Identifier(name: string): Transcoder {
-    //     // TODO: ...
-    //     return state => null;
-    // }
-
     function AbstractStringLiteral(value: string): Transcoder {
         return ({S, N}) => {
             assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
@@ -173,10 +168,9 @@ export function parse(text: string) {
 
     // ---------- other built-ins ----------
     function i32(state: Duad): Duad {
-        if (state.N !== EMPTY_NODE) return null; // TODO: explain... i32 can't augment any existing node
+        if (state.N !== EMPTY_NODE) return null; // an i32 can't augment another node
 
-        // TODO: negative ints
-        // TODO: exponents
+        // TODO: allow leading '+' or '-' sign, followed by one or more [0-9] digits. No exponents.
 
         // TODO: would be better not to calc these on every call
         const ZERO = '0'.charCodeAt(0);
