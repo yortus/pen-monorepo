@@ -126,15 +126,15 @@ export function parse(text: string) {
         };
     }
 
-    function Record(fields: Array<{id: string, value: Transcoder}>): Transcoder {
+    function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
         const arity = fields.length;
         return state => {
             assert(state.N === EMPTY_NODE); // a record can't augment another node
             let S = state.S;
             let N = {};
             for (let i = 0; i < arity; ++i) {
-                let {id, value} = fields[i];
-                let result = value({S, N: EMPTY_NODE});
+                let {id, expression} = fields[i];
+                let result = expression({S, N: EMPTY_NODE});
                 if (result === null) return null;
                 S = result.S;
                 N[id] = result.N;

@@ -6,7 +6,7 @@ export interface Module {
 export interface Binding {
     nodeType: 'Binding';
     id: Identifier;
-    value: Expression; // TODO: rename value ==> expression
+    expression: Expression;
 }
 
 export interface Selection {
@@ -33,7 +33,7 @@ export interface Record {
 export interface RecordField {
     nodeType: 'RecordField';
     id: Identifier;
-    value: Expression; // TODO: rename value ==> expression
+    expression: Expression;
 }
 
 export interface Identifier {
@@ -43,8 +43,8 @@ export interface Identifier {
 
 export interface StringLiteral {
     nodeType: 'StringLiteral';
+    variant: 'Abstract' | 'Concrete' | 'Uniform';
     value: string;
-    onlyIn?: 'ast' | 'text'; // TODO: settle on official term for non-dual / non-transcoded
     // TODO: preserve escape sequences? eg raw/cooked props?
     //       how does babel etc handle this in its AST?
 }

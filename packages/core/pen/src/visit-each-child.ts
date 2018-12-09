@@ -6,12 +6,12 @@ import {Node} from './ast-types';
 export function visitEachChild(node: Node, visitor: Visitor) {
     switch (node.nodeType) {
         case 'Application': return visitNodes(visitor, node.id, ...node.arguments);
-        case 'Binding': return visitNodes(visitor, node.id, node.value);
+        case 'Binding': return visitNodes(visitor, node.id, node.expression);
         case 'Identifier': return;
         case 'Module': return visitNodes(visitor, ...node.bindings);
         case 'ParenthesizedExpression': return visitNodes(visitor, node.expression);
         case 'Record': return visitNodes(visitor, ...node.fields);
-        case 'RecordField': return visitNodes(visitor, node.id, node.value);
+        case 'RecordField': return visitNodes(visitor, node.id, node.expression);
         case 'Selection': return visitNodes(visitor, ...node.expressions);
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
         case 'StringLiteral': return;

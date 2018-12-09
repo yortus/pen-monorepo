@@ -14,7 +14,7 @@ import {StringLiteral} from './ast-types';
 
 export function emitModule(module: Module): ts.Statement[] {
     let stmts = [] as ts.Statement[];
-    for (let {id, value} of module.bindings) {
+    for (let {id, expression} of module.bindings) {
         let funcDecl = ts.createFunctionDeclaration(
             /*decorators*/ undefined,
             /*modifiers*/ undefined,
@@ -50,7 +50,7 @@ export function emitModule(module: Module): ts.Statement[] {
                     ts.createIdentifier(id.name),
                     'start'
                 ),
-                /*right*/ emitExpression(value)
+                /*right*/ emitExpression(expression)
             )
         );
 
@@ -107,8 +107,8 @@ function emitRecord(expr: Record) {
                                 /*initializer*/ ts.createStringLiteral(field.id.name)
                             ),
                             ts.createPropertyAssignment(
-                                /*name*/ 'value',
-                                /*initializer*/ emitExpression(field.value)
+                                /*name*/ 'expression',
+                                /*initializer*/ emitExpression(field.expression)
                             ),
                         ],
                         /*multiline*/ true
@@ -137,9 +137,8 @@ function emitSequence(expr: Sequence) {
 }
 
 function emitStringLiteral(expr: StringLiteral) {
-    const kind = expr.onlyIn ? (expr.onlyIn === 'ast' ? 'Abstract' : 'Concrete') : 'Uniform';
     return ts.createCall(
-        ts.createIdentifier(`${kind}StringLiteral`),
+        ts.createIdentifier(`${expr.variant}StringLiteral`),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ [
             ts.createStringLiteral(expr.value),

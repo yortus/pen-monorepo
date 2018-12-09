@@ -6,8 +6,8 @@ Module
     { return {nodeType: 'Module', bindings: bindings.map(el => el[1])}; }
 
 Binding
-    = id:Identifier   WS   EQ   WS   value:Expression
-    { return {nodeType: 'Binding', id, value}; }
+    = id:Identifier   WS   EQ   WS   expression:Expression
+    { return {nodeType: 'Binding', id, expression}; }
 
 
 
@@ -46,8 +46,8 @@ RecordFields
     { return [h].concat(t.map(el => el[3])); }
 
 RecordField
-    = id:Identifier   WS   COLON   WS   value:Expression
-    { return {nodeType: 'RecordField', id, value}; }
+    = id:Identifier   WS   COLON   WS   expression:Expression
+    { return {nodeType: 'RecordField', id, expression}; }
 
 Identifier
     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
@@ -55,13 +55,13 @@ Identifier
 
 StringLiteral
     = SQUOTE   text:[^'\\\r\n]*   SQUOTE
-    { return {nodeType: 'StringLiteral', value: text.join(''), onlyIn: 'ast'}; }
+    { return {nodeType: 'StringLiteral', variant: 'Abstract', value: text.join('')}; }
 
     / DQUOTE   text:[^"\\\r\n]*   DQUOTE
-    { return {nodeType: 'StringLiteral', value: text.join('')}; }
+    { return {nodeType: 'StringLiteral', variant: 'Uniform', value: text.join('')}; } // TODO: 8-letter synonym?
 
     / BTICK   text:[^`\\\r\n]*   BTICK
-    { return {nodeType: 'StringLiteral', value: text.join(''), onlyIn: 'text'}; }
+    { return {nodeType: 'StringLiteral', variant: 'Concrete', value: text.join('')}; }
 
 ParenthesizedExpression
     = LPAREN   WS   expression:Expression   WS   RPAREN
