@@ -1,4 +1,5 @@
 Todo:
+    [ ] get unparse() working end-to-end; test it 
     [x] add math expression grammar as test fixture
     [x] add API function to parse a grammar and return AST (temporary)
     [x] add API function to parse a grammar and spit out source for a `parse()` function:

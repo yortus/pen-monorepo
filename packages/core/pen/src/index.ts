@@ -21,7 +21,7 @@ export function getParser(grammar: string) {
     // Parse a file
     let sourceFile = ts.createSourceFile(
         'test.ts',
-        fs.readFileSync(path.join(__dirname, '../templates/transcode-function.ts'), 'utf8'),
+        fs.readFileSync(path.join(__dirname, '../templates/parse-function.ts'), 'utf8'),
         ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
     );
@@ -72,56 +72,3 @@ export function getParser(grammar: string) {
         diagnostics: javaScriptOutput.diagnostics || [],
     };
 }
-
-
-
-
-
-
-
-
-
-
-// let parseFunc = ts.createFunctionDeclaration(
-//     /*decorators*/ undefined,
-//     /*modifiers*/ undefined,
-//     /*asteriskToken*/ undefined,
-//     'parse',
-//     /*typeParameters*/ undefined,
-//     /*parameters*/ [
-//         // tslint:disable-next-line:max-line-length
-//         ts.createParameter(undefined, undefined, undefined, 'text', undefined,
-//             ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword), undefined),
-//     ],
-//     /*type*/ undefined,
-//     /*body*/ ts.createBlock([
-//         ts.createVariableStatement(
-//             undefined,
-//             ts.createVariableDeclarationList(
-//                 [
-//                     ts.createVariableDeclaration(
-//                         'pos',
-//                         ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
-//                         ts.createLiteral(0)
-//                     ),
-//                 ],
-//                 ts.NodeFlags.Let
-//             )
-//         ),
-//         ts.createVariableStatement(
-//             undefined,
-//             ts.createVariableDeclarationList(
-//                 [
-//                     ts.createVariableDeclaration(
-//                         'ret',
-//                         ts.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
-//                         ts.createIdentifier('undefined')
-//                     ),
-//                 ],
-//                 ts.NodeFlags.Let
-//             )
-//         ),
-//         stmt,
-//         ...sourceFile.statements,
-//     ], true)
-// );
