@@ -10,6 +10,7 @@ Todo:
     [ ] `Module` and `Record` are basically the same - flech out any differences and/or merge concepts
       [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
+    [ ] `StringLiteral`: better word than 'uniform' for the "..." variant? (eg parallel, matching, constant, ordinary)
     [ ] statically error on sequences that don't produce a single node (and remove assert()s from template code)
     [ ] theory: investigate memoisation for correctness
       [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?

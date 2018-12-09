@@ -1,25 +1,19 @@
-const Unit = Symbol('unit');
-type Unit = typeof Unit;
-const Fail = Symbol('fail');
-type Fail = typeof Fail;
-type Node = string | number | object;
-type ParseResult = Node | Unit | Fail;
-type Parser = () => ParseResult; // side-effect: changes `pos`
-declare const start: Parser;
+type Span = number; // index of start position in `text`
+const EMPTY_NODE = Symbol('EmptyNode');
+type EmptyNode = typeof EMPTY_NODE;
+type Node = EmptyNode | string | number | object;
+interface Duad { S: Span; N: Node; }
+type Transcoder = (t: Duad) => Duad | null;
+declare const start: Transcoder;
 
 
 
 
-export function parse(text: string) {
+export function parse(text: string): Node {
 
-    // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
-    // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
-    // an offset. It is also reasonably performant, since most JS runtimes (including V8) optimise string slicing
-    // like the kind done here. E.g. see https://jsperf.com/consuming-a-long-string
-    // This could be revisited later to increase performance, but it should be measured to see if it's worth it.
-    // these two fns just make reading the code a bit easier. Will be more important when there is more state beside pos
-    function consume(count: number) { text = text.slice(count); }
-    function restore(_text: string) { text = _text; }
+    // These constants are used by the i32 parser below.
+    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
+    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
 
 
@@ -30,78 +24,64 @@ export function parse(text: string) {
 
 
     debugger;
-    let ast = start();
-    if (ast === Fail) throw new Error(`parse failed`);
-    if (text.length > 0) throw new Error(`parse didn't consume entire input`);
-    if (ast === Unit) throw new Error(`parse didn't return a value`);
-    return ast;
+    let ast = start({S: 0, N: EMPTY_NODE});
+    if (ast === null) throw new Error(`parse failed`);
+    if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
+    if (ast.N === EMPTY_NODE) throw new Error(`parse didn't return a value`);
+    return ast.N;
 
 
 
 
     // ---------- wip... ----------
-    function Memo(expr: Parser): Parser {
-        interface Memo {
+    function Memo(expr: Transcoder): Transcoder {
+        const memos = new Map<Span, { // TODO: use holey array? Faster? to much RAM load? V8 array tips?
             resolved: boolean;
-            consumed: number;
-            result: ParseResult;
-        }
-        const memos = new Map<string, Memo>();
-
-        return () => {
-            let memo = memos.get(text);
+            isLeftRecursive: boolean;
+            result: Duad | null;
+        }>();
+        return state => {
+            // Check whether the memo table already has an entry for the given value of state.S.
+            let memo = memos.get(state.S);
             if (!memo) {
-                // TODO: ...
-                // Memo has just been created...
-                // transduce and memoize the inner expession using a cycle-tolerant algorithm...
-                memo = {resolved: false, consumed: 0, result: Unit};
-                memos.set(text, memo);
+                // The memo table does *not* have an entry, so this is the first attempt to parse this rule at state.S.
+                // The first thing we do is create a memo table entry, which is marked as *unresolved*. All future calls
+                // with the same value of state.S will find this memo. If a future call finds the memo still unresolved,
+                // then we know we have encountered left-recursion.
+                memo = {resolved: false, isLeftRecursive: false, result: null};
+                memos.set(state.S, memo);
 
-                // TODO: ...
-                let startText = text;
-                let result = expr(); // recurse... the memo will be updated...
-
-                // We now have a fully resolved memo.
+                // Now that the unresolved memo is in place, invoke the rule, and resolve the memo with the result. At
+                // this point, any left-recursive invocations are guaranteed to have been noted and aborted (see below).
+                memo.result = expr(state);
                 memo.resolved = true;
-                memo.consumed = startText.length - text.length;
-                memo.result = result;
 
-                // TODO: If the preceding call to Transduce() succeeded...
-                // Re-transduce from our initial position until we meet a stopping condition.
-                // This will transduce left-cycles without getting caught in an infinite loop. It works as follows.
-                // When the call to Transduce() below reaches a left-cyclic path, this method is reentered with
-                // the same source position. But thanks to the preceding code, there is a resolved memo for this
-                // position now. The method uses this memo and returns immediately, and transduction continues
-                // beyond the left-cycle. We stop the re-transduction loop when it either fails or consumes no
-                // further input (which could be due to right-cycles).
-                while (result !== Fail) {
-                    // NB: backtrack before re-parsing...
-                    restore(startText);
-                    result = expr();
+                // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
+                if (!memo.isLeftRecursive) return memo.result;
 
-                    // If the re-transduction positively progressed, update the memo and re-transduce again
-                    if (startText.length - text.length <= memo.consumed) {
-                        restore(startText);
-                        result = Fail;
-                    }
-                    if (result !== Fail) {
-                        memo.consumed = startText.length - text.length;
-                        memo.result = result;
-                    }
+                // If we get here, then the above invocation of the rule called itself left-recursively, but we aborted
+                // the left-recursive path(s). That means that the current parse result is either a failed parse, or a
+                // successful parse of a non-left-recursive application of the rule. We now iterate, repeatedly parsing
+                // the same rule with the same input. We continue to iterate as long as the parse succeeds and
+                // consumes more input, in which case we update the memo with the new result. We thus 'grow' the parse
+                // result until it no longer succeeds or consumes more input, at which point we take the memo as final.
+                while (memo.result !== null) {
+                    let stateᐟ = expr(state);
+                    if (stateᐟ === null || stateᐟ.S <= memo.result.S) break;
+                    memo.result = stateᐟ;
                 }
             }
-
             else if (!memo.resolved) {
-                // TODO: ...
-                // We have re-entered this function at the same input position as the original call,
-                // so we must have encountered a left-cycle. We simply flag the presence of the left-cycle
-                // and return false, as explained in the previous switch case.
-                return Fail;
+                // If we get here, then we have already invoked the rule at this input position, but not resolved it.
+                // That means we must have entered a left-recursive path of the rule. All we do here is note that the
+                // rule application encountered left-recursion, and return a failed parse. This means that the initial
+                // application of the rule at this position can only possibly succeed along a non-left-recursive path.
+                // More importantly, it means the parser will never loop endlessly on left-recursive rules.
+                memo.isLeftRecursive = true;
+                return null;
             }
 
-            // TODO: ...
-            // If we get here, Memo is established - use it for the translation
-            consume(memo.consumed);
+            // We have a resolved memo, so the result of the parse is already computed. Return it from the memo.
             return memo.result;
         };
     }
@@ -110,43 +90,41 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser combinators ----------
-    function Selection(...expressions: Parser[]): Parser {
-        return () => {
-            let result: ParseResult = Fail;
-            for (let i = 0; i < expressions.length && result === Fail; ++i) {
-                result = expressions[i]();
+    function Selection(...expressions: Transcoder[]): Transcoder {
+        const arity = expressions.length;
+        return state => {
+            let stateᐟ = null;
+            for (let i = 0; i < arity && stateᐟ === null; ++i) {
+                stateᐟ = expressions[i](state);
             }
-            return result;
+            return stateᐟ;
         };
     }
 
-    function Sequence(...expressions: Parser[]): Parser {
-        return () => {
-            let startText = text;
-            let result: ParseResult = Unit;
-            for (let i = 0; i < expressions.length && result !== Fail; ++i) {
-                let next = expressions[i]();
-                result = result === Unit ? next : result; // TODO: fix properly...
+    function Sequence(...expressions: Transcoder[]): Transcoder {
+        const arity = expressions.length;
+        return state => {
+            let stateᐟ = state;
+            for (let i = 0; i < arity && stateᐟ !== null; ++i) {
+                stateᐟ = expressions[i](stateᐟ);
             }
-            if (result === Fail) restore(startText);
-            return result;
+            return stateᐟ;
         };
     }
 
-    function Record(fields: {[id: string]: Parser}): Parser {
-        // TODO: doc... relies on prop order being preserved...
-        const fieldIds = Object.keys(fields);
-        return () => {
-            let startText = text;
-            let obj = {};
-            let result: ParseResult = Unit;
-            for (let i = 0; i < fieldIds.length && result !== Fail; ++i) {
-                let id = fieldIds[i];
-                result = obj[id] = fields[id]();
+    function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
+        const arity = fields.length;
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE); // a record can't augment another node
+            N = {};
+            for (let i = 0; i < arity; ++i) {
+                let {id, expression} = fields[i];
+                let result = expression({S, N: EMPTY_NODE});
+                if (result === null) return null;
+                S = result.S;
+                N[id] = result.N;
             }
-            if (result !== Fail) return obj;
-            restore(startText);
-            return Fail;
+            return {S, N};
         };
     }
 
@@ -154,18 +132,25 @@ export function parse(text: string) {
 
 
     // ---------- built-in parser factories ----------
-    function Identifier(name: string): Parser {
-        // TODO: ...
-        return () => Fail;
+    function AbstractStringLiteral(value: string): Transcoder {
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
+            return {S, N: N === EMPTY_NODE ? value : (N + value)};
+        };
     }
 
-    function StringLiteral(value: string, onlyIn?: 'ast' | 'text'): Parser {
-        return () => {
-            if (onlyIn !== 'ast') {
-                if (text.slice(0, value.length) !== value) return Fail;
-            }
-            consume(onlyIn === 'ast' ? 0 : value.length);
-            return onlyIn === 'text' ? Unit : value;
+    function ConcreteStringLiteral(value: string): Transcoder {
+        return ({S, N}) => {
+            if (!matchesAt(text, value, S)) return null;
+            return {S: S + value.length, N};
+        };
+    }
+
+    function UniformStringLiteral(value: string): Transcoder {
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
+            if (!matchesAt(text, value, S)) return null;
+            return {S: S + value.length, N: N === EMPTY_NODE ? value : (N + value)};
         };
     }
 
@@ -173,44 +158,63 @@ export function parse(text: string) {
 
 
     // ---------- other built-ins ----------
-    function i32() {
-        // TODO: negative ints
-        // TODO: exponents
+    function i32({S, N}: Duad): Duad {
+        if (N !== EMPTY_NODE) return null; // an i32 can't augment another node
 
-        // TODO: would be better not to calc these on every call
-        const ZERO = '0'.charCodeAt(0);
-        const NINE = '9'.charCodeAt(0);
-        const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+        // Parse optional leading '-' sign...
+        let isNegative = false;
+        if (text.charAt(S) === '-') {
+            isNegative = true;
+            S += 1;
+        }
 
-        let startText = text;
-        let n = 0;
-        while (text.length > 0) {
+        // ...followed by one or more decimal digits. (NB: no exponents).
+        N = 0;
+        let digits = 0;
+        while (S < text.length) {
 
             // Read a digit
-            let c = text.charCodeAt(0);
-            if (c < ZERO || c > NINE) break;
+            let c = text.charCodeAt(S);
+            if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
 
             // Check for overflow
-            if (n > ONE_TENTH_MAXINT32) {
-                restore(startText);
-                return Fail;
+            if (N > ONE_TENTH_MAXINT32) {
+                return null;
             }
 
             // Update parsed number
-            n *= 10;
-            n += (c - ZERO);
-            consume(1);
+            N *= 10;
+            N += (c - UNICODE_ZERO_DIGIT);
+            S += 1;
+            ++digits;
         }
 
-        // Check that we parsed at least one digit
-        if (text === startText) {
-            return Fail;
-        }
+        // Check that we parsed at least one digit.
+        if (digits === 0) return null;
 
-        // TODO: sanity check over/under-flow. See eg:
-        // https://github.com/dotnet/coreclr/blob/cdff8b0babe5d82737058ccdae8b14d8ae90160d/src/mscorlib/src/System/Number.cs#L518-L532
+        // Apply the sign.
+        if (isNegative) N = -N;
+
+        // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
+        if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
 
         // Success
-        return n;
+        return {S, N};
     }
+}
+
+
+
+
+function matchesAt(text: string, substr: string, position: number) {
+    let lastPos = position + substr.length;
+    if (lastPos > text.length) return false;
+    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+        if (text.charAt(i) !== substr.charAt(j)) return false;
+    }
+    return true;
+}
+
+function assert(value: unknown) {
+    if (!value) throw new Error(`Assertion failed`);
 }

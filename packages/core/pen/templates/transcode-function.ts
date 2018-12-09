@@ -9,7 +9,7 @@ declare const start: Transcoder;
 
 
 
-export function parse(text: string) {
+export function parse(text: string): Node {
 
     // These constants are used by the i32 parser below.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
@@ -114,10 +114,9 @@ export function parse(text: string) {
 
     function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
         const arity = fields.length;
-        return state => {
-            assert(state.N === EMPTY_NODE); // a record can't augment another node
-            let S = state.S;
-            let N = {};
+        return ({S, N}) => {
+            assert(N === EMPTY_NODE); // a record can't augment another node
+            N = {};
             for (let i = 0; i < arity; ++i) {
                 let {id, expression} = fields[i];
                 let result = expression({S, N: EMPTY_NODE});
@@ -197,7 +196,6 @@ export function parse(text: string) {
         if (isNegative) N = -N;
 
         // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-        // tslint:disable-next-line:no-bitwise
         if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
 
         // Success
