@@ -11,18 +11,16 @@ declare const start: Transcoder;
 
 export function parse(text: string) {
 
-    // TODO: misc precomputed values...
-    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
-
-    // NB: For simplicity of implementation, when we consume characters from `text`, we replace `text` with
+    // Implementation note:
+    // For simplicity of implementation, when we consume characters from `text`, we replace `text` with
     // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
     // an offset. It is also reasonably performant, since most JS runtimes (including V8) optimise string slicing
     // like the kind done here. E.g. see https://jsperf.com/consuming-a-long-string
     // This could be revisited later to increase performance, but it should be measured to see if it's worth it.
-    // these two fns just make reading the code a bit easier. Will be more important when there is more state beside pos
-    // function consume(count: number) { text = text.slice(count); }
-    // function restore(_text: string) { text = _text; }
+
+    // These constants are used by the i32 parser below.
+    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
+    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
 
 
@@ -44,14 +42,11 @@ export function parse(text: string) {
 
     // ---------- wip... ----------
     function Memo(expr: Transcoder): Transcoder {
-        // TODO: WeakMap better? but can't key WeakMap by string, see:
-        // https://softwareengineering.stackexchange.com/questions/324345/why-cant-an-es2015-weakmap-have-primitive-keys
         const memos = new Map<string, {
             resolved: boolean;
             isLeftRecursive: boolean;
             result: Duad | null;
         }>();
-
         return state => {
             // Check whether the memo table already has an entry for the given value of state.S.
             let memo = memos.get(state.S);
