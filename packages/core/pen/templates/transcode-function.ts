@@ -43,59 +43,57 @@ export function parse(text: string) {
 
 
     // ---------- wip... ----------
-    function LeftRec(expr: Transcoder): Transcoder {
-        interface Memo {
+    function Memo(expr: Transcoder): Transcoder {
+        // TODO: WeakMap better? but can't key WeakMap by string, see:
+        // https://softwareengineering.stackexchange.com/questions/324345/why-cant-an-es2015-weakmap-have-primitive-keys
+        const memos = new Map<string, {
             resolved: boolean;
+            isLeftRecursive: boolean;
             result: Duad | null;
-        }
-        const memos = new Map<string, Memo>(); // TODO: WeakMap better?
+        }>();
 
         return state => {
-            let memo = memos.get(state.S); // TODO: what about state.N, should that form part of memo's key? Investigate...
+            // Check whether the memo table already has an entry for the given value of state.S.
+            let memo = memos.get(state.S);
             if (!memo) {
-                // TODO: ...
-                // Memo has just been created...
-                // transduce and memoize the inner expession using a cycle-tolerant algorithm...
-                memo = {resolved: false, result: null};
+                // The memo table does *not* have an entry, so this is the first attempt to parse this rule at state.S.
+                // The first thing we do is create a memo table entry, which is marked as *unresolved*. All future calls
+                // with the same value of state.S will find this memo. If a future call finds the memo still unresolved,
+                // then we know we have encountered left-recursion.
+                memo = {resolved: false, isLeftRecursive: false, result: null};
                 memos.set(state.S, memo);
 
-                // TODO: ...
-                let stateᐟ = expr(state); // recurse... the memo will be updated...
-
-                // We now have a fully resolved memo.
+                // Now that the unresolved memo is in place, invoke the rule, and resolve the memo with the result. At
+                // this point, any left-recursive invocations are guaranteed to have been noted and aborted (see below).
+                memo.result = expr(state);
                 memo.resolved = true;
-                memo.result = stateᐟ;
 
-                // TODO: If the preceding call to Transduce() succeeded...
-                // Re-transduce from our initial position until we meet a stopping condition.
-                // This will transduce left-cycles without getting caught in an infinite loop. It works as follows.
-                // When the call to Transduce() below reaches a left-cyclic path, this method is reentered with
-                // the same source position. But thanks to the preceding code, there is a resolved memo for this
-                // position now. The method uses this memo and returns immediately, and transduction continues
-                // beyond the left-cycle. We stop the re-transduction loop when it either fails or consumes no
-                // further input (which could be due to right-cycles).
-                while (stateᐟ !== null) {
-// TODO: REVIEW FROM HERE... ===>
-                    stateᐟ = expr(state);
+                // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
+                if (!memo.isLeftRecursive) return memo.result;
 
-                    // If the re-transduction positively progressed, update the memo and re-transduce again
-                    if (stateᐟ === null) return memo.result;
-                    if (stateᐟ.S.length >= memo.result.S.length) return memo.result;
+                // If we get here, then the above invocation of the rule called itself left-recursively, but we aborted
+                // the left-recursive path(s). That means that the current parse result is either a failed parse, or a
+                // successful parse of a non-left-recursive application of the rule. We now iterate, repeatedly parsing
+                // the same rule with the same input. We continue to iterate as long as the parse succeeds and
+                // consumes more input, in which case we update the memo with the new result. We thus 'grow' the parse
+                // result until it no longer succeeds or consumes more input, at which point we take the memo as final.
+                while (memo.result !== null) {
+                    let stateᐟ = expr(state);
+                    if (stateᐟ === null || stateᐟ.S.length >= memo.result.S.length) break;
                     memo.result = stateᐟ;
-// ...TO HERE ===>
-        }
+                }
             }
-
             else if (!memo.resolved) {
-                // TODO: ...
-                // We have re-entered this function at the same input position as the original call,
-                // so we must have encountered a left-cycle. We simply flag the presence of the left-cycle
-                // and return false, as explained in the previous switch case.
+                // If we get here, then we have already invoked the rule at this input position, but not resolved it.
+                // That means we must have entered a left-recursive path of the rule. All we do here is note that the
+                // rule application encountered left-recursion, and return a failed parse. This means that the initial
+                // application of the rule at this position can only possibly succeed along a non-left-recursive path.
+                // More importantly, it means the parser will never loop endlessly on left-recursive rules.
+                memo.isLeftRecursive = true;
                 return null;
             }
 
-            // TODO: ...
-            // If we get here, Memo is established - use it for the translation
+            // We have a resolved memo, so the result of the parse is already computed. Return it from the memo.
             return memo.result;
         };
     }

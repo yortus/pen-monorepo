@@ -18,7 +18,7 @@ function parse(text) {
     function expr(state) {
         return expr.start(state);
     }
-    expr.start = LeftRec(Selection(add, sub, term));
+    expr.start = Memo(Selection(add, sub, term));
 
     // add
     function add(state) {
@@ -44,7 +44,7 @@ function parse(text) {
     function term(state) {
         return term.start(state);
     }
-    term.start = LeftRec(Selection(mul, div, factor));
+    term.start = Memo(Selection(mul, div, factor));
 
     // mul
     function mul(state) {
@@ -129,7 +129,7 @@ function parse(text) {
 
 
     // ---------- wip... ----------
-    function LeftRec(expr) {
+    function Memo(expr) {
         const memos = new Map();
         return state => {
             let memo = memos.get(state.S); // TODO: what about state.N, should that form part of memo's key? Investigate...

@@ -11,11 +11,14 @@ Todo:
       [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
     [ ] statically error on sequences that don't produce a single node (and remove assert()s from template code)
+    [ ] theory: investigate memoisation for correctness
+      [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?
+      [ ] do we need memoisation when unparsing? In which cases and why?
     [ ] way to add newline spacing between decls in emitted TS?
     [ ] only need `start` prop if binding value isn't a combinator factory call (eg string lits, simple delegation)
         [ ] `function isCombinator(astNode) {...}`
     [ ] doc resemblence of combinators to generic types that need 'instantiation' to make types
-    [ ] support automatic insertion of LeftRec (define subtasks...)
+    [ ] support automatic insertion of Memo<...> around rhs of left-recursive rules (define subtasks...)
     [ ] add UMD build using webpack, as per how `multimethods` does it
 
 

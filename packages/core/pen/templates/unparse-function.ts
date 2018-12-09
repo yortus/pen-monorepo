@@ -29,7 +29,7 @@ export function unparse(ast: Node): string {
 
 
     // ---------- wip... ----------
-    // function LeftRec(expr: Parser): Parser {
+    // function Memo(expr: Parser): Parser {
     //     interface Memo {
     //         resolved: boolean;
     //         consumed: number;

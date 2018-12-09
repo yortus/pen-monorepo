@@ -1,7 +1,7 @@
 
 // temp testing... this one works...
 // start = A
-// A = LeftRec<A `b` | `a`>    // accepts a, ab, abb, abbb, ...
+// A = Memo<A `b` | `a`>    // accepts a, ab, abb, abbb, ...
 
 
 
@@ -19,18 +19,18 @@ start = expr
 //A = "a"
 //B = "b"
 
-//expr = LeftRec<add | term>
+//expr = Memo<add | term>
 //add = {type: 'add', lhs: expr, rhs: ADD term}
 //term = i32
 
 
 
 
-expr = LeftRec<add | sub | term>
+expr = Memo<add | sub | term>
 add = {type: 'add', lhs: expr, rhs: ADD term}
 sub = {type: 'sub', lhs: expr, rhs: SUB term}
 
-term = LeftRec<mul | div | factor>
+term = Memo<mul | div | factor>
 mul = {type: 'mul', lhs: term, rhs: MUL factor}
 div = {type: 'div', lhs: term, rhs: DIV factor}
 
