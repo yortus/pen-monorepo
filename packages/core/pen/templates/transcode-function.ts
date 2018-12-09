@@ -1,4 +1,4 @@
-type Span = string;
+type Span = number; // index of start position in `text`
 const EMPTY_NODE = Symbol('EmptyNode');
 type EmptyNode = typeof EMPTY_NODE;
 type Node = EmptyNode | string | number | object;
@@ -10,13 +10,6 @@ declare const start: Transcoder;
 
 
 export function parse(text: string) {
-
-    // Implementation note:
-    // For simplicity of implementation, when we consume characters from `text`, we replace `text` with
-    // its unconsumed suffix, reapeating until it is fully consumed. This is simpler than tracking both the text and
-    // an offset. It is also reasonably performant, since most JS runtimes (including V8) optimise string slicing
-    // like the kind done here. E.g. see https://jsperf.com/consuming-a-long-string
-    // This could be revisited later to increase performance, but it should be measured to see if it's worth it.
 
     // These constants are used by the i32 parser below.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
@@ -31,9 +24,9 @@ export function parse(text: string) {
 
 
     debugger;
-    let ast = start({S: text, N: EMPTY_NODE});
+    let ast = start({S: 0, N: EMPTY_NODE});
     if (ast === null) throw new Error(`parse failed`);
-    if (ast.S.length > 0) throw new Error(`parse didn't consume entire input`);
+    if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
     if (ast.N === EMPTY_NODE) throw new Error(`parse didn't return a value`);
     return ast.N;
 
@@ -42,7 +35,7 @@ export function parse(text: string) {
 
     // ---------- wip... ----------
     function Memo(expr: Transcoder): Transcoder {
-        const memos = new Map<string, {
+        const memos = new Map<Span, { // TODO: use holey array? Faster? to much RAM load? V8 array tips?
             resolved: boolean;
             isLeftRecursive: boolean;
             result: Duad | null;
@@ -74,7 +67,7 @@ export function parse(text: string) {
                 // result until it no longer succeeds or consumes more input, at which point we take the memo as final.
                 while (memo.result !== null) {
                     let stateᐟ = expr(state);
-                    if (stateᐟ === null || stateᐟ.S.length >= memo.result.S.length) break;
+                    if (stateᐟ === null || stateᐟ.S <= memo.result.S) break;
                     memo.result = stateᐟ;
                 }
             }
@@ -149,16 +142,16 @@ export function parse(text: string) {
 
     function ConcreteStringLiteral(value: string): Transcoder {
         return ({S, N}) => {
-            if (!S.startsWith(value)) return null;
-            return {S: S.slice(value.length), N};
+            if (!matchesAt(text, value, S)) return null;
+            return {S: S + value.length, N};
         };
     }
 
     function UniformStringLiteral(value: string): Transcoder {
         return ({S, N}) => {
             assert(N === EMPTY_NODE || typeof N === 'string'); // a string can augment another string
-            if (!S.startsWith(value)) return null;
-            return {S: S.slice(value.length), N: N === EMPTY_NODE ? value : (N + value)};
+            if (!matchesAt(text, value, S)) return null;
+            return {S: S + value.length, N: N === EMPTY_NODE ? value : (N + value)};
         };
     }
 
@@ -171,18 +164,18 @@ export function parse(text: string) {
 
         // Parse optional leading '-' sign...
         let isNegative = false;
-        if (S.charAt(0) === '-') {
+        if (text.charAt(S) === '-') {
             isNegative = true;
-            S = S.slice(1);
+            S += 1;
         }
 
         // ...followed by one or more decimal digits. (NB: no exponents).
         N = 0;
         let digits = 0;
-        while (S.length > 0) {
+        while (S < text.length) {
 
             // Read a digit
-            let c = S.charCodeAt(0);
+            let c = text.charCodeAt(S);
             if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
 
             // Check for overflow
@@ -193,7 +186,7 @@ export function parse(text: string) {
             // Update parsed number
             N *= 10;
             N += (c - UNICODE_ZERO_DIGIT);
-            S = S.slice(1);
+            S += 1;
             ++digits;
         }
 
@@ -214,6 +207,15 @@ export function parse(text: string) {
 
 
 
+
+function matchesAt(text: string, substr: string, position: number) {
+    let lastPos = position + substr.length;
+    if (lastPos > text.length) return false;
+    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+        if (text.charAt(i) !== substr.charAt(j)) return false;
+    }
+    return true;
+}
 
 function assert(value: unknown) {
     if (!value) throw new Error(`Assertion failed`);
