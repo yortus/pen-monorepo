@@ -6,7 +6,7 @@ export interface Module {
 export interface Binding {
     nodeType: 'Binding';
     id: Identifier;
-    value: Expression;
+    value: Expression; // TODO: rename value ==> expression
 }
 
 export interface Selection {
@@ -33,7 +33,7 @@ export interface Record {
 export interface RecordField {
     nodeType: 'RecordField';
     id: Identifier;
-    value: Expression;
+    value: Expression; // TODO: rename value ==> expression
 }
 
 export interface Identifier {

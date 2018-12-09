@@ -105,9 +105,10 @@ export function parse(text: string) {
 
     // ---------- built-in parser combinators ----------
     function Selection(...expressions: Transcoder[]): Transcoder {
+        const arity = expressions.length;
         return state => {
             let stateᐟ = null;
-            for (let i = 0; i < expressions.length && stateᐟ === null; ++i) {
+            for (let i = 0; i < arity && stateᐟ === null; ++i) {
                 stateᐟ = expressions[i](state);
             }
             return stateᐟ;
@@ -115,24 +116,25 @@ export function parse(text: string) {
     }
 
     function Sequence(...expressions: Transcoder[]): Transcoder {
+        const arity = expressions.length;
         return state => {
             let stateᐟ = state;
-            for (let i = 0; i < expressions.length && stateᐟ !== null; ++i) {
+            for (let i = 0; i < arity && stateᐟ !== null; ++i) {
                 stateᐟ = expressions[i](stateᐟ);
             }
             return stateᐟ;
         };
     }
 
-    function Record(fields: {[id: string]: Transcoder}): Transcoder {
-        // TODO: doc... relies on prop order being preserved...
-        const fieldIds = Object.keys(fields);
+    function Record(fields: Array<{id: string, value: Transcoder}>): Transcoder {
+        const arity = fields.length;
         return state => {
             assert(state.N === EMPTY_NODE); // a record can't augment another node
             let S = state.S;
             let N = {};
-            for (let id of fieldIds) {
-                let result = fields[id]({S, N: EMPTY_NODE});
+            for (let i = 0; i < arity; ++i) {
+                let {id, value} = fields[i];
+                let result = value({S, N: EMPTY_NODE});
                 if (result === null) return null;
                 S = result.S;
                 N[id] = result.N;

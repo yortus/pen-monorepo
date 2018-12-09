@@ -98,11 +98,20 @@ function emitRecord(expr: Record) {
         ts.createIdentifier('Record'),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ [
-            ts.createObjectLiteral(
-                /*properties*/ expr.fields.map(field => {
-                    return ts.createPropertyAssignment(
-                        /*name*/ field.id.name,
-                        /*initializer*/ emitExpression(field.value)
+            ts.createArrayLiteral(
+                expr.fields.map(field => {
+                    return ts.createObjectLiteral(
+                        [
+                            ts.createPropertyAssignment(
+                                /*name*/ 'id',
+                                /*initializer*/ ts.createStringLiteral(field.id.name)
+                            ),
+                            ts.createPropertyAssignment(
+                                /*name*/ 'value',
+                                /*initializer*/ emitExpression(field.value)
+                            ),
+                        ],
+                        /*multiline*/ true
                     );
                 }),
                 /*multiline*/ true

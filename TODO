@@ -30,3 +30,8 @@ TODO: clarify terminology:
     'AST' vs 'text':
         - 'ast', consisting of nodes, one node
         - 'text', consisting of spans, one span
+
+
+TODO: list perf tips (and benchmark them):
+    avoid allocations
+    avoid iterators - prefer `for (;;)`
