@@ -12,7 +12,8 @@ Todo:
       [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
     [ ] `StringLiteral`: better word than 'uniform' for the "..." variant? (eg parallel, matching, constant, ordinary)
-    [ ] statically error on sequences that don't produce a single node (and remove assert()s from template code)
+    [ ] `Sequence` comninator: revise code when we know if the 'type' of the seqence is 'string' or not
+    [ ] statically error on sequences that don't produce a single node (and remove assert/throw from template code)
     [ ] theory: investigate memoisation for correctness
       [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?
       [ ] do we need memoisation when unparsing? In which cases and why?
