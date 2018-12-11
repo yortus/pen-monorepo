@@ -1,0 +1,15 @@
+.vscode/
+dist/test/
+scripts/
+src/
+test/
+extras/
+*.ts
+!*.d.ts
+*.js.map
+*.peg
+*.log
+tsconfig.json
+tslint.json
+TODO
+yarn.lock

@@ -4,9 +4,9 @@ var path = require('path');
 
 
 
-// Create a symlink at `node_modules/pen` pointing to `dist/commonjs`
+// Create a symlink at `node_modules/penc` pointing to `dist/commonjs`
 try {
-    var linkFrom = path.join(__dirname, '../node_modules/pen');
+    var linkFrom = path.join(__dirname, '../node_modules/penc');
     var linkTo = path.join(__dirname, '../dist/commonjs');
     fs.symlinkSync(linkTo, linkFrom, 'junction');
 }
