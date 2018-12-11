@@ -1,9 +1,9 @@
-type Span = string; // index of start position in `text`
-const EMPTY_NODE = Symbol('EmptyNode');
-type EmptyNode = typeof EMPTY_NODE;
-type Node = EmptyNode | string | number | object;
+type Span = string;
+const NO_NODE = Symbol('NoNode');
+type NO_NODE = typeof NO_NODE;
+type Node = NO_NODE | string | number | object;
 interface Duad { S: Span; N: Node; }
-type Transcoder = (t: Duad) => Duad | null;
+type Transcoder = (N: Node) => Duad | null;
 declare const start: Transcoder;
 
 
@@ -23,9 +23,9 @@ export function unparse(ast: Node): string {
 
 
     debugger;
-    let text = start({N: ast, S: ''});
+    let text = start(ast);
     if (text === null) throw new Error(`unparse failed`);
-    if (text.N !== EMPTY_NODE) throw new Error(`unparse didn't consume entire input`);
+    if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
     return text.S;
 
 
@@ -33,62 +33,59 @@ export function unparse(ast: Node): string {
 
     // ---------- wip... ----------
     function Memo(expr: Transcoder): Transcoder {
-        // TODO: code is *almost* identical for parse and unparse... make DRY
-        const memos = new Map<Node, { // TODO: use holey array? Faster? to much RAM load? V8 array tips?
-            resolved: boolean;
-            isLeftRecursive: boolean;
-            result: Duad | null;
-        }>();
-        return state => {
-            // Check whether the memo table already has an entry for the given value of state.N.
-            let memo = memos.get(state.N);
+        const memos = new Map<Node, {resolved: boolean, isLeftRecursive: boolean, result: Duad | null}>();
+        return N => {
+            // Check whether the memo table already has an entry for the given initial state.
+            let memo = memos.get(N);
             if (!memo) {
-                // The memo table does *not* have an entry, so this is the first attempt to parse this rule at state.N.
-                // The first thing we do is create a memo table entry, which is marked as *unresolved*. All future calls
-                // with the same value of state.S will find this memo. If a future call finds the memo still unresolved,
-                // then we know we have encountered left-recursion.
+                // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
+                // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
+                // All future applications of this rule with the same initial state will find this memo. If a future
+                // application finds the memo still unresolved, then we know we have encountered left-recursion.
                 memo = {resolved: false, isLeftRecursive: false, result: null};
-                memos.set(state.N, memo);
+                memos.set(N, memo);
 
-                // Now that the unresolved memo is in place, invoke the rule, and resolve the memo with the result. At
-                // this point, any left-recursive invocations are guaranteed to have been noted and aborted (see below).
-                memo.result = expr(state);
+                // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
+                // this point, any left-recursive paths encountered during application are guaranteed to have been noted
+                // and aborted (see below).
+                memo.result = expr(N);
                 memo.resolved = true;
 
                 // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
                 if (!memo.isLeftRecursive) return memo.result;
 
-                // If we get here, then the above invocation of the rule called itself left-recursively, but we aborted
-                // the left-recursive path(s). That means that the current parse result is either a failed parse, or a
-                // successful parse of a non-left-recursive application of the rule. We now iterate, repeatedly parsing
-                // the same rule with the same input. We continue to iterate as long as the parse succeeds and
-                // consumes more input, in which case we update the memo with the new result. We thus 'grow' the parse
-                // result until it no longer succeeds or consumes more input, at which point we take the memo as final.
+                // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying the
+                // same rule with the same initial state. We continue to iterate as long as the application succeeds
+                // and consumes more input than the previous iteration did, in which case we update the memo with the
+                // new result. We thus 'grow' the result, stopping when application either fails or does not consume
+                // more input, at which point we take the result of the previous iteration as final.
                 while (memo.result !== null) {
-                    let stateᐟ = expr(state);
-                    if (stateᐟ === null) break;
+                    let nextResult = expr(N);
 
                     // TODO: break cases:
-                    // anything --> same thing (covers all string cases, since they can only be same, shorter or EMPTY)
-                    // EMPTY_NODE --> anything
+                    // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                    // NO_NODE --> anything
                     // some node --> some different non-empty node (assert: should never happen!)
-                    if (stateᐟ.N === memo.result.N) break;
-                    if (memo.result.N === EMPTY_NODE) break;
-                    if (stateᐟ.N !== EMPTY_NODE) break;
-                    memo.result = stateᐟ;
+                    if (nextResult.N === memo.result.N) break;
+                    if (memo.result.N === NO_NODE) break;
+                    if (nextResult.N !== NO_NODE) break;
+                    memo.result = nextResult;
                 }
             }
             else if (!memo.resolved) {
-                // If we get here, then we have already invoked the rule at this input position, but not resolved it.
-                // That means we must have entered a left-recursive path of the rule. All we do here is note that the
-                // rule application encountered left-recursion, and return a failed parse. This means that the initial
-                // application of the rule at this position can only possibly succeed along a non-left-recursive path.
-                // More importantly, it means the parser will never loop endlessly on left-recursive rules.
+                // If we get here, then we have already applied the rule with this initial state, but not yet resolved
+                // it. That means we must have entered a left-recursive path of the rule. All we do here is note that
+                // the rule application encountered left-recursion, and return with failure. This means that the initial
+                // application of the rule for this initial state can only possibly succeed along a non-left-recursive
+                // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
                 memo.isLeftRecursive = true;
                 return null;
             }
 
-            // We have a resolved memo, so the result of the parse is already computed. Return it from the memo.
+            // We have a resolved memo, so the result of the rule application for the given initial state has already
+            // been computed. Return it from the memo.
             return memo.result;
         };
     }
@@ -98,42 +95,48 @@ export function unparse(ast: Node): string {
 
     // ---------- built-in parser combinators ----------
     function Selection(...expressions: Transcoder[]): Transcoder {
-        // TODO: code is identical for parse and unparse... make DRY
         const arity = expressions.length;
-        return state => {
-            let stateᐟ = null;
-            for (let i = 0; i < arity && stateᐟ === null; ++i) {
-                stateᐟ = expressions[i](state);
+        return N => {
+            for (let i = 0; i < arity; ++i) {
+                let result = expressions[i](N);
+                if (result !== null) return result;
             }
-            return stateᐟ;
+            return null;
         };
     }
 
     function Sequence(...expressions: Transcoder[]): Transcoder {
-        // TODO: code is identical for parse and unparse... make DRY
         const arity = expressions.length;
-        return state => {
-            let stateᐟ = state;
-            for (let i = 0; i < arity && stateᐟ !== null; ++i) {
-                stateᐟ = expressions[i](stateᐟ);
+        return N => {
+            let S: Span = '';
+            for (let i = 0; i < arity; ++i) {
+                let result = expressions[i](N);
+                if (result === null) return null;
+                if (typeof N === 'string') assert(typeof result.N === 'string' && N.endsWith(result.N));
+                else assert(result.N === N || result.N === NO_NODE);
+                S += result.S;
+                N = result.N;
             }
-            return stateᐟ;
+            return {S, N};
         };
     }
 
+    // TODO: instead of requiring identical keys, just return excess keys in a 'residual' object in result.N
     function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
         const arity = fields.length;
-        return ({N, S}) => {
+        return N => {
+            let S = '';
             if (!isPlainObject(N)) return null;
             if (Object.keys(N).length !== arity) return null;
             for (let i = 0; i < arity; ++i) {
                 let {id, expression} = fields[i];
                 if (!N.hasOwnProperty(id)) return null;
-                let result = expression({N: N[id], S});
+                let result = expression(N[id]);
                 if (result === null) return null;
-                S = result.S;
+                assert(result.N === (typeof N[id] === 'string' ? '' : NO_NODE));
+                S += result.S;
             }
-            return {N, S};
+            return {S, N: NO_NODE};
         };
     }
 
@@ -142,26 +145,22 @@ export function unparse(ast: Node): string {
 
     // ---------- built-in parser factories ----------
     function AbstractStringLiteral(value: string): Transcoder {
-        return ({N, S}) => {
-            if (value === '') return {N, S};
-            if (typeof N !== 'string') return null;
-            if (!N.startsWith(value)) return null;
-            return {N: N.slice(value.length) || EMPTY_NODE, S};
+        return N => {
+            if (typeof N !== 'string' || !N.startsWith(value)) return null;
+            return {S: '', N: N.slice(value.length)};
         };
     }
 
     function ConcreteStringLiteral(value: string): Transcoder {
-        return ({N, S}) => {
-            return {N, S: S + value};
+        return N => {
+            return {S: value, N};
         };
     }
 
     function UniformStringLiteral(value: string): Transcoder {
-        return ({N, S}) => {
-            if (value === '') return {N, S};
-            if (typeof N !== 'string') return null;
-            if (!N.startsWith(value)) return null;
-            return {N: N.slice(value.length) || EMPTY_NODE, S: S + value};
+        return N => {
+            if (typeof N !== 'string' || !N.startsWith(value)) return null;
+            return {S: value, N: N.slice(value.length)};
         };
     }
 
@@ -169,7 +168,7 @@ export function unparse(ast: Node): string {
 
 
     // ---------- other built-ins ----------
-    function i32({N, S}: Duad): Duad {
+    function i32(N: Node): Duad {
 
         // TODO: ensure N is a 32-bit integer
         if (typeof N !== 'number') return null;
@@ -179,7 +178,7 @@ export function unparse(ast: Node): string {
         let isNegative = false;
         if (N < 0) {
             isNegative = true;
-            if (N === -2147483648) return {N: EMPTY_NODE, S: '-2147483648'}; // one case where N = -N could overflow
+            if (N === -2147483648) return {S: '-2147483648', N: NO_NODE}; // the one case where N = -N could overflow
             N = -N;
         }
 
@@ -194,7 +193,7 @@ export function unparse(ast: Node): string {
 
         // TODO: compute final string...
         if (isNegative) digits.push('-');
-        return {N: EMPTY_NODE, S: S + digits.reverse().join('')};
+        return {S: digits.reverse().join(''), N: NO_NODE};
     }
 }
 
@@ -203,4 +202,8 @@ export function unparse(ast: Node): string {
 
 function isPlainObject(value: unknown): value is object {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
+}
+
+function assert(value: unknown) {
+    if (!value) throw new Error(`Assertion failed`);
 }

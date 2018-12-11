@@ -1,5 +1,6 @@
 Todo:
-    [ ] get unparse() working end-to-end; test it 
+    [ ] get unparse() working end-to-end; test it
+    [ ] DRYify the very similar code in parse and unparse templates
     [x] add math expression grammar as test fixture
     [x] add API function to parse a grammar and return AST (temporary)
     [x] add API function to parse a grammar and spit out source for a `parse()` function:
@@ -13,7 +14,9 @@ Todo:
     [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
     [ ] `StringLiteral`: better word than 'uniform' for the "..." variant? (eg parallel, matching, constant, ordinary)
     [ ] `Sequence` comninator: revise code when we know if the 'type' of the seqence is 'string' or not
-    [ ] statically error on sequences that don't produce a single node (and remove assert/throw from template code)
+    [ ] review assert()s in template parse/unparse code - most should be static errors detectable from AST analysis
+      [ ] sequences that produce multiple nodes
+      [ ] record field values of NO_NODE
     [ ] theory: investigate memoisation for correctness
       [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?
       [ ] do we need memoisation when unparsing? In which cases and why?

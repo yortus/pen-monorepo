@@ -1,7 +1,7 @@
 type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
-type EmptyNode = typeof NO_NODE;
-type Node = EmptyNode | string | number | object;
+type NO_NODE = typeof NO_NODE;
+type Node = NO_NODE | string | number | object;
 interface Duad { S: Span; N: Node; }
 type Transcoder = (S: Span) => Duad | null;
 declare const start: Transcoder;
@@ -124,6 +124,7 @@ export function parse(text: string): Node {
                 let {id, expression} = fields[i];
                 let result = expression(S);
                 if (result === null) return null;
+                assert(result.N !== NO_NODE);
                 S = result.S;
                 N[id] = result.N;
             }
