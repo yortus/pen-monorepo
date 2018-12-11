@@ -7,19 +7,30 @@ import {parse} from './grammar';
 
 
 
-export function getParser(grammar: string) {
+export function transpileToJS(grammar: string) {
     let ast = parse(grammar);
     let moduleStmts = emitModule(ast);
 
     let parseTemplate = ts.createSourceFile(
-        'parse-template.ts',
+        'parse.ts',
         fs.readFileSync(path.join(__dirname, '../templates/parse-function.ts'), 'utf8'),
         ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
     );
 
+    let unparseTemplate = ts.createSourceFile(
+        'unparse.ts',
+        fs.readFileSync(path.join(__dirname, '../templates/unparse-function.ts'), 'utf8'),
+        ts.ScriptTarget.ES2015,
+        /*setParentNodes */ true
+    );
+
     instantiateTemplate(parseTemplate, moduleStmts);
-    return generateCode(parseTemplate);
+    instantiateTemplate(unparseTemplate, moduleStmts);
+    return {
+        parse: generateCode(parseTemplate),
+        unparse: generateCode(unparseTemplate),
+    };
 }
 
 

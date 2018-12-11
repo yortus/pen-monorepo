@@ -1,2 +1,3 @@
 export * from './ast-types';
-export {getParser} from './get-parser';
+export {evaluate} from './evaluate';
+export {transpileToJS} from './transpile-to-js';
