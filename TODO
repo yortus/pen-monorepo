@@ -1,5 +1,10 @@
 Todo:
-    [ ] get unparse() working end-to-end; test it
+    add mocha/chai unit tests to core pen module:
+      [ ] add expression grammar as a fixture
+      [ ] tests that parse various math expressions and expect a specific ast
+      [ ] tests that unparse various math expr asts and expect specific text
+      [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
+    [x] get unparse() working end-to-end; test it
     [ ] DRYify the very similar code in parse and unparse templates
     [x] add math expression grammar as test fixture
     [x] add API function to parse a grammar and return AST (temporary)
