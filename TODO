@@ -4,6 +4,8 @@ Todo:
       [ ] tests that parse various math expressions and expect a specific ast
       [ ] tests that unparse various math expr asts and expect specific text
       [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
+    [ ] milestone: initial type analysis as part of compiling a grammar
+    [ ] milestone: initial error diagnostic accumulation as part of parse/unparse internal operation
     [x] get unparse() working end-to-end; test it
     [ ] DRYify the very similar code in parse and unparse templates
     [x] add math expression grammar as test fixture
