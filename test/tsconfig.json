@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
-        "composite": true,
 
         "target": "es2017",
         "module": "commonjs",
         "lib": ["es2017"],
-        "types": ["node"],
+        "types": ["mocha", "node"],
+
+        "rootDir": ".",
+        "outDir": "../dist/test",
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,

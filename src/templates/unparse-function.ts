@@ -1,56 +1,56 @@
-type Span = number; // index of start position in `text`
+type Span = string;
 const NO_NODE = Symbol('NoNode');
 type NO_NODE = typeof NO_NODE;
 type Node = NO_NODE | string | number | object;
 interface Duad { S: Span; N: Node; }
-type Transcoder = (S: Span) => Duad | null;
+type Transcoder = (N: Node) => Duad | null;
 declare const start: Transcoder;
 
 
 
 
-export function parse(text: string): Node {
+export function unparse(ast: Node): string {
 
-    // These constants are used by the i32 parser below.
+    // These constants are used by the i32 unparser below.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
 
 
 
+    // @ts-ignore 7028 unused label
     placeholder: {}
 
 
 
 
     debugger;
-    let ast = start(0);
-    if (ast === null) throw new Error(`parse failed`);
-    if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
-    if (ast.N === NO_NODE) throw new Error(`parse didn't return a value`);
-    return ast.N;
+    let text = start(ast);
+    if (text === null) throw new Error(`unparse failed`);
+    if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
+    return text.S;
 
 
 
 
     // ---------- wip... ----------
+    // @ts-ignore 6133 unused declaration
     function Memo(expr: Transcoder): Transcoder {
-        const memos = new Map<Span, {resolved: boolean, isLeftRecursive: boolean, result: Duad | null}>();
-        return S => {
+        const memos = new Map<Node, {resolved: boolean, isLeftRecursive: boolean, result: Duad | null}>();
+        return N => {
             // Check whether the memo table already has an entry for the given initial state.
-            let memo = memos.get(S);
+            let memo = memos.get(N);
             if (!memo) {
                 // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
                 // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
                 // All future applications of this rule with the same initial state will find this memo. If a future
                 // application finds the memo still unresolved, then we know we have encountered left-recursion.
                 memo = {resolved: false, isLeftRecursive: false, result: null};
-                memos.set(S, memo);
+                memos.set(N, memo);
 
                 // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
                 // this point, any left-recursive paths encountered during application are guaranteed to have been noted
                 // and aborted (see below).
-                memo.result = expr(S);
+                memo.result = expr(N);
                 memo.resolved = true;
 
                 // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
@@ -64,8 +64,16 @@ export function parse(text: string): Node {
                 // new result. We thus 'grow' the result, stopping when application either fails or does not consume
                 // more input, at which point we take the result of the previous iteration as final.
                 while (memo.result !== null) {
-                    let nextResult = expr(S);
-                    if (nextResult === null || nextResult.S <= memo.result.S) break;
+                    let nextResult = expr(N);
+
+                    // TODO: break cases:
+                    // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                    // NO_NODE --> anything
+                    // some node --> some different non-empty node (assert: should never happen!)
+                    if (nextResult === null) break;
+                    if (nextResult.N === memo.result.N) break;
+                    if (memo.result.N === NO_NODE) break;
+                    if (nextResult.N !== NO_NODE) break;
                     memo.result = nextResult;
                 }
             }
@@ -89,46 +97,52 @@ export function parse(text: string): Node {
 
 
     // ---------- built-in parser combinators ----------
+    // @ts-ignore 6133 unused declaration
     function Selection(...expressions: Transcoder[]): Transcoder {
         const arity = expressions.length;
-        return S => {
+        return N => {
             for (let i = 0; i < arity; ++i) {
-                let result = expressions[i](S);
+                let result = expressions[i](N);
                 if (result !== null) return result;
             }
             return null;
         };
     }
 
+    // @ts-ignore 6133 unused declaration
     function Sequence(...expressions: Transcoder[]): Transcoder {
         const arity = expressions.length;
-        return S => {
-            let N: Node = NO_NODE;
+        return N => {
+            let S: Span = '';
             for (let i = 0; i < arity; ++i) {
-                let result = expressions[i](S);
+                let result = expressions[i](N);
                 if (result === null) return null;
-                S = result.S;
-                if (N === NO_NODE) N = result.N;
-                else if (typeof N === 'string' && typeof result.N === 'string') N = N + result.N;
-                else if (result.N !== NO_NODE) throw new Error(`Internal error: invalid sequence`);
+                if (typeof N === 'string') assert(typeof result.N === 'string' && N.endsWith(result.N));
+                else assert(result.N === N || result.N === NO_NODE);
+                S += result.S;
+                N = result.N;
             }
             return {S, N};
         };
     }
 
+    // TODO: instead of requiring identical keys, just return excess keys in a 'residual' object in result.N
+    // @ts-ignore 6133 unused declaration
     function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
         const arity = fields.length;
-        return S => {
-            let N = {};
+        return (N: any) => {
+            let S = '';
+            if (!isPlainObject(N)) return null;
+            if (Object.keys(N).length !== arity) return null;
             for (let i = 0; i < arity; ++i) {
                 let {id, expression} = fields[i];
-                let result = expression(S);
+                if (!N.hasOwnProperty(id)) return null;
+                let result = expression(N[id]);
                 if (result === null) return null;
-                assert(result.N !== NO_NODE);
-                S = result.S;
-                N[id] = result.N;
+                assert(result.N === (typeof N[id] === 'string' ? '' : NO_NODE));
+                S += result.S;
             }
-            return {S, N};
+            return {S, N: NO_NODE};
         };
     }
 
@@ -136,23 +150,26 @@ export function parse(text: string): Node {
 
 
     // ---------- built-in parser factories ----------
+    // @ts-ignore 6133 unused declaration
     function AbstractStringLiteral(value: string): Transcoder {
-        return S => {
-            return {S, N: value};
+        return N => {
+            if (typeof N !== 'string' || !N.startsWith(value)) return null;
+            return {S: '', N: N.slice(value.length)};
         };
     }
 
+    // @ts-ignore 6133 unused declaration
     function ConcreteStringLiteral(value: string): Transcoder {
-        return S => {
-            if (!matchesAt(text, value, S)) return null;
-            return {S: S + value.length, N: NO_NODE};
+        return N => {
+            return {S: value, N};
         };
     }
 
+    // @ts-ignore 6133 unused declaration
     function UniformStringLiteral(value: string): Transcoder {
-        return S => {
-            if (!matchesAt(text, value, S)) return null;
-            return {S: S + value.length, N: value};
+        return N => {
+            if (typeof N !== 'string' || !N.startsWith(value)) return null;
+            return {S: value, N: N.slice(value.length)};
         };
     }
 
@@ -160,60 +177,41 @@ export function parse(text: string): Node {
 
 
     // ---------- other built-ins ----------
-    function i32(S: Span): Duad {
+    // @ts-ignore 6133 unused declaration
+    function i32(N: Node): Duad | null {
 
-        // Parse optional leading '-' sign...
+        // TODO: ensure N is a 32-bit integer
+        if (typeof N !== 'number') return null;
+        if ((N & 0xFFFFFFFF) !== N) return null;
+
+        // TODO: check sign...
         let isNegative = false;
-        if (text.charAt(S) === '-') {
+        if (N < 0) {
             isNegative = true;
-            S += 1;
+            if (N === -2147483648) return {S: '-2147483648', N: NO_NODE}; // the one case where N = -N could overflow
+            N = -N;
         }
 
-        // ...followed by one or more decimal digits. (NB: no exponents).
-        let N = 0;
-        let digits = 0;
-        while (S < text.length) {
-
-            // Read a digit
-            let c = text.charCodeAt(S);
-            if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
-
-            // Check for overflow
-            if (N > ONE_TENTH_MAXINT32) {
-                return null;
-            }
-
-            // Update parsed number
-            N *= 10;
-            N += (c - UNICODE_ZERO_DIGIT);
-            S += 1;
-            ++digits;
+        // TODO: ...then digits
+        let digits = [] as string[];
+        while (true) {
+            let d = N % 10;
+            N = (N / 10) | 0;
+            digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
+            if (N === 0) break;
         }
 
-        // Check that we parsed at least one digit.
-        if (digits === 0) return null;
-
-        // Apply the sign.
-        if (isNegative) N = -N;
-
-        // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-        if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
-
-        // Success
-        return {S, N};
+        // TODO: compute final string...
+        if (isNegative) digits.push('-');
+        return {S: digits.reverse().join(''), N: NO_NODE};
     }
 }
 
 
 
 
-function matchesAt(text: string, substr: string, position: number) {
-    let lastPos = position + substr.length;
-    if (lastPos > text.length) return false;
-    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-        if (text.charAt(i) !== substr.charAt(j)) return false;
-    }
-    return true;
+function isPlainObject(value: unknown) {
+    return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
 
 function assert(value: unknown) {

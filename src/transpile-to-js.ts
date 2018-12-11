@@ -13,14 +13,16 @@ export function transpileToJS(grammar: string) {
 
     let parseTemplate = ts.createSourceFile(
         'parse.ts',
-        fs.readFileSync(path.join(__dirname, '../templates/parse-function.ts'), 'utf8'),
+        // TODO: awkward mapping from /dist/commonjs back to /src. Fix this.
+        fs.readFileSync(path.join(__dirname, '../../src/templates/parse-function.ts'), 'utf8'),
         ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
     );
 
     let unparseTemplate = ts.createSourceFile(
         'unparse.ts',
-        fs.readFileSync(path.join(__dirname, '../templates/unparse-function.ts'), 'utf8'),
+        // TODO: awkward mapping from /dist/commonjs back to /src. Fix this.
+        fs.readFileSync(path.join(__dirname, '../../src/templates/unparse-function.ts'), 'utf8'),
         ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
     );

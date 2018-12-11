@@ -5,7 +5,7 @@ import * as pen from 'pen';
 
 
 
-let mathGrammar = fs.readFileSync(path.join(__dirname, '../fixtures/math-grammar.txt'), 'utf8');
+let mathGrammar = fs.readFileSync(path.join(__dirname, './fixtures/math-grammar.txt'), 'utf8');
 let {parse, unparse} = pen.evaluate(mathGrammar);
 
 
