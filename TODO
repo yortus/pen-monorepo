@@ -4,8 +4,8 @@ Todo:
       [ ] tests that parse various math expressions and expect a specific ast
       [ ] tests that unparse various math expr asts and expect specific text
       [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
-    [ ] get umd build working from multimethods
-    [ ] move repo to yortus/penc
+    [ ] get umd build working from multimethods (need umd for a command line tool?)
+    [x] move repo to yortus/penc
     `penc` should work as a command-line tool (and also an important node module?). What should the command output?:
       [ ] .d.ts file for parse/unparse functions, with AST types
       [ ] js code for parse/unparse functions
