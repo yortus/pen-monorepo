@@ -14,7 +14,7 @@ export function evaluate(grammar: string) {
     // TODO: was... remove... console.log(src.parse.javaScriptSource);
 
     const {parse} = loadModule(src.parse.javaScriptSource) as {parse(text: string): unknown};
-    const {unparse} = loadModule(src.unparse.javaScriptSource) as {unparse(node: unknown): string};
+    const {unparse} = loadModule(src.unparse.javaScriptSource) as {unparse(ast: unknown): string};
     return {parse, unparse};
 }
 
