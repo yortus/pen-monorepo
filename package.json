@@ -24,7 +24,15 @@
         "self-ref": "node ./scripts/enable-self-reference",
         "test:bc TODO restore this!": "node --print-bytecode >bytecode.txt packages/usage-tests/math/dist/index.js"
     },
-    "dependencies": {
+    "contributors": [
+        {
+          "name": "Troy Gerwien",
+          "email": "yortus@gmail.com",
+          "url": "http://github.com/yortus/"
+        }
+      ],
+      "license": "MIT",
+        "dependencies": {
         "typescript": "next"
     },
     "devDependencies": {
