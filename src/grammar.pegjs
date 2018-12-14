@@ -49,6 +49,9 @@ RecordField
     = id:Identifier   WS   COLON   WS   expression:Expression
     { return {nodeType: 'RecordField', id, expression}; }
 
+// TODO: computed field name
+// TODO: rest/spread fields (one per record, must come last?)
+
 Identifier
     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
     { return {nodeType: 'Identifier', name}; }

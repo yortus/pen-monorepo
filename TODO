@@ -1,10 +1,25 @@
 Todo:
+    new PEN language features necessary to parse/unparse JSON:
+      [ ] computed field names, ie the `[NameRule]` part in `{[NameRule]: ValueRule}`
+      [ ] rest/spread fields for records, ie the `...RestRule` part in `{'foo': FooRule, ...RestRule}`
+        NB: when parsing, it acts like the JS object spread operator in an object literal expression
+        NB: when unparsing, it acts like the JS object rest operator in destructuring assignment
+        must it be like rest param - ie only one allowed and must come last?:
+          for parsing you could have any number in any position without it being ambiguous
+          for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
+          ANS: yes, only one and must come last
+          [ ] so let's just call it a 'rest field' for short since it has characteristics of that more restricted operator
+      [ ] lists, which map to JS arrays
+      [ ] rest/spread elements for lists (just call them 'rest elements', like with fields)
+      [ ] `f64` floating point numbers
+      [ ] abstract literals `true`, `false`, and `null` (want these built-in or library-based?)
     add mocha/chai unit tests to core pen module:
-      [ ] add expression grammar as a fixture
-      [ ] tests that parse various math expressions and expect a specific ast
-      [ ] tests that unparse various math expr asts and expect specific text
+      [x] add expression grammar as a fixture
+      [x] tests that parse various math expressions and expect a specific ast
+      [x] tests that unparse various math expr asts and expect specific text
       [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
-    [ ] get umd build working from multimethods (need umd for a command line tool?)
+    add UMD build using webpack, as per how `multimethods` does it:
+      [ ] but first answer this: do we need umd for a command line tool?
     [x] move repo to yortus/penc
     `penc` should work as a command-line tool (and also an important node module?). What should the command output?:
       [ ] .d.ts file for parse/unparse functions, with AST types
@@ -17,14 +32,13 @@ Todo:
     [x] add math expression grammar as test fixture
     [x] add API function to parse a grammar and return AST (temporary)
     [x] add API function to parse a grammar and spit out source for a `parse()` function:
-    [ ] add API function to parse a grammar and spit out source for an `unparse()` function
+    [x] add API function to parse a grammar and spit out source for an `unparse()` function
     [x] `i32`: get it working for natural numbers (ie no sign)
     [x] `i32`: support negative integers
     [x] `i32`: are exponents normally supported for int literals? What do other langs do? ANS: no exponents on int lits
     [ ] `i32`: if int is too large, we return `Fail`, but probably better to be some kind of error. What to do?
-    [ ] `Module` and `Record` are basically the same - flech out any differences and/or merge concepts
+    [ ] `Module` and `Record` are basically the same - flesh out any differences and/or merge concepts
       [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
-    [ ] `Record`: rewrite in terms of `Selection`/`Sequence` etc
     [ ] `StringLiteral`: better word than 'uniform' for the "..." variant? (eg parallel, matching, constant, ordinary)
     [ ] `Sequence` comninator: revise code when we know if the 'type' of the seqence is 'string' or not
     [ ] review assert()s in template parse/unparse code - most should be static errors detectable from AST analysis
@@ -38,7 +52,6 @@ Todo:
         [ ] `function isCombinator(astNode) {...}`
     [ ] doc resemblence of combinators to generic types that need 'instantiation' to make types
     [ ] support automatic insertion of Memo<...> around rhs of left-recursive rules (define subtasks...)
-    [ ] add UMD build using webpack, as per how `multimethods` does it
 
 
 
