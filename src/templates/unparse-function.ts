@@ -23,7 +23,7 @@ export function unparse(ast: Node): string {
 
 
 
-    debugger;
+    //debugger;
     let text = start(ast);
     if (text === null) throw new Error(`unparse failed`);
     if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
@@ -127,22 +127,53 @@ export function unparse(ast: Node): string {
     }
 
     // TODO: instead of requiring identical keys, just return excess keys in a 'residual' object in result.N
+    type Field = ({computed: true, name: Transcoder} | {computed: false, name: string}) & {value: Transcoder};
     // @ts-ignore 6133 unused declaration
-    function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
+    function Record(fields: Field[]): Transcoder {
         const arity = fields.length;
         return (N: any) => {
             let S = '';
             if (!isPlainObject(N)) return null;
             if (Object.keys(N).length !== arity) return null;
+
+            // Make a copy of N from which we delete key/value pairs once they are consumed
+            N = {...N};
+
+            // TODO: ...
+            outerLoop:
             for (let i = 0; i < arity; ++i) {
-                let {id, expression} = fields[i];
-                if (!N.hasOwnProperty(id)) return null;
-                let result = expression(N[id]);
-                if (result === null) return null;
-                assert(result.N === (typeof N[id] === 'string' ? '' : NO_NODE));
-                S += result.S;
+                let field = fields[i];
+
+                // Find the first property key/value pair that matches this field name/value pair (if any)
+                let propNames = Object.keys(N);
+                for (let propName of propNames) {
+                    if (field.computed) {
+                        let r = field.name(propName);
+                        if (r === null || r.N !== '') continue;
+                        S += r.S;
+                    }
+                    else {
+                        if (propName !== field.name) continue;
+                    }
+
+                    // TODO: match value
+                    let result = field.value(N[propName]);
+                    if (result === null) continue;
+                    if (result.N !== (typeof N[propName] === 'string' ? '' : NO_NODE)) continue;
+                    S += result.S;
+
+                    // TODO: we matched both name and value - consume them from N
+                    delete N[propName];
+                    continue outerLoop;
+                }
+
+                // If we get here, no match...
+                return null;
             }
-            return {S, N: NO_NODE};
+
+            // TODO: if all properties consumed (ie N is now an empty object), set N to NO_NODE
+            if (Object.keys(N).length === 0) N = NO_NODE;
+            return {S, N};
         };
     }
 

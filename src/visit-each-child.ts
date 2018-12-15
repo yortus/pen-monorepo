@@ -11,7 +11,7 @@ export function visitEachChild(node: Node, visitor: Visitor) {
         case 'Module': return visitNodes(visitor, ...node.bindings);
         case 'ParenthesizedExpression': return visitNodes(visitor, node.expression);
         case 'Record': return visitNodes(visitor, ...node.fields);
-        case 'RecordField': return visitNodes(visitor, node.id, node.expression);
+        case 'RecordField': return visitNodes(visitor, node.name, node.value);
         case 'Selection': return visitNodes(visitor, ...node.expressions);
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
         case 'StringLiteral': return;

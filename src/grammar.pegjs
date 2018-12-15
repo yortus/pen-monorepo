@@ -46,8 +46,11 @@ RecordFields
     { return [h].concat(t.map(el => el[3])); }
 
 RecordField
-    = id:Identifier   WS   COLON   WS   expression:Expression
-    { return {nodeType: 'RecordField', id, expression}; }
+    = name:Identifier   WS   COLON   WS   value:Expression
+    { return {nodeType: 'RecordField', hasComputedName: false, name, value}; }
+
+    / LSQBR name:Expression RSQBR   WS   COLON   WS   value:Expression
+    { return {nodeType: 'RecordField', hasComputedName: true, name, value}; }
 
 // TODO: computed field name
 // TODO: rest/spread fields (one per record, must come last?)
@@ -99,14 +102,14 @@ EQ      = '='
 LANGLE  = '<'
 LBRACE  = '{'
 LPAREN  = '('
-// LSQBR   = '['
+LSQBR   = '['
 PIPE    = '|'
 // PLUS    = '+'
 // QMARK   = '?'
 RANGLE  = '>'
 RBRACE  = '}'
 RPAREN  = ')'
-// RSQBR   = ']'
+RSQBR   = ']'
 SQUOTE  = "'"
 // STAR    = '*'
 

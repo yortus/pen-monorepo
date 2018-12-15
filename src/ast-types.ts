@@ -30,11 +30,17 @@ export interface Record {
     fields: RecordField[];
 }
 
-export interface RecordField {
+export type RecordField = {
     nodeType: 'RecordField';
-    id: Identifier;
-    expression: Expression;
-}
+    hasComputedName: false;
+    name: Identifier;
+    value: Expression;
+} | {
+    nodeType: 'RecordField';
+    hasComputedName: true;
+    name: Expression;
+    value: Expression;
+};
 
 export interface Identifier {
     nodeType: 'Identifier';

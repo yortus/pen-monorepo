@@ -7,10 +7,9 @@ Todo:
         must it be like rest param - ie only one allowed and must come last?:
           for parsing you could have any number in any position without it being ambiguous
           for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
-          ANS: yes, only one and must come last
-          [ ] so let's just call it a 'rest field' for short since it has characteristics of that more restricted operator
+          actually have have multiple in any position - see JSON grammar - its about tracking what has been consumed so far in the current node
       [ ] lists, which map to JS arrays
-      [ ] rest/spread elements for lists (just call them 'rest elements', like with fields)
+      [ ] rest/spread elements for lists
       [ ] `f64` floating point numbers
       [ ] abstract literals `true`, `false`, and `null` (want these built-in or library-based?)
     add mocha/chai unit tests to core pen module:

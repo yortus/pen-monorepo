@@ -103,12 +103,18 @@ function emitRecord(expr: Record) {
                     return ts.createObjectLiteral(
                         [
                             ts.createPropertyAssignment(
-                                /*name*/ 'id',
-                                /*initializer*/ ts.createStringLiteral(field.id.name)
+                                /*name*/ 'computed',
+                                /*initializer*/ field.hasComputedName ? ts.createTrue() : ts.createFalse()
                             ),
                             ts.createPropertyAssignment(
-                                /*name*/ 'expression',
-                                /*initializer*/ emitExpression(field.expression)
+                                /*name*/ 'name',
+                                /*initializer*/ field.hasComputedName
+                                    ? emitExpression(field.name)
+                                    : ts.createStringLiteral(field.name.name)
+                            ),
+                            ts.createPropertyAssignment(
+                                /*name*/ 'value',
+                                /*initializer*/ emitExpression(field.value)
                             ),
                         ],
                         /*multiline*/ true

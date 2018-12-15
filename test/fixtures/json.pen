@@ -1,0 +1,31 @@
+
+
+
+start = Test
+
+
+Test = {[As]: Bs}
+As   = "A" As | "A"
+Bs   = "B" Bs | "B"
+
+
+
+//Object = LBRACE Properties RBRACE
+//Properties
+//    =   {...KeyValuePair, COMMA ...Properties} // NB this supports trailing commas (since Properties can be `{}`), but JSON doesn't
+//    |   KeyValuePair
+//    |   {} // always succeeds and returns an empty object
+//
+//KeyValuePair = {[String]: COLON Value}
+
+
+
+
+//LBRACE          = WS `{` WS
+//RBRACE          = WS `}` WS
+//LBRACKET        = WS `[` WS
+//RBRACKET        = WS `]` WS
+//COLON           = WS `:` WS
+//COMMA           = WS `,` WS
+//DOUBLE_QUOTE    = `"`
+//WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>

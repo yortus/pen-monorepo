@@ -24,7 +24,7 @@ export function parse(text: string): Node {
 
 
 
-    debugger;
+    //debugger;
     let ast = start(0);
     if (ast === null) throw new Error(`parse failed`);
     if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
@@ -120,18 +120,33 @@ export function parse(text: string): Node {
         };
     }
 
+    type Field = ({computed: true, name: Transcoder} | {computed: false, name: string}) & {value: Transcoder};
     // @ts-ignore 6133 unused declaration
-    function Record(fields: Array<{id: string, expression: Transcoder}>): Transcoder {
+    function Record(fields: Field[]): Transcoder {
         const arity = fields.length;
         return S => {
             let N = {} as any; // TODO: remove/improve cast
             for (let i = 0; i < arity; ++i) {
-                let {id, expression} = fields[i];
-                let result = expression(S);
+                let field = fields[i];
+                let id: string;
+                let result: Duad | null;
+
+                if (field.computed) {
+                    result = field.name(S);
+                    if (result === null) return null;
+                    assert(typeof result.N === 'string');
+                    id = result.N as string;
+                    S = result.S;
+                }
+                else {
+                    id = field.name;
+                }
+
+                result = field.value(S);
                 if (result === null) return null;
                 assert(result.N !== NO_NODE);
-                S = result.S;
                 N[id] = result.N;
+                S = result.S;
             }
             return {S, N};
         };

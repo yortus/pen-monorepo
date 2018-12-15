@@ -1,11 +1,3 @@
-
-// temp testing... this one works...
-// start = A
-// A = Memo<A `b` | `a`>    // accepts a, ab, abb, abbb, ...
-
-
-
-
 /*
  * egs:
  *      2+3*5
@@ -13,18 +5,6 @@
  */
 
 start = expr
-
-// TODO: temp testing...
-//expr = LP (A | B) A A A RP
-//A = "a"
-//B = "b"
-
-//expr = Memo<add | term>
-//add = {type: 'add', lhs: expr, rhs: ADD term}
-//term = i32
-
-
-
 
 expr = Memo<add | sub | term>
 add = {type: 'add', lhs: expr, rhs: ADD term}
@@ -42,14 +22,3 @@ MUL = `*`
 DIV = `/`
 LP  = `(`
 RP  = `)`
-
-/*
- * TODO...
- * '..'    ast-only string
- * ".."    literal string
- * /../    string pattern (simplified regex)
- * a <b> c   means:
- *     a: precondition(s), leading source marker(s)
- *     b: transcoded content
- *     c: postcondition(s), trailing source marker(s)
- */
