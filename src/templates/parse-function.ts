@@ -120,33 +120,44 @@ export function parse(text: string): Node {
         };
     }
 
-    type Field = ({computed: true, name: Transcoder} | {computed: false, name: string}) & {value: Transcoder};
+    type Field =
+        | {type: 'static', name: string, value: Transcoder}
+        | {type: 'computed', name: Transcoder, value: Transcoder}
+        | {type: 'spread', expr: Transcoder};
     // @ts-ignore 6133 unused declaration
     function Record(fields: Field[]): Transcoder {
-        const arity = fields.length;
         return S => {
             let N = {} as any; // TODO: remove/improve cast
-            for (let i = 0; i < arity; ++i) {
-                let field = fields[i];
-                let id: string;
+            for (let field of fields) {
                 let result: Duad | null;
 
-                if (field.computed) {
-                    result = field.name(S);
+                if (field.type === 'spread') {
+                    // TODO: ...
+                    result = field.expr(S);
                     if (result === null) return null;
-                    assert(typeof result.N === 'string');
-                    id = result.N as string;
+                    assert(result.N && typeof result.N === 'object');
+                    N = {...N, ...(result.N as object)};
                     S = result.S;
                 }
                 else {
-                    id = field.name;
-                }
+                    let id: string;
+                    if (field.type === 'computed') {
+                        result = field.name(S);
+                        if (result === null) return null;
+                        assert(typeof result.N === 'string');
+                        id = result.N as string;
+                        S = result.S;
+                    }
+                    else /* field.type === 'static' */ {
+                        id = field.name;
+                    }
 
-                result = field.value(S);
-                if (result === null) return null;
-                assert(result.N !== NO_NODE);
-                N[id] = result.N;
-                S = result.S;
+                    result = field.value(S);
+                    if (result === null) return null;
+                    assert(result.N !== NO_NODE);
+                    N[id] = result.N;
+                    S = result.S;
+                }
             }
             return {S, N};
         };

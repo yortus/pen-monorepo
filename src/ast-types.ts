@@ -27,7 +27,7 @@ export interface Application {
 
 export interface Record {
     nodeType: 'Record';
-    fields: RecordField[];
+    fields: Array<RecordField | RecordSpread>;
 }
 
 export type RecordField = {
@@ -41,6 +41,11 @@ export type RecordField = {
     name: Expression;
     value: Expression;
 };
+
+export interface RecordSpread {
+    nodeType: 'RecordSpread';
+    argument: Expression;
+}
 
 export interface Identifier {
     nodeType: 'Identifier';
@@ -71,6 +76,7 @@ export type Node =
     | Application
     | Record
     | RecordField
+    | RecordSpread
     | Identifier
     | StringLiteral
     | ParenthesizedExpression;

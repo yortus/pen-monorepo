@@ -14,16 +14,11 @@ describe('Unparsing JSON', () => {
 
     // List the test cases with their expected results.
     let tests = [
-        `{AAA: 'BBB'} ==> AAABBB`,
-        `{A: 'BBB'} ==> ABBB`,
-        `{A: 'BBC'} ==> ERROR`,
-        `{A: 'BBB', B: 'BBB'} ==> ERROR`,
-        `{} ==> ERROR`,
-        // `1+1 ==> ERROR`,
-        // `AAABBB ==> {AAA: 'BBB'}`,
-        // `ABBB ==> {A: 'BBB'}`,
-        // `BBBB ==> ERROR`,
-        // `AAAA ==> ERROR`,
+        `{} ==> {}`,
+        `{a: 1} ==> {a:1}`,
+        `{a: 1, b: 2} ==> {a:1,b:2}`,
+        `{a: 1, b: 2, c: 3} ==> {a:1,b:2,c:3}`,
+        `{a: 1, b: 2, c: 3, d: 4} ==> {a:1,b:2,c:3,d:4}`,
     ];
 
     // Execute each test case.

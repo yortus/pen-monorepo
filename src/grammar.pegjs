@@ -42,7 +42,7 @@ Record
     { return {nodeType: 'Record', fields: fields || []}; }
 
 RecordFields
-    = h:RecordField   t:(WS   COMMA   WS   RecordField)*
+    = h:(RecordField / RecordSpread)   t:(WS   COMMA   WS   (RecordField / RecordSpread))*
     { return [h].concat(t.map(el => el[3])); }
 
 RecordField
@@ -52,8 +52,9 @@ RecordField
     / LSQBR name:Expression RSQBR   WS   COLON   WS   value:Expression
     { return {nodeType: 'RecordField', hasComputedName: true, name, value}; }
 
-// TODO: computed field name
-// TODO: rest/spread fields (one per record, must come last?)
+RecordSpread
+    = DOT DOT DOT   WS   arg:Expression
+    { return {nodeType: 'RecordSpread', argument: arg}; }
 
 Identifier
     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
@@ -95,7 +96,7 @@ IDENT   = [_a-z]i   [_a-z0-9]i*   { return text(); }
 BTICK   = '`'
 COLON   = ':'
 COMMA   = ','
-// DOT     = '.'
+DOT     = '.'
 DQUOTE  = '"'
 EQ      = '='
 // FSLASH  = '/'

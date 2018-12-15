@@ -1,22 +1,23 @@
 
 
 
-start = Test
 
-
-Test = {[As]: Bs}
-As   = "A" As | "A"
-Bs   = "B" Bs | "B"
+start = Object2 // NB: 'Object' crashes the unparser - clash with builtin Object?
 
 
 
-//Object = LBRACE Properties RBRACE
-//Properties
-//    =   {...KeyValuePair, COMMA ...Properties} // NB this supports trailing commas (since Properties can be `{}`), but JSON doesn't
-//    |   KeyValuePair
-//    |   {} // always succeeds and returns an empty object
-//
-//KeyValuePair = {[String]: COLON Value}
+
+Object2 = LBRACE (Properties | {}) RBRACE
+Properties =   {...KeyValuePair, ...COMMA Properties}   |   KeyValuePair
+KeyValuePair = {[String]: COLON Value}
+
+String = "a" | "b" | "c" | "d"
+Value = i32
+
+LBRACE          = `{`
+RBRACE          = `}`
+COLON           = `:`
+COMMA           = `,`
 
 
 

@@ -100,25 +100,42 @@ function emitRecord(expr: Record) {
         /*argumentsArray*/ [
             ts.createArrayLiteral(
                 expr.fields.map(field => {
-                    return ts.createObjectLiteral(
-                        [
-                            ts.createPropertyAssignment(
-                                /*name*/ 'computed',
-                                /*initializer*/ field.hasComputedName ? ts.createTrue() : ts.createFalse()
-                            ),
-                            ts.createPropertyAssignment(
-                                /*name*/ 'name',
-                                /*initializer*/ field.hasComputedName
-                                    ? emitExpression(field.name)
-                                    : ts.createStringLiteral(field.name.name)
-                            ),
-                            ts.createPropertyAssignment(
-                                /*name*/ 'value',
-                                /*initializer*/ emitExpression(field.value)
-                            ),
-                        ],
-                        /*multiline*/ true
-                    );
+                    if (field.nodeType === 'RecordField') {
+                        return ts.createObjectLiteral(
+                            [
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'type',
+                                    /*init*/ ts.createStringLiteral(field.hasComputedName ? 'computed' : 'static')
+                                ),
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'name',
+                                    /*init*/ field.hasComputedName
+                                        ? emitExpression(field.name)
+                                        : ts.createStringLiteral(field.name.name)
+                                ),
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'value',
+                                    /*init*/ emitExpression(field.value)
+                                ),
+                            ],
+                            /*multiline*/ true
+                        );
+                    }
+                    else /* field.nodeType === 'RecordSpread' */ {
+                        return ts.createObjectLiteral(
+                            [
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'type',
+                                    /*init*/ ts.createStringLiteral('spread')
+                                ),
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'expr',
+                                    /*init*/ emitExpression(field.argument)
+                                ),
+                            ],
+                            /*multiline*/ true
+                        );
+                    }
                 }),
                 /*multiline*/ true
             ),

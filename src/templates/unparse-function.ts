@@ -11,7 +11,10 @@ declare const start: Transcoder;
 
 export function unparse(ast: Node): string {
 
+    // TODO: temp testing...
+    const objectKeys = (({}).constructor as ObjectConstructor).keys;
     // These constants are used by the i32 unparser below.
+    const fromCharCode = (''.constructor as StringConstructor).fromCharCode;
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
@@ -118,7 +121,9 @@ export function unparse(ast: Node): string {
                 let result = expressions[i](N);
                 if (result === null) return null;
                 if (typeof N === 'string') assert(typeof result.N === 'string' && N.endsWith(result.N));
-                else assert(result.N === N || result.N === NO_NODE);
+                // TODO: for objects, `result.N` must be a residual of `N`. Could be expensive to check.
+                // specifically, all KVPs in `result.N` must also be in `N`
+//TODO: was... restore...                else assert(result.N === N || result.N === NO_NODE);
                 S += result.S;
                 N = result.N;
             }
@@ -126,53 +131,61 @@ export function unparse(ast: Node): string {
         };
     }
 
-    // TODO: instead of requiring identical keys, just return excess keys in a 'residual' object in result.N
-    type Field = ({computed: true, name: Transcoder} | {computed: false, name: string}) & {value: Transcoder};
+    type Field =
+        | {type: 'static', name: string, value: Transcoder}
+        | {type: 'computed', name: Transcoder, value: Transcoder}
+        | {type: 'spread', expr: Transcoder};
     // @ts-ignore 6133 unused declaration
     function Record(fields: Field[]): Transcoder {
-        const arity = fields.length;
         return (N: any) => {
             let S = '';
             if (!isPlainObject(N)) return null;
-            if (Object.keys(N).length !== arity) return null;
 
             // Make a copy of N from which we delete key/value pairs once they are consumed
             N = {...N};
 
             // TODO: ...
             outerLoop:
-            for (let i = 0; i < arity; ++i) {
-                let field = fields[i];
-
-                // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(N);
-                for (let propName of propNames) {
-                    if (field.computed) {
-                        let r = field.name(propName);
-                        if (r === null || r.N !== '') continue;
-                        S += r.S;
-                    }
-                    else {
-                        if (propName !== field.name) continue;
-                    }
-
-                    // TODO: match value
-                    let result = field.value(N[propName]);
-                    if (result === null) continue;
-                    if (result.N !== (typeof N[propName] === 'string' ? '' : NO_NODE)) continue;
+            for (let field of fields) {
+                if (field.type === 'spread') {
+                    // TODO: ...
+                    let result = field.expr(N);
+                    if (result === null) return null;
                     S += result.S;
-
-                    // TODO: we matched both name and value - consume them from N
-                    delete N[propName];
-                    continue outerLoop;
+                    N = result.N === NO_NODE ? {} : {...result.N as object};
                 }
+                else {
 
-                // If we get here, no match...
-                return null;
+                    // Find the first property key/value pair that matches this field name/value pair (if any)
+                    let propNames = objectKeys(N);
+                    for (let propName of propNames) {
+                        if (field.type === 'computed') {
+                            let r = field.name(propName);
+                            if (r === null || r.N !== '') continue;
+                            S += r.S;
+                        }
+                        else /* field.type === 'static' */ {
+                            if (propName !== field.name) continue;
+                        }
+
+                        // TODO: match value
+                        let result = field.value(N[propName]);
+                        if (result === null) continue;
+                        if (result.N !== (typeof N[propName] === 'string' ? '' : NO_NODE)) continue;
+                        S += result.S;
+
+                        // TODO: we matched both name and value - consume them from N
+                        delete N[propName];
+                        continue outerLoop;
+                    }
+
+                    // If we get here, no match...
+                    return null;
+                }
             }
 
             // TODO: if all properties consumed (ie N is now an empty object), set N to NO_NODE
-            if (Object.keys(N).length === 0) N = NO_NODE;
+            if (objectKeys(N).length === 0) N = NO_NODE;
             return {S, N};
         };
     }
@@ -228,7 +241,7 @@ export function unparse(ast: Node): string {
         while (true) {
             let d = N % 10;
             N = (N / 10) | 0;
-            digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
+            digits.push(fromCharCode(UNICODE_ZERO_DIGIT + d));
             if (N === 0) break;
         }
 
