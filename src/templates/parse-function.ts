@@ -1,7 +1,7 @@
 type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
 type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | object;
+type Node = NO_NODE | string | number | boolean | null | object;
 interface Duad { S: Span; N: Node; }
 type Transcoder = (S: Span) => Duad | null;
 declare const start: Transcoder;
@@ -235,6 +235,23 @@ export function parse(text: string): Node {
 
         // Success
         return {S, N};
+    }
+
+
+
+
+    // TODO: where do these ones belong?
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_true(S: Span): Duad | null {
+        return {S, N: true};
+    }
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_false(S: Span): Duad | null {
+        return {S, N: false};
+    }
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_null(S: Span): Duad | null {
+        return {S, N: null};
     }
 }
 

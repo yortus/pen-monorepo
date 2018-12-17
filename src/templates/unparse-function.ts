@@ -1,7 +1,7 @@
 type Span = string;
 const NO_NODE = Symbol('NoNode');
 type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | object;
+type Node = NO_NODE | string | number | boolean | null | object;
 interface Duad { S: Span; N: Node; }
 type Transcoder = (N: Node) => Duad | null;
 declare const start: Transcoder;
@@ -241,6 +241,23 @@ export function unparse(ast: Node): string {
         // TODO: compute final string...
         if (isNegative) digits.push('-');
         return {S: digits.reverse().join(''), N: NO_NODE};
+    }
+
+
+
+
+    // TODO: where do these ones belong?
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_true(N: Node): Duad | null {
+        return N === true ? {S: '', N: NO_NODE} : null;
+    }
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_false(N: Node): Duad | null {
+        return N === false ? {S: '', N: NO_NODE} : null;
+    }
+    // @ts-ignore 6133 unused declaration
+    function intrinsic_null(N: Node): Duad | null {
+        return N === null ? {S: '', N: NO_NODE} : null;
     }
 }
 

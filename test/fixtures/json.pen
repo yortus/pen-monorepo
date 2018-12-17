@@ -1,18 +1,18 @@
 // ---------- JSON Grammar ----------
 start = /*WS*/ Value /*WS*/
 Value =
-//    |   False
-//    |   Null
-//    |   True
+    |   False
+    |   Null
+    |   True
     |   Object
 //    |   Array
     |   Number  // TODO: should be NUMBER? what do we mean by UCASE convention?
 //    |   String  // TODO: should be STRING? "   "
 
 // ---------- Primitive values ----------
-//False   = `false` false  // Assumes false, null and true are AST primitives
-//Null    = `null` null    // "   "
-//True    = `true` true    // "   "
+False   = `false` intrinsic_false  // Assumes `intrinsic_false`, `intrinsic_null` and `intrinsic_true` are defined to be abstract terminals
+Null    = `null` intrinsic_null    // "   "
+True    = `true` intrinsic_true    // "   "
 
 // ---------- Objects ----------
 Object = LBRACE (Properties | {}) RBRACE
