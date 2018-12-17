@@ -25,7 +25,8 @@ Todo:
     BUG: rule names in grammars can shadow names referenced in parse/unparse templates:
       eg1, a rule named "String" in a unit test make i32 unparsing fail b/c String.fromCharCode referred to the local String decl
       eg2, ditto a rule named "Object" which messed up Object.keys calls
-      [ ] this needs to be made impossible and provably so
+      [x] put 'user' rules into a nested scope, so they are never visible to built-in rules
+      [ ] check whether 'user' rules can still interfere with each other through crafted names, eg `start`
     add UMD build using webpack, as per how `multimethods` does it:
       [ ] but first answer this: do we need umd for a command line tool?
     [x] move repo to yortus/penc

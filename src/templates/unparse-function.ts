@@ -11,26 +11,22 @@ declare const start: Transcoder;
 
 export function unparse(ast: Node): string {
 
-    // TODO: temp testing...
-    const objectKeys = (({}).constructor as ObjectConstructor).keys;
     // These constants are used by the i32 unparser below.
-    const fromCharCode = (''.constructor as StringConstructor).fromCharCode;
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
 
-    // @ts-ignore 7028 unused label
-    placeholder: {}
+    return (function userScope() {
+        // @ts-ignore 7028 unused label
+        placeholder: {}
 
-
-
-
-    //debugger;
-    let text = start(ast);
-    if (text === null) throw new Error(`unparse failed`);
-    if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
-    return text.S;
+        //debugger;
+        let text = start(ast);
+        if (text === null) throw new Error(`unparse failed`);
+        if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
+        return text.S;
+    })();
 
 
 
@@ -157,7 +153,7 @@ export function unparse(ast: Node): string {
                 else {
 
                     // Find the first property key/value pair that matches this field name/value pair (if any)
-                    let propNames = objectKeys(N);
+                    let propNames = Object.keys(N);
                     for (let propName of propNames) {
                         if (field.type === 'computed') {
                             let r = field.name(propName);
@@ -185,7 +181,7 @@ export function unparse(ast: Node): string {
             }
 
             // TODO: if all properties consumed (ie N is now an empty object), set N to NO_NODE
-            if (objectKeys(N).length === 0) N = NO_NODE;
+            if (Object.keys(N).length === 0) N = NO_NODE;
             return {S, N};
         };
     }
@@ -241,7 +237,7 @@ export function unparse(ast: Node): string {
         while (true) {
             let d = N % 10;
             N = (N / 10) | 0;
-            digits.push(fromCharCode(UNICODE_ZERO_DIGIT + d));
+            digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
             if (N === 0) break;
         }
 

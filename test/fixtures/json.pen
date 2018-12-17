@@ -2,12 +2,12 @@
 
 
 
-start = Object2 // NB: 'Object' crashes the unparser - clash with builtin Object?
+start = Object // NB: 'Object' crashes the unparser - clash with builtin Object?
 
 
 
 
-Object2 = LBRACE (Properties | {}) RBRACE
+Object = LBRACE (Properties | {}) RBRACE
 Properties =   {...KeyValuePair, ...COMMA Properties}   |   KeyValuePair
 KeyValuePair = {[String]: COLON Value}
 

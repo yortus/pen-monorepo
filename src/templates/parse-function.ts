@@ -18,18 +18,17 @@ export function parse(text: string): Node {
 
 
 
-    // @ts-ignore 7028 unused label
-    placeholder: {}
+    return (function userScope() {
+        // @ts-ignore 7028 unused label
+        placeholder: {}
 
-
-
-
-    //debugger;
-    let ast = start(0);
-    if (ast === null) throw new Error(`parse failed`);
-    if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
-    if (ast.N === NO_NODE) throw new Error(`parse didn't return a value`);
-    return ast.N;
+        //debugger;
+        let ast = start(0);
+        if (ast === null) throw new Error(`parse failed`);
+        if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
+        if (ast.N === NO_NODE) throw new Error(`parse didn't return a value`);
+        return ast.N;
+    })();
 
 
 
