@@ -134,8 +134,10 @@ export function parse(text: string): Node {
                     // TODO: ...
                     result = field.expr(S);
                     if (result === null) return null;
-                    assert(result.N && typeof result.N === 'object');
-                    N = {...N, ...(result.N as object)};
+                    assert((result.N && typeof result.N === 'object') || result.N === NO_NODE);
+                    if (result.N !== NO_NODE) {
+                        N = {...N, ...(result.N as object)};
+                    }
                     S = result.S;
                 }
                 else {
@@ -265,6 +267,10 @@ export function parse(text: string): Node {
                 S = result.S;
             }
         };
+    }
+    // @ts-ignore 6133 unused declaration
+    function Maybe(expression: Transcoder): Transcoder {
+        return S => expression(S) || {S, N: NO_NODE};
     }
 }
 

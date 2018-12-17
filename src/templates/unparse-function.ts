@@ -276,6 +276,10 @@ export function unparse(ast: Node): string {
             // }
         };
     }
+    // @ts-ignore 6133 unused declaration
+    function Maybe(expression: Transcoder): Transcoder {
+        return N => expression(N) || {S: '', N};
+    }
 }
 
 
