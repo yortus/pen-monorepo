@@ -253,6 +253,19 @@ export function parse(text: string): Node {
     function intrinsic_null(S: Span): Duad | null {
         return {S, N: null};
     }
+    // @ts-ignore 6133 unused declaration
+    function ZeroOrMore(expression: Transcoder): Transcoder {
+        return S => {
+            let N: Node = NO_NODE;
+            while (true) {
+                let result = expression(S);
+                if (result === null) return {S, N};
+                assert(S !== result.S); // TODO: ensure something was consumed... is this always correct?
+                assert(result.N === NO_NODE); // TODO: allow string concatenation on the abstract side
+                S = result.S;
+            }
+        };
+    }
 }
 
 

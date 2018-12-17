@@ -1,13 +1,13 @@
 // ---------- JSON Grammar ----------
-start = /*WS*/ Value /*WS*/
+start = WS   Value   WS
 Value =
     |   False
     |   Null
     |   True
     |   Object
 //    |   Array
-    |   Number  // TODO: should be NUMBER? what do we mean by UCASE convention?
-//    |   String  // TODO: should be STRING? "   "
+    |   Number
+//    |   String
 
 // ---------- Primitive values ----------
 False   = `false` intrinsic_false  // Assumes `intrinsic_false`, `intrinsic_null` and `intrinsic_true` are defined to be abstract terminals
@@ -15,7 +15,7 @@ Null    = `null` intrinsic_null    // "   "
 True    = `true` intrinsic_true    // "   "
 
 // ---------- Objects ----------
-Object = LBRACE (Properties | {}) RBRACE
+Object = LBRACE   (Properties | {})   RBRACE
 Properties =   {...KeyValuePair, ...COMMA Properties}   |   KeyValuePair
 KeyValuePair = {[String]: COLON Value}
 
@@ -29,20 +29,12 @@ Number = i32 // TODO: should be f64? check JS specs
 String = "a" | "b" | "c" | "d"
 
 // ---------- Literal characters ----------
-LBRACE          = `{`
-RBRACE          = `}`
-COLON           = `:`
-COMMA           = `,`
-
-
-
-
-// TODO: was... restore
-//LBRACE          = WS `{` WS
-//RBRACE          = WS `}` WS
-//LBRACKET        = WS `[` WS
-//RBRACKET        = WS `]` WS
-//COLON           = WS `:` WS
-//COMMA           = WS `,` WS
-//DOUBLE_QUOTE    = `"`
-//WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>
+LBRACE          = WS `{` WS
+RBRACE          = WS `}` WS
+LBRACKET        = WS `[` WS
+RBRACKET        = WS `]` WS
+COLON           = WS `:` WS
+COMMA           = WS `,` WS
+DOUBLE_QUOTE    = `"`
+WS              = ZeroOrMore<` `>
+// TODO: was... restore... WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>

@@ -259,6 +259,23 @@ export function unparse(ast: Node): string {
     function intrinsic_null(N: Node): Duad | null {
         return N === null ? {S: '', N: NO_NODE} : null;
     }
+    // @ts-ignore 6133 unused declaration
+    function ZeroOrMore(expression: Transcoder): Transcoder {
+        return N => {
+            // TODO: temp testing... always go with zero iterations for now, since on the parse side we never produce
+            // a node. Otherwise this would loop forever without consuming anything from N.
+            return {S: '', N};
+            // TODO: was... loops forever...
+            // let S: Span = '';
+            // while (true) {
+            //     let result = expression(N);
+            //     if (result === null) return {S, N};
+            //     assert(result.S !== ''); // TODO: ensure something was produced... is this always correct?
+            //     assert(result.N === N); // TODO: allow string concatenation on the abstract side
+            //     S += result.S;
+            // }
+        };
+    }
 }
 
 

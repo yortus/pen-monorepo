@@ -15,17 +15,18 @@ describe('Parsing JSON', () => {
     // List the test cases with their expected results.
     let tests = [
         `{} ==> {}`,
-        `{a:1} ==> {a: 1}`,
-        `{a:1,b:2} ==> {a: 1, b: 2}`,
-        `{a:1,b:2,c:3} ==> {a: 1, b: 2, c: 3}`,
-        `{a:1,b:2,c:3,d:4} ==> {a: 1, b: 2, c: 3, d: 4}`,
-        `{a:{},b:{c:42}} ==> {a: {}, b: {c: 42}}`,
+        `{a: 1} ==> {a: 1}`,
+        `{a: 1, b: 2} ==> {a: 1, b: 2}`,
+        `{a: 1, b: 2, c: 3} ==> {a: 1, b: 2, c: 3}`,
+        `{a: 1, b: 2, c: 3, d: 4} ==> {a: 1, b: 2, c: 3, d: 4}`,
+        `{a: {}, b: {c: 42}} ==> {a: {}, b: {c: 42}}`,
+        `   {  a   : 1   }    ==> {a: 1}`,
 
-        `{a:true,b:false,c:null} ==> {a: true, b: false, c: null}`,
-        `{a:null} ==> {a: null}`,
-        `{a:nil} ==> ERROR`,
-        `{a:"null"} ==> ERROR`,
-        `{a:'null'} ==> ERROR`,
+        `{a: true, b: false, c: null} ==> {a: true, b: false, c: null}`,
+        `{a: null} ==> {a: null}`,
+        `{a: nil} ==> ERROR`,
+        `{a: "null"} ==> ERROR`,
+        `{a: 'null'} ==> ERROR`,
     ];
 
     // Execute each test case.
