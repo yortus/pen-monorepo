@@ -1,19 +1,34 @@
+// ---------- JSON Grammar ----------
+start = /*WS*/ Value /*WS*/
+Value =
+//    |   False
+//    |   Null
+//    |   True
+    |   Object
+//    |   Array
+    |   Number  // TODO: should be NUMBER? what do we mean by UCASE convention?
+//    |   String  // TODO: should be STRING? "   "
 
+// ---------- Primitive values ----------
+//False   = `false` false  // Assumes false, null and true are AST primitives
+//Null    = `null` null    // "   "
+//True    = `true` true    // "   "
 
-
-
-start = Object // NB: 'Object' crashes the unparser - clash with builtin Object?
-
-
-
-
+// ---------- Objects ----------
 Object = LBRACE (Properties | {}) RBRACE
 Properties =   {...KeyValuePair, ...COMMA Properties}   |   KeyValuePair
 KeyValuePair = {[String]: COLON Value}
 
-String = "a" | "b" | "c" | "d"
-Value = i32
+// ---------- Arrays ----------
+// TODO: ...
 
+// ---------- Numbers ----------
+Number = i32 // TODO: should be f64? check JS specs
+
+// ---------- Strings ----------
+String = "a" | "b" | "c" | "d"
+
+// ---------- Literal characters ----------
 LBRACE          = `{`
 RBRACE          = `}`
 COLON           = `:`
@@ -22,6 +37,7 @@ COMMA           = `,`
 
 
 
+// TODO: was... restore
 //LBRACE          = WS `{` WS
 //RBRACE          = WS `}` WS
 //LBRACKET        = WS `[` WS

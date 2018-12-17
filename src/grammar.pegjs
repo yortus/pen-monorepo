@@ -22,7 +22,7 @@ ExpressionBelowApplication = Record / Identifier / StringLiteral / Parenthesized
 
 
 Selection
-    = h:ExpressionBelowSelection   t:(WS   PIPE   WS   ExpressionBelowSelection)+
+    = (PIPE   WS)?   h:ExpressionBelowSelection   t:(WS   PIPE   WS   ExpressionBelowSelection)+
     { return {nodeType: 'Selection', expressions: [h].concat(t.map(el => el[3]))}; }
 
 Sequence

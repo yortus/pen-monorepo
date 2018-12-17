@@ -1,4 +1,5 @@
 Todo:
+    [ ] support `i32` literals in different bases (hex at least. See Java source code which does this)
     need a thoughoughly consistent approach to 'consuming' nodes:
       strings and objects both support incremental consumption now. Soon tuples will too.
       [x] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
