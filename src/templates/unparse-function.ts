@@ -24,7 +24,7 @@ export function unparse(ast: Node): string {
         //debugger;
         let text = start(ast);
         if (text === null) throw new Error(`unparse failed`);
-        if (text.N !== NO_NODE) throw new Error(`unparse didn't consume entire input`);
+        if (!isFullyConsumed(text.N)) throw new Error(`unparse didn't consume entire input`);
         return text.S;
     })();
 
@@ -116,10 +116,9 @@ export function unparse(ast: Node): string {
             for (let i = 0; i < arity; ++i) {
                 let result = expressions[i](N);
                 if (result === null) return null;
-                if (typeof N === 'string') assert(typeof result.N === 'string' && N.endsWith(result.N));
-                // TODO: for objects, `result.N` must be a residual of `N`. Could be expensive to check.
-                // specifically, all KVPs in `result.N` must also be in `N`
-//TODO: was... restore...                else assert(result.N === N || result.N === NO_NODE);
+                assert(isResidualNode(N, result.N)); // TODO: this expensive check should be enabled only in debug mode.
+                                                     //       Also it should be wrapped around *all* unparse calls since
+                                                     //       it is an invariant of unparsing.
                 S += result.S;
                 N = result.N;
             }
@@ -133,7 +132,7 @@ export function unparse(ast: Node): string {
         | {type: 'spread', expr: Transcoder};
     // @ts-ignore 6133 unused declaration
     function Record(fields: Field[]): Transcoder {
-        return (N: any) => {
+        return N => {
             let S = '';
             if (!isPlainObject(N)) return null;
 
@@ -147,8 +146,9 @@ export function unparse(ast: Node): string {
                     // TODO: ...
                     let result = field.expr(N);
                     if (result === null) return null;
+                    assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
                     S += result.S;
-                    N = result.N === NO_NODE ? {} : {...result.N as object};
+                    N = {...result.N as object};
                 }
                 else {
 
@@ -165,13 +165,13 @@ export function unparse(ast: Node): string {
                         }
 
                         // TODO: match value
-                        let result = field.value(N[propName]);
+                        let result = field.value((N as any)[propName]);
                         if (result === null) continue;
-                        if (result.N !== (typeof N[propName] === 'string' ? '' : NO_NODE)) continue;
+                        if (!isFullyConsumed(result.N)) continue;
                         S += result.S;
 
                         // TODO: we matched both name and value - consume them from N
-                        delete N[propName];
+                        delete (N as any)[propName];
                         continue outerLoop;
                     }
 
@@ -179,9 +179,6 @@ export function unparse(ast: Node): string {
                     return null;
                 }
             }
-
-            // TODO: if all properties consumed (ie N is now an empty object), set N to NO_NODE
-            if (Object.keys(N).length === 0) N = NO_NODE;
             return {S, N};
         };
     }
@@ -250,7 +247,24 @@ export function unparse(ast: Node): string {
 
 
 
-function isPlainObject(value: unknown) {
+function isFullyConsumed(N: Node) {
+    if (N === NO_NODE) return true;
+    if (N === '') return true;
+    if (isPlainObject(N) && Object.keys(N).length === 0) return true;
+    return false;
+}
+
+function isResidualNode(N: Node, Nʹ: Node) {
+    if (typeof N === 'string') {
+        return typeof Nʹ === 'string' && N.endsWith(Nʹ);
+    }
+    if (isPlainObject(N)) {
+        return isPlainObject(Nʹ) && Object.keys(Nʹ).every(k => N.hasOwnProperty(k) && (N as any)[k] === (Nʹ as any)[k]);
+    }
+    return Nʹ === N || Nʹ === NO_NODE;
+}
+
+function isPlainObject(value: unknown): value is object {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
 
