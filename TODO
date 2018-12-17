@@ -1,11 +1,13 @@
 Todo:
     need a thoughoughly consistent approach to 'consuming' nodes:
-      strings and objects both support incremental consumption now
-      [ ] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
-      [ ] see/fix TODO comment in unparse code about commented-out assertion to check `result.N` is a 'residual' of `N`
+      strings and objects both support incremental consumption now. Soon tuples will too.
+      [x] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
+      [x] see/fix TODO comment in unparse code about commented-out assertion to check `result.N` is a 'residual' of `N`
+    [ ] support debug mode a la multimethods, enable expensive `isResidualNode` checks only in debug mode
+    [ ] in debug mode, wrap all parse/unparse functions in a wrapper function that checks pre/post/invariant conditions (eg `isResidualNode`)
     new PEN language features necessary to parse/unparse JSON:
-      [ ] computed field names, ie the `[NameRule]` part in `{[NameRule]: ValueRule}`
-      [ ] spread/gather fields for records, ie the `...RestRule` part in `{'foo': FooRule, ...RestRule}`
+      [x] computed field names, ie the `[NameRule]` part in `{[NameRule]: ValueRule}`
+      [x] spread/gather fields for records, ie the `...RestRule` part in `{'foo': FooRule, ...RestRule}`
         NB: when parsing, it acts like the JS object spread operator in an object literal expression
         NB: when unparsing, it acts like the JS object rest operator in destructuring assignment (actually not - more like a gather operator)
         must it be like rest param - ie only one allowed and must come last?:
@@ -13,10 +15,11 @@ Todo:
           for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
           actually have have multiple in any position - see JSON grammar - its about tracking what has been consumed so far in the current node
           so not really 'rest', more like 'gather'
-      [ ] lists, which map to JS arrays
-      [ ] rest/spread elements for lists
+      [ ] lists (tuples), which map to JS arrays
+        [ ] which is the correct/best name? tuple? list? array? Use the term whose defn most closely matches (probably tuple as per the 'types' book)
+      [ ] rest/spread elements for lists/tuples
       [ ] `f64` floating point numbers
-      [ ] abstract literals `true`, `false`, and `null` (want these built-in or library-based?)
+      [ ] abstract literals `true`, `false`, and `null` (want these built-in or library-based?) ANS: library-based plz
     add mocha/chai unit tests to core pen module:
       [x] add expression grammar as a fixture
       [x] tests that parse various math expressions and expect a specific ast
