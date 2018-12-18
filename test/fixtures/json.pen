@@ -26,7 +26,18 @@ Elements    = [Value, ...Maybe<COMMA Elements>]
 Number = i32 // TODO: should be f64? check JS specs
 
 // ---------- Strings ----------
+// TODO: temp testing...
 String = "a" | "b" | "c" | "d"
+
+// TODO: need to get these working...
+/*
+String = DOUBLE_QUOTE   ZeroOrMore(CHAR)   DOUBLE_QUOTE
+CHAR =
+    |   "[^\0-\x1F\x22\x5C]"                // TODO
+    |   "\\["\\/bfnrt]"                     // TODO
+    |   "\\u" HEXDIG HEXDIG HEXDIG HEXDIG   // TODO
+HEXDIG = "0-9" | "a-f" | "A-F"              // TODO
+*/
 
 // ---------- Literal characters ----------
 LBRACE          = WS `{` WS
