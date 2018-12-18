@@ -8,6 +8,9 @@ Todo:
         [ ] use `&` or `;` as sequence operator, but make it always optional?
             [ ] this could allow `fn(arg)` syntax instead of `fn<arg>`, since can disambiguate with `nonFn ; (arg)`
         [ ] `not` operator
+        [ ] first-class intrinsic keywords for booleans (`true`|`false`)
+        [ ] first class intrinsic keyword for null (`null`? `void`? `()`? `nil`?)
+        [ ] `OneOrMore` instead of `ZeroOrMore`? Then ZeroOrMore = maybe OneOrMore (call it `repeat` or `iter` or some such?)
     [ ] support `i32` literals in different bases (hex at least. See Java source code which does this)
     modules:
         [ ] list ideas...
@@ -34,7 +37,6 @@ Todo:
         [ ] unicode character escapes (hex at least)
         [ ] `f64` floating point numbers
         [x] abstract literals `true`, `false`, and `null` (want these built-in or library-based?) ANS: library-based plz
-        [ ] reconsider: first-class instrisic keywords for booleans (`true`|`false`) and/or null (`null`? `void`? `()`? `nil`?)
         [x] `ZeroOrMore` combinator
         [ ] escape sequences in string literals (at least basic ones like `\n`)
     add mocha/chai unit tests to core pen module:

@@ -14,6 +14,7 @@
         "build:cjs": "tsc -p src && pegjs -o dist/commonjs/grammar.js src/grammar.pegjs",
         "build:umd": "webpack",
         "build:tests": "tsc -p test && cpx test/fixtures/*.* dist/test/fixtures",
+        "build:extras": "tsc -p extras",
         "lint": "tslint src/**/*.ts test/**/*.ts",
         "test": "node ./scripts/run-unit-tests",
         "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
