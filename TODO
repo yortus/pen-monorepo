@@ -1,7 +1,16 @@
 Todo:
-    [ ] `RecordField` ==> `RecordEntry` (can be field or spread)
-    [ ] `ListElement` ==> `ListEntry` (can be element or spread)
+    review aggregate/element naming:
+        [ ] `Record` vs `RecordField`/`RecordEntry`? (can be field or spread)
+        [ ] `List` vs `ListElement`/`ListEntry`? (can be element or spread)
+        [ ] `String` vs `Char`/`StringElement`?
+    misc notation ideas:
+        [ ] instead of `Maybe<>`, provide an 'epsilon' keyword ie `Maybe<A>` is same as `A | epsilon`
+        [ ] use `&` or `;` as sequence operator, but make it always optional?
+            [ ] this could allow `fn(arg)` syntax instead of `fn<arg>`, since can disambiguate with `nonFn ; (arg)`
+        [ ] `not` operator
     [ ] support `i32` literals in different bases (hex at least. See Java source code which does this)
+    modules:
+        [ ] list ideas...
     need a thoughoughly consistent approach to 'consuming' nodes:
         strings and objects both support incremental consumption now. Soon tuples will too.
         [x] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
@@ -18,11 +27,14 @@ Todo:
                 for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
                 actually have have multiple in any position - see JSON grammar - its about tracking what has been consumed so far in the current node
                 so not really 'rest', more like 'gather'
-        [ ] lists (tuples), which map to JS arrays
-            [ ] which is the correct/best name? tuple? list? array? Use the term whose defn most closely matches (probably tuple as per the 'types' book)
-        [ ] rest/spread elements for lists/tuples
+        [x] lists (tuples), which map to JS arrays
+            [x] which is the correct/best name? tuple? list? array? Use the term whose defn most closely matches. ANS: went with 'list'
+        [x] rest/spread elements for lists/tuples
+        [ ] character classes, including ranges and 'not' (or separate `Not<>` combinator)
+        [ ] unicode character escapes (hex at least)
         [ ] `f64` floating point numbers
         [x] abstract literals `true`, `false`, and `null` (want these built-in or library-based?) ANS: library-based plz
+        [ ] reconsider: first-class instrisic keywords for booleans (`true`|`false`) and/or null (`null`? `void`? `()`? `nil`?)
         [x] `ZeroOrMore` combinator
         [ ] escape sequences in string literals (at least basic ones like `\n`)
     add mocha/chai unit tests to core pen module:
