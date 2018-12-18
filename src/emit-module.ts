@@ -8,6 +8,7 @@ import {Record} from './ast-types';
 import {Selection} from './ast-types';
 import {Sequence} from './ast-types';
 import {StringLiteral} from './ast-types';
+import {List} from './ast-types';
 
 
 
@@ -64,6 +65,7 @@ function emitExpression(expr: Expression): ts.Expression {
     switch (expr.nodeType) {
         case 'Application': return emitApplication(expr);
         case 'Identifier': return emitIdentifier(expr);
+        case 'List': return emitList(expr);
         case 'ParenthesizedExpression': return emitParenthesizedExpression(expr);
         case 'Record': return emitRecord(expr);
         case 'Selection': return emitSelection(expr);
@@ -87,6 +89,50 @@ function emitApplication(expr: Application) {
 
 function emitIdentifier(expr: Identifier) {
     return ts.createIdentifier(expr.name);
+}
+
+function emitList(expr: List) {
+    return ts.createCall(
+        ts.createIdentifier('List'),
+        /*typeArguments*/ undefined,
+        /*argumentsArray*/ [
+            ts.createArrayLiteral(
+                expr.elements.map(element => {
+                    if (element.nodeType === 'ListElement') {
+                        return ts.createObjectLiteral(
+                            [
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'type',
+                                    /*init*/ ts.createStringLiteral('element')
+                                ),
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'value',
+                                    /*init*/ emitExpression(element.value)
+                                ),
+                            ],
+                            /*multiline*/ true
+                        );
+                    }
+                    else /* field.nodeType === 'ListSpread' */ {
+                        return ts.createObjectLiteral(
+                            [
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'type',
+                                    /*init*/ ts.createStringLiteral('spread')
+                                ),
+                                ts.createPropertyAssignment(
+                                    /*name*/ 'expr',
+                                    /*init*/ emitExpression(element.argument)
+                                ),
+                            ],
+                            /*multiline*/ true
+                        );
+                    }
+                }),
+                /*multiline*/ true
+            ),
+        ]
+    );
 }
 
 function emitParenthesizedExpression(expr: ParenthesizedExpression) {

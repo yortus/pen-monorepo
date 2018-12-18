@@ -16,7 +16,7 @@ Binding
 Expression = Selection / ExpressionBelowSelection
 ExpressionBelowSelection = Sequence / ExpressionBelowSequence
 ExpressionBelowSequence = Application / ExpressionBelowApplication
-ExpressionBelowApplication = Record / Identifier / StringLiteral / ParenthesizedExpression
+ExpressionBelowApplication = Record / List / Identifier / StringLiteral / ParenthesizedExpression
 
 
 
@@ -55,6 +55,22 @@ RecordField
 RecordSpread
     = DOT DOT DOT   WS   arg:Expression
     { return {nodeType: 'RecordSpread', argument: arg}; }
+
+List
+    = LSQBR   WS   elements:ListElements?   WS   RSQBR
+    { return {nodeType: 'List', elements: elements || []}; }
+
+ListElements
+    = h:(ListElement / ListSpread)   t:(WS   COMMA   WS   (ListElement / ListSpread))*
+    { return [h].concat(t.map(el => el[3])); }
+
+ListElement
+    = value:Expression
+    { return {nodeType: 'ListElement', value}; }
+
+ListSpread
+    = DOT DOT DOT   WS   arg:Expression
+    { return {nodeType: 'ListSpread', argument: arg}; }
 
 Identifier
     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?

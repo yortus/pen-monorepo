@@ -5,7 +5,7 @@ Value =
     |   Null
     |   True
     |   Object
-//    |   Array
+    |   Array
     |   Number
 //    |   String
 
@@ -19,7 +19,8 @@ Object      = LBRACE   (Properties | {})   RBRACE
 Properties  = {[String]: COLON Value, ...Maybe<COMMA Properties>}
 
 // ---------- Arrays ----------
-// TODO: ...
+Array       = LBRACKET   (Elements | [])   RBRACKET
+Elements    = [Value, ...Maybe<COMMA Elements>]
 
 // ---------- Numbers ----------
 Number = i32 // TODO: should be f64? check JS specs

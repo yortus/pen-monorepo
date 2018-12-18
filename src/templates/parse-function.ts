@@ -1,7 +1,7 @@
 type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
 type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | boolean | null | object;
+type Node = NO_NODE | string | number | boolean | null | object | any[];
 interface Duad { S: Span; N: Node; }
 type Transcoder = (S: Span) => Duad | null;
 declare const start: Transcoder;
@@ -119,25 +119,22 @@ export function parse(text: string): Node {
         };
     }
 
-    type Field =
+    type RecordField =
         | {type: 'static', name: string, value: Transcoder}
         | {type: 'computed', name: Transcoder, value: Transcoder}
         | {type: 'spread', expr: Transcoder};
     // @ts-ignore 6133 unused declaration
-    function Record(fields: Field[]): Transcoder {
+    function Record(fields: RecordField[]): Transcoder {
         return S => {
             let N = {} as any; // TODO: remove/improve cast
             for (let field of fields) {
                 let result: Duad | null;
 
                 if (field.type === 'spread') {
-                    // TODO: ...
                     result = field.expr(S);
                     if (result === null) return null;
-                    assert((result.N && typeof result.N === 'object') || result.N === NO_NODE);
-                    if (result.N !== NO_NODE) {
-                        N = {...N, ...(result.N as object)};
-                    }
+                    assert(result.N === NO_NODE || (result.N && typeof result.N === 'object'));
+                    if (result.N !== NO_NODE) Object.assign(N, result.N);
                     S = result.S;
                 }
                 else {
@@ -157,6 +154,33 @@ export function parse(text: string): Node {
                     if (result === null) return null;
                     assert(result.N !== NO_NODE);
                     N[id] = result.N;
+                    S = result.S;
+                }
+            }
+            return {S, N};
+        };
+    }
+
+    type ListElement =
+        | {type: 'element', value: Transcoder}
+        | {type: 'spread', expr: Transcoder};
+    // @ts-ignore 6133 unused declaration
+    function List(elements: ListElement[]): Transcoder {
+        return S => {
+            let N = [] as Node[];
+            for (let element of elements) {
+                if (element.type === 'spread') {
+                    let result = element.expr(S);
+                    if (result === null) return null;
+                    assert(result.N === NO_NODE || Array.isArray(result.N));
+                    if (result.N !== NO_NODE) N.push(...result.N as any[]);
+                    S = result.S;
+                }
+                else /* field.type === 'element' */ {
+                    let result = element.value(S);
+                    if (result === null) return null;
+                    assert(result.N !== NO_NODE);
+                    N.push(result.N);
                     S = result.S;
                 }
             }

@@ -1,44 +1,46 @@
 Todo:
+    [ ] `RecordField` ==> `RecordEntry` (can be field or spread)
+    [ ] `ListElement` ==> `ListEntry` (can be element or spread)
     [ ] support `i32` literals in different bases (hex at least. See Java source code which does this)
     need a thoughoughly consistent approach to 'consuming' nodes:
-      strings and objects both support incremental consumption now. Soon tuples will too.
-      [x] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
-      [x] see/fix TODO comment in unparse code about commented-out assertion to check `result.N` is a 'residual' of `N`
+        strings and objects both support incremental consumption now. Soon tuples will too.
+        [x] so `NO_NODE`, `''` and `{}` can all mean 'no more input' in the right circumstances - generalise this
+        [x] see/fix TODO comment in unparse code about commented-out assertion to check `result.N` is a 'residual' of `N`
     [ ] support debug mode a la multimethods, enable expensive `isResidualNode` checks only in debug mode
     [ ] in debug mode, wrap all parse/unparse functions in a wrapper function that checks pre/post/invariant conditions (eg `isResidualNode`)
     new PEN language features necessary to parse/unparse JSON:
-      [x] computed field names, ie the `[NameRule]` part in `{[NameRule]: ValueRule}`
-      [x] spread/gather fields for records, ie the `...RestRule` part in `{'foo': FooRule, ...RestRule}`
-        NB: when parsing, it acts like the JS object spread operator in an object literal expression
-        NB: when unparsing, it acts like the JS object rest operator in destructuring assignment (actually not - more like a gather operator)
-        must it be like rest param - ie only one allowed and must come last?:
-          for parsing you could have any number in any position without it being ambiguous
-          for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
-          actually have have multiple in any position - see JSON grammar - its about tracking what has been consumed so far in the current node
-          so not really 'rest', more like 'gather'
-      [ ] lists (tuples), which map to JS arrays
-        [ ] which is the correct/best name? tuple? list? array? Use the term whose defn most closely matches (probably tuple as per the 'types' book)
-      [ ] rest/spread elements for lists/tuples
-      [ ] `f64` floating point numbers
-      [x] abstract literals `true`, `false`, and `null` (want these built-in or library-based?) ANS: library-based plz
-      [x] `ZeroOrMore` combinator
-      [ ] escape sequences in string literals (at least basic ones like `\n`)
+        [x] computed field names, ie the `[NameRule]` part in `{[NameRule]: ValueRule}`
+        [x] spread/gather fields for records, ie the `...RestRule` part in `{'foo': FooRule, ...RestRule}`
+            NB: when parsing, it acts like the JS object spread operator in an object literal expression
+            NB: when unparsing, it acts like the JS object rest operator in destructuring assignment (actually not - more like a gather operator)
+            must it be like rest param - ie only one allowed and must come last?:
+                for parsing you could have any number in any position without it being ambiguous
+                for unparsing, it probably *does* need be be like a rest param (ie only one & comes last)
+                actually have have multiple in any position - see JSON grammar - its about tracking what has been consumed so far in the current node
+                so not really 'rest', more like 'gather'
+        [ ] lists (tuples), which map to JS arrays
+            [ ] which is the correct/best name? tuple? list? array? Use the term whose defn most closely matches (probably tuple as per the 'types' book)
+        [ ] rest/spread elements for lists/tuples
+        [ ] `f64` floating point numbers
+        [x] abstract literals `true`, `false`, and `null` (want these built-in or library-based?) ANS: library-based plz
+        [x] `ZeroOrMore` combinator
+        [ ] escape sequences in string literals (at least basic ones like `\n`)
     add mocha/chai unit tests to core pen module:
-      [x] add expression grammar as a fixture
-      [x] tests that parse various math expressions and expect a specific ast
-      [x] tests that unparse various math expr asts and expect specific text
-      [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
+        [x] add expression grammar as a fixture
+        [x] tests that parse various math expressions and expect a specific ast
+        [x] tests that unparse various math expr asts and expect specific text
+        [ ] parse/unparse round-trips on various math exprs that should/shouldn't succeed and/or get back original text
     BUG: rule names in grammars can shadow names referenced in parse/unparse templates:
-      eg1, a rule named "String" in a unit test make i32 unparsing fail b/c String.fromCharCode referred to the local String decl
-      eg2, ditto a rule named "Object" which messed up Object.keys calls
-      [x] put 'user' rules into a nested scope, so they are never visible to built-in rules
-      [ ] check whether 'user' rules can still interfere with each other through crafted names, eg `start`
+        eg1, a rule named "String" in a unit test make i32 unparsing fail b/c String.fromCharCode referred to the local String decl
+        eg2, ditto a rule named "Object" which messed up Object.keys calls
+        [x] put 'user' rules into a nested scope, so they are never visible to built-in rules
+        [ ] check whether 'user' rules can still interfere with each other through crafted names, eg `start`
     add UMD build using webpack, as per how `multimethods` does it:
-      [ ] but first answer this: do we need umd for a command line tool?
+        [ ] but first answer this: do we need umd for a command line tool?
     [x] move repo to yortus/penc
     `penc` should work as a command-line tool (and also an important node module?). What should the command output?:
-      [ ] .d.ts file for parse/unparse functions, with AST types
-      [ ] js code for parse/unparse functions
+        [ ] .d.ts file for parse/unparse functions, with AST types
+        [ ] js code for parse/unparse functions
     [ ] address all the ts-ignore comments in the parse/unparse templates
     [ ] milestone: initial type analysis as part of compiling a grammar
     [ ] milestone: initial error diagnostic accumulation as part of parse/unparse internal operation
@@ -53,15 +55,15 @@ Todo:
     [x] `i32`: are exponents normally supported for int literals? What do other langs do? ANS: no exponents on int lits
     [ ] `i32`: if int is too large, we return `Fail`, but probably better to be some kind of error. What to do?
     [ ] `Module` and `Record` are basically the same - flesh out any differences and/or merge concepts
-      [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
+        [ ] difference: module can have non-exported bindings, whereas all record properties are visible outside
     [ ] `StringLiteral`: better word than 'uniform' for the "..." variant? (eg parallel, matching, constant, ordinary)
     [ ] `Sequence` comninator: revise code when we know if the 'type' of the seqence is 'string' or not
     [ ] review assert()s in template parse/unparse code - most should be static errors detectable from AST analysis
-      [ ] sequences that produce multiple nodes
-      [ ] record field values of NO_NODE
+        [ ] sequences that produce multiple nodes
+        [ ] record field values of NO_NODE
     [ ] theory: investigate memoisation for correctness
-      [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?
-      [ ] do we need memoisation when unparsing? In which cases and why?
+        [ ] when parsing, we only use `state.S` as the memo key. What about other state? Any example of incorrectness?
+        [ ] do we need memoisation when unparsing? In which cases and why?
     [ ] way to add newline spacing between decls in emitted TS?
     [ ] only need `start` prop if binding value isn't a combinator factory call (eg string lits, simple delegation)
         [ ] `function isCombinator(astNode) {...}`

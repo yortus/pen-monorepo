@@ -1,7 +1,7 @@
 type Span = string;
 const NO_NODE = Symbol('NoNode');
 type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | boolean | null | object;
+type Node = NO_NODE | string | number | boolean | null | object | any[];
 interface Duad { S: Span; N: Node; }
 type Transcoder = (N: Node) => Duad | null;
 declare const start: Transcoder;
@@ -183,6 +183,41 @@ export function unparse(ast: Node): string {
         };
     }
 
+    type ListElement =
+        | {type: 'element', value: Transcoder}
+        | {type: 'spread', expr: Transcoder};
+    // @ts-ignore 6133 unused declaration
+    function List(elements: ListElement[]): Transcoder {
+        return N => {
+            let S = '';
+            if (!Array.isArray(N)) return null;
+
+            // TODO: was... for records... can just slice arrays
+            // // Make a copy of N from which we slice off elements once they are consumed
+            // N = {...N};
+
+            // TODO: ... fix casts in code below
+            for (let element of elements) {
+                if (element.type === 'spread') {
+                    let result = element.expr(N);
+                    if (result === null) return null;
+                    assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
+                    S += result.S;
+                    N = result.N as any[];
+                }
+                else /* element.type === 'element' */{
+                    if ((N as any[]).length === 0) return null;
+                    let result = element.value((N as any[])[0]);
+                    if (result === null) return null;
+                    if (!isFullyConsumed(result.N)) return null;
+                    S += result.S;
+                    N = (N as any[]).slice(1);
+                }
+            }
+            return {S, N};
+        };
+    }
+
 
 
 
@@ -289,6 +324,7 @@ function isFullyConsumed(N: Node) {
     if (N === NO_NODE) return true;
     if (N === '') return true;
     if (isPlainObject(N) && Object.keys(N).length === 0) return true;
+    if (Array.isArray(N) && N.length === 0) return true;
     return false;
 }
 
@@ -298,6 +334,13 @@ function isResidualNode(N: Node, Nʹ: Node) {
     }
     if (isPlainObject(N)) {
         return isPlainObject(Nʹ) && Object.keys(Nʹ).every(k => N.hasOwnProperty(k) && (N as any)[k] === (Nʹ as any)[k]);
+    }
+    if (Array.isArray(N)) {
+        if (!Array.isArray(Nʹ)) return false;
+        for (let n = Nʹ.length, i = N.length - n, j = 0; j < n; ++i, ++j) {
+            if (N[i] !== Nʹ[j]) return false;
+        }
+        return true;
     }
     return Nʹ === N || Nʹ === NO_NODE;
 }

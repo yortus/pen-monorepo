@@ -47,6 +47,21 @@ export interface RecordSpread {
     argument: Expression;
 }
 
+export interface List {
+    nodeType: 'List';
+    elements: Array<ListElement | ListSpread>;
+}
+
+export interface ListElement {
+    nodeType: 'ListElement';
+    value: Expression;
+}
+
+export interface ListSpread {
+    nodeType: 'ListSpread';
+    argument: Expression;
+}
+
 export interface Identifier {
     nodeType: 'Identifier';
     name: string;
@@ -77,6 +92,9 @@ export type Node =
     | Record
     | RecordField
     | RecordSpread
+    | List
+    | ListElement
+    | ListSpread
     | Identifier
     | StringLiteral
     | ParenthesizedExpression;
@@ -86,6 +104,7 @@ export type Expression =
     | Sequence
     | Application
     | Record
+    | List
     | Identifier
     | StringLiteral
     | ParenthesizedExpression;
