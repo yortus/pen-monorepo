@@ -27,7 +27,6 @@ Number = i32 // TODO: should be f64? check JS specs
 
 // ---------- Strings ----------
 String = DOUBLE_QUOTE   ZeroOrMore<CHAR>   DOUBLE_QUOTE
-// TODO: which quotes should be used below? single, double, backtick? Consider unparsing behaviour.
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
@@ -57,5 +56,4 @@ RBRACKET        = WS `]` WS
 COLON           = WS `:` WS
 COMMA           = WS `,` WS
 DOUBLE_QUOTE    = `"`
-WS              = ZeroOrMore<` `>
-// TODO: was... restore... WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>
+WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>

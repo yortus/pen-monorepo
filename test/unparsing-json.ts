@@ -62,6 +62,13 @@ describe('Unparsing JSON', () => {
 
         // Mixed types
         `[{"a": 1, "b": [42, 24]}, 33, [], [[{"b": 2}]]] ==> [{"a":1,"b":[42,24]},33,[],[[{"b":2}]]]`,
+
+        // Whitespace and escape handling
+        `\t123 ==> 123`,
+        `"  \t  " ==> "  \\t  "`,
+        `\`  \n  \` ==> "  \\n  "`,
+        `"  \q  " ==> "  q  "`,
+        // TODO: add unicode escape tests
     ];
 
     // Execute each test case.

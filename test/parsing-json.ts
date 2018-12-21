@@ -71,6 +71,15 @@ describe('Parsing JSON', () => {
 
         // Mixed types
         `[{"a": 1, "b": [42, 24]}, 33, [], [[{"b": 2}]]] ==> [{a: 1, b: [42, 24]}, 33, [], [[{b: 2}]]]`,
+
+        // Whitespace and escape handling
+        `   123   ==> 123`,
+        `\t\n\n   "abc"\n   ==> "abc"`,
+        `123\q ==> ERROR`,
+        `"  \t  " ==> ERROR`,
+        `"  \\t  " ==> "  \t  "`,
+        `"  \\n  " ==> \`  \n  \``,
+        // TODO: add unicode escape tests
     ];
 
     // Execute each test case.
