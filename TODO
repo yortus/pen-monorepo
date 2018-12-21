@@ -1,8 +1,9 @@
 Priorities:
     type-check the AST to catch more errors and give better diagnostic feedback during compilation
-    feature: modules. And break up existing functionality into modules.
+    feature: modules. And break up existing functionality into modules. eg `MyMod = import './my-mod'`
     feature: `f64` intrinsic. Shortcut using `parseFloat` and `toString`, but with extra strictness checks
     revise `char` instrinsic - how to parse/unparse unicode escape sequences like `\u0032` in JSON strings?
+    `parse`/`unparse` function signatures - with universal 'consumption progress' integer, incl on object keys (use bitfield)
 
 
 Todo:
@@ -129,6 +130,7 @@ Major research themes (focus on bi-directionality and issues arising):
     sharing interfaces with other tools
     information loss during parse/unparse - strategies (dimensions: lossy/lossless, in-band, out-of-band)
     stateful parsing/unparsing
+    more encodings beside `text` - eg `binary`, `devnull` (time for multimethods?)
 
 
 Secondary research themes (general things that need to be addressed somehow):
@@ -137,5 +139,3 @@ Secondary research themes (general things that need to be addressed somehow):
     incremental parsing/unparsing
     parallel parsing/unparsing
     performance
-
-
