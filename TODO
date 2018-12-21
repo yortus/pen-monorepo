@@ -1,4 +1,16 @@
 Todo:
+
+    [ ] consider common error: writing `Fn(X)` when meaning application `Fn<X>`, but getting sequence `Fn X` with no hint there's a user error
+      [ ] type-checking the AST should help identify this error, since `Fn X` should be a type error since `Fn` is not a trancoder
+    [ ] address known bug(s) in unit tests - see TODOs in unit test source files
+    more features required to support JSON strings:
+        [x] `Not<>` combinator
+        [x] `..` range operator on strings
+        [x] `char` intrinsic (transcodes any single char uniformly; like PEG's '.' operator)
+        [ ] add unit tests
+        [ ] rename `'uniform'` everywhere to `"translit"` meaning a tranliterated string/char (cf abstract, concrete)
+
+
     review aggregate/element naming:
         [ ] `Record` vs `RecordField`/`RecordEntry`? (can be field or spread)
         [ ] `List` vs `ListElement`/`ListEntry`? (can be element or spread)
@@ -103,3 +115,26 @@ TODO: clarify terminology:
 TODO: list perf tips (and benchmark them):
     avoid allocations
     avoid iterators - prefer `for (;;)`
+
+
+
+
+Major research themes (focus on bi-directionality and issues arising):
+    grammar bi-directionality - unification of parsing with unparsing (just transcoding in general - better term?)
+    grammar extensibility and reuse
+    grammar modularity
+    strong typing
+    sharing interfaces across grammars
+    sharing interfaces with other tools
+    information loss during parse/unparse - strategies (dimensions: lossy/lossless, in-band, out-of-band)
+    stateful parsing/unparsing
+
+
+Secondary research themes (general things that need to be addressed somehow):
+    error handling
+    error correction
+    incremental parsing/unparsing
+    parallel parsing/unparsing
+    performance
+
+

@@ -7,7 +7,7 @@ Value =
     |   Object
     |   Array
     |   Number
-//    |   String
+    |   String
 
 // ---------- Primitive values ----------
 False   = `false` intrinsic_false  // Assumes `intrinsic_false`, `intrinsic_null` and `intrinsic_true` are defined to be abstract terminals
@@ -26,18 +26,28 @@ Elements    = [Value, ...Maybe<COMMA Elements>]
 Number = i32 // TODO: should be f64? check JS specs
 
 // ---------- Strings ----------
-// TODO: temp testing...
-String = "a" | "b" | "c" | "d"
-
-// TODO: need to get these working...
-/*
-String = DOUBLE_QUOTE   ZeroOrMore(CHAR)   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   ZeroOrMore<CHAR>   DOUBLE_QUOTE
+// TODO: which quotes should be used below? single, double, backtick? Consider unparsing behaviour.
+// TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
+//       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
-    |   "[^\0-\x1F\x22\x5C]"                // TODO
-    |   "\\["\\/bfnrt]"                     // TODO
-    |   "\\u" HEXDIG HEXDIG HEXDIG HEXDIG   // TODO
-HEXDIG = "0-9" | "a-f" | "A-F"              // TODO
-*/
+    |   Not<"\x00".."\x1f"   |   "\""   |   "\\">   char        // any char except control char, " or \
+    |   `\\"`   '"'                                             // quotation mark
+    |   `\\\\`   '\\'                                           // reverse solidus
+    |   `\\/`   '/'                                             // solidus
+    |   `\\b`   '\b'                                            // backspace
+    |   `\\f`   '\f'                                            // formfeed
+    |   `\\n`   '\n'                                            // newline
+    |   `\\r`   '\r'                                            // carriage return
+    |   `\\t`   '\t'                                            // horizontal tab
+
+    // TODO: support \uXXXX for completeness...
+    //       but how to convert esc seq in text to/from char in ast node? custom transcoder?
+    //       make `char` parse escape sequences? Provide a variant of `char`, eg `charesc`?
+    // TODO: was...
+    // |   is (`\\u`    HEXDIG   HEXDIG   HEXDIG   HEXDIG)   char  // unicode escape sequence
+    //
+    // HEXDIG = `0`..`9`   |   `a`..`f`   |   `A`..`F`
 
 // ---------- Literal characters ----------
 LBRACE          = WS `{` WS

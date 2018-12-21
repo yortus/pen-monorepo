@@ -16,7 +16,7 @@ Binding
 Expression = Selection / ExpressionBelowSelection
 ExpressionBelowSelection = Sequence / ExpressionBelowSequence
 ExpressionBelowSequence = Application / ExpressionBelowApplication
-ExpressionBelowApplication = Record / List / Identifier / StringLiteral / ParenthesizedExpression
+ExpressionBelowApplication = Record / List / CharRange / String / Identifier / ParenthesizedExpression
 
 
 
@@ -72,19 +72,35 @@ ListSpread
     = DOT DOT DOT   WS   arg:Expression
     { return {nodeType: 'ListSpread', argument: arg}; }
 
+CharRange
+    = SQUOTE   !SQUOTE   min:Character   SQUOTE   WS   DOT   DOT   WS   SQUOTE   !SQUOTE   max:Character   SQUOTE
+    { return {nodeType: 'CharacterRange', variant: 'Abstract', min, max}; }
+
+    / DQUOTE   !DQUOTE   min:Character   DQUOTE   WS   DOT   DOT   WS   DQUOTE   !DQUOTE   max:Character   DQUOTE
+    { return {nodeType: 'CharacterRange', variant: 'Uniform', min, max}; }
+
+    / BTICK   !BTICK   min:Character   BTICK   WS   DOT   DOT   WS   BTICK   !BTICK   max:Character   BTICK
+    { return {nodeType: 'CharacterRange', variant: 'Concrete', min, max}; }
+
+String
+    = SQUOTE   cs:(!SQUOTE   Character)*   SQUOTE
+    { return {nodeType: 'StringLiteral', variant: 'Abstract', value: cs.map(c => c[1]).join('')}; }
+
+    / DQUOTE   cs:(!DQUOTE   Character)*   DQUOTE
+    { return {nodeType: 'StringLiteral', variant: 'Uniform', value: cs.map(c => c[1]).join('')}; }
+
+    / BTICK   cs:(!BTICK   Character)*   BTICK
+    { return {nodeType: 'StringLiteral', variant: 'Concrete', value: cs.map(c => c[1]).join('')}; }
+
+Character
+    = !CTRL   !BSLASH   .   { return text(); }
+    / BSLASH   c:["'`\\/bfnrt]   { return JSON.parse(`"${text()}"`); } // TODO: could be more permissive here, like JS...
+    / BSLASH   "x"   d:(HEXDIGIT   HEXDIGIT)   { return JSON.parse(`"\\u00${d.join('')}"`); }
+    / BSLASH   "u"   HEXDIGIT   HEXDIGIT   HEXDIGIT   HEXDIGIT   { return JSON.parse(`"${text()}"`); }
+
 Identifier
     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
     { return {nodeType: 'Identifier', name}; }
-
-StringLiteral
-    = SQUOTE   text:[^'\\\r\n]*   SQUOTE
-    { return {nodeType: 'StringLiteral', variant: 'Abstract', value: text.join('')}; }
-
-    / DQUOTE   text:[^"\\\r\n]*   DQUOTE
-    { return {nodeType: 'StringLiteral', variant: 'Uniform', value: text.join('')}; } // TODO: 8-letter synonym?
-
-    / BTICK   text:[^`\\\r\n]*   BTICK
-    { return {nodeType: 'StringLiteral', variant: 'Concrete', value: text.join('')}; }
 
 ParenthesizedExpression
     = LPAREN   WS   expression:Expression   WS   RPAREN
@@ -109,13 +125,16 @@ ParenthesizedExpression
 
 IDENT   = [_a-z]i   [_a-z0-9]i*   { return text(); }
 
+BSLASH  = '\\'
 BTICK   = '`'
 COLON   = ':'
 COMMA   = ','
+CTRL    = [\x00-\x1F]
 DOT     = '.'
 DQUOTE  = '"'
 EQ      = '='
 // FSLASH  = '/'
+HEXDIGIT= [0-9a-fA-F]
 LANGLE  = '<'
 LBRACE  = '{'
 LPAREN  = '('

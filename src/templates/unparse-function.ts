@@ -223,6 +223,33 @@ export function unparse(ast: Node): string {
 
     // ---------- built-in parser factories ----------
     // @ts-ignore 6133 unused declaration
+    function AbstractCharRange(min: string, max: string): Transcoder {
+        return N => {
+            if (typeof N !== 'string' || N.length === 0) return null;
+            let c = N.charAt(0);
+            if (c < min || c > max) return null;
+            return {S: '', N: N.slice(1)};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
+    function ConcreteCharRange(min: string, max: string): Transcoder {
+        return N => {
+            return {S: min, N};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
+    function UniformCharRange(min: string, max: string): Transcoder {
+        return N => {
+            if (typeof N !== 'string' || N.length === 0) return null;
+            let c = N.charAt(0);
+            if (c < min || c > max) return null;
+            return {S: c, N: N.slice(1)};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
     function AbstractStringLiteral(value: string): Transcoder {
         return N => {
             if (typeof N !== 'string' || !N.startsWith(value)) return null;
@@ -278,6 +305,12 @@ export function unparse(ast: Node): string {
         return {S: digits.reverse().join(''), N: NO_NODE};
     }
 
+    // @ts-ignore 6133 unused declaration
+    function char(N: Node): Duad | null {
+        if (typeof N !== 'string' || N.length === 0) return null;
+        return {S: N.charAt(0), N: N.slice(1)};
+    }
+
 
 
 
@@ -297,23 +330,38 @@ export function unparse(ast: Node): string {
     // @ts-ignore 6133 unused declaration
     function ZeroOrMore(expression: Transcoder): Transcoder {
         return N => {
-            // TODO: temp testing... always go with zero iterations for now, since on the parse side we never produce
-            // a node. Otherwise this would loop forever without consuming anything from N.
-            return {S: '', N};
-            // TODO: was... loops forever...
-            // let S: Span = '';
-            // while (true) {
-            //     let result = expression(N);
-            //     if (result === null) return {S, N};
-            //     assert(result.S !== ''); // TODO: ensure something was produced... is this always correct?
-            //     assert(result.N === N); // TODO: allow string concatenation on the abstract side
-            //     S += result.S;
-            // }
+            // TODO: temp testing... this requires incrementally consuming from N, which we only know how to do
+            // if N is a string. Since iteration doesn't make sense (for now?) with objects or lists, but ZeroOrMore
+            // should *always* succeed, in non-string cases we just consume nothing and return success.
+            // Investigate if the above summary is complete and correct in all cases. Any counterexamples that should
+            // be handled differently? Eg iterating *one time* to consume an object or list as a whole? Or would we
+            // make that a type error when we add type-checking?
+            if (typeof N !== 'string') return {S: '', N};
+
+            let S: Span = '';
+            while (true) {
+                let result = expression(N);
+                if (result === null) return {S, N};
+
+                // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
+                // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
+                if (N === result.N) return {S, N};
+
+                assert(isResidualNode(N, result.N)); // TODO: this expensive check should be enabled only in debug mode.
+                                                     //       Also it should be wrapped around *all* unparse calls since
+                                                     //       it is an invariant of unparsing.
+                S += result.S;
+                N = result.N;
+            }
         };
     }
     // @ts-ignore 6133 unused declaration
     function Maybe(expression: Transcoder): Transcoder {
         return N => expression(N) || {S: '', N};
+    }
+    // @ts-ignore 6133 unused declaration
+    function Not(expression: Transcoder): Transcoder {
+        return N => expression(N) ? null : {S: '', N};
     }
 }
 

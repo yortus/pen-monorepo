@@ -14,23 +14,32 @@ describe('Parsing JSON', () => {
 
     // List the test cases with their expected results.
     let tests = [
+
+        // TODO: KNOWN BUGS:
+        // `{"": 1} ==> {'': 1}`, // fails but should pass. parser is not producing empty string, but rather NO_NODE
+
         // Simple objects
         `{} ==> {}`,
-        `{a: 1} ==> {a: 1}`,
-        `{a: 1, b: 2} ==> {a: 1, b: 2}`,
-        `{a: 1, b: 2, c: 3} ==> {a: 1, b: 2, c: 3}`,
-        `{a: 1, b: 2, c: 3, d: 4} ==> {a: 1, b: 2, c: 3, d: 4}`,
-        `{a: {}, b: {c: 42}} ==> {a: {}, b: {c: 42}}`,
-        `   {  a   : 1   }    ==> {a: 1}`,
-        `{a: {, b: {c: 42}} ==> ERROR`,
-        `{a: }, b: {c: 42}} ==> ERROR`,
+        `{"a": 1} ==> {a: 1}`,
+        `{"a": 1, "b": 2} ==> {a: 1, b: 2}`,
+        `{"a": 1, "b": 2, "c": 3} ==> {a: 1, b: 2, c: 3}`,
+        `{"a": 1, "b": 2, "c": 3, "d": 4} ==> {a: 1, b: 2, c: 3, d: 4}`,
+        `{a: 1} ==> ERROR`,
+        `{"a": 1, b: 2} ==> ERROR`,
+        `{'a': 1} ==> ERROR`,
+        `{1: "a"} ==> ERROR`,
+        `{"a": {}, "b": {"c": 42}} ==> {"a": {}, "b": {"c": 42}}`,
+        `   {  "a"   : 1   }    ==> {a: 1}`,
+        `   {  "a  "   : 1   }    ==> {'a  ': 1}`,
+        `{"a": {, "b": {"c": 42}} ==> ERROR`,
+        `{"a": }, "b": {"c": 42}} ==> ERROR`,
 
         // true/false/null
-        `{a: true, b: false, c: null} ==> {a: true, b: false, c: null}`,
-        `{a: null} ==> {a: null}`,
-        `{a: nil} ==> ERROR`,
-        `{a: "null"} ==> ERROR`,
-        `{a: 'null'} ==> ERROR`,
+        `{"a": true, "b": false, "c": null} ==> {a: true, b: false, c: null}`,
+        `{"a": null} ==> {a: null}`,
+        `{"a": nil} ==> ERROR`,
+        `{"a": "null"} ==> {a: 'null'}`,
+        `{"a": 'null'} ==> ERROR`,
 
         // Simple arrays
         `[] ==> []`,
@@ -43,7 +52,7 @@ describe('Parsing JSON', () => {
         `[[1, [2, 33, ], 4]] ==> ERROR`,
 
         // Mixed types
-        `[{a: 1, b: [42, 24]}, 33, [], [[{b: 2}]]] ==> [{a: 1, b: [42, 24]}, 33, [], [[{b: 2}]]]`,
+        `[{"a": 1, "b": [42, 24]}, 33, [], [[{"b": 2}]]] ==> [{a: 1, b: [42, 24]}, 33, [], [[{b: 2}]]]`,
     ];
 
     // Execute each test case.

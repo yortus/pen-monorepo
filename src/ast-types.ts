@@ -62,9 +62,11 @@ export interface ListSpread {
     argument: Expression;
 }
 
-export interface Identifier {
-    nodeType: 'Identifier';
-    name: string;
+export interface CharacterRange {
+    nodeType: 'CharacterRange';
+    variant: 'Abstract' | 'Concrete' | 'Uniform';
+    min: string;   // TODO: preserve escape sequences? eg raw/cooked props?
+    max: string;   //       how does babel etc handle this in its AST?
 }
 
 export interface StringLiteral {
@@ -73,6 +75,11 @@ export interface StringLiteral {
     value: string;
     // TODO: preserve escape sequences? eg raw/cooked props?
     //       how does babel etc handle this in its AST?
+}
+
+export interface Identifier {
+    nodeType: 'Identifier';
+    name: string;
 }
 
 export interface ParenthesizedExpression {
@@ -95,8 +102,9 @@ export type Node =
     | List
     | ListElement
     | ListSpread
-    | Identifier
+    | CharacterRange
     | StringLiteral
+    | Identifier
     | ParenthesizedExpression;
 
 export type Expression =
@@ -105,6 +113,7 @@ export type Expression =
     | Application
     | Record
     | List
-    | Identifier
+    | CharacterRange
     | StringLiteral
+    | Identifier
     | ParenthesizedExpression;

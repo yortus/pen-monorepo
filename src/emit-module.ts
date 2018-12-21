@@ -1,14 +1,15 @@
 import * as ts from 'typescript';
 import {Application} from './ast-types';
+import {CharacterRange} from './ast-types';
 import {Expression} from './ast-types';
 import {Identifier} from './ast-types';
+import {List} from './ast-types';
 import {Module} from './ast-types';
 import {ParenthesizedExpression} from './ast-types';
 import {Record} from './ast-types';
 import {Selection} from './ast-types';
 import {Sequence} from './ast-types';
 import {StringLiteral} from './ast-types';
-import {List} from './ast-types';
 
 
 
@@ -64,6 +65,7 @@ export function emitModule(module: Module): ts.Statement[] {
 function emitExpression(expr: Expression): ts.Expression {
     switch (expr.nodeType) {
         case 'Application': return emitApplication(expr);
+        case 'CharacterRange': return emitCharacterRange(expr);
         case 'Identifier': return emitIdentifier(expr);
         case 'List': return emitList(expr);
         case 'ParenthesizedExpression': return emitParenthesizedExpression(expr);
@@ -84,6 +86,17 @@ function emitApplication(expr: Application) {
         ts.createIdentifier(expr.id.name),
         /*typeArguments*/ undefined,
         /*argumentsArray*/ expr.arguments.map(emitExpression)
+    );
+}
+
+function emitCharacterRange(expr: CharacterRange) {
+    return ts.createCall(
+        ts.createIdentifier(`${expr.variant}CharRange`),
+        /*typeArguments*/ undefined,
+        /*argumentsArray*/ [
+            ts.createStringLiteral(expr.min),
+            ts.createStringLiteral(expr.max),
+        ]
     );
 }
 

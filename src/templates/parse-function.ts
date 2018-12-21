@@ -112,7 +112,7 @@ export function parse(text: string): Node {
                 if (result === null) return null;
                 S = result.S;
                 if (N === NO_NODE) N = result.N;
-                else if (typeof N === 'string' && typeof result.N === 'string') N = N + result.N;
+                else if (typeof N === 'string' && typeof result.N === 'string') N += result.N;
                 else if (result.N !== NO_NODE) throw new Error(`Internal error: invalid sequence`);
             }
             return {S, N};
@@ -193,6 +193,33 @@ export function parse(text: string): Node {
 
     // ---------- built-in parser factories ----------
     // @ts-ignore 6133 unused declaration
+    function AbstractCharRange(min: string, max: string): Transcoder {
+        return S => {
+            return {S, N: min};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
+    function ConcreteCharRange(min: string, max: string): Transcoder {
+        return S => {
+            if (S >= text.length) return null;
+            let c = text.charAt(S);
+            if (c < min || c > max) return null;
+            return {S: S + 1, N: NO_NODE};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
+    function UniformCharRange(min: string, max: string): Transcoder {
+        return S => {
+            if (S >= text.length) return null;
+            let c = text.charAt(S);
+            if (c < min || c > max) return null;
+            return {S: S + 1, N: c};
+        };
+    }
+
+    // @ts-ignore 6133 unused declaration
     function AbstractStringLiteral(value: string): Transcoder {
         return S => {
             return {S, N: value};
@@ -263,6 +290,12 @@ export function parse(text: string): Node {
         return {S, N};
     }
 
+    // @ts-ignore 6133 unused declaration
+    function char(S: Span): Duad | null {
+        if (S >= text.length) return null;
+        return {S: S + 1, N: text.charAt(S)};
+    }
+
 
 
 
@@ -286,15 +319,25 @@ export function parse(text: string): Node {
             while (true) {
                 let result = expression(S);
                 if (result === null) return {S, N};
-                assert(S !== result.S); // TODO: ensure something was consumed... is this always correct?
-                assert(result.N === NO_NODE); // TODO: allow string concatenation on the abstract side
+
+                // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
+                // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
+                if (S === result.S) return {S, N};
+
                 S = result.S;
+                if (N === NO_NODE) N = result.N;
+                else if (typeof N === 'string' && typeof result.N === 'string') N += result.N;
+                else if (result.N !== NO_NODE) throw new Error(`Internal error: invalid sequence`);
             }
         };
     }
     // @ts-ignore 6133 unused declaration
     function Maybe(expression: Transcoder): Transcoder {
         return S => expression(S) || {S, N: NO_NODE};
+    }
+    // @ts-ignore 6133 unused declaration
+    function Not(expression: Transcoder): Transcoder {
+        return S => expression(S) ? null : {S, N: NO_NODE};
     }
 }
 

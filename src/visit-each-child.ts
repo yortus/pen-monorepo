@@ -1,3 +1,8 @@
+// TODO: this function is unused so far. Why keep it?
+
+
+
+
 import {Node} from './ast-types';
 
 
@@ -7,6 +12,7 @@ export function visitEachChild(node: Node, visitor: Visitor) {
     switch (node.nodeType) {
         case 'Application': return visitNodes(visitor, node.id, ...node.arguments);
         case 'Binding': return visitNodes(visitor, node.id, node.expression);
+        case 'CharacterRange': return;
         case 'Identifier': return;
         case 'List': return visitNodes(visitor, ...node.elements);
         case 'ListElement': return visitNodes(visitor, node.value);
