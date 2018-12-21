@@ -14,7 +14,34 @@ describe('Unparsing JSON', () => {
 
     // List the test cases with their expected results.
     let tests = [
-        // Simple objects
+
+        // TODO: KNOWN BUGS:
+        // `3.14 ==> 3.14`, // fails but should pass because f64 not implemented yet.
+
+        // Primitive values:
+        `"abc" ==> "abc"`,
+        `'abc' ==> "abc"`,
+        `" a  b    c        " ==> " a  b    c        "`,
+        `987 ==> 987`,
+        `-300521 ==> -300521`,
+        `2147483647 ==> 2147483647`,
+        `2147483648 ==> ERROR`,
+        `-2147483648 ==> -2147483648`,
+        `-2147483649 ==> ERROR`,
+        `9999999999 ==> ERROR`,
+        `0 ==> 0`,
+        `-0 ==> 0`,
+        // TODO: floating point tests (include infinity, nan, etc, which are not valid in JSON)
+        `true ==> true`,
+        `false ==> false`,
+        `null ==> null`,
+        `undefined ==> ERROR`,
+        `/a/ ==> ERROR`,
+        `"true" ==> "true"`,
+        `"null" ==> "null"`,
+        `'null' ==> "null"`,
+
+        // Objects
         `{} ==> {}`,
         `{a: 1} ==> {"a":1}`,
         `{a: 1, b: 2} ==> {"a":1,"b":2}`,
@@ -26,15 +53,7 @@ describe('Unparsing JSON', () => {
         `{a: 'aaa'} ==> {"a":"aaa"}`,
         `{1: 'a'} ==> {"1":"a"}`,
 
-        // true/false/null
-        `{a: true, b: false, c: null} ==> {"a":true,"b":false,"c":null}`,
-        `{a: null} ==> {"a":null}`,
-        `{a: /a/} ==> ERROR`,
-        `{a: "null"} ==> {"a":"null"}`,
-        `{a: 'null'} ==> {"a":"null"}`,
-        `{a: undefined} ==> ERROR`,
-
-        // Simple arrays
+        // Arrays
         `[] ==> []`,
         `[1] ==> [1]`,
         `[1, 2] ==> [1,2]`,

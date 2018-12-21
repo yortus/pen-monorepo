@@ -7,7 +7,7 @@ Todo:
         [x] `Not<>` combinator
         [x] `..` range operator on strings
         [x] `char` intrinsic (transcodes any single char uniformly; like PEG's '.' operator)
-        [ ] add unit tests
+        [x] add unit tests
         [ ] rename `'uniform'` everywhere to `"translit"` meaning a tranliterated string/char (cf abstract, concrete)
 
 

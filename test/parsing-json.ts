@@ -16,9 +16,34 @@ describe('Parsing JSON', () => {
     let tests = [
 
         // TODO: KNOWN BUGS:
-        // `{"": 1} ==> {'': 1}`, // fails but should pass. parser is not producing empty string, but rather NO_NODE
+        // `{"": 1} ==> {'': 1}`, // fails but should pass. Parser is not producing empty string, but rather NO_NODE
+        // `3.14 ==> 3.14`, // fails but should pass because f64 not implemented yet.
 
-        // Simple objects
+        // Primitive values:
+        `"abc" ==> "abc"`,
+        `'abc' ==> ERROR`,
+        `" a  b    c        " ==> " a  b    c        "`,
+        `000987 ==> 987`,
+        `-300521 ==> -300521`,
+        `2147483647 ==> 2147483647`,
+        `2147483648 ==> ERROR`,
+        `-2147483648 ==> -2147483648`,
+        `-2147483649 ==> ERROR`,
+        `9999999999 ==> ERROR`,
+        `0 ==> 0`,
+        `-0 ==> ERROR`,
+        // TODO: floating point tests (include infinity, nan, etc, which are not valid in JSON)
+        `true ==> true`,
+        `false ==> false`,
+        `null ==> null`,
+        `nil ==> ERROR`,
+        `undefined ==> ERROR`,
+        `/a/ ==> ERROR`,
+        `"true" ==> "true"`,
+        `"null" ==> "null"`,
+        `'null' ==> ERROR`,
+
+        // Objects
         `{} ==> {}`,
         `{"a": 1} ==> {a: 1}`,
         `{"a": 1, "b": 2} ==> {a: 1, b: 2}`,
@@ -34,14 +59,7 @@ describe('Parsing JSON', () => {
         `{"a": {, "b": {"c": 42}} ==> ERROR`,
         `{"a": }, "b": {"c": 42}} ==> ERROR`,
 
-        // true/false/null
-        `{"a": true, "b": false, "c": null} ==> {a: true, b: false, c: null}`,
-        `{"a": null} ==> {a: null}`,
-        `{"a": nil} ==> ERROR`,
-        `{"a": "null"} ==> {a: 'null'}`,
-        `{"a": 'null'} ==> ERROR`,
-
-        // Simple arrays
+        // Arrays
         `[] ==> []`,
         `[1] ==> [1]`,
         `[1, 2] ==> [1, 2]`,
