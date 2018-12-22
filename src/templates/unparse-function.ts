@@ -1,9 +1,9 @@
 type Span = string;
 const NO_NODE = Symbol('NoNode');
-type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | boolean | null | object | any[];
-interface Duad { S: Span; N: Node; }
-type Transcoder = (N: Node) => Duad | null;
+const FAIL = '\uD800'; // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
+type Node = typeof NO_NODE | string | number | boolean | null | object | any[];
+type Duad = {S: Span, N: Node} | {S: typeof FAIL, N: Node};
+type Transcoder = (N: Node) => Duad;
 declare const start: Transcoder;
 
 
@@ -14,17 +14,17 @@ export function unparse(ast: Node): string {
     placeholder: {}
 
     //debugger;
-    let text = start(ast);
-    if (text === null) throw new Error(`unparse failed`);
-    if (!isFullyConsumed(text.N)) throw new Error(`unparse didn't consume entire input`);
-    return text.S;
+    let {S, N} = start(ast);
+    if (S === FAIL) throw new Error(`unparse failed`);
+    if (!isFullyConsumed(N)) throw new Error(`unparse didn't consume entire input`);
+    return S;
 }
 
 
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
-    const memos = new Map<Node, {resolved: boolean, isLeftRecursive: boolean, result: Duad | null}>();
+    const memos = new Map<Node, {resolved: boolean, isLeftRecursive: boolean, result: Duad}>(); // TODO: remove result, add S and N
     return N => {
         // Check whether the memo table already has an entry for the given initial state.
         let memo = memos.get(N);
@@ -33,7 +33,7 @@ export function Memo(expr: Transcoder): Transcoder {
             // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
             // All future applications of this rule with the same initial state will find this memo. If a future
             // application finds the memo still unresolved, then we know we have encountered left-recursion.
-            memo = {resolved: false, isLeftRecursive: false, result: null};
+            memo = {resolved: false, isLeftRecursive: false, result: {S: FAIL, N}};
             memos.set(N, memo);
 
             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
@@ -52,14 +52,14 @@ export function Memo(expr: Transcoder): Transcoder {
             // and consumes more input than the previous iteration did, in which case we update the memo with the
             // new result. We thus 'grow' the result, stopping when application either fails or does not consume
             // more input, at which point we take the result of the previous iteration as final.
-            while (memo.result !== null) {
+            while (memo.result.S !== FAIL) {
                 let nextResult = expr(N);
 
                 // TODO: break cases:
                 // anything --> same thing (covers all string cases, since they can only be same or shorter)
                 // NO_NODE --> anything
                 // some node --> some different non-empty node (assert: should never happen!)
-                if (nextResult === null) break;
+                if (nextResult.S === FAIL) break;
                 if (nextResult.N === memo.result.N) break;
                 if (memo.result.N === NO_NODE) break;
                 if (nextResult.N !== NO_NODE) break;
@@ -73,7 +73,7 @@ export function Memo(expr: Transcoder): Transcoder {
             // application of the rule for this initial state can only possibly succeed along a non-left-recursive
             // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
             memo.isLeftRecursive = true;
-            return null;
+            return {S: FAIL, N};
         }
 
         // We have a resolved memo, so the result of the rule application for the given initial state has already
@@ -91,9 +91,9 @@ export function Selection(...expressions: Transcoder[]): Transcoder {
     return N => {
         for (let i = 0; i < arity; ++i) {
             let result = expressions[i](N);
-            if (result !== null) return result;
+            if (result.S !== FAIL) return result;
         }
-        return null;
+        return {S: FAIL, N};
     };
 }
 
@@ -103,7 +103,7 @@ export function Sequence(...expressions: Transcoder[]): Transcoder {
         let S: Span = '';
         for (let i = 0; i < arity; ++i) {
             let result = expressions[i](N);
-            if (result === null) return null;
+            if (result.S === FAIL) return result;
             assert(isResidualNode(N, result.N)); // TODO: this expensive check should be enabled only in debug mode.
                                                     //       Also it should be wrapped around *all* unparse calls since
                                                     //       it is an invariant of unparsing.
@@ -121,7 +121,7 @@ type Field =
 export function Record(fields: Field[]): Transcoder {
     return N => {
         let S = '';
-        if (!isPlainObject(N)) return null;
+        if (!isPlainObject(N)) return {S: FAIL, N};
 
         // Make a copy of N from which we delete key/value pairs once they are consumed
         N = {...N};
@@ -132,7 +132,7 @@ export function Record(fields: Field[]): Transcoder {
             if (field.type === 'spread') {
                 // TODO: ...
                 let result = field.expr(N);
-                if (result === null) return null;
+                if (result.S === FAIL) return result;
                 assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
                 S += result.S;
                 N = {...result.N as object};
@@ -144,7 +144,7 @@ export function Record(fields: Field[]): Transcoder {
                 for (let propName of propNames) {
                     if (field.type === 'computed') {
                         let r = field.name(propName);
-                        if (r === null || r.N !== '') continue;
+                        if (r.S === FAIL || r.N !== '') continue;
                         S += r.S;
                     }
                     else /* field.type === 'static' */ {
@@ -153,7 +153,7 @@ export function Record(fields: Field[]): Transcoder {
 
                     // TODO: match value
                     let result = field.value((N as any)[propName]);
-                    if (result === null) continue;
+                    if (result.S === FAIL) continue;
                     if (!isFullyConsumed(result.N)) continue;
                     S += result.S;
 
@@ -163,7 +163,7 @@ export function Record(fields: Field[]): Transcoder {
                 }
 
                 // If we get here, no match...
-                return null;
+                return {S: FAIL, N};
             }
         }
         return {S, N};
@@ -176,7 +176,7 @@ type ListElement =
 export function List(elements: ListElement[]): Transcoder {
     return N => {
         let S = '';
-        if (!Array.isArray(N)) return null;
+        if (!Array.isArray(N)) return {S: FAIL, N};
 
         // TODO: was... for records... can just slice arrays
         // // Make a copy of N from which we slice off elements once they are consumed
@@ -186,16 +186,16 @@ export function List(elements: ListElement[]): Transcoder {
         for (let element of elements) {
             if (element.type === 'spread') {
                 let result = element.expr(N);
-                if (result === null) return null;
+                if (result.S === FAIL) return result;
                 assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
                 S += result.S;
                 N = result.N as any[];
             }
             else /* element.type === 'element' */{
-                if ((N as any[]).length === 0) return null;
+                if ((N as any[]).length === 0) return {S: FAIL, N};
                 let result = element.value((N as any[])[0]);
-                if (result === null) return null;
-                if (!isFullyConsumed(result.N)) return null;
+                if (result.S === FAIL) return result;
+                if (!isFullyConsumed(result.N)) return {S: FAIL, N};
                 S += result.S;
                 N = (N as any[]).slice(1);
             }
@@ -210,9 +210,9 @@ export function List(elements: ListElement[]): Transcoder {
 // ---------- built-in parser factories ----------
 export function AbstractCharRange(min: string, max: string): Transcoder {
     return N => {
-        if (typeof N !== 'string' || N.length === 0) return null;
+        if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
         let c = N.charAt(0);
-        if (c < min || c > max) return null;
+        if (c < min || c > max) return {S: FAIL, N};
         return {S: '', N: N.slice(1)};
     };
 }
@@ -226,16 +226,16 @@ export function ConcreteCharRange(min: string, max: string): Transcoder {
 
 export function UniformCharRange(min: string, max: string): Transcoder {
     return N => {
-        if (typeof N !== 'string' || N.length === 0) return null;
+        if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
         let c = N.charAt(0);
-        if (c < min || c > max) return null;
+        if (c < min || c > max) return {S: FAIL, N};
         return {S: c, N: N.slice(1)};
     };
 }
 
 export function AbstractStringLiteral(value: string): Transcoder {
     return N => {
-        if (typeof N !== 'string' || !N.startsWith(value)) return null;
+        if (typeof N !== 'string' || !N.startsWith(value)) return {S: FAIL, N};
         return {S: '', N: N.slice(value.length)};
     };
 }
@@ -248,7 +248,7 @@ export function ConcreteStringLiteral(value: string): Transcoder {
 
 export function UniformStringLiteral(value: string): Transcoder {
     return N => {
-        if (typeof N !== 'string' || !N.startsWith(value)) return null;
+        if (typeof N !== 'string' || !N.startsWith(value)) return {S: FAIL, N};
         return {S: value, N: N.slice(value.length)};
     };
 }
@@ -257,11 +257,11 @@ export function UniformStringLiteral(value: string): Transcoder {
 
 
 // ---------- other built-ins ----------
-export function i32(N: Node): Duad | null {
+export function i32(N: Node): Duad {
 
     // TODO: ensure N is a 32-bit integer
-    if (typeof N !== 'number') return null;
-    if ((N & 0xFFFFFFFF) !== N) return null;
+    if (typeof N !== 'number') return {S: FAIL, N};
+    if ((N & 0xFFFFFFFF) !== N) return {S: FAIL, N};
 
     // TODO: check sign...
     let isNegative = false;
@@ -291,8 +291,8 @@ const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
-export function char(N: Node): Duad | null {
-    if (typeof N !== 'string' || N.length === 0) return null;
+export function char(N: Node): Duad {
+    if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
     return {S: N.charAt(0), N: N.slice(1)};
 }
 
@@ -300,14 +300,14 @@ export function char(N: Node): Duad | null {
 
 
 // TODO: where do these ones belong?
-export function intrinsic_true(N: Node): Duad | null {
-    return N === true ? {S: '', N: NO_NODE} : null;
+export function intrinsic_true(N: Node): Duad {
+    return N === true ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
-export function intrinsic_false(N: Node): Duad | null {
-    return N === false ? {S: '', N: NO_NODE} : null;
+export function intrinsic_false(N: Node): Duad {
+    return N === false ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
-export function intrinsic_null(N: Node): Duad | null {
-    return N === null ? {S: '', N: NO_NODE} : null;
+export function intrinsic_null(N: Node): Duad {
+    return N === null ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
 export function ZeroOrMore(expression: Transcoder): Transcoder {
     return N => {
@@ -322,7 +322,7 @@ export function ZeroOrMore(expression: Transcoder): Transcoder {
         let S: Span = '';
         while (true) {
             let result = expression(N);
-            if (result === null) return {S, N};
+            if (result.S === FAIL) return {S, N};
 
             // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
             // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
@@ -337,10 +337,16 @@ export function ZeroOrMore(expression: Transcoder): Transcoder {
     };
 }
 export function Maybe(expression: Transcoder): Transcoder {
-    return N => expression(N) || {S: '', N};
+    return N => {
+        let result = expression(N);
+        return result.S === FAIL ? {S: '', N} : result;
+    };
 }
 export function Not(expression: Transcoder): Transcoder {
-    return N => expression(N) ? null : {S: '', N};
+    return N => {
+        let result = expression(N);
+        return result.S === FAIL ? {S: '', N} : {S: FAIL, N};
+    };
 }
 
 

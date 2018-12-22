@@ -1,9 +1,9 @@
 type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
-type NO_NODE = typeof NO_NODE;
-type Node = NO_NODE | string | number | boolean | null | object | any[];
-interface Duad { S: Span; N: Node; }
-type Transcoder = (text: string, S: Span) => Duad | null;
+const FAIL = Symbol('Fail');
+type Node = typeof NO_NODE | string | number | boolean | null | object | any[];
+type Duad = {S: Span, N: Node} | {S: Span, N: typeof FAIL};
+type Transcoder = (text: string, S: Span) => Duad;
 declare const start: Transcoder;
 
 
@@ -14,11 +14,11 @@ export function parse(text: string): Node {
     placeholder: {}
 
     //debugger;
-    let ast = start(text, 0);
-    if (ast === null) throw new Error(`parse failed`);
-    if (ast.S !== text.length) throw new Error(`parse didn't consume entire input`);
-    if (ast.N === NO_NODE) throw new Error(`parse didn't return a value`);
-    return ast.N;
+    let {S, N} = start(text, 0);
+    if (N === FAIL) throw new Error(`parse failed`);
+    if (S !== text.length) throw new Error(`parse didn't consume entire input`);
+    if (N === NO_NODE) throw new Error(`parse didn't return a value`);
+    return N;
 }
 
 
@@ -26,7 +26,7 @@ export function parse(text: string): Node {
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
-    const memos = new Map<Span, {resolved: boolean, isLeftRecursive: boolean, result: Duad | null}>();
+    const memos = new Map<Span, {resolved: boolean, isLeftRecursive: boolean, result: Duad}>(); // TODO: remove result, add S and N
     return (text, S) => {
         // Check whether the memo table already has an entry for the given initial state.
         let memo = memos.get(S);
@@ -35,7 +35,7 @@ export function Memo(expr: Transcoder): Transcoder {
             // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
             // All future applications of this rule with the same initial state will find this memo. If a future
             // application finds the memo still unresolved, then we know we have encountered left-recursion.
-            memo = {resolved: false, isLeftRecursive: false, result: null};
+            memo = {resolved: false, isLeftRecursive: false, result: {S, N: FAIL}};
             memos.set(S, memo);
 
             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
@@ -54,9 +54,9 @@ export function Memo(expr: Transcoder): Transcoder {
             // and consumes more input than the previous iteration did, in which case we update the memo with the
             // new result. We thus 'grow' the result, stopping when application either fails or does not consume
             // more input, at which point we take the result of the previous iteration as final.
-            while (memo.result !== null) {
+            while (memo.result.N !== FAIL) {
                 let nextResult = expr(text, S);
-                if (nextResult === null || nextResult.S <= memo.result.S) break;
+                if (nextResult.N === FAIL || nextResult.S <= memo.result.S) break;
                 memo.result = nextResult;
             }
         }
@@ -67,7 +67,7 @@ export function Memo(expr: Transcoder): Transcoder {
             // application of the rule for this initial state can only possibly succeed along a non-left-recursive
             // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
             memo.isLeftRecursive = true;
-            return null;
+            return {S, N: FAIL};
         }
 
         // We have a resolved memo, so the result of the rule application for the given initial state has already
@@ -85,9 +85,9 @@ export function Selection(...expressions: Transcoder[]): Transcoder {
     return (text, S) => {
         for (let i = 0; i < arity; ++i) {
             let result = expressions[i](text, S);
-            if (result !== null) return result;
+            if (result.N !== FAIL) return result;
         }
-        return null;
+        return {S, N: FAIL};
     };
 }
 
@@ -97,7 +97,7 @@ export function Sequence(...expressions: Transcoder[]): Transcoder {
         let N: Node = NO_NODE;
         for (let i = 0; i < arity; ++i) {
             let result = expressions[i](text, S);
-            if (result === null) return null;
+            if (result.N === FAIL) return result;
             S = result.S;
             if (N === NO_NODE) N = result.N;
             else if (typeof N === 'string' && typeof result.N === 'string') N += result.N;
@@ -115,11 +115,11 @@ export function Record(fields: RecordField[]): Transcoder {
     return (text, S) => {
         let N = {} as any; // TODO: remove/improve cast
         for (let field of fields) {
-            let result: Duad | null;
+            let result: Duad;
 
             if (field.type === 'spread') {
                 result = field.expr(text, S);
-                if (result === null) return null;
+                if (result.N === FAIL) return result;
                 assert(result.N === NO_NODE || (result.N && typeof result.N === 'object'));
                 if (result.N !== NO_NODE) Object.assign(N, result.N);
                 S = result.S;
@@ -128,7 +128,7 @@ export function Record(fields: RecordField[]): Transcoder {
                 let id: string;
                 if (field.type === 'computed') {
                     result = field.name(text, S);
-                    if (result === null) return null;
+                    if (result.N === FAIL) return result;
                     assert(typeof result.N === 'string');
                     id = result.N as string;
                     S = result.S;
@@ -138,7 +138,7 @@ export function Record(fields: RecordField[]): Transcoder {
                 }
 
                 result = field.value(text, S);
-                if (result === null) return null;
+                if (result.N === FAIL) return result;
                 assert(result.N !== NO_NODE);
                 N[id] = result.N;
                 S = result.S;
@@ -157,14 +157,14 @@ export function List(elements: ListElement[]): Transcoder {
         for (let element of elements) {
             if (element.type === 'spread') {
                 let result = element.expr(text, S);
-                if (result === null) return null;
+                if (result.N === FAIL) return result;
                 assert(result.N === NO_NODE || Array.isArray(result.N));
                 if (result.N !== NO_NODE) N.push(...result.N as any[]);
                 S = result.S;
             }
             else /* field.type === 'element' */ {
                 let result = element.value(text, S);
-                if (result === null) return null;
+                if (result.N === FAIL) return result;
                 assert(result.N !== NO_NODE);
                 N.push(result.N);
                 S = result.S;
@@ -187,18 +187,18 @@ export function AbstractCharRange(min: string, max: string): Transcoder {
 
 export function ConcreteCharRange(min: string, max: string): Transcoder {
     return (text, S) => {
-        if (S >= text.length) return null;
+        if (S >= text.length) return {S, N: FAIL};
         let c = text.charAt(S);
-        if (c < min || c > max) return null;
+        if (c < min || c > max) return {S, N: FAIL};
         return {S: S + 1, N: NO_NODE};
     };
 }
 
 export function UniformCharRange(min: string, max: string): Transcoder {
     return (text, S) => {
-        if (S >= text.length) return null;
+        if (S >= text.length) return {S, N: FAIL};
         let c = text.charAt(S);
-        if (c < min || c > max) return null;
+        if (c < min || c > max) return {S, N: FAIL};
         return {S: S + 1, N: c};
     };
 }
@@ -211,14 +211,14 @@ export function AbstractStringLiteral(value: string): Transcoder {
 
 export function ConcreteStringLiteral(value: string): Transcoder {
     return (text, S) => {
-        if (!matchesAt(text, value, S)) return null;
+        if (!matchesAt(text, value, S)) return {S, N: FAIL};
         return {S: S + value.length, N: NO_NODE};
     };
 }
 
 export function UniformStringLiteral(value: string): Transcoder {
     return (text, S) => {
-        if (!matchesAt(text, value, S)) return null;
+        if (!matchesAt(text, value, S)) return {S, N: FAIL};
         return {S: S + value.length, N: value};
     };
 }
@@ -227,7 +227,7 @@ export function UniformStringLiteral(value: string): Transcoder {
 
 
 // ---------- other built-ins ----------
-export function i32(text: string, S: Span): Duad | null {
+export function i32(text: string, S: Span): Duad {
 
     // Parse optional leading '-' sign...
     let isNegative = false;
@@ -247,7 +247,7 @@ export function i32(text: string, S: Span): Duad | null {
 
         // Check for overflow
         if (N > ONE_TENTH_MAXINT32) {
-            return null;
+            return {S, N: FAIL};
         }
 
         // Update parsed number
@@ -258,13 +258,13 @@ export function i32(text: string, S: Span): Duad | null {
     }
 
     // Check that we parsed at least one digit.
-    if (digits === 0) return null;
+    if (digits === 0) return {S, N: FAIL};
 
     // Apply the sign.
     if (isNegative) N = -N;
 
     // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-    if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return null;
+    if (isNegative ? (N & 0xFFFFFFFF) >= 0 : (N & 0xFFFFFFFF) < 0) return {S, N: FAIL};
 
     // Success
     return {S, N};
@@ -277,8 +277,8 @@ const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
 
 
-export function char(text: string, S: Span): Duad | null {
-    if (S >= text.length) return null;
+export function char(text: string, S: Span): Duad {
+    if (S >= text.length) return {S, N: FAIL};
     return {S: S + 1, N: text.charAt(S)};
 }
 
@@ -286,13 +286,13 @@ export function char(text: string, S: Span): Duad | null {
 
 
 // TODO: where do these ones belong?
-export function intrinsic_true(_: string, S: Span): Duad | null {
+export function intrinsic_true(_: string, S: Span): Duad {
     return {S, N: true};
 }
-export function intrinsic_false(_: string, S: Span): Duad | null {
+export function intrinsic_false(_: string, S: Span): Duad {
     return {S, N: false};
 }
-export function intrinsic_null(_: string, S: Span): Duad | null {
+export function intrinsic_null(_: string, S: Span): Duad {
     return {S, N: null};
 }
 export function ZeroOrMore(expression: Transcoder): Transcoder {
@@ -300,7 +300,7 @@ export function ZeroOrMore(expression: Transcoder): Transcoder {
         let N: Node = NO_NODE;
         while (true) {
             let result = expression(text, S);
-            if (result === null) return {S, N};
+            if (result.N === FAIL) return {S, N};
 
             // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
             // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
@@ -314,10 +314,16 @@ export function ZeroOrMore(expression: Transcoder): Transcoder {
     };
 }
 export function Maybe(expression: Transcoder): Transcoder {
-    return (text, S) => expression(text, S) || {S, N: NO_NODE};
+    return (text, S) => {
+        let result = expression(text, S);
+        return result.N === FAIL ? {S, N: NO_NODE} : result;
+    };
 }
 export function Not(expression: Transcoder): Transcoder {
-    return (text, S) => expression(text, S) ? null : {S, N: NO_NODE};
+    return (text, S) => {
+        let result = expression(text, S);
+        return result.N === FAIL ? {S, N: NO_NODE} : {S, N: FAIL};
+    };
 }
 
 
