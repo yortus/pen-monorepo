@@ -1,6 +1,14 @@
 Priorities:
+    break up templates into separate files:
+        [ ] penc needs to get them back into one file
+    feature: modules:
+        [ ] syntax eg `MyMod = import './my-mod.pen'` (looks like a normal binding except RHS is a relative path)
+        [ ] break up existing functionality into modules
+        [ ] pen modules `my-mod.pen`
+        [ ] TS modules `special-thing.pen.ts`
+            [ ] how to tell module format? don't rely on extension. Use hashbang? Comment at top? Just try to parse as pen, with fallback to ts
+        [ ] built-in modules (may be either pen or ts format)
     type-check the AST to catch more errors and give better diagnostic feedback during compilation
-    feature: modules. And break up existing functionality into modules. eg `MyMod = import './my-mod'`
     feature: `f64` intrinsic. Shortcut using `parseFloat` and `toString`, but with extra strictness checks
     revise `char` instrinsic - how to parse/unparse unicode escape sequences like `\u0032` in JSON strings?
     `parse`/`unparse` function signatures - with universal 'consumption progress' integer, incl on object keys (use bitfield)
