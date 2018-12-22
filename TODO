@@ -1,4 +1,5 @@
 Priorities:
+    [x] make all parsers/unparsers into pure functions, put all outside any closures
     break up templates into separate files:
         [ ] penc needs to get them back into one file
     feature: modules:

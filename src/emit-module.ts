@@ -24,7 +24,8 @@ export function emitModule(module: Module): ts.Statement[] {
             /*name*/ id.name,
             /*typeParameters*/ undefined,
             /*parameters*/ [
-                ts.createParameter(undefined, undefined, undefined, 'state'),
+                ts.createParameter(undefined, undefined, undefined, 'text'),
+                ts.createParameter(undefined, undefined, undefined, 'S'),
             ],
             /*type*/ undefined,
             /*body*/ ts.createBlock(
@@ -37,7 +38,8 @@ export function emitModule(module: Module): ts.Statement[] {
                             ),
                             /*typeArguments*/ undefined,
                             /*argumentsArray*/ [
-                                ts.createIdentifier('state'),
+                                ts.createIdentifier('text'),
+                                ts.createIdentifier('S'),
                             ]
                         )
                     ),
