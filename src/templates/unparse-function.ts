@@ -23,6 +23,8 @@ export function unparse(ast: unknown): string {
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
+
+    // TODO: revise memo key once using new ast/pos signature
     const memos = new Map<
         unknown,
         {resolved: boolean, isLeftRecursive: boolean, result: Duad} // TODO: remove result, add S and N

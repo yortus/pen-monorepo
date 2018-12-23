@@ -25,6 +25,8 @@ export function parse(text: string): unknown {
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
+
+    // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
     const memos = new Map<
         Span,
         {resolved: boolean, isLeftRecursive: boolean, result: Duad} // TODO: remove result, add S and N
