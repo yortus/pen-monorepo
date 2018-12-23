@@ -1,9 +1,11 @@
 Priorities:
     [x] make all parsers/unparsers into pure functions, put all outside any closures
     [x] never return `null` from parsers/unparsers, so can always destructure multiple returns.
-    [ ] new signature for parse:     `parse(src: string, pos: number): {ast: Node|FAIL,   pos′: number}`
-    [ ] new signature for unparse: `unparse(ast: Node,   pos: number): {src: string|FAIL, pos′: number}`
+    [ ] new signature for parse:     `parse(src: string, pos: number): {ast: Node|FAIL,   posᐟ: number}`
+    [ ] new signature for unparse: `unparse(ast: Node,   pos: number): {src: string|FAIL, posᐟ: number}`
     [ ] review `result` local in all parsers/unparsers - can we directly destructure some of these?
+    [ ] combine parse/unparse templates into a single file
+    [ ] break up templates into many files that cross-reference using TS namespace merging
     break up templates into separate files:
         [ ] penc needs to get them back into one file
     feature: modules:

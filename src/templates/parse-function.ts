@@ -1,15 +1,14 @@
 type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
 const FAIL = Symbol('Fail');
-type Node = typeof NO_NODE | string | number | boolean | null | object | any[];
-type Duad = {S: Span, N: Node} | {S: Span, N: typeof FAIL};
+type Duad = {S: Span, N: unknown} | {S: Span, N: typeof FAIL};
 type Transcoder = (text: string, S: Span) => Duad;
 declare const start: Transcoder;
 
 
 
 
-export function parse(text: string): Node {
+export function parse(text: string): unknown {
     // @ts-ignore 7028 unused label
     placeholder: {}
 
@@ -26,7 +25,10 @@ export function parse(text: string): Node {
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
-    const memos = new Map<Span, {resolved: boolean, isLeftRecursive: boolean, result: Duad}>(); // TODO: remove result, add S and N
+    const memos = new Map<
+        Span,
+        {resolved: boolean, isLeftRecursive: boolean, result: Duad} // TODO: remove result, add S and N
+    >();
     return (text, S) => {
         // Check whether the memo table already has an entry for the given initial state.
         let memo = memos.get(S);
@@ -94,7 +96,7 @@ export function Selection(...expressions: Transcoder[]): Transcoder {
 export function Sequence(...expressions: Transcoder[]): Transcoder {
     const arity = expressions.length;
     return (text, S) => {
-        let N: Node = NO_NODE;
+        let N: unknown = NO_NODE;
         for (let i = 0; i < arity; ++i) {
             let result = expressions[i](text, S);
             if (result.N === FAIL) return result;
@@ -153,7 +155,7 @@ type ListElement =
     | {type: 'spread', expr: Transcoder};
 export function List(elements: ListElement[]): Transcoder {
     return (text, S) => {
-        let N = [] as Node[];
+        let N = [] as Array<unknown>;
         for (let element of elements) {
             if (element.type === 'spread') {
                 let result = element.expr(text, S);
@@ -297,7 +299,7 @@ export function intrinsic_null(_: string, S: Span): Duad {
 }
 export function ZeroOrMore(expression: Transcoder): Transcoder {
     return (text, S) => {
-        let N: Node = NO_NODE;
+        let N: unknown = NO_NODE;
         while (true) {
             let result = expression(text, S);
             if (result.N === FAIL) return {S, N};

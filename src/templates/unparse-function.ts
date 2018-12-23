@@ -1,15 +1,14 @@
 type Span = string;
 const NO_NODE = Symbol('NoNode');
 const FAIL = '\uD800'; // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
-type Node = typeof NO_NODE | string | number | boolean | null | object | any[];
-type Duad = {S: Span, N: Node} | {S: typeof FAIL, N: Node};
-type Transcoder = (N: Node) => Duad;
+type Duad = {S: Span, N: unknown} | {S: typeof FAIL, N: unknown};
+type Transcoder = (N: unknown) => Duad;
 declare const start: Transcoder;
 
 
 
 
-export function unparse(ast: Node): string {
+export function unparse(ast: unknown): string {
     // @ts-ignore 7028 unused label
     placeholder: {}
 
@@ -24,7 +23,10 @@ export function unparse(ast: Node): string {
 
 // ---------- wip... ----------
 export function Memo(expr: Transcoder): Transcoder {
-    const memos = new Map<Node, {resolved: boolean, isLeftRecursive: boolean, result: Duad}>(); // TODO: remove result, add S and N
+    const memos = new Map<
+        unknown,
+        {resolved: boolean, isLeftRecursive: boolean, result: Duad} // TODO: remove result, add S and N
+    >();
     return N => {
         // Check whether the memo table already has an entry for the given initial state.
         let memo = memos.get(N);
@@ -140,7 +142,7 @@ export function Record(fields: Field[]): Transcoder {
             else {
 
                 // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(N);
+                let propNames = Object.keys(N as object);
                 for (let propName of propNames) {
                     if (field.type === 'computed') {
                         let r = field.name(propName);
@@ -257,7 +259,7 @@ export function UniformStringLiteral(value: string): Transcoder {
 
 
 // ---------- other built-ins ----------
-export function i32(N: Node): Duad {
+export function i32(N: number): Duad {
 
     // TODO: ensure N is a 32-bit integer
     if (typeof N !== 'number') return {S: FAIL, N};
@@ -268,14 +270,14 @@ export function i32(N: Node): Duad {
     if (N < 0) {
         isNegative = true;
         if (N === -2147483648) return {S: '-2147483648', N: NO_NODE}; // the one case where N = -N could overflow
-        N = -N;
+        N = -N as number;
     }
 
     // TODO: ...then digits
     let digits = [] as string[];
     while (true) {
         let d = N % 10;
-        N = (N / 10) | 0;
+        N = ((N / 10) | 0) as number;
         digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
         if (N === 0) break;
     }
@@ -291,7 +293,7 @@ const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
-export function char(N: Node): Duad {
+export function char(N: unknown): Duad {
     if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
     return {S: N.charAt(0), N: N.slice(1)};
 }
@@ -300,13 +302,13 @@ export function char(N: Node): Duad {
 
 
 // TODO: where do these ones belong?
-export function intrinsic_true(N: Node): Duad {
+export function intrinsic_true(N: unknown): Duad {
     return N === true ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
-export function intrinsic_false(N: Node): Duad {
+export function intrinsic_false(N: unknown): Duad {
     return N === false ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
-export function intrinsic_null(N: Node): Duad {
+export function intrinsic_null(N: unknown): Duad {
     return N === null ? {S: '', N: NO_NODE} : {S: FAIL, N};
 }
 export function ZeroOrMore(expression: Transcoder): Transcoder {
@@ -353,7 +355,7 @@ export function Not(expression: Transcoder): Transcoder {
 
 
 // TODO: internal helpers...
-function isFullyConsumed(N: Node) {
+function isFullyConsumed(N: unknown) {
     if (N === NO_NODE) return true;
     if (N === '') return true;
     if (isPlainObject(N) && Object.keys(N).length === 0) return true;
@@ -361,7 +363,7 @@ function isFullyConsumed(N: Node) {
     return false;
 }
 
-function isResidualNode(N: Node, Nʹ: Node) {
+function isResidualNode(N: unknown, Nʹ: unknown) {
     if (typeof N === 'string') {
         return typeof Nʹ === 'string' && N.endsWith(Nʹ);
     }
