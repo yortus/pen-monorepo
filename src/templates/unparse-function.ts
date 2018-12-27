@@ -1,9 +1,16 @@
-type Span = string;
+// type Span = string;
 const NO_NODE = Symbol('NoNode');
-const FAIL = '\uD800'; // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
-type Duad = {S: Span, N: unknown} | {S: typeof FAIL, N: unknown};
-type Transcoder = (N: unknown) => Duad;
-declare const start: Transcoder;
+// const FAIL = '\uD800'; // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
+// type Duad = {S: Span, N: unknown} | {S: typeof FAIL, N: unknown};
+// type Transcoder = (N: unknown) => Duad;
+// declare const start: Transcoder;
+
+
+
+
+// TODO: temp testing...
+type Unparser = (ast: unknown, result: {src: string, astᐟ: unknown}) => boolean;
+declare const start: Unparser;
 
 
 
@@ -13,41 +20,46 @@ export function unparse(ast: unknown): string {
     placeholder: {}
 
     //debugger;
-    let {S, N} = start(ast);
-    if (S === FAIL) throw new Error(`unparse failed`);
-    if (!isFullyConsumed(N)) throw new Error(`unparse didn't consume entire input`);
-    return S;
+    let result = {src: '', astᐟ: null};
+    if (!start(ast, result)) throw new Error(`parse failed`);
+    if (!isFullyConsumed(result.astᐟ)) throw new Error(`unparse didn't consume entire input`);
+    return result.src;
 }
 
 
 
+
 // ---------- wip... ----------
-export function Memo(expr: Transcoder): Transcoder {
+export function Memo(expr: Unparser): Unparser {
 
     // TODO: revise memo key once using new ast/pos signature
+    const FAIL = Symbol('FAIL');
     const memos = new Map<
         unknown,
-        {resolved: boolean, isLeftRecursive: boolean, result: Duad} // TODO: remove result, add S and N
+        {resolved: boolean, isLeftRecursive: boolean, result: {src: string, astᐟ: unknown}}
     >();
-    return N => {
+    return (ast, result) => {
         // Check whether the memo table already has an entry for the given initial state.
-        let memo = memos.get(N);
+        let memo = memos.get(ast);
         if (!memo) {
             // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
             // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
             // All future applications of this rule with the same initial state will find this memo. If a future
             // application finds the memo still unresolved, then we know we have encountered left-recursion.
-            memo = {resolved: false, isLeftRecursive: false, result: {S: FAIL, N}};
-            memos.set(N, memo);
+            memo = {resolved: false, isLeftRecursive: false, result: {src: '', astᐟ: FAIL}};
+            memos.set(ast, memo);
 
             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
             // this point, any left-recursive paths encountered during application are guaranteed to have been noted
             // and aborted (see below).
-            memo.result = expr(N);
+            if (!expr(ast, memo.result)) memo.result.astᐟ = FAIL;
             memo.resolved = true;
 
             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
-            if (!memo.isLeftRecursive) return memo.result;
+            if (!memo.isLeftRecursive) {
+                Object.assign(result, memo.result);
+                return result.astᐟ !== FAIL;
+            }
 
             // If we get here, then the above application of the rule invoked itself left-recursively, but we
             // aborted the left-recursive paths (see below). That means that the result is either failure, or
@@ -56,18 +68,18 @@ export function Memo(expr: Transcoder): Transcoder {
             // and consumes more input than the previous iteration did, in which case we update the memo with the
             // new result. We thus 'grow' the result, stopping when application either fails or does not consume
             // more input, at which point we take the result of the previous iteration as final.
-            while (memo.result.S !== FAIL) {
-                let nextResult = expr(N);
+            while (memo.result.astᐟ !== FAIL) {
+                if (!expr(ast, result)) result.astᐟ = FAIL;
 
                 // TODO: break cases:
                 // anything --> same thing (covers all string cases, since they can only be same or shorter)
                 // NO_NODE --> anything
                 // some node --> some different non-empty node (assert: should never happen!)
-                if (nextResult.S === FAIL) break;
-                if (nextResult.N === memo.result.N) break;
-                if (memo.result.N === NO_NODE) break;
-                if (nextResult.N !== NO_NODE) break;
-                memo.result = nextResult;
+                if (result.astᐟ === FAIL) break;
+                if (result.astᐟ === memo.result.astᐟ) break;
+                if (memo.result.astᐟ === NO_NODE) break;
+                if (result.astᐟ !== NO_NODE) break;
+                Object.assign(memo.result, result);
             }
         }
         else if (!memo.resolved) {
@@ -77,12 +89,13 @@ export function Memo(expr: Transcoder): Transcoder {
             // application of the rule for this initial state can only possibly succeed along a non-left-recursive
             // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
             memo.isLeftRecursive = true;
-            return {S: FAIL, N};
+            return false;
         }
 
         // We have a resolved memo, so the result of the rule application for the given initial state has already
         // been computed. Return it from the memo.
-        return memo.result;
+        Object.assign(result, memo.result);
+        return result.astᐟ !== FAIL;
     };
 }
 
@@ -90,203 +103,219 @@ export function Memo(expr: Transcoder): Transcoder {
 
 
 // ---------- built-in parser combinators ----------
-export function Selection(...expressions: Transcoder[]): Transcoder {
+export function Selection(...expressions: Unparser[]): Unparser {
     const arity = expressions.length;
-    return N => {
+    return (ast, result) => {
         for (let i = 0; i < arity; ++i) {
-            let result = expressions[i](N);
-            if (result.S !== FAIL) return result;
+            if (expressions[i](ast, result)) return true;
         }
-        return {S: FAIL, N};
+        return false;
     };
 }
 
-export function Sequence(...expressions: Transcoder[]): Transcoder {
+export function Sequence(...expressions: Unparser[]): Unparser {
     const arity = expressions.length;
-    return N => {
-        let S: Span = '';
+    return (ast, result) => {
+        let src = '';
         for (let i = 0; i < arity; ++i) {
-            let result = expressions[i](N);
-            if (result.S === FAIL) return result;
-            assert(isResidualNode(N, result.N)); // TODO: this expensive check should be enabled only in debug mode.
-                                                    //       Also it should be wrapped around *all* unparse calls since
-                                                    //       it is an invariant of unparsing.
-            S += result.S;
-            N = result.N;
+            if (!expressions[i](ast, result)) return false;
+            assert(isResidualNode(ast, result.astᐟ)); // TODO: this expensive check should be enabled only in debug mode
+                                                      //      Also it should be wrapped around *all* unparse calls since
+                                                      //      it is an invariant of unparsing.
+            src += result.src;
+            ast = result.astᐟ;
         }
-        return {S, N};
+        result.src = src;
+        result.astᐟ = ast;
+        return true;
     };
 }
 
 type Field =
-    | {type: 'static', name: string, value: Transcoder}
-    | {type: 'computed', name: Transcoder, value: Transcoder}
-    | {type: 'spread', expr: Transcoder};
-export function Record(fields: Field[]): Transcoder {
-    return N => {
-        let S = '';
-        if (!isPlainObject(N)) return {S: FAIL, N};
+    | {type: 'static', name: string, value: Unparser}
+    | {type: 'computed', name: Unparser, value: Unparser}
+    | {type: 'spread', expr: Unparser};
+export function Record(fields: Field[]): Unparser {
+    return (ast, result) => {
+        let src = '';
+        if (!isPlainObject(ast)) return false;
+        let obj = ast;
 
-        // Make a copy of N from which we delete key/value pairs once they are consumed
-        N = {...N};
+        // Make a copy of obj from which we delete key/value pairs once they are consumed
+        obj = {...obj};
 
         // TODO: ...
         outerLoop:
         for (let field of fields) {
             if (field.type === 'spread') {
                 // TODO: ...
-                let result = field.expr(N);
-                if (result.S === FAIL) return result;
-                assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
-                S += result.S;
-                N = {...result.N as object};
+                if (!field.expr(obj, result)) return false;
+                assert(isResidualNode(obj, result.astᐟ)); // TODO: see comment in Sequence() re isResidualNode
+                src += result.src;
+                obj = {...result.astᐟ as object};
             }
             else {
-
                 // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(N as object);
+                let propNames = Object.keys(obj);
                 for (let propName of propNames) {
                     if (field.type === 'computed') {
-                        let r = field.name(propName);
-                        if (r.S === FAIL || r.N !== '') continue;
-                        S += r.S;
+                        if (!field.name(propName, result)) continue;
+                        if (result.astᐟ !== '') continue;
+                        src += result.src;
                     }
                     else /* field.type === 'static' */ {
                         if (propName !== field.name) continue;
                     }
 
                     // TODO: match value
-                    let result = field.value((N as any)[propName]);
-                    if (result.S === FAIL) continue;
-                    if (!isFullyConsumed(result.N)) continue;
-                    S += result.S;
+                    if (!field.value((obj as any)[propName], result)) continue;
+                    if (!isFullyConsumed(result.astᐟ)) continue;
+                    src += result.src;
 
-                    // TODO: we matched both name and value - consume them from N
-                    delete (N as any)[propName];
+                    // TODO: we matched both name and value - consume them from obj
+                    delete (obj as any)[propName];
                     continue outerLoop;
                 }
 
                 // If we get here, no match...
-                return {S: FAIL, N};
+                return false;
             }
         }
-        return {S, N};
+        result.src = src;
+        result.astᐟ = obj;
+        return true;
     };
 }
 
 type ListElement =
-    | {type: 'element', value: Transcoder}
-    | {type: 'spread', expr: Transcoder};
-export function List(elements: ListElement[]): Transcoder {
-    return N => {
-        let S = '';
-        if (!Array.isArray(N)) return {S: FAIL, N};
+    | {type: 'element', value: Unparser}
+    | {type: 'spread', expr: Unparser};
+export function List(elements: ListElement[]): Unparser {
+    return (ast, result) => {
+        let src = '';
+        if (!Array.isArray(ast)) return false;
+        let arr = ast;
 
-        // TODO: was... for records... can just slice arrays
-        // // Make a copy of N from which we slice off elements once they are consumed
-        // N = {...N};
-
-        // TODO: ... fix casts in code below
         for (let element of elements) {
             if (element.type === 'spread') {
-                let result = element.expr(N);
-                if (result.S === FAIL) return result;
-                assert(isResidualNode(N, result.N)); // TODO: see comment in Sequence() re isResidualNode
-                S += result.S;
-                N = result.N as any[];
+                if (!element.expr(arr, result)) return false;
+                assert(isResidualNode(arr, result.astᐟ)); // TODO: see comment in Sequence() re isResidualNode
+                src += result.src;
+                arr = result.astᐟ as any[];
             }
             else /* element.type === 'element' */{
-                if ((N as any[]).length === 0) return {S: FAIL, N};
-                let result = element.value((N as any[])[0]);
-                if (result.S === FAIL) return result;
-                if (!isFullyConsumed(result.N)) return {S: FAIL, N};
-                S += result.S;
-                N = (N as any[]).slice(1);
+                if (arr.length === 0) return false;
+                if (!element.value(arr[0], result)) return false;
+                if (!isFullyConsumed(result.astᐟ)) return false;
+                src += result.src;
+                arr = arr.slice(1);
             }
         }
-        return {S, N};
+        result.src = src;
+        result.astᐟ = arr;
+        return true;
     };
 }
 
 
 
 
-// ---------- built-in parser factories ----------
-export function AbstractCharRange(min: string, max: string): Transcoder {
-    return N => {
-        if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
-        let c = N.charAt(0);
-        if (c < min || c > max) return {S: FAIL, N};
-        return {S: '', N: N.slice(1)};
+// // ---------- built-in parser factories ----------
+export function AbstractCharRange(min: string, max: string): Unparser {
+    return (ast, result) => {
+        if (typeof ast !== 'string' || ast.length === 0) return false;
+        let c = ast.charAt(0);
+        if (c < min || c > max) return false;
+        result.src = '';
+        result.astᐟ = ast.slice(1);
+        return true;
     };
 }
 
-export function ConcreteCharRange(min: string, max: string): Transcoder {
+export function ConcreteCharRange(min: string, max: string): Unparser {
     [max]; // prevent 6133 unused decl
-    return N => {
-        return {S: min, N};
+    return (ast, result) => {
+        result.src = min;
+        result.astᐟ = ast;
+        return true;
     };
 }
 
-export function UniformCharRange(min: string, max: string): Transcoder {
-    return N => {
-        if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
-        let c = N.charAt(0);
-        if (c < min || c > max) return {S: FAIL, N};
-        return {S: c, N: N.slice(1)};
+export function UniformCharRange(min: string, max: string): Unparser {
+    return (ast, result) => {
+        if (typeof ast !== 'string' || ast.length === 0) return false;
+        let c = ast.charAt(0);
+        if (c < min || c > max) return false;
+        result.src = c;
+        result.astᐟ = ast.slice(1);
+        return true;
     };
 }
 
-export function AbstractStringLiteral(value: string): Transcoder {
-    return N => {
-        if (typeof N !== 'string' || !N.startsWith(value)) return {S: FAIL, N};
-        return {S: '', N: N.slice(value.length)};
+export function AbstractStringLiteral(value: string): Unparser {
+    return (ast, result) => {
+        if (typeof ast !== 'string' || !ast.startsWith(value)) return false;
+        result.src = '';
+        result.astᐟ = ast.slice(value.length);
+        return true;
     };
 }
 
-export function ConcreteStringLiteral(value: string): Transcoder {
-    return N => {
-        return {S: value, N};
+export function ConcreteStringLiteral(value: string): Unparser {
+    return (ast, result) => {
+        result.src = value;
+        result.astᐟ = ast;
+        return true;
     };
 }
 
-export function UniformStringLiteral(value: string): Transcoder {
-    return N => {
-        if (typeof N !== 'string' || !N.startsWith(value)) return {S: FAIL, N};
-        return {S: value, N: N.slice(value.length)};
+export function UniformStringLiteral(value: string): Unparser {
+    return (ast, result) => {
+        if (typeof ast !== 'string' || !ast.startsWith(value)) return false;
+        result.src = value;
+        result.astᐟ = ast.slice(value.length);
+        return true;
     };
 }
 
 
 
 
-// ---------- other built-ins ----------
-export function i32(N: number): Duad {
+// // ---------- other built-ins ----------
+export function i32(ast: unknown, result: {src: string, astᐟ: unknown}) {
 
     // TODO: ensure N is a 32-bit integer
-    if (typeof N !== 'number') return {S: FAIL, N};
-    if ((N & 0xFFFFFFFF) !== N) return {S: FAIL, N};
+    if (typeof ast !== 'number') return false;
+    let num = ast;
+    if ((num & 0xFFFFFFFF) !== num) return false;
 
     // TODO: check sign...
     let isNegative = false;
-    if (N < 0) {
+    if (num < 0) {
         isNegative = true;
-        if (N === -2147483648) return {S: '-2147483648', N: NO_NODE}; // the one case where N = -N could overflow
-        N = -N as number;
+        if (num === -2147483648) {
+            // Specially handle the one case where N = -N could overflow
+            result.src = '-2147483648';
+            result.astᐟ = NO_NODE;
+            return true;
+        }
+        num = -num as number;
     }
 
     // TODO: ...then digits
     let digits = [] as string[];
     while (true) {
-        let d = N % 10;
-        N = ((N / 10) | 0) as number;
+        let d = num % 10;
+        num = (num / 10) | 0;
         digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
-        if (N === 0) break;
+        if (num === 0) break;
     }
 
     // TODO: compute final string...
     if (isNegative) digits.push('-');
-    return {S: digits.reverse().join(''), N: NO_NODE};
+    result.src = digits.reverse().join('');
+    result.astᐟ = NO_NODE;
+    return true;
 }
 
 // These constants are used by the i32 unparser.
@@ -295,91 +324,121 @@ const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
-export function char(N: unknown): Duad {
-    if (typeof N !== 'string' || N.length === 0) return {S: FAIL, N};
-    return {S: N.charAt(0), N: N.slice(1)};
+export function char(ast: unknown, result: {src: string, astᐟ: unknown}) {
+    if (typeof ast !== 'string' || ast.length === 0) return false;
+    result.src = ast.charAt(0);
+    result.astᐟ = ast.slice(1);
+    return true;
 }
 
 
 
 
-// TODO: where do these ones belong?
-export function intrinsic_true(N: unknown): Duad {
-    return N === true ? {S: '', N: NO_NODE} : {S: FAIL, N};
+// // TODO: where do these ones belong?
+export function intrinsic_true(ast: unknown, result: {src: string, astᐟ: unknown}) {
+    if (ast !== true) return false;
+    result.src = '';
+    result.astᐟ = NO_NODE;
+    return true;
 }
-export function intrinsic_false(N: unknown): Duad {
-    return N === false ? {S: '', N: NO_NODE} : {S: FAIL, N};
+
+export function intrinsic_false(ast: unknown, result: {src: string, astᐟ: unknown}) {
+    if (ast !== false) return false;
+    result.src = '';
+    result.astᐟ = NO_NODE;
+    return true;
 }
-export function intrinsic_null(N: unknown): Duad {
-    return N === null ? {S: '', N: NO_NODE} : {S: FAIL, N};
+
+export function intrinsic_null(ast: unknown, result: {src: string, astᐟ: unknown}) {
+    if (ast !== null) return false;
+    result.src = '';
+    result.astᐟ = NO_NODE;
+    return true;
 }
-export function ZeroOrMore(expression: Transcoder): Transcoder {
-    return N => {
+
+export function ZeroOrMore(expression: Unparser): Unparser {
+    return (ast, result) => {
         // TODO: temp testing... this requires incrementally consuming from N, which we only know how to do
         // if N is a string. Since iteration doesn't make sense (for now?) with objects or lists, but ZeroOrMore
         // should *always* succeed, in non-string cases we just consume nothing and return success.
         // Investigate if the above summary is complete and correct in all cases. Any counterexamples that should
         // be handled differently? Eg iterating *one time* to consume an object or list as a whole? Or would we
         // make that a type error when we add type-checking?
-        if (typeof N !== 'string') return {S: '', N};
+        if (typeof ast !== 'string') {
+            result.src = '';
+            result.astᐟ = ast;
+            return true;
+        }
 
-        let S: Span = '';
+        let src = '';
         while (true) {
-            let result = expression(N);
-            if (result.S === FAIL) return {S, N};
+            if (!expression(ast, result)) break;
 
             // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
             // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
-            if (N === result.N) return {S, N};
+            if (ast === result.astᐟ) break;
 
-            assert(isResidualNode(N, result.N)); // TODO: this expensive check should be enabled only in debug mode.
-                                                    //       Also it should be wrapped around *all* unparse calls since
-                                                    //       it is an invariant of unparsing.
-            S += result.S;
-            N = result.N;
+            assert(isResidualNode(ast, result.astᐟ)); // TODO: this expensive check should be enabled only in debug mode
+                                                      //     Also it should be wrapped around *all* unparse calls since
+                                                      //     it is an invariant of unparsing.
+            src += result.src;
+            ast = result.astᐟ;
         }
+
+        result.src = src;
+        result.astᐟ = ast;
+        return true;
     };
 }
-export function Maybe(expression: Transcoder): Transcoder {
-    return N => {
-        let result = expression(N);
-        return result.S === FAIL ? {S: '', N} : result;
+
+export function Maybe(expression: Unparser): Unparser {
+    return (ast, result) => {
+        if (expression(ast, result)) return true;
+        return epsilon(ast, result);
     };
 }
-export function Not(expression: Transcoder): Transcoder {
-    return N => {
-        let result = expression(N);
-        return result.S === FAIL ? {S: '', N} : {S: FAIL, N};
+
+export function Not(expression: Unparser): Unparser {
+    return (ast, result) => {
+        if (expression(ast, result)) return false;
+        return epsilon(ast, result);
     };
+}
+
+export function epsilon(ast: unknown, result: {src: string, astᐟ: unknown}) {
+    result.src = '';
+    result.astᐟ = ast;
+    return true;
 }
 
 
 
 
 // TODO: internal helpers...
-function isFullyConsumed(N: unknown) {
-    if (N === NO_NODE) return true;
-    if (N === '') return true;
-    if (isPlainObject(N) && Object.keys(N).length === 0) return true;
-    if (Array.isArray(N) && N.length === 0) return true;
+function isFullyConsumed(ast: unknown) {
+    if (ast === NO_NODE) return true;
+    if (ast === '') return true;
+    if (isPlainObject(ast) && Object.keys(ast).length === 0) return true;
+    if (Array.isArray(ast) && ast.length === 0) return true;
     return false;
 }
 
-function isResidualNode(N: unknown, Nʹ: unknown) {
-    if (typeof N === 'string') {
-        return typeof Nʹ === 'string' && N.endsWith(Nʹ);
+function isResidualNode(ast: unknown, astʹ: unknown) {
+    if (typeof ast === 'string') {
+        return typeof astʹ === 'string' && ast.endsWith(astʹ);
     }
-    if (isPlainObject(N)) {
-        return isPlainObject(Nʹ) && Object.keys(Nʹ).every(k => N.hasOwnProperty(k) && (N as any)[k] === (Nʹ as any)[k]);
+    if (isPlainObject(ast)) {
+        return isPlainObject(astʹ)
+            && Object.keys(astʹ).every(k => ast.hasOwnProperty(k) && (ast as any)[k] === (astʹ as any)[k]);
     }
-    if (Array.isArray(N)) {
-        if (!Array.isArray(Nʹ)) return false;
-        for (let n = Nʹ.length, i = N.length - n, j = 0; j < n; ++i, ++j) {
-            if (N[i] !== Nʹ[j]) return false;
+    if (Array.isArray(ast)) {
+        if (!Array.isArray(astʹ)) return false;
+        for (let n = astʹ.length, i = ast.length - n, j = 0; j < n; ++i, ++j) {
+            if (ast[i] !== astʹ[j]) return false;
         }
         return true;
     }
-    return Nʹ === N || Nʹ === NO_NODE;
+    return astʹ === ast || astʹ === NO_NODE;
 }
 
 function isPlainObject(value: unknown): value is object {
