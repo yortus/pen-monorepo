@@ -112,6 +112,7 @@ export function Sequence(...expressions: Unparser[]): Unparser {
         let src = '';
         for (let i = 0; i < arity; ++i) {
             if (!expressions[i](ast, pos, result)) return false;
+            // TODO: more sanity checking in here, like for parse...
             src += result.src;
             pos = result.posᐟ;
         }
@@ -350,24 +351,12 @@ export function intrinsic_null(ast: unknown, pos: number, result: {src: string, 
 
 export function ZeroOrMore(expression: Unparser): Unparser {
     return (ast, pos, result) => {
-        // TODO: temp testing... this requires incrementally consuming from N, which we only know how to do
-        // if N is a string. Since iteration doesn't make sense (for now?) with objects or lists, but ZeroOrMore
-        // should *always* succeed, in non-string cases we just consume nothing and return success.
-        // Investigate if the above summary is complete and correct in all cases. Any counterexamples that should
-        // be handled differently? Eg iterating *one time* to consume an object or list as a whole? Or would we
-        // make that a type error when we add type-checking?
-        if (typeof ast !== 'string') {
-            result.src = '';
-            result.posᐟ = pos;
-            return true;
-        }
-
         let src = '';
         while (true) {
             if (!expression(ast, pos, result)) break;
 
-            // TODO: check if any input was consumed... if not, return with zero iterations, since otherwise
-            // we would loop forever. Change to one iteration as 'canonical' / more useful behaviour? Why (not)?
+            // TODO: check if any input was consumed... if not, stop iterating, since otherwise we may loop loop forever
+            // TODO: any other checks needed? review...
             if (pos === result.posᐟ) break;
             src += result.src;
             pos = result.posᐟ;
@@ -415,6 +404,7 @@ function isFullyConsumed(ast: unknown, pos: number) {
     return pos === 1;
 }
 
+// TODO: this is copypasta - same fn is in parse template
 function isPlainObject(value: unknown): value is object {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
