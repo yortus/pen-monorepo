@@ -1,4 +1,3 @@
-const NO_NODE = Symbol('NoNode');
 type Unparser = (ast: unknown, pos: number, result: {src: string, posᐟ: number}) => boolean;
 declare const start: Unparser;
 
@@ -69,11 +68,9 @@ export function Memo(expr: Unparser): Unparser {
 
                 // TODO: break cases:
                 // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                // NO_NODE --> anything
                 // some node --> some different non-empty node (assert: should never happen!)
                 if (result.src === FAIL) break;
                 if (result.posᐟ === memo.result.posᐟ) break;
-                if (isFullyConsumed(ast, memo.result.posᐟ)) break; // TODO: covered by previous check? I think so...
                 if (!isFullyConsumed(ast, result.posᐟ)) break;
                 Object.assign(memo.result, result);
             }
@@ -407,7 +404,6 @@ export function epsilon(_: unknown, pos: number, result: {src: string, posᐟ: n
 
 // TODO: internal helpers...
 function isFullyConsumed(ast: unknown, pos: number) {
-    if (ast === NO_NODE) return true;
     if (typeof ast === 'string') return pos === ast.length;
     if (Array.isArray(ast)) return pos === ast.length;
     if (isPlainObject(ast)) {
