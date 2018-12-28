@@ -1,14 +1,4 @@
-// type Span = number; // index of start position in `text`
 const NO_NODE = Symbol('NoNode');
-// const FAIL = Symbol('Fail');
-// type Duad = {S: Span, N: unknown} | {S: Span, N: typeof FAIL};
-// type Transcoder = (text: string, S: Span) => Duad;
-// declare const start: Transcoder;
-
-
-
-
-// TODO: temp testing...
 type Parser = (src: string, pos: number, result: {ast: unknown, posᐟ: number}) => boolean;
 declare const start: Parser;
 
@@ -190,7 +180,7 @@ export function List(elements: ListElement[]): Parser {
 
 
 
-// // ---------- built-in parser factories ----------
+// ---------- built-in parser factories ----------
 export function AbstractCharRange(min: string, max: string): Parser {
     [max]; // prevent 6133 unused decl
     return (_, pos, result) => {
@@ -314,7 +304,7 @@ export function char(src: string, pos: number, result: {ast: unknown, posᐟ: nu
 
 
 
-// // TODO: where do these ones belong?
+// TODO: where do these ones belong?
 export function intrinsic_true(_: string, pos: number, result: {ast: unknown, posᐟ: number}) {
     result.ast = true;
     result.posᐟ = pos;

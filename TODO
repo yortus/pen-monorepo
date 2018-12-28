@@ -2,9 +2,12 @@ Priorities:
     [x] make all parsers/unparsers into pure functions, put all outside any closures
     [x] never return `null` from parsers/unparsers, so can always destructure multiple returns.
     [x] new signature for parse:     `parse(src: string, pos: number, result: {ast: unknown, posᐟ: number}): boolean`
-    [ ] new signature for unparse:
+    New signature for unparse:
         [x] step1: `unparse(ast: unknown, result: {src: string, astᐟ: unknown}): boolean`
-        [ ] final: `unparse(ast: unknown, pos: number, result: {src: string, posᐟ: number}): boolean`
+        [x] final: `unparse(ast: unknown, pos: number, result: {src: string, posᐟ: number}): boolean`
+        [ ] fix `ZeroOrMore` to handle incremental consumption of more node types (ie not just strings)
+        [ ] still need `NO_NODE`?
+    [ ] should object & arrays just merge in sequences, like strings do? Wouldn't even need spread/gather operators then
     [ ] review `result` local in all parsers/unparsers - can we directly destructure some of these?
     [ ] combine parse/unparse templates into a single file
     [ ] break up templates into many files that cross-reference using TS namespace merging
