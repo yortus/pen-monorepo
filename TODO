@@ -8,9 +8,9 @@ Priorities:
         [x] fix `ZeroOrMore` to handle incremental consumption of more node types (ie not just strings)
         [x] still need `NO_NODE` in unparse template? ANS: no, removed
         [ ] still need `NO_NODE` in parse template?
-    [ ] should object & arrays just merge in sequences, like strings do? AND: yes
+    [x] should object & arrays just merge in sequences, like strings do? AND: yes
         [x] implement this
-        [ ] remove spread/gather operators for objects and arrays
+        [x] remove spread/gather operators for objects and arrays
     [ ] review `result` local in all parsers/unparsers - can we directly destructure some of these?
     [ ] combine parse/unparse templates into a single file
     [ ] break up templates into many files that cross-reference using TS namespace merging

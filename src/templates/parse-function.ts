@@ -115,37 +115,26 @@ export function Sequence(...expressions: Parser[]): Parser {
     };
 }
 
-type RecordField =
-    | {type: 'static', name: string, value: Parser}
-    | {type: 'computed', name: Parser, value: Parser}
-    | {type: 'spread', expr: Parser};
+type RecordField = {type: 'static', name: string, value: Parser} | {type: 'computed', name: Parser, value: Parser};
 export function Record(fields: RecordField[]): Parser {
     return (src, pos, result) => {
         let obj = {} as any; // TODO: remove/improve cast
         for (let field of fields) {
-            if (field.type === 'spread') {
-                if (!field.expr(src, pos, result)) return false;
-                assert(result.ast === NO_NODE || (result.ast && typeof result.ast === 'object'));
-                if (result.ast !== NO_NODE) Object.assign(obj, result.ast);
+            let id: string;
+            if (field.type === 'computed') {
+                if (!field.name(src, pos, result)) return false;
+                assert(typeof result.ast === 'string');
+                id = result.ast as string;
                 pos = result.posᐟ;
             }
-            else {
-                let id: string;
-                if (field.type === 'computed') {
-                    if (!field.name(src, pos, result)) return false;
-                    assert(typeof result.ast === 'string');
-                    id = result.ast as string;
-                    pos = result.posᐟ;
-                }
-                else /* field.type === 'static' */ {
-                    id = field.name;
-                }
+            else /* field.type === 'static' */ {
+                id = field.name;
+            }
 
-                if (!field.value(src, pos, result)) return false;
-                assert(result.ast !== NO_NODE);
-                obj[id] = result.ast;
-                pos = result.posᐟ;
-            }
+            if (!field.value(src, pos, result)) return false;
+            assert(result.ast !== NO_NODE);
+            obj[id] = result.ast;
+            pos = result.posᐟ;
         }
         result.ast = obj;
         result.posᐟ = pos;
@@ -153,25 +142,15 @@ export function Record(fields: RecordField[]): Parser {
     };
 }
 
-type ListElement =
-    | {type: 'element', value: Parser}
-    | {type: 'spread', expr: Parser};
+interface ListElement { type: 'element'; value: Parser; }
 export function List(elements: ListElement[]): Parser {
     return (src, pos, result) => {
         let arr = [] as Array<unknown>;
         for (let element of elements) {
-            if (element.type === 'spread') {
-                if (!element.expr(src, pos, result)) return false;
-                assert(result.ast === NO_NODE || Array.isArray(result.ast));
-                if (result.ast !== NO_NODE) arr.push(...result.ast as any[]);
-                pos = result.posᐟ;
-            }
-            else /* field.type === 'element' */ {
-                if (!element.value(src, pos, result)) return false;
-                assert(result.ast !== NO_NODE);
-                arr.push(result.ast);
-                pos = result.posᐟ;
-            }
+            if (!element.value(src, pos, result)) return false;
+            assert(result.ast !== NO_NODE);
+            arr.push(result.ast);
+            pos = result.posᐟ;
         }
         result.ast = arr;
         result.posᐟ = pos;

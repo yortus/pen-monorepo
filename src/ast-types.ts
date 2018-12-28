@@ -27,7 +27,7 @@ export interface Application {
 
 export interface Record {
     nodeType: 'Record';
-    fields: Array<RecordField | RecordSpread>;
+    fields: RecordField[];
 }
 
 export type RecordField = {
@@ -42,24 +42,14 @@ export type RecordField = {
     value: Expression;
 };
 
-export interface RecordSpread {
-    nodeType: 'RecordSpread';
-    argument: Expression;
-}
-
 export interface List {
     nodeType: 'List';
-    elements: Array<ListElement | ListSpread>;
+    elements: ListElement[];
 }
 
 export interface ListElement {
     nodeType: 'ListElement';
     value: Expression;
-}
-
-export interface ListSpread {
-    nodeType: 'ListSpread';
-    argument: Expression;
 }
 
 export interface CharacterRange {
@@ -98,10 +88,8 @@ export type Node =
     | Application
     | Record
     | RecordField
-    | RecordSpread
     | List
     | ListElement
-    | ListSpread
     | CharacterRange
     | StringLiteral
     | Identifier

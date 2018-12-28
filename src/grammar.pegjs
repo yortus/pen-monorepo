@@ -42,7 +42,7 @@ Record
     { return {nodeType: 'Record', fields: fields || []}; }
 
 RecordFields
-    = h:(RecordField / RecordSpread)   t:(WS   COMMA   WS   (RecordField / RecordSpread))*
+    = h:RecordField   t:(WS   COMMA   WS   RecordField)*
     { return [h].concat(t.map(el => el[3])); }
 
 RecordField
@@ -52,25 +52,17 @@ RecordField
     / LSQBR name:Expression RSQBR   WS   COLON   WS   value:Expression
     { return {nodeType: 'RecordField', hasComputedName: true, name, value}; }
 
-RecordSpread
-    = DOT DOT DOT   WS   arg:Expression
-    { return {nodeType: 'RecordSpread', argument: arg}; }
-
 List
     = LSQBR   WS   elements:ListElements?   WS   RSQBR
     { return {nodeType: 'List', elements: elements || []}; }
 
 ListElements
-    = h:(ListElement / ListSpread)   t:(WS   COMMA   WS   (ListElement / ListSpread))*
+    = h:ListElement   t:(WS   COMMA   WS   ListElement)*
     { return [h].concat(t.map(el => el[3])); }
 
 ListElement
     = value:Expression
     { return {nodeType: 'ListElement', value}; }
-
-ListSpread
-    = DOT DOT DOT   WS   arg:Expression
-    { return {nodeType: 'ListSpread', argument: arg}; }
 
 CharRange
     = SQUOTE   !SQUOTE   min:Character   SQUOTE   WS   DOT   DOT   WS   SQUOTE   !SQUOTE   max:Character   SQUOTE
