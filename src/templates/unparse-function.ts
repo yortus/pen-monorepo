@@ -18,12 +18,16 @@ export function unparse(ast: unknown): string {
 
 
 
+// TODO: temp testing...
+export const i32 = I32();
+
+
+
+
 // ---------- wip... ----------
 export function Memo(expr: Unparser): Unparser {
-
-    // TODO: revise memo key once using new ast/pos signature
-    const FAIL = '\uD800'; // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
-    const memos = new Map<
+    const UNFAIL = '\uD800'; // NB: this invalid code point (lead surrogate with no pair) is used as a sentinel.
+    const unmemos = new Map<
         unknown,
         Map<
             number,
@@ -31,29 +35,28 @@ export function Memo(expr: Unparser): Unparser {
         >
     >();
     return (ast, pos, result) => {
-
         // Check whether the memo table already has an entry for the given initial state.
-        let memos2 = memos.get(ast);
-        if (memos2 === undefined) memos.set(ast, memos2 = new Map());
+        let memos2 = unmemos.get(ast);
+        if (memos2 === undefined) unmemos.set(ast, memos2 = new Map());
         let memo = memos2.get(pos);
         if (!memo) {
             // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
             // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
             // All future applications of this rule with the same initial state will find this memo. If a future
             // application finds the memo still unresolved, then we know we have encountered left-recursion.
-            memo = {resolved: false, isLeftRecursive: false, result: {src: FAIL, posᐟ: 0}};
+            memo = {resolved: false, isLeftRecursive: false, result: {src: UNFAIL, posᐟ: 0}};
             memos2.set(pos, memo);
 
             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
             // this point, any left-recursive paths encountered during application are guaranteed to have been noted
             // and aborted (see below).
-            if (!expr(ast, pos, memo.result)) memo.result.src = FAIL;
+            if (!expr(ast, pos, memo.result)) memo.result.src = UNFAIL;
             memo.resolved = true;
 
             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
             if (!memo.isLeftRecursive) {
                 Object.assign(result, memo.result);
-                return result.src !== FAIL;
+                return result.src !== UNFAIL;
             }
 
             // If we get here, then the above application of the rule invoked itself left-recursively, but we
@@ -63,13 +66,13 @@ export function Memo(expr: Unparser): Unparser {
             // and consumes more input than the previous iteration did, in which case we update the memo with the
             // new result. We thus 'grow' the result, stopping when application either fails or does not consume
             // more input, at which point we take the result of the previous iteration as final.
-            while (memo.result.src !== FAIL) {
-                if (!expr(ast, pos, result)) result.src = FAIL;
+            while (memo.result.src !== UNFAIL) {
+                if (!expr(ast, pos, result)) result.src = UNFAIL;
 
                 // TODO: break cases:
                 // anything --> same thing (covers all string cases, since they can only be same or shorter)
                 // some node --> some different non-empty node (assert: should never happen!)
-                if (result.src === FAIL) break;
+                if (result.src === UNFAIL) break;
                 if (result.posᐟ === memo.result.posᐟ) break;
                 if (!isFullyConsumed(ast, result.posᐟ)) break;
                 Object.assign(memo.result, result);
@@ -88,7 +91,7 @@ export function Memo(expr: Unparser): Unparser {
         // We have a resolved memo, so the result of the rule application for the given initial state has already
         // been computed. Return it from the memo.
         Object.assign(result, memo.result);
-        return result.src !== FAIL;
+        return result.src !== UNFAIL;
     };
 }
 
@@ -122,10 +125,7 @@ export function Sequence(...expressions: Unparser[]): Unparser {
     };
 }
 
-type Field =
-    | {type: 'static', name: string, value: Unparser}
-    | {type: 'computed', name: Unparser, value: Unparser}
-    | {type: 'spread', expr: Unparser};
+type Field = {type: 'static', name: string, value: Unparser} | {type: 'computed', name: Unparser, value: Unparser};
 export function Record(fields: Field[]): Unparser {
     return (ast, pos, result) => {
         let src = '';
@@ -134,47 +134,39 @@ export function Record(fields: Field[]): Unparser {
         // TODO: ...
         outerLoop:
         for (let field of fields) {
-            if (field.type === 'spread') {
-                // TODO: ...
-                if (!field.expr(ast, pos, result)) return false;
-                src += result.src;
-                pos = result.posᐟ;
-            }
-            else {
-                // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(ast);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
+            // Find the first property key/value pair that matches this field name/value pair (if any)
+            let propNames = Object.keys(ast);
+            let propCount = propNames.length;
+            assert(propCount <= 32);
+            for (let i = 0; i < propCount; ++i) {
+                let propName = propNames[i];
 
-                    // TODO: skip already-consumed key/value pairs
-                    const posIncrement = 1 << i;
-                    if ((pos & posIncrement) !== 0) continue;
+                // TODO: skip already-consumed key/value pairs
+                const posIncrement = 1 << i;
+                if ((pos & posIncrement) !== 0) continue;
 
-                    // TODO: match field name
-                    if (field.type === 'computed') {
-                        if (!field.name(propName, 0, result)) continue;
-                        if (result.posᐟ !== propName.length) continue;
-                        src += result.src;
-                    }
-                    else /* field.type === 'static' */ {
-                        if (propName !== field.name) continue;
-                    }
-
-                    // TODO: match field value
-                    if (!field.value((ast as any)[propName], 0, result)) continue;
-                    if (!isFullyConsumed((ast as any)[propName], result.posᐟ)) continue;
+                // TODO: match field name
+                if (field.type === 'computed') {
+                    if (!field.name(propName, 0, result)) continue;
+                    if (result.posᐟ !== propName.length) continue;
                     src += result.src;
-
-                    // TODO: we matched both name and value - consume them from ast
-                    pos += posIncrement;
-                    continue outerLoop;
+                }
+                else /* field.type === 'static' */ {
+                    if (propName !== field.name) continue;
                 }
 
-                // If we get here, no match...
-                return false;
+                // TODO: match field value
+                if (!field.value((ast as any)[propName], 0, result)) continue;
+                if (!isFullyConsumed((ast as any)[propName], result.posᐟ)) continue;
+                src += result.src;
+
+                // TODO: we matched both name and value - consume them from ast
+                pos += posIncrement;
+                continue outerLoop;
             }
+
+            // If we get here, no match...
+            return false;
         }
         result.src = src;
         result.posᐟ = pos;
@@ -182,27 +174,18 @@ export function Record(fields: Field[]): Unparser {
     };
 }
 
-type ListElement =
-    | {type: 'element', value: Unparser}
-    | {type: 'spread', expr: Unparser};
+interface ListElement { type: 'element'; value: Unparser; }
 export function List(elements: ListElement[]): Unparser {
     return (ast, pos, result) => {
         let src = '';
         if (!Array.isArray(ast)) return false;
 
         for (let element of elements) {
-            if (element.type === 'spread') {
-                if (!element.expr(ast, pos, result)) return false;
-                src += result.src;
-                pos = result.posᐟ;
-            }
-            else /* element.type === 'element' */{
-                if (pos >= ast.length) return false;
-                if (!element.value(ast[pos], 0, result)) return false;
-                if (!isFullyConsumed(ast[pos], result.posᐟ)) return false;
-                src += result.src;
-                pos += 1;
-            }
+            if (pos >= ast.length) return false;
+            if (!element.value(ast[pos], 0, result)) return false;
+            if (!isFullyConsumed(ast[pos], result.posᐟ)) return false;
+            src += result.src;
+            pos += 1;
         }
         result.src = src;
         result.posᐟ = pos;
@@ -275,44 +258,44 @@ export function UniformStringLiteral(value: string): Unparser {
 
 
 // ---------- other built-ins ----------
-export function i32(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
+export function I32(): Unparser {
+    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
-    // TODO: ensure N is a 32-bit integer
-    if (typeof ast !== 'number' || pos !== 0) return false;
-    let num = ast;
-    if ((num & 0xFFFFFFFF) !== num) return false;
+    return (ast, pos, result) => {
+        // TODO: ensure N is a 32-bit integer
+        if (typeof ast !== 'number' || pos !== 0) return false;
+        let num = ast;
+        if ((num & 0xFFFFFFFF) !== num) return false;
 
-    // TODO: check sign...
-    let isNegative = false;
-    if (num < 0) {
-        isNegative = true;
-        if (num === -2147483648) {
-            // Specially handle the one case where N = -N could overflow
-            result.src = '-2147483648';
-            result.posᐟ = 1;
-            return true;
+        // TODO: check sign...
+        let isNegative = false;
+        if (num < 0) {
+            isNegative = true;
+            if (num === -2147483648) {
+                // Specially handle the one case where N = -N could overflow
+                result.src = '-2147483648';
+                result.posᐟ = 1;
+                return true;
+            }
+            num = -num as number;
         }
-        num = -num as number;
-    }
 
-    // TODO: ...then digits
-    let digits = [] as string[];
-    while (true) {
-        let d = num % 10;
-        num = (num / 10) | 0;
-        digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
-        if (num === 0) break;
-    }
+        // TODO: ...then digits
+        let digits = [] as string[];
+        while (true) {
+            let d = num % 10;
+            num = (num / 10) | 0;
+            digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
+            if (num === 0) break;
+        }
 
-    // TODO: compute final string...
-    if (isNegative) digits.push('-');
-    result.src = digits.reverse().join('');
-    result.posᐟ = 1;
-    return true;
+        // TODO: compute final string...
+        if (isNegative) digits.push('-');
+        result.src = digits.reverse().join('');
+        result.posᐟ = 1;
+        return true;
+    };
 }
-
-// These constants are used by the i32 unparser.
-const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
@@ -326,6 +309,25 @@ export function char(ast: unknown, pos: number, result: {src: string, posᐟ: nu
 
 
 
+
+export function ZeroOrMore(expression: Unparser): Unparser {
+    return (ast, pos, result) => {
+        let src = '';
+        while (true) {
+            if (!expression(ast, pos, result)) break;
+
+            // TODO: check if any input was consumed... if not, stop iterating, since otherwise we may loop loop forever
+            // TODO: any other checks needed? review...
+            if (pos === result.posᐟ) break;
+            src += result.src;
+            pos = result.posᐟ;
+        }
+
+        result.src = src;
+        result.posᐟ = pos;
+        return true;
+    };
+}
 
 // TODO: where do these ones belong?
 export function intrinsic_true(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
@@ -347,25 +349,6 @@ export function intrinsic_null(ast: unknown, pos: number, result: {src: string, 
     result.src = '';
     result.posᐟ = 1;
     return true;
-}
-
-export function ZeroOrMore(expression: Unparser): Unparser {
-    return (ast, pos, result) => {
-        let src = '';
-        while (true) {
-            if (!expression(ast, pos, result)) break;
-
-            // TODO: check if any input was consumed... if not, stop iterating, since otherwise we may loop loop forever
-            // TODO: any other checks needed? review...
-            if (pos === result.posᐟ) break;
-            src += result.src;
-            pos = result.posᐟ;
-        }
-
-        result.src = src;
-        result.posᐟ = pos;
-        return true;
-    };
 }
 
 export function Maybe(expression: Unparser): Unparser {

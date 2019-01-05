@@ -1,3 +1,9 @@
+[ ] rename `char` to `any-char`
+[ ] rename `intrinsic-*` to ???
+
+
+
+
 Priorities:
     [x] make all parsers/unparsers into pure functions, put all outside any closures
     [x] never return `null` from parsers/unparsers, so can always destructure multiple returns.
@@ -11,7 +17,7 @@ Priorities:
     [x] should object & arrays just merge in sequences, like strings do? AND: yes
         [x] implement this
         [x] remove spread/gather operators for objects and arrays
-    [ ] review `result` local in all parsers/unparsers - can we directly destructure some of these?
+    [x] review `result` local in all parsers/unparsers - can we directly destructure some of these? N/A now
     [ ] combine parse/unparse templates into a single file
     [ ] break up templates into many files that cross-reference using TS namespace merging
     break up templates into separate files:
