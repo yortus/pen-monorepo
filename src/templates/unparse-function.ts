@@ -20,6 +20,11 @@ export function unparse(ast: unknown): string {
 
 // TODO: temp testing...
 export const i32 = I32();
+export const char = Char();
+export const intrinsic_true = True();
+export const intrinsic_false = False();
+export const intrinsic_null = Null();
+export const epsilon = Epsilon();
 
 
 
@@ -300,11 +305,13 @@ export function I32(): Unparser {
 
 
 
-export function char(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
-    if (typeof ast !== 'string' || pos >= ast.length) return false;
-    result.src = ast.charAt(pos);
-    result.posᐟ = pos + 1;
-    return true;
+export function Char(): Unparser {
+    return (ast, pos, result) => {
+        if (typeof ast !== 'string' || pos >= ast.length) return false;
+        result.src = ast.charAt(pos);
+        result.posᐟ = pos + 1;
+        return true;
+    };
 }
 
 
@@ -330,25 +337,31 @@ export function ZeroOrMore(expression: Unparser): Unparser {
 }
 
 // TODO: where do these ones belong?
-export function intrinsic_true(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
-    if (ast !== true || pos !== 0) return false;
-    result.src = '';
-    result.posᐟ = 1;
-    return true;
+export function True(): Unparser {
+    return (ast, pos, result) => {
+        if (ast !== true || pos !== 0) return false;
+        result.src = '';
+        result.posᐟ = 1;
+        return true;
+    };
 }
 
-export function intrinsic_false(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
-    if (ast !== false || pos !== 0) return false;
-    result.src = '';
-    result.posᐟ = 1;
-    return true;
+export function False(): Unparser {
+    return (ast, pos, result) => {
+        if (ast !== false || pos !== 0) return false;
+        result.src = '';
+        result.posᐟ = 1;
+        return true;
+    };
 }
 
-export function intrinsic_null(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
-    if (ast !== null || pos !== 0) return false;
-    result.src = '';
-    result.posᐟ = 1;
-    return true;
+export function Null(): Unparser {
+    return (ast, pos, result) => {
+        if (ast !== null || pos !== 0) return false;
+        result.src = '';
+        result.posᐟ = 1;
+        return true;
+    };
 }
 
 export function Maybe(expression: Unparser): Unparser {
@@ -365,10 +378,12 @@ export function Not(expression: Unparser): Unparser {
     };
 }
 
-export function epsilon(_: unknown, pos: number, result: {src: string, posᐟ: number}) {
-    result.src = '';
-    result.posᐟ = pos;
-    return true;
+export function Epsilon(): Unparser {
+    return (_, pos, result) => {
+        result.src = '';
+        result.posᐟ = pos;
+        return true;
+    };
 }
 
 

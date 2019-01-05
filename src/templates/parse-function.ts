@@ -22,6 +22,11 @@ export function parse(text: string): unknown {
 
 // TODO: temp testing...
 export const i32 = I32();
+export const char = Char();
+export const intrinsic_true = True();
+export const intrinsic_false = False();
+export const intrinsic_null = Null();
+export const epsilon = Epsilon();
 
 
 
@@ -281,11 +286,13 @@ export function I32(): Parser {
 
 
 
-export function char(src: string, pos: number, result: {ast: unknown, posᐟ: number}) {
-    if (pos >= src.length) return false;
-    result.ast = src.charAt(pos);
-    result.posᐟ = pos + 1;
-    return true;
+export function Char(): Parser {
+    return (src, pos, result) => {
+        if (pos >= src.length) return false;
+        result.ast = src.charAt(pos);
+        result.posᐟ = pos + 1;
+        return true;
+    };
 }
 
 
@@ -316,22 +323,28 @@ export function ZeroOrMore(expression: Parser): Parser {
 }
 
 // TODO: where do these ones belong?
-export function intrinsic_true(_: string, pos: number, result: {ast: unknown, posᐟ: number}) {
-    result.ast = true;
-    result.posᐟ = pos;
-    return true;
+export function True(): Parser {
+    return (_, pos, result) => {
+        result.ast = true;
+        result.posᐟ = pos;
+        return true;
+    };
 }
 
-export function intrinsic_false(_: string, pos: number, result: {ast: unknown, posᐟ: number}) {
-    result.ast = false;
-    result.posᐟ = pos;
-    return true;
+export function False(): Parser {
+    return (_, pos, result) => {
+        result.ast = false;
+        result.posᐟ = pos;
+        return true;
+    };
 }
 
-export function intrinsic_null(_: string, pos: number, result: {ast: unknown, posᐟ: number}) {
-    result.ast = null;
-    result.posᐟ = pos;
-    return true;
+export function Null(): Parser {
+    return (_, pos, result) => {
+        result.ast = null;
+        result.posᐟ = pos;
+        return true;
+    };
 }
 
 export function Maybe(expression: Parser): Parser {
@@ -348,10 +361,12 @@ export function Not(expression: Parser): Parser {
     };
 }
 
-export function epsilon(_: string, pos: number, result: {ast: unknown, posᐟ: number}) {
-    result.ast = NO_NODE;
-    result.posᐟ = pos;
-    return true;
+export function Epsilon(): Parser {
+    return (_, pos, result) => {
+        result.ast = NO_NODE;
+        result.posᐟ = pos;
+        return true;
+    };
 }
 
 
