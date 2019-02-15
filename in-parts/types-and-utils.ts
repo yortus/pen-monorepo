@@ -13,6 +13,27 @@ const NO_NODE = Symbol('NoNode');
 
 
 
+function defineRule(init: () => Codec) {
+    let result: Codec = {
+        parse(src, pos, res) {
+            let rule = init();
+            result.parse = rule.parse;
+            result.unparse = rule.unparse;
+            return rule.parse(src, pos, res);
+        },
+        unparse(ast, pos, res) {
+            let rule = init();
+            result.parse = rule.parse;
+            result.unparse = rule.unparse;
+            return rule.unparse(ast, pos, res);
+        },
+    };
+    return result;
+}
+
+
+
+
 function isFullyConsumed(ast: unknown, pos: number) {
     if (typeof ast === 'string') return pos === ast.length;
     if (Array.isArray(ast)) return pos === ast.length;

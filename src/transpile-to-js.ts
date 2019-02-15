@@ -7,6 +7,46 @@ import {parse} from './grammar';
 
 
 
+export function NEWtranspileToJS(grammar: string) {
+
+    // Generate TypeScript source code for the grammar
+    let ast = parse(grammar);
+    let stmts = emitModule(ast);
+    let decl = ts.createBlock(stmts, true);
+    const printer = ts.createPrinter({newLine: ts.NewLineKind.LineFeed});
+    const grammarSource = printer.printNode(
+        ts.EmitHint.Unspecified,
+        decl,
+        ts.createSourceFile('main', '', ts.ScriptTarget.ES2015)
+    );
+
+    // Fetch all builtin sources
+    const BUILTIN_PATH = path.join(__dirname, '../../in-parts');
+    let builtinFilenames = fs.readdirSync(BUILTIN_PATH).filter(fn => path.extname(fn) === '.ts');
+    let builtinSources = builtinFilenames.map(fn => fs.readFileSync(path.join(BUILTIN_PATH, fn), {encoding: 'utf8'}));
+
+    // Concatenate all sources
+    let source = [grammarSource, ...builtinSources].join('\n\n\n\n');
+
+    // TODO: temp testing... write back to disk for inspection
+    fs.writeFileSync(path.join(process.cwd(), 'output.ts'), source, {encoding: 'utf8'});
+    process.exit(0);
+
+    let out = ts.transpileModule(source, {
+        compilerOptions: {
+            target: ts.ScriptTarget.ES2015,
+        },
+    });
+
+    // TODO: temp testing... what have we so far?
+    out;
+    grammar;
+
+}
+
+
+
+
 export function transpileToJS(grammar: string) {
     let ast = parse(grammar);
     let moduleStmts = emitModule(ast);

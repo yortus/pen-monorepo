@@ -17,51 +17,84 @@ import {StringLiteral} from './ast-types';
 export function emitModule(module: Module): ts.Statement[] {
     let stmts = [] as ts.Statement[];
     for (let {id, expression} of module.bindings) {
-        let funcDecl = ts.createFunctionDeclaration(
-            /*decorators*/ undefined,
+
+        let decl = ts.createVariableStatement(
             /*modifiers*/ undefined,
-            /*asteriskToken*/ undefined,
-            /*name*/ id.name,
-            /*typeParameters*/ undefined,
-            /*parameters*/ [
-                ts.createParameter(undefined, undefined, undefined, 'src'),
-                ts.createParameter(undefined, undefined, undefined, 'pos'),
-                ts.createParameter(undefined, undefined, undefined, 'result'),
-            ],
-            /*type*/ undefined,
-            /*body*/ ts.createBlock(
-                /*statements*/ [
-                    ts.createReturn(
-                        ts.createCall(
-                            /*expression*/ ts.createPropertyAccess(
-                                ts.createIdentifier(id.name),
-                                'start'
-                            ),
+            /*declarationList*/ ts.createVariableDeclarationList(
+                /*declarations*/ [
+                    ts.createVariableDeclaration(
+                        /*name*/ id.name,
+                        /*type*/ undefined,
+                        /*initializer*/ ts.createCall(
+                            /*expression*/ ts.createIdentifier('defineRule'),
                             /*typeArguments*/ undefined,
                             /*argumentsArray*/ [
-                                ts.createIdentifier('src'),
-                                ts.createIdentifier('pos'),
-                                ts.createIdentifier('result'),
+                                ts.createArrowFunction(
+                                    /*modifiers*/ undefined,
+                                    /*typeParameters*/ undefined,
+                                    /*parameters*/ [],
+                                    /*type*/ undefined,
+                                    /*token*/ undefined,
+                                    /*body*/ emitExpression(expression)
+                                ),
                             ]
                         )
                     ),
                 ],
-                /*multiline*/ true
+                /*flags*/ ts.NodeFlags.Const
             )
         );
+        ts.addSyntheticLeadingComment(decl, ts.SyntaxKind.SingleLineCommentTrivia, ` ${id.name}`, true);
+        stmts.push(decl);
 
-        let propStmt = ts.createExpressionStatement(
-            ts.createAssignment(
-                /*left*/ ts.createPropertyAccess(
-                    ts.createIdentifier(id.name),
-                    'start'
-                ),
-                /*right*/ emitExpression(expression)
-            )
-        );
 
-        ts.addSyntheticLeadingComment(funcDecl, ts.SyntaxKind.SingleLineCommentTrivia, ` ${id.name}`, true);
-        stmts.push(funcDecl, propStmt);
+
+
+        // let funcDecl = ts.createFunctionDeclaration(
+        //     /*decorators*/ undefined,
+        //     /*modifiers*/ undefined,
+        //     /*asteriskToken*/ undefined,
+        //     /*name*/ id.name,
+        //     /*typeParameters*/ undefined,
+        //     /*parameters*/ [
+        //         ts.createParameter(undefined, undefined, undefined, 'src'),
+        //         ts.createParameter(undefined, undefined, undefined, 'pos'),
+        //         ts.createParameter(undefined, undefined, undefined, 'result'),
+        //     ],
+        //     /*type*/ undefined,
+        //     /*body*/ ts.createBlock(
+        //         /*statements*/ [
+        //             ts.createReturn(
+        //                 ts.createCall(
+        //                     /*expression*/ ts.createPropertyAccess(
+        //                         ts.createIdentifier(id.name),
+        //                         'start'
+        //                     ),
+        //                     /*typeArguments*/ undefined,
+        //                     /*argumentsArray*/ [
+        //                         ts.createIdentifier('src'),
+        //                         ts.createIdentifier('pos'),
+        //                         ts.createIdentifier('result'),
+        //                     ]
+        //                 )
+        //             ),
+        //         ],
+        //         /*multiline*/ true
+        //     )
+        // );
+
+        // let propStmt = ts.createExpressionStatement(
+        //     ts.createAssignment(
+        //         /*left*/ ts.createPropertyAccess(
+        //             ts.createIdentifier(id.name),
+        //             'start'
+        //         ),
+        //         /*right*/ emitExpression(expression)
+        //     )
+        // );
+
+        // ts.addSyntheticLeadingComment(funcDecl, ts.SyntaxKind.SingleLineCommentTrivia, ` ${id.name}`, true);
+        // stmts.push(funcDecl, propStmt);
     }
     return stmts;
 }

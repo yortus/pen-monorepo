@@ -73,3 +73,20 @@ The type of the sequence `E1 E2` is:
 - else when `T1 = 
 
 
+
+
+
+Syntax Ideas:
+```
+module Thing =
+    start = Open Content Close
+
+    Open = ...
+    Content = ...
+    Close = ...
+
+
+Thing->Open
+Thing.Open
+
+```

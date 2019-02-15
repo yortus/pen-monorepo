@@ -15,7 +15,9 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceRoot}/dist/test/**/*.js"
+                // TODO: temp testing...
+                "${workspaceRoot}/dist/test/**/new-test.js"
+                // TODO: was... restore... "${workspaceRoot}/dist/test/**/*.js"
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
