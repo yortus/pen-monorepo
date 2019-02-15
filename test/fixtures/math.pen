@@ -4,13 +4,15 @@
  *      42*(333-2)
  */
 
+let {Memoize} = import 'pen';
+
 start = expr
 
-expr = Memo<add | sub | term>
+expr = Memoize(add | sub | term)
 add = {type: 'add', lhs: expr, rhs: ADD term}
 sub = {type: 'sub', lhs: expr, rhs: SUB term}
 
-term = Memo<mul | div | factor>
+term = Memoize(mul | div | factor)
 mul = {type: 'mul', lhs: term, rhs: MUL factor}
 div = {type: 'div', lhs: term, rhs: DIV factor}
 

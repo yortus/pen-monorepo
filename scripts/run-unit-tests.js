@@ -1,7 +1,5 @@
 // Tell mocha where the test files are.
-// TODO: temp testing...
-process.argv.push('dist/test/**/new-test.js');
-// TODO: was... restore... process.argv.push('dist/test/**/*.js');
+process.argv.push('dist/test/**/*.js');
 
 // Tell mocha *not* to call process.exit() when tests have finished.
 process.argv.push('--no-exit');

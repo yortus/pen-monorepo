@@ -1,3 +1,10 @@
+jsIntrinsics = import './js-intrinsics.pen.ts'
+{Maybe, Not, ZeroOrMore} = import './utils.pen';
+{Translit} = import 'pen';
+
+
+
+
 // ---------- JSON Grammar ----------
 start = WS   Value   WS
 Value =
@@ -10,27 +17,27 @@ Value =
     |   String
 
 // ---------- Primitive values ----------
-False   = `false` intrinsic_false  // Assumes `intrinsic_false`, `intrinsic_null` and `intrinsic_true` are defined to be abstract terminals
-Null    = `null` intrinsic_null    // "   "
-True    = `true` intrinsic_true    // "   "
+False   = `false`   jsIntrinsics.false
+Null    = `null`   jsIntrinsics.null
+True    = `true`   jsIntrinsics.true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String]: COLON Value}   Maybe<COMMA Properties>
+Properties  = {[String]: COLON Value}   Maybe(COMMA Properties)
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET
-Elements    = [Value]   Maybe<COMMA Elements>
+Elements    = [Value]   Maybe(COMMA Elements)
 
 // ---------- Numbers ----------
 Number = i32 // TODO: should be f64? check JS specs
 
 // ---------- Strings ----------
-String = DOUBLE_QUOTE   ZeroOrMore<CHAR>   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   ZeroOrMore(CHAR)   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
-    |   Not<"\x00".."\x1f"   |   "\""   |   "\\">   char        // any char except control char, " or \
+    |   Not("\x00".."\x1f"   |   "\""   |   "\\")   char        // any char except control char, " or \
     |   `\\"`   '"'                                             // quotation mark
     |   `\\\\`   '\\'                                           // reverse solidus
     |   `\\/`   '/'                                             // solidus
@@ -56,4 +63,4 @@ RBRACKET        = WS `]` WS
 COLON           = WS `:` WS
 COMMA           = WS `,` WS
 DOUBLE_QUOTE    = `"`
-WS              = ZeroOrMore<` ` | `\t` | `\n` | `\r`>
+WS              = ZeroOrMore(` ` | `\t` | `\n` | `\r`)
