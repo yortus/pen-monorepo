@@ -1,6 +1,6 @@
-import {Module} from './ast-types';
+import {ForeignModule, PenModule} from './ast-types';
 
 
 
 
-export function parse(text: string): Module;
+export function parse(text: string): ForeignModule | PenModule;

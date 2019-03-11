@@ -1,241 +1,207 @@
-Start
-    = File
+// ==========   Top-level: files and modules   ==========
+start
+    = foreignModule
+    / penModule
 
-File
-    = PenFile
-    / ForeignFile
+foreignModule
+    = (!endOfLine !"@pen" .)*   "@pen"   horizontalWhitespace+   "export"   horizontalWhitespace+   exports:foreignExportList   .*
+    { return {type: 'ForeignModule', exports}; }
 
-PenFile
-    = WS   Module   WS
+foreignExportList
+    = head:identifier   tail:(horizontalWhitespace*   ","   horizontalWhitespace*   identifier)*
+    { return [head].concat(tail.map(el => el[3]));}
 
-ForeignFile
-    = !. . // TODO...
+penModule
+    = decls:(__   penModuleDeclaration)*   __   endOfFile
+    { return {type: 'PenModule', declarations: decls.map(el => el[1])}; }
 
-Module
-    = items:(WS   ModuleItem)*
-    { return {type: 'Module', items: items.map(d => d[1])}; }
+penModuleDeclaration
+    = importDeclaration
+    / exportDeclaration
+    / definition
 
-ModuleItem
-    = StartDeclaration
-    / BindingDeclaration
-    / TypeDeclaration
 
-StartDeclaration
-    = !. . // TODO...
 
-BindingDeclaration
-    = SingleBindingDeclaration
-    / MultiBindingDeclaration
 
-// TODO: exports...
-SingleBindingDeclaration
-    = id:Identifier   WS   EQUALS   WS   expression:Expression
-    { return {type: 'SingleBindingDeclaration', id, expression}; }
+// ==========   Import declarations   ==========
+importDeclaration
+    = importKeyword   __   bindings:importBindingList   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
+    { return {type: 'ImportDeclaration', moduleSpecifier, bindings}; }
 
-// TODO: exports?... renaming...
-MultiBindingDeclaration
-    = !. . // TODO...
+importBindingList
+    = head:importBinding   tail:(__   ","   __   importBinding)*
+    { return [head].concat(tail.map(el => el[3])); }
 
+importBinding
+    = name:identifier   as:(__   asKeyword   __   identifier)?
+    { return as ? {name, alias: as[3]} : {name}; }
 
-// TODO: exports...
-TypeDeclaration
-    = !. . // TODO...
+moduleSpecifier
+    = "'"   [^'\r\n]*   "'"   { return text().slice(1, -1); }
+    / '"'   [^"\r\n]*   '"'   { return text().slice(1, -1); }
 
 
 
 
-// NB: precedence is defined here:
-Expression
-    = Selection
-    / ExpressionBelowSelection
+// ==========   Export declarations   ==========
+exportDeclaration
+    = exportKeyword   __   definition:definition
+    { return {type: 'ExportDeclaration', definition}; }
 
-ExpressionBelowSelection
-    = Sequence
-    / ExpressionBelowSequence
 
-ExpressionBelowSequence
-    = Application
-    / ExpressionBelowApplication
 
-ExpressionBelowApplication
-    = ModuleReference
-    / ModuleExpression
-    / Record
-    / List
-    / CharRange
-    / AbstractStringLiteral
-    / ConcreteStringLiteral
-    / VoidLiteral
-    / Identifier   !(WS   EQUALS) // NB: an Identifier expression may *not* be followed by '='
-    / ParenthesizedExpression
 
+// ==========   Definitions   ==========
+definition
+    = name:identifier   __   "="   __   expression:expression
+    { return {type: 'Definition', name, expression}; }
 
-ModuleReference
-    = "module"   WS   SQUOTE   moduleId:(!SQUOTE .)+   SQUOTE   // TODO: fix...
-    { return {type: 'ModuleReference', moduleId}; }
 
-ModuleExpression
-    = "module"   WS   LBRACE   m:Module   WS   RBRACE
-    { return m; }
 
 
+// ==========   Expressions   ==========
+expression
+    = selection             // a | b
+    / subSelection
 
+subSelection
+    = sequence              // a b
+    / subSequence
 
-// TODO: not a keyword...
-Identifier
-    = name:IDENT
-    { return {type: 'Identifier', name}; }
+subSequence
+    = combinator            // a => b
+    / application           // a(b)
+    / block                 // {a=b c=d start=a}
+    / parenthetical         // (foo bar)
+    / recordLiteral         // {a: b, c: d}
+    / listLiteral           // [a, b, c]
+    / characterRange        // 'a-z'
+    / stringLiteral         // "foo"
+    / voidLiteral           // ()
+    / reference             // a
 
+selection
+    = ("|"   __)?   head:subSelection   tail:(__   "|"   __   subSelection)+
+    { return {type: 'Selection', expressions: [head].concat(tail.map(el => el[3]))}; }
 
-// Module = module header modulebody
-// ModuleBody = list of declarations
-// Declaration = NameBinding
-// NameBinding = export? <name> = expr
+sequence
+    = head:subSequence   tail:(whitespace   subSequence)+
+    { return {type: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
 
+combinator
+    = parameters:combinatorParameterList   __   "=>"   __   expression:expression
+    { return {type: 'Combinator', parameters, expression}; }
 
+combinatorParameterList
+    = id:identifier
+    { return [id]; }
 
-// Module
-//     = WS   bindings:(WS   Binding)*   WS   !.
-//     { return {nodeType: 'Module', bindings: bindings.map(el => el[1])}; }
+    / "("   __   ")"
+    { return []; }
 
-// Binding
-//     = id:Identifier   WS   EQ   WS   expression:Expression
-//     { return {nodeType: 'Binding', id, expression}; }
+    / "("   __   head:identifier   tail:(__   ","   __   identifier)*   __   ")"
+    { return [head].concat(tail.map(el => el[3])); }
 
+application
+    = f:(reference / parenthetical)   /* NO WHITESPACE */   args:applicationArgumentList
+    { return {type: 'Application', combinator: f.type === 'Parenthetical' ? f.expression : f, arguments: args}; }
 
+applicationArgumentList
+    = "("   __   head:expression   tail:(__   ","   __   expression)*   __   ")"
+    { return [head].concat(tail.map(el => el[3])); }
 
+    / ex:expression
+    { return [ex]; }
 
-// // NB: precedence is defined here:
-// Expression = Selection / ExpressionBelowSelection
-// ExpressionBelowSelection = Sequence / ExpressionBelowSequence
-// ExpressionBelowSequence = Application / ExpressionBelowApplication
-// ExpressionBelowApplication = Record / List / CharRange / String / Identifier / ParenthesizedExpression
+block
+    = "{"   defs:(__   definition)+   __   "}"
+    { return {type: 'Block', definitions: defs.map(el => el[1])}; }
 
+parenthetical
+    = "("   __   expression:expression   __   ")"
+    { return {type: 'Parenthetical', expression}; }
 
+recordLiteral
+    = "{"   __   fields:recordFields?   __   "}"
+    { return {type: 'RecordLiteral', fields: fields || []}; }
 
+recordFields
+    = head:recordField   tail:(__   ","   __   recordField)*   (__   ",")?
+    { return [head].concat(tail.map(el => el[3])); }
 
-// Selection
-//     = (PIPE   WS)?   h:ExpressionBelowSelection   t:(WS   PIPE   WS   ExpressionBelowSelection)+
-//     { return {nodeType: 'Selection', expressions: [h].concat(t.map(el => el[3]))}; }
+recordField
+    = name:(identifier / keyword)   __   ":"   __   expression:expression
+    { return {type: 'RecordField', hasComputedName: false, name, expression}; }
 
-// Sequence
-//     = h:ExpressionBelowSequence   t:(WS   !(Identifier WS EQ)   ExpressionBelowSequence)+
-//     { return {nodeType: 'Sequence', expressions: [h].concat(t.map(el => el[2]))}; }
+    / "["   __   name:expression   __   "]"   __   ":"   __   expression:expression
+    { return {type: 'RecordField', hasComputedName: true, name, expression}; }
 
-// Application
-//     = id:Identifier   WS   LANGLE   WS   args:ApplicationArguments?   WS   RANGLE
-//     { return {nodeType: 'Application', id, arguments: args || []}; }
+listLiteral
+    = "["   __   elements:listElements?   __   "]"
+    { return {type: 'ListLiteral', elements: elements || []}; }
 
-// ApplicationArguments
-//     = h:Expression   t:(WS   COMMA   WS   Expression)*
-//     { return [h].concat(t.map(el => el[3])); }
+listElements
+    = head:expression   tail:(__   ","   __   expression)*   (__   ",")?
+    { return [head].concat(tail.map(el => el[3])); }
 
-// Record
-//     = LBRACE   WS   fields:RecordFields?   WS   RBRACE
-//     { return {nodeType: 'Record', fields: fields || []}; }
+characterRange
+    = "'"   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   "'"
+    { return {type: 'CharacterRange', kind: 'Abstract', minValue, maxValue}; }
 
-// RecordFields
-//     = h:RecordField   t:(WS   COMMA   WS   RecordField)*
-//     { return [h].concat(t.map(el => el[3])); }
+    / '"'   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   '"'
+    { return {type: 'CharacterRange', kind: 'Concrete', minValue, maxValue}; }
 
-// RecordField
-//     = name:Identifier   WS   COLON   WS   value:Expression
-//     { return {nodeType: 'RecordField', hasComputedName: false, name, value}; }
+stringLiteral
+    = "'"   (![-']   character)*   "'"
+    { return {type: 'StringLiteral', kind: 'Abstract', value: text().slice(1, -1)}; }
 
-//     / LSQBR name:Expression RSQBR   WS   COLON   WS   value:Expression
-//     { return {nodeType: 'RecordField', hasComputedName: true, name, value}; }
+    / '"'   (![-"]   character)*   '"'
+    { return {type: 'StringLiteral', kind: 'Concrete', value: text().slice(1, -1)}; }
 
-// List
-//     = LSQBR   WS   elements:ListElements?   WS   RSQBR
-//     { return {nodeType: 'List', elements: elements || []}; }
+voidLiteral
+    = "("   __   ")"
+    { return {type: 'VoidLiteral'}; }
 
-// ListElements
-//     = h:ListElement   t:(WS   COMMA   WS   ListElement)*
-//     { return [h].concat(t.map(el => el[3])); }
+reference
+    = name:identifier   !(__   "="   !">")
+    { return {type: 'Reference', name}; }
 
-// ListElement
-//     = value:Expression
-//     { return {nodeType: 'ListElement', value}; }
 
-// CharRange
-//     = SQUOTE   !SQUOTE   min:Character   SQUOTE   WS   DOT   DOT   WS   SQUOTE   !SQUOTE   max:Character   SQUOTE
-//     { return {nodeType: 'CharacterRange', variant: 'Abstract', min, max}; }
 
-//     / DQUOTE   !DQUOTE   min:Character   DQUOTE   WS   DOT   DOT   WS   DQUOTE   !DQUOTE   max:Character   DQUOTE
-//     { return {nodeType: 'CharacterRange', variant: 'Uniform', min, max}; }
 
-//     / BTICK   !BTICK   min:Character   BTICK   WS   DOT   DOT   WS   BTICK   !BTICK   max:Character   BTICK
-//     { return {nodeType: 'CharacterRange', variant: 'Concrete', min, max}; }
+// ==========   Literal characters and escape sequences   ==========
+character
+    = ![\x00-\x1F]   !"\\"   .   { return text(); }
+    / "\\-"   { return '-'; }
+    / "\\"   c:[bfnrtv0'"\\]   { return eval(`"${text()}"`); }
+    / "\\x"   d:(hexdigit   hexdigit)   { return eval(`"\\u00${d.join('')}"`); }
+    / "\\u"   hexdigit   hexdigit   hexdigit   hexdigit   { return eval(`"${text()}"`); }
+    / "\\u{"   d:hexdigit+   "}"   { return eval(`"${text()}"`); }
 
-// String
-//     = SQUOTE   cs:(!SQUOTE   Character)*   SQUOTE
-//     { return {nodeType: 'StringLiteral', variant: 'Abstract', value: cs.map(c => c[1]).join('')}; }
+hexdigit = [0-9a-fA-F]
 
-//     / DQUOTE   cs:(!DQUOTE   Character)*   DQUOTE
-//     { return {nodeType: 'StringLiteral', variant: 'Uniform', value: cs.map(c => c[1]).join('')}; }
 
-//     / BTICK   cs:(!BTICK   Character)*   BTICK
-//     { return {nodeType: 'StringLiteral', variant: 'Concrete', value: cs.map(c => c[1]).join('')}; }
 
-// Character
-//     = !CTRL   !BSLASH   .   { return text(); }
-//     / BSLASH   c:["'`\\/bfnrt]   { return JSON.parse(`"${text()}"`); } // TODO: could be more permissive here, like JS...
-//     / BSLASH   "x"   d:(HEXDIGIT   HEXDIGIT)   { return JSON.parse(`"\\u00${d.join('')}"`); }
-//     / BSLASH   "u"   HEXDIGIT   HEXDIGIT   HEXDIGIT   HEXDIGIT   { return JSON.parse(`"${text()}"`); }
 
-// Identifier
-//     = name:IDENT // TODO: don't consume lhs of next binding - put this check in `Sequence`?
-//     { return {nodeType: 'Identifier', name}; }
+// ==========   Identifiers and Keywords   ==========
+identifier 'identifier' = &identifierStart   !keyword   identifierStart   identifierPart*   { return text(); }
+identifierStart         = [a-zA-Z_]
+identifierPart          = [a-zA-Z_0-9]
+keyword 'keyword'       = asKeyword / fromKeyword / exportKeyword / importKeyword
+asKeyword               = "as"   !identifierPart   { return text(); }
+exportKeyword           = "export"   !identifierPart   { return text(); }
+fromKeyword             = "from"   !identifierPart   { return text(); }
+importKeyword           = "import"   !identifierPart   { return text(); }
 
-// ParenthesizedExpression
-//     = LPAREN   WS   expression:Expression   WS   RPAREN
-//     { return {nodeType: 'ParenthesizedExpression', expression}; }
 
 
 
-
-// // Identifier
-// //     = name:IDENT   !(WS   EQ)
-// //     { return {nodeType: 'Identifier', name } }
-
-// // NumberLiteral
-// //     = 'int32'
-
-// // AnyChar
-// //     = DOT
-// //     { return {nodeType: 'AnyChar'}; }
-
-
-
-
-IDENT   = [_a-z]i   [_a-z0-9]i*   { return text(); }
-
-// BSLASH  = '\\'
-// BTICK   = '`'
-// COLON   = ':'
-// COMMA   = ','
-// CTRL    = [\x00-\x1F]
-// DOT     = '.'
-DQUOTE  = '"'
-EQUALS  = '='
-// // FSLASH  = '/'
-// HEXDIGIT= [0-9a-fA-F]
-// LANGLE  = '<'
-LBRACE  = '{'
-// LPAREN  = '('
-// LSQBR   = '['
-// PIPE    = '|'
-// // PLUS    = '+'
-// // QMARK   = '?'
-// RANGLE  = '>'
-RBRACE  = '}'
-// RPAREN  = ')'
-// RSQBR   = ']'
-SQUOTE  = "'"
-// // STAR    = '*'
-
-WS                      = WS_ITEM*
-WS_ITEM                 = WS_CHAR / WS_SINGLE_LINE_COMMENT / WS_MULTI_LINE_COMMENT
-WS_CHAR                 = [ \t\r\n]
-WS_SINGLE_LINE_COMMENT  = '//'   (![\r\n] .)*
-WS_MULTI_LINE_COMMENT   = '/*'   (!'*/' .)*   '*/'
+// ==========   Whitespace and file markers   ==========
+__                      = whitespace?
+whitespace 'whitespace' = whitespaceItem+   { return text(); }
+whitespaceItem          = singleLineComment / multiLineComment / horizontalWhitespace / endOfLine
+singleLineComment       = "//"   (!endOfLine .)*
+multiLineComment        = "/*"   (!"*/" .)*   "*/"
+horizontalWhitespace    = [ \t]
+endOfLine               = "\r\n" / "\r" / "\n"
+endOfFile               = !.

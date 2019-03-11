@@ -1,107 +1,140 @@
-export interface Module {
-    nodeType: 'Module';
-    bindings: Binding[];
+export type File =
+    | ForeignModule
+    | PenModule;
+
+export interface ForeignModule {
+    type: 'ForeignModule';
+    exports: string[];
 }
 
-export interface Binding {
-    nodeType: 'Binding';
-    id: Identifier;
+export interface PenModule {
+    type: 'PenModule';
+    declarations: PenModuleDeclaration[];
+}
+
+export type PenModuleDeclaration =
+    | ImportDeclaration
+    | ExportDeclaration
+    | Definition;
+
+export interface ImportDeclaration {
+    type: 'ImportDeclaration';
+    moduleSpecifier: string;
+    bindings: Array<{name: string, alias?: string}>;
+}
+
+export interface ExportDeclaration {
+    type: 'ExportDeclaration';
+    definition: Definition;
+}
+
+export interface Definition {
+    type: 'Definition';
+    name: string;
     expression: Expression;
 }
 
+export type Expression =
+    | Selection
+    | Sequence
+    | Combinator
+    | Application
+    | Block
+    | Parenthetical
+    | RecordLiteral
+    | ListLiteral
+    | CharacterRange
+    | StringLiteral
+    | VoidLiteral
+    | Reference;
+
 export interface Selection {
-    nodeType: 'Selection';
+    type: 'Selection';
     expressions: Expression[];
 }
 
 export interface Sequence {
-    nodeType: 'Sequence';
+    type: 'Sequence';
     expressions: Expression[];
 }
 
+export interface Combinator {
+    type: 'Combinator';
+    parameters: string[];
+    expression: Expression;
+}
+
 export interface Application {
-    nodeType: 'Application';
-    id: Identifier;
+    type: 'Application';
+    combinator: Expression;
     arguments: Expression[];
 }
 
-export interface Record {
-    nodeType: 'Record';
+export interface Block {
+    type: 'Block';
+    definitions: Definition[];
+}
+
+export interface Parenthetical {
+    type: 'Parenthetical';
+    expression: Expression;
+}
+
+export interface RecordLiteral {
+    type: 'RecordLiteral';
     fields: RecordField[];
 }
 
-export type RecordField = {
-    nodeType: 'RecordField';
-    hasComputedName: false;
-    name: Identifier;
-    value: Expression;
-} | {
-    nodeType: 'RecordField';
-    hasComputedName: true;
-    name: Expression;
-    value: Expression;
-};
+export type RecordField =
+    | {type: 'RecordField', hasComputedName: false, name: string, expression: Expression}
+    | {type: 'RecordField', hasComputedName: true, name: Expression, expression: Expression};
 
-export interface List {
-    nodeType: 'List';
-    elements: ListElement[];
-}
-
-export interface ListElement {
-    nodeType: 'ListElement';
-    value: Expression;
+export interface ListLiteral {
+    type: 'ListLiteral';
+    elements: Expression[];
 }
 
 export interface CharacterRange {
-    nodeType: 'CharacterRange';
-    variant: 'Abstract' | 'Concrete' | 'Uniform';
-    min: string;   // TODO: preserve escape sequences? eg raw/cooked props?
-    max: string;   //       how does babel etc handle this in its AST?
+    type: 'CharacterRange';
+    kind: 'Abstract' | 'Concrete';
+    minValue: string;
+    maxValue: string;
 }
 
 export interface StringLiteral {
-    nodeType: 'StringLiteral';
-    variant: 'Abstract' | 'Concrete' | 'Uniform';
+    type: 'StringLiteral';
+    kind: 'Abstract' | 'Concrete';
     value: string;
-    // TODO: preserve escape sequences? eg raw/cooked props?
-    //       how does babel etc handle this in its AST?
 }
 
-export interface Identifier {
-    nodeType: 'Identifier';
-    name: string;
+export interface VoidLiteral {
+    type: 'VoidLiteral';
 }
 
-export interface ParenthesizedExpression {
-    nodeType: 'ParenthesizedExpression';
-    expression: Expression;
+export interface Reference {
+   type: 'Reference';
+   name: string;
 }
 
 
 
 
 export type Node =
-    | Module
-    | Binding
+    | ForeignModule
+    | PenModule
+    | ImportDeclaration
+    | ExportDeclaration
+    | Definition
     | Selection
     | Sequence
+    | Combinator
     | Application
-    | Record
+    | Block
+    | Parenthetical
+    | RecordLiteral
     | RecordField
-    | List
-    | ListElement
+    | ListLiteral
     | CharacterRange
     | StringLiteral
-    | Identifier
-    | ParenthesizedExpression;
-
-export type Expression =
-    | Selection
-    | Sequence
-    | Application
-    | Record
-    | List
-    | CharacterRange
-    | StringLiteral
-    | Identifier
-    | ParenthesizedExpression;
+    | VoidLiteral
+    | Reference;
