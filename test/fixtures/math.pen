@@ -4,23 +4,16 @@
  *      42*(333-2)
  */
 
-let {Memoize} = import 'pen';
+import Memoize, i32 from 'pen'
 
 start = expr
 
 expr = Memoize(add | sub | term)
-add = {type: 'add', lhs: expr, rhs: ADD term}
-sub = {type: 'sub', lhs: expr, rhs: SUB term}
+add = {type: 'add', lhs: expr, rhs: "+" term}
+sub = {type: 'sub', lhs: expr, rhs: "\-" term}
 
 term = Memoize(mul | div | factor)
-mul = {type: 'mul', lhs: term, rhs: MUL factor}
-div = {type: 'div', lhs: term, rhs: DIV factor}
+mul = {type: 'mul', lhs: term, rhs: "*" factor}
+div = {type: 'div', lhs: term, rhs: "/" factor}
 
-factor = i32 | LP expr RP
-
-ADD = `+`
-SUB = `-`
-MUL = `*`
-DIV = `/`
-LP  = `(`
-RP  = `)`
+factor = i32 | "(" expr ")"
