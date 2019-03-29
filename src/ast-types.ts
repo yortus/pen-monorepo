@@ -3,12 +3,12 @@ export type File =
     | PenModule;
 
 export interface ForeignModule {
-    type: 'ForeignModule';
+    kind: 'ForeignModule';
     exports: string[];
 }
 
 export interface PenModule {
-    type: 'PenModule';
+    kind: 'PenModule';
     declarations: PenModuleDeclaration[];
 }
 
@@ -18,18 +18,18 @@ export type PenModuleDeclaration =
     | Definition;
 
 export interface ImportDeclaration {
-    type: 'ImportDeclaration';
+    kind: 'ImportDeclaration';
     moduleSpecifier: string;
     bindings: Array<{name: string, alias?: string}>;
 }
 
 export interface ExportDeclaration {
-    type: 'ExportDeclaration';
+    kind: 'ExportDeclaration';
     definition: Definition;
 }
 
 export interface Definition {
-    type: 'Definition';
+    kind: 'Definition';
     name: string;
     expression: Expression;
 }
@@ -49,75 +49,72 @@ export type Expression =
     | Reference;
 
 export interface Selection {
-    type: 'Selection';
+    kind: 'Selection';
     expressions: Expression[];
 }
 
 export interface Sequence {
-    type: 'Sequence';
+    kind: 'Sequence';
     expressions: Expression[];
 }
 
 export interface Combinator {
-    type: 'Combinator';
+    kind: 'Combinator';
     parameters: string[];
     expression: Expression;
 }
 
 export interface Application {
-    type: 'Application';
+    kind: 'Application';
     combinator: Expression;
     arguments: Expression[];
 }
 
 export interface Block {
-    type: 'Block';
+    kind: 'Block';
     definitions: Definition[];
 }
 
 export interface Parenthetical {
-    type: 'Parenthetical';
+    kind: 'Parenthetical';
     expression: Expression;
 }
 
 export interface RecordLiteral {
-    type: 'RecordLiteral';
+    kind: 'RecordLiteral';
     fields: RecordField[];
 }
 
 export type RecordField =
-    | {type: 'RecordField', hasComputedName: false, name: string, expression: Expression}
-    | {type: 'RecordField', hasComputedName: true, name: Expression, expression: Expression};
+    | {kind: 'RecordField', hasComputedName: false, name: string, expression: Expression}
+    | {kind: 'RecordField', hasComputedName: true, name: Expression, expression: Expression};
 
 export interface ListLiteral {
-    type: 'ListLiteral';
+    kind: 'ListLiteral';
     elements: Expression[];
 }
 
 export interface CharacterRange {
-    type: 'CharacterRange';
-    kind: 'Abstract' | 'Concrete';
+    kind: 'CharacterRange';
+    subkind: 'Abstract' | 'Concrete';
     minValue: string;
     maxValue: string;
 }
 
 export interface StringLiteral {
-    type: 'StringLiteral';
-    kind: 'Abstract' | 'Concrete';
+    kind: 'StringLiteral';
+    subkind: 'Abstract' | 'Concrete';
     value: string;
 }
 
 export interface VoidLiteral {
-    type: 'VoidLiteral';
+    kind: 'VoidLiteral';
 }
 
 export interface Reference {
-   type: 'Reference';
+   kind: 'Reference';
    name: string;
 }
-
-
-
 
 export type Node =
     | ForeignModule

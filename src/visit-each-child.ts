@@ -9,20 +9,25 @@ import {Node} from './ast-types';
 
 
 export function visitEachChild(node: Node, visitor: Visitor) {
-    switch (node.nodeType) {
-        case 'Application': return visitNodes(visitor, node.id, ...node.arguments);
-        case 'Binding': return visitNodes(visitor, node.id, node.expression);
-        case 'CharacterRange': return;
-        case 'Identifier': return;
-        case 'List': return visitNodes(visitor, ...node.elements);
-        case 'ListElement': return visitNodes(visitor, node.value);
-        case 'Module': return visitNodes(visitor, ...node.bindings);
-        case 'ParenthesizedExpression': return visitNodes(visitor, node.expression);
-        case 'Record': return visitNodes(visitor, ...node.fields);
-        case 'RecordField': return visitNodes(visitor, node.name, node.value);
+    switch (node.kind) {
+        case 'ForeignModule': return;
+        case 'PenModule': return visitNodes(visitor, ...node.declarations);
+        case 'ImportDeclaration': return;
+        case 'ExportDeclaration': return visitNodes(visitor, node.definition);
+        case 'Definition': return visitNodes(visitor, node.expression);
         case 'Selection': return visitNodes(visitor, ...node.expressions);
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
+        case 'Combinator': return visitNodes(visitor, node.expression);
+        case 'Application': return visitNodes(visitor, node.combinator, ...node.arguments);
+        case 'Block': return visitNodes(visitor, ...node.definitions);
+        case 'Parenthetical': return visitNodes(visitor, node.expression);
+        case 'RecordLiteral': return visitNodes(visitor, ...node.fields);
+        case 'RecordField': return visitNodes(visitor, ...(node.hasComputedName ? [node.name] : []), node.expression);
+        case 'ListLiteral': return visitNodes(visitor, ...node.elements);
+        case 'CharacterRange': return;
         case 'StringLiteral': return;
+        case 'VoidLiteral': return;
+        case 'Reference': return;
         default: return assertNever(node);
     }
 }
