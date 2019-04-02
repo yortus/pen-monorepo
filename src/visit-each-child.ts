@@ -1,19 +1,17 @@
-// TODO: this function is unused so far. Why keep it?
-
-
-
-
 import {Node} from './ast-types';
 
 
 
 
-export function visitEachChild(node: Node, visitor: Visitor) {
+/**
+ * Iterates over each direct child node of the given `node`, and calls the specified `visitor`
+ * function once for each child node. If `node` is a leaf node, this function does nothing.
+ */
+export function visitEachChild(node: Node, visitor: (childNode: Node) => void) {
     switch (node.kind) {
         case 'ForeignModule': return;
         case 'PenModule': return visitNodes(visitor, ...node.declarations);
         case 'ImportDeclaration': return;
-        case 'ExportDeclaration': return visitNodes(visitor, node.definition);
         case 'Definition': return visitNodes(visitor, node.expression);
         case 'Selection': return visitNodes(visitor, ...node.expressions);
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
@@ -35,12 +33,8 @@ export function visitEachChild(node: Node, visitor: Visitor) {
 
 
 
-export type Visitor = (n: Node) => void;
-
-
-
-
-function visitNodes(visitor: Visitor, ...nodes: Node[]) {
+// Helper function to simplify the switch block in `visitEachChild`.
+function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
     // tslint:disable-next-line:prefer-for-of
     for (let i = 0; i < nodes.length; ++i) {
         visitor(nodes[i]);
@@ -50,6 +44,7 @@ function visitNodes(visitor: Visitor, ...nodes: Node[]) {
 
 
 
+// Helper function used in the switch block in `visitEachChild` to ensure the cases are exhaustive.
 function assertNever(_value: never): never {
     throw new Error(`Internal error: unhandled node type in visitEachChild`);
 }
