@@ -4,8 +4,10 @@ import {Node} from './ast-types';
 
 
 /**
- * Iterates over each direct child node of the given `node`, and calls the specified `visitor`
+ * Iterates over each direct child node of the given `node`, invoking the specified `visitor`
  * function once for each child node. If `node` is a leaf node, this function does nothing.
+ * @param node the node whose children are to be visited.
+ * @param visitor the function to invoke on each child node.
  */
 export function visitEachChild(node: Node, visitor: (childNode: Node) => void) {
     switch (node.kind) {
