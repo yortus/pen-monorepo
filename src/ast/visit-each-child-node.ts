@@ -1,4 +1,4 @@
-import {Node} from './ast-types';
+import {Node} from './node-types';
 
 
 
@@ -9,7 +9,7 @@ import {Node} from './ast-types';
  * @param node the node whose children are to be visited.
  * @param visitor the function to invoke on each child node.
  */
-export function visitEachChild(node: Node, visitor: (childNode: Node) => void) {
+export function visitEachChildNode(node: Node, visitor: (childNode: Node) => void) {
     switch (node.kind) {
         case 'ForeignModule': return;
         case 'PenModule': return visitNodes(visitor, ...node.declarations);
@@ -35,7 +35,7 @@ export function visitEachChild(node: Node, visitor: (childNode: Node) => void) {
 
 
 
-// Helper function to simplify the switch block in `visitEachChild`.
+// Helper function to simplify the switch block in `visitEachChildNode`.
 function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
     // tslint:disable-next-line:prefer-for-of
     for (let i = 0; i < nodes.length; ++i) {
@@ -46,7 +46,7 @@ function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
 
 
 
-// Helper function used in the switch block in `visitEachChild` to ensure the cases are exhaustive.
+// Helper function used in the switch block in `visitEachChildNode` to ensure the cases are exhaustive.
 function assertNever(_value: never): never {
-    throw new Error(`Internal error: unhandled node type in visitEachChild`);
+    throw new Error(`Internal error: unhandled node type in visitEachChildNode`);
 }

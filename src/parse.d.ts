@@ -1,4 +1,4 @@
-import {ForeignModule, PenModule} from './ast-types';
+import {ForeignModule, PenModule} from './ast/node-types';
 
 
 

@@ -1,4 +1,4 @@
-import {Node} from './ast-types';
+import {Node} from './node-types';
 
 
 

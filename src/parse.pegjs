@@ -5,7 +5,7 @@ start
 
 foreignModule
     = (!endOfLine !"@pen" .)*   "@pen"   horizontalWhitespace+   "export"   horizontalWhitespace+   exports:foreignExportList   .*
-    { return {type: 'ForeignModule', exports}; }
+    { return {kind: 'ForeignModule', exports}; }
 
 foreignExportList
     = head:identifier   tail:(horizontalWhitespace*   ","   horizontalWhitespace*   identifier)*
@@ -13,7 +13,7 @@ foreignExportList
 
 penModule
     = decls:(__   penModuleDeclaration)*   __   endOfFile
-    { return {type: 'PenModule', declarations: decls.map(el => el[1])}; }
+    { return {kind: 'PenModule', declarations: decls.map(el => el[1])}; }
 
 penModuleDeclaration
     = importDeclaration
@@ -26,7 +26,7 @@ penModuleDeclaration
 // ==========   Import declarations   ==========
 importDeclaration
     = importKeyword   __   bindings:importBindingList   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
-    { return {type: 'ImportDeclaration', moduleSpecifier, bindings}; }
+    { return {kind: 'ImportDeclaration', moduleSpecifier, bindings}; }
 
 importBindingList
     = head:importBinding   tail:(__   ","   __   importBinding)*
@@ -46,7 +46,7 @@ moduleSpecifier
 // ==========   Export declarations   ==========
 exportDeclaration
     = exportKeyword   __   definition:definition
-    { return {type: 'ExportDeclaration', definition}; }
+    { return {...definition, isExported: true}; }
 
 
 
@@ -54,7 +54,7 @@ exportDeclaration
 // ==========   Definitions   ==========
 definition
     = name:identifier   __   "="   __   expression:expression
-    { return {type: 'Definition', name, expression}; }
+    { return {kind: 'Definition', name, expression, isExported: false}; }
 
 
 
@@ -82,15 +82,15 @@ subSequence
 
 selection
     = ("|"   __)?   head:subSelection   tail:(__   "|"   __   subSelection)+
-    { return {type: 'Selection', expressions: [head].concat(tail.map(el => el[3]))}; }
+    { return {kind: 'Selection', expressions: [head].concat(tail.map(el => el[3]))}; }
 
 sequence
     = head:subSequence   tail:(whitespace   subSequence)+
-    { return {type: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
+    { return {kind: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
 
 combinator
     = parameters:combinatorParameterList   __   "=>"   __   expression:expression
-    { return {type: 'Combinator', parameters, expression}; }
+    { return {kind: 'Combinator', parameters, expression}; }
 
 combinatorParameterList
     = id:identifier
@@ -104,7 +104,7 @@ combinatorParameterList
 
 application
     = f:(reference / parenthetical)   /* NO WHITESPACE */   args:applicationArgumentList
-    { return {type: 'Application', combinator: f.type === 'Parenthetical' ? f.expression : f, arguments: args}; }
+    { return {kind: 'Application', combinator: f.kind === 'Parenthetical' ? f.expression : f, arguments: args}; }
 
 applicationArgumentList
     = "("   __   head:expression   tail:(__   ","   __   expression)*   __   ")"
@@ -115,15 +115,15 @@ applicationArgumentList
 
 block
     = "{"   defs:(__   definition)+   __   "}"
-    { return {type: 'Block', definitions: defs.map(el => el[1])}; }
+    { return {kind: 'Block', definitions: defs.map(el => el[1])}; }
 
 parenthetical
     = "("   __   expression:expression   __   ")"
-    { return {type: 'Parenthetical', expression}; }
+    { return {kind: 'Parenthetical', expression}; }
 
 recordLiteral
     = "{"   __   fields:recordFields?   __   "}"
-    { return {type: 'RecordLiteral', fields: fields || []}; }
+    { return {kind: 'RecordLiteral', fields: fields || []}; }
 
 recordFields
     = head:recordField   tail:(__   ","   __   recordField)*   (__   ",")?
@@ -131,14 +131,14 @@ recordFields
 
 recordField
     = name:(identifier / keyword)   __   ":"   __   expression:expression
-    { return {type: 'RecordField', hasComputedName: false, name, expression}; }
+    { return {kind: 'RecordField', hasComputedName: false, name, expression}; }
 
     / "["   __   name:expression   __   "]"   __   ":"   __   expression:expression
-    { return {type: 'RecordField', hasComputedName: true, name, expression}; }
+    { return {kind: 'RecordField', hasComputedName: true, name, expression}; }
 
 listLiteral
     = "["   __   elements:listElements?   __   "]"
-    { return {type: 'ListLiteral', elements: elements || []}; }
+    { return {kind: 'ListLiteral', elements: elements || []}; }
 
 listElements
     = head:expression   tail:(__   ","   __   expression)*   (__   ",")?
@@ -146,25 +146,25 @@ listElements
 
 characterRange
     = "'"   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   "'"
-    { return {type: 'CharacterRange', kind: 'Abstract', minValue, maxValue}; }
+    { return {kind: 'CharacterRange', subkind: 'Abstract', minValue, maxValue}; }
 
     / '"'   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   '"'
-    { return {type: 'CharacterRange', kind: 'Concrete', minValue, maxValue}; }
+    { return {kind: 'CharacterRange', subkind: 'Concrete', minValue, maxValue}; }
 
 stringLiteral
     = "'"   (![-']   character)*   "'"
-    { return {type: 'StringLiteral', kind: 'Abstract', value: text().slice(1, -1)}; }
+    { return {kind: 'StringLiteral', subkind: 'Abstract', value: text().slice(1, -1)}; }
 
     / '"'   (![-"]   character)*   '"'
-    { return {type: 'StringLiteral', kind: 'Concrete', value: text().slice(1, -1)}; }
+    { return {kind: 'StringLiteral', subkind: 'Concrete', value: text().slice(1, -1)}; }
 
 voidLiteral
     = "("   __   ")"
-    { return {type: 'VoidLiteral'}; }
+    { return {kind: 'VoidLiteral'}; }
 
 reference
     = name:identifier   !(__   "="   !">")
-    { return {type: 'Reference', name}; }
+    { return {kind: 'Reference', name}; }
 
 
 
