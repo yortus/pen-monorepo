@@ -5,6 +5,12 @@ import {Symbol} from './symbol-types';
 
 
 // TODO: jsdoc...
+export let currentScope: Scope = {id: 0, symbols: []};
+
+
+
+
+// TODO: jsdoc...
 export function define(symbol: Symbol) {
     // Guard against duplicate definitions of the same name in the current scope.
     if (currentScope.symbols.some(sym => sym.name === symbol.name)) {
@@ -51,7 +57,4 @@ export function leaveScope() {
 
 
 // TODO: doc helper...
-let nextScopeId = 1;
-
-// TODO: doc helper...
-let currentScope: Scope = {id: ++nextScopeId, symbols: []};
+let nextScopeId = 0;

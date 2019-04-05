@@ -1,3 +1,4 @@
+import {Scope} from './scope';
 
 
 
@@ -12,9 +13,11 @@ export type Symbol =
 export interface Pattern {
     kind: 'Pattern';
     name: string;
+    scope: Scope;
 }
 
 export interface Combinator {
     kind: 'Combinator';
     name: string;
+    scope: Scope;
 }
