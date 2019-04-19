@@ -11,7 +11,7 @@ export let currentScope: Scope = {id: 0, symbols: []};
 
 
 // TODO: jsdoc...
-export function define(symbol: Symbol) {
+export function insert(symbol: Symbol) {
     // Guard against duplicate definitions of the same name in the current scope.
     if (currentScope.symbols.some(sym => sym.name === symbol.name)) {
         throw new Error(`The name '${symbol.name}' is already defined in the current scope.`);
@@ -25,7 +25,7 @@ export function define(symbol: Symbol) {
 
 
 // TODO: jsdoc...
-export function resolve(name: string): Symbol {
+export function lookup(name: string): Symbol {
     let scope = currentScope;
     while (true) {
         let resolved = scope.symbols.find(sym => sym.name === name);

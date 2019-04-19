@@ -1,6 +1,7 @@
+import {augment} from './ast/augment2';
 import {parse} from './parse';
-import {Symbol, symbolTable} from './symbols';
-import {transformAstBottomUp} from './transform-ast-bottom-up';
+import {symbolTable} from './symbols';
+import {Node} from './ast';
 
 
 
@@ -14,23 +15,33 @@ export interface JsTargetCode {code: string; }
 export function compileToJs(source: PenSourceCode): JsTargetCode {
 
     // 1. parse source (PEN) input code ==> ast
-    let ast = parse(source.code);
+    let ast = parse(source.code) as Node;
 
     // 2. analyse and check ast
 
     // 2a. define all symbols within their scopes
-    let ast2 = transformAstBottomUp(ast, {
-        Block: block => {
+    let ast2 = augment(ast, {
+
+        Block(block, visitChildren) {
             symbolTable.enterScope();
-            return {...block, scope: symbolTable.currentScope};
+            block = visitChildren(block);
+            const result = {...block, scope: symbolTable.currentScope};
+            symbolTable.leaveScope();
+            return result;
         },
-        Definition: defn => {
-            // TODO: fix hardcoded 'Pattern', since not always a Pattern, may be a Combinator. But we don't know yet.
-            //       e.g. if node.expression is a 'Reference', what kind does it refer to? Refs are not resolved yet.
-            //       This seems to be really a type-checking thing (so do a runtime check if no static type checking).
-            const symbol: Symbol = {kind: 'Pattern', name: defn.name, scope: symbolTable.currentScope};
-            symbolTable.define(symbol);
-            return {...defn, symbol};
+
+        Definition(defn, visitChildren) {
+            console.log(`    ENTER ${defn.name}`);
+            const result = visitChildren(defn);
+            console.log(`    LEAVE ${defn.name}`);
+            return result;
+
+            // // TODO: fix hardcoded 'Pattern', since not always a Pattern, may be a Combinator. But we don't know yet.
+            // //       e.g. if node.expression is a 'Reference', what kind does it refer to? Refs are not resolved yet.
+            // //       This seems to be really a type-checking thing (so do a runtime check if no static type checking).
+            // const symbol: Symbol = {kind: 'Pattern', name: defn.name, scope: symbolTable.currentScope};
+            // symbolTable.insert(symbol);
+            // return {...defn, symbol};
         },
     });
     [] = [ast2];

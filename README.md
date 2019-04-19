@@ -1,3 +1,34 @@
+
+#### Symbol Tables, Scopes, Referencing Environments
+```ts
+
+// singleton
+interface SymbolTable {
+    insert(name: string): Symbol;               // inserts into current scope
+    lookup(name: string, scope: Scope): Symbol; // -or- look up in current scope?
+    enterScope(): void;
+    leaveScope(): void;
+}
+
+interface Scope {...} // need this?
+
+interface Symbol {
+    name: string;
+    scope: Scope;
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
 #### Let bindings, Names, and Scopes
 ```
 let Id = Identifier in

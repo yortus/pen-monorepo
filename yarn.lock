@@ -1851,9 +1851,9 @@ type-detect@^4.0.0, type-detect@^4.0.5:
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
 typescript@next:
-  version "3.4.0-dev.20190330"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.0-dev.20190330.tgz#8f0ff21f8b559c92eae4b9d6cb7bd10e9adfe2e6"
-  integrity sha512-w0LchV0iknmuvCbQ1EgqzUkeNZNvOznvbCwKaNZMOwGSOoE/jKxeswNfZGLerTScppmfCieQGAiGS9tRUvMBvg==
+  version "3.5.0-dev.20190412"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.0-dev.20190412.tgz#98c1209acb2372aa7411f99fc288d822302e048e"
+  integrity sha512-ggfmPI3Jddh42pOzeAqQ5EaPIjFPJNlmFzKOYVj/Rybz6o4QCl5o0fwfitAPatFhY5k6I7E5D90zURXhr1W4rQ==
 
 union-value@^1.0.0:
   version "1.0.0"
