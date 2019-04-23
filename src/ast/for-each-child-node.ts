@@ -8,8 +8,9 @@ import {Node} from './node-types';
  * function once for each child node. If `node` is a leaf node, this function does nothing.
  * @param node the node whose children are to be visited.
  * @param visitor the function to invoke on each child node.
+ * @returns no return value. The `visitor` functions are executed for their side-effects.
  */
-export function visitEachChildNode(node: Node, visitor: (childNode: Node) => void) {
+export function forEachChildNode(node: Node, visitor: (childNode: Node) => void) {
     switch (node.kind) {
         case 'ForeignModule': return;
         case 'PenModule': return visitNodes(visitor, ...node.declarations);
@@ -35,7 +36,7 @@ export function visitEachChildNode(node: Node, visitor: (childNode: Node) => voi
 
 
 
-// Helper function to simplify the switch block in `visitEachChildNode`.
+// Helper function to simplify the switch block in `forEachChildNode`.
 function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
     // tslint:disable-next-line:prefer-for-of
     for (let i = 0; i < nodes.length; ++i) {
@@ -46,7 +47,7 @@ function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
 
 
 
-// Helper function used in the switch block in `visitEachChildNode` to ensure the cases are exhaustive.
+// Helper function used in the switch block in `forEachChildNode` to ensure the cases are exhaustive.
 function assertNever(_value: never): never {
-    throw new Error(`Internal error: unhandled node type in visitEachChildNode`);
+    throw new Error(`Internal error: unhandled node type in forEachChildNode`);
 }

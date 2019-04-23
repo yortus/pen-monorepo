@@ -1,7 +1,6 @@
-import {augment} from './ast/augment2';
+import {decorateAst, Node} from './ast';
 import {parse} from './parse';
 import {symbolTable} from './symbols';
-import {Node} from './ast';
 
 
 
@@ -20,7 +19,7 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
     // 2. analyse and check ast
 
     // 2a. define all symbols within their scopes
-    let ast2 = augment(ast, {
+    let ast2 = decorateAst(ast, {
 
         Block(block, visitChildren) {
             symbolTable.enterScope();
