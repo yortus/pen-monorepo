@@ -1,6 +1,7 @@
-import {decorateAst, Node} from './ast';
+import {decorateAst} from './ast';
 import {parse} from './parse';
-import {symbolTable} from './symbols';
+//import {symbolTable} from './symbols';
+import {newScope} from './scope';
 
 
 
@@ -14,25 +15,26 @@ export interface JsTargetCode {code: string; }
 export function compileToJs(source: PenSourceCode): JsTargetCode {
 
     // 1. parse source (PEN) input code ==> ast
-    let ast = parse(source.code) as Node;
+    let ast = parse(source.code);
 
     // 2. analyse and check ast
 
     // 2a. define all symbols within their scopes
+    let currentScope = newScope();
     let ast2 = decorateAst(ast, {
 
         Block(block, visitChildren) {
-            symbolTable.enterScope();
+            let scope = currentScope = newScope(currentScope);
             block = visitChildren(block);
-            const result = {...block, scope: symbolTable.currentScope};
-            symbolTable.leaveScope();
+            const result = {...block, scope};
+            currentScope = currentScope.parent!;
             return result;
         },
 
-        Definition(defn, visitChildren) {
-            console.log(`    ENTER ${defn.name}`);
-            const result = visitChildren(defn);
-            console.log(`    LEAVE ${defn.name}`);
+        Definition(def, visitChildren) {
+            let symbol = currentScope.insert(def.name);
+            def = visitChildren(def);
+            const result = {...def, symbol};
             return result;
 
             // // TODO: fix hardcoded 'Pattern', since not always a Pattern, may be a Combinator. But we don't know yet.
@@ -44,6 +46,15 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
         },
     });
     [] = [ast2];
+
+    // 2b. resolve all references to symbols defined in the first pass
+    let ast3 = decorateAst(ast2, {
+
+    //     Reference(ref) {
+    //         let result = {...ref};
+    //         return result;
+    //     },
+    });
 
     // 3. emit ast ==> target (JS) output code
 
