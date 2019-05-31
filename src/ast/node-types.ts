@@ -1,18 +1,27 @@
+import {Scope, SymbolInfo} from '../scope';
+
+
+
+
 // ====================   All nodes   ====================
 export type Node =
     | Application
     | Block
+    | Blockᐟ
     | CharacterRange
     | Combinator
     | Definition
+    | Definitionᐟ
     | ForeignModule
     | ImportDeclaration
+    | ImportDeclarationᐟ
     | ListLiteral
     | Parenthetical
     | PenModule
     | RecordField
     | RecordLiteral
     | Reference
+    | Referenceᐟ
     | Selection
     | Sequence
     | StringLiteral
@@ -42,6 +51,7 @@ export interface PenModule {
 // ====================   Declaration nodes   ====================
 export type Declaration =
     | Definition
+    | Definitionᐟ
     | ImportDeclaration;
 
 export interface Definition {
@@ -51,11 +61,33 @@ export interface Definition {
     readonly isExported: boolean;
 }
 
+export interface Definitionᐟ {
+    readonly kind: 'Definitionᐟ';
+    readonly name: string;
+    readonly expression: Expression;
+    readonly isExported: boolean;
+    readonly symbol: SymbolInfo;
+}
+
 export interface ImportDeclaration {
     readonly kind: 'ImportDeclaration';
     readonly moduleSpecifier: string;
-    readonly bindings: ReadonlyArray<{name: string, alias?: string}>;
+    readonly bindings: ReadonlyArray<{
+        readonly name: string;
+        readonly alias?: string;
+    }>;
 }
+
+export interface ImportDeclarationᐟ {
+    readonly kind: 'ImportDeclarationᐟ';
+    readonly moduleSpecifier: string;
+    readonly bindings: ReadonlyArray<{
+        readonly name: string;
+        readonly alias?: string;
+        readonly symbol: SymbolInfo;
+    }>;
+}
+
 
 
 
@@ -63,12 +95,14 @@ export interface ImportDeclaration {
 export type Expression =
     | Application
     | Block
+    | Blockᐟ
     | CharacterRange
     | Combinator
     | ListLiteral
     | Parenthetical
     | RecordLiteral
     | Reference
+    | Referenceᐟ
     | Selection
     | Sequence
     | StringLiteral
@@ -83,6 +117,12 @@ export interface Application {
 export interface Block {
     readonly kind: 'Block';
     readonly definitions: readonly Definition[];
+}
+
+export interface Blockᐟ {
+    readonly kind: 'Blockᐟ';
+    readonly definitions: readonly Definition[];
+    readonly scope: Scope;
 }
 
 export interface CharacterRange {
@@ -116,6 +156,12 @@ export interface RecordLiteral {
 export interface Reference {
     readonly kind: 'Reference';
     readonly name: string;
+}
+
+export interface Referenceᐟ {
+    readonly kind: 'Referenceᐟ';
+    readonly name: string;
+    readonly symbol: SymbolInfo;
 }
 
 export interface Selection {

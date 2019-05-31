@@ -29,8 +29,10 @@ export function newScope(parent?: Scope): Scope {
             symbols.set(name, sym);
             return sym;
         },
-        lookup(_name) {
-            throw new Error('Not implemented');
+        lookup(name) {
+            if (symbols.has(name)) return symbols.get(name)!;
+            if (!parent) throw new Error(`Symbol '${name}' is not defined.`);
+            return parent.lookup(name);
         },
         parent,
         symbols,

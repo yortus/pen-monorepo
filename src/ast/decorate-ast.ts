@@ -5,6 +5,7 @@ import {Node} from './node-types';
 
 
 
+// TODO: revise jsdoc...
 /**
  * Generates a new AST with the same topology as the given `ast`, but where each node is replaced with
  * the result of passing it through the matching decorator function from `nodeDecorators`. Each decorator
@@ -21,7 +22,7 @@ import {Node} from './node-types';
  */
 export function decorateAst<N extends Node, D extends NodeDecorators>(ast: N, nodeDecorators: D) {
     const traverse = makeTraverser(nodeDecorators);
-    let result = traverse(ast) as Extract<DecorateAny<Node, D>, N>;
+    let result = traverse(ast) as DecoratedNodeFromKind<N['kind'], D>;
     return result;
 }
 
@@ -35,12 +36,12 @@ export type NodeDecorators = {[K in NodeKind]?: DecorateNode<NodeFromKind<K>>};
 
 
 /**
- * A node decorator function. Must return a new node that is a sub-type of the given node.
+ * A node decorator function. ~Must return a new node that is a sub-type of the given node.~
  * The decorator function must call the `decorateChildren` callback to have its child nodes
  * recursively traversed and decorated. Various top-down and bottom-up decoration strategies
  * are supported by decorating the node before and/or after passing it to this callback.
  */
-export type DecorateNode<N extends Node> = (node: N, decorateChildren: (node: N) => N) => N;
+export type DecorateNode<N extends Node> = (node: N, decorateChildren: <Nᐟ extends Node>(node: Nᐟ) => Nᐟ) => Node;
 
 
 
@@ -67,25 +68,6 @@ type DecoratedNodeFromKind<K extends NodeKind, D extends NodeDecorators> =
 
 
 
-/** Helper type where all properties of a node type are recursively mapped to their decorated node types. */
-type Decorate<N extends Node, D extends NodeDecorators> = {
-    [K in keyof N]:
-        N[K] extends Array<infer E1> ? Array<DecorateAny<E1, D>> :
-        N[K] extends ReadonlyArray<infer E1> ? ReadonlyArray<DecorateAny<E1, D>> :
-        DecorateAny<N[K], D>;
-};
-
-/** Helper type that simplifies the recursive definition of the `Decorate` type. */
-type DecorateAny<T, D extends NodeDecorators> =
-    // If T is a node type, produce the recursively-decorated node type.
-    // If T is a union of node types, produce the union of decorated node types.
-    T extends Node ? Decorate<DecoratedNodeFromKind<T['kind'], D>, D> :
-    // For any other type N, leave it unchanged.
-    T;
-
-
-
-
 /**
  * Helper function that returns an AST traversal function. The returned function takes an AST, and
  * returns a new AST consisting of decorated nodes, using the decorators given in `nodeDecorators`.
@@ -101,14 +83,17 @@ function makeTraverser(nodeDecorators: NodeDecorators) {
     );
 
     // Create the callback function that is passed to each decorator function so it can recurse to its child nodes.
-    const decorateChildren = (n: Node): Node => matchNode<unknown>(n, {
+    const decorateChildren = <N extends Node>(n: N): N => matchNode<unknown>(n, {
         Application: n => ({...n, combinator: decorateNode(n.combinator), arguments: n.arguments.map(decorateNode)}),
         Block: n => ({...n, definitions: n.definitions.map(decorateNode)}),
+        Blockᐟ: n => ({...n, definitions: n.definitions.map(decorateNode)}),
         CharacterRange: n => n,
         Combinator: n => ({...n, expression: decorateNode(n.expression)}),
         Definition: n => ({...n, expression: decorateNode(n.expression)}),
+        Definitionᐟ: n => ({...n, expression: decorateNode(n.expression)}),
         ForeignModule: n => n,
         ImportDeclaration: n => n,
+        ImportDeclarationᐟ: n => n,
         ListLiteral: n => ({...n, elements: n.elements.map(decorateNode)}),
         Parenthetical: n => ({...n, expression: decorateNode(n.expression)}),
         PenModule: n => ({...n, declarations: n.declarations.map(decorateNode)}),
@@ -119,11 +104,12 @@ function makeTraverser(nodeDecorators: NodeDecorators) {
         }),
         RecordLiteral: n => ({...n, fields: n.fields.map(decorateNode)}),
         Reference: n => n,
+        Referenceᐟ: n => n,
         Selection: n => ({...n, exprssions: n.expressions.map(decorateNode)}),
         Sequence: n => ({...n, exprssions: n.expressions.map(decorateNode)}),
         StringLiteral: n => n,
         VoidLiteral: n => n,
-    }) as Node;
+    }) as N;
 
 
     // Create and return the AST traversal function. NB: This is mutually recursive with `decorateChildren`.
