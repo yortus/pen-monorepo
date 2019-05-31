@@ -1,7 +1,7 @@
 import * as assert from 'assert';
-import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, transformAst} from './ast';
+import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, Node} from './ast';
+import {forEachChildNode, matchNode, transformAst} from './ast';
 import {parse} from './parse';
-//import {symbolTable} from './symbols';
 import {newScope} from './scope';
 
 
@@ -74,13 +74,34 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             return result;
         },
     });
-    [] = [ast3];
 
     // 3. emit ast ==> target (JS) output code
+    let lines = [] as string[];
+    let emit: Emitter = line => lines.push(line);
+    emitNode(ast3, emit);
 
     // 4. PROFIT
-    let target: JsTargetCode = {code: [].join('\n')};
+    let target: JsTargetCode = {code: lines.join('\n')};
     return target;
+}
+
+
+
+
+interface Emitter {
+    (line: string): void;
+}
+
+function emitNode(n: Node, emit: Emitter) {
+    matchNode(n, {
+        Definitionᐟ: def => {
+            emit(`${def.name}`);
+        },
+
+        default: node => {
+            forEachChildNode(node, child => emitNode(child, emit));
+        },
+    });
 }
 
 

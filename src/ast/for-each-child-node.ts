@@ -1,8 +1,3 @@
-// TODO: this function is currently unused in the codebase. Remove it? Why keep it?
-
-
-
-
 import {Node} from './node-types';
 
 
