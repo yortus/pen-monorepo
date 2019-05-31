@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {decorateAst, Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ} from './ast';
+import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, transformAst} from './ast';
 import {parse} from './parse';
 //import {symbolTable} from './symbols';
 import {newScope} from './scope';
@@ -22,19 +22,19 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
 
     // 2a. define all symbols within their scopes
     let currentScope = newScope();
-    let ast2 = decorateAst(ast, {
+    let ast2 = transformAst(ast, {
 
-        Block(block, visitChildren) {
+        Block(block, transformChildren) {
             let scope = currentScope = newScope(currentScope);
-            block = visitChildren(block);
+            block = transformChildren(block);
             const result: Blockᐟ = {...block, kind: 'Blockᐟ', scope};
             currentScope = currentScope.parent!;
             return result;
         },
 
-        Definition(def, visitChildren) {
+        Definition(def, transformChildren) {
             let symbol = currentScope.insert(def.name);
-            def = visitChildren(def);
+            def = transformChildren(def);
             const result: Definitionᐟ = {...def, kind: 'Definitionᐟ', symbol};
             return result;
 
@@ -46,12 +46,11 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             // return {...defn, symbol};
         },
 
-        ImportDeclaration(decl, visitChildren) {
+        ImportDeclaration(decl) {
             let bindings = decl.bindings.map(binding => {
                 let symbol = currentScope.insert(binding.name); // TODO: what about alias?
                 return {...binding, symbol};
             });
-            decl = visitChildren(decl);
             const result: ImportDeclarationᐟ = {...decl, kind: 'ImportDeclarationᐟ', bindings};
             return result;
         },
@@ -59,12 +58,12 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
 
     // 2b. resolve all references to symbols defined in the first pass
     assert(!currentScope.parent); // sanity check - we should be back at the root scope here
-    let ast3 = decorateAst(ast2, {
+    let ast3 = transformAst(ast2, {
 
-        Blockᐟ(block, visitChildren) {
+        Blockᐟ(block, transformChildren) {
             assert(block.scope.parent === currentScope); // sanity check
             currentScope = block.scope;
-            block = visitChildren(block);
+            block = transformChildren(block);
             currentScope = currentScope.parent!;
             return block;
         },
