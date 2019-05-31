@@ -26,6 +26,7 @@ function getNodeKinds() {
         ListLiteral: 0,
         Parenthetical: 0,
         PenModule: 0,
+        PenModuleᐟ: 0,
         RecordField: 0,
         RecordLiteral: 0,
         Reference: 0,

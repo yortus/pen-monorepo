@@ -18,6 +18,7 @@ export type Node =
     | ListLiteral
     | Parenthetical
     | PenModule
+    | PenModuleᐟ
     | RecordField
     | RecordLiteral
     | Reference
@@ -33,7 +34,8 @@ export type Node =
 // ====================   Module nodes   ====================
 export type Module =
     | ForeignModule
-    | PenModule;
+    | PenModule
+    | PenModuleᐟ;
 
 export interface ForeignModule {
     readonly kind: 'ForeignModule';
@@ -43,6 +45,12 @@ export interface ForeignModule {
 export interface PenModule {
     readonly kind: 'PenModule';
     readonly declarations: readonly Declaration[];
+}
+
+export interface PenModuleᐟ {
+    readonly kind: 'PenModuleᐟ';
+    readonly declarations: readonly Declaration[];
+    readonly scope: Scope;
 }
 
 

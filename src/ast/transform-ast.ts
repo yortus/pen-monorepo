@@ -93,6 +93,7 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
         ListLiteral: n => ({...n, elements: n.elements.map(transformNode)}),
         Parenthetical: n => ({...n, expression: transformNode(n.expression)}),
         PenModule: n => ({...n, declarations: n.declarations.map(transformNode)}),
+        PenModuleᐟ: n => ({...n, declarations: n.declarations.map(transformNode)}),
         RecordField: n => ({
             ...n,
             name: n.hasComputedName ? transformNode(n.name) : n.name,

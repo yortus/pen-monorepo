@@ -25,6 +25,7 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
         case 'ListLiteral': return visitNodes(visitor, ...node.elements);
         case 'Parenthetical': return visitNodes(visitor, node.expression);
         case 'PenModule': return visitNodes(visitor, ...node.declarations);
+        case 'PenModuleᐟ': return visitNodes(visitor, ...node.declarations);
         case 'RecordField': return visitNodes(visitor, ...(node.hasComputedName ? [node.name] : []), node.expression);
         case 'RecordLiteral': return visitNodes(visitor, ...node.fields);
         case 'Reference': return;

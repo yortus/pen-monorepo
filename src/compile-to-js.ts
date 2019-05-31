@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, Node} from './ast';
+import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, Node, PenModuleᐟ} from './ast';
 import {forEachChildNode, matchNode, transformAst} from './ast';
 import {parse} from './parse';
 import {newScope} from './scope';
@@ -54,6 +54,14 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             const result: ImportDeclarationᐟ = {...decl, kind: 'ImportDeclarationᐟ', bindings};
             return result;
         },
+
+        PenModule(mod, transformChildren) {
+            let scope = currentScope = newScope(currentScope);
+            mod = transformChildren(mod);
+            const result: PenModuleᐟ = {...mod, kind: 'PenModuleᐟ', scope};
+            currentScope = currentScope.parent!;
+            return result;
+        },
     });
 
     // 2b. resolve all references to symbols defined in the first pass
@@ -66,6 +74,14 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             block = transformChildren(block);
             currentScope = currentScope.parent!;
             return block;
+        },
+
+        PenModuleᐟ(mod, transformChildren) {
+            assert(mod.scope.parent === currentScope); // sanity check
+            currentScope = mod.scope;
+            mod = transformChildren(mod);
+            currentScope = currentScope.parent!;
+            return mod;
         },
 
         Reference(ref) {
@@ -95,7 +111,16 @@ interface Emitter {
 function emitNode(n: Node, emit: Emitter) {
     matchNode(n, {
         Definitionᐟ: def => {
-            emit(`${def.name}`);
+            emit(`Object.assign(m1.${def.name}, /*expr for ${def.name}*/);`);
+        },
+
+        PenModuleᐟ: mod => {
+            emit(`let m1 = {`);
+            for (let name of mod.scope.symbols.keys()) {
+                emit(`    ${name}: {},`);
+            }
+            emit(`};`);
+            forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
         },
 
         default: node => {
