@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, Node, PenModuleᐟ} from './ast';
 import {forEachChildNode, matchNode, transformAst} from './ast';
+import {Emitter, makeEmitter} from './emitter';
 import {parse} from './parse';
 import {newScope} from './scope';
 
@@ -92,34 +93,32 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
     });
 
     // 3. emit ast ==> target (JS) output code
-    let lines = [] as string[];
-    let emit: Emitter = line => lines.push(line);
+    let emit = makeEmitter();
     emitNode(ast3, emit);
 
     // 4. PROFIT
-    let target: JsTargetCode = {code: lines.join('\n')};
+    let target: JsTargetCode = {code: emit.toString()};
     return target;
 }
 
 
 
 
-interface Emitter {
-    (line: string): void;
-}
 
 function emitNode(n: Node, emit: Emitter) {
     matchNode(n, {
         Definitionᐟ: def => {
-            emit(`Object.assign(m1.${def.name}, /*expr for ${def.name}*/);`);
+            emit.line().line(`Object.assign(m1.${def.name}, {`).indent();
+            emit.line(`/*expr for ${def.name}*/`);
+            emit.dedent().line(`});`);
         },
 
         PenModuleᐟ: mod => {
-            emit(`let m1 = {`);
+            emit.line().line(`let m1 = {`).indent();
             for (let name of mod.scope.symbols.keys()) {
-                emit(`    ${name}: {},`);
+                emit.line(`${name}: {},`);
             }
-            emit(`};`);
+            emit.dedent().line(`};`);
             forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
         },
 
@@ -128,22 +127,3 @@ function emitNode(n: Node, emit: Emitter) {
         },
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// function indent() { prefix += '    '; }
-// function dedent() { prefix = prefix.slice(4); }
-// function emit(...lines: string[]) {
-//     for (let line of lines) output.push(`${prefix}${line}`);
-// }
-// let prefix = '';
-// let output = [] as string[];
