@@ -15,17 +15,17 @@ import Memoize, i32 from 'pen'
 
 start = expr
 
-expr = Memoize(add | sub | term)
-add = {type: 'add', lhs: expr, rhs: "+" term}
+expr = Memoize(add | sub | term)                        // Application, Selection
+add = {type: 'add', lhs: expr, rhs: "+" term}           // Record, ASL, CSL
 sub = {type: 'sub', lhs: expr, rhs: "\\-" term}
 
-term = {
+term = {                                                // Block
     start = Memoize(mul | div | factor)
     mul = {type: 'mul', lhs: term, rhs: "*" factor}
     div = {type: 'div', lhs: term, rhs: "/" factor}
 }
 
-factor = i32 | "(" expr ")"
+factor = i32 | "(" expr ")"                             // Sequence
 `;
 
 

@@ -1,7 +1,6 @@
 export interface Emitter {
-    line(s?: string): this;
-    indent(): this;
-    dedent(): this;
+    text(s?: string): this;
+    nl(indentChange?: number): this;
     toString(): string;
 }
 
@@ -9,22 +8,19 @@ export interface Emitter {
 
 
 export function makeEmitter() {
-    let lines = [] as string[];
-    let prefix = '';
+    let parts = [] as string[];
+    let indent = 0;
     let emitter: Emitter = {
-        line(s = '') {
-            lines.push(prefix + s);
+        text(s = '') {
+            parts.push(s);
             return emitter;
         },
-        indent() {
-            prefix += ' '.repeat(4);
+        nl(indentChange = 0) {
+            indent += indentChange;
+            parts.push('\n', '    '.repeat(indent));
             return emitter;
         },
-        dedent() {
-            prefix = prefix.slice(4);
-            return emitter;
-        },
-        toString: () => lines.join('\n'),
+        toString: () => parts.join(''),
     };
     return emitter;
 }

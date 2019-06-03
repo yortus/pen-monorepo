@@ -102,8 +102,8 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
         RecordLiteral: n => ({...n, fields: n.fields.map(transformNode)}),
         Reference: n => n,
         Referenceᐟ: n => n,
-        Selection: n => ({...n, exprssions: n.expressions.map(transformNode)}),
-        Sequence: n => ({...n, exprssions: n.expressions.map(transformNode)}),
+        Selection: n => ({...n, expressions: n.expressions.map(transformNode)}),
+        Sequence: n => ({...n, expressions: n.expressions.map(transformNode)}),
         StringLiteral: n => n,
         VoidLiteral: n => n,
     }) as N;

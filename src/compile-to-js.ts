@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Blockᐟ, Definitionᐟ, Referenceᐟ, ImportDeclarationᐟ, Node, PenModuleᐟ} from './ast';
+import {Blockᐟ, Definitionᐟ, Expression, Referenceᐟ, ImportDeclarationᐟ, Node, PenModuleᐟ} from './ast';
 import {forEachChildNode, matchNode, transformAst} from './ast';
 import {Emitter, makeEmitter} from './emitter';
 import {parse} from './parse';
@@ -107,23 +107,102 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
 
 function emitNode(n: Node, emit: Emitter) {
     matchNode(n, {
-        Definitionᐟ: def => {
-            emit.line().line(`Object.assign(m1.${def.name}, {`).indent();
-            emit.line(`/*expr for ${def.name}*/`);
-            emit.dedent().line(`});`);
+        Application: app => {
+            emitCall(app.combinator, app.arguments, emit);
         },
 
+        // Blockᐟ: node => {},
+        // CharacterRange: node => {},
+        // Combinator: node => {},
+
+        Definitionᐟ: def => {
+            emit.text(`Object.assign(`).nl(+1);
+            emit.text(`m1.${def.name},`).nl();
+            emitNode(def.expression, emit);
+            emit.nl(-1).text(`);`).nl();
+        },
+
+        // ForeignModule: node => {},
+        // ImportDeclarationᐟ: node => {},
+        // ListLiteral: node => {},
+        // Parenthetical: node => {},
+
         PenModuleᐟ: mod => {
-            emit.line().line(`let m1 = {`).indent();
-            for (let name of mod.scope.symbols.keys()) {
-                emit.line(`${name}: {},`);
-            }
-            emit.dedent().line(`};`);
+            emit.text(`let m1 = {`).nl(+1);
+            let names = [...mod.scope.symbols.keys()];
+            names.forEach((name, i) => {
+                emit.text(`${name}: {}`);
+                if (i < names.length - 1) emit.text(',').nl();
+            });
+            emit.nl(-1).text(`};`).nl();
             forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
         },
 
+        RecordField: field => {
+            emit.text(`{`).nl(+1);
+            emit.text(`computed: ${field.hasComputedName},`).nl().text(`name: `);
+            if (field.hasComputedName) {
+                emitNode(field.name, emit);
+            }
+            else {
+                emit.text(JSON.stringify(field.name));
+            }
+            emit.text(`,`).nl().text(`value: `);
+            emitNode(field.expression, emit);
+            emit.nl(-1).text(`}`);
+        },
+
+        RecordLiteral: rec => {
+            emit.text(`Record([`).nl(+1);
+            rec.fields.forEach((field, i) => {
+                emitNode(field, emit);
+                if (i < rec.fields.length - 1) emit.text(',').nl();
+            });
+            emit.nl(-1).text(`])`);
+        },
+
+        Referenceᐟ: ref => {
+            emit.text(ref.name);
+        },
+
+        Selection: sel => {
+            emitCall('Selection', sel.expressions, emit);
+        },
+
+        Sequence: seq => {
+            emitCall('Sequence', seq.expressions, emit);
+        },
+
+        StringLiteral: lit => {
+            emit.text(`${lit.subkind}StringLiteral(${JSON.stringify(lit.value)})`);
+        },
+
+        VoidLiteral: () => {
+            emit.text(`Void`);
+        },
+
         default: node => {
+            // TODO: raise error for unhandled/unexpected node kind...
+            emit.text(`<?${node.kind}?>`);
             forEachChildNode(node, child => emitNode(child, emit));
         },
     });
+}
+
+
+
+
+function emitCall(fn: string | Expression, args: readonly Expression[], emit: Emitter) {
+    if (typeof fn === 'string') {
+        emit.text(fn);
+    }
+    else {
+        emitNode(fn, emit);
+    }
+    emit.text(`(`).nl(+1);
+    args.forEach((arg, i) => {
+        emitNode(arg, emit);
+        if (i < args.length - 1) emit.text(',').nl();
+    });
+    emit.nl(-1).text(`)`);
 }
