@@ -1,32 +1,27 @@
 // ==========   Top-level: files and modules   ==========
 start
-    = foreignModule
-    / penModule
+    = moduleDeclaration
+    / moduleDefinition
 
-foreignModule
-    = (!endOfLine !"@pen" .)*   "@pen"   horizontalWhitespace+   "export"   horizontalWhitespace+   exports:foreignExportList   .*
-    { return {kind: 'ForeignModule', exports}; }
+moduleDeclaration
+    = (!endOfLine !"@pen" .)*   "@pen"   horizontalWhitespace+   "export"   horizontalWhitespace+   exports:moduleDeclarationExportList   .*
+    { return {kind: 'ModuleDeclaration', exports}; }
 
-foreignExportList
+moduleDeclarationExportList
     = head:identifier   tail:(horizontalWhitespace*   ","   horizontalWhitespace*   identifier)*
     { return [head].concat(tail.map(el => el[3]));}
 
-penModule
-    = decls:(__   penModuleDeclaration)*   __   endOfFile
-    { return {kind: 'PenModule', declarations: decls.map(el => el[1])}; }
-
-penModuleDeclaration
-    = importDeclaration
-    / exportDeclaration
-    / definition
+moduleDefinition
+    = imports:(__   import)*   __   defs:(__   definition)+   __   endOfFile
+    { return {kind: 'ModuleDefinition', imports: imports.map(el => el[1]), block: {kind: 'Block', definitions: defs.map(el => el[1])}}; }
 
 
 
 
 // ==========   Import declarations   ==========
-importDeclaration
+import
     = importKeyword   __   bindings:importBindingList   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
-    { return {kind: 'ImportDeclaration', moduleSpecifier, bindings}; }
+    { return {kind: 'Import', moduleSpecifier, bindings}; }
 
 importBindingList
     = head:importBinding   tail:(__   ","   __   importBinding)*
@@ -43,18 +38,10 @@ moduleSpecifier
 
 
 
-// ==========   Export declarations   ==========
-exportDeclaration
-    = exportKeyword   __   definition:definition
-    { return {...definition, isExported: true}; }
-
-
-
-
 // ==========   Definitions   ==========
 definition
-    = name:identifier   __   "="   __   expression:expression
-    { return {kind: 'Definition', name, expression, isExported: false}; }
+    = isExported:(exportKeyword   __)?   name:identifier   __   "="   __   expression:expression
+    { return {kind: 'Definition', name, expression, isExported: !!isExported}; }
 
 
 

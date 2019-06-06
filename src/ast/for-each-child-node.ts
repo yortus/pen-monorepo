@@ -14,22 +14,17 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
     switch (node.kind) {
         case 'Application': return visitNodes(visitor, node.combinator, ...node.arguments);
         case 'Block': return visitNodes(visitor, ...node.definitions);
-        case 'Blockᐟ': return visitNodes(visitor, ...node.definitions);
         case 'CharacterRange': return;
         case 'Combinator': return visitNodes(visitor, node.expression);
         case 'Definition': return visitNodes(visitor, node.expression);
-        case 'Definitionᐟ': return visitNodes(visitor, node.expression);
-        case 'ForeignModule': return;
-        case 'ImportDeclaration': return;
-        case 'ImportDeclarationᐟ': return;
+        case 'Import': return;
         case 'ListLiteral': return visitNodes(visitor, ...node.elements);
+        case 'ModuleDeclaration': return;
+        case 'ModuleDefinition': return visitNodes(visitor, ...node.imports, node.block);
         case 'Parenthetical': return visitNodes(visitor, node.expression);
-        case 'PenModule': return visitNodes(visitor, ...node.declarations);
-        case 'PenModuleᐟ': return visitNodes(visitor, ...node.declarations);
         case 'RecordField': return visitNodes(visitor, ...(node.hasComputedName ? [node.name] : []), node.expression);
         case 'RecordLiteral': return visitNodes(visitor, ...node.fields);
         case 'Reference': return;
-        case 'Referenceᐟ': return;
         case 'Selection': return visitNodes(visitor, ...node.expressions);
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
         case 'StringLiteral': return;

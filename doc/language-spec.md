@@ -7,16 +7,16 @@
 
 NB: one file equals one module, like in ES6+
 
-#### Foreign Module
+#### Module Declaration
 - TODO...
 
-#### Pen Module
+#### Module Definition
 - TODO: rename to: native module, ...?
 - TODO...
 
 
 
-## Declarations
+## ~Declarations~
 
 #### Definition
 - TODO...

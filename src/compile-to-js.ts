@@ -1,9 +1,9 @@
 import * as assert from 'assert';
-import {Blockᐟ, Definitionᐟ, Expression, Referenceᐟ, ImportDeclarationᐟ, Node, PenModuleᐟ} from './ast';
+import {Expression, Node} from './ast';
 import {forEachChildNode, matchNode, transformAst} from './ast';
 import {Emitter, makeEmitter} from './emitter';
 import {parse} from './parse';
-import {newScope} from './scope';
+import {insert, lookup, makeChildScope} from './scope';
 
 
 
@@ -22,22 +22,19 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
     // 2. analyse and check ast
 
     // 2a. define all symbols within their scopes
-    let currentScope = newScope();
+    let currentScope = makeChildScope();
     let ast2 = transformAst(ast, {
 
         Block(block, transformChildren) {
-            let scope = currentScope = newScope(currentScope);
-            block = transformChildren(block);
-            const result: Blockᐟ = {...block, kind: 'Blockᐟ', scope};
+            let scope = currentScope = makeChildScope(currentScope);
+            block = {...transformChildren(block), scope};
             currentScope = currentScope.parent!;
-            return result;
+            return block;
         },
 
         Definition(def, transformChildren) {
-            let symbol = currentScope.insert(def.name);
-            def = transformChildren(def);
-            const result: Definitionᐟ = {...def, kind: 'Definitionᐟ', symbol};
-            return result;
+            let symbol = insert(currentScope, def.name);
+            return {...transformChildren(def), symbol};
 
             // // TODO: fix hardcoded 'Pattern', since not always a Pattern, may be a Combinator. But we don't know yet.
             // //       e.g. if node.expression is a 'Reference', what kind does it refer to? Refs are not resolved yet.
@@ -47,21 +44,12 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             // return {...defn, symbol};
         },
 
-        ImportDeclaration(decl) {
+        Import(decl) {
             let bindings = decl.bindings.map(binding => {
-                let symbol = currentScope.insert(binding.name); // TODO: what about alias?
+                let symbol = insert(currentScope, binding.name); // TODO: what about alias?
                 return {...binding, symbol};
             });
-            const result: ImportDeclarationᐟ = {...decl, kind: 'ImportDeclarationᐟ', bindings};
-            return result;
-        },
-
-        PenModule(mod, transformChildren) {
-            let scope = currentScope = newScope(currentScope);
-            mod = transformChildren(mod);
-            const result: PenModuleᐟ = {...mod, kind: 'PenModuleᐟ', scope};
-            currentScope = currentScope.parent!;
-            return result;
+            return {...decl, bindings};
         },
     });
 
@@ -69,7 +57,7 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
     assert(!currentScope.parent); // sanity check - we should be back at the root scope here
     let ast3 = transformAst(ast2, {
 
-        Blockᐟ(block, transformChildren) {
+        Block(block, transformChildren) {
             assert(block.scope.parent === currentScope); // sanity check
             currentScope = block.scope;
             block = transformChildren(block);
@@ -77,18 +65,9 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             return block;
         },
 
-        PenModuleᐟ(mod, transformChildren) {
-            assert(mod.scope.parent === currentScope); // sanity check
-            currentScope = mod.scope;
-            mod = transformChildren(mod);
-            currentScope = currentScope.parent!;
-            return mod;
-        },
-
         Reference(ref) {
-            let symbol = currentScope.lookup(ref.name);
-            let result: Referenceᐟ = {...ref, kind: 'Referenceᐟ', symbol};
-            return result;
+            let symbol = lookup(currentScope, ref.name);
+            return {...ref, symbol};
         },
     });
 
@@ -111,32 +90,36 @@ function emitNode(n: Node, emit: Emitter) {
             emitCall(app.combinator, app.arguments, emit);
         },
 
-        // Blockᐟ: node => {},
+        Block: block => {
+            emit.text(`let m1 = {`).nl(+1);
+            let names = [...block.scope.symbols.keys()];
+            names.forEach((name, i) => {
+                emit.text(`${name}: {}`);
+                if (i < names.length - 1) emit.text(',').nl();
+            });
+            emit.nl(-1).text(`};`).nl();
+            forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+        },
         // CharacterRange: node => {},
         // Combinator: node => {},
 
-        Definitionᐟ: def => {
+        Definition: def => {
             emit.text(`Object.assign(`).nl(+1);
             emit.text(`m1.${def.name},`).nl();
             emitNode(def.expression, emit);
             emit.nl(-1).text(`);`).nl();
         },
 
-        // ForeignModule: node => {},
-        // ImportDeclarationᐟ: node => {},
+        // Import: node => {},
         // ListLiteral: node => {},
-        // Parenthetical: node => {},
 
-        PenModuleᐟ: mod => {
-            emit.text(`let m1 = {`).nl(+1);
-            let names = [...mod.scope.symbols.keys()];
-            names.forEach((name, i) => {
-                emit.text(`${name}: {}`);
-                if (i < names.length - 1) emit.text(',').nl();
-            });
-            emit.nl(-1).text(`};`).nl();
+        ModuleDefinition: mod => {
+            emit.text(`==========  MODULE  ==========`).nl();
             forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
         },
+
+        // ModuleDeclaration: node => {},
+        // Parenthetical: node => {},
 
         RecordField: field => {
             emit.text(`{`).nl(+1);
@@ -161,7 +144,7 @@ function emitNode(n: Node, emit: Emitter) {
             emit.nl(-1).text(`])`);
         },
 
-        Referenceᐟ: ref => {
+        Reference: ref => {
             emit.text(ref.name);
         },
 
