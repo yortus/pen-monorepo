@@ -110,7 +110,11 @@ function emitNode(n: Node, emit: Emitter) {
             emit.nl(-1).text(`);`).nl();
         },
 
-        // Import: node => {},
+        Import: imp => {
+            let names = imp.bindings.map(b => b.name + (b.alias ? ` as ${b.alias}` : ''));
+            emit.text(`import {${names.join(', ')}} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
+        },
+
         // ListLiteral: node => {},
 
         ModuleDefinition: mod => {
