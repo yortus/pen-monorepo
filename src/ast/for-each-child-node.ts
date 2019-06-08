@@ -17,7 +17,8 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
         case 'CharacterRange': return;
         case 'Combinator': return visitNodes(visitor, node.expression);
         case 'Definition': return visitNodes(visitor, node.expression);
-        case 'Import': return;
+        case 'ImportNames': return;
+        case 'ImportNamespace': return;
         case 'ListLiteral': return visitNodes(visitor, ...node.elements);
         case 'ModuleDeclaration': return;
         case 'ModuleDefinition': return visitNodes(visitor, ...node.imports, node.block);

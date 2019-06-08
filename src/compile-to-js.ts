@@ -3,7 +3,7 @@ import {Expression, Node} from './ast';
 import {forEachChildNode, matchNode, transformAst} from './ast';
 import {Emitter, makeEmitter} from './emitter';
 import {parse} from './parse';
-import {insert, lookup, makeChildScope} from './scope';
+import {insert, lookup, makeModuleScope, makeNestedScope, Scope} from './scope';
 
 
 
@@ -22,52 +22,60 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
     // 2. analyse and check ast
 
     // 2a. define all symbols within their scopes
-    let currentScope = makeChildScope();
+    let moduleScope = makeModuleScope();
+    let currentScope: Scope = moduleScope;
+    let blockNestingLevel = 0;
     let ast2 = transformAst(ast, {
 
         Block(block, transformChildren) {
-            let scope = currentScope = makeChildScope(currentScope);
-            block = {...transformChildren(block), scope};
-            currentScope = currentScope.parent!;
+            let restore = {currentScope, blockNestingLevel};
+            if (blockNestingLevel > 0) currentScope = makeNestedScope(currentScope);
+            blockNestingLevel += 1;
+            block = {...transformChildren(block), scope: currentScope};
+            ({currentScope, blockNestingLevel} = restore);
             return block;
         },
 
         Definition(def, transformChildren) {
             let symbol = insert(currentScope, def.name);
+            symbol.isExported = def.isExported;
             return {...transformChildren(def), symbol};
-
-            // // TODO: fix hardcoded 'Pattern', since not always a Pattern, may be a Combinator. But we don't know yet.
-            // //       e.g. if node.expression is a 'Reference', what kind does it refer to? Refs are not resolved yet.
-            // //       This seems to be really a type-checking thing (so do a runtime check if no static type checking).
-            // const symbol: Symbol = {kind: 'Pattern', name: defn.name, scope: symbolTable.currentScope};
-            // symbolTable.insert(symbol);
-            // return {...defn, symbol};
         },
 
-        Import(decl) {
-            let bindings = decl.bindings.map(binding => {
-                let symbol = insert(currentScope, binding.name); // TODO: what about alias?
-                return {...binding, symbol};
-            });
-            return {...decl, bindings};
+        ImportNames(imp) {
+            assert(currentScope === moduleScope); // sanity check
+            let symbols = imp.names.map(name => Object.assign(insert(currentScope, name), {isImported: true}));
+            return {...imp, symbols};
+        },
+
+        ImportNamespace(imp) {
+            assert(currentScope === moduleScope); // sanity check
+            let symbol = insert(currentScope, imp.namespace); // TODO: what about alias?
+            symbol.isImported = true;
+            return {...imp, symbol};
         },
     });
 
     // 2b. resolve all references to symbols defined in the first pass
-    assert(!currentScope.parent); // sanity check - we should be back at the root scope here
+    assert(currentScope === moduleScope); // sanity check - we should be back at the root scope here
     let ast3 = transformAst(ast2, {
 
         Block(block, transformChildren) {
-            assert(block.scope.parent === currentScope); // sanity check
+            let restore = currentScope;
             currentScope = block.scope;
             block = transformChildren(block);
-            currentScope = currentScope.parent!;
+            currentScope = restore;
             return block;
         },
 
         Reference(ref) {
-            let symbol = lookup(currentScope, ref.name);
-            return {...ref, symbol};
+            //if (ref.namespaces) {
+                // TODO: ...
+            //}
+            //else {
+                let symbol = lookup(currentScope, ref.name);
+                return {...ref, symbol};
+            //}
         },
     });
 
@@ -91,28 +99,46 @@ function emitNode(n: Node, emit: Emitter) {
         },
 
         Block: block => {
-            emit.text(`let m1 = {`).nl(+1);
-            let names = [...block.scope.symbols.keys()];
-            names.forEach((name, i) => {
-                emit.text(`${name}: {}`);
-                if (i < names.length - 1) emit.text(',').nl();
-            });
-            emit.nl(-1).text(`};`).nl();
-            forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+            let symbols = [...block.scope.symbols.values()];
+            switch (block.scope.kind) {
+                case 'Module':
+                    symbols.forEach(sym => {
+                        if (sym.isImported) return;
+                        emit.text(`${sym.isExported ? 'export ': ''}const ${sym.name} = {};`).nl();
+                    });
+                    forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+                    break;
+                case 'Nested':
+                    // TODO: use an IIFE
+                    emit.text(`(() => {`).nl(+1);
+                    symbols.forEach(sym => {
+                        emit.text(`const ${sym.name} = {};`).nl();
+                    });
+                    forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+                    emit.text(`const exports = {${symbols.filter(s => s.isExported).map(s => s.name).join(', ')}};`).nl();
+                    emit.text(`return Object.assign(start, exports);`);
+                    emit.nl(-1).text(`}();`)
+                    break;
+            }
         },
         // CharacterRange: node => {},
         // Combinator: node => {},
 
         Definition: def => {
             emit.text(`Object.assign(`).nl(+1);
-            emit.text(`m1.${def.name},`).nl();
+            emit.text(def.name + ',').nl();
             emitNode(def.expression, emit);
             emit.nl(-1).text(`);`).nl();
         },
 
-        Import: imp => {
-            let names = imp.bindings.map(b => b.name + (b.alias ? ` as ${b.alias}` : ''));
+        ImportNames: imp => {
+            let names = imp.names;
             emit.text(`import {${names.join(', ')}} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
+        },
+
+        ImportNamespace: imp => {
+            let name = imp.namespace;
+            emit.text(`import * as ${name} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
         },
 
         // ListLiteral: node => {},
@@ -149,7 +175,8 @@ function emitNode(n: Node, emit: Emitter) {
         },
 
         Reference: ref => {
-            emit.text(ref.name);
+            // TODO: emit namespaces if present
+            emit.text(`Reference(${ref.name})`);
         },
 
         Selection: sel => {

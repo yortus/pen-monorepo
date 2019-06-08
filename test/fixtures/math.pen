@@ -4,7 +4,7 @@
  *      42*(333-2)
  */
 
-import Memoize, i32 from 'pen'
+import {Memoize, i32} from 'pen'
 
 start = expr
 

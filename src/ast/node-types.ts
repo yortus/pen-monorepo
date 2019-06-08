@@ -10,7 +10,8 @@ export type Node =
     | CharacterRange
     | Combinator
     | Definition
-    | Import
+    | ImportNames
+    | ImportNamespace
     | ListLiteral
     | ModuleDeclaration
     | ModuleDefinition
@@ -26,8 +27,10 @@ export type Node =
 
 
 
-// ====================   File/Module nodes   ====================
-export type File = ModuleDeclaration | ModuleDefinition;
+// ====================   Module nodes   ====================
+export type Module =
+    | ModuleDeclaration
+    | ModuleDefinition;
 
 export interface ModuleDeclaration {
     readonly kind: 'ModuleDeclaration';
@@ -36,18 +39,20 @@ export interface ModuleDeclaration {
     
 export interface ModuleDefinition {
     readonly kind: 'ModuleDefinition';
-    readonly imports: readonly Import[];
+    readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;
     readonly block: Block;
 }
 
-export interface Import {
-    readonly kind: 'Import';
-    readonly moduleSpecifier: string;
-    readonly bindings: ReadonlyArray<{
-        readonly name: string;
-        readonly alias?: string;
-        readonly symbol: SymbolInfo;
-    }>;
+
+
+
+// ====================   Definition nodes   ====================
+export interface Definition { // TODO: rename RuleDefinition -or- BindingDefinition -or- NameDefinition
+    readonly kind: 'Definition';
+    readonly name: string;
+    readonly expression: Expression;
+    readonly isExported: boolean;
+    readonly symbol: SymbolInfo;
 }
 
 
@@ -110,6 +115,7 @@ export interface RecordLiteral { // rename: Record
 
 export interface Reference { // TODO: rename RuleReference -or- BindingReference -or- NameReference
     readonly kind: 'Reference';
+    readonly namespaces?: readonly [string, ...string[]];
     readonly name: string;
     readonly symbol: SymbolInfo;
 }
@@ -138,11 +144,17 @@ export interface VoidLiteral { // rename: Void
 
 
 // ====================   Other nodes   ====================
-export interface Definition { // TODO: rename RuleDefinition -or- BindingDefinition -or- NameDefinition
-    readonly kind: 'Definition';
-    readonly name: string;
-    readonly expression: Expression;
-    readonly isExported: boolean;
+export interface ImportNames {
+    readonly kind: 'ImportNames';
+    readonly moduleSpecifier: string;
+    readonly names: readonly string[];
+    readonly symbols: readonly SymbolInfo[];
+}
+
+export interface ImportNamespace {
+    readonly kind: 'ImportNamespace';
+    readonly moduleSpecifier: string;
+    readonly namespace: string;
     readonly symbol: SymbolInfo;
 }
 

@@ -1,6 +1,6 @@
-import false, null, true, i32 from './js-intrinsics.pen.ts'
-import Maybe, Not, ZeroOrMore from './utils.pen'
-import Translit from 'pen'
+import {false, null, true, i32} from './js-intrinsics.pen.ts'
+import {Maybe, Not, ZeroOrMore} from './utils.pen'
+import {Translit} from 'pen'
 
 
 

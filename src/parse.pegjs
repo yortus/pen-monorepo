@@ -12,24 +12,24 @@ moduleDeclarationExportList
     { return [head].concat(tail.map(el => el[3]));}
 
 moduleDefinition
-    = imports:(__   import)*   __   defs:(__   definition)+   __   endOfFile
+    = imports:(__   (importNamespace / importNames))*   __   defs:(__   definition)+   __   endOfFile
     { return {kind: 'ModuleDefinition', imports: imports.map(el => el[1]), block: {kind: 'Block', definitions: defs.map(el => el[1])}}; }
 
 
 
 
 // ==========   Import declarations   ==========
-import
-    = importKeyword   __   bindings:importBindingList   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
-    { return {kind: 'Import', moduleSpecifier, bindings}; }
+importNamespace
+    = importKeyword   __   intoKeyword   __   namespace:identifier   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
+    { return {kind: 'ImportNamespace', moduleSpecifier, namespace}; }
 
-importBindingList
-    = head:importBinding   tail:(__   ","   __   importBinding)*
+importNames
+    = importKeyword   __   "{"   __   names:importNameList   __   "}"   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
+    { return {kind: 'ImportNames', moduleSpecifier, names}; }
+
+importNameList
+    = head:identifier   tail:(__   ","   __   identifier)*
     { return [head].concat(tail.map(el => el[3])); }
-
-importBinding
-    = name:identifier   as:(__   asKeyword   __   identifier)?
-    { return as ? {name, alias: as[3]} : {name}; }
 
 moduleSpecifier
     = "'"   [^'\r\n]*   "'"   { return text().slice(1, -1); }
@@ -150,8 +150,12 @@ voidLiteral
     { return {kind: 'VoidLiteral'}; }
 
 reference
-    = name:identifier   !(__   "="   !">")
-    { return {kind: 'Reference', name}; }
+    = namespaces:referenceNamespaces?   name:identifier   !(__   "="   !">")
+    { return namespaces ? {kind: 'Reference', namespaces, name} : {kind: 'Reference', name}; }
+
+referenceNamespaces
+    = ids:(identifier   ".")+
+    { return ids.map(id => id[0]); }
 
 
 
@@ -174,11 +178,12 @@ hexdigit = [0-9a-fA-F]
 identifier 'identifier' = &identifierStart   !keyword   identifierStart   identifierPart*   { return text(); }
 identifierStart         = [a-zA-Z_]
 identifierPart          = [a-zA-Z_0-9]
-keyword 'keyword'       = asKeyword / fromKeyword / exportKeyword / importKeyword
+keyword 'keyword'       = asKeyword / fromKeyword / exportKeyword / importKeyword / intoKeyword
 asKeyword               = "as"   !identifierPart   { return text(); }
 exportKeyword           = "export"   !identifierPart   { return text(); }
 fromKeyword             = "from"   !identifierPart   { return text(); }
 importKeyword           = "import"   !identifierPart   { return text(); }
+intoKeyword             = "into"   !identifierPart   { return text(); }
 
 
 

@@ -11,21 +11,25 @@ const pen = `
 *      42*(333-2)
 */
 
-import Memoize, i32 from 'pen'
+import {Memoize, i32} from 'pen'
+import into pen from 'pen'
 
 start = expr
 
 expr = Memoize(add | sub | term)                        // Application, Selection
-add = {type: 'add', lhs: expr, rhs: "+" term}           // Record, ASL, CSL
-sub = {type: 'sub', lhs: expr, rhs: "\\-" term}
+export add = {type: 'add', lhs: expr, rhs: "+" term}    // Record, ASL, CSL
+export sub = {type: 'sub', lhs: expr, rhs: "\\-" term}
 
 term = {                                                // Block
     start = Memoize(mul | div | factor)
-    mul = {type: 'mul', lhs: term, rhs: "*" factor}
-    div = {type: 'div', lhs: term, rhs: "/" factor}
+    export mul = {type: 'mul', lhs: term, rhs: "*" factor}
+    export div = {type: 'div', lhs: term, rhs: "/" factor}
 }
 
 factor = i32 | "(" expr ")"                             // Sequence
+
+
+//blahTest = pen.i32 | term.mul | term.div
 `;
 
 
