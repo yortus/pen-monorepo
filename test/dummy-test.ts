@@ -29,7 +29,7 @@ term = {                                                // Block
 factor = i32 | "(" expr ")"                             // Sequence
 
 
-//blahTest = pen.i32 | term.mul | term.div
+blahTest = term.mul | term.div |  pen.i32
 `;
 
 

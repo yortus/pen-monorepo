@@ -18,6 +18,7 @@ export interface SymbolInfo {
     name: string;
     isImported?: boolean;
     isExported?: boolean;
+    members?: SymbolInfo[];
 }
 
 

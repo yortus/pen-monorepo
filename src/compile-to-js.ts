@@ -39,7 +39,11 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
         Definition(def, transformChildren) {
             let symbol = insert(currentScope, def.name);
             symbol.isExported = def.isExported;
-            return {...transformChildren(def), symbol};
+            def = {...transformChildren(def), symbol};
+            if (def.expression.kind === 'Block') {
+                symbol.members = [...def.expression.scope.symbols.values()].filter(s => s.isExported);
+            }
+            return def;
         },
 
         ImportNames(imp) {
@@ -52,6 +56,17 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
             assert(currentScope === moduleScope); // sanity check
             let symbol = insert(currentScope, imp.namespace); // TODO: what about alias?
             symbol.isImported = true;
+
+
+            // TODO: temp testing... hardcode some 'pen' exports for testing...
+            if (imp.moduleSpecifier === 'pen') {
+                symbol.members = [
+                    {name: 'i32', isExported: true},
+                    {name: 'Memoize', isExported: true},
+                ];
+            }
+
+
             return {...imp, symbol};
         },
     });
@@ -69,13 +84,16 @@ export function compileToJs(source: PenSourceCode): JsTargetCode {
         },
 
         Reference(ref) {
-            //if (ref.namespaces) {
-                // TODO: ...
-            //}
-            //else {
-                let symbol = lookup(currentScope, ref.name);
-                return {...ref, symbol};
-            //}
+            let names = [...ref.namespaces || [], ref.name];
+            let fullRef = names.join('.');
+            let symbol = lookup(currentScope, names.shift()!);
+            for (let name of names) {
+                let nestedSymbol = symbol.members && symbol.members.find(s => s.name === name);
+                if (nestedSymbol && !nestedSymbol.isExported) nestedSymbol = undefined;
+                if (!nestedSymbol) throw new Error(`Symbol '${fullRef}' is not defined.`);
+                symbol = nestedSymbol;
+            }
+            return {...ref, symbol};
         },
     });
 
@@ -175,8 +193,8 @@ function emitNode(n: Node, emit: Emitter) {
         },
 
         Reference: ref => {
-            // TODO: emit namespaces if present
-            emit.text(`Reference(${ref.name})`);
+            let namespaces = ref.namespaces ? ref.namespaces.map(ns => `${ns}.exports.`) : [];
+            emit.text(`Reference(${namespaces.join('')}${ref.name})`);
         },
 
         Selection: sel => {
