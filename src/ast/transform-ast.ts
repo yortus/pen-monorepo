@@ -1,6 +1,6 @@
 import {matchNode} from './match-node';
 import {nodeKinds} from './node-kinds';
-import {Node} from './node-types';
+import {Node} from './nodes';
 
 
 
@@ -79,7 +79,7 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
     );
 
     // Create the callback function that is passed to each tranform function so it can recurse to its child nodes.
-    const transformChildren = <N extends Node>(n: N): N => matchNode<unknown>(n, {
+    const transformChildren = <N extends Node>(node: N): N => matchNode<unknown>(node, {
         Application: n => ({...n, combinator: transformNode(n.combinator), arguments: n.arguments.map(transformNode)}),
         Block: n => ({...n, definitions: n.definitions.map(transformNode)}),
         CharacterRange: n => n,

@@ -1,4 +1,4 @@
-import {Scope, SymbolInfo} from '../scope';
+import {Scope, SymbolInfo} from './scope';
 
 
 

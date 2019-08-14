@@ -1,4 +1,4 @@
-import {ModuleDeclaration, ModuleDefinition} from './ast/node-types';
+import {ModuleDeclaration, ModuleDefinition} from '../ast';
 
 
 

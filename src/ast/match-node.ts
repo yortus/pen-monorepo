@@ -1,4 +1,4 @@
-import {Node} from './node-types';
+import {Node} from './nodes';
 
 
 
