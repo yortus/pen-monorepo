@@ -1,15 +1,15 @@
 {
     "compilerOptions": {
         "target": "es2017",
-        "module": "commonjs",
+        "module": "none",
         "lib": ["es2017"],
-        "types": ["mocha", "node"],
+        "types": [],
 
         "rootDir": ".",
-        "outDir": "../dist/test",
+        "outFile": "../dist/penlib.js",
         "removeComments": false,
-        "sourceMap": true,
-        "declaration": true,
+        "sourceMap": false,
+        "declaration": false,
 
         "pretty": true,
 
@@ -19,5 +19,6 @@
         "noFallthroughCasesInSwitch": true,
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
+        "alwaysStrict": false,
     }
 }

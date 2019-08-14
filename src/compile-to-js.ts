@@ -135,7 +135,7 @@ function emitNode(n: Node, emit: Emitter) {
                     forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
                     emit.text(`const exports = {${symbols.filter(s => s.isExported).map(s => s.name).join(', ')}};`).nl();
                     emit.text(`return Object.assign(start, exports);`);
-                    emit.nl(-1).text(`}();`)
+                    emit.nl(-1).text(`})()`)
                     break;
             }
         },
@@ -162,8 +162,13 @@ function emitNode(n: Node, emit: Emitter) {
         // ListLiteral: node => {},
 
         ModuleDefinition: mod => {
-            emit.text(`==========  MODULE  ==========`).nl();
+            const MODULE_ID = `module1`;
+            emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
+            emit.text(`function ${MODULE_ID}() {`).nl(+1);
+            emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
+            emit.text(`// TODO: detect circular dependencies...`).nl();
             forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+            emit.nl(-1).text(`}`);
         },
 
         // ModuleDeclaration: node => {},

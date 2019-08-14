@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-
         "target": "es2017",
         "module": "commonjs",
         "lib": ["es2017"],
@@ -8,20 +7,17 @@
 
         "rootDir": ".",
         "outDir": "../dist/commonjs",
+        "removeComments": false,
         "sourceMap": true,
         "declaration": true,
-        "declarationMap": true,
 
         "pretty": true,
 
         "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true
     }
 }

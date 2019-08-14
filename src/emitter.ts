@@ -1,5 +1,5 @@
 export interface Emitter {
-    text(s?: string): this;
+    text(s: string): this;
     nl(indentChange?: number): this;
     toString(): string;
 }
@@ -11,7 +11,7 @@ export function makeEmitter() {
     let parts = [] as string[];
     let indent = 0;
     let emitter: Emitter = {
-        text(s = '') {
+        text(s) {
             parts.push(s);
             return emitter;
         },

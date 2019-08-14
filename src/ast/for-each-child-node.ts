@@ -30,7 +30,11 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
         case 'Sequence': return visitNodes(visitor, ...node.expressions);
         case 'StringLiteral': return;
         case 'VoidLiteral': return;
-        default: return assertNever(node);
+
+        // Ensure both statically and at runtime that *every* node type has been handled by the switch cases above.
+        default: return ((node: never) => {
+            throw new Error(`Internal error: unhandled node kind '${(node as Node).kind}'`);
+        })(node);
     }
 }
 
@@ -43,12 +47,4 @@ function visitNodes(visitor: (n: Node) => void, ...nodes: Node[]) {
     for (let i = 0; i < nodes.length; ++i) {
         visitor(nodes[i]);
     }
-}
-
-
-
-
-// Helper function used in the switch block in `forEachChildNode` to ensure the cases are exhaustive.
-function assertNever(_value: never): never {
-    throw new Error(`Internal error: unhandled node type in forEachChildNode`);
 }

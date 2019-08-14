@@ -11,8 +11,8 @@ import {Node} from './node-types';
  * encountered for which no transform function is given, then the default transform is applied. The default
  * transform produces a new node where all child nodes have been recursively replaced with their transformed
  * nodes, and all other properties have been shallow-copied. The traversal over `ast` is depth-first, and
- * each transform function determines whether its node is processed top-down or bottom-up, since it controls
- * when its child nodes are traversed via the `transformChildren` callback passed to it.
+ * each transform function determines whether its node is processed top-down (preorder) or bottom-up (postorder),
+ * since it controls when its child nodes are traversed via the `transformChildren` callback passed to it.
  * @param ast the root node that is traversed to produce a corresponding transformed AST.
  * @param nodeTransforms an object keyed by node kind, whose values are functions that transform that node kind.
  * @returns a new AST that is the result of traversing `ast` and applying the given tranforms to its nodes.

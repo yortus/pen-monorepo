@@ -1,4 +1,6 @@
 //import {expect} from 'chai';
+import * as fs from 'fs';
+import * as path from 'path';
 import {compileToJs} from 'penc';
 
 
@@ -37,11 +39,8 @@ blahTest = term.mul | term.div |  pen.i32
 
 describe('Dummy test', () => {
     it('passes', () => {
-
         let js = compileToJs({code: pen});
-
-        console.log('\n\n\n\n');
-        js.code.split('\n').forEach(line => console.log(line));
-
+        try { fs.mkdirSync(path.join(__dirname, 'out')); } catch {}
+        fs.writeFileSync(path.join(__dirname, 'out/dummy.js'), js.code, {encoding: 'utf8'});
     });
 });

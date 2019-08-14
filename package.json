@@ -9,7 +9,8 @@
     "typings": "dist/commonjs/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "yarn build:src && yarn build:tests",
+        "build": "yarn build:penlib && yarn build:src && yarn build:tests",
+        "build:penlib": "tsc -p penlib",
         "build:src": "tsc -p src && pegjs -o dist/commonjs/parse.js src/parse.pegjs",
         "build:tests": "tsc -p test && cpx test/fixtures/*.* dist/test/fixtures",
         "lint": "tslint src/**/*.ts test/**/*.ts",
