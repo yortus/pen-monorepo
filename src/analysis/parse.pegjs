@@ -1,15 +1,10 @@
 // ==========   Top-level: files and modules   ==========
+// TODO: module declarations:
+// - They will have a separate start rule.
+// - They are completely ambient (ie no emit). They describe the exports of a module written in the host language.
+// - They are differentiated by file extension `.d.pen`. Although is it better to do it another way?
 start
-    = moduleDeclaration
-    / moduleDefinition
-
-moduleDeclaration
-    = (!endOfLine !"@pen" .)*   "@pen"   horizontalWhitespace+   "export"   horizontalWhitespace+   exports:moduleDeclarationExportList   .*
-    { return {kind: 'ModuleDeclaration', exports}; }
-
-moduleDeclarationExportList
-    = head:identifier   tail:(horizontalWhitespace*   ","   horizontalWhitespace*   identifier)*
-    { return [head].concat(tail.map(el => el[3]));}
+    = moduleDefinition
 
 moduleDefinition
     = imports:(__   (importNamespace / importNames))*   __   defs:(__   definition)+   __   endOfFile
