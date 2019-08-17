@@ -20,7 +20,6 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
         case 'ImportNames': return;
         case 'ImportNamespace': return;
         case 'ListLiteral': return visitNodes(visitor, ...node.elements);
-        case 'ModuleDeclaration': return;
         case 'ModuleDefinition': return visitNodes(visitor, ...node.imports, node.block);
         case 'Parenthetical': return visitNodes(visitor, node.expression);
         case 'RecordField': return visitNodes(visitor, ...(node.hasComputedName ? [node.name] : []), node.expression);

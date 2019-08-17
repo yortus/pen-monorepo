@@ -1,11 +1,11 @@
 import * as assert from 'assert';
-import {ModuleDeclaration, ModuleDefinition, transformAst} from '../ast';
+import {ModuleDefinition, transformAst} from '../ast';
 import {lookup, makeModuleScope, Scope} from '../ast'; // TODO: rename some of these...
 
 
 
 
-export function resolveSymbolReferences(ast: ModuleDeclaration | ModuleDefinition) {
+export function resolveSymbolReferences(ast: ModuleDefinition) {
     let moduleScope = makeModuleScope();
     let currentScope: Scope = moduleScope;
     let result = transformAst(ast, {

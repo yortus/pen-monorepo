@@ -66,7 +66,6 @@ export function emitNode(node: Node, emit: Emitter) {
             emit.nl(-1).text(`}`);
         },
 
-        // ModuleDeclaration: node => {},
         // Parenthetical: node => {},
 
         RecordField: field => {

@@ -21,7 +21,6 @@ function getNodeKinds() {
         ImportNames: 0,
         ImportNamespace: 0,
         ListLiteral: 0,
-        ModuleDeclaration: 0,
         ModuleDefinition: 0,
         Parenthetical: 0,
         RecordField: 0,

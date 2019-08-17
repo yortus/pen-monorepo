@@ -13,7 +13,6 @@ export type Node =
     | ImportNames
     | ImportNamespace
     | ListLiteral
-    | ModuleDeclaration
     | ModuleDefinition
     | Parenthetical
     | RecordField
@@ -29,13 +28,7 @@ export type Node =
 
 // ====================   Module nodes   ====================
 export type Module =
-    | ModuleDeclaration
     | ModuleDefinition;
-
-export interface ModuleDeclaration {
-    readonly kind: 'ModuleDeclaration';
-    readonly exports: readonly string[];
-}
     
 export interface ModuleDefinition {
     readonly kind: 'ModuleDefinition';

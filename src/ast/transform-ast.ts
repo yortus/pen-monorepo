@@ -88,7 +88,6 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
         ImportNames: n => n,
         ImportNamespace: n => n,
         ListLiteral: n => ({...n, elements: n.elements.map(transformNode)}),
-        ModuleDeclaration: n => n,
         ModuleDefinition: n => ({...n, imports: n.imports.map(transformNode), block: transformNode(n.block)}),
         Parenthetical: n => ({...n, expression: transformNode(n.expression)}),
         RecordField: n => ({
