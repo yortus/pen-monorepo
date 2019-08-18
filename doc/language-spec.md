@@ -32,6 +32,7 @@ NB: one file equals one module, like in ES6+
 
 #### Application
 - no whitespace between function and argument(s) - this ensures no ambiguity between application and sequence
+- use parentheses if necessary to ensure no whitespace
 - TODO...
 
 #### Block
