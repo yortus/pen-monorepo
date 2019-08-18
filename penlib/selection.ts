@@ -1,6 +1,7 @@
-function Selection(...expressions: Rule[]): Rule {
+function Selection(...expressions: Relation[]): Relation {
     const arity = expressions.length;
     return {
+        kind: 'Relation',
         parse: (src, pos, result) => {
             for (let i = 0; i < arity; ++i) {
                 if (expressions[i].parse(src, pos, result)) return true;

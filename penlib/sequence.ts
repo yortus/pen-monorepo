@@ -1,6 +1,7 @@
-function Sequence(...expressions: Rule[]): Rule {
+function Sequence(...expressions: Relation[]): Relation {
     const arity = expressions.length;
     return {
+        kind: 'Relation',
         parse: (src, pos, result) => {
             let ast: unknown = undefined;
             for (let i = 0; i < arity; ++i) {
