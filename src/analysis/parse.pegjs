@@ -51,7 +51,7 @@ subSelection
     / subSequence
 
 subSequence
-    = combinator            // a => b
+    = function              // a => b
     / application           // a(b)
     / block                 // {a=b c=d start=a}
     / parenthetical         // (foo bar)
@@ -70,11 +70,11 @@ sequence
     = head:subSequence   tail:(whitespace   subSequence)+
     { return {kind: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
 
-combinator
-    = parameters:combinatorParameterList   __   "=>"   __   expression:expression
-    { return {kind: 'Combinator', parameters, expression}; }
+function
+    = parameters:functionParameterList   __   "=>"   __   expression:expression
+    { return {kind: 'Function', parameters, expression}; }
 
-combinatorParameterList
+functionParameterList
     = id:identifier
     { return [id]; }
 
@@ -85,8 +85,9 @@ combinatorParameterList
     { return [head].concat(tail.map(el => el[3])); }
 
 application
+    // TODO: allow nested parentheticals eg (((fn))) ?
     = f:(reference / parenthetical)   /* NO WHITESPACE */   args:applicationArgumentList
-    { return {kind: 'Application', combinator: f.kind === 'Parenthetical' ? f.expression : f, arguments: args}; }
+    { return {kind: 'Application', function: f.kind === 'Parenthetical' ? f.expression : f, arguments: args}; }
 
 applicationArgumentList
     = "("   __   head:expression   tail:(__   ","   __   expression)*   __   ")"

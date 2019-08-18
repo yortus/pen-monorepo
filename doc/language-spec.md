@@ -44,8 +44,7 @@ NB: one file equals one module, like in ES6+
 - Syntax for both concrete and abstract character ranges, same as for string literals
 - Examples: `"a-f"`, `"0-9"`, `'A-Z'`
 
-#### Combinator
-- TODO: rename to 'Function' or 'Function Expression'?
+#### Function
 - TODO...
 
 #### List Literal

@@ -80,11 +80,11 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
 
     // Create the callback function that is passed to each tranform function so it can recurse to its child nodes.
     const transformChildren = <N extends Node>(node: N): N => matchNode<unknown>(node, {
-        Application: n => ({...n, combinator: transformNode(n.combinator), arguments: n.arguments.map(transformNode)}),
+        Application: n => ({...n, function: transformNode(n.function), arguments: n.arguments.map(transformNode)}),
         Block: n => ({...n, definitions: n.definitions.map(transformNode)}),
         CharacterRange: n => n,
-        Combinator: n => ({...n, expression: transformNode(n.expression)}),
         Definition: n => ({...n, expression: transformNode(n.expression)}),
+        Function: n => ({...n, expression: transformNode(n.expression)}),
         ImportNames: n => n,
         ImportNamespace: n => n,
         ListLiteral: n => ({...n, elements: n.elements.map(transformNode)}),
