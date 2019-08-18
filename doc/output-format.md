@@ -38,11 +38,11 @@ const blahTest = {} as Relation;
 
 
 // 2. Bind all names to their expressions.
-bind(
+define(
     start,
-    expr // NB: this is still an empty object, but bind() checks for that and adds a temporary indirection that will be backpatched
+    expr // NB: this is still an empty object, but define() checks for that and adds a temporary indirection that will be backpatched
 );
-bind(
+define(
     expr,
     Memoize(
         Selection(
@@ -52,7 +52,7 @@ bind(
         )
     )
 );
-bind(
+define(
     add,
     Record([
         {
@@ -75,7 +75,7 @@ bind(
         }
     ])
 );
-bind(
+define(
     sub,
     Record([
         {
@@ -98,23 +98,24 @@ bind(
         }
     ])
 );
-bind(
+define(
     term,
+    // TODO: emit for a block... needs revision...
     (() => {
-        const start = {};
-        const mul = {};
-        const div = {};
-        bind(
+        const start = {} as Relation;
+        const mul = {} as Relation;
+        const div = {} as Relation;
+        define(
             start,
             Memoize(
                 Selection(
                     mul,
                     div,
-                    (factor
+                    factor
                 )
             )
         );
-        bind(
+        define(
             mul,
             Record([
                 {
@@ -137,7 +138,7 @@ bind(
                 }
             ])
         );
-        bind(
+        define(
             div,
             Record([
                 {
@@ -160,11 +161,11 @@ bind(
                 }
             ])
         );
-        const exports = {mul, div};
-        return Object.assign(start, exports);
+        start.exports = {mul, div};
+        return start;
     })()
 );
-bind(
+define(
     factor,
     Selection(
         i32,
@@ -175,7 +176,7 @@ bind(
         )
     )
 );
-bind(
+define(
     blahTest,
     Selection(
         term.exports.mul,
