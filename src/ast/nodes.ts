@@ -36,7 +36,7 @@ export interface ModuleDeclaration {
     readonly kind: 'ModuleDeclaration';
     readonly exports: readonly string[];
 }
-    
+
 export interface ModuleDefinition {
     readonly kind: 'ModuleDefinition';
     readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;

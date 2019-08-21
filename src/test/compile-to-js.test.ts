@@ -1,7 +1,7 @@
-//import {expect} from 'chai';
+// import {expect} from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
-import {compileToJs} from 'penc';
+import {compileToJs} from '../compile-to-js';
 
 
 
@@ -37,10 +37,10 @@ blahTest = term.mul | term.div |  pen.i32
 
 
 
-describe('Dummy test', () => {
+describe('compileToJs', () => {
     it('passes', () => {
         let js = compileToJs({code: pen});
-        try { fs.mkdirSync(path.join(__dirname, 'out')); } catch {}
-        fs.writeFileSync(path.join(__dirname, 'out/dummy.js'), js.code, {encoding: 'utf8'});
+        try { fs.mkdirSync(path.join(__dirname, '../../dist/out')); } catch {}
+        fs.writeFileSync(path.join(__dirname, '../../dist/out/dummy.js'), js.code, {encoding: 'utf8'});
     });
 });

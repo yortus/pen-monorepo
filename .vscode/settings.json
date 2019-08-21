@@ -1,7 +1,19 @@
 {
-	// Columns at which to show vertical rulers
+	// Columns at which to show vertical rulers.
 	"editor.rulers": [120],
 
     // Specifies the folder path containing the tsserver and lib*.d.ts files to use.
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+
+	// Hide files/folders in Explorer if they match any of the following patterns.
+	"files.exclude": {
+		"node_modules": true,
+		"dist": true,
+		"**/.git": true,
+		"**/.DS_Store": true
+	},
+
+	// Settings for "Mocha Test Explorer" extension.
+	"mochaExplorer.files": "src/**/*.test.ts",
+	"mochaExplorer.require": "ts-node/register"
 }

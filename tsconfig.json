@@ -5,8 +5,8 @@
         "lib": ["es2017"],
         "types": ["mocha", "node"],
 
-        "rootDir": ".",
-        "outDir": "../dist/test",
+        "rootDir": "src",
+        "outDir": "dist",
         "removeComments": false,
         "sourceMap": true,
         "declaration": true,
@@ -19,5 +19,7 @@
         "noFallthroughCasesInSwitch": true,
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
-    }
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/**/*.test.ts"],
 }

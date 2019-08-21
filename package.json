@@ -5,19 +5,15 @@
     "engines": {
         "node": ">=8.2.1"
     },
-    "main": "dist/commonjs/index.js",
-    "typings": "dist/commonjs/index.d.ts",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "npm run build:penlib && npm run build:src && npm run build:tests",
+        "build": "npm run build:penlib && npm run build:src",
         "build:penlib": "tsc -p penlib",
-        "build:src": "tsc -p src && pegjs -o dist/commonjs/analysis/parse.js src/analysis/parse.pegjs",
-        "build:tests": "tsc -p test && cpx test/fixtures/*.* dist/test/fixtures",
-        "lint": "tslint src/**/*.ts test/**/*.ts",
-        "test": "node ./scripts/run-unit-tests",
-        "test:debug": "cross-env DEBUG=penc node ./scripts/run-unit-tests",
-        "prepare": "npm run self-ref && npm run build",
-        "self-ref": "node ./scripts/enable-self-reference"
+        "build:src": "tsc && cpx src/**/*.pegjs dist",
+        "lint": "tslint src/**/*.ts",
+        "test": "mocha --require ts-node/register src/**/*.test.ts"
     },
     "contributors": [
         {
@@ -27,18 +23,21 @@
         }
     ],
     "license": "MIT",
-    "dependencies": {},
+    "dependencies": {
+        "pegjs": "^0.10.0"
+    },
     "devDependencies": {
-        "@types/chai": "^4.1.7",
-        "@types/mocha": "^5.2.5",
-        "@types/node": "^10.0.0",
+        "@types/chai": "^4.2.0",
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^10.14.16",
+        "@types/pegjs": "^0.10.1",
         "chai": "^4.2.0",
         "concurrently": "^3.5.1",
         "cpx": "^1.5.0",
         "mocha": "^5.2.0",
-        "pegjs": "^0.10.0",
-        "rimraf": "^2.6.2",
-        "tslint": "^5.11.0",
+        "rimraf": "^2.7.1",
+        "ts-node": "^8.3.0",
+        "tslint": "^5.19.0",
         "typescript": "3.5.2"
     }
 }
