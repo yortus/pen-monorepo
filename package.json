@@ -9,7 +9,7 @@
     "typings": "dist/commonjs/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "yarn build:penlib && yarn build:src && yarn build:tests",
+        "build": "npm run build:penlib && npm run build:src && npm run build:tests",
         "build:penlib": "tsc -p penlib",
         "build:src": "tsc -p src && pegjs -o dist/commonjs/analysis/parse.js src/analysis/parse.pegjs",
         "build:tests": "tsc -p test && cpx test/fixtures/*.* dist/test/fixtures",
@@ -27,8 +27,7 @@
         }
     ],
     "license": "MIT",
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@types/chai": "^4.1.7",
         "@types/mocha": "^5.2.5",
@@ -40,6 +39,6 @@
         "pegjs": "^0.10.0",
         "rimraf": "^2.6.2",
         "tslint": "^5.11.0",
-        "typescript": "next"
+        "typescript": "3.5.2"
     }
 }
