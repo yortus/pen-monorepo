@@ -32,6 +32,7 @@ NB: one file equals one module, like in ES6+
 
 #### Application
 - no whitespace between function and argument(s) - this ensures no ambiguity between application and sequence
+- use parentheses if necessary to ensure no whitespace
 - TODO...
 
 #### Block
@@ -44,8 +45,7 @@ NB: one file equals one module, like in ES6+
 - Syntax for both concrete and abstract character ranges, same as for string literals
 - Examples: `"a-f"`, `"0-9"`, `'A-Z'`
 
-#### Combinator
-- TODO: rename to 'Function' or 'Function Expression'?
+#### Function
 - TODO...
 
 #### List Literal

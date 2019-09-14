@@ -8,12 +8,11 @@ export type Node =
     | Application
     | Block
     | CharacterRange
-    | Combinator
     | Definition
+    | Function
     | ImportNames
     | ImportNamespace
     | ListLiteral
-    | ModuleDeclaration
     | ModuleDefinition
     | Parenthetical
     | RecordField
@@ -29,14 +28,8 @@ export type Node =
 
 // ====================   Module nodes   ====================
 export type Module =
-    | ModuleDeclaration
     | ModuleDefinition;
-
-export interface ModuleDeclaration {
-    readonly kind: 'ModuleDeclaration';
-    readonly exports: readonly string[];
-}
-
+    
 export interface ModuleDefinition {
     readonly kind: 'ModuleDefinition';
     readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;
@@ -63,7 +56,7 @@ export type Expression =
     | Application
     | Block
     | CharacterRange
-    | Combinator
+    | Function
     | ListLiteral
     | Parenthetical
     | RecordLiteral
@@ -75,7 +68,7 @@ export type Expression =
 
 export interface Application {
     readonly kind: 'Application';
-    readonly combinator: Expression; // rename: function?
+    readonly function: Expression; // rename: function?
     readonly arguments: readonly Expression[];
 }
 
@@ -92,8 +85,8 @@ export interface CharacterRange { // rename: CharRange
     readonly maxValue: string;
 }
 
-export interface Combinator { // rename: function definition? lambda?
-    readonly kind: 'Combinator';
+export interface Function {
+    readonly kind: 'Function';
     readonly parameters: readonly string[];
     readonly expression: Expression;
 }

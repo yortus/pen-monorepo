@@ -1,11 +1,11 @@
 import * as assert from 'assert';
-import {ModuleDeclaration, ModuleDefinition, transformAst} from '../ast';
+import {ModuleDefinition, transformAst} from '../ast';
 import {insert, makeModuleScope, makeNestedScope, Scope} from '../ast'; // TODO: rename some of these...
 
 
 
 
-export function resolveSymbolDefinitions(ast: ModuleDeclaration | ModuleDefinition) {
+export function resolveSymbolDefinitions(ast: ModuleDefinition) {
     let moduleScope = makeModuleScope();
     let currentScope: Scope = moduleScope;
     let blockNestingLevel = 0;

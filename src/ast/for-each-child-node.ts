@@ -12,15 +12,14 @@ import {Node} from './nodes';
  */
 export function forEachChildNode(node: Node, visitor: (childNode: Node) => void) {
     switch (node.kind) {
-        case 'Application': return visitNodes(visitor, node.combinator, ...node.arguments);
+        case 'Application': return visitNodes(visitor, node.function, ...node.arguments);
         case 'Block': return visitNodes(visitor, ...node.definitions);
         case 'CharacterRange': return;
-        case 'Combinator': return visitNodes(visitor, node.expression);
         case 'Definition': return visitNodes(visitor, node.expression);
+        case 'Function': return visitNodes(visitor, node.expression);
         case 'ImportNames': return;
         case 'ImportNamespace': return;
         case 'ListLiteral': return visitNodes(visitor, ...node.elements);
-        case 'ModuleDeclaration': return;
         case 'ModuleDefinition': return visitNodes(visitor, ...node.imports, node.block);
         case 'Parenthetical': return visitNodes(visitor, node.expression);
         case 'RecordField': return visitNodes(visitor, ...(node.hasComputedName ? [node.name] : []), node.expression);

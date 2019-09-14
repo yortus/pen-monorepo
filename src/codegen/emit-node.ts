@@ -7,7 +7,7 @@ import {Emitter} from './emitter';
 export function emitNode(node: Node, emit: Emitter) {
     matchNode(node, {
         Application: app => {
-            emitCall(app.combinator, app.arguments, emit);
+            emitCall(app.function, app.arguments, emit);
         },
 
         Block: block => {
@@ -34,8 +34,8 @@ export function emitNode(node: Node, emit: Emitter) {
                     break;
             }
         },
+
         // CharacterRange: node => {},
-        // Combinator: node => {},
 
         Definition: def => {
             emit.text(`Object.assign(`).nl(+1);
@@ -43,6 +43,8 @@ export function emitNode(node: Node, emit: Emitter) {
             emitNode(def.expression, emit);
             emit.nl(-1).text(`);`).nl();
         },
+
+        // Function: node => {},
 
         ImportNames: imp => {
             let names = imp.names;
@@ -66,7 +68,6 @@ export function emitNode(node: Node, emit: Emitter) {
             emit.nl(-1).text(`}`);
         },
 
-        // ModuleDeclaration: node => {},
         // Parenthetical: node => {},
 
         RecordField: field => {

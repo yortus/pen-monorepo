@@ -1,12 +1,13 @@
 type RecordField =
-    | {hasComputedName: false, name: string, value: Rule}
-    | {hasComputedName: true, name: Rule, value: Rule};
+    | {hasComputedName: false, name: string, value: Relation}
+    | {hasComputedName: true, name: Relation, value: Relation};
 
 
 
 
-function Record(fields: RecordField[]): Rule {
+function Record(fields: RecordField[]): Relation {
     return {
+        kind: 'Relation',
         parse: (src, pos, result) => {
             let obj = {} as any; // TODO: remove/improve cast
             for (let field of fields) {

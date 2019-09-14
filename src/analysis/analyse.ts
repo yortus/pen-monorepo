@@ -1,4 +1,4 @@
-import {ModuleDeclaration, ModuleDefinition} from '../ast';
+import {Module} from '../ast';
 import {parse} from './parse';
 import {resolveSymbolDefinitions} from './resolve-symbol-definitions';
 import {resolveSymbolReferences} from './resolve-symbol-references';
@@ -6,10 +6,10 @@ import {resolveSymbolReferences} from './resolve-symbol-references';
 
 
 
-export function analyse(penModuleSourceText: string): ModuleDeclaration | ModuleDefinition {
+export function analyse(moduleSourceText: string): Module {
 
     // Parse pen module source code into an AST.
-    let ast = parse(penModuleSourceText);
+    let ast = parse(moduleSourceText);
 
     // TODO: more checking and analysis of AST...
 
