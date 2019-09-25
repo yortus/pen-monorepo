@@ -1,4 +1,1 @@
-export * from './ast-types';
-export {evaluate} from './evaluate';
-export {transpileToJS} from './transpile-to-js';
-export {NEWtranspileToJS} from './transpile-NEW-TEMP';
+export {compileToJs, PenSourceCode, JsTargetCode} from './compile-to-js';

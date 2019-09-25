@@ -1,5 +1,23 @@
-[ ] rename `char` to `any-char`
-[ ] rename `intrinsic-*` to ???
+[ ] emit core imports if references - eg `Sequence`, `Selection`, etc
+[ ] can we use dotted references? eg `myBlock.rule1` to `rule` exported from the block `myBlock`
+    [ ] leaning toward yes for usefulness, eg imagine a mixed grammar with `json.array` and `yaml.array`
+    [ ] if doing this, still need import aliases? eg `import foo as bar`. Can avoid collisions via dotted refs 
+    [ ] related: can we `import * as m` from a module and then reference as `m.foo`?
+    [ ] consider:
+        - other uses of dot
+          - alternative for 'match any char'?
+        - whitespace handling, eg is `foo . bar` allowed? probably not
+            - call `foo.bar` a 'nested binding' or 'composite binding' - treat it effectively as a single name/binding
+        - readability
+
+
+
+
+
+
+Older:
+    [ ] rename `char` to `any-char`
+    [ ] rename `intrinsic-*` to ???
 
 
 

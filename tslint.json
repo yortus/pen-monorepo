@@ -64,7 +64,7 @@
         "no-angle-bracket-type-assertion": true,
         "no-any": false,
         "no-arg": true,
-        "no-bitwise": false,
+        "no-bitwise": true,
         "no-conditional-assignment": true,
         "no-consecutive-blank-lines": {"options": 4},                               // <===== changed from recommended
         "no-console": true,
@@ -88,12 +88,12 @@
         "no-trailing-whitespace": true,
         "no-unnecessary-initializer": true,
         "no-unsafe-finally": true,
-        "no-unused-expression": false,      // TODO: temp testing changed for TSX...
+        "no-unused-expression": true,
         "no-use-before-declare": false,
         "no-var-keyword": true,
         "no-var-requires": true,
         "object-literal-key-quotes": {
-            "options": ["consistent"]
+            "options": ["consistent-as-needed"]
         },
         "object-literal-shorthand": true,
         "object-literal-sort-keys": false,                                          // <===== changed from recommended
@@ -120,7 +120,12 @@
         },
         "prefer-const": false,                                                      // <===== changed from recommended
         "prefer-for-of": true,
-        "quotemark": [true, "single", "jsx-double"],                                // <===== changed from recommended
+        "quotemark": {                                                              // <===== changed from recommended
+            "options": [
+                "single",
+                "avoid-escape"
+            ]
+        },
         "radix": true,
         "semicolon": {
             "options": ["always"]
@@ -167,13 +172,13 @@
                 }
             ]
         },
+        "typeof-compare": true,
         "unified-signatures": true,
         "use-isnan": true,
-        "variable-name": {                                                          // <===== changed from recommended
+        "variable-name": {
             "options": [
                 "ban-keywords",
                 "check-format",
-                "allow-leading-underscore",
                 "allow-pascal-case"
             ]
         },

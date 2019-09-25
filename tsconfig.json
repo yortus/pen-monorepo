@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "commonjs",
+        "lib": ["es2017"],
+        "types": ["mocha", "node"],
+
+        "rootDir": "src",
+        "outDir": "dist",
+        "removeComments": false,
+        "sourceMap": true,
+        "declaration": true,
+
+        "pretty": true,
+
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/**/*.test.ts"],
+}

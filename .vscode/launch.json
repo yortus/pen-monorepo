@@ -15,24 +15,9 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                // TODO: temp testing...
-                "${workspaceRoot}/dist/test/**/new-test.js"
-                // TODO: was... restore... "${workspaceRoot}/dist/test/**/*.js"
+                "${workspaceRoot}/dist/test/**/*.js"
             ],
             "internalConsoleOptions": "openOnSessionStart",
-            "skipFiles": [
-                "<node_internals>/**",
-                "${workspaceRoot}/node_modules/**/*.js",
-            ]
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/packages/usage-tests/math/dist/index.js",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ],
             "skipFiles": [
                 "<node_internals>/**",
                 "${workspaceRoot}/node_modules/**/*.js",
