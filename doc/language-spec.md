@@ -91,6 +91,11 @@ A = FooBar.Foo                 // namespace member access
   4. implementation declarations
 
 
+## TODO: ambient module declarations
+- They are completely ambient (ie no emit). They describe the exports of a module written in the host language.
+- They are differentiated by file extension `.d.pen`. Although is it better to do it another way?
+
+
 
 
 

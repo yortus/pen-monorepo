@@ -1,3 +1,20 @@
+// TODO:
+// BindingDeclaration: BindingTarget EQUALS BindingSource
+//
+// BindingTarget (lvalue):
+// | export
+// | identifier (one binding name)
+// | record destructuring pattern (0..M binding names)
+//   - just support simple {foo, bar} patterns for now - no aliases, no rests
+//   - how does babel/acorn represent these binding LHSes in AST nodes?
+//
+// BindingSource (rvalue):
+// | import
+// | expression
+
+
+
+
 import {Scope, SymbolInfo} from './scope';
 
 
@@ -29,7 +46,7 @@ export type Node =
 // ====================   Module nodes   ====================
 export type Module =
     | ModuleDefinition;
-    
+
 export interface ModuleDefinition {
     readonly kind: 'ModuleDefinition';
     readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;

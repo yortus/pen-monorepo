@@ -8,15 +8,15 @@
 {Memoize, i32} = import 'pen'
 
 
-export {math = expr}
+export = {math = expr}
 
 
-let expr = Memoize(add | sub | term)
-let add = {type = 'add'   lhs = expr   rhs = "+" term}
-let sub = {type = 'sub'   lhs = expr   rhs = "\-" term}
+expr = Memoize(add | sub | term)
+add = {type = 'add'   lhs = expr   rhs = "+" term}
+sub = {type = 'sub'   lhs = expr   rhs = "\-" term}
 
-let term = Memoize(mul | div | factor)
-let mul = {type = 'mul'   lhs = term   rhs = "*" factor}
-let div = {type = 'div'   lhs = term   rhs = "/" factor}
+term = Memoize(mul | div | factor)
+mul = {type = 'mul'   lhs = term   rhs = "*" factor}
+div = {type = 'div'   lhs = term   rhs = "/" factor}
 
-let factor = i32 | "(" expr ")"
+factor = i32 | "(" expr ")"

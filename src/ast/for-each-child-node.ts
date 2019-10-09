@@ -31,9 +31,7 @@ export function forEachChildNode(node: Node, visitor: (childNode: Node) => void)
         case 'VoidLiteral': return;
 
         // Ensure both statically and at runtime that *every* node type has been handled by the switch cases above.
-        default: return ((node: never) => {
-            throw new Error(`Internal error: unhandled node kind '${(node as Node).kind}'`);
-        })(node);
+        default: ((_: never) => { throw new Error(`Internal error: unrecognised node '${node}'`); })(node);
     }
 }
 

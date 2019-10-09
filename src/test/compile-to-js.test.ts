@@ -40,7 +40,7 @@ blahTest = term.mul | term.div |  pen.i32
 describe('compileToJs', () => {
     it('passes', () => {
         let js = compileToJs({code: pen});
-        try { fs.mkdirSync(path.join(__dirname, '../../dist/out')); } catch {}
+        try { fs.mkdirSync(path.join(__dirname, '../../dist/out')); } catch {/***/}
         fs.writeFileSync(path.join(__dirname, '../../dist/out/dummy.js'), js.code, {encoding: 'utf8'});
     });
 });

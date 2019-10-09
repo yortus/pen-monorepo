@@ -1,32 +1,28 @@
 // ==========   Top-level: files and modules   ==========
-// TODO: module declarations:
-// - They will have a separate start rule.
-// - They are completely ambient (ie no emit). They describe the exports of a module written in the host language.
-// - They are differentiated by file extension `.d.pen`. Although is it better to do it another way?
 start
-    = moduleDefinition
+    = ModuleFile
 
-moduleDefinition
-    = imports:(__   (importNamespace / importNames))*   __   defs:(__   definition)+   __   endOfFile
+ModuleFile
+    = imports:(__   (ImportNamespace / ImportNames))*   __   defs:(__   Definition)+   __   endOfFile
     { return {kind: 'ModuleDefinition', imports: imports.map(el => el[1]), block: {kind: 'Block', definitions: defs.map(el => el[1])}}; }
 
 
 
 
 // ==========   Import declarations   ==========
-importNamespace
-    = importKeyword   __   intoKeyword   __   namespace:identifier   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
+ImportNamespace
+    = importKeyword   __   intoKeyword   __   namespace:identifier   __   fromKeyword   __   moduleSpecifier:ModuleSpecifier
     { return {kind: 'ImportNamespace', moduleSpecifier, namespace}; }
 
-importNames
-    = importKeyword   __   "{"   __   names:importNameList   __   "}"   __   fromKeyword   __   moduleSpecifier:moduleSpecifier
+ImportNames
+    = importKeyword   __   "{"   __   names:ImportNameList   __   "}"   __   fromKeyword   __   moduleSpecifier:ModuleSpecifier
     { return {kind: 'ImportNames', moduleSpecifier, names}; }
 
-importNameList
+ImportNameList
     = head:identifier   tail:(__   ","   __   identifier)*
     { return [head].concat(tail.map(el => el[3])); }
 
-moduleSpecifier
+ModuleSpecifier
     = "'"   [^'\r\n]*   "'"   { return text().slice(1, -1); }
     / '"'   [^"\r\n]*   '"'   { return text().slice(1, -1); }
 
@@ -34,47 +30,47 @@ moduleSpecifier
 
 
 // ==========   Definitions   ==========
-definition
-    = isExported:(exportKeyword   __)?   name:identifier   __   "="   __   expression:expression
+Definition
+    = isExported:(exportKeyword   __)?   name:identifier   __   "="   __   expression:Expression
     { return {kind: 'Definition', name, expression, isExported: !!isExported}; }
 
 
 
 
 // ==========   Expressions   ==========
-expression
-    = selection             // a | b
-    / subSelection
+Expression
+    = Selection             // a | b
+    / SubSelection
 
-subSelection
-    = sequence              // a b
-    / subSequence
+SubSelection
+    = Sequence              // a b
+    / SubSequence
 
-subSequence
-    = function              // a => b
-    / application           // a(b)
-    / block                 // {a=b c=d start=a}
-    / parenthetical         // (foo bar)
-    / recordLiteral         // {a: b, c: d}
-    / listLiteral           // [a, b, c]
-    / characterRange        // 'a-z'
-    / stringLiteral         // "foo"
-    / voidLiteral           // ()
-    / reference             // a
+SubSequence
+    = Function              // a => b
+    / Application           // a(b)
+    / Block                 // {a=b c=d start=a}
+    / Parenthetical         // (foo bar)
+    / RecordLiteral         // {a: b, c: d}
+    / ListLiteral           // [a, b, c]
+    / CharacterRange        // 'a-z'
+    / StringLiteral         // "foo"
+    / VoidLiteral           // ()
+    / Reference             // a
 
-selection
-    = ("|"   __)?   head:subSelection   tail:(__   "|"   __   subSelection)+
+Selection
+    = ("|"   __)?   head:SubSelection   tail:(__   "|"   __   SubSelection)+
     { return {kind: 'Selection', expressions: [head].concat(tail.map(el => el[3]))}; }
 
-sequence
-    = head:subSequence   tail:(whitespace   subSequence)+
+Sequence
+    = head:SubSequence   tail:(whitespace   SubSequence)+
     { return {kind: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
 
-function
-    = parameters:functionParameterList   __   "=>"   __   expression:expression
+Function
+    = parameters:FunctionParameterList   __   "=>"   __   expression:Expression
     { return {kind: 'Function', parameters, expression}; }
 
-functionParameterList
+FunctionParameterList
     = id:identifier
     { return [id]; }
 
@@ -84,72 +80,72 @@ functionParameterList
     / "("   __   head:identifier   tail:(__   ","   __   identifier)*   __   ")"
     { return [head].concat(tail.map(el => el[3])); }
 
-application
+Application
     // TODO: allow nested parentheticals eg (((fn))) ?
-    = f:(reference / parenthetical)   /* NO WHITESPACE */   args:applicationArgumentList
+    = f:(Reference / Parenthetical)   /* NO WHITESPACE */   args:ApplicationArgumentList
     { return {kind: 'Application', function: f.kind === 'Parenthetical' ? f.expression : f, arguments: args}; }
 
-applicationArgumentList
-    = "("   __   head:expression   tail:(__   ","   __   expression)*   __   ")"
+ApplicationArgumentList
+    = "("   __   head:Expression   tail:(__   ","   __   Expression)*   __   ")"
     { return [head].concat(tail.map(el => el[3])); }
 
-    / ex:expression
+    / ex:Expression
     { return [ex]; }
 
-block
-    = "{"   defs:(__   definition)+   __   "}"
+Block
+    = "{"   defs:(__   Definition)+   __   "}"
     { return {kind: 'Block', definitions: defs.map(el => el[1])}; }
 
-parenthetical
-    = "("   __   expression:expression   __   ")"
+Parenthetical
+    = "("   __   expression:Expression   __   ")"
     { return {kind: 'Parenthetical', expression}; }
 
-recordLiteral
-    = "{"   __   fields:recordFields?   __   "}"
+RecordLiteral
+    = "{"   __   fields:RecordFields?   __   "}"
     { return {kind: 'RecordLiteral', fields: fields || []}; }
 
-recordFields
-    = head:recordField   tail:(__   ","   __   recordField)*   (__   ",")?
+RecordFields
+    = head:RecordField   tail:(__   ","   __   RecordField)*   (__   ",")?
     { return [head].concat(tail.map(el => el[3])); }
 
-recordField
-    = name:(identifier / keyword)   __   ":"   __   expression:expression
+RecordField
+    = name:(identifier / keyword)   __   ":"   __   expression:Expression
     { return {kind: 'RecordField', hasComputedName: false, name, expression}; }
 
-    / "["   __   name:expression   __   "]"   __   ":"   __   expression:expression
+    / "["   __   name:Expression   __   "]"   __   ":"   __   expression:Expression
     { return {kind: 'RecordField', hasComputedName: true, name, expression}; }
 
-listLiteral
-    = "["   __   elements:listElements?   __   "]"
+ListLiteral
+    = "["   __   elements:ListElements?   __   "]"
     { return {kind: 'ListLiteral', elements: elements || []}; }
 
-listElements
-    = head:expression   tail:(__   ","   __   expression)*   (__   ",")?
+ListElements
+    = head:Expression   tail:(__   ","   __   Expression)*   (__   ",")?
     { return [head].concat(tail.map(el => el[3])); }
 
-characterRange
+CharacterRange
     = "'"   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   "'"
     { return {kind: 'CharacterRange', subkind: 'Abstract', minValue, maxValue}; }
 
     / '"'   !['"-]   minValue:character   "-"   !['"-]   maxValue:character   '"'
     { return {kind: 'CharacterRange', subkind: 'Concrete', minValue, maxValue}; }
 
-stringLiteral
+StringLiteral
     = "'"   (![-']   character)*   "'"
     { return {kind: 'StringLiteral', subkind: 'Abstract', value: text().slice(1, -1)}; }
 
     / '"'   (![-"]   character)*   '"'
     { return {kind: 'StringLiteral', subkind: 'Concrete', value: text().slice(1, -1)}; }
 
-voidLiteral
+VoidLiteral
     = "("   __   ")"
     { return {kind: 'VoidLiteral'}; }
 
-reference
-    = namespaces:referenceNamespaces?   name:identifier   !(__   "="   !">")
+Reference
+    = namespaces:ReferenceNamespaces?   name:identifier   !(__   "="   !">")
     { return namespaces ? {kind: 'Reference', namespaces, name} : {kind: 'Reference', name}; }
 
-referenceNamespaces
+ReferenceNamespaces
     = ids:(identifier   ".")+
     { return ids.map(id => id[0]); }
 
