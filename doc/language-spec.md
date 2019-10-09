@@ -1,63 +1,94 @@
 # PEN Language Specification
 
 
-## Packages and Modules
-- A pen package is a unit of distributable functionality. Each package contains a hierarchy of modules (commonly just a single exposed module).
-- A pen package is a directory containing a `pen-package.json` file. Packages may *not* be nested in other packages.
-- A pen module is a unit of referenceable functionality. Every pen module is a file or directory within a package.
+
+## Packages
+
+- Useful references:
+  - https://en.wikipedia.org/wiki/Package_manager
+- A package is a unit of distributable functionality.
+- A package is identified by its *package name*, which is a string.
+- A package may declare dependencies on other packages.
+- A package exports declarations from its implementation.
+- Package implementation:
+  - A package is a directory containing a `pen-package.json` file, which contains metadata about the package.
+  - A package contains a hierarchy of modules. Every file and directory under a package's directory is a module within that package.
+  - A single module within the package is nominated to provide the package's exports.
+  - A packages may *not* contain nested packages.
+- TODO: package name format & uniqueness, package registries
+
+
+
+## Modules
+
+- A module is a unit of referenceable functionality within a package. Every file and directory under a package's directory is a module within that package.
 - Directory modules may contain nested modules, whereas file modules are always 'leaf' modules containing no nested modules.
-- The declarations for a directory module are in its `index.pen` file. All other files within a directory module are nested modules.
+- The declarations for a directory module are in its `index.pen` file. All other entries within a directory module are nested modules.
 - A directory with no `index.pen` file is just a container for nested modules, with no declarations of its own.
 - Modules do not have names. They are referred to by *module specifiers*, which map directly to their file path. There are several kinds of module specifier, which are described later.
-- File/directory naming style is not mandated (apart from `index.pen`). Best practice is to use all lowercase with hyphens, ie kebab-case.
+- A module cannot have both a file module and a directory module at the same path (eg cannot have both a `./src/foo.pen` file and a `./src/foo/` directory).
+- File/directory naming style is not mandated (apart from `index.pen`). Best practice is to use kebab-case (i.e. all lowercase with hyphens).
 
 
-## Visibility within a package
-- There are two levels of visibility: public and private. Every declaration and module is either public or private.
-- Modules and module declarations are public by default.
-- Public declarations are visible to all modules and declarations within the containing package.
-- Private declarations are not visible outside their module. They *are* visible to all declarations inside the module, including within nested modules.
-- A top-level declaration within a module may be marked as private by prepending the `private` keyword to the declaration.
-- An entire module may be marked as private by specifying the `private module` declaration as the first declaration in the module. NB: for directory modules, this declaration goes in the directory's `index.pen` file.
 
 
-## Visibility outside a package (package exports)
-- Every package exports a single module from within the package. Since modules may be nested, this also allows for module hierarchies to be exported.
-- A package's 'exports' are determined by the `"exports"` property in the package's `pen-package.json` file.
-- The `"exports"` property is expected to be a relative module specifier that specifies a module within the package. Either a file or a directory module may be specified.
-- If the `"exports"` property is not specified, it defaults to `"./index.pen"`. I.e., the package directory as a whole is taken to be the exported module.
-- TODO: 
+## Visibility
+- Visibility within a package:
+  - A package's modules are visible to other modules within the same package.
+  - A module's declarations are private to that module by default. Private declarations are not visible outside their containing file and cannot be imported by other modules.
+  - A module specifies its externally-visible (i.e. exported) declarations by using a single `export = ...` binding declaration.
+  - A module specifies which externally-defined declarations are visible *inside* the module by using zero or more `... = import '...'` binding declarations.
+  - Thus, *every* identifier that is in scope within a module file appears explicitly in the LHS of a binding declaration within that file.
+- Visibility outside a package (package exports)
+  - A package's modules are not visible outside the package.
+  - The declarations exported from a package are determined by the `"export"` property in the package's `pen-package.json` file.
+  - The `"export"` property is expected to be a relative module specifier that specifies a module within the package. Either a file or a directory module may be specified.
+  - If the `"export"` property is not specified, it defaults to `"./index.pen"`. i.e., the package directory as a whole is taken to be the exported module.
+  - The declarations exported from the package are the exports of the module referred to by the `"export"` property in `pen-package.json`.
+
+
 
 
 ## Module specifiers
-- used by `import` declarations
-TODO: types of module specifier:
+- used by `import` binding declarations and in the `"export"` property of `pen-package.json`
 - internal module specifiers:
-  - (i) file-relative (relative to importing module, start with `./` or `../`)
-  - (ii) package-relative (relative to package root, start with `self/`)
+  - (i) file-relative
+    - start with `./` or `../`
+    - relative to the directory containing the importing module
+    - must reference a module within the same package
+    - cyclic dependencies are allowed
+  - (ii) package-relative
+    - start with `package/` (or just `package` to import the package's exports)
+    - relative to the directory containing the module specified in the `"export"` property in the `pen-package.json` file
+    - must reference a module within the same package
+    - cyclic dependencies are allowed
 - external module specifiers:
-  - (iii) standard library / third-party (start with package name, may have path to public module within package)
+  - (iii) standard library / third-party package
+    - specifies the name of a built-in package, or the name of a package published to the configured package registry.
+    - cannot start with `.` or `package` (reserved for internal module specifiers - see above)
 - illegal / not supported module specifiers:
   - absolute file paths
   - URLs
 
 
-## `import` declarations
+## Referencing external declarations within a module
 ```
-// TODO: examples:
-import './my-module' as MyModule    // import whole module as a namespace
-import './my-module' as {File}      // import selected declarations via destructuring
-                                    // TODO: destructuring with renaming
-                                    // TODO: re-exports
+// Examples:
+FooBar = import './foobar'     // import whole module as a namespace
+{Foo, Bar} = import './foobar' // import selected declarations via destructuring
+{F = Foo} = import './foobar'  // destructuring with renaming
 
-
-A = MyModule.File
-B = File
+A = FooBar.Foo                 // namespace member access
 ```
 
 
 
-
+## Module layout
+- layout is non-mandated
+- best practice is:
+  2. import declarations
+  3. export declaration
+  4. implementation declarations
 
 
 

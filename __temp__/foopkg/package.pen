@@ -1,0 +1,17 @@
+// TODO: testing an idea: package file is a pen file that exports a `package` definition.
+//       It's a bit like a directory module's `index.pen` file.
+
+// BIG CON: in the general case, obtaining the package metadata would require importing imports and resolving all references and compiling the entire package
+
+
+export = {package, foo}
+
+
+package = {
+    name = "foopkg",
+    description = "foo package...",
+    ...
+}
+
+
+foo = ...

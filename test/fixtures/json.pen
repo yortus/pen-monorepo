@@ -1,12 +1,23 @@
-import {false, null, true, i32} from './js-intrinsics.pen.ts'
-import {Maybe, Not, ZeroOrMore} from './utils.pen'
-import {Translit} from 'pen'
+// ===============================================================================
+// |                                  Imports                                    |
+// ===============================================================================
+{false, null, true, i32}    = import './js-intrinsics.pen.ts'
+{Maybe, Not, ZeroOrMore}    = import './utils.pen'
+{Translit}                  = import 'pen'
 
 
+// ===============================================================================
+// |                                  Exports                                    |
+// ===============================================================================
+export = {json}
 
+
+// ===============================================================================
+// |                               Implementation                                |
+// ===============================================================================
 
 // ---------- JSON Grammar ----------
-start = WS   Value   WS
+json = WS   Value   WS
 Value =
     |   False
     |   Null
@@ -23,7 +34,7 @@ True    = "true"   true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String]: COLON Value}   Maybe(COMMA Properties)
+Properties  = {[String] = COLON Value}   Maybe(COMMA Properties)
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET
