@@ -1,4 +1,5 @@
-import {Node} from './nodes';
+import {Node as AnyPassNode} from './nodes';
+type Node = AnyPassNode<'pass2'>;
 
 
 

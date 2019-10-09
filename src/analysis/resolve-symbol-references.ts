@@ -5,7 +5,7 @@ import {lookup, makeModuleScope, Scope} from '../ast'; // TODO: rename some of t
 
 
 
-export function resolveSymbolReferences(ast: ModuleDefinition) {
+export function resolveSymbolReferences(ast: ModuleDefinition<'pass2'>) {
     let moduleScope = makeModuleScope();
     let currentScope: Scope = moduleScope;
     let result = transformAst(ast, {

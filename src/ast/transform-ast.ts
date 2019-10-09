@@ -1,7 +1,7 @@
 import {matchNode} from './match-node';
 import {nodeKinds} from './node-kinds';
-import {Node} from './nodes';
-
+import {Node as AnyPassNode} from './nodes';
+type Node = AnyPassNode<'pass2'>;
 
 
 
@@ -72,10 +72,10 @@ function makeTraverser(nodeTransforms: NodeTransforms) {
 
     // Create a transform lookup object that associates a transform function with *every* node kind. The transform
     // functions are taken from `nodeTransforms` if defined there, otherwise the default transform is used.
-    const DEFAULT_TRANSFORM: TransformNode<any> = (node, transformChildren) => transformChildren(node);
+    const DEFAULT_TRANSFORM: TransformNode<any> = (node, xformChildren) => xformChildren(node);
     let allTranforms = nodeKinds.reduce(
         (decs, kind) => Object.assign(decs, {[kind]: nodeTransforms[kind] || DEFAULT_TRANSFORM}),
-        {} as {[K in NodeKind]: TransformNode<Node>},
+        {} as {[K in NodeKind]: TransformNode<Node>}
     );
 
     // Create the callback function that is passed to each tranform function so it can recurse to its child nodes.

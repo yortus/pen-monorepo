@@ -13,169 +13,188 @@
 // | expression
 
 
-
-
 import {Scope, SymbolInfo} from './scope';
 
 
-
-
 // ====================   All nodes   ====================
-export type Node =
-    | Application
-    | Block
+export type Pass = 'pass1' | 'pass2' | 'pass3';
+
+export type Node<P extends Pass> =
+    | Application<P>
+    | Block<P>
     | CharacterRange
-    | Definition
-    | Function
-    | ImportNames
-    | ImportNamespace
-    | ListLiteral
-    | ModuleDefinition
-    | Parenthetical
-    | RecordField
-    | RecordLiteral
-    | Reference
-    | Selection
-    | Sequence
+    | Definition<P>
+    | Function<P>
+    | ImportNames<P>
+    | ImportNamespace<P>
+    | ListLiteral<P>
+    | ModuleDefinition<P>
+    | Parenthetical<P>
+    | RecordField<P>
+    | RecordLiteral<P>
+    | Reference<P>
+    | Selection<P>
+    | Sequence<P>
     | StringLiteral
     | VoidLiteral;
-
-
 
 
 // ====================   Module nodes   ====================
-export type Module =
-    | ModuleDefinition;
+export type Module<P extends Pass> =
+    | ModuleDefinition<P>;
 
-export interface ModuleDefinition {
-    readonly kind: 'ModuleDefinition';
-    readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;
-    readonly block: Block;
-}
-
-
+export type ModuleDefinition<P extends Pass> = Readonly<{
+    kind: 'ModuleDefinition';
+    imports: ReadonlyArray<ImportNames<P> | ImportNamespace<P>>;
+    block: Block<P>;
+}>;
 
 
 // ====================   Definition nodes   ====================
-export interface Definition { // TODO: rename RuleDefinition -or- BindingDefinition -or- NameDefinition
-    readonly kind: 'Definition';
-    readonly name: string;
-    readonly expression: Expression;
-    readonly isExported: boolean;
-    readonly symbol: SymbolInfo;
-}
-
-
+// TODO: rename RuleDefinition -or- BindingDefinition -or- NameDefinition
+export type Definition<P extends Pass> = MultiPassNode<P, {
+    pass1: {
+        kind: 'Definition';
+        name: string;
+        expression: Expression<P>;
+        isExported: boolean;
+    },
+    pass2: {
+        symbol: SymbolInfo;
+    },
+}>;
 
 
 // ====================   Expression nodes   ====================
-export type Expression =
-    | Application
-    | Block
+export type Expression<P extends Pass> =
+    | Application<P>
+    | Block<P>
     | CharacterRange
-    | Function
-    | ListLiteral
-    | Parenthetical
-    | RecordLiteral
-    | Reference
-    | Selection
-    | Sequence
+    | Function<P>
+    | ListLiteral<P>
+    | Parenthetical<P>
+    | RecordLiteral<P>
+    | Reference<P>
+    | Selection<P>
+    | Sequence<P>
     | StringLiteral
     | VoidLiteral;
 
-export interface Application {
-    readonly kind: 'Application';
-    readonly function: Expression; // rename: function?
-    readonly arguments: readonly Expression[];
-}
+export type Application<P extends Pass> = Readonly<{
+    kind: 'Application';
+    function: Expression<P>; // rename: function?
+    arguments: ReadonlyArray<Expression<P>>;
+}>;
 
-export interface Block {
-    readonly kind: 'Block';
-    readonly definitions: readonly Definition[];
-    readonly scope: Scope;
-}
+export type Block<P extends Pass> = MultiPassNode<P, {
+    pass1: {
+        kind: 'Block';
+        definitions: ReadonlyArray<Definition<P>>;
+    },
+    pass2: {
+        scope: Scope;
+    },
+}>;
 
-export interface CharacterRange { // rename: CharRange
-    readonly kind: 'CharacterRange';
-    readonly subkind: 'Abstract' | 'Concrete';
-    readonly minValue: string;
-    readonly maxValue: string;
-}
+export type CharacterRange = Readonly<{ // rename: CharRange
+    kind: 'CharacterRange';
+    subkind: 'Abstract' | 'Concrete';
+    minValue: string;
+    maxValue: string;
+}>;
 
-export interface Function {
-    readonly kind: 'Function';
-    readonly parameters: readonly string[];
-    readonly expression: Expression;
-}
+export type Function<P extends Pass> = Readonly<{
+    kind: 'Function';
+    parameters: readonly string[];
+    expression: Expression<P>;
+}>;
 
-export interface ListLiteral { // rename: List
-    readonly kind: 'ListLiteral';
-    readonly elements: readonly Expression[];
-}
+export type ListLiteral<P extends Pass> = Readonly<{ // rename: List
+    kind: 'ListLiteral';
+    elements: ReadonlyArray<Expression<P>>;
+}>;
 
-export interface Parenthetical {
-    readonly kind: 'Parenthetical';
-    readonly expression: Expression;
-}
+export type Parenthetical<P extends Pass> = Readonly<{
+    kind: 'Parenthetical';
+    expression: Expression<P>;
+}>;
 
-export interface RecordLiteral { // rename: Record
-    readonly kind: 'RecordLiteral';
-    readonly fields: readonly RecordField[];
-}
+export type RecordLiteral<P extends Pass> = Readonly<{ // rename: Record
+    kind: 'RecordLiteral';
+    fields: ReadonlyArray<RecordField<P>>;
+}>;
 
-export interface Reference { // TODO: rename RuleReference -or- BindingReference -or- NameReference
-    readonly kind: 'Reference';
-    readonly namespaces?: readonly [string, ...string[]];
-    readonly name: string;
-    readonly symbol: SymbolInfo;
-}
+// TODO: rename RuleReference -or- BindingReference -or- NameReference
+export type Reference<P extends Pass> = MultiPassNode<P, {
+    pass1: {
+        kind: 'Reference';
+        namespaces?: readonly [string, ...string[]];
+        name: string;
+    },
+    pass2: {
+        symbol: SymbolInfo;
+    },
+}>;
 
-export interface Selection {
-    readonly kind: 'Selection';
-    readonly expressions: readonly Expression[];
-}
+export type Selection<P extends Pass> = Readonly<{
+    kind: 'Selection';
+    expressions: ReadonlyArray<Expression<P>>;
+}>;
 
-export interface Sequence {
-    readonly kind: 'Sequence';
-    readonly expressions: readonly Expression[];
-}
+export type Sequence<P extends Pass> = Readonly<{
+    kind: 'Sequence';
+    expressions: ReadonlyArray<Expression<P>>;
+}>;
 
-export interface StringLiteral { // rename: String
-    readonly kind: 'StringLiteral';
-    readonly subkind: 'Abstract' | 'Concrete';
-    readonly value: string;
-}
+export type StringLiteral = Readonly<{ // rename: String
+    kind: 'StringLiteral';
+    subkind: 'Abstract' | 'Concrete';
+    value: string;
+}>;
 
-export interface VoidLiteral { // rename: Void
-    readonly kind: 'VoidLiteral';
-}
-
-
+export type VoidLiteral = Readonly<{ // rename: Void
+    kind: 'VoidLiteral';
+}>;
 
 
 // ====================   Other nodes   ====================
-export interface ImportNames {
-    readonly kind: 'ImportNames';
-    readonly moduleSpecifier: string;
-    readonly names: readonly string[];
-    readonly symbols: readonly SymbolInfo[];
-}
+export type ImportNames<P extends Pass> = MultiPassNode<P, {
+    pass1: {
+        kind: 'ImportNames';
+        moduleSpecifier: string;
+        names: readonly string[];
+    },
+    pass2: {
+        symbols: readonly SymbolInfo[];
+    },
+}>;
 
-export interface ImportNamespace {
-    readonly kind: 'ImportNamespace';
-    readonly moduleSpecifier: string;
-    readonly namespace: string;
-    readonly symbol: SymbolInfo;
-}
+export type ImportNamespace<P extends Pass> = MultiPassNode<P, {
+    pass1: {
+        kind: 'ImportNamespace';
+        moduleSpecifier: string;
+        namespace: string;
+    }, pass2: {
+        symbol: SymbolInfo;
+    },
+}>;
 
-export type RecordField = { // rename: Field
-    readonly kind: 'RecordField';
-    readonly hasComputedName: false;
-    readonly name: string;
-    readonly expression: Expression;
-} | {
-    readonly kind: 'RecordField';
-    readonly hasComputedName: true;
-    readonly name: Expression;
-    readonly expression: Expression;
-};
+export type RecordField<P extends Pass> = Readonly<{ // rename: Field
+    kind: 'RecordField';
+    hasComputedName: false;
+    name: string;
+    expression: Expression<P>;
+}> | Readonly<{
+    kind: 'RecordField';
+    hasComputedName: true;
+    name: Expression<P>;
+    expression: Expression<P>;
+}>;
+
+
+// ====================   TODO: helper type...   ====================
+type MultiPassNode<P extends Pass, Defn extends {[K in Pass]?: Defn[K]}> = Readonly<
+    & (P extends 'pass1' | 'pass2' | 'pass3' ? Defn['pass1'] : unknown)
+    & (P extends 'pass2' | 'pass3' ? Defn['pass2'] : unknown)
+    & (P extends 'pass3' ? Defn['pass3'] : unknown)
+>;

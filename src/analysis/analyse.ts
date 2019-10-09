@@ -6,7 +6,7 @@ import {resolveSymbolReferences} from './resolve-symbol-references';
 
 
 
-export function analyse(moduleSourceText: string): Module {
+export function analyse(moduleSourceText: string): Module<'pass2'> {
 
     // Parse pen module source code into an AST.
     let ast = parse(moduleSourceText);

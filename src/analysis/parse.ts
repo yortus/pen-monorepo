@@ -6,7 +6,7 @@ import {ModuleDefinition} from '../ast';
 
 
 
-export const parse = pegjs.generate(getGrammar()).parse as (text: string) => ModuleDefinition;
+export const parse = pegjs.generate(getGrammar()).parse as (text: string) => ModuleDefinition<'pass2'>;
 
 
 

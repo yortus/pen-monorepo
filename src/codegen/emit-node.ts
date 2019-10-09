@@ -4,7 +4,7 @@ import {Emitter} from './emitter';
 
 
 
-export function emitNode(node: Node, emit: Emitter) {
+export function emitNode(node: Node<'pass2'>, emit: Emitter) {
     matchNode(node, {
         Application: app => {
             emitCall(app.function, app.arguments, emit);
@@ -125,7 +125,7 @@ export function emitNode(node: Node, emit: Emitter) {
 
 
 
-function emitCall(fn: string | Expression, args: readonly Expression[], emit: Emitter) {
+function emitCall(fn: string | Expression<'pass2'>, args: ReadonlyArray<Expression<'pass2'>>, emit: Emitter) {
     if (typeof fn === 'string') {
         emit.text(fn);
     }
