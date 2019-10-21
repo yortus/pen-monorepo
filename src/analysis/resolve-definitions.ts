@@ -5,7 +5,7 @@ import {insert, makeModuleScope, makeNestedScope, Scope} from '../ast'; // TODO:
 
 
 
-export function resolveSymbolDefinitions(ast: ModuleDefinition<'pass2'>) {
+export function resolveDefinitions(ast: ModuleDefinition<'pass2'>) {
     let moduleScope = makeModuleScope();
     let currentScope: Scope = moduleScope;
     let blockNestingLevel = 0;
