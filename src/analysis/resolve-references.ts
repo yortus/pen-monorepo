@@ -33,7 +33,6 @@ export function resolveReferences(ast: Node<200, 'ModuleDefinition'>): Node<300,
 
             // TODO: the rest are just pass-throughs... can these have 'default' processing?
             case 'Application': return {...n, function: rec(n.function), arguments: n.arguments.map(rec)};
-            case 'Block': return {...n, definitions: n.definitions.map(rec) };
             case 'CharacterRange': return n;
             case 'Definition': return {...n, expression: rec(n.expression)};
             case 'Function': return {...n, expression: rec(n.expression)};

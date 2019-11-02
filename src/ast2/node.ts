@@ -103,13 +103,11 @@ type AstSchemaBase<V extends NodeVersion> = WithKind<{
     ImportNames: {
         moduleSpecifier: string;
         names: string[];
-        // 2: symbols: SymbolInfo[];
     };
 
     ImportNamespace: {
         moduleSpecifier: string;
         namespace: string;
-        // 2: symbol: SymbolInfo;
     };
 
     RecordField: { // rename: Field
@@ -131,6 +129,14 @@ interface AstSchema200 {
 
     Block: {
         scope: Scope;
+    };
+
+    ImportNames: {
+        symbols: SymbolInfo[];
+    };
+
+    ImportNamespace: {
+        symbol: SymbolInfo;
     };
 }
 

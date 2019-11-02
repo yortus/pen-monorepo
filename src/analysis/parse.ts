@@ -1,12 +1,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {ModuleDefinition} from '../ast';
+import {Node} from '../ast2';
 
 
 
 
-export const parse = pegjs.generate(getGrammar()).parse as (text: string) => ModuleDefinition<'pass2'>;
+type Parser = (test: string) => Node<100, 'ModuleDefinition'>;
+
+
+
+
+export const parse = pegjs.generate(getGrammar()).parse as Parser;
 
 
 
