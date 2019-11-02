@@ -47,65 +47,72 @@ import * as assert from 'assert';
 
 
 
-import {makeAnnotatorFunction} from '../ast2/make-annotator-function';
+import {Node} from '../ast2';
 import {lookup, makeModuleScope, Scope} from '../ast2/scope'; // TODO: rename some of these...
-import {NodeFromKind} from '../ast2/type-operators';
 
 
-export function resolveReferences2(ast: NodeFromKind<200, 'ModuleDefinition'>) {
+export function resolveReferences2(ast: Node<200, 'ModuleDefinition'>): Node<300, 'ModuleDefinition'> {
     let moduleScope = makeModuleScope();
     let currentScope: Scope = moduleScope;
 
-    let annotate = makeAnnotatorFunction<200, 300>(rec => ({
-
-        Block: block => {
-            let restore = currentScope;
-            currentScope = block.scope;
-            let result = {...block, definitions: block.definitions.map(rec)};
-            currentScope = restore;
-            return result;
-        },
-
-        Reference: ref => {
-            let names = [...ref.namespaces || [], ref.name];
-            let fullRef = names.join('.');
-            let symbol = lookup(currentScope, names.shift()!);
-            for (let name of names) {
-                let nestedSymbol = symbol.members && symbol.members.find(s => s.name === name);
-                if (nestedSymbol && !nestedSymbol.isExported) nestedSymbol = undefined;
-                if (!nestedSymbol) throw new Error(`Symbol '${fullRef}' is not defined.`);
-                symbol = nestedSymbol;
+    function rec<N extends Node<200>>(n: N): Node<300, N['kind']>;
+    function rec(n: Node<200>): Node<300> {
+        switch (n.kind) {
+            case 'Block': {
+                let restore = currentScope;
+                currentScope = n.scope;
+                let res = {...n, definitions: n.definitions.map(rec)};
+                currentScope = restore;
+                return res;
             }
-            return {...ref, symbol};
-        },
 
-        // All other node kinds are recursively shallow cloned
-        Application: n => ({...n, function: rec(n.function), arguments: n.arguments.map(rec)}),
-        CharacterRange: n => n,
-        Definition: n => ({...n, expression: rec(n.expression)}),
-        Function: n => ({...n, expression: rec(n.expression)}),
-        ImportNames: n => n,
-        ImportNamespace: n => n,
-        ListLiteral: n => ({...n, elements: n.elements.map(rec)}),
-        ModuleDefinition: n => ({...n, imports: n.imports.map(rec), block: rec(n.block)}),
-        Parenthetical: n => ({...n, expression: rec(n.expression)}),
-        RecordField: n => ({
-            ...n,
-            name: n.hasComputedName ? rec(n.name) : n.name as any,
-            expression: rec(n.expression),
-        }),
-        RecordLiteral: n => ({...n, fields: n.fields.map(rec)}),
-        Selection: n => ({...n, expressions: n.expressions.map(rec)}),
-        Sequence: n => ({...n, expressions: n.expressions.map(rec)}),
-        StringLiteral: n => n,
-        VoidLiteral: n => n,
-    }));
+            case 'Reference': {
+                let names = [...n.namespaces || [], n.name];
+                let fullRef = names.join('.');
+                let symbol = lookup(currentScope, names.shift()!);
+                for (let name of names) {
+                    let nestedSymbol = symbol.members && symbol.members.find(s => s.name === name);
+                    if (nestedSymbol && !nestedSymbol.isExported) nestedSymbol = undefined;
+                    if (!nestedSymbol) throw new Error(`Symbol '${fullRef}' is not defined.`);
+                    symbol = nestedSymbol;
+                }
+                return {...n, symbol};
+            }
 
-    let res = annotate(ast);
+            // TODO: the rest are just pass-throughs... can these have 'default' processing?
+            case 'Application': return {...n, function: rec(n.function), arguments: n.arguments.map(rec)};
+            case 'Block': return {...n, definitions: n.definitions.map(rec) };
+            case 'CharacterRange': return n;
+            case 'Definition': return {...n, expression: rec(n.expression)};
+            case 'Function': return {...n, expression: rec(n.expression)};
+            case 'ImportNames': return n;
+            case 'ImportNamespace': return n;
+            case 'ListLiteral': return {...n, elements: n.elements.map(rec)};
+            case 'ModuleDefinition': return {...n, imports: n.imports.map(rec), block: rec(n.block)};
+            case 'Parenthetical': return {...n, expression: rec(n.expression)};
+            case 'RecordField':
+                return {
+                    ...n,
+                    name: n.hasComputedName ? rec(n.name) : n.name as any,
+                    expression: rec(n.expression),
+                };
+            case 'RecordLiteral': return {...n, fields: n.fields.map(rec)};
+            case 'Selection': return {...n, expressions: n.expressions.map(rec)};
+            case 'Sequence': return {...n, expressions: n.expressions.map(rec)};
+            case 'StringLiteral': return n;
+            case 'VoidLiteral': return n;
+
+            // Ensure both statically and at runtime that *every* node type has been handled by the switch cases above.
+            default: ((_: never) => { throw new Error(`Internal error: unrecognised node '${n}'`); })(n);
+        }
+    }
+
+    // TODO: do it
+    let result = rec(ast);
 
     // sanity check - we should be back at the root scope here.
     assert(currentScope === moduleScope);
 
     // All done.
-    return res;
+    return result;
 }

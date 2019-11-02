@@ -1,1 +1,3 @@
-export {AstVersion, Expression, Node, NodeFromKind, NodeKind} from './type-operators';
+export {Node} from './node';
+export {NodeKind} from './node-kind';
+export {NodeVersion} from './node-version';
