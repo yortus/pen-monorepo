@@ -1,7 +1,7 @@
 import {Module} from '../ast';
 import {parse} from './parse';
 import {resolveDefinitions} from './resolve-definitions';
-import {resolveReferences2} from './resolve-references';
+import {resolveReferences} from './resolve-references';
 
 
 
@@ -17,7 +17,7 @@ export function analyse(moduleSourceText: string): Module<'pass2'> {
     let ast2 = resolveDefinitions(ast);
 
     // Resolve all references to symbols defined in the previous pass.
-    let ast3 = resolveReferences2(ast2 as any); // TODO: remove cast
+    let ast3 = resolveReferences(ast2 as any); // TODO: remove cast
 
     // All done.
     return ast3;

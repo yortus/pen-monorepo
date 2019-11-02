@@ -5,7 +5,7 @@
 // - Ast transforms can only add properties - they cannot change node kinds (call it 'annotateAst'?)
 
 
-import {NodeKind} from './node-kind';
+import {ExpressionNodeKind, NodeKind} from './node-kind';
 import {NodeVersion} from './node-version';
 import {Scope, SymbolInfo} from './scope';
 
@@ -18,7 +18,7 @@ export type Node<V extends NodeVersion = NodeVersion, K extends NodeKind = NodeK
 
 
 export type Expression<V extends NodeVersion> = Node<V> extends infer U
-    ? (U extends {meta: {isExpression: true}} ? U : never)
+    ? (U extends {kind: ExpressionNodeKind} ? U : never)
     : never;
 
 
@@ -46,69 +46,57 @@ type AstSchemaBase<V extends NodeVersion> = WithKind<{
 
     // Expressions...
     Application: {
-        meta: {isExpression: true};
         function: Expression<V>; // rename: function?
         arguments: Array<Expression<V>>;
     };
 
     Block: {
-        meta: {isExpression: true};
         definitions: Array<Node<V, 'Definition'>>;
     };
 
     CharacterRange: { // rename: CharRange
-        meta: {isExpression: true};
         subkind: 'Abstract' | 'Concrete';
         minValue: string;
         maxValue: string;
     };
 
     Function: {
-        meta: {isExpression: true};
         parameters: string[];
         expression: Expression<V>;
     };
 
     ListLiteral: { // rename: List
-        meta: {isExpression: true};
         elements: Array<Expression<V>>;
     };
 
     Parenthetical: {
-        meta: {isExpression: true};
         expression: Expression<V>;
     };
 
     RecordLiteral: { // rename: Record
-        meta: {isExpression: true};
         fields: Array<Node<V, 'RecordField'>>;
     };
 
     // TODO: rename RuleReference -or- BindingReference -or- NameReference
     Reference: {
-        meta: {isExpression: true};
         namespaces?: [string, ...string[]];
         name: string;
     };
 
     Selection: {
-        meta: {isExpression: true};
         expressions: Array<Expression<V>>;
     };
 
     Sequence: {
-        meta: {isExpression: true};
         expressions: Array<Expression<V>>;
     };
 
     StringLiteral: { // rename: String
-        meta: {isExpression: true};
         subkind: 'Abstract' | 'Concrete';
         value: string;
     };
 
     VoidLiteral: { // rename: Void
-        meta: {isExpression: true};
     };
 
     // Other kinds...
