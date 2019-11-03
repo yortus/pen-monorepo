@@ -1,10 +1,10 @@
-import {Expression, forEachChildNode, matchNode, Node} from '../ast';
+import {Expression, forEachChildNode, matchNode, Node} from '../ast2';
 import {Emitter} from './emitter';
 
 
 
 
-export function emitNode(node: Node<'pass2'>, emit: Emitter) {
+export function emitNode(node: Node<300>, emit: Emitter) {
     matchNode(node, {
         Application: app => {
             emitCall(app.function, app.arguments, emit);
@@ -125,7 +125,7 @@ export function emitNode(node: Node<'pass2'>, emit: Emitter) {
 
 
 
-function emitCall(fn: string | Expression<'pass2'>, args: ReadonlyArray<Expression<'pass2'>>, emit: Emitter) {
+function emitCall(fn: string | Expression<300>, args: ReadonlyArray<Expression<300>>, emit: Emitter) {
     if (typeof fn === 'string') {
         emit.text(fn);
     }

@@ -22,7 +22,7 @@ export type Expression<V extends NodeVersion> = Node<V> extends infer U
     : never;
 
 
-type WithKind<T extends AstSchema<T>> = {[K in keyof T]: {kind: K} & T[K]};
+type WithKind<T extends AstSchema<T>> = {[K in keyof T]: {[P in 'kind' | keyof T[K]] : ({kind: K} & T[K])[P]};
 
 
 type AstSchema<T> =
