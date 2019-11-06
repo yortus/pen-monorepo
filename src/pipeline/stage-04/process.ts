@@ -1,11 +1,19 @@
-import {Expression, forEachChildNode, matchNode, Node} from '../ast2';
-import {Emitter} from './emitter';
+import {makeNodeVisitor} from '../../ast-utils';
+import * as V03 from '../stage-03/output-types';
+import {Emitter, makeEmitter} from './emitter';
 
 
+export function process(ast: V03.Ast): string {
+    let emit = makeEmitter();
+    emitNode(ast, emit);
+    let result = emit.toString();
+    return result;
+}
 
 
-export function emitNode(node: Node<300>, emit: Emitter) {
-    matchNode<300, void>(node, {
+function emitNode(node: V03.Node, emit: Emitter) {
+    const visit = makeNodeVisitor<V03.Node>(rec => ({
+
         Application: app => {
             emitCall(app.function, app.arguments, emit);
         },
@@ -18,7 +26,7 @@ export function emitNode(node: Node<300>, emit: Emitter) {
                         if (sym.isImported) return;
                         emit.text(`${sym.isExported ? 'export ' : ''}const ${sym.name} = {};`).nl();
                     });
-                    forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+                    rec(...block.definitions);
                     break;
                 case 'Nested':
                     // TODO: use an IIFE
@@ -26,7 +34,7 @@ export function emitNode(node: Node<300>, emit: Emitter) {
                     symbols.forEach(sym => {
                         emit.text(`const ${sym.name} = {};`).nl();
                     });
-                    forEachChildNode(block, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+                    rec(...block.definitions);
                     emit.text(`const exports = {${symbols.filter(s => s.isExported).map(s => s.name).join(', ')}};`);
                     emit.nl();
                     emit.text(`return Object.assign(start, exports);`);
@@ -35,16 +43,18 @@ export function emitNode(node: Node<300>, emit: Emitter) {
             }
         },
 
-        // CharacterRange: node => {},
+        // TODO: ...
+        CharacterRange: () => {/***/},
 
         Definition: def => {
             emit.text(`Object.assign(`).nl(+1);
             emit.text(def.name + ',').nl();
-            emitNode(def.expression, emit);
+            rec(def.expression);
             emit.nl(-1).text(`);`).nl();
         },
 
-        // Function: node => {},
+        // TODO: ...
+        Function: () => {/***/},
 
         ImportNames: imp => {
             let names = imp.names;
@@ -56,7 +66,8 @@ export function emitNode(node: Node<300>, emit: Emitter) {
             emit.text(`import * as ${name} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
         },
 
-        // ListLiteral: node => {},
+        // TODO: ...
+        ListLiteral: () => {/***/},
 
         ModuleDefinition: mod => {
             const MODULE_ID = `module1`;
@@ -64,31 +75,34 @@ export function emitNode(node: Node<300>, emit: Emitter) {
             emit.text(`function ${MODULE_ID}() {`).nl(+1);
             emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
             emit.text(`// TODO: detect circular dependencies...`).nl();
-            forEachChildNode(mod, child => emitNode(child, emit)); // TODO: boilerplate... can automate?
+            rec(...mod.imports, mod.block);
             emit.nl(-1).text(`}`);
         },
 
-        // Parenthetical: node => {},
+        // TODO: ...
+        Parenthetical: () => {/***/},
 
         RecordField: field => {
             emit.text(`{`).nl(+1);
             emit.text(`computed: ${field.hasComputedName},`).nl().text(`name: `);
-            if (field.hasComputedName) {
-                emitNode(field.name, emit);
-            }
-            else {
+            if (typeof field.name === 'string') {
+                // assert(hasComputedName === false)
                 emit.text(JSON.stringify(field.name));
             }
+            else {
+                // assert(hasComputedName === true)
+                rec(field.name);
+            }
             emit.text(`,`).nl().text(`value: `);
-            emitNode(field.expression, emit);
+            rec(field.expression);
             emit.nl(-1).text(`}`);
         },
 
-        RecordLiteral: rec => {
+        RecordLiteral: record => {
             emit.text(`Record([`).nl(+1);
-            rec.fields.forEach((field, i) => {
-                emitNode(field, emit);
-                if (i < rec.fields.length - 1) emit.text(',').nl();
+            record.fields.forEach((field, i) => {
+                rec(field);
+                if (i < record.fields.length - 1) emit.text(',').nl();
             });
             emit.nl(-1).text(`])`);
         },
@@ -113,19 +127,15 @@ export function emitNode(node: Node<300>, emit: Emitter) {
         VoidLiteral: () => {
             emit.text(`Void`);
         },
+    }));
 
-        default: n => {
-            // TODO: raise error for unhandled/unexpected node kind...
-            emit.text(`<?${n.kind}?>`);
-            forEachChildNode(n, child => emitNode(child, emit));
-        },
-    });
+    visit(node);
 }
 
 
 
 
-function emitCall(fn: string | Expression<300>, args: ReadonlyArray<Expression<300>>, emit: Emitter) {
+function emitCall(fn: string | V03.Expression, args: ReadonlyArray<V03.Expression>, emit: Emitter) {
     if (typeof fn === 'string') {
         emit.text(fn);
     }

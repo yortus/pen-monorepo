@@ -5,8 +5,6 @@ export interface Emitter {
 }
 
 
-
-
 export function makeEmitter() {
     let parts = [] as string[];
     let indent = 0;

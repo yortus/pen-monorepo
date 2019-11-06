@@ -1,1 +1,0 @@
-export {analyse} from './analyse';

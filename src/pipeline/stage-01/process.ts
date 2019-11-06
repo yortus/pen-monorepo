@@ -1,19 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {Node} from '../ast2';
+import {Ast} from './output-types';
 
 
-
-
-type Parser = (test: string) => Node<100, 'ModuleDefinition'>;
-
-
-
-
-export const parse = pegjs.generate(getGrammar()).parse as Parser;
-
-
+// TODO: doc...
+export const process = pegjs.generate(getGrammar()).parse as (text: string) => Ast;
 
 
 function getGrammar() {
