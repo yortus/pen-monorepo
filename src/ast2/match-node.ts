@@ -21,9 +21,9 @@ export function matchNode<V extends NodeVersion, TR>(node: Node<V>, handlers: Ha
 
 
 type Handlers<V extends NodeVersion, TR> =
-    // | MatchEvery<V, TR>
+    | MatchEvery<V, TR>
     | MatchSome<V, TR>
-    // | MatchError<V, TR>
+    | MatchError<V, TR>
 ;
 
 

@@ -17,12 +17,19 @@ export type Node<V extends NodeVersion = NodeVersion, K extends NodeKind = NodeK
     never;
 
 
-export type Expression<V extends NodeVersion> = Node<V> extends infer U
-    ? (U extends {kind: ExpressionNodeKind} ? U : never)
-    : never;
+export type Expression<V extends NodeVersion> =
+    | Node<V, 'Application'>
+    | Node<V, 'Block'>
+    | Node<V, 'Reference'>
+    | Node<V, 'Selection'>
+    | Node<V, 'Sequence'>
+;
+// export type Expression<V extends NodeVersion> = Node<V> extends infer U
+//     ? (U extends {kind: ExpressionNodeKind} ? U : never)
+//     : never;
 
 
-type WithKind<T extends AstSchema<T>> = {[K in keyof T]: {[P in 'kind' | keyof T[K]] : ({kind: K} & T[K])[P]};
+type WithKind<T extends AstSchema<T>> = {[K in keyof T]: {[P in 'kind' | keyof T[K]] : ({kind: K} & T[K])[P]}};
 
 
 type AstSchema<T> =
@@ -46,7 +53,7 @@ type AstSchemaBase<V extends NodeVersion> = WithKind<{
 
     // Expressions...
     Application: {
-        function: Expression<V>; // rename: function?
+        function: Expression<V>;
         arguments: Array<Expression<V>>;
     };
 

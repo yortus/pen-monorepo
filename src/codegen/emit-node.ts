@@ -5,7 +5,7 @@ import {Emitter} from './emitter';
 
 
 export function emitNode(node: Node<300>, emit: Emitter) {
-    matchNode(node, {
+    matchNode<300, void>(node, {
         Application: app => {
             emitCall(app.function, app.arguments, emit);
         },
