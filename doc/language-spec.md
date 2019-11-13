@@ -14,7 +14,7 @@
   - A package is a directory containing a `pen-package.json` file, which contains metadata about the package.
   - A package contains a hierarchy of modules. Every file and directory under a package's directory is a module within that package.
   - A single module within the package is nominated to provide the package's exports.
-  - A packages may *not* contain nested packages.
+  - A package may *not* contain nested packages.
 - TODO: package name format & uniqueness, package registries
 
 
