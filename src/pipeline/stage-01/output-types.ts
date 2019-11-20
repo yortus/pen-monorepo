@@ -27,6 +27,7 @@ export type Expression =
 
 
 // ====================   Top-level nodes   ====================
+// TODO: renamed/modified
 export interface ModuleDefinition<Expr> {
     readonly kind: 'ModuleDefinition';
     readonly imports: ReadonlyArray<ImportNames | ImportNamespace>;
@@ -34,7 +35,7 @@ export interface ModuleDefinition<Expr> {
 }
 
 
-// TODO: rename RuleDefinition -or- BindingDefinition -or- NameDefinition
+// TODO: removed/replaced
 export interface Definition<Expr> {
     readonly kind: 'Definition';
     readonly name: string;
@@ -47,17 +48,18 @@ export interface Definition<Expr> {
 export interface Application<Expr> {
     readonly kind: 'Application';
     readonly function: Expr;
-    readonly arguments: readonly Expr[];
+    readonly arguments: readonly Expr[]; // TODO: now `argument`, singular not array
 }
 
 
+// TODO: removed from grammar...
 export interface Block<Expr> {
     readonly kind: 'Block';
     readonly definitions: ReadonlyArray<Definition<Expr>>;
 }
 
 
-export interface CharacterRange { // TODO: rename: CharRange
+export interface CharacterRange { // TODO: renamed: Character
     readonly kind: 'CharacterRange';
     readonly subkind: 'Abstract' | 'Concrete';
     readonly minValue: string;
@@ -72,12 +74,13 @@ export interface Function<Expr> {
 }
 
 
-export interface ListLiteral<Expr> { // TODO: rename: List
+export interface ListLiteral<Expr> { // TODO: renamed: Tuple
     readonly kind: 'ListLiteral';
     readonly elements: readonly Expr[];
 }
 
 
+// TODO: removed from grammar...
 export interface Parenthetical<Expr> {
     readonly kind: 'Parenthetical';
     readonly expression: Expr;
@@ -110,13 +113,14 @@ export interface Sequence<Expr> {
 }
 
 
-export interface StringLiteral { // TODO: rename: String
+export interface StringLiteral { // TODO: renamed: String
     readonly kind: 'StringLiteral';
     readonly subkind: 'Abstract' | 'Concrete';
     readonly value: string;
 }
 
 
+// TODO: removed from grammar...
 export interface VoidLiteral { // TODO: rename: Void
     readonly kind: 'VoidLiteral';
 }
