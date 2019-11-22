@@ -1,12 +1,5 @@
-// TODO:
-// - BindingPattern: (ie the LHS/LValue of a Binding)
-//   - BindingPattern := `{` BindingElement (COMMA BindindElement* `}`
-//   - BindingElement := (Identifier EQ)? Identifier (DOT Identifier)*
-
-
-
-// A module has 0..M bindings
-// A record has 0..M fields
+// A module has 0..M declarations via 0..N bindings (but only static bindings - check in a later pipeline stage)
+// A record has 0..M fields via 0..N bindings
 // A tuple has 0..M elements
 
 // A binding has 1 pattern
@@ -15,29 +8,22 @@
 
 
 
-// ========================>  Where makes sense: M=Module, R=Record, F=Function param
-// identifier corresponding to entire bound expr            M, R, F
-// names corresponding to tuple positions of bound expr     M, R, F
-// names corresponding to field names of bound expr         M, R, F
-
-// 'export' reserved word                                   M
-// computed name                                            R
-
-
-
 
 // TODOs:
+// - overall:
+//   - distinuish nodes: FieldBinding is not a Binding (ie can't appear wherever a Binding is valid)
+
+
 // - Records:
-//   - shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
-//   - need to append "," to these fields, otherwise abbiguous with sequences
-//   - make commas optional and valid for all fields (even non-shorthand ones) then?
+//   [x] shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
+//   [x] need to append "," to these fields, otherwise abbiguous with sequences
+//   [x] make commas optional and valid for all fields (even non-shorthand ones) then? ANS: yes
 // - Patterns:
-//   - rest/spread element for RecordPattern and TuplePattern
-//   - document special '_' identifier
-//   - AliasPattern, c.f. OCaml, F#
-//   - commas between fields - required or optional or ...?
+//   [ ]  rest/spread element for RecordPattern and TuplePattern
+//   [x] document special '_' identifier. ANS: has its own RESERVED token
+//   [x] commas between fields - required or optional or ...? ANS: optional, but significant in some cases
 // - Tuples:
-//   - are parentheses required? ANS: yes, otherwise ambiguous with comma-separated shorthand fields
+//   [x] are parentheses required? ANS: yes, otherwise ambiguous with comma-separated shorthand fields
 // - Strings
 //   - revisit
 // - CharRanges
@@ -48,28 +34,45 @@
 
 
 
-// ==========   Top-level: Files and Modules   ==========
+// ==========   Files and Modules   ==========
 File
     = __   module:Module   __   END_OF_FILE
     { return module; }
 
-Module
-    = head:Binding?   tail:(__   Binding)*
-    { return {kind: 'Module', bindings: (head ? [head] : []).concat(tail.map(el => el[1]))}; }
+Module  // NB: same as RecordExpression but without the opening/closing braces
+    = bindings:BindingList
+    { return {kind: 'Module', bindings}; }
 
 
 // ==========   Bindings and Patterns   ==========
-Binding
-    = pattern:Pattern   __   "="   __   value:Expression
-    { return {kind: 'Binding', pattern, value}; }
+BindingList
+    = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-// TODO: Add more patterns in future
-//       See eg https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/pattern-matching
+Binding
+    = StaticBinding
+    / DynamicBinding
+    / ShorthandBinding
+
+StaticBinding
+    = pattern:Pattern   __   "="   __   value:Expression
+    { return {kind: 'StaticBinding', pattern, value}; }
+
+DynamicBinding
+    = "["   __   name:Expression   __   "]"   __   "="   __   value:Expression
+    { return {kind: 'DynamicBinding', name, value}; }
+
+ShorthandBinding
+    = name:IDENTIFIER
+    { return {kind: 'ShorthandBinding', name}; }
+
 Pattern
     = WildcardPattern
     / VariablePattern
     / TuplePattern
     / RecordPattern
+    // TODO: Add more patterns in future...
+    //       See eg https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/pattern-matching
 
 WildcardPattern
     = UNDERSCORE
@@ -80,20 +83,17 @@ VariablePattern
     { return {kind: 'VariablePattern', name}; }
 
 TuplePattern
-    = "("   __   head:Pattern?   tail:(__   ","   __   Pattern)*   __   ")"
+    = "("   __   !","   head:Pattern?   tail:(__   ","   __   Pattern)*   (__   ",")?   __   ")"
     { return {kind: 'TuplePattern', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
 
 RecordPattern
-    = "{"   __   fields:PatternFieldList   __   "}"
-    { return {kind: 'RecordPattern', fields}; }
+    = "{"   __   !","   head:FieldPattern?   tail:((__   ",")?   __   FieldPattern)*   (__   ",")?   __   "}"
+    { return {kind: 'RecordPattern', fields: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
-PatternFieldList
-    = head:PatternField?   tail:(__   ","   __   PatternField)* // TODO: commas optional?
-    { return (head ? [head] : []).concat(tail.map(el => el[3])); }
 
-PatternField
-    = fieldName:IDENTIFIER   pattern:(__   AS   __   Pattern)?
-    { return {kind: 'PatternField', fieldName, pattern: pattern ? pattern[3] : undefined}; }
+FieldPattern
+    = fieldName:IDENTIFIER   alias:(__   AS   __   Pattern)?
+    { return {kind: 'FieldPattern', fieldName, pattern: alias ? alias[3] : undefined}; }
 
 
 // ==========   Expressions   ==========
@@ -139,59 +139,12 @@ FunctionExpression
     { return {kind: 'Function', pattern, body}; }
 
 TupleExpression
-    = "("   __   elements:ElementList   __   ")"
-    { return {kind: 'Tuple', elements}; }
-
-ElementList
-    = head:Expression?   tail:(__   ","   __   Expression)*   (__   ",")?
-    { return (head ? [head] : []).concat(tail.map(el => el[3])); }
-
-
-
-
-
-
+    = "("   __   !","   head:Expression?   tail:(__   ","   __   Expression)*   (__   ",")?   __   ")"
+    { return {kind: 'Tuple', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
 
 RecordExpression
-    = "{"   __   fields: FieldList   __   "}"
-    { return {kind: 'Record', fields}; }
-
-FieldList
-    = head:Field?   tail:((__   ",")?   __   Field)*   (__   ",")?
-    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
-
-Field
-    = Binding
-    / ShorthandBinding
-//    / DynamicBinding
-
-ShorthandBinding
-    = name:IDENTIFIER
-    { return {kind: 'ShorthandBinding', name}; }
-
-// DynamicBinding
-//     = Binding
-
-
-
-
-
-// Field
-//     = name:FieldName   __   "="   __   expression:Expression
-//     {
-//         // TODO: differentiate `name` kinds?
-//         return {kind: 'Field', hasComputedName: false, name, expression};
-//         return {kind: 'Field', hasComputedName: true, name, expression};
-//     }
-
-// // TODO: FieldName/FieldLabel = pattern / computed name
-// FieldName
-//     = pattern: Pattern
-//     { TODO }
-
-//     / "["   __   expression:Expression   __   "]"
-//     { TODO }
-
+    = "{"   __   bindings:BindingList   __   "}"
+    { return {kind: 'Record', bindings}; }
 
 
 
