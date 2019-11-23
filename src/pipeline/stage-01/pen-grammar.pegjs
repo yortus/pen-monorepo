@@ -19,7 +19,8 @@
 //   [x] need to append "," to these fields, otherwise abbiguous with sequences
 //   [x] make commas optional and valid for all fields (even non-shorthand ones) then? ANS: yes
 // - Patterns:
-//   [ ]  rest/spread element for RecordPattern and TuplePattern
+//   [ ] rest/spread element for RecordPattern and TuplePattern.
+//     - Q: why? show use case...
 //   [x] document special '_' identifier. ANS: has its own RESERVED token
 //   [x] commas between fields - required or optional or ...? ANS: optional, but significant in some cases
 // - Tuples:
@@ -90,115 +91,125 @@ RecordPattern
     = "{"   __   !","   head:FieldPattern?   tail:((__   ",")?   __   FieldPattern)*   (__   ",")?   __   "}"
     { return {kind: 'RecordPattern', fields: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
-
-FieldPattern
+FieldPattern // NB: only valid inside a RecordPattern, i.e. this is not valid as a standalone pattern
     = fieldName:IDENTIFIER   alias:(__   AS   __   Pattern)?
     { return {kind: 'FieldPattern', fieldName, pattern: alias ? alias[3] : undefined}; }
 
 
 // ==========   Expressions   ==========
+/*
+    PRECEDENCE 1 (LOWEST)
+        SelectionExpression         a | b      | a | b | c
+
+    PRECEDENCE 2
+        SequenceExpression          a b      a  b c                                                                     NB: whitespace between terms, else is application
+
+    PRECEDENCE 3
+        ApplicationExpression       a(b)   (a)b   a'blah'   a(b)                                                        NB: no whitespace between terms, else is sequence
+        StaticMemberExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
+
+    PRECEDENCE 4 (HIGHEST):
+        FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
+        TupleExpression             (a, b, c)   (a)   ()                                                                NB: parentheses are required for tuples to avoid ambiguity with shorthand bindings in records, eg {a, b}. TODO: revise this
+        RecordExpression            {a=b c=d e=f}   {a=b}   {c}   {}
+        CharacterExpression         "a-z"   "0-9"
+        StringExpression            "foo"   "a string!"
+        LabelExpression             'foo'   'bar'
+        ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
+        ThisExpression              this
+        ModuleExpression            module './foo'   module "somelib"   module {export=this a=b c=d}
+*/
+
 Expression
-    = Precedence1
+    = Precedence1OrHigher
 
-Precedence1                 // LOWEST PRECEDENCE
-    = SelectionExpression   // a | b      | a | b | c
-    / Precedence2
+Precedence1OrHigher
+    = SelectionExpression
+    / Precedence2OrHigher
 
-Precedence2
-    = SequenceExpression    // a b      a  b                    // NB: whitespace between terms, else is application
-    / Precedence3
+Precedence2OrHigher
+    = SequenceExpression
+    / Precedence3OrHigher
 
-Precedence3
-    = ApplicationExpression // a(b)   (a)b   a'blah'   a(b)(c)  // NB: no whitespace between terms, else is a sequence
-    / Precedence4
+Precedence3OrHigher
+    = Precedence3Expression
+    / Precedence4OrHigher
 
-Precedence4                 // HIGHEST PRECEDENCE
-    = FunctionExpression    // a => a a   (a, b) => a b   () => "blah"      NB: lhs is just a BindingPattern!
-    / TupleExpression       // (a, b, c)   (a)   ()                         TODO: are parantheses required for tuples?
-    / RecordExpression      // {a=b c=d e=f}   {a=b}    {}
-    / CharacterExpression   // 'a-z'   "a-z"   '"a-z"'   "'a-z'"
-    / StringExpression      // "foo"   'foo'   '"foo"'   "'foo'"
-    / ReferenceExpression   // a   a.b   a.b.c
-    / ModuleExpression      // module './foo'   module "./bar"   module {export=this a=b c=d}
-    / ThisExpression        // this
+Precedence4OrHigher
+    = PrimaryExpression
+
+PrimaryExpression
+    = FunctionExpression
+    / TupleExpression
+    / RecordExpression
+    / CharacterExpression
+    / StringExpression
+    // / LabelExpression
+    / ReferenceExpression
+    / ThisExpression
+//    / ModuleExpression
 
 SelectionExpression
-    = ("|"   __)?   head:Precedence2   tail:(__   "|"   __   Precedence2)+
-    { return {kind: 'Selection', expressions: [head].concat(tail.map(el => el[3]))}; }
+    = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
+    { return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))}; }
 
 SequenceExpression
-    = head:Precedence3   tail:(/* NON-OPTIONAL */ WHITESPACE   Precedence3)+
-    { return {kind: 'Sequence', expressions: [head].concat(tail.map(el => el[1]))}; }
+    = head:Precedence3OrHigher   tail:(/* MANDATORY WHITESPACE */   WHITESPACE   Precedence3OrHigher)+
+    { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
-ApplicationExpression
-    = head:Precedence4   tail:(/* NO WHITESPACE */   Precedence4)+
-    { return tail.reduce((fn, arg) => ({kind: 'Application', function: fn, argument: arg}), head); }
+Precedence3Expression
+    = head:Precedence4OrHigher   tail:(/* NO WHITESPACE */   StaticMemberReference / ApplicationArgument)+
+    {
+        return tail.reduce(
+            (lhs, rhs) => (rhs.name
+                ? {kind: 'StaticMemberExpression', namespace: lhs, memberName: rhs.name}
+                : {kind: 'ApplicationExpression', function: lhs, argument: rhs.arg}
+            ),
+            head
+        );
+    }
+
+StaticMemberReference
+    = "."   /* NO WHITESPACE */   name:IDENTIFIER
+    { return {name}; }
+
+ApplicationArgument
+    = arg: Precedence4OrHigher
+    { return {arg}; }
 
 FunctionExpression
     = pattern:Pattern   __   "=>"   __   body:Expression
-    { return {kind: 'Function', pattern, body}; }
+    { return {kind: 'FunctionExpression', pattern, body}; }
 
 TupleExpression
     = "("   __   !","   head:Expression?   tail:(__   ","   __   Expression)*   (__   ",")?   __   ")"
-    { return {kind: 'Tuple', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
+    { return {kind: 'TupleExpression', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
 
 RecordExpression
     = "{"   __   bindings:BindingList   __   "}"
-    { return {kind: 'Record', bindings}; }
-
-
-
-
-
-
-
-
-
-
-
-
+    { return {kind: 'RecordExpression', bindings}; }
 
 CharacterExpression
-    = "'"   !['"-]   minValue:CHARACTER   "-"   !['"-]   maxValue:CHARACTER   "'"
-    { return {kind: 'CharacterRange', subkind: 'Abstract', minValue, maxValue}; }
-
-    / '"'   !['"-]   minValue:CHARACTER   "-"   !['"-]   maxValue:CHARACTER   '"'
-    { return {kind: 'CharacterRange', subkind: 'Concrete', minValue, maxValue}; }
-
-
-
-
-
-
+    = '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
+    { return {kind: 'CharacterExpression', minValue, maxValue}; }
 
 StringExpression
-    = "'"   (![-']   CHARACTER)*   "'"
-    { return {kind: 'StringLiteral', subkind: 'Abstract', value: text().slice(1, -1)}; }
+    = !CharacterExpression   '"'   (!["]   CHARACTER)*   '"'
+    { return {kind: 'StringExpression', value: text().slice(1, -1)}; }
 
-    / '"'   (![-"]   CHARACTER)*   '"'
-    { return {kind: 'StringLiteral', subkind: 'Concrete', value: text().slice(1, -1)}; }
+
+
+
+LabelExpression
+    = .
+    {/*TODO*/}
+
+
 
 
 ReferenceExpression
-    = namespaces:ReferenceNamespaces?   name:IDENTIFIER   !(__   "="   !">")
-    { return namespaces ? {kind: 'Reference', namespaces, name} : {kind: 'Reference', name}; }
-
-ReferenceNamespaces
-    = ids:(IDENTIFIER   ".")+
-    { return ids.map(id => id[0]); }
-
-
-
-// TODO...
-ModuleExpression
-    = MODULE   __   specifier:MODULE_SPECIFIER
-    { return {kind: 'Module', specifier}; }
-
-    / MODULE   __   specifier:MODULE_SPECIFIER // TODO: inline BindingList
-    { return {kind: 'Module', module}; }
-
-
-
+    = name:IDENTIFIER   !(__   "="   !">")
+    { return {kind: 'ReferenceExpression', name}; }
 
 
 
@@ -209,10 +220,22 @@ ThisExpression
 
 
 
-// ==========   Module specifiers   ==========
-MODULE_SPECIFIER
+
+// TODO...
+ModuleExpression
+    = MODULE   __   specifier:ModuleSpecifier
+    { return {kind: 'Module', specifier}; }
+
+    / MODULE   __   specifier:ModuleSpecifier // TODO: inline BindingList
+    { return {kind: 'Module', module}; }
+
+ModuleSpecifier
     = "'"   [^'\r\n]*   "'"   { return text().slice(1, -1); }
     / '"'   [^"\r\n]*   '"'   { return text().slice(1, -1); }
+
+
+
+
 
 
 // ==========   Literal characters and escape sequences   ==========
