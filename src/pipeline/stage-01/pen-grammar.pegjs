@@ -117,7 +117,7 @@ FieldPattern // NB: only valid inside a RecordPattern, i.e. this is not valid as
         LabelExpression             'foo'   'bar'
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ThisExpression              this
-        ModuleExpression            module './foo'   module "somelib"   module {export=this a=b c=d}
+        ModuleExpression            module './foo'   module 'somelib'
 */
 
 Expression
@@ -144,10 +144,10 @@ PrimaryExpression
     / RecordExpression
     / CharacterExpression
     / StringExpression
-    // / LabelExpression
+    / LabelExpression
     / ReferenceExpression
     / ThisExpression
-//    / ModuleExpression
+    / ModuleExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
@@ -194,48 +194,24 @@ CharacterExpression
     { return {kind: 'CharacterExpression', minValue, maxValue}; }
 
 StringExpression
-    = !CharacterExpression   '"'   (!["]   CHARACTER)*   '"'
+    = !CharacterExpression   '"'   (!'"'   CHARACTER)*   '"'
     { return {kind: 'StringExpression', value: text().slice(1, -1)}; }
 
-
-
-
 LabelExpression
-    = .
-    {/*TODO*/}
-
-
-
+    = "'"   (!"'"   CHARACTER)*   "'"
+    { return {kind: 'LabelExpression', value: text().slice(1, -1)}; }
 
 ReferenceExpression
     = name:IDENTIFIER   !(__   "="   !">")
     { return {kind: 'ReferenceExpression', name}; }
 
-
-
 ThisExpression
     = THIS
-    { return {kind: 'This'}; }
+    { return {kind: 'ThisExpression'}; }
 
-
-
-
-
-// TODO...
 ModuleExpression
-    = MODULE   __   specifier:ModuleSpecifier
-    { return {kind: 'Module', specifier}; }
-
-    / MODULE   __   specifier:ModuleSpecifier // TODO: inline BindingList
-    { return {kind: 'Module', module}; }
-
-ModuleSpecifier
-    = "'"   [^'\r\n]*   "'"   { return text().slice(1, -1); }
-    / '"'   [^"\r\n]*   '"'   { return text().slice(1, -1); }
-
-
-
-
+    = MODULE   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
+    { return {kind: 'ModuleExpression', specifier: specifierChars.map(el => el[1]).join('')}; }
 
 
 // ==========   Literal characters and escape sequences   ==========
