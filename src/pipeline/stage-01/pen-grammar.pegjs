@@ -14,23 +14,29 @@
 //   - distinuish nodes: FieldBinding is not a Binding (ie can't appear wherever a Binding is valid)
 
 
-// - Records:
+// - Record:
 //   [x] shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
 //   [x] need to append "," to these fields, otherwise abbiguous with sequences
 //   [x] make commas optional and valid for all fields (even non-shorthand ones) then? ANS: yes
-// - Patterns:
+// - Pattern:
 //   [ ] rest/spread element for RecordPattern and TuplePattern.
 //     - Q: why? show use case...
 //   [x] document special '_' identifier. ANS: has its own RESERVED token
 //   [x] commas between fields - required or optional or ...? ANS: optional, but significant in some cases
-// - Tuples:
+// - Tuple:
 //   [x] are parentheses required? ANS: yes, otherwise ambiguous with comma-separated shorthand fields
-// - Strings
-//   - revisit
-// - CharRanges
-//   - revisit
+//   [ ] revisit parens requirement. When ambiguous exactly? Any alternative to make parens optional?
+//   [ ] how do tuples map to AST nodes? Esp in 1-tuple case? Arrays always? Or?
+// - String:
+//   [x] revisit
+// - Character:
+//   [x] revisit
+// - Module:
+//   [ ] current syntax is prefix operator notation, should use function application syntax instead? ie module('./foo')
+// - Application:
+//   [ ] support JSX-lke syntax alternative?
 // - Expression nodes in general
-//   - revisit prop naming - eg in Function - pattern, expression are not descriptive, they are just the types (should be param(s), body?)
+//   [ ] revisit prop naming - eg in Function - pattern, expression are not descriptive, they are just the types (should be param(s), body?)
 
 
 
@@ -51,9 +57,14 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = StaticBinding
+    = ExportBinding
+    / StaticBinding
     / DynamicBinding
     / ShorthandBinding
+
+ExportBinding
+    = EXPORT   __   "="   __   value:Expression
+    { return {kind: 'ExportBinding', value}; }
 
 StaticBinding
     = pattern:Pattern   __   "="   __   value:Expression
@@ -117,7 +128,7 @@ FieldPattern // NB: only valid inside a RecordPattern, i.e. this is not valid as
         LabelExpression             'foo'   'bar'
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ThisExpression              this
-        ModuleExpression            module './foo'   module 'somelib'
+        ImportExpression            import './foo'   import 'somelib'
 */
 
 Expression
@@ -147,7 +158,7 @@ PrimaryExpression
     / LabelExpression
     / ReferenceExpression
     / ThisExpression
-    / ModuleExpression
+    / ImportExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
@@ -209,9 +220,9 @@ ThisExpression
     = THIS
     { return {kind: 'ThisExpression'}; }
 
-ModuleExpression
-    = MODULE   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'ModuleExpression', specifier: specifierChars.map(el => el[1]).join('')}; }
+ImportExpression
+    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
+    { return {kind: 'ImportExpression', specifier: specifierChars.map(el => el[1]).join('')}; }
 
 
 // ==========   Literal characters and escape sequences   ==========
@@ -230,9 +241,10 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / MODULE / THIS / UNDERSCORE
+RESERVED 'RESERVED'     = AS / EXPORT / IMPORT / THIS / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
-MODULE                  = "module"   !IDENTIFIER_PART   { return text(); }
+EXPORT                  = "export"   !IDENTIFIER_PART   { return text(); }
+IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 THIS                    = "this"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
 
