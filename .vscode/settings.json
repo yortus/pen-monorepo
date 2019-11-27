@@ -15,5 +15,5 @@
 
 	// Settings for "Mocha Test Explorer" extension.
 	"mochaExplorer.files": "src/**/*.test.ts",
-	"mochaExplorer.require": "ts-node/register"
+	"mochaExplorer.require": "ts-node/register",
 }
