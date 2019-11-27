@@ -11,7 +11,7 @@
         "clean": "rimraf dist/",
         "build": "npm run build:penlib && npm run build:src",
         "build:penlib": "tsc -p penlib",
-        "build:src": "tsc && cpy src/**/*.pegjs dist",
+        "build:src": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
         "lint": "tslint src/**/*.ts",
         "test": "mocha --require ts-node/register src/**/*.test.ts"
     },
