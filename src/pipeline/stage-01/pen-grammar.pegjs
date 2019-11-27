@@ -1,47 +1,4 @@
-// A module has 0..M declarations via 0..N bindings (but only static bindings - check in a later pipeline stage)
-// A record has 0..M fields via 0..N bindings
-// A tuple has 0..M elements
-
-// A binding has 1 pattern
-// A function has 1 pattern
-// A binding pattern has several forms and ultimately has 0..M identifiers that add names to the current lexical scope
-
-
-
-
-// TODOs:
-// - overall:
-//   - distinuish nodes: FieldBinding is not a Binding (ie can't appear wherever a Binding is valid)
-
-
-// - Record:
-//   [x] shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
-//   [x] need to append "," to these fields, otherwise abbiguous with sequences
-//   [x] make commas optional and valid for all fields (even non-shorthand ones) then? ANS: yes
-// - Pattern:
-//   [ ] rest/spread element for RecordPattern and TuplePattern.
-//     - Q: why? show use case...
-//   [x] document special '_' identifier. ANS: has its own RESERVED token
-//   [x] commas between fields - required or optional or ...? ANS: optional, but significant in some cases
-// - Tuple:
-//   [x] are parentheses required? ANS: yes, otherwise ambiguous with comma-separated shorthand fields
-//   [ ] revisit parens requirement. When ambiguous exactly? Any alternative to make parens optional?
-//   [ ] how do tuples map to AST nodes? Esp in 1-tuple case? Arrays always? Or?
-// - String:
-//   [x] revisit
-// - Character:
-//   [x] revisit
-// - Module:
-//   [ ] current syntax is prefix operator notation, should use function application syntax instead? ie module('./foo')
-// - Application:
-//   [ ] support JSX-lke syntax alternative?
-// - Expression nodes in general
-//   [ ] revisit prop naming - eg in Function - pattern, expression are not descriptive, they are just the types (should be param(s), body?)
-
-
-
-
-// ==========   Files and Modules   ==========
+// ====================   Files and Modules   ====================
 File
     = __   module:Module   __   END_OF_FILE
     { return module; }
@@ -51,7 +8,7 @@ Module  // NB: same as RecordExpression but without the opening/closing braces
     { return {kind: 'Module', bindings}; }
 
 
-// ==========   Bindings and Patterns   ==========
+// ====================   Bindings   ====================
 BindingList
     = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
@@ -78,6 +35,8 @@ ShorthandBinding
     = name:IDENTIFIER
     { return {kind: 'ShorthandBinding', name}; }
 
+
+// ====================   Patterns   ====================
 Pattern
     = WildcardPattern
     / VariablePattern
@@ -107,7 +66,7 @@ FieldPattern // NB: only valid inside a RecordPattern, i.e. this is not valid as
     { return {kind: 'FieldPattern', fieldName, pattern: alias ? alias[3] : undefined}; }
 
 
-// ==========   Expressions   ==========
+// ====================   Expressions   ====================
 /*
     PRECEDENCE 1 (LOWEST)
         SelectionExpression         a | b      | a | b | c
@@ -165,7 +124,7 @@ SelectionExpression
     { return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))}; }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/* MANDATORY WHITESPACE */   WHITESPACE   Precedence3OrHigher)+
+    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">"))+
     { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
 Precedence3Expression
@@ -185,7 +144,7 @@ StaticMemberReference
     { return {name}; }
 
 ApplicationArgument
-    = arg: Precedence4OrHigher
+    = arg:Precedence4OrHigher
     { return {arg}; }
 
 FunctionExpression
@@ -213,7 +172,7 @@ LabelExpression
     { return {kind: 'LabelExpression', value: text().slice(1, -1)}; }
 
 ReferenceExpression
-    = name:IDENTIFIER   !(__   "="   !">")
+    = name:IDENTIFIER
     { return {kind: 'ReferenceExpression', name}; }
 
 ThisExpression
@@ -222,10 +181,10 @@ ThisExpression
 
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'ImportExpression', specifier: specifierChars.map(el => el[1]).join('')}; }
+    { return {kind: 'ImportExpression', moduleSpecifier: specifierChars.map(el => el[1]).join('')}; }
 
 
-// ==========   Literal characters and escape sequences   ==========
+// ====================   Literal characters and escape sequences   ====================
 CHARACTER
     = ![\x00-\x1F]   !"\\"   .   { return text(); }
     / "\\-"   { return '-'; }
@@ -237,7 +196,7 @@ CHARACTER
 HEX_DIGIT = [0-9a-fA-F]
 
 
-// ==========   Identifiers and Keywords   ==========
+// ====================   Identifiers and Keywords   ====================
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
@@ -249,7 +208,7 @@ THIS                    = "this"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
 
 
-// ==========   Whitespace and lexical markers   ==========
+// ====================   Whitespace and lexical markers   ====================
 __                      = WHITESPACE?
 WHITESPACE 'WHITESPACE' = WHITESPACE_ITEM+   { return text(); }
 WHITESPACE_ITEM         = SINGLE_LINE_COMMENT / MULTILINE_COMMENT / HORITONTAL_WHITESPACE / END_OF_LINE

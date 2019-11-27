@@ -1,3 +1,27 @@
+TODOs from the pegjs grammar file:
+    RecordExpression:
+        [x] shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
+        [x] need to append "," to these fields, otherwise abbiguous with sequences
+        [x] make commas optional and valid for all fields (even non-shorthand ones) then? ANS: yes
+    Pattern:
+        [ ] rest/spread element for RecordPattern and TuplePattern.
+            - Q: why? show use case...
+        [x] document special '_' identifier. ANS: has its own RESERVED token
+        [x] commas between fields - required or optional or ...? ANS: optional, but significant in some cases
+    TupleExpression:
+        [x] are parentheses required? ANS: yes, otherwise ambiguous with comma-separated shorthand fields
+        [ ] revisit parens requirement. When ambiguous exactly? Any alternative to make parens optional?
+        [ ] Q: how do tuples map to AST nodes? Esp in 1-tuple case? Arrays always? Or?
+    ImportExpression:
+        [ ] current syntax is prefix operator notation, should use function application syntax instead? ie module('./foo')
+    ApplicationExpression:
+        [ ] support JSX-lke syntax alternative?
+    Expression nodes in general:
+        [x] revisit prop naming - eg in Function - pattern, expression are not descriptive, they are just the types (should be param(s), body?)
+
+
+
+
 [ ] emit core imports if references - eg `Sequence`, `Selection`, etc
 [ ] can we use dotted references? eg `myBlock.rule1` to `rule` exported from the block `myBlock`
     [ ] leaning toward yes for usefulness, eg imagine a mixed grammar with `json.array` and `yaml.array`
