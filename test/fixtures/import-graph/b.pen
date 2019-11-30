@@ -1,1 +1,2 @@
 {} = import './c'
+{} = import './b' // NB: self ref

@@ -40,4 +40,4 @@ function fail(modSpec: string): never {
 
 
 // TODO: use more robust way of locating lib files & third-party deps
-const CORE_LIBS_PATH = path.join(__dirname, '../../../penlib');
+const CORE_LIBS_PATH = path.join(__dirname, '../../../../penlib');

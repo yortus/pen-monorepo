@@ -181,7 +181,11 @@ ThisExpression
 
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'ImportExpression', moduleSpecifier: specifierChars.map(el => el[1]).join('')}; }
+    {
+        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        let sourceFile = options.sourceFile.imports[moduleSpecifier];
+        return {kind: 'ImportExpression', moduleSpecifier, sourceFile};
+    }
 
 
 // ====================   Literal characters and escape sequences   ====================

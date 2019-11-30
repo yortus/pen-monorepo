@@ -1,26 +1,26 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {Options} from '../../options';
-import {File, FileList} from './output-types';
+import {CompilerOptions} from '../../representations/00-validated-compiler-options';
+import {Program, SourceFile} from '../../representations/01-source-file-graph';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
 
 
 // TODO: doc...
-export function process(options: Options): FileList {
+export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
 
-    let fileMap = new Map<string, File>();
+    let fileMap = new Map<string, SourceFile>();
 
     function getFile(absPath: string) {
         let file = fileMap.get(absPath);
         if (!file) {
-            file = {path: absPath, imports: {}};
+            file = {kind: 'SourceFile', path: absPath, imports: {}};
             fileMap.set(absPath, file);
         }
         return file;
     }
 
-    let mainPath = resolveModuleSpecifier(options.main);
+    let mainPath = resolveModuleSpecifier(compilerOptions.main);
     let unprocessedPaths = [mainPath];
     let processedPaths = new Set<string>();
     while (unprocessedPaths.length > 0) {
@@ -30,8 +30,8 @@ export function process(options: Options): FileList {
         processedPaths.add(filePath);
         let file = getFile(filePath);
 
-        let moduleSource = fs.readFileSync(filePath, 'utf8');
-        let importModSpecs = detectImports(moduleSource);
+        let sourceText = fs.readFileSync(filePath, 'utf8');
+        let importModSpecs = detectImports(sourceText);
         for (let importModSpec of importModSpecs) {
             let importPath = resolveModuleSpecifier(importModSpec, filePath);
             file.imports[importModSpec] = getFile(importPath);
@@ -40,6 +40,8 @@ export function process(options: Options): FileList {
     }
 
     return {
+        kind: 'Program',
+        compilerOptions,
         files: [...fileMap.values()],
         main: getFile(mainPath),
     };

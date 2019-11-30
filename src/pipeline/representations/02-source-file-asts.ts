@@ -1,13 +1,12 @@
-// ====================   Main types   ====================
-export type Ast = Module<{Binding: Binding}>;
+import * as Prev from './01-source-file-graph';
 
 
+// ====================   Node types by category   ====================
 export type Node =
     | Binding
+    | Pattern
     | Expression
-    | FieldPattern<{Pattern: Pattern}>
-    | Module<{Binding: Binding}>
-    | Pattern;
+    | Other;
 
 
 export type Binding =
@@ -40,7 +39,25 @@ export type Expression =
     | TupleExpression<{Expression: Expression}>;
 
 
-// ====================   Modules   ====================
+export type Other =
+    | FieldPattern<{Pattern: Pattern}>
+    | Module<{Binding: Binding}>
+    | Program
+    | SourceFile;
+
+
+// ====================   Top-level nodes   ====================
+export interface Program extends Prev.Program {
+    readonly files: readonly SourceFile[];
+    readonly main: SourceFile;
+}
+
+
+export interface SourceFile extends Prev.SourceFile {
+    module: Module<{Binding: Binding}>;
+}
+
+
 export interface Module<V extends {Binding: any}> {
     readonly kind: 'Module';
     readonly bindings: ReadonlyArray<V['Binding']>;
@@ -131,6 +148,7 @@ export interface FunctionExpression<V extends {Expression: any, Pattern: any}> {
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
+    readonly sourceFile: SourceFile; // TODO: this may need parameterising since SourceFile may be extended
 }
 
 

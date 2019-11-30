@@ -25,9 +25,6 @@
 //        "src/**/*.test.ts",
 
         // TODO: temp testing... remove...
-        "src/**/stage-02/**/*.ts",
-        "src/**/stage-03/**/*.ts",
-        "src/**/stage-04/**/*.ts",
-        "src/**/stage-05/**/*.ts",
+        "src/**/stage-*/**/*.ts",
     ],
 }

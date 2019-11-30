@@ -2,6 +2,4 @@
 
 
 // TODO: temp testing...
-import {Options} from './options';
-import {pipeline} from './pipeline';
-export {Options, pipeline};
+export {CompilerOptions, pipeline} from './pipeline';
