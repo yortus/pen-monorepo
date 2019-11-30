@@ -2,21 +2,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
 import * as Prev from '../../representations/01-source-file-graph';
-import {Binding, Module, Program} from '../../representations/02-source-file-asts';
+import {Binding, Module, Program, SourceFile} from '../../representations/02-source-file-asts';
 
 
 export function parseSourceFiles(program: Prev.Program): Program {
-
-    for (let sourceFile of program.files) {
-
+    let files = program.files.map((sourceFile): SourceFile => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         let module = parse(sourceText, {sourceFile});
-
-        [] = [module];
-
-
-    }
-    return null!;
+        return {...sourceFile, module};
+    });
+    return {
+        ...program,
+        files,
+        main: files[program.files.indexOf(program.main)],
+    };
 }
 
 
