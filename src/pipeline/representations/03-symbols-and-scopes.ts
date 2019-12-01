@@ -2,7 +2,7 @@ import * as Prev from './02-source-file-asts';
 
 
 // ====================   Scopes and Symbols   ====================
-export type Scope = ModuleScope | NestedScope;
+export type Scope = ModuleScope | RecordScope;
 
 
 export interface ModuleScope {
@@ -11,8 +11,8 @@ export interface ModuleScope {
 }
 
 
-export interface NestedScope { // TODO: rename RecordScope
-    kind: 'NestedScope';
+export interface RecordScope {
+    kind: 'RecordScope';
     parent: Scope;
     symbols: Map<string, SymbolInfo>; // maps name to symbol info
 }

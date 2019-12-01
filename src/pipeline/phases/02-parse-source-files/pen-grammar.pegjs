@@ -1,3 +1,9 @@
+{
+    let sourceFile = options.sourceFile = options.sourceFile || {};
+    let imports = sourceFile.imports = sourceFile.imports || {};
+}
+
+
 // ====================   Files and Modules   ====================
 File
     = __   module:Module   __   END_OF_FILE
