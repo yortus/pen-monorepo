@@ -99,7 +99,7 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         FunctionExpression: n => ({...n, pattern: rec(n.pattern), body: rec(n.body)}),
         ImportExpression: n => n,
         LabelExpression: n => n,
-        Program: n => ({...n, sourceFilesByPath: mapMap(n.sourceFilesByPath, rec)}),
+        Program: n => ({...n, sourceFiles: mapMap(n.sourceFiles, rec)}),
         RecordPattern: n => ({...n, fields: n.fields.map(rec)}),
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),

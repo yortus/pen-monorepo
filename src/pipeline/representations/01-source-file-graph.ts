@@ -10,7 +10,7 @@ export type Node =
 export interface Program {
     readonly kind: 'Program';
     readonly compilerOptions: CompilerOptions;
-    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
+    readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile>;
     readonly mainPath: AbsPath;
 }
 

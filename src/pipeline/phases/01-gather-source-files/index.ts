@@ -10,14 +10,14 @@ import {resolveModuleSpecifier} from './resolve-module-specifier';
 // TODO: doc...
 export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
 
-    let sourceFilesByPath = new Map<AbsPath, SourceFile>();
+    let sourceFiles = new Map<AbsPath, SourceFile>();
 
     function getSourceFile(absPath: AbsPath) {
-        let sourceFile = sourceFilesByPath.get(absPath);
+        let sourceFile = sourceFiles.get(absPath);
         if (sourceFile) return sourceFile;
 
         sourceFile = {kind: 'SourceFile', path: absPath, imports: {}};
-        sourceFilesByPath.set(absPath, sourceFile);
+        sourceFiles.set(absPath, sourceFile);
         return sourceFile;
     }
 
@@ -43,7 +43,7 @@ export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
     return {
         kind: 'Program',
         compilerOptions,
-        sourceFilesByPath,
+        sourceFiles,
         mainPath,
     };
 }

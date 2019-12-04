@@ -7,14 +7,14 @@ import {Binding, Module, Program, SourceFile} from '../../representations/02-sou
 
 
 export function parseSourceFiles(program: Prev.Program): Program<{Binding: Binding}> {
-    let sourceFilesByPath = mapMap(program.sourceFilesByPath, (sourceFile): SourceFile<{Binding: Binding}> => {
+    let sourceFiles = mapMap(program.sourceFiles, (sourceFile): SourceFile<{Binding: Binding}> => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         let module = parse(sourceText, {sourceFile});
         return {...sourceFile, module};
     });
     return {
         ...program,
-        sourceFilesByPath,
+        sourceFiles,
     };
 }
 

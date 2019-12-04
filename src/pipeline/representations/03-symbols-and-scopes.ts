@@ -77,6 +77,11 @@ type Other =
 
 
 // ====================   Modified Nodes   ====================
+// export interface Program<V extends {Binding: any}> extends Prev.Program<V> {
+//     readonly symbols: ReadonlyMap<string, SymbolInfo>;
+// }
+
+
 export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
     readonly scope: Scope;
 }

@@ -53,7 +53,7 @@ type Other =
 
 // ====================   Top-level nodes   ====================
 export interface Program<V extends {Binding: any}> extends Prev.Program {
-    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile<V>>;
+    readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<V>>;
 }
 
 
