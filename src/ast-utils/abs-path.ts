@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 
+// TODO: doc... branded type
 export type AbsPath = string & {__brand: 'Normalised Absolute Path'};
 
 

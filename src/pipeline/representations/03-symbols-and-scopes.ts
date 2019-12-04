@@ -7,18 +7,18 @@ export type Scope = ModuleScope | RecordScope;
 
 export interface ModuleScope {
     kind: 'ModuleScope';
-    symbols: Map<string, SymbolInfo>; // maps name to symbol info
+    symbols: Map<string, Symbol>; // maps name to symbol info
 }
 
 
 export interface RecordScope {
     kind: 'RecordScope';
     parent: Scope;
-    symbols: Map<string, SymbolInfo>; // maps name to symbol info
+    symbols: Map<string, Symbol>; // maps name to symbol info
 }
 
 
-export interface SymbolInfo {
+export interface Symbol {
     name: string;
 
     // TODO: review these members...
@@ -93,7 +93,7 @@ export interface RecordExpression<V extends {Binding: any}> extends Prev.RecordE
 
 
 export interface ShorthandBinding extends Prev.ShorthandBinding {
-    symbol: SymbolInfo;
+    symbol: Symbol;
 }
 
 
