@@ -1,19 +1,33 @@
 import {makeNodeMapper, mapMap} from '../../../ast-utils';
 import * as Prev from '../../representations/02-source-file-asts';
-import {Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
-import {makeModuleScope, makeRecordScope} from './helpers';
+import {Binding, Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
+import {makeModuleScope, makeRecordScope} from './scope';
 
 
 // TODO: doc...
-export function identifySymbolsAndScopes(program: Prev.Program): Program {
+export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Binding}>): Program<{Binding: Binding}> {
     let currentScope: Scope | undefined;
     let mapNode = makeNodeMapper<Prev.Node, Node>(rec => ({
 
         // TODO: every kind of Binding/Pattern
         // - add a symbol for each introduced static name
 
-        // TODO: ImportExpression
-        // - resolve the module being imported from (should this go in an ealier pipeline stage?
+        //                     interface ShorthandBinding {
+        //                         readonly kind: 'ShorthandBinding';
+        //                         readonly name: string;
+        //                     }
+
+        //                     interface VariablePattern {
+        //                         readonly kind: 'VariablePattern';
+        //                         readonly name: string;
+        //                     }
+
+        //                     interface FieldPattern<V extends {Pattern: any}> {
+        //                         readonly kind: 'FieldPattern';
+        //                         readonly fieldName: string;
+        //                         readonly pattern?: V['Pattern'];
+        //                     }
+        
 
         Module: mod => {
             assert(currentScope === undefined);

@@ -1,4 +1,3 @@
-import {AbsPath} from '../../ast-utils';
 import * as Prev from './02-source-file-asts';
 
 
@@ -39,8 +38,8 @@ export type Node =
 
 type TopLevel =
     | Module<{Binding: Binding}>
-    | Program
-    | SourceFile;
+    | Prev.Program<{Binding: Binding}>
+    | Prev.SourceFile<{Binding: Binding}>;
 
 export type Binding =
     | Prev.DynamicBinding<{Expression: Expression}>
@@ -77,16 +76,6 @@ type Other =
 
 
 // ====================   Modified Nodes   ====================
-export interface Program extends Prev.Program {
-    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
-}
-
-
-export interface SourceFile extends Prev.SourceFile {
-    module: Module<{Binding: Binding}>;
-}
-
-
 export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
     readonly scope: Scope;
 }
@@ -95,27 +84,6 @@ export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
 export interface RecordExpression<V extends {Binding: any}> extends Prev.RecordExpression<V> {
     readonly scope: Scope;
 }
-
-
-// export interface Definition<Expr> extends V01.Definition<Expr> {
-//     readonly symbol: SymbolInfo;
-// }
-
-
-// export interface Block<Expr> extends V01.Block<Expr> {
-//     readonly definitions: ReadonlyArray<Definition<Expr>>;
-//     readonly scope: Scope;
-// }
-
-
-// export interface ImportNames extends V01.ImportNames {
-//     readonly symbols: readonly SymbolInfo[];
-// }
-
-
-// export interface ImportNamespace extends V01.ImportNamespace {
-//     readonly symbol: SymbolInfo;
-// }
 
 
 // ====================   Unmodified Nodes   ====================
@@ -128,11 +96,13 @@ export {
     FunctionExpression,
     ImportExpression,
     LabelExpression,
+    Program,
     RecordPattern,
     ReferenceExpression,
     SelectionExpression,
     SequenceExpression,
     ShorthandBinding,
+    SourceFile,
     StaticBinding,
     StaticMemberExpression,
     StringExpression,

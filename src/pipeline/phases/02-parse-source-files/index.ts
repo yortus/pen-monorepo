@@ -6,8 +6,8 @@ import * as Prev from '../../representations/01-source-file-graph';
 import {Binding, Module, Program, SourceFile} from '../../representations/02-source-file-asts';
 
 
-export function parseSourceFiles(program: Prev.Program): Program {
-    let sourceFilesByPath = mapMap(program.sourceFilesByPath, (sourceFile): SourceFile => {
+export function parseSourceFiles(program: Prev.Program): Program<{Binding: Binding}> {
+    let sourceFilesByPath = mapMap(program.sourceFilesByPath, (sourceFile): SourceFile<{Binding: Binding}> => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         let module = parse(sourceText, {sourceFile});
         return {...sourceFile, module};

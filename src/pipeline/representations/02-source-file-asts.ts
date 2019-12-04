@@ -13,8 +13,8 @@ export type Node =
 
 type TopLevel =
     | Module<{Binding: Binding}>
-    | Program
-    | SourceFile;
+    | Program<{Binding: Binding}>
+    | SourceFile<{Binding: Binding}>;
 
 
 export type Binding =
@@ -52,13 +52,13 @@ type Other =
 
 
 // ====================   Top-level nodes   ====================
-export interface Program extends Prev.Program {
-    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
+export interface Program<V extends {Binding: any}> extends Prev.Program {
+    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile<V>>;
 }
 
 
-export interface SourceFile extends Prev.SourceFile {
-    module: Module<{Binding: Binding}>;
+export interface SourceFile<V extends {Binding: any}> extends Prev.SourceFile {
+    module: Module<V>;
 }
 
 
