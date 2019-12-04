@@ -18,10 +18,6 @@ rec = {
 }
 
 
-// ==========   Shorthand binding introducing new fields   ==========
-point = {x, y, z = {z1, z2}}
-
-
 // ==========   Pattern-matched binding of members of records/tuples   ==========
 // NB: rec may be an expression, should only eval it once in a binding
 //     (but referentially transparent so does it matter?)

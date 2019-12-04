@@ -1,4 +1,4 @@
 export = {
-    util1 = import './util1',
-    util2 = import './util2',
+    util1 = import './util1'
+    util2 = import './util2'
 }

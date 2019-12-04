@@ -47,13 +47,6 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         },
 
         // TODO: temp testing...
-        ShorthandBinding: binding => {
-            assert(currentScope !== undefined);
-            let symbol = insert(currentScope, binding.name);
-            let bindingᐟ = {...binding, symbol};
-            return bindingᐟ;
-        },
-
         VariablePattern: pattern => {
             assert(currentScope !== undefined);
             let symbol = insert(currentScope, pattern.name);

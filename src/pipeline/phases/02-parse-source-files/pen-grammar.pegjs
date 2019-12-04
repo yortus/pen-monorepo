@@ -16,14 +16,13 @@ Module  // NB: same as RecordExpression but without the opening/closing braces
 
 // ====================   Bindings   ====================
 BindingList
-    = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
-    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
+    = head:Binding?   tail:(__   Binding)*
+    { return (head ? [head] : []).concat(tail.map(el => el[1])); }
 
 Binding
     = ExportBinding
     / StaticBinding
     / DynamicBinding
-    / ShorthandBinding
 
 ExportBinding
     = EXPORT   __   "="   __   value:Expression
@@ -36,10 +35,6 @@ StaticBinding
 DynamicBinding
     = "["   __   name:Expression   __   "]"   __   "="   __   value:Expression
     { return {kind: 'DynamicBinding', name, value}; }
-
-ShorthandBinding
-    = name:IDENTIFIER
-    { return {kind: 'ShorthandBinding', name}; }
 
 
 // ====================   Patterns   ====================

@@ -45,7 +45,6 @@ type TopLevel =
 export type Binding =
     | Prev.DynamicBinding<{Expression: Expression}>
     | Prev.ExportBinding<{Expression: Expression}>
-    | ShorthandBinding
     | Prev.StaticBinding<{Expression: Expression, Pattern: Pattern}>;
 
 
@@ -77,6 +76,7 @@ type Other =
 
 
 // ====================   Modified Nodes   ====================
+// TODO: where does symbol table go?
 // export interface Program<V extends {Binding: any}> extends Prev.Program<V> {
 //     readonly symbols: ReadonlyMap<string, SymbolInfo>;
 // }
@@ -89,11 +89,6 @@ export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
 
 export interface RecordExpression<V extends {Binding: any}> extends Prev.RecordExpression<V> {
     readonly scope: Scope;
-}
-
-
-export interface ShorthandBinding extends Prev.ShorthandBinding {
-    symbol: Symbol;
 }
 
 

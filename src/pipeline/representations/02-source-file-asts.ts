@@ -20,7 +20,6 @@ type TopLevel =
 export type Binding =
     | DynamicBinding<{Expression: Expression}>
     | ExportBinding<{Expression: Expression}>
-    | ShorthandBinding
     | StaticBinding<{Expression: Expression, Pattern: Pattern}>;
 
 
@@ -79,12 +78,6 @@ export interface DynamicBinding<V extends {Expression: any}> {
 export interface ExportBinding<V extends {Expression: any}> {
     readonly kind: 'ExportBinding';
     readonly value: V['Expression'];
-}
-
-
-export interface ShorthandBinding {
-    readonly kind: 'ShorthandBinding';
-    readonly name: string;
 }
 
 

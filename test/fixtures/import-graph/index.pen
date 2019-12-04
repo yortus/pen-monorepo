@@ -2,8 +2,6 @@
 {} = import './b.pen'
 
 rec = {
-    aaa,
-    b = 'b thing',
-    ccc,
+    b = 'b thing'
     d = 'd thing'
 }
