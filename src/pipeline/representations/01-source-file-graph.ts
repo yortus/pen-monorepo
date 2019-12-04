@@ -1,3 +1,4 @@
+import {AbsPath} from '../../ast-utils';
 import {CompilerOptions} from './00-validated-compiler-options';
 
 
@@ -9,18 +10,21 @@ export type Node =
 export interface Program {
     readonly kind: 'Program';
     readonly compilerOptions: CompilerOptions;
-    readonly files: readonly SourceFile[];
-    readonly main: SourceFile;
+    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
+    readonly mainPath: AbsPath;
 }
 
 
 export interface SourceFile {
     readonly kind: 'SourceFile';
 
-    /** The source file's absolute normalised path. */
-    readonly path: string;
+    /** The source file's normalised absolute path. */
+    readonly path: AbsPath;
 
-    // TODO: the modspec keys are verbatim from the source text
-    /** Every module specifier imported by this source file, mapped to its own SourceFile object. */
-    readonly imports: {[moduleSpecifier: string]: SourceFile};
+    /**
+     * A map with one entry for each import expression in this source file. The keys are the imported module
+     * specifiers, exactly as they appear in the source text. The values are the normalised absolute paths of
+     * the corresponding imported SourceFiles.
+     */
+    readonly imports: {[moduleSpecifier: string]: AbsPath};
 }

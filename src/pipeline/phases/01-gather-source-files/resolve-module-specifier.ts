@@ -1,33 +1,40 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import {AbsPath} from '../../../ast-utils';
 
 
 // TODO: doc... returns an absolute normalised file path
 // TODO: doc... `fromPath`, if given, *must* be the absolute path to a file (the parent/importing module).
 // TODO: doc... if `fromPath` is not provided, `modSpec` is resolved relative to the CWD.
-export function resolveModuleSpecifier(modSpec: string, fromPath?: string) {
+export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsPath {
     // TODO: assert `fromPath` is blank or points to an existing *file* (not dir)
+    let absPath: AbsPath;
 
     // 1. If `modSpec` is a core module
     if (modSpec === 'pen') {
-        return path.resolve(CORE_LIBS_PATH, 'penlib.pen');
+        absPath = AbsPath('penlib.pen', CORE_LIBS_PATH);
     }
 
     // 2. If `modSpec` is a relative path
-    if (modSpec.startsWith('.')) {
+    else if (modSpec.startsWith('.')) {
         let baseDir = fromPath ? path.dirname(fromPath) : process.cwd();
-        modSpec = path.resolve(baseDir, modSpec);
+        absPath = AbsPath(modSpec, baseDir);
     }
 
     // 3. If `modSpec` is an absolute path
-    return tryPath(modSpec)
-        || tryPath(modSpec + '.pen')
-        || tryPath(path.join(modSpec, 'index.pen'))
+    else {
+        absPath = AbsPath(modSpec);
+    }
+
+    // Try an exact path match, then adding a .pen extension, then a directory module
+    return tryPath(absPath)
+        || tryPath(AbsPath(absPath + '.pen'))
+        || tryPath(AbsPath(path.join(absPath, 'index.pen')))
         || fail(modSpec);
 }
 
 
-function tryPath(p: string) {
+function tryPath(p: AbsPath) {
     if (!fs.existsSync(p)) return undefined;
     if (!fs.statSync(p).isFile()) return undefined;
     return p;

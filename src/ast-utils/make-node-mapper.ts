@@ -1,6 +1,13 @@
 // TODO: doc...
 export function makeNodeMapper<N extends {kind: string}, Nᐟ extends {kind: string}>(getMappers: GetMappers<N, Nᐟ>) {
-    const rec: <NN extends N>(n: NN) => NodeOfKind<Nᐟ, NN['kind']> = n => mappers[n.kind](n);
+    const rec: <NN extends N>(n: NN) => NodeOfKind<Nᐟ, NN['kind']> = n => {
+        try {
+            return mappers[n.kind](n);
+        }
+        catch (err) {
+            err;
+        }
+    };
     const mappers: any = getMappers(rec);
     return rec;
 }

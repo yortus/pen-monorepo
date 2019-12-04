@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
+import {AbsPath} from '../../../ast-utils';
 import {CompilerOptions} from '../../representations/00-validated-compiler-options';
 import {Program, SourceFile} from '../../representations/01-source-file-graph';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
@@ -9,32 +10,32 @@ import {resolveModuleSpecifier} from './resolve-module-specifier';
 // TODO: doc...
 export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
 
-    let fileMap = new Map<string, SourceFile>();
+    let sourceFilesByPath = new Map<AbsPath, SourceFile>();
 
-    function getFile(absPath: string) {
-        let file = fileMap.get(absPath);
-        if (!file) {
-            file = {kind: 'SourceFile', path: absPath, imports: {}};
-            fileMap.set(absPath, file);
-        }
-        return file;
+    function getSourceFile(absPath: AbsPath) {
+        let sourceFile = sourceFilesByPath.get(absPath);
+        if (sourceFile) return sourceFile;
+
+        sourceFile = {kind: 'SourceFile', path: absPath, imports: {}};
+        sourceFilesByPath.set(absPath, sourceFile);
+        return sourceFile;
     }
 
     let mainPath = resolveModuleSpecifier(compilerOptions.main);
     let unprocessedPaths = [mainPath];
-    let processedPaths = new Set<string>();
+    let processedPaths = new Set<AbsPath>();
     while (unprocessedPaths.length > 0) {
-        let filePath = unprocessedPaths.shift()!;
-        if (processedPaths.has(filePath)) continue;
+        let sourceFilePath = unprocessedPaths.shift()!;
+        if (processedPaths.has(sourceFilePath)) continue;
 
-        processedPaths.add(filePath);
-        let file = getFile(filePath);
+        processedPaths.add(sourceFilePath);
+        let sourceFile = getSourceFile(sourceFilePath);
 
-        let sourceText = fs.readFileSync(filePath, 'utf8');
+        let sourceText = fs.readFileSync(sourceFilePath, 'utf8');
         let importModSpecs = detectImports(sourceText);
         for (let importModSpec of importModSpecs) {
-            let importPath = resolveModuleSpecifier(importModSpec, filePath);
-            file.imports[importModSpec] = getFile(importPath);
+            let importPath = resolveModuleSpecifier(importModSpec, sourceFilePath);
+            sourceFile.imports[importModSpec] = getSourceFile(importPath).path;
             unprocessedPaths.push(importPath);
         }
     }
@@ -42,8 +43,8 @@ export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
     return {
         kind: 'Program',
         compilerOptions,
-        files: [...fileMap.values()],
-        main: getFile(mainPath),
+        sourceFilesByPath,
+        mainPath,
     };
 }
 

@@ -1,3 +1,4 @@
+import {AbsPath} from '../../ast-utils';
 import * as Prev from './02-source-file-asts';
 
 
@@ -29,11 +30,17 @@ export interface SymbolInfo {
 
 // ====================   Node types by category   ====================
 export type Node =
+    | TopLevel
     | Binding
     | Expression
     | Pattern
     | Other;
 
+
+type TopLevel =
+    | Module<{Binding: Binding}>
+    | Program
+    | SourceFile;
 
 export type Binding =
     | Prev.DynamicBinding<{Expression: Expression}>
@@ -65,17 +72,13 @@ export type Expression =
     | Prev.TupleExpression<{Expression: Expression}>;
 
 
-export type Other =
-    | Prev.FieldPattern<{Pattern: Pattern}>
-    | Module<{Binding: Binding}>
-    | Program
-    | SourceFile;
+type Other =
+    | Prev.FieldPattern<{Pattern: Pattern}>;
 
 
 // ====================   Modified Nodes   ====================
 export interface Program extends Prev.Program {
-    files: SourceFile[];
-    main: SourceFile;
+    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
 }
 
 

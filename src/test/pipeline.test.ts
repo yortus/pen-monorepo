@@ -9,6 +9,6 @@ describe('pipeline', () => {
         let options: CompilerOptions = {main};
         let result = pipeline(options);
         // expect(result.main.imports).to.have.keys('./a', './b.pen');
-        expect(result).to.deep.equal({});
+        expect(result).to.contain.keys(['kind']);
     });
 });

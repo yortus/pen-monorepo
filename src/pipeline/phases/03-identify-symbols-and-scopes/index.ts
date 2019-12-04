@@ -1,4 +1,4 @@
-import {makeNodeMapper} from '../../../ast-utils';
+import {makeNodeMapper, mapMap} from '../../../ast-utils';
 import * as Prev from '../../representations/02-source-file-asts';
 import {Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
 import {makeModuleScope, makeRecordScope} from './helpers';
@@ -73,13 +73,13 @@ export function identifySymbolsAndScopes(program: Prev.Program): Program {
         FunctionExpression: n => ({...n, pattern: rec(n.pattern), body: rec(n.body)}),
         ImportExpression: n => n,
         LabelExpression: n => n,
-        Program: n => ({...n, files: n.files.map(rec), main: rec(n.main)}),
+        Program: n => ({...n, sourceFilesByPath: mapMap(n.sourceFilesByPath, rec)}),
         RecordPattern: n => ({...n, fields: n.fields.map(rec)}),
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SequenceExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         ShorthandBinding: n => n,
-        SourceFile: null!, // BUG: SFs are special! We don't want to clone them, since they form a graph. Maybe they should not be Node kinds?
+        SourceFile: n => ({...n, module: rec(n.module)}),
         StaticBinding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
         StaticMemberExpression: n => ({...n, namespace: rec(n.namespace)}),
         StringExpression: n => n,

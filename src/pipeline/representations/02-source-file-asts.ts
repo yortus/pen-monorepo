@@ -1,12 +1,20 @@
+import {AbsPath} from '../../ast-utils';
 import * as Prev from './01-source-file-graph';
 
 
 // ====================   Node types by category   ====================
 export type Node =
+    | TopLevel
     | Binding
     | Pattern
     | Expression
     | Other;
+
+
+type TopLevel =
+    | Module<{Binding: Binding}>
+    | Program
+    | SourceFile;
 
 
 export type Binding =
@@ -39,17 +47,13 @@ export type Expression =
     | TupleExpression<{Expression: Expression}>;
 
 
-export type Other =
-    | FieldPattern<{Pattern: Pattern}>
-    | Module<{Binding: Binding}>
-    | Program
-    | SourceFile;
+type Other =
+    | FieldPattern<{Pattern: Pattern}>;
 
 
 // ====================   Top-level nodes   ====================
 export interface Program extends Prev.Program {
-    readonly files: readonly SourceFile[];
-    readonly main: SourceFile;
+    readonly sourceFilesByPath: ReadonlyMap<AbsPath, SourceFile>;
 }
 
 
@@ -64,7 +68,7 @@ export interface Module<V extends {Binding: any}> {
 }
 
 
-// ====================   Bindings   ====================
+// ====================   Binding nodes   ====================
 export interface DynamicBinding<V extends {Expression: any}> {
     readonly kind: 'DynamicBinding';
     readonly name: V['Expression'];
@@ -91,7 +95,7 @@ export interface StaticBinding<V extends {Expression: any, Pattern: any}> {
 }
 
 
-// ====================   Patterns   ====================
+// ====================   Pattern nodes   ====================
 export interface RecordPattern<V extends {Pattern: any}> {
     readonly kind: 'RecordPattern';
     readonly fields: ReadonlyArray<FieldPattern<V>>;
@@ -115,15 +119,7 @@ export interface WildcardPattern {
 }
 
 
-// ====================   Pattern Clauses   ====================
-export interface FieldPattern<V extends {Pattern: any}> {
-    readonly kind: 'FieldPattern';
-    readonly fieldName: string;
-    readonly pattern?: V['Pattern'];
-}
-
-
-// ====================   Expressions   ====================
+// ====================   Expression nodes   ====================
 export interface ApplicationExpression<V extends {Expression: any}> {
     readonly kind: 'ApplicationExpression';
     readonly function: V['Expression'];
@@ -148,7 +144,7 @@ export interface FunctionExpression<V extends {Expression: any, Pattern: any}> {
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
-    readonly sourceFile: SourceFile; // TODO: this may need parameterising since SourceFile may be extended
+    readonly sourceFilePath: AbsPath;
 }
 
 
@@ -203,4 +199,12 @@ export interface ThisExpression {
 export interface TupleExpression<V extends {Expression: any}> {
     readonly kind: 'TupleExpression';
     readonly elements: ReadonlyArray<V['Expression']>;
+}
+
+
+// ====================   Other nodes   ====================
+export interface FieldPattern<V extends {Pattern: any}> {
+    readonly kind: 'FieldPattern';
+    readonly fieldName: string;
+    readonly pattern?: V['Pattern'];
 }
