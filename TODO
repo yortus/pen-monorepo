@@ -18,7 +18,8 @@ TODOs from the pegjs grammar file:
         [ ] support JSX-lke syntax alternative?
     Expression nodes in general:
         [x] revisit prop naming - eg in Function - pattern, expression are not descriptive, they are just the types (should be param(s), body?)
-
+    Member Access:
+        [ ] need syntax to access an element of a tuple expression
 
 
 
