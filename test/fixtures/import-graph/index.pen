@@ -1,2 +1,4 @@
 {} = import './a'
 {} = import './b.pen'
+
+rec = {aaa, bbb}

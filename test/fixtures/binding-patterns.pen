@@ -1,0 +1,44 @@
+rec = {
+    a = {
+        a1 = 'a1'
+        a2 = 'a2'
+        a3 = ('a3i', 'a3ii')
+    }
+
+    b = (
+        'b1',
+        {
+            b2a = 'b2a'
+            b2b = 'b2b'
+        },
+        'b3'
+    )
+
+    c = 'c'
+}
+
+
+// ==========   Shorthand binding introducing new fields   ==========
+point = {x, y, z = {z1, z2}}
+
+
+// ==========   Pattern-matched binding of members of records/tuples   ==========
+// NB: rec may be an expression, should only eval it once in a binding
+//     (but referentially transparent so does it matter?)
+
+// _tmp = rec, a = _tmp.a, b = _tmp.b, c = _tmp.c
+{a, b, c} = rec
+
+// _tmp = rec, a1 = _tmp.a.a1
+{a as {a1}} = rec
+
+// _tmp = rec, b1 = _tmp.b[0], b3 = _tmp.b[2]
+{b as (b1, _, b3)} = rec
+
+// _tmp = rec, b2aAlias = _tmp.b[1].b2a, b2b = _tmp.b[1].b2b
+{b as (_, {b2a as b2aAlias, b2b})} = rec
+
+
+// ==========   Accessing members of records/tuples   ==========
+m1 = rec.a.a1
+//m2 = rec.b[0] // NB: syntax not support

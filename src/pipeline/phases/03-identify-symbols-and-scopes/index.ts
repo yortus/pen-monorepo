@@ -1,7 +1,7 @@
 import {makeNodeMapper, mapMap} from '../../../ast-utils';
 import * as Prev from '../../representations/02-source-file-asts';
 import {Binding, Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
-import {makeModuleScope, makeRecordScope} from './scope';
+import {insert, makeModuleScope, makeRecordScope} from './scope';
 
 
 // TODO: doc...
@@ -27,8 +27,8 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         //                         readonly fieldName: string;
         //                         readonly pattern?: V['Pattern'];
         //                     }
-        
 
+        // Create a new scope for each module and record
         Module: mod => {
             assert(currentScope === undefined);
             currentScope = makeModuleScope();
@@ -45,6 +45,18 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
             currentScope = outerScope;
             return recordᐟ;
         },
+
+        // TODO: temp testing...
+        ShorthandBinding: binding => {
+            assert(currentScope !== undefined);
+            let symbol = insert(currentScope, binding.name);
+            let bindingᐟ = {...binding, symbol};
+            return bindingᐟ;
+        },
+
+
+        // Lookup a child
+        // Introduce a symbol for each shorthand binding, variable pattern, and field pattern
 
         // Definition: def => {
         //     let symbol = insert(currentScope, def.name);
@@ -92,7 +104,6 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SequenceExpression: n => ({...n, expressions: n.expressions.map(rec)}),
-        ShorthandBinding: n => n,
         SourceFile: n => ({...n, module: rec(n.module)}),
         StaticBinding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
         StaticMemberExpression: n => ({...n, namespace: rec(n.namespace)}),

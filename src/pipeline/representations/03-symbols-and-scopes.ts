@@ -19,8 +19,9 @@ export interface RecordScope {
 
 
 export interface SymbolInfo {
-    // TODO: review all members...
-    // name: string;
+    name: string;
+
+    // TODO: review these members...
     // isImported?: boolean;
     // isExported?: boolean;
     // members?: SymbolInfo[];
@@ -44,7 +45,7 @@ type TopLevel =
 export type Binding =
     | Prev.DynamicBinding<{Expression: Expression}>
     | Prev.ExportBinding<{Expression: Expression}>
-    | Prev.ShorthandBinding
+    | ShorthandBinding
     | Prev.StaticBinding<{Expression: Expression, Pattern: Pattern}>;
 
 
@@ -86,6 +87,11 @@ export interface RecordExpression<V extends {Binding: any}> extends Prev.RecordE
 }
 
 
+export interface ShorthandBinding extends Prev.ShorthandBinding {
+    symbol: SymbolInfo;
+}
+
+
 // ====================   Unmodified Nodes   ====================
 export {
     ApplicationExpression,
@@ -101,7 +107,6 @@ export {
     ReferenceExpression,
     SelectionExpression,
     SequenceExpression,
-    ShorthandBinding,
     SourceFile,
     StaticBinding,
     StaticMemberExpression,
