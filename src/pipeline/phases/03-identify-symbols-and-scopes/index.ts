@@ -54,6 +54,13 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
             return bindingᐟ;
         },
 
+        VariablePattern: pattern => {
+            assert(currentScope !== undefined);
+            let symbol = insert(currentScope, pattern.name);
+            let patternᐟ = {...pattern, symbol};
+            return patternᐟ;
+        },
+
 
         // Lookup a child
         // Introduce a symbol for each shorthand binding, variable pattern, and field pattern
@@ -111,7 +118,6 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         ThisExpression: n => n,
         TupleExpression: n => ({...n, elements: n.elements.map(rec)}),
         TuplePattern: n => ({...n, elements: n.elements.map(rec)}),
-        VariablePattern: n => n,
         WildcardPattern: n => n,
     }));
 

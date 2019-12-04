@@ -1,4 +1,9 @@
 {} = import './a'
 {} = import './b.pen'
 
-rec = {aaa, bbb}
+rec = {
+    aaa,
+    b = 'b thing',
+    ccc,
+    d = 'd thing'
+}

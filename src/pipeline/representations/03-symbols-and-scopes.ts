@@ -52,7 +52,7 @@ export type Binding =
 export type Pattern =
     | Prev.RecordPattern<{Pattern: Pattern}>
     | Prev.TuplePattern<{Pattern: Pattern}>
-    | Prev.VariablePattern
+    | VariablePattern
     | Prev.WildcardPattern;
 
 
@@ -97,6 +97,11 @@ export interface ShorthandBinding extends Prev.ShorthandBinding {
 }
 
 
+export interface VariablePattern extends Prev.VariablePattern {
+    symbol: Symbol;
+}
+
+
 // ====================   Unmodified Nodes   ====================
 export {
     ApplicationExpression,
@@ -119,6 +124,5 @@ export {
     ThisExpression,
     TupleExpression,
     TuplePattern,
-    VariablePattern,
     WildcardPattern,
 } from './02-source-file-asts';
