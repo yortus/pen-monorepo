@@ -1,3 +1,54 @@
+Grammar Rules affected by splitting modules and records:
+    [ ] Module
+    [ ] Binding (no dynamic, maybe change export syntax)
+    [ ] ExportBinding
+    [ ] StaticBinding (just a normal binding now, there is no dynamic)
+    [ ] DynamicBinding (remove / move to RecordField)
+    [ ] Pattern (see FooPattern changes below)
+    [ ] WildcardPattern (keep for tuples)
+    [ ] RecordPattern (should be something like ModulePattern now)
+    [ ] FieldPattern (should be BindingPattern now?)
+    [ ] StaticMemberReference (should be BindingReference or something now)
+        [ ] NestedBinding?
+        [ ] names in JS/ES/TS/ESTree/Babel/ParserAPI Nodes?
+    [ ] RecordExpression (whole lotta work)
+
+
+
+Other Grammar changes:
+    [ ] Introduce Lists and List Elements
+    [ ] Tuple changes:
+        [ ] tuples don't require parens
+        [ ] add separate ParenthesisedExpression
+        [ ] confirm use cases
+            [ ] passing args to functions
+            [ ] multivalue function returns???
+            [ ] but what *are* fn return values in pen?
+                [ ] cf generic type instantiation
+    [ ] module/import/export changes:
+        [ ] `import` --> `module` keyword
+        [ ] ModuleImportExpression
+        [ ] ModuleLiteralExpression
+        [ ] export as binding modifier, not pattern? pros/cons?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 TODOs from the pegjs grammar file:
     RecordExpression:
         [x] shorthand when FieldName equals RHS Reference name, eg {Foo} short for {Foo = Foo}
