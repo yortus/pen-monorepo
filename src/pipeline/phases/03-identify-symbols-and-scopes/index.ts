@@ -46,7 +46,10 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
             return recordᐟ;
         },
 
-        // TODO: temp testing...
+        // TODO: temp testing... this is the only node kind that introduces a new name into the current scope
+        // TODO: don't store the symbol ref directly here, but just the symbol id
+        // - what is a symbol id
+        // - what does it index into? Where is the symbol table? Or are there several?
         VariablePattern: pattern => {
             assert(currentScope !== undefined);
             let symbol = insert(currentScope, pattern.name);
