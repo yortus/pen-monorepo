@@ -157,7 +157,7 @@ TupleExpression
     { return {kind: 'TupleExpression', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
 
 RecordExpression
-    = "{"   __   bindings:BindingList   __   "}"
+    = "{"   __   fields:FieldList   __   "}"
     { return {kind: 'RecordExpression', bindings}; }
 
 CharacterExpression
@@ -187,6 +187,26 @@ ImportExpression
         let sourceFile = options.sourceFile.imports[moduleSpecifier];
         return {kind: 'ImportExpression', moduleSpecifier, sourceFile};
     }
+
+
+// ====================   Clauses   ====================
+FieldList
+    = head:Field?   tail:(__   Field)*
+    { return (head ? [head] : []).concat(tail.map(el => el[1])); }
+
+Field
+    // ShorthandField? maybe leave for future version. Will be amgiguous, need commas
+    = StaticField
+    // LabelField? maybe do this in future too, since it can be achieved using DynamicField
+    / DynamicField
+
+StaticField
+    = name:IDENTIFIER   __   "="   __   value:Expression
+    { return {kind: 'Field', name, value, dynamic: false}; }
+
+DynamicField
+    = "["   __   name:Expression   __   "]"   __   "="   __   value:Expression
+    { return {kind: 'Field', name, value, dynamic: true}; }
 
 
 // ====================   Literal characters and escape sequences   ====================
