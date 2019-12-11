@@ -1,41 +1,53 @@
 Grammar Rules affected by splitting modules and records:
-    [ ] Module
-    [ ] Binding (no dynamic, maybe change export syntax)
-    [ ] ExportBinding
-    [ ] StaticBinding (just a normal binding now, there is no dynamic)
-    [ ] DynamicBinding (remove / move to RecordField)
-    [ ] Pattern (see FooPattern changes below)
-    [ ] WildcardPattern (keep for tuples)
-    [ ] RecordPattern (should be something like ModulePattern now)
-    [ ] FieldPattern (should be BindingPattern now?)
-    [ ] StaticMemberReference (should be BindingReference or something now)
-        [ ] NestedBinding?
-        [ ] names in JS/ES/TS/ESTree/Babel/ParserAPI Nodes?
-    [ ] RecordExpression (whole lotta work)
+    [x] Module
+    [x] Binding (no dynamic, maybe change export syntax)
+    [x] ExportBinding
+    [x] StaticBinding (just a normal binding now, there is no dynamic)
+    [x] DynamicBinding (remove / move to RecordField)
+    [x] Pattern (see FooPattern changes below)
+    [x] WildcardPattern (only for tuples - so remove for now)
+    [x] RecordPattern (should be something like ModulePattern now)
+    [x] FieldPattern (should be BindingPattern now?)
+    [x] RecordExpression (whole lotta work)
+    [x] ModuleExpression (inline module)
 
 
 
 Other Grammar changes:
-    [ ] Introduce Lists and List Elements
-    [ ] Tuple changes:
+    [x] Introduce Lists and List Elements
+    [x] module/import/export changes:
+        [x] ModuleImportExpression
+        [x] ModuleLiteralExpression
+        [x] export as binding modifier, not pattern? pros/cons?
+
+
+
+
+PEN Language features to consider in future:
+    Records:
+        [ ] shorthand fields
+            - similar to shorthand properties in JS
+            - need to also add optional commas between fields for disambiguation
+        [ ] string literal field names
+            - like `{'foo!': foo}` in JS
+            - slightly shorter than current equivalent: `{['foo!'] = foo}`
+    Tuples:
+        [ ] re-introduce tuples later
+        [ ] static concept only
+        [ ] re-introduce `_` WildcardPattern for matching tuple elements
         [ ] tuples don't require parens
         [ ] add separate ParenthesisedExpression
-        [ ] confirm use cases
-            [ ] passing args to functions
+        confirm use cases:
+            [ ] eg can pass an ordered list of arguments to a function
+            [ ] pattern matching - eg function can match passed-in tuple elements
             [ ] multivalue function returns???
             [ ] but what *are* fn return values in pen?
                 [ ] cf generic type instantiation
-    [ ] module/import/export changes:
-        [ ] `import` --> `module` keyword
-        [ ] ModuleImportExpression
-        [ ] ModuleLiteralExpression
-        [ ] export as binding modifier, not pattern? pros/cons?
-
-
-
-
-
-
+    Patterns:
+        [ ] generalise / add more
+            - `ModulePattern` is currently simplified - support fully general/recursive?
+            - re-introduce `TuplePattern` and `WildcardPattern`
+            - See eg https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/pattern-matching
 
 
 

@@ -1,15 +1,158 @@
+// ========== <TODO new> ==========
+
+
+blah = {
+    export a
+    blah2 = b222
+    blah3 = b333
+}
+
+a = aaa
+b = bbb
+c = ccc
+
+
+
+
+
+
+
+
+
+
+
+
+foobar = import './foobar'
+{foo bar} = import './foobar'
+
+
+
+// to export everything, write your module file like this...
+...imports...
+export a = ...
+export b = ...
+export c = ...
+export d = ...
+
+
+// to export nothing, write your module file like this...
+...imports...
+a = ...
+b = ...
+c = ...
+d = ...
+
+
+// to export some things, write your module file like this...
+...imports...
+export a = ...
+export b = ...
+c = ...
+d = ...
+
+
+// to re-export an import...
+import './foobar' as {foo}
+export foo // special syntax for copying `foo` from outer scope into this scope. Not shorthand! (ie foo=foo is different)
+// -OR alt imp/exp syntax:-
+export {foo} = import './foobar'
+export foobar = import './foobar'
+export import './foobar'
+
+// to write a nested/inline module, write your module file like this...
+...imports...
+a = {
+    export a1 = {
+        export a11 = ...
+        ...
+    }
+    export a2 = ...
+    a_local = ...
+}
+b = a.a1 a.a2
+{a1, a2} = a
+{stuff from a1} = a
+{{a11} from a1} = a
+{{x from a11} from a1} = a
+
+
+// syntax: Pattern "from" Module
+import a from './a'
+import {{a11} from a1, a2} from './a'
+{{a11} from a1} = a
+
+a = import './a'
+{a1, a2} = import './a'
+{a1 as thing, a2} = import './a'
+{a1 as {a11}, a2} = import './a'
+{a1 as {a11}} = a
+{b1 as bbb, b2} = {export b1=..., export b2=...}
+
+
+
+
+
+
+
+
+export object, array
+
+
+
+
+
+
+
+
+
+import './foobar' as foobar
+import './foobar' as {foo = foo, bar = baz}
+
+export *
+export string, array as a1, object
+// export none by default
+
+
+// Kinds of things: rule, function, namespace
+
+json = string | array | object | etc
+
+string = ...
+
+array = ...
+
+object = ...
+
+myFunc = {a, b} => a b
+
+callFunc = myFunc{a=1 b=2}
+
+// importing file...
+json = import './json' as json
+import './json' as {object, array as a1}
+
+rule1 = json ...
+rule2 = object ...
+
+
+// ========== </TODO new> ==========
+
+
+
+
+
 rec = {
-    a = {
-        a1 = 'a1'
-        a2 = 'a2'
-        a3 = ('a3i', 'a3ii')
+    a: {
+        a1: 'a1'
+        a2: 'a2'
+        a3: ('a3i', 'a3ii')
     }
 
-    b = (
+    b: (
         'b1',
         {
-            b2a = 'b2a'
-            b2b = 'b2b'
+            b2a: 'b2a'
+            b2b: 'b2b'
         },
         'b3'
     )

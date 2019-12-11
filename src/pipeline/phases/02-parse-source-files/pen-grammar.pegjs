@@ -16,55 +16,30 @@ Module  // NB: same as RecordExpression but without the opening/closing braces
 
 // ====================   Bindings   ====================
 BindingList
-    = head:Binding?   tail:(__   Binding)*
-    { return (head ? [head] : []).concat(tail.map(el => el[1])); }
+    = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = ExportBinding
-    / StaticBinding
-    / DynamicBinding
-
-ExportBinding
-    = EXPORT   __   "="   __   value:Expression
-    { return {kind: 'ExportBinding', value}; }
-
-StaticBinding
-    = pattern:Pattern   __   "="   __   value:Expression
-    { return {kind: 'StaticBinding', pattern, value}; }
-
-DynamicBinding
-    = "["   __   name:Expression   __   "]"   __   "="   __   value:Expression
-    { return {kind: 'DynamicBinding', name, value}; }
+    = ex:(EXPORT   __)?   pattern:Pattern   __   "="   __   value:Expression
+    { return Object.assign({kind: 'Binding', pattern, value}, ex ? {exported: true} : {}); }
 
 
 // ====================   Patterns   ====================
 Pattern
-    = WildcardPattern
-    / VariablePattern
-    / TuplePattern
-    / RecordPattern
-    // TODO: Add more patterns in future...
-    //       See eg https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/pattern-matching
-
-WildcardPattern
-    = UNDERSCORE
-    { return {kind: 'WildcardPattern'}; }
+    = VariablePattern
+    / ModulePattern
 
 VariablePattern
     = name:IDENTIFIER
     { return {kind: 'VariablePattern', name}; }
 
-TuplePattern
-    = "("   __   !","   head:Pattern?   tail:(__   ","   __   Pattern)*   (__   ",")?   __   ")"
-    { return {kind: 'TuplePattern', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
+ModulePattern
+    = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
+    { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
-RecordPattern
-    = "{"   __   !","   head:FieldPattern?   tail:((__   ",")?   __   FieldPattern)*   (__   ",")?   __   "}"
-    { return {kind: 'RecordPattern', fields: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
-
-FieldPattern // NB: only valid inside a RecordPattern, i.e. this is not valid as a standalone pattern
-    = fieldName:IDENTIFIER   alias:(__   AS   __   Pattern)?
-    { return {kind: 'FieldPattern', fieldName, pattern: alias ? alias[3] : undefined}; }
+ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePattern
+    = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
+    { return Object.assign({kind: 'ModulePatternName', name}, alias ? {alias: alias[3]} : {}); }
 
 
 // ====================   Expressions   ====================
@@ -111,13 +86,13 @@ Precedence4OrHigher
 
 PrimaryExpression
     = FunctionExpression
-    / TupleExpression
     / RecordExpression
+    / ModuleExpression
+    / ListExpression
     / CharacterExpression
     / StringExpression
     / LabelExpression
     / ReferenceExpression
-    / ThisExpression
     / ImportExpression
 
 SelectionExpression
@@ -152,13 +127,17 @@ FunctionExpression
     = pattern:Pattern   __   "=>"   __   body:Expression
     { return {kind: 'FunctionExpression', pattern, body}; }
 
-TupleExpression
-    = "("   __   !","   head:Expression?   tail:(__   ","   __   Expression)*   (__   ",")?   __   ")"
-    { return {kind: 'TupleExpression', elements: (head ? [head] : []).concat(tail.map(el => el[3]))}; }
-
 RecordExpression
     = "{"   __   fields:FieldList   __   "}"
-    { return {kind: 'RecordExpression', bindings}; }
+    { return {kind: 'RecordExpression', fields}; }
+
+ModuleExpression
+    = "{"   __   bindings:BindingList   __   "}"
+    { return {kind: 'ModuleExpression', bindings}; }
+
+ListExpression
+    = "["   __   elements:ElementList   __   "]"
+    { return {kind: 'ListExpression', elements}; }
 
 CharacterExpression
     = '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
@@ -176,37 +155,35 @@ ReferenceExpression
     = name:IDENTIFIER
     { return {kind: 'ReferenceExpression', name}; }
 
-ThisExpression
-    = THIS
-    { return {kind: 'ThisExpression'}; }
-
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let moduleSpecifier = specifierChars.map(el => el[1]).join('');
         let sourceFile = options.sourceFile.imports[moduleSpecifier];
-        return {kind: 'ImportExpression', moduleSpecifier, sourceFile};
+        return Object.assign({kind: 'ImportExpression', moduleSpecifier}, sourceFile ? {sourceFile} : {});
     }
 
 
-// ====================   Clauses   ====================
+// ====================   Fields and Elements   ====================
 FieldList
     = head:Field?   tail:(__   Field)*
     { return (head ? [head] : []).concat(tail.map(el => el[1])); }
 
 Field
-    // ShorthandField? maybe leave for future version. Will be amgiguous, need commas
     = StaticField
-    // LabelField? maybe do this in future too, since it can be achieved using DynamicField
     / DynamicField
 
 StaticField
-    = name:IDENTIFIER   __   "="   __   value:Expression
-    { return {kind: 'Field', name, value, dynamic: false}; }
+    = name:IDENTIFIER   __   ":"   __   value:Expression
+    { return {kind: 'Field', name, value}; }
 
 DynamicField
-    = "["   __   name:Expression   __   "]"   __   "="   __   value:Expression
+    = "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression
     { return {kind: 'Field', name, value, dynamic: true}; }
+
+ElementList
+    = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 
 // ====================   Literal characters and escape sequences   ====================
@@ -225,11 +202,10 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / EXPORT / IMPORT / THIS / UNDERSCORE
+RESERVED 'RESERVED'     = AS / EXPORT / IMPORT / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 EXPORT                  = "export"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
-THIS                    = "this"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
 
 
