@@ -1,3 +1,18 @@
+Next up:
+    [ ] Check if  Rep01 (source file graph) needs any changes for grammar update (don't think so)
+    [ ] Update Rep02 (base AST) for grammar changes
+        [ ] Module and Record separation
+        [ ] Tuples gone
+        [ ] ThisExpression gone
+        [ ] ListExpression added
+        [ ] Binding and Pattern changes
+        [ ] note some node kinds have several variants with props that are either `true` or missing (eg `alias`)
+        [ ] anything else?
+    [ ] finalise phase 3
+    [ ] implement phase 4 starting from stuff in `[TODO]`
+    [ ] remove `[TODO]` dir and contents
+
+
 Grammar Rules affected by splitting modules and records:
     [x] Module
     [x] Binding (no dynamic, maybe change export syntax)
