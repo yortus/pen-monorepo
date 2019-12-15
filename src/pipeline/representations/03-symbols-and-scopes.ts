@@ -43,16 +43,13 @@ type TopLevel =
     | Prev.SourceFile<{Binding: Binding}>;
 
 export type Binding =
-    | Prev.DynamicBinding<{Expression: Expression}>
-    | Prev.ExportBinding<{Expression: Expression}>
-    | Prev.StaticBinding<{Expression: Expression, Pattern: Pattern}>;
+    | Prev.InternalBinding<{Expression: Expression, Pattern: Pattern}>
+    | Prev.ExportedBinding<{Expression: Expression, Pattern: Pattern}>;
 
 
 export type Pattern =
-    | Prev.RecordPattern<{Pattern: Pattern}>
-    | Prev.TuplePattern<{Pattern: Pattern}>
-    | VariablePattern
-    | Prev.WildcardPattern;
+    | Prev.ModulePattern
+    | VariablePattern;
 
 
 export type Expression =
@@ -61,18 +58,20 @@ export type Expression =
     | Prev.FunctionExpression<{Expression: Expression, Pattern: Pattern}>
     | Prev.ImportExpression
     | Prev.LabelExpression
-    | RecordExpression<{Binding: Binding}>
+    | Prev.ListExpression<{Expression: Expression}>
+    | Prev.ModuleExpression<{Binding: Binding}>
+    | RecordExpression<{Expression: Expression}>
     | Prev.ReferenceExpression
     | Prev.SelectionExpression<{Expression: Expression}>
     | Prev.SequenceExpression<{Expression: Expression}>
     | Prev.StaticMemberExpression<{Expression: Expression}>
-    | Prev.StringExpression
-    | Prev.ThisExpression
-    | Prev.TupleExpression<{Expression: Expression}>;
+    | Prev.StringExpression;
 
 
 type Other =
-    | Prev.FieldPattern<{Pattern: Pattern}>;
+    | Prev.DynamicField<{Expression: Expression}>
+    | Prev.ModulePatternName
+    | Prev.StaticField<{Expression: Expression}>;
 
 
 // ====================   Modified Nodes   ====================
@@ -87,7 +86,7 @@ export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
 }
 
 
-export interface RecordExpression<V extends {Binding: any}> extends Prev.RecordExpression<V> {
+export interface RecordExpression<V extends {Expression: any}> extends Prev.RecordExpression<V> {
     readonly scope: Scope;
 }
 
@@ -101,23 +100,22 @@ export interface VariablePattern extends Prev.VariablePattern {
 export {
     ApplicationExpression,
     CharacterExpression,
-    DynamicBinding,
-    ExportBinding,
-    FieldPattern,
+    DynamicField,
+    ExportedBinding,
     FunctionExpression,
     ImportExpression,
+    InternalBinding,
     LabelExpression,
+    ListExpression,
+    ModuleExpression,
+    ModulePattern,
+    ModulePatternName,
     Program,
-    RecordPattern,
     ReferenceExpression,
     SelectionExpression,
     SequenceExpression,
     SourceFile,
-    StaticBinding,
+    StaticField,
     StaticMemberExpression,
     StringExpression,
-    ThisExpression,
-    TupleExpression,
-    TuplePattern,
-    WildcardPattern,
 } from './02-source-file-asts';

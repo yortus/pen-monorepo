@@ -18,16 +18,13 @@ type TopLevel =
 
 
 export type Binding =
-    | DynamicBinding<{Expression: Expression}>
-    | ExportBinding<{Expression: Expression}>
-    | StaticBinding<{Expression: Expression, Pattern: Pattern}>;
+    | InternalBinding<{Expression: Expression, Pattern: Pattern}>
+    | ExportedBinding<{Expression: Expression, Pattern: Pattern}>;
 
 
 export type Pattern =
-    | RecordPattern<{Pattern: Pattern}>
-    | TuplePattern<{Pattern: Pattern}>
-    | VariablePattern
-    | WildcardPattern;
+    | ModulePattern
+    | VariablePattern;
 
 
 export type Expression =
@@ -36,18 +33,20 @@ export type Expression =
     | FunctionExpression<{Expression: Expression, Pattern: Pattern}>
     | ImportExpression
     | LabelExpression
-    | RecordExpression<{Binding: Binding}>
+    | ListExpression<{Expression: Expression}>
+    | ModuleExpression<{Binding: Binding}>
+    | RecordExpression<{Expression: Expression}>
     | ReferenceExpression
     | SelectionExpression<{Expression: Expression}>
     | SequenceExpression<{Expression: Expression}>
     | StaticMemberExpression<{Expression: Expression}>
-    | StringExpression
-    | ThisExpression
-    | TupleExpression<{Expression: Expression}>;
+    | StringExpression;
 
 
 type Other =
-    | FieldPattern<{Pattern: Pattern}>;
+    | DynamicField<{Expression: Expression}>
+    | ModulePatternName
+    | StaticField<{Expression: Expression}>;
 
 
 // ====================   Top-level nodes   ====================
@@ -68,47 +67,31 @@ export interface Module<V extends {Binding: any}> {
 
 
 // ====================   Binding nodes   ====================
-export interface DynamicBinding<V extends {Expression: any}> {
-    readonly kind: 'DynamicBinding';
-    readonly name: V['Expression'];
-    readonly value: V['Expression'];
-}
-
-
-export interface ExportBinding<V extends {Expression: any}> {
-    readonly kind: 'ExportBinding';
-    readonly value: V['Expression'];
-}
-
-
-export interface StaticBinding<V extends {Expression: any, Pattern: any}> {
-    readonly kind: 'StaticBinding';
+export interface ExportedBinding<V extends {Expression: any, Pattern: any}> {
+    readonly kind: 'Binding';
     readonly pattern: V['Pattern'];
     readonly value: V['Expression'];
+    readonly exported: true;
+}
+
+export interface InternalBinding<V extends {Expression: any, Pattern: any}> {
+    readonly kind: 'Binding';
+    readonly pattern: V['Pattern'];
+    readonly value: V['Expression'];
+    readonly exported?: false;
 }
 
 
 // ====================   Pattern nodes   ====================
-export interface RecordPattern<V extends {Pattern: any}> {
-    readonly kind: 'RecordPattern';
-    readonly fields: ReadonlyArray<FieldPattern<V>>;
-}
-
-
-export interface TuplePattern<V extends {Pattern: any}> {
-    readonly kind: 'TuplePattern';
-    readonly elements: ReadonlyArray<V['Pattern']>;
+export interface ModulePattern {
+    readonly kind: 'ModulePattern';
+    readonly names: ReadonlyArray<ModulePatternName>;
 }
 
 
 export interface VariablePattern {
     readonly kind: 'VariablePattern';
     readonly name: string;
-}
-
-
-export interface WildcardPattern {
-    readonly kind: 'WildcardPattern';
 }
 
 
@@ -147,9 +130,21 @@ export interface LabelExpression {
 }
 
 
-export interface RecordExpression<V extends {Binding: any}> {
-    readonly kind: 'RecordExpression';
+export interface ListExpression<V extends {Expression: any}> {
+    readonly kind: 'ListExpression';
+    readonly elements: ReadonlyArray<V['Expression']>;
+}
+
+
+export interface ModuleExpression<V extends {Binding: any}> {
+    readonly kind: 'ModuleExpression';
     readonly bindings: ReadonlyArray<V['Binding']>;
+}
+
+
+export interface RecordExpression<V extends {Expression: any}> {
+    readonly kind: 'RecordExpression';
+    readonly fields: ReadonlyArray<StaticField<V> | DynamicField<V>>;
 }
 
 
@@ -184,20 +179,25 @@ export interface StringExpression {
 }
 
 
-export interface ThisExpression {
-    readonly kind: 'ThisExpression';
-}
-
-
-export interface TupleExpression<V extends {Expression: any}> {
-    readonly kind: 'TupleExpression';
-    readonly elements: ReadonlyArray<V['Expression']>;
-}
-
-
 // ====================   Other nodes   ====================
-export interface FieldPattern<V extends {Pattern: any}> {
-    readonly kind: 'FieldPattern';
-    readonly fieldName: string;
-    readonly pattern?: V['Pattern'];
+export interface ModulePatternName {
+    readonly kind: 'ModulePatternName';
+    readonly name: string;
+    readonly alias?: string;
+}
+
+
+export interface DynamicField<V extends {Expression: any}> {
+    readonly kind: 'Field';
+    readonly name: V['Expression'];
+    readonly value: V['Expression'];
+    readonly dynamic: true;
+}
+
+
+export interface StaticField<V extends {Expression: any}> {
+    readonly kind: 'Field';
+    readonly name: string;
+    readonly value: V['Expression'];
+    readonly dynamic?: false;
 }

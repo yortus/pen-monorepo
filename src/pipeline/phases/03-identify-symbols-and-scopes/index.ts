@@ -37,11 +37,22 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
             return modᐟ;
         },
 
+        ModuleExpression: mod => {
+            let outerScope = currentScope;
+            assert(currentScope !== undefined);
+            // TODO: makeRecordScope is misnamed now - change it (its a child scope)
+            currentScope = makeRecordScope(currentScope);
+            let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope: currentScope};
+            currentScope = outerScope;
+            return modᐟ;
+        },
+
+        // TODO: remove this one? Record Field names don't belong in a scope - different concept
         RecordExpression: record => {
             let outerScope = currentScope;
             assert(currentScope !== undefined);
             currentScope = makeRecordScope(currentScope);
-            let recordᐟ = {...record, bindings: record.bindings.map(rec), scope: currentScope};
+            let recordᐟ = {...record, fields: record.fields.map(rec), scope: currentScope};
             currentScope = outerScope;
             return recordᐟ;
         },
@@ -93,28 +104,36 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         //     return {...n, symbol};
         // },
 
+
+
+        // TODO: temp testing...
+        Binding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
+        Field: n => n.dynamic ? ({...n, name: rec(n.name), value: rec(n.value)}) : ({...n, value: rec(n.value)}),
+        ListExpression: n => ({...n, elements: n.elements.map(rec)}),
+        ModulePattern: n => ({...n, names: n.names.map(rec)}),
+        ModulePatternName: n => n,
+
+
+
+
         // TODO: the rest are just pass-throughs... can these have 'default' processing?
         ApplicationExpression: n => ({...n, function: rec(n.function), argument: rec(n.argument)}),
         CharacterExpression: n => n,
-        DynamicBinding: n => ({...n, name: rec(n.name), value: rec(n.value)}),
-        ExportBinding: n => ({...n, value: rec(n.value)}),
-        FieldPattern: n => ({...n, pattern: n.pattern ? rec(n.pattern) : undefined}),
+        //DynamicBinding: n => ({...n, name: rec(n.name), value: rec(n.value)}),
+        //ExportBinding: n => ({...n, value: rec(n.value)}),
+        //FieldPattern: n => ({...n, pattern: n.pattern ? rec(n.pattern) : undefined}),
         FunctionExpression: n => ({...n, pattern: rec(n.pattern), body: rec(n.body)}),
         ImportExpression: n => n,
         LabelExpression: n => n,
         Program: n => ({...n, sourceFiles: mapMap(n.sourceFiles, rec)}),
-        RecordPattern: n => ({...n, fields: n.fields.map(rec)}),
+        //RecordPattern: n => ({...n, fields: n.fields.map(rec)}),
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SequenceExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SourceFile: n => ({...n, module: rec(n.module)}),
-        StaticBinding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
+        //StaticBinding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
         StaticMemberExpression: n => ({...n, namespace: rec(n.namespace)}),
         StringExpression: n => n,
-        ThisExpression: n => n,
-        TupleExpression: n => ({...n, elements: n.elements.map(rec)}),
-        TuplePattern: n => ({...n, elements: n.elements.map(rec)}),
-        WildcardPattern: n => n,
     }));
 
     // TODO: do it

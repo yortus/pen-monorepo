@@ -56,13 +56,13 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
 
     PRECEDENCE 4 (HIGHEST):
         FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
-        TupleExpression             (a, b, c)   (a)   ()                                                                NB: parentheses are required for tuples to avoid ambiguity with shorthand bindings in records, eg {a, b}. TODO: revise this
-        RecordExpression            {a=b c=d e=f}   {a=b}   {c}   {}
+        RecordExpression            {a: b   c: d   [e]: f}   {a: b}   {}
+        ModuleExpression            {export a=b c=d e=f}   {a=b}
+        ListExpression              [a, b, c]   [a]   []
         CharacterExpression         "a-z"   "0-9"
         StringExpression            "foo"   "a string!"
         LabelExpression             'foo'   'bar'
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
-        ThisExpression              this
         ImportExpression            import './foo'   import 'somelib'
 */
 
@@ -100,7 +100,7 @@ SelectionExpression
     { return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))}; }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">"))+
+    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))+
     { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
 Precedence3Expression
@@ -166,8 +166,8 @@ ImportExpression
 
 // ====================   Fields and Elements   ====================
 FieldList
-    = head:Field?   tail:(__   Field)*
-    { return (head ? [head] : []).concat(tail.map(el => el[1])); }
+    = !","   head:Field?   tail:((__   ",")?   __   Field)*   (__   ",")?
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Field
     = StaticField
