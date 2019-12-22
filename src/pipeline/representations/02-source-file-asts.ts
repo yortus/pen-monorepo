@@ -13,8 +13,8 @@ export type Node =
 
 type TopLevel =
     | Module<{Binding: Binding}>
-    | Program<{Binding: Binding}>
-    | SourceFile<{Binding: Binding}>;
+    | Program<{Module: Module<{Binding: Binding}>}>
+    | SourceFile<{Module: Module<{Binding: Binding}>}>;
 
 
 export type Binding =
@@ -34,7 +34,7 @@ export type Expression =
     | ImportExpression
     | LabelExpression
     | ListExpression<{Expression: Expression}>
-    | ModuleExpression<{Binding: Binding}>
+    | ModuleExpression<{Module: Module<{Binding: Binding}>}>
     | RecordExpression<{Expression: Expression}>
     | ReferenceExpression
     | SelectionExpression<{Expression: Expression}>
@@ -50,13 +50,13 @@ type Other =
 
 
 // ====================   Top-level nodes   ====================
-export interface Program<V extends {Binding: any}> extends Prev.Program {
+export interface Program<V extends {Module: any}> extends Prev.Program {
     readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<V>>;
 }
 
 
-export interface SourceFile<V extends {Binding: any}> extends Prev.SourceFile {
-    module: Module<V>;
+export interface SourceFile<V extends {Module: any}> extends Prev.SourceFile {
+    module: V['Module'];
 }
 
 
@@ -136,9 +136,9 @@ export interface ListExpression<V extends {Expression: any}> {
 }
 
 
-export interface ModuleExpression<V extends {Binding: any}> {
+export interface ModuleExpression<V extends {Module: any}> {
     readonly kind: 'ModuleExpression';
-    readonly module: Module<V>;
+    readonly module: V['Module'];
 }
 
 

@@ -10,7 +10,10 @@ Next up:
         [x] note some node kinds have several variants with props that are either `true` or missing (eg `alias`)
         [x] anything else?
     [x] revise scope rules in light of module/record separation (record field names don't get added to a scope)
-    [ ] finalise phase 3
+    [x] finalise phase 3
+    [ ] resolve symbols for StaticMemberExpression
+        [ ] expand `Symbol` to allow for namespace symbols, which link to their own module scope
+        [ ] rename `namespace` prop to `moduleRef`?
     [ ] implement phase 4 starting from stuff in `[TODO]`
     [ ] remove `[TODO]` dir and contents
 

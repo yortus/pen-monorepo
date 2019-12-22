@@ -1,61 +1,50 @@
 import {assert, makeNodeMapper, mapMap} from '../../../ast-utils';
 import * as Prev from '../../representations/02-source-file-asts';
-import {Binding, Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
-import {createScope, insert} from './scope';
+import {Binding, Module, Node, Program} from '../../representations/03-symbol-definitions';
+import {createScope, insert, Scope} from '../../scopes-and-symbols';
 
 
 // TODO: doc...
-export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Binding}>): Program<{Binding: Binding}> {
-    let currentScope: Scope = createScope('GlobalScope');
+export function createSymbolDefinitions(program: Prev.Program<{Module: Prev.Module<{Binding: Prev.Binding}>}>): Program<{Module: Module<{Binding: Binding}>}> {
+    const globalScope = createScope('GlobalScope');
+    let currentScope: Scope = globalScope;
     let mapNode = makeNodeMapper<Prev.Node, Node>(rec => ({
 
-        // TODO: every kind of Binding/Pattern
-        // - add a symbol for each introduced static name
+        // Attach a scope to each Program, Module and FunctionExpression node.
+        Program: prg => {
+            assert(currentScope === globalScope);
+            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), scope: globalScope};
+            return prgᐟ;
+        },
 
-        //                     interface ShorthandBinding {
-        //                         readonly kind: 'ShorthandBinding';
-        //                         readonly name: string;
-        //                     }
-
-        //                     interface VariablePattern {
-        //                         readonly kind: 'VariablePattern';
-        //                         readonly name: string;
-        //                     }
-
-        //                     interface FieldPattern<V extends {Pattern: any}> {
-        //                         readonly kind: 'FieldPattern';
-        //                         readonly fieldName: string;
-        //                         readonly pattern?: V['Pattern'];
-        //                     }
-
-        // Create a scope for each Module and FunctionExpression.
         Module: mod => {
+            assert(currentScope !== undefined);
             let outerScope = currentScope;
-            currentScope = createScope('ModuleScope', currentScope);
-            let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope: currentScope};
+            let scope = currentScope = createScope('ModuleScope', currentScope);
+            let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope};
             currentScope = outerScope;
             return modᐟ;
         },
 
         FunctionExpression: fexpr => {
+            assert(currentScope !== undefined);
             let outerScope = currentScope;
-            currentScope = createScope('FunctionScope', currentScope);
-            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
+            let scope = currentScope = createScope('FunctionScope', currentScope);
+            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), scope};
             currentScope = outerScope;
             return fexprᐟ;
         },
 
-        // Create a symbol for each VariablePattern and ModulePatternName.
-        // TODO: don't store the symbol ref directly here, but just the symbol id
-        // - what is a symbol id?
-        // - what does it index into? Where is the symbol table? Or are there several?
+        // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
+            assert(currentScope !== undefined);
             let symbol = insert(currentScope, pat.name);
             let patternᐟ = {...pat, symbol};
             return patternᐟ;
         },
 
         ModulePatternName: name => {
+            assert(currentScope !== undefined);
             let symbol = insert(currentScope, name.alias || name.name);
             let nameᐟ = {...name, symbol};
             return nameᐟ;
@@ -71,7 +60,6 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         ListExpression: n => ({...n, elements: n.elements.map(rec)}),
         ModuleExpression: n => ({...n, module: rec(n.module)}),
         ModulePattern: n => ({...n, names: n.names.map(rec)}),
-        Program: n => ({...n, sourceFiles: mapMap(n.sourceFiles, rec)}),
         RecordExpression: n => ({...n, fields: n.fields.map(rec)}),
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),
@@ -85,7 +73,7 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
     let result = mapNode(program);
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope.kind === 'GlobalScope');
+    assert(currentScope === globalScope);
 
     // All done.
     return result;

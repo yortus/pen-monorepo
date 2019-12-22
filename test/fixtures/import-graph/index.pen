@@ -5,3 +5,6 @@ rec = {
     b = 'b thing'
     d = 'd thing'
 }
+
+r2 = rec
+r2d = rec.d
