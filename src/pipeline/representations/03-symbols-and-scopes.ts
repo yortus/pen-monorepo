@@ -2,17 +2,24 @@ import * as Prev from './02-source-file-asts';
 
 
 // ====================   Scopes and Symbols   ====================
-export type Scope = ModuleScope | RecordScope;
+export type Scope = GlobalScope | ModuleScope | FunctionScope;
 
 
-export interface ModuleScope {
-    kind: 'ModuleScope';
+export interface GlobalScope {
+    kind: 'GlobalScope';
     symbols: Map<string, Symbol>; // maps name to symbol info
 }
 
 
-export interface RecordScope {
-    kind: 'RecordScope';
+export interface ModuleScope {
+    kind: 'ModuleScope';
+    parent: Scope;
+    symbols: Map<string, Symbol>; // maps name to symbol info
+}
+
+
+export interface FunctionScope {
+    kind: 'FunctionScope';
     parent: Scope;
     symbols: Map<string, Symbol>; // maps name to symbol info
 }
@@ -60,7 +67,7 @@ export type Expression =
     | Prev.LabelExpression
     | Prev.ListExpression<{Expression: Expression}>
     | Prev.ModuleExpression<{Binding: Binding}>
-    | RecordExpression<{Expression: Expression}>
+    | Prev.RecordExpression<{Expression: Expression}>
     | Prev.ReferenceExpression
     | Prev.SelectionExpression<{Expression: Expression}>
     | Prev.SequenceExpression<{Expression: Expression}>
@@ -86,13 +93,8 @@ export interface Module<V extends {Binding: any}> extends Prev.Module<V> {
 }
 
 
-export interface RecordExpression<V extends {Expression: any}> extends Prev.RecordExpression<V> {
-    readonly scope: Scope;
-}
-
-
 export interface VariablePattern extends Prev.VariablePattern {
-    symbol: Symbol;
+    readonly symbol: Symbol;
 }
 
 
@@ -111,6 +113,7 @@ export {
     ModulePattern,
     ModulePatternName,
     Program,
+    RecordExpression,
     ReferenceExpression,
     SelectionExpression,
     SequenceExpression,

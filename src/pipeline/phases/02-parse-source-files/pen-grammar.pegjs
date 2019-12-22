@@ -9,7 +9,7 @@ File
     = __   module:Module   __   END_OF_FILE
     { return module; }
 
-Module  // NB: same as RecordExpression but without the opening/closing braces
+Module
     = bindings:BindingList
     { return {kind: 'Module', bindings}; }
 
@@ -132,8 +132,8 @@ RecordExpression
     { return {kind: 'RecordExpression', fields}; }
 
 ModuleExpression
-    = "{"   __   bindings:BindingList   __   "}"
-    { return {kind: 'ModuleExpression', bindings}; }
+    = "{"   __   module:Module   __   "}"
+    { return {kind: 'ModuleExpression', module}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"

@@ -138,7 +138,7 @@ export interface ListExpression<V extends {Expression: any}> {
 
 export interface ModuleExpression<V extends {Binding: any}> {
     readonly kind: 'ModuleExpression';
-    readonly bindings: ReadonlyArray<V['Binding']>;
+    readonly module: Module<V>;
 }
 
 

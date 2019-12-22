@@ -1,12 +1,12 @@
-import {makeNodeMapper, mapMap} from '../../../ast-utils';
+import {assert, makeNodeMapper, mapMap} from '../../../ast-utils';
 import * as Prev from '../../representations/02-source-file-asts';
 import {Binding, Node, Program, Scope} from '../../representations/03-symbols-and-scopes';
-import {insert, makeModuleScope, makeRecordScope} from './scope';
+import {createScope, insert} from './scope';
 
 
 // TODO: doc...
 export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Binding}>): Program<{Binding: Binding}> {
-    let currentScope: Scope | undefined;
+    let currentScope: Scope = createScope('GlobalScope');
     let mapNode = makeNodeMapper<Prev.Node, Node>(rec => ({
 
         // TODO: every kind of Binding/Pattern
@@ -28,110 +28,55 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
         //                         readonly pattern?: V['Pattern'];
         //                     }
 
-        // Create a new scope for each module and record
+        // Create a scope for each Module and FunctionExpression.
         Module: mod => {
-            assert(currentScope === undefined);
-            currentScope = makeModuleScope();
-            let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope: currentScope};
-            currentScope = undefined;
-            return modᐟ;
-        },
-
-        ModuleExpression: mod => {
             let outerScope = currentScope;
-            assert(currentScope !== undefined);
-            // TODO: makeRecordScope is misnamed now - change it (its a child scope)
-            currentScope = makeRecordScope(currentScope);
+            currentScope = createScope('ModuleScope', currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope: currentScope};
             currentScope = outerScope;
             return modᐟ;
         },
 
-        // TODO: remove this one? Record Field names don't belong in a scope - different concept
-        RecordExpression: record => {
+        FunctionExpression: fexpr => {
             let outerScope = currentScope;
-            assert(currentScope !== undefined);
-            currentScope = makeRecordScope(currentScope);
-            let recordᐟ = {...record, fields: record.fields.map(rec), scope: currentScope};
+            currentScope = createScope('FunctionScope', currentScope);
+            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
             currentScope = outerScope;
-            return recordᐟ;
+            return fexprᐟ;
         },
 
-        // TODO: temp testing... this is the only node kind that introduces a new name into the current scope
+        // Create a symbol for each VariablePattern and ModulePatternName.
         // TODO: don't store the symbol ref directly here, but just the symbol id
-        // - what is a symbol id
+        // - what is a symbol id?
         // - what does it index into? Where is the symbol table? Or are there several?
-        VariablePattern: pattern => {
-            assert(currentScope !== undefined);
-            let symbol = insert(currentScope, pattern.name);
-            let patternᐟ = {...pattern, symbol};
+        VariablePattern: pat => {
+            let symbol = insert(currentScope, pat.name);
+            let patternᐟ = {...pat, symbol};
             return patternᐟ;
         },
 
-
-        // Lookup a child
-        // Introduce a symbol for each shorthand binding, variable pattern, and field pattern
-
-        // Definition: def => {
-        //     let symbol = insert(currentScope, def.name);
-        //     symbol.isExported = def.isExported;
-        //     let defᐟ = {...def, expression: rec(def.expression), symbol};
-        //     if (defᐟ.expression.kind === 'Block') {
-        //         symbol.members = [...defᐟ.expression.scope.symbols.values()].filter(s => s.isExported);
-        //     }
-        //     return defᐟ;
-        // },
-
-        // ImportNames: n => {
-        //     assert(currentScope === moduleScope); // sanity check
-        //     let symbols = n.names.map(name => Object.assign(insert(currentScope, name), {isImported: true}));
-        //     return {...n, symbols};
-        // },
-
-        // ImportNamespace: n => {
-        //     assert(currentScope === moduleScope); // sanity check
-        //     let symbol = insert(currentScope, n.namespace); // TODO: what about alias?
-        //     symbol.isImported = true;
-
-        //     // TODO: temp testing... hardcode some 'pen' exports for testing...
-        //     if (n.moduleSpecifier === 'pen') {
-        //         symbol.members = [
-        //             {name: 'i32', isExported: true},
-        //             {name: 'Memoize', isExported: true},
-        //         ];
-        //     }
-
-        //     return {...n, symbol};
-        // },
-
-
-
-        // TODO: temp testing...
-        Binding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
-        Field: n => n.dynamic ? ({...n, name: rec(n.name), value: rec(n.value)}) : ({...n, value: rec(n.value)}),
-        ListExpression: n => ({...n, elements: n.elements.map(rec)}),
-        ModulePattern: n => ({...n, names: n.names.map(rec)}),
-        ModulePatternName: n => n,
-
-
-
+        ModulePatternName: name => {
+            let symbol = insert(currentScope, name.alias || name.name);
+            let nameᐟ = {...name, symbol};
+            return nameᐟ;
+        },
 
         // TODO: the rest are just pass-throughs... can these have 'default' processing?
         ApplicationExpression: n => ({...n, function: rec(n.function), argument: rec(n.argument)}),
+        Binding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
         CharacterExpression: n => n,
-        //DynamicBinding: n => ({...n, name: rec(n.name), value: rec(n.value)}),
-        //ExportBinding: n => ({...n, value: rec(n.value)}),
-        //FieldPattern: n => ({...n, pattern: n.pattern ? rec(n.pattern) : undefined}),
-        FunctionExpression: n => ({...n, pattern: rec(n.pattern), body: rec(n.body)}),
+        Field: n => n.dynamic ? ({...n, name: rec(n.name), value: rec(n.value)}) : ({...n, value: rec(n.value)}),
         ImportExpression: n => n,
         LabelExpression: n => n,
+        ListExpression: n => ({...n, elements: n.elements.map(rec)}),
+        ModuleExpression: n => ({...n, module: rec(n.module)}),
+        ModulePattern: n => ({...n, names: n.names.map(rec)}),
         Program: n => ({...n, sourceFiles: mapMap(n.sourceFiles, rec)}),
-        //RecordPattern: n => ({...n, fields: n.fields.map(rec)}),
+        RecordExpression: n => ({...n, fields: n.fields.map(rec)}),
         ReferenceExpression: n => n,
         SelectionExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SequenceExpression: n => ({...n, expressions: n.expressions.map(rec)}),
         SourceFile: n => ({...n, module: rec(n.module)}),
-        //StaticBinding: n => ({...n, pattern: rec(n.pattern), value: rec(n.value)}),
         StaticMemberExpression: n => ({...n, namespace: rec(n.namespace)}),
         StringExpression: n => n,
     }));
@@ -140,14 +85,8 @@ export function identifySymbolsAndScopes(program: Prev.Program<{Binding: Prev.Bi
     let result = mapNode(program);
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === undefined);
+    assert(currentScope.kind === 'GlobalScope');
 
     // All done.
     return result;
-}
-
-
-// Helper function
-function assert<T>(x: T): asserts x {
-    if (!x) throw new Error(`Assertion failed`);
 }
