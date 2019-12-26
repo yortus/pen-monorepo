@@ -1,4 +1,4 @@
-import {AbsPath} from '../../ast-utils';
+import {AbsPath} from '../../utils';
 import * as Prev from './01-source-file-graph';
 
 

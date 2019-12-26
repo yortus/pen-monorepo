@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {AbsPath} from '../../../ast-utils';
+import {AbsPath} from '../../../utils';
 import {CompilerOptions} from '../../representations/00-validated-compiler-options';
 import {Program, SourceFile} from '../../representations/01-source-file-graph';
 import {resolveModuleSpecifier} from './resolve-module-specifier';

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {AbsPath} from '../../../ast-utils';
+import {AbsPath} from '../../../utils';
 
 
 // TODO: doc... returns an absolute normalised file path

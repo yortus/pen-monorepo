@@ -1,4 +1,4 @@
-import {AbsPath} from '../../ast-utils';
+import {AbsPath} from '../../utils';
 import {CompilerOptions} from './00-validated-compiler-options';
 
 

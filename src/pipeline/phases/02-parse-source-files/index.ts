@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {mapMap} from '../../../ast-utils';
+import {mapMap} from '../../../utils';
 import * as Prev from '../../representations/01-source-file-graph';
 import {Binding, Module, Program, SourceFile} from '../../representations/02-source-file-asts';
 

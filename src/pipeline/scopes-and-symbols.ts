@@ -1,4 +1,4 @@
-import {assert} from '../ast-utils';
+import {assert} from '../utils';
 
 
 // ====================   Scopes   ====================
