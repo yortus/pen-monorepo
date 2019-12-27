@@ -1,4 +1,5 @@
-import {Scope, Symbol} from '../scopes-and-symbols';
+import {Scope} from '../scope';
+import {Symbol} from '../symbol';
 import * as Prev from './02-source-file-asts';
 
 

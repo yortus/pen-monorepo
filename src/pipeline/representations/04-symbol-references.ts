@@ -1,4 +1,4 @@
-import {Symbol} from '../scopes-and-symbols';
+import {Symbol} from '../symbol';
 import * as Prev from './03-symbol-definitions';
 
 

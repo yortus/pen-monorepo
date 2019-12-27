@@ -1,7 +1,8 @@
 import {assert, makeNodeMapper, mapMap} from '../../../utils';
 import * as Prev from '../../representations/03-symbol-definitions';
 import {Binding, Module, Node, Program} from '../../representations/04-symbol-references';
-import {lookup, Scope} from '../../scopes-and-symbols';
+import {Scope} from '../../scope';
+import {lookup} from '../../symbol';
 
 
 // TODO: doc...
