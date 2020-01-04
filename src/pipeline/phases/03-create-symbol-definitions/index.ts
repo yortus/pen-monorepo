@@ -2,7 +2,7 @@ import {assert, makeNodeMapper, mapMap} from '../../../utils';
 import * as Prev from '../../representations/02-source-file-asts';
 import {Binding, Module, Node, Program} from '../../representations/03-symbol-definitions';
 import {createScope, Scope} from '../../scope';
-import {insert} from '../../symbol';
+import {createSymbol} from '../../symbol';
 
 
 // TODO: doc...
@@ -39,14 +39,14 @@ export function createSymbolDefinitions(program: Prev.Program<{Module: Prev.Modu
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
             assert(currentScope !== undefined);
-            let symbol = insert(currentScope, pat.name);
+            let symbol = createSymbol('OtherSymbol', pat.name, currentScope);
             let patternᐟ = {...pat, symbol};
             return patternᐟ;
         },
 
         ModulePatternName: name => {
             assert(currentScope !== undefined);
-            let symbol = insert(currentScope, name.alias || name.name);
+            let symbol = createSymbol('OtherSymbol', name.alias || name.name, currentScope);
             let nameᐟ = {...name, symbol};
             return nameᐟ;
         },

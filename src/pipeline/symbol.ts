@@ -1,20 +1,29 @@
 import {Scope} from './scope'; // NB: this type-only import is elided at runtime
 
 
-export interface Symbol {
-    name: string;
+export type Symbol =
+    | ModuleSymbol
+    | OtherSymbol;
 
-    // TODO: review these members...
-    // isImported?: boolean;
-    // isExported?: boolean;
-    // members?: SymbolInfo[];
+
+export interface ModuleSymbol {
+    kind: 'ModuleSymbol';
+    name: string;
 }
 
 
-export function insert(scope: Scope, name: string): Symbol {
+export interface OtherSymbol {
+    kind: 'OtherSymbol';
+    name: string;
+}
+
+
+export function createSymbol(kind: 'ModuleSymbol', name: string, scope: Scope): ModuleSymbol;
+export function createSymbol(kind: 'OtherSymbol', name: string, scope: Scope): OtherSymbol;
+export function createSymbol(kind: Symbol['kind'], name: string, scope: Scope): Symbol {
     // ensure not already defined in this scope
     if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
-    let sym: Symbol = {name};
+    let sym: Symbol = {kind, name};
     scope.symbols.set(name, sym);
     return sym;
 }
