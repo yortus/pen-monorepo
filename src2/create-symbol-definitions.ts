@@ -1,68 +1,52 @@
-// TODO: not great inference... fix:
-// - can mis-spell node kinds in property names with no red squggles
-// - can return wrong type with no red squiggles (eg prgᐟ.meta does not match {scope: Scope})
-
-
-
+import {makeNodeMapper} from './make-node-mapper';
 import {SymbolDefinitions} from './node-metadata';
-import {createScope, Scope} from './node-metadata/scope';
+import {Scope, ScopeStack} from './node-metadata/scope';
 import {createSymbol} from './node-metadata/symbol';
 import {Node, Program} from './node-types';
-import {assert, makeNodeMapper, mapMap} from './utils';
+import {assert, mapMap} from './utils';
 
 
 // TODO: doc...
 export function createSymbolDefinitions(program: Program<{}>): Program<SymbolDefinitions> {
-    const globalScope = createScope('GlobalScope');
-    let currentScope: Scope = globalScope;
-    let mapNode = makeNodeMapper<Node<{}>, Node<SymbolDefinitions>>(rec => ({
+    const scopes = new ScopeStack();
+    const globalScope = scopes.current;
+    let mapNode = makeNodeMapper<Node, Node<SymbolDefinitions>>();
+    let result = mapNode(program, rec => ({
 
         // Attach a scope to each Program, Module and FunctionExpression node.
         Program: prg => {
-            assert(currentScope === globalScope);
-            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), scope: globalScope};
+            assert(scopes.current === globalScope);
+            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {scope: globalScope}};
             return prgᐟ;
         },
-
         Module: mod => {
-            assert(currentScope !== undefined);
-            let outerScope = currentScope;
-            let scope = currentScope = createScope('ModuleScope', currentScope);
-            let modᐟ = {...mod, bindings: mod.bindings.map(rec), scope};
-            currentScope = outerScope;
+            let scope = scopes.push('ModuleScope');
+            let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
+            scopes.pop();
             return modᐟ;
         },
-
         FunctionExpression: fexpr => {
-            assert(currentScope !== undefined);
-            let outerScope = currentScope;
-            let scope = currentScope = createScope('FunctionScope', currentScope);
-            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), scope};
-            currentScope = outerScope;
+            let scope = scopes.push('FunctionScope');
+            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), meta: {scope}};
+            scopes.pop();
             return fexprᐟ;
         },
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
-            assert(currentScope !== undefined);
-            let symbol = createSymbol('OtherSymbol', pat.name, currentScope);
-            let patternᐟ = {...pat, symbol};
+            let symbol = createSymbol('OtherSymbol', pat.name, scopes.current);
+            let patternᐟ = {...pat, meta: {symbol}};
             return patternᐟ;
         },
-
         ModulePatternName: name => {
-            assert(currentScope !== undefined);
-            let symbol = createSymbol('OtherSymbol', name.alias || name.name, currentScope);
-            let nameᐟ = {...name, symbol};
+            let symbol = createSymbol('OtherSymbol', name.alias || name.name, scopes.current);
+            let nameᐟ = {...name, meta: {symbol}};
             return nameᐟ;
         },
     }));
 
-    // TODO: do it
-    let result = mapNode(program);
-
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === globalScope);
+    assert(scopes.current === globalScope);
 
     // All done.
     return result;

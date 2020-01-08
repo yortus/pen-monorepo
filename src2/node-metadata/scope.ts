@@ -28,15 +28,24 @@ export interface FunctionScope {
 }
 
 
-export function createScope(kind: 'GlobalScope'): GlobalScope;
-export function createScope(kind: 'ModuleScope', parent: Scope): ModuleScope;
-export function createScope(kind: 'FunctionScope', parent: Scope): FunctionScope;
-export function createScope(kind: Scope['kind'], parent?: Scope): Scope {
-    let symbols = new Map<string, Symbol>();
-    if (kind === 'GlobalScope') {
-        assert(parent === undefined);
-        return {kind, symbols};
+export class ScopeStack {
+    push(kind: 'ModuleScope'): ModuleScope;
+    push(kind: 'FunctionScope'): FunctionScope;
+    push(kind: 'ModuleScope' | 'FunctionScope') {
+        let newScope = {kind, parent: this.current, symbols: new Map()};
+        this.stack.push(newScope);
+        return newScope;
     }
-    assert(parent !== undefined);
-    return {kind, parent, symbols};
+
+    pop() {
+        assert(this.stack.length > 0);
+        this.stack.pop();
+    }
+
+    get current() {
+        assert(this.stack.length > 0);
+        return this.stack[this.stack.length - 1];
+    }
+
+    private stack: Scope[] = [{kind: 'GlobalScope', symbols: new Map()}];
 }

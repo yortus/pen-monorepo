@@ -3,7 +3,7 @@ import {AbsPath} from './utils';
 
 
 // // ====================   Node types by category   ====================
-export type Node<M> =
+export type Node<M = {}> =
     // Top-level nodes
     | Module<M>
     | Program<M>
@@ -239,4 +239,4 @@ export interface StaticField<M> {
 
 
 // Helper type
-type NodeMetadata<M, K extends Node<{}>['kind']> = M extends {[P in K]: infer V} ? V : never;
+type NodeMetadata<M, K extends Node['kind']> = M extends {[P in K]: infer V} ? V : {};
