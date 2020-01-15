@@ -1,3 +1,8 @@
+// TODO: move to utils...
+
+
+
+
 // TODO: doc...
 export function makeNodeVisitor<N extends {kind: string}>(getVisitors: GetVisitors<N>) {
     const rec = (...childNodes: N[]): void => childNodes.forEach(n => visitors[n.kind](n));

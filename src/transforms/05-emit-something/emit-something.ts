@@ -1,18 +1,21 @@
-import {makeNodeVisitor} from '../../ast-utils';
-import * as V03 from '../stage-03/output-types';
+import {Expression, Node, Program} from '../../ast-nodes';
+import {SymbolDefinitions} from '../03-create-symbol-definitions';
+import {SymbolReferences} from '../04-resolve-symbol-references';
 import {Emitter, makeEmitter} from './emitter';
+import {makeNodeVisitor} from './make-node-visitor';
 
 
-export function process(ast: V03.Ast): string {
+// TODO: name?
+export function emitSomething(program: Program<SymbolDefinitions & SymbolReferences>): string {
     let emit = makeEmitter();
-    emitNode(ast, emit);
+    emitNode(program, emit);
     let result = emit.toString();
     return result;
 }
 
 
-function emitNode(node: V03.Node, emit: Emitter) {
-    const visit = makeNodeVisitor<V03.Node>(rec => ({
+function emitNode(node: Node<SymbolDefinitions & SymbolReferences>, emit: Emitter) {
+    const visit = makeNodeVisitor<Node<SymbolDefinitions & SymbolReferences>>(rec => ({
 
         Application: app => {
             emitCall(app.function, app.arguments, emit);
@@ -135,7 +138,7 @@ function emitNode(node: V03.Node, emit: Emitter) {
 
 
 
-function emitCall(fn: string | V03.Expression, args: ReadonlyArray<V03.Expression>, emit: Emitter) {
+function emitCall(fn: string | Expression, args: ReadonlyArray<Expression>, emit: Emitter) {
     if (typeof fn === 'string') {
         emit.text(fn);
     }
