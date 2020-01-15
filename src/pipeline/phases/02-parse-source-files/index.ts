@@ -1,25 +1,33 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
+import {Module, Program, SourceFile} from '../../../node-types';
 import {mapMap} from '../../../utils';
-import * as Prev from '../../representations/01-source-file-graph';
-import {Binding, Module, Program, SourceFile} from '../../representations/02-source-file-asts';
+import {SourceFileGraph, SourceFileInfo} from '../01-gather-source-files';
 
 
-export function parseSourceFiles(program: Prev.Program): Program<{Module: Module<{Binding: Binding}>}> {
-    let sourceFiles = mapMap(program.sourceFiles, (sourceFile): SourceFile<{Module: Module<{Binding: Binding}>}> => {
+export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<{}> {
+    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): SourceFile<{}> => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         let module = parse(sourceText, {sourceFile});
-        return {...sourceFile, module};
+        return {
+            kind: 'SourceFile',
+            path: sourceFile.path,
+            imports: sourceFile.imports,
+            module,
+            meta: {},
+        };
     });
     return {
-        ...program,
+        kind: 'Program',
         sourceFiles,
+        mainPath: sourceFileGraph.mainPath,
+        meta: {},
     };
 }
 
 
 // TODO: doc parsing helpers
 const grammar = fs.readFileSync(path.join(__dirname, 'pen-grammar.pegjs'), 'utf8');
-let parse: (moduleSource: string, options: {sourceFile: Prev.SourceFile}) => Module<{Binding: Binding}>;
+let parse: (moduleSource: string, options: {sourceFile: SourceFileInfo}) => Module<{}>;
 parse = pegjs.generate(grammar).parse;

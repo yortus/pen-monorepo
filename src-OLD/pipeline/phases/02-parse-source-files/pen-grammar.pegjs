@@ -1,6 +1,6 @@
 {
-    options.sourceFile = options.sourceFile || {};
-    options.sourceFile.imports = options.sourceFile.imports || {};
+    let sourceFile = options.sourceFile = options.sourceFile || {};
+    let imports = sourceFile.imports = sourceFile.imports || {};
 }
 
 
@@ -159,8 +159,8 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = options.sourceFile.imports[moduleSpecifier];
-        return {kind: 'ImportExpression', moduleSpecifier, sourceFilePath};
+        let sourceFile = options.sourceFile.imports[moduleSpecifier];
+        return Object.assign({kind: 'ImportExpression', moduleSpecifier}, sourceFile ? {sourceFile} : {});
     }
 
 
@@ -175,11 +175,11 @@ Field
 
 StaticField
     = name:IDENTIFIER   __   ":"   __   value:Expression
-    { return {kind: 'StaticField', name, value}; }
+    { return {kind: 'Field', name, value}; }
 
 DynamicField
     = "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression
-    { return {kind: 'DynamicField', name, value}; }
+    { return {kind: 'Field', name, value, dynamic: true}; }
 
 ElementList
     = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?

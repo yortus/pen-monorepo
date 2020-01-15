@@ -1,4 +1,3 @@
-import {CompilerOptions} from './compiler-options';
 import {AbsPath} from './utils';
 
 
@@ -49,7 +48,6 @@ export type Expression<M> =
 // ====================   Top-level nodes   ====================
 export interface Program<M> {
     readonly kind: 'Program';
-    readonly compilerOptions: CompilerOptions;
     readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<M>>;
     readonly mainPath: AbsPath;
     readonly meta: NodeMetadata<M, this['kind']>;
@@ -212,6 +210,14 @@ export interface StringExpression<M> {
 
 
 // // ====================   Other nodes   ====================
+export interface DynamicField<M> {
+    readonly kind: 'DynamicField';
+    readonly name: Expression<M>;
+    readonly value: Expression<M>;
+    readonly meta: NodeMetadata<M, this['kind']>;
+}
+
+
 export interface ModulePatternName<M> {
     readonly kind: 'ModulePatternName';
     readonly name: string;
@@ -220,20 +226,10 @@ export interface ModulePatternName<M> {
 }
 
 
-export interface DynamicField<M> {
-    readonly kind: 'Field';
-    readonly name: Expression<M>;
-    readonly value: Expression<M>;
-    readonly dynamic: true;
-    readonly meta: NodeMetadata<M, this['kind']>;
-}
-
-
 export interface StaticField<M> {
-    readonly kind: 'Field';
+    readonly kind: 'StaticField';
     readonly name: string;
     readonly value: Expression<M>;
-    readonly dynamic?: false;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 

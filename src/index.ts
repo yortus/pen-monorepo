@@ -1,5 +1,5 @@
-// export {compileToJs, PenSourceCode, JsTargetCode} from './compile-to-js';
+import {CompilerOptions} from './compiler-options';
+import {pipeline} from './pipeline';
 
 
-// TODO: temp testing...
-export {CompilerOptions, pipeline} from './pipeline';
+export {CompilerOptions, pipeline};

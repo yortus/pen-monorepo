@@ -1,43 +1,23 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {CompilerOptions} from '../../../compiler-options';
 import {AbsPath} from '../../../utils';
+import {CompilerOptions} from '../../representations/00-validated-compiler-options';
+import {Program, SourceFile} from '../../representations/01-source-file-graph';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
 
 
-// TODO: ...
-export interface SourceFileGraph {
-    sourceFiles: Map<AbsPath, SourceFileInfo>;
-    mainPath: AbsPath;
-}
-
-
-// TODO: ...
-export interface SourceFileInfo {
-
-    /** The source file's normalised absolute path. */
-    readonly path: AbsPath;
-
-    /**
-     * A map with one entry for each import expression in this source file. The keys are the imported module
-     * specifiers, exactly as they appear in the source text. The values are the normalised absolute paths of
-     * the corresponding imported SourceFiles.
-     */
-    readonly imports: {[moduleSpecifier: string]: AbsPath};
-}
-
-
 // TODO: doc...
-export function createSourceFileGraph(compilerOptions: CompilerOptions): SourceFileGraph {
-    let sourceFiles = new Map<AbsPath, SourceFileInfo>();
+export function gatherSourceFiles(compilerOptions: CompilerOptions): Program {
+
+    let sourceFiles = new Map<AbsPath, SourceFile>();
 
     function getSourceFile(absPath: AbsPath) {
         let sourceFile = sourceFiles.get(absPath);
-        if (!sourceFile) {
-            sourceFile = {path: absPath, imports: {}};
-            sourceFiles.set(absPath, sourceFile);
-        }
+        if (sourceFile) return sourceFile;
+
+        sourceFile = {kind: 'SourceFile', path: absPath, imports: {}};
+        sourceFiles.set(absPath, sourceFile);
         return sourceFile;
     }
 
@@ -60,7 +40,12 @@ export function createSourceFileGraph(compilerOptions: CompilerOptions): SourceF
         }
     }
 
-    return {sourceFiles, mainPath};
+    return {
+        kind: 'Program',
+        compilerOptions,
+        sourceFiles,
+        mainPath,
+    };
 }
 
 
