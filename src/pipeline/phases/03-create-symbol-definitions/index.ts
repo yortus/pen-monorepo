@@ -7,9 +7,9 @@ import {assert, mapMap} from '../../../utils';
 
 
 // TODO: doc...
-export function createSymbolDefinitions(program: Program<{}>): Program<SymbolDefinitions> {
+export function createSymbolDefinitions(program: Program): Program<SymbolDefinitions> {
     const scopes = new ScopeStack();
-    const globalScope = scopes.current;
+    const globalScope = scopes.push('GlobalScope');
     let mapNode = makeNodeMapper<Node, Node<SymbolDefinitions>>();
     let result = mapNode(program, rec => ({
 

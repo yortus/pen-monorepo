@@ -19,17 +19,17 @@ export type Node<M = {}> =
     | StaticField<M>;
 
 
-export type Binding<M> =
+export type Binding<M = {}> =
     | InternalBinding<M>
     | ExportedBinding<M>;
 
 
-export type Pattern<M> =
+export type Pattern<M = {}> =
     | ModulePattern<M>
     | VariablePattern<M>;
 
 
-export type Expression<M> =
+export type Expression<M = {}> =
     | ApplicationExpression<M>
     | CharacterExpression<M>
     | FunctionExpression<M>
@@ -46,7 +46,7 @@ export type Expression<M> =
 
 
 // ====================   Top-level nodes   ====================
-export interface Program<M> {
+export interface Program<M = {}> {
     readonly kind: 'Program';
     readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<M>>;
     readonly mainPath: AbsPath;
@@ -54,7 +54,7 @@ export interface Program<M> {
 }
 
 
-export interface SourceFile<M> {
+export interface SourceFile<M = {}> {
     readonly kind: 'SourceFile';
 
     /** The source file's normalised absolute path. */
@@ -72,7 +72,7 @@ export interface SourceFile<M> {
 }
 
 
-export interface Module<M> {
+export interface Module<M = {}> {
     readonly kind: 'Module';
     readonly bindings: ReadonlyArray<Binding<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
@@ -80,7 +80,7 @@ export interface Module<M> {
 
 
 // ====================   Binding nodes   ====================
-export interface ExportedBinding<M> {
+export interface ExportedBinding<M = {}> {
     readonly kind: 'Binding';
     readonly pattern: Pattern<M>;
     readonly value: Expression<M>;
@@ -88,7 +88,7 @@ export interface ExportedBinding<M> {
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
-export interface InternalBinding<M> {
+export interface InternalBinding<M = {}> {
     readonly kind: 'Binding';
     readonly pattern: Pattern<M>;
     readonly value: Expression<M>;
@@ -98,14 +98,14 @@ export interface InternalBinding<M> {
 
 
 // ====================   Pattern nodes   ====================
-export interface ModulePattern<M> {
+export interface ModulePattern<M = {}> {
     readonly kind: 'ModulePattern';
     readonly names: ReadonlyArray<ModulePatternName<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface VariablePattern<M> {
+export interface VariablePattern<M = {}> {
     readonly kind: 'VariablePattern';
     readonly name: string;
     readonly meta: NodeMetadata<M, this['kind']>;
@@ -113,7 +113,7 @@ export interface VariablePattern<M> {
 
 
 // // ====================   Expression nodes   ====================
-export interface ApplicationExpression<M> {
+export interface ApplicationExpression<M = {}> {
     readonly kind: 'ApplicationExpression';
     readonly function: Expression<M>;
     readonly argument: Expression<M>;
@@ -121,7 +121,7 @@ export interface ApplicationExpression<M> {
 }
 
 
-export interface CharacterExpression<M> {
+export interface CharacterExpression<M = {}> {
     readonly kind: 'CharacterExpression';
     readonly minValue: string;
     readonly maxValue: string;
@@ -129,7 +129,7 @@ export interface CharacterExpression<M> {
 }
 
 
-export interface FunctionExpression<M> {
+export interface FunctionExpression<M = {}> {
     readonly kind: 'FunctionExpression';
     readonly pattern: Pattern<M>;
     readonly body: Expression<M>;
@@ -137,7 +137,7 @@ export interface FunctionExpression<M> {
 }
 
 
-export interface ImportExpression<M> {
+export interface ImportExpression<M = {}> {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
     readonly sourceFilePath: AbsPath;
@@ -145,56 +145,56 @@ export interface ImportExpression<M> {
 }
 
 
-export interface LabelExpression<M> {
+export interface LabelExpression<M = {}> {
     readonly kind: 'LabelExpression';
     readonly value: string;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface ListExpression<M> {
+export interface ListExpression<M = {}> {
     readonly kind: 'ListExpression';
     readonly elements: ReadonlyArray<Expression<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface ModuleExpression<M> {
+export interface ModuleExpression<M = {}> {
     readonly kind: 'ModuleExpression';
     readonly module: Module<M>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface RecordExpression<M> {
+export interface RecordExpression<M = {}> {
     readonly kind: 'RecordExpression';
     readonly fields: ReadonlyArray<StaticField<M> | DynamicField<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface ReferenceExpression<M> {
+export interface ReferenceExpression<M = {}> {
     readonly kind: 'ReferenceExpression';
     readonly name: string;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface SelectionExpression<M> {
+export interface SelectionExpression<M = {}> {
     readonly kind: 'SelectionExpression';
     readonly expressions: ReadonlyArray<Expression<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface SequenceExpression<M> {
+export interface SequenceExpression<M = {}> {
     readonly kind: 'SequenceExpression';
     readonly expressions: ReadonlyArray<Expression<M>>;
     readonly meta: NodeMetadata<M, this['kind']>;
 }
 
 
-export interface StaticMemberExpression<M> {
+export interface StaticMemberExpression<M = {}> {
     readonly kind: 'StaticMemberExpression';
     readonly namespace: Expression<M>;
     readonly name: string;
@@ -202,7 +202,7 @@ export interface StaticMemberExpression<M> {
 }
 
 
-export interface StringExpression<M> {
+export interface StringExpression<M = {}> {
     readonly kind: 'StringExpression';
     readonly value: string;
     readonly meta: NodeMetadata<M, this['kind']>;
@@ -210,7 +210,7 @@ export interface StringExpression<M> {
 
 
 // // ====================   Other nodes   ====================
-export interface DynamicField<M> {
+export interface DynamicField<M = {}> {
     readonly kind: 'DynamicField';
     readonly name: Expression<M>;
     readonly value: Expression<M>;
@@ -218,7 +218,7 @@ export interface DynamicField<M> {
 }
 
 
-export interface ModulePatternName<M> {
+export interface ModulePatternName<M = {}> {
     readonly kind: 'ModulePatternName';
     readonly name: string;
     readonly alias?: string;
@@ -226,7 +226,7 @@ export interface ModulePatternName<M> {
 }
 
 
-export interface StaticField<M> {
+export interface StaticField<M = {}> {
     readonly kind: 'StaticField';
     readonly name: string;
     readonly value: Expression<M>;

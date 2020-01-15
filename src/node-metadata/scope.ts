@@ -29,23 +29,34 @@ export interface FunctionScope {
 
 
 export class ScopeStack {
+    push(kind: 'GlobalScope'): GlobalScope;
     push(kind: 'ModuleScope'): ModuleScope;
     push(kind: 'FunctionScope'): FunctionScope;
-    push(kind: 'ModuleScope' | 'FunctionScope') {
-        let newScope = {kind, parent: this.current, symbols: new Map()};
-        this.stack.push(newScope);
-        return newScope;
+    push(scope: Scope): Scope;
+    push(scope: 'GlobalScope' | 'ModuleScope' | 'FunctionScope' | Scope) {
+        if (typeof scope === 'string') {
+            let kind = scope;
+            assert(kind !== 'GlobalScope' || this.isEmpty);
+            let symbols = new Map<string, Symbol>();
+            scope = kind === 'GlobalScope' ? {kind, symbols} : {kind, parent: this.current, symbols} as Scope;
+        }
+        this.stack.push(scope);
+        return scope;
     }
 
     pop() {
-        assert(this.stack.length > 0);
+        assert(!this.isEmpty);
         this.stack.pop();
     }
 
     get current() {
-        assert(this.stack.length > 0);
+        assert(!this.isEmpty);
         return this.stack[this.stack.length - 1];
     }
 
-    private stack: Scope[] = [{kind: 'GlobalScope', symbols: new Map()}];
+    get isEmpty() {
+        return this.stack.length === 0;
+    }
+
+    private stack: Scope[] = [];
 }

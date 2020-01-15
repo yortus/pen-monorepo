@@ -6,8 +6,8 @@ import {mapMap} from '../../../utils';
 import {SourceFileGraph, SourceFileInfo} from '../01-gather-source-files';
 
 
-export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<{}> {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): SourceFile<{}> => {
+export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
+    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): SourceFile => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         let module = parse(sourceText, {sourceFile});
         return {
@@ -29,5 +29,5 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<{}> 
 
 // TODO: doc parsing helpers
 const grammar = fs.readFileSync(path.join(__dirname, 'pen-grammar.pegjs'), 'utf8');
-let parse: (moduleSource: string, options: {sourceFile: SourceFileInfo}) => Module<{}>;
+let parse: (moduleSource: string, options: {sourceFile: SourceFileInfo}) => Module;
 parse = pegjs.generate(grammar).parse;

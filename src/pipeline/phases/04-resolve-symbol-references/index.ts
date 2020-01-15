@@ -1,6 +1,6 @@
 import {makeNodeMapper} from '../../../make-node-mapper';
 import {SymbolDefinitions, SymbolReferences} from '../../../node-metadata';
-import {Scope} from '../../../node-metadata/scope';
+import {ScopeStack} from '../../../node-metadata/scope';
 import {lookup} from '../../../node-metadata/symbol';
 import {Node, Program} from '../../../node-types';
 import {assert, mapMap} from '../../../utils';
@@ -8,39 +8,36 @@ import {assert, mapMap} from '../../../utils';
 
 // TODO: doc...
 export function resolveSymbolReferences(program: Program<SymbolDefinitions>): Program<SymbolDefinitions & SymbolReferences> {
-    let currentScope: Scope;
+    const scopes = new ScopeStack();
     let mapNode = makeNodeMapper<Node<SymbolDefinitions>, Node<SymbolDefinitions & SymbolReferences>>();
     let result = mapNode(program, rec => ({
 
         // TODO: keep track of the current scope...
         Program: prg => {
-            let outerScope = currentScope;
-            currentScope = prg.meta.scope;
+            scopes.push(prg.meta.scope);
             let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec)};
-            currentScope = outerScope;
+            scopes.pop();
             return prgᐟ;
         },
 
         Module: mod => {
-            let outerScope = currentScope;
-            currentScope = mod.meta.scope;
+            scopes.push(mod.meta.scope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
-            currentScope = outerScope;
+            scopes.pop();
             return modᐟ;
 
         },
 
         FunctionExpression: fexpr => {
-            let outerScope = currentScope;
-            currentScope = fexpr.meta.scope;
+            scopes.push(fexpr.meta.scope);
             let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
-            currentScope = outerScope;
+            scopes.pop();
             return fexprᐟ;
         },
 
         // TODO: resolve symbol references...
         ReferenceExpression: ref => {
-            let symbol = lookup(currentScope, ref.name);
+            let symbol = lookup(scopes.current, ref.name);
             let refᐟ = {...ref, meta: {symbol}};
             return refᐟ;
         },
@@ -51,7 +48,7 @@ export function resolveSymbolReferences(program: Program<SymbolDefinitions>): Pr
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope! === undefined);
+    assert(scopes.isEmpty);
 
     // All done.
     return result;
