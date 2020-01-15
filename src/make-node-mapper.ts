@@ -67,3 +67,32 @@ type Mappings<N extends Node, Nᐟ extends Node, MapObj> =
  * single node type corresponding to the node kind given by `K`.
  */
 type NodeOfKind<N extends Node, K extends Node['kind']> = N extends {kind: K} ? N : never;
+
+
+
+
+
+
+
+
+
+
+// // TODO: doc...
+// type DiffMetaKeys<N extends Node, Nᐟ extends Node> =
+//     N extends Node<infer M> ? (
+//         Nᐟ extends Node<infer Mᐟ> ? (
+//             {
+//                 [K in keyof M | keyof Mᐟ]:
+//                     SameType<
+//                         K extends keyof M ? M[K] : unknown,
+//                         K extends keyof Mᐟ ? Mᐟ[K] : unknown
+//                     > extends true ? never : K
+//             }[keyof M | keyof Mᐟ]
+//         )
+//         : never
+//     )
+//     : never;
+
+
+// // TODO: doc...
+// type SameType<T, U> = T extends U ? U extends T ? true : false : false;
