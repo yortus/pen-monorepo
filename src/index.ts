@@ -1,5 +1,5 @@
 import {CompilerOptions} from './compiler-options';
-import {pipeline} from './pipeline';
+import {compile} from './compile';
 
 
-export {CompilerOptions, pipeline};
+export {CompilerOptions, compile as pipeline};

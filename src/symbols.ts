@@ -1,4 +1,4 @@
-import {Scope} from './scope'; // NB: this type-only import is elided at runtime
+import {Scope} from './scopes'; // NB: this type-only import is elided at runtime
 
 
 export type Symbol =

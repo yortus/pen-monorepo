@@ -1,5 +1,5 @@
-import {Node} from './node-types';
-import {mapMap} from './utils';
+import {Node} from '../ast-nodes';
+import {mapMap} from './map-map';
 
 
 // TODO: doc...
@@ -11,7 +11,7 @@ export function makeNodeMapper<N extends Node, Nᐟ extends Node>() {
                 return mapFn ? mapFn(n) : defaultMappers(n);
             }
             catch (err) {
-                err; // TODO: how to handle? May be better to let caller handle it?
+                // err; // TODO: how to handle? May be better to let caller handle it?
             }
         };
         const defaultMappers: any = makeDefaultMappers(rec as any);
@@ -68,14 +68,6 @@ type Mappings<N extends Node, Nᐟ extends Node, MapObj> =
  * single node type corresponding to the node kind given by `K`.
  */
 type NodeOfKind<N extends Node, K extends Node['kind']> = N extends {kind: K} ? N : never;
-
-
-
-
-
-
-
-
 
 
 // TODO: doc...

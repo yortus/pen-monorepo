@@ -1,5 +1,5 @@
-import {Scope} from './scope';
-import {Symbol} from './symbol';
+import {Scope} from '../../scopes';
+import {Symbol} from '../../symbols';
 
 
 export interface SymbolDefinitions {

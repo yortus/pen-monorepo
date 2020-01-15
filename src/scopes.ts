@@ -1,5 +1,5 @@
-import {assert} from '../utils';
-import {Symbol} from './symbol'; // NB: this type-only import is elided at runtime
+import {Symbol} from './symbols'; // NB: this type-only import is elided at runtime
+import {assert} from './utils';
 
 
 export type Scope =

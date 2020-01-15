@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pegjs from 'pegjs';
-import {Module, Program, SourceFile} from '../../../node-types';
-import {mapMap} from '../../../utils';
-import {SourceFileGraph, SourceFileInfo} from '../01-gather-source-files';
+import {Module, Program, SourceFile} from '../../ast-nodes';
+import {mapMap} from '../../utils';
+import {SourceFileGraph, SourceFileInfo} from '../01-create-source-file-graph';
 
 
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {AbsPath} from '../../../utils';
+import {AbsPath} from '../../utils';
 
 
 // TODO: doc... returns an absolute normalised file path
@@ -47,4 +47,4 @@ function fail(modSpec: string): never {
 
 
 // TODO: use more robust way of locating lib files & third-party deps
-const CORE_LIBS_PATH = path.join(__dirname, '../../../../penlib');
+const CORE_LIBS_PATH = path.join(__dirname, '../../../penlib');

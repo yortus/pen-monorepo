@@ -1,13 +1,13 @@
-import {makeNodeMapper} from '../../../make-node-mapper';
-import {SymbolDefinitions, SymbolReferences} from '../../../node-metadata';
-import {ScopeStack} from '../../../node-metadata/scope';
-import {lookup} from '../../../node-metadata/symbol';
-import {Node, Program} from '../../../node-types';
-import {assert, mapMap} from '../../../utils';
+import {Node, Program} from '../../ast-nodes';
+import {ScopeStack} from '../../scopes';
+import {lookup} from '../../symbols';
+import {assert, makeNodeMapper, mapMap} from '../../utils';
+import {SymbolDefinitions} from '../03-create-symbol-definitions';
+import {SymbolReferences} from './symbol-references';
 
 
 // TODO: doc...
-export function resolveSymbolReferences(program: Program<SymbolDefinitions>): Program<SymbolDefinitions & SymbolReferences> {
+export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
     const scopes = new ScopeStack();
     let mapNode = makeNodeMapper<Node<SymbolDefinitions>, Node<SymbolDefinitions & SymbolReferences>>();
     let result = mapNode(program, rec => ({
