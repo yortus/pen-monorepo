@@ -55,11 +55,11 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
 
 // TODO: doc...
 type Mappings<N extends Node, Nᐟ extends Node, MapObj> =
-    (rec: <SpecificNode extends N>(n: SpecificNode) => NodeOfKind<Nᐟ, SpecificNode['kind']>) => MapObj & {
-        [K in keyof MapObj]: K extends Node['kind']
-            ? (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>
-            : never
-    };
+    (rec: <SpecificNode extends N>(n: SpecificNode) => NodeOfKind<Nᐟ, SpecificNode['kind']>) => (
+        & MapObj
+        & {[K in keyof MapObj]: K extends Node['kind'] ? unknown : never}
+        & {[K in DiffMetaKeys<N, Nᐟ>]: (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>}
+    );
 
 
 /**
@@ -77,22 +77,22 @@ type NodeOfKind<N extends Node, K extends Node['kind']> = N extends {kind: K} ? 
 
 
 
-// // TODO: doc...
-// type DiffMetaKeys<N extends Node, Nᐟ extends Node> =
-//     N extends Node<infer M> ? (
-//         Nᐟ extends Node<infer Mᐟ> ? (
-//             {
-//                 [K in keyof M | keyof Mᐟ]:
-//                     SameType<
-//                         K extends keyof M ? M[K] : unknown,
-//                         K extends keyof Mᐟ ? Mᐟ[K] : unknown
-//                     > extends true ? never : K
-//             }[keyof M | keyof Mᐟ]
-//         )
-//         : never
-//     )
-//     : never;
+// TODO: doc...
+type DiffMetaKeys<N extends Node, Nᐟ extends Node> =
+    N extends Node<infer M> ? (
+        Nᐟ extends Node<infer Mᐟ> ? (
+            {
+                [K in keyof M | keyof Mᐟ]:
+                    SameType<
+                        K extends keyof M ? M[K] : unknown,
+                        K extends keyof Mᐟ ? Mᐟ[K] : unknown
+                    > extends true ? never : K
+            }[keyof M | keyof Mᐟ]
+        )
+        : never
+    )
+    : never;
 
 
-// // TODO: doc...
-// type SameType<T, U> = T extends U ? U extends T ? true : false : false;
+// TODO: doc...
+type SameType<T, U> = T extends U ? U extends T ? true : false : false;
