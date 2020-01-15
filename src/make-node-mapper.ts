@@ -59,6 +59,7 @@ type Mappings<N extends Node, Nᐟ extends Node, MapObj> =
         & MapObj
         & {[K in keyof MapObj]: K extends Node['kind'] ? unknown : never}
         & {[K in DiffMetaKeys<N, Nᐟ>]: (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>}
+        & {[K in Node['kind']]?: (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>}
     );
 
 
