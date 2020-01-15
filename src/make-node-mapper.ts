@@ -7,8 +7,8 @@ export function makeNodeMapper<N extends Node, Nᐟ extends Node>() {
     return function mapNode<SpecificNode extends N, MapObj>(node: SpecificNode, mappings: Mappings<N, Nᐟ, MapObj>) {
         const rec: <NN extends N>(n: NN) => NodeOfKind<Nᐟ, NN['kind']> = n => {
             try {
-                let mapFn = mappers[n.kind] || defaultMappers[n.kind];
-                return mapFn(n);
+                let mapFn = mappers[n.kind];
+                return mapFn ? mapFn(n) : defaultMappers(n);
             }
             catch (err) {
                 err; // TODO: how to handle? May be better to let caller handle it?

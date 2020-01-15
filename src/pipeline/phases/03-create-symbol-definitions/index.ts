@@ -1,9 +1,9 @@
-import {makeNodeMapper} from './make-node-mapper';
-import {SymbolDefinitions} from './node-metadata';
-import {ScopeStack} from './node-metadata/scope';
-import {createSymbol} from './node-metadata/symbol';
-import {Node, Program} from './node-types';
-import {assert, mapMap} from './utils';
+import {makeNodeMapper} from '../../../make-node-mapper';
+import {SymbolDefinitions} from '../../../node-metadata';
+import {ScopeStack} from '../../../node-metadata/scope';
+import {createSymbol} from '../../../node-metadata/symbol';
+import {Node, Program} from '../../../node-types';
+import {assert, mapMap} from '../../../utils';
 
 
 // TODO: doc...
