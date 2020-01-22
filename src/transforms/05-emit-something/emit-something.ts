@@ -1,5 +1,5 @@
 import * as AstNodes from '../../ast-nodes';
-import {makeNodeMapper} from '../../utils';
+import {makeNodeMapper, mapMap} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {makeEmitter} from './emitter';
@@ -24,7 +24,11 @@ export function emitSomething(program: Program) {
         },
 
         // TODO: ...
-        Binding: n => n,
+        Binding: bnd => {
+            rec(bnd.pattern);
+            // rec(bnd.value);
+            return bnd;
+        },
 
         // TODO:  ==========   OLD ast - update this to new ast...   ==========
         // Block: block => {
@@ -88,13 +92,13 @@ export function emitSomething(program: Program) {
 
         Module: mod => {
             // TODO: ...
-            // const MODULE_ID = `module1`;
-            // emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
-            // emit.text(`function ${MODULE_ID}() {`).nl(+1);
-            // emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
-            // emit.text(`// TODO: detect circular dependencies...`).nl();
-            // rec(...mod.imports, mod.block);
-            // emit.nl(-1).text(`}`);
+            const MODULE_ID = `module1`;
+            emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
+            emit.text(`function ${MODULE_ID}() {`).nl(+1);
+            emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
+            emit.text(`// TODO: detect circular dependencies...`).nl();
+            mod.bindings.map(rec);
+            emit.nl(-1).text(`}`);
             return mod;
         },
 
@@ -102,13 +106,19 @@ export function emitSomething(program: Program) {
         ModuleExpression: n => n,
 
         // TODO: ...
-        ModulePattern: n => n,
+        ModulePattern: pat => {
+            emit.text(`// TODO: ModulePattern`).nl();
+            return pat;
+        },
 
         // TODO: ...
         ModulePatternName: n => n,
 
         // TODO: ...
-        Program: n => n,
+        Program: prg => {
+            mapMap(prg.sourceFiles, rec);
+            return prg;
+        },
 
         // TODO: ...
         RecordExpression: n => n,
@@ -154,7 +164,11 @@ export function emitSomething(program: Program) {
         },
 
         // TODO: ...
-        SourceFile: n => n,
+        SourceFile: src => {
+            emit.nl().nl().text(`// ==========  ${src.path}  ==========`).nl();
+            rec(src.module);
+            return src;
+        },
 
         // TODO: ...
         StaticField: n => n,
@@ -173,7 +187,10 @@ export function emitSomething(program: Program) {
         },
 
         // TODO: ...
-        VariablePattern: n => n,
+        VariablePattern: pat => {
+            emit.text(`// TODO: VariablePattern for ${pat.name}`).nl();
+            return pat;
+        },
     }));
 
     // TODO: temp testing...
