@@ -3,7 +3,7 @@ import {createSourceFileGraph} from './transforms';
 import {parseSourceFiles} from './transforms';
 import {createSymbolDefinitions} from './transforms';
 import {resolveSymbolReferences} from './transforms';
-import {emitSomething} from './transforms';
+import {generateTargetCode} from './transforms';
 
 
 export function compile(compilerOptions: CompilerOptions) {
@@ -11,6 +11,7 @@ export function compile(compilerOptions: CompilerOptions) {
     let ast01 = parseSourceFiles(sourceFiles);
     let ast02 = createSymbolDefinitions(ast01);
     let ast03 = resolveSymbolReferences(ast02);
-    let ast04 = emitSomething(ast03);
+
+    let ast04 = generateTargetCode(ast03);
     return ast04;
 }

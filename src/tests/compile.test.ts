@@ -5,7 +5,7 @@ import {compile, CompilerOptions} from '..';
 
 describe('compile', () => {
     it('passes', () => {
-        let fixture = ['import-graph', 'math', 'json'][2];
+        let fixture = ['import-graph', 'math', 'json'][1];
         let main = path.join(__dirname, `../../test/fixtures/${fixture}`);
         let outDir = path.join(__dirname, `../../dist/out/${fixture}`);
         let options: CompilerOptions = {main, outDir};

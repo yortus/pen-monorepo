@@ -12,7 +12,7 @@ type Program = AstNodes.Program<SymbolDefinitions & SymbolReferences>;
 
 // TODO: proper name for this...
 // TODO: doc...
-export function emitSomething(program: Program) {
+export function generateTargetCode(program: Program) {
     let emit = makeEmitter();
 
     let emitNode = makeNodeMapper<Node, Node>();
