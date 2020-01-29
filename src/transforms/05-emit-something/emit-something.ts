@@ -26,7 +26,7 @@ export function emitSomething(program: Program) {
         // TODO: ...
         Binding: bnd => {
             rec(bnd.pattern);
-            // rec(bnd.value);
+            rec(bnd.value);
             return bnd;
         },
 
@@ -74,15 +74,10 @@ export function emitSomething(program: Program) {
         FunctionExpression: n => n,
 
         // TODO: ...
-        ImportExpression: n => n,
-        // ImportNames: imp => {
-        //     let names = imp.names;
-        //     emit.text(`import {${names.join(', ')}} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
-        // },
-        // ImportNamespace: imp => {
-        //     let name = imp.namespace;
-        //     emit.text(`import * as ${name} from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
-        // },
+        ImportExpression: imp => {
+            emit.text(` from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
+            return imp;
+        },
 
         // TODO: ...
         LabelExpression: n => n,
@@ -107,12 +102,16 @@ export function emitSomething(program: Program) {
 
         // TODO: ...
         ModulePattern: pat => {
-            emit.text(`// TODO: ModulePattern`).nl();
+            emit.text('import {')
+                .text(pat.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', '))
+                .text('}');
             return pat;
         },
 
         // TODO: ...
-        ModulePatternName: n => n,
+        ModulePatternName: () => {
+            throw new Error('Internal error: ModulePatternName'); // NB: should be unreachable
+        },
 
         // TODO: ...
         Program: prg => {

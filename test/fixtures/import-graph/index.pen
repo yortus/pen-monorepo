@@ -1,4 +1,4 @@
-{} = import './a'
+{f as foo, b as bar, baz} = import './a'
 {} = import './b.pen'
 
 rec = {
