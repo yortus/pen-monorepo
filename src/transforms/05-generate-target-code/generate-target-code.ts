@@ -1,33 +1,65 @@
-import * as AstNodes from '../../ast-nodes';
-import {makeNodeMapper, mapMap} from '../../utils';
+import {Expression, Node, Program, SourceFile} from '../../ast-nodes';
+import {assert, makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {makeEmitter} from './emitter';
+import {TargetCode} from './target-code';
 
 
-// TODO: temp testing...
-type Expression = AstNodes.Expression<SymbolDefinitions & SymbolReferences>;
-type Node = AstNodes.Node<SymbolDefinitions & SymbolReferences>;
-type Program = AstNodes.Program<SymbolDefinitions & SymbolReferences>;
-
-// TODO: proper name for this...
 // TODO: doc...
-export function generateTargetCode(program: Program) {
+export function generateTargetCode(program: Program<SymbolDefinitions & SymbolReferences>): TargetCode {
+    return emitProgram(program);
+}
+
+
+function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): TargetCode {
+    let targetCode = new Map<SourceFile, string>();
+    for (let [, sourceFile] of program.sourceFiles.entries()) {
+        let emit = makeEmitter();
+        emit.nl().nl().text(`// ==========  ${sourceFile.path}  ==========`).nl();
+
+        // TODO: ...
+        const MODULE_ID = `module1`;
+        emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
+        emit.text(`function ${MODULE_ID}() {`).nl(+1);
+        emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
+        emit.text(`// TODO: detect circular dependencies...`).nl();
+
+        for (let {pattern, value} of sourceFile.module.bindings) {
+            if (value.kind === 'ImportExpression') {
+                assert(pattern.kind === 'ModulePattern');
+                emit.text('import {')
+                    .text(pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', '))
+                    .text(`} from ${JSON.stringify(value.moduleSpecifier)};`)
+                    .nl();
+            }
+            else {
+
+            }
+        }
+        emit.nl(-1).text(`}`);
+        targetCode.set(sourceFile, emit.toString());
+    }
+    return targetCode;
+}
+
+
+
+
+
+
+
+
+// TODO: was... remove...
+export function generateTargetCodeOLD(program: Program) {
     let emit = makeEmitter();
 
     let emitNode = makeNodeMapper<Node, Node>();
     emitNode(program, rec => ({
 
-        ApplicationExpression: app => {
+        ApplicationExpression: (app: any) => {
             emitCall(app.function, [app.argument], rec);
             return app;
-        },
-
-        // TODO: ...
-        Binding: bnd => {
-            rec(bnd.pattern);
-            rec(bnd.value);
-            return bnd;
         },
 
         // TODO:  ==========   OLD ast - update this to new ast...   ==========
@@ -56,9 +88,6 @@ export function generateTargetCode(program: Program) {
         //     }
         // },
 
-        // TODO: ...
-        CharacterExpression: n => n,
-
         // TODO:  ==========   OLD ast - update this to new ast...   ==========
         // Definition: def => {
         //     emit.text(`Object.assign(`).nl(+1);
@@ -67,65 +96,13 @@ export function generateTargetCode(program: Program) {
         //     emit.nl(-1).text(`);`).nl();
         // },
 
-        // TODO: ...
-        DynamicField: n => n,
-
-        // TODO: ...
-        FunctionExpression: n => n,
-
-        // TODO: ...
-        ImportExpression: imp => {
-            emit.text(` from ${JSON.stringify(imp.moduleSpecifier)};`).nl();
-            return imp;
-        },
-
-        // TODO: ...
-        LabelExpression: n => n,
-
-        // TODO: ...
-        ListExpression: n => n,
-
-        Module: mod => {
-            // TODO: ...
-            const MODULE_ID = `module1`;
-            emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
-            emit.text(`function ${MODULE_ID}() {`).nl(+1);
-            emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
-            emit.text(`// TODO: detect circular dependencies...`).nl();
-            mod.bindings.map(rec);
-            emit.nl(-1).text(`}`);
-            return mod;
-        },
-
-        // TODO: ...
-        ModuleExpression: n => n,
-
-        // TODO: ...
-        ModulePattern: pat => {
-            emit.text('import {')
-                .text(pat.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', '))
-                .text('}');
-            return pat;
-        },
-
-        // TODO: ...
-        ModulePatternName: () => {
-            throw new Error('Internal error: ModulePatternName'); // NB: should be unreachable
-        },
-
-        ParenthesisedExpression: par => {
+        ParenthesisedExpression: (par: any) => {
             rec(par.expression);
             return par;
         },
 
         // TODO: ...
-        Program: prg => {
-            mapMap(prg.sourceFiles, rec);
-            return prg;
-        },
-
-        // TODO: ...
-        RecordExpression: n => n,
+        RecordExpression: (n: any) => n,
         // RecordField: field => {
         //     emit.text(`{`).nl(+1);
         //     emit.text(`computed: ${field.hasComputedName},`).nl().text(`name: `);
@@ -150,52 +127,42 @@ export function generateTargetCode(program: Program) {
         //     emit.nl(-1).text(`])`);
         // },
 
-        ReferenceExpression: ref => {
+        ReferenceExpression: (ref: any) => {
             // TODO: ...
             // let namespaces = ref.namespaces ? ref.namespaces.map(ns => `${ns}.exports.`) : [];
             // emit.text(`Reference(${namespaces.join('')}${ref.name})`);
             return ref;
         },
 
-        SelectionExpression: sel => {
+        SelectionExpression: (sel: any) => {
             emitCall('Selection', sel.expressions, rec);
             return sel;
         },
 
-        SequenceExpression: seq => {
+        SequenceExpression: (seq: any) => {
             emitCall('Sequence', seq.expressions, rec);
             return seq;
         },
 
-        // TODO: ...
-        SourceFile: src => {
-            emit.nl().nl().text(`// ==========  ${src.path}  ==========`).nl();
-            rec(src.module);
-            return src;
-        },
-
-        // TODO: ...
-        StaticField: n => n,
-
-        StaticMemberExpression: memb => {
+        StaticMemberExpression: (memb: any) => {
             // TODO: ...
             // let namespaces = ref.namespaces ? ref.namespaces.map(ns => `${ns}.exports.`) : [];
             // emit.text(`Reference(${namespaces.join('')}${ref.name})`);
             return memb;
         },
 
-        StringExpression: str => {
+        StringExpression: (str: any) => {
             // TODO: ...
             emit.text(`StringExpression(${JSON.stringify(str.value)})`);
             return str;
         },
 
         // TODO: ...
-        VariablePattern: pat => {
+        VariablePattern: (pat: any) => {
             emit.text(`// TODO: VariablePattern for ${pat.name}`).nl();
             return pat;
         },
-    }));
+    } as any));
 
     // TODO: temp testing...
     return emit.toString();
