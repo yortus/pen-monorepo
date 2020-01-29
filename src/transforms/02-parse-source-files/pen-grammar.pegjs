@@ -89,11 +89,12 @@ PrimaryExpression
     / RecordExpression
     / ModuleExpression
     / ListExpression
+    / ParenthesisedExpression
+    / ImportExpression
     / CharacterExpression
     / StringExpression
     / LabelExpression
     / ReferenceExpression
-    / ImportExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
@@ -139,6 +140,18 @@ ListExpression
     = "["   __   elements:ElementList   __   "]"
     { return {kind: 'ListExpression', elements}; }
 
+ParenthesisedExpression
+    = "("   __   expression:Expression   __   ")"
+    { return {kind: 'ParenthesisedExpression', expression}; }
+
+ImportExpression
+    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
+    {
+        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        let sourceFilePath = options.sourceFile.imports[moduleSpecifier];
+        return {kind: 'ImportExpression', moduleSpecifier, sourceFilePath};
+    }
+
 CharacterExpression
     = '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
     { return {kind: 'CharacterExpression', minValue, maxValue}; }
@@ -154,14 +167,6 @@ LabelExpression
 ReferenceExpression
     = name:IDENTIFIER
     { return {kind: 'ReferenceExpression', name}; }
-
-ImportExpression
-    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    {
-        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = options.sourceFile.imports[moduleSpecifier];
-        return {kind: 'ImportExpression', moduleSpecifier, sourceFilePath};
-    }
 
 
 // ====================   Fields and Elements   ====================

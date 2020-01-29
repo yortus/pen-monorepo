@@ -113,6 +113,11 @@ export function emitSomething(program: Program) {
             throw new Error('Internal error: ModulePatternName'); // NB: should be unreachable
         },
 
+        ParenthesisedExpression: par => {
+            rec(par.expression);
+            return par;
+        },
+
         // TODO: ...
         Program: prg => {
             mapMap(prg.sourceFiles, rec);
