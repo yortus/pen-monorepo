@@ -5,8 +5,9 @@ import {compile, CompilerOptions} from '..';
 
 describe('compile', () => {
     it('passes', () => {
-        let main = path.join(__dirname, '../../test/fixtures/import-graph');
-        let outDir = path.join(__dirname, '../../dist/out/import-graph');
+        let fixture = ['import-graph', 'math', 'json'][2];
+        let main = path.join(__dirname, `../../test/fixtures/${fixture}`);
+        let outDir = path.join(__dirname, `../../dist/out/${fixture}`);
         let options: CompilerOptions = {main, outDir};
         let result = compile(options);
         expect(result).to.be.a('string');

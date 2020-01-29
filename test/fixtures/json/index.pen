@@ -9,15 +9,14 @@
 // ===============================================================================
 // |                                  Exports                                    |
 // ===============================================================================
-export = {json}
+export json = WS   Value   WS
 
 
 // ===============================================================================
 // |                               Implementation                                |
 // ===============================================================================
 
-// ---------- JSON Grammar ----------
-json = WS   Value   WS
+// ---------- Top-Level JSON Values ----------
 Value =
     |   False
     |   Null
@@ -34,7 +33,7 @@ True    = "true"   true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String] = COLON Value}   Maybe(COMMA Properties)
+Properties  = {[String]: COLON Value}   Maybe(COMMA Properties)
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET

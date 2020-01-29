@@ -8,7 +8,7 @@
 {Memoize, i32} = import 'pen'
 
 
-export = {math = expr}
+export math = expr
 
 
 expr = Memoize(add | sub | term)
