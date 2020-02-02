@@ -62,6 +62,7 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
     }
 
     // TODO: Define variables
+    emit.nl();
     for (let {pattern, value} of module.bindings) {
         if (pattern.kind === 'ModulePattern') {
             assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
@@ -78,8 +79,42 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
 }
 
 
-function emitExpression(emit: Emitter, _expr: Expression<SymbolDefinitions & SymbolReferences>) {
-    emit.text('<expression>,');
+function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & SymbolReferences>) {
+    switch (expr.kind) {
+        case 'ApplicationExpression': return emitCall(emit, expr.function, [expr.argument]);
+        case 'CharacterExpression': break; // TODO...
+        case 'FunctionExpression': break; // TODO...
+        case 'ImportExpression': break; // TODO...
+        case 'LabelExpression': break; // TODO...
+        case 'ListExpression': break; // TODO...
+        case 'ModuleExpression': break; // TODO...
+        case 'ParenthesisedExpression': break; // TODO...
+        case 'RecordExpression': break; // TODO...
+        case 'ReferenceExpression': return emit.text(expr.name);
+        case 'SelectionExpression': return emitCall(emit, 'Selection', expr.expressions);
+        case 'SequenceExpression': return emitCall(emit, 'Sequence', expr.expressions);
+        case 'StaticMemberExpression': break; // TODO...
+        case 'StringExpression': return emit.text(JSON.stringify(expr.value));
+        default: throw new Error('Internal Error'); // TODO...
+    }
+    emit.text('<expression>');
+}
+
+
+// TODO: temp testing...
+function emitCall(emit: Emitter, fn: string | Expression<SymbolDefinitions & SymbolReferences>, args: ReadonlyArray<Expression<SymbolDefinitions & SymbolReferences>>) {
+    if (typeof fn === 'string') {
+        emit.text(fn);
+    }
+    else {
+        emitExpression(emit, fn);
+    }
+    emit.text(`(`).nl(+1);
+    args.forEach((arg, i) => {
+        emitExpression(emit, arg);
+        if (i < args.length - 1) emit.text(',').nl();
+    });
+    emit.nl(-1).text(`)`);
 }
 
 
