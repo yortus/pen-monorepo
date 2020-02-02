@@ -1,8 +1,8 @@
-import {Expression, Node, Program, SourceFile} from '../../ast-nodes';
+import {Expression, Module, Node, Program, SourceFile} from '../../ast-nodes';
 import {assert, makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
-import {makeEmitter} from './emitter';
+import {Emitter, makeEmitter} from './emitter';
 import {TargetCode} from './target-code';
 
 
@@ -17,32 +17,54 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): Ta
     for (let [, sourceFile] of program.sourceFiles.entries()) {
         let emit = makeEmitter();
         emit.nl().nl().text(`// ==========  ${sourceFile.path}  ==========`).nl();
+        emitSourceFile(emit, sourceFile);
 
-        // TODO: ...
-        const MODULE_ID = `module1`;
-        emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
-        emit.text(`function ${MODULE_ID}() {`).nl(+1);
-        emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
-        emit.text(`// TODO: detect circular dependencies...`).nl();
-
-        for (let {pattern, value} of sourceFile.module.bindings) {
-            if (value.kind === 'ImportExpression') {
-                assert(pattern.kind === 'ModulePattern');
-                emit.text('import {')
-                    .text(pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', '))
-                    .text(`} from ${JSON.stringify(value.moduleSpecifier)};`)
-                    .nl();
-            }
-            else {
-
-            }
-        }
-        emit.nl(-1).text(`}`);
+        // // TODO: ...
+        // const MODULE_ID = `module1`;
+        // emit.nl().nl().text(`// ==========  ${MODULE_ID}  ==========`).nl();
+        // emit.text(`function ${MODULE_ID}() {`).nl(+1);
+        // emit.text(`if (${MODULE_ID}.cached) return ${MODULE_ID}.cached;`).nl();
+        // emit.text(`// TODO: detect circular dependencies...`).nl();
+        // emit.nl(-1).text(`}`);
         targetCode.set(sourceFile, emit.toString());
     }
     return targetCode;
 }
 
+
+function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions & SymbolReferences>) {
+    let modSpecs = Object.keys(sourceFile.imports);
+    modSpecs.forEach((modSpec, i) => {
+        emit.text(`import * as _${i} from ${JSON.stringify(modSpec)};`).nl();
+    });
+    emit.text(`const imports = {`).nl(+1);
+    modSpecs.forEach((moduleId, i) => {
+        emit.text(`${JSON.stringify(moduleId)}: _${i},`);
+        if (i < modSpecs.length - 1) emit.nl();
+    });
+    emit.nl(-1).text('};').nl();
+    emitModule(emit, sourceFile.module);
+}
+
+
+function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
+
+    // Declare variables
+    for (let {pattern, value} of module.bindings) {
+        if (pattern.kind === 'ModulePattern') {
+            assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
+            let names = pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', ');
+            emit.text(`const {${names}} = imports[${JSON.stringify(value.moduleSpecifier)}];`).nl();
+        }
+        else {
+            emit.text(`const ${pattern.name} = {} as Rule;`).nl();
+        }
+    }
+
+    // TODO: Define variables
+    // for (let {pattern, value} of module.bindings) {
+    // }
+}
 
 
 
