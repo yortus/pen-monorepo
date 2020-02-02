@@ -62,9 +62,29 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
     }
 
     // TODO: Define variables
-    // for (let {pattern, value} of module.bindings) {
-    // }
+    for (let {pattern, value} of module.bindings) {
+        if (pattern.kind === 'ModulePattern') {
+            assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
+            // Already handled... no-op here...
+        }
+        else {
+            emit.nl().text('define(').nl(+1);
+            emit.text(`${pattern.name},`).nl();
+            emitExpression(emit, value);
+            emit.nl(-1).text(');').nl();
+
+        }
+    }
 }
+
+
+function emitExpression(emit: Emitter, _expr: Expression<SymbolDefinitions & SymbolReferences>) {
+    emit.text('<expression>,');
+}
+
+
+
+
 
 
 
