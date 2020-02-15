@@ -17,7 +17,7 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): Ta
     let targetCode = new Map<SourceFile, string>();
     for (let [, sourceFile] of program.sourceFiles.entries()) {
         let emit = makeEmitter();
-        emit.nl().nl().text(`// ==========  ${sourceFile.path}  ==========`).nl();
+        emit.down(2).text(`// ==========  ${sourceFile.path}  ==========`);
         emitSourceFile(emit, sourceFile);
 
         // // TODO: ...
@@ -37,15 +37,14 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
 
     // TODO: every source file import the PEN standard library
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    emit.text(`import * as ℙ from "penlib;"`).nl();
+    emit.down(1).text(`import * as ℙ from "penlib;"`);
 
     let modSpecs = Object.keys(sourceFile.imports);
     modSpecs.forEach((modSpec, _i) => {
         let id = identifierFromModuleSpecifier(modSpec);
         // TODO: need to store this modspec->id association somewhere to refer back to it later
-        emit.text(`import * as ${id} from ${JSON.stringify(modSpec)};`).nl();
+        emit.down(1).text(`import * as ${id} from ${JSON.stringify(modSpec)};`);
     });
-    emit.nl();
 
     // emit.text(`const imports = {`).nl(+1);
     // modSpecs.forEach((moduleId, i) => {
@@ -54,22 +53,26 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
     // });
     // emit.nl(-1).text('};').nl();
 
-    emit.text('export default ');
+    emit.down(2).text('export default (').indent();
     emitModule(emit, sourceFile.module);
+    emit.dedent().down(1).text(');');
 }
 
 
 function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
 
     // remember, a module is an expression...
-    emit.text('((() => {').nl(+1);
+    emit.down(1).text('(function getModule() {').indent();
+    emit.down(1).text(`let self = getModule.cached;`);
+    emit.down(1).text(`if (self) return self;`);
+    emit.down(2).text(`self = getModule.cached = {`).indent();
 
     // Declare all module-scoped variables.
     for (let [, symbol] of module.meta.scope.symbols) {
         // TODO: ensure no clashes with ES names, eg Object, String, etc
-        emit.text(`const ${symbol.name} = ℙ.declare();`).nl();
+        emit.down(1).text(`${symbol.name}: ℙ.declare();`);
     }
-    emit.nl();
+    emit.dedent().down(1).text('};');
 
     // // Define all module-scoped variables.
     // for (let {pattern, value} of module.bindings) {
@@ -88,25 +91,21 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
         if (pattern.kind === 'ModulePattern') {
             assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
             // TODO: emit...
-            emit.nl().text('// TODO: define...').nl();
+            emit.down(2).text('// TODO: define...');
         }
         else {
-            emit.nl().text('ℙ.define(').nl(+1);
-            emit.text(`${pattern.name},`).nl();
+            emit.down(2).text('ℙ.define(').indent();
+            emit.down(1).text(`self.${pattern.name},`);
+            emit.down(1);
             emitExpression(emit, value);
-            emit.nl(-1).text(');').nl();
-
+            emit.text(',');
+            emit.dedent().down(1).text(');');
         }
     }
 
     // TODO: export stuff
-    emit.text(`return {`).nl(+1);
-    for (let [, symbol] of module.meta.scope.symbols) {
-        emit.text(`${symbol.name},`).nl(); // TODO: filter to only exported symbols
-    }
-    emit.nl(-1).text('};').nl();
-
-    emit.nl(-1).text('})());').nl();
+    emit.down(2).text(`return self;`);
+    emit.dedent().down(1).text('});');
 }
 
 
@@ -122,8 +121,8 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
         case 'ParenthesisedExpression': break; // TODO...
         case 'RecordExpression': break; // TODO...
         case 'ReferenceExpression': return emit.text(expr.name);
-        case 'SelectionExpression': return emitCall(emit, 'Selection', expr.expressions);
-        case 'SequenceExpression': return emitCall(emit, 'Sequence', expr.expressions);
+        case 'SelectionExpression': return emitCall(emit, 'ℙ.selection', expr.expressions);
+        case 'SequenceExpression': return emitCall(emit, 'ℙ.sequence', expr.expressions);
         case 'StaticMemberExpression': break; // TODO...
         case 'StringExpression': return emit.text(JSON.stringify(expr.value));
         default: throw new Error('Internal Error'); // TODO...
@@ -140,12 +139,13 @@ function emitCall(emit: Emitter, fn: string | Expression<SymbolDefinitions & Sym
     else {
         emitExpression(emit, fn);
     }
-    emit.text(`(`).nl(+1);
-    args.forEach((arg, i) => {
+    emit.text(`(`).indent();
+    args.forEach((arg, _i) => {
+        emit.down(1);
         emitExpression(emit, arg);
-        if (i < args.length - 1) emit.text(',').nl();
+        emit.text(',');
     });
-    emit.nl(-1).text(`)`);
+    emit.dedent().down(1).text(`)`);
 }
 
 
@@ -267,7 +267,7 @@ export function generateTargetCodeOLD(program: Program) {
 
         // TODO: ...
         VariablePattern: (pat: any) => {
-            emit.text(`// TODO: VariablePattern for ${pat.name}`).nl();
+            emit.text(`// TODO: VariablePattern for ${pat.name}`);
             return pat;
         },
     } as any));
@@ -283,11 +283,11 @@ export function generateTargetCodeOLD(program: Program) {
         else {
             rec(fn);
         }
-        emit.text(`(`).nl(+1);
+        emit.text(`(`).indent();
         args.forEach((arg, i) => {
             rec(arg);
-            if (i < args.length - 1) emit.text(',').nl();
+            if (i < args.length - 1) emit.text(',');
         });
-        emit.nl(-1).text(`)`);
+        emit.dedent().text(`)`);
     }
 }

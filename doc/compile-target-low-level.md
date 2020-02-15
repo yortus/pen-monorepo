@@ -191,96 +191,311 @@ define(
 
 #### TODO: new output WIP
 ```ts
-// ==========  v:\projects\oss\penc\test\fixtures\math.pen  ==========
-import * as _0 from "pen";
-const imports = {
-    "pen": _0,
-};
-const {Memoize, i32} = imports["pen"]; // might still be undefined if imports are cyclic
+// ==========  v:\oss\penc\test\fixtures\math.pen  ==========
+import * as ℙ from "penlib;"
+import * as a_pen from "./import-graph/a.pen";
+import * as import_graph from "./import-graph";
+import * as pen from "pen";
 
-import blah from './blah'; // default import
-
-
-
-const foo: Rule = {
-    parse(...args) {
-        // replace parse/unparse functions with their targets on first call...
-        define(foo, blah.foo); // will be defined by now, even if part of an import cycle
-        return foo.parse(...args);
-    },
-    unparse(...args) {
-        // replace parse/unparse functions with their targets on first call...
-        define(foo, blah.foo); // will be defined by now, even if part of an import cycle
-        return foo.unparse(...args);
-    },
-};
-
-
-
-const math = {} as Rule;
-const expr = {} as Rule;
-const add = {} as Rule;
-const sub = {} as Rule;
-const term = {} as Rule;
-const mul = {} as Rule;
-const div = {} as Rule;
-const factor = {} as Rule;
-
-
-define(
-    math,
-    expr
-);
-
-define(
-    expr,
-    Memoize(
-        <expression>
-    )
-);
-
-define(
-    add,
-    <expression>
-);
-
-define(
-    sub,
-    <expression>
-);
-
-define(
-    term,
-    Memoize(
-        <expression>
-    )
-);
-
-define(
-    mul,
-    <expression>
-);
-
-define(
-    div,
-    <expression>
-);
-
-define(
-    factor,
-    Selection(
-        i32,
-        Sequence(
-            "(",
-            expr,
-            ")"
-        )
-    )
-);
-
-
-// ==========  v:\projects\oss\penc\penlib\penlib.pen  ==========
-const imports = {
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
     
-};
+    self = getModule.cached = {
+        foo: ℙ.declare();
+        rec: ℙ.declare();
+        Memoize: ℙ.declare();
+        i32: ℙ.declare();
+        math: ℙ.declare();
+        expr: ℙ.declare();
+        add: ℙ.declare();
+        sub: ℙ.declare();
+        term: ℙ.declare();
+        mul: ℙ.declare();
+        div: ℙ.declare();
+        factor: ℙ.declare();
+        
+    };
+    
+    
+    ℙ.define(
+        self.foo,
+        <expression>
+    );
+    
+    // TODO: define...
+    
+    // TODO: define...
+    
+    ℙ.define(
+        self.math,
+        expr
+    );
+    
+    ℙ.define(
+        self.expr,
+        Memoize(
+            <expression>
+        )
+    );
+    
+    ℙ.define(
+        self.add,
+        <expression>
+    );
+    
+    ℙ.define(
+        self.sub,
+        <expression>
+    );
+    
+    ℙ.define(
+        self.term,
+        Memoize(
+            <expression>
+        )
+    );
+    
+    ℙ.define(
+        self.mul,
+        <expression>
+    );
+    
+    ℙ.define(
+        self.div,
+        <expression>
+    );
+    
+    ℙ.define(
+        self.factor,
+        Selection(
+            i32,
+            Sequence(
+                "(",
+                expr,
+                ")"
+            )
+        )
+    );
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\a.pen  ==========
+import * as ℙ from "penlib;"
+import * as c from "./c";
+import * as b_pen from "./b.pen";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        
+    };
+    
+    
+    // TODO: define...
+    
+    // TODO: define...
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\index.pen  ==========
+import * as ℙ from "penlib;"
+import * as a from "./a";
+import * as b_pen from "./b.pen";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        foo: ℙ.declare();
+        bar: ℙ.declare();
+        baz: ℙ.declare();
+        rec: ℙ.declare();
+        r2: ℙ.declare();
+        r2d: ℙ.declare();
+        
+    };
+    
+    
+    // TODO: define...
+    
+    // TODO: define...
+    
+    ℙ.define(
+        self.rec,
+        <expression>
+    );
+    
+    ℙ.define(
+        self.r2,
+        rec
+    );
+    
+    ℙ.define(
+        self.r2d,
+        <expression>
+    );
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\penlib\penlib.pen  ==========
+import * as ℙ from "penlib;"
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        
+    };
+    
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\c.pen  ==========
+import * as ℙ from "penlib;"
+import * as a_pen from "./a.pen";
+import * as c from "./c";
+import * as d from "./d";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        
+    };
+    
+    
+    // TODO: define...
+    
+    // TODO: define...
+    
+    // TODO: define...
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\b.pen  ==========
+import * as ℙ from "penlib;"
+import * as c from "./c";
+import * as b from "./b";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        
+    };
+    
+    
+    // TODO: define...
+    
+    // TODO: define...
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\d.pen  ==========
+import * as ℙ from "penlib;"
+import * as pen from "pen";
+import * as util from "./util";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        
+    };
+    
+    
+    // TODO: define...
+    
+    // TODO: define...
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\util\index.pen  ==========
+import * as ℙ from "penlib;"
+import * as util1 from "./util1";
+import * as util2 from "./util2";
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        util: ℙ.declare();
+        
+    };
+    
+    
+    ℙ.define(
+        self.util,
+        <expression>
+    );
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\util\util1.pen  ==========
+import * as ℙ from "penlib;"
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        util1: ℙ.declare();
+        
+    };
+    
+    
+    ℙ.define(
+        self.util1,
+        "util1"
+    );
+    return self;
+    
+});
+
+
+// ==========  v:\oss\penc\test\fixtures\import-graph\util\util2  ==========
+import * as ℙ from "penlib;"
+
+export default (function getModule() {
+    let self = getModule.cached;
+    if (self) return self;
+    
+    self = getModule.cached = {
+        util2: ℙ.declare();
+        
+    };
+    
+    
+    ℙ.define(
+        self.util2,
+        "util2"
+    );
+    return self;
+    
+});
 ```
