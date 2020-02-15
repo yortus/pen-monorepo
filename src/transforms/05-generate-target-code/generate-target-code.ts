@@ -3,6 +3,7 @@ import {assert, makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {Emitter, makeEmitter} from './emitter';
+import {identifierFromModuleSpecifier} from './identifier-from-module-specifier';
 import {TargetCode} from './target-code';
 
 
@@ -33,49 +34,79 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): Ta
 
 
 function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions & SymbolReferences>) {
+
+    // TODO: every source file import the PEN standard library
+    // TODO: how to ensure it can be loaded? Use rel path and copy file there?
+    emit.text(`import * as ℙ from "penlib;"`).nl();
+
     let modSpecs = Object.keys(sourceFile.imports);
-    modSpecs.forEach((modSpec, i) => {
-        emit.text(`import * as _${i} from ${JSON.stringify(modSpec)};`).nl();
+    modSpecs.forEach((modSpec, _i) => {
+        let id = identifierFromModuleSpecifier(modSpec);
+        // TODO: need to store this modspec->id association somewhere to refer back to it later
+        emit.text(`import * as ${id} from ${JSON.stringify(modSpec)};`).nl();
     });
-    emit.text(`const imports = {`).nl(+1);
-    modSpecs.forEach((moduleId, i) => {
-        emit.text(`${JSON.stringify(moduleId)}: _${i},`);
-        if (i < modSpecs.length - 1) emit.nl();
-    });
-    emit.nl(-1).text('};').nl();
+    emit.nl();
+
+    // emit.text(`const imports = {`).nl(+1);
+    // modSpecs.forEach((moduleId, i) => {
+    //     emit.text(`${JSON.stringify(moduleId)}: _${i},`);
+    //     if (i < modSpecs.length - 1) emit.nl();
+    // });
+    // emit.nl(-1).text('};').nl();
+
+    emit.text('export default ');
     emitModule(emit, sourceFile.module);
 }
 
 
 function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
 
-    // Declare variables
-    for (let {pattern, value} of module.bindings) {
-        if (pattern.kind === 'ModulePattern') {
-            assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
-            let names = pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', ');
-            emit.text(`const {${names}} = imports[${JSON.stringify(value.moduleSpecifier)}];`).nl();
-        }
-        else {
-            emit.text(`const ${pattern.name} = {} as Rule;`).nl();
-        }
-    }
+    // remember, a module is an expression...
+    emit.text('((() => {').nl(+1);
 
-    // TODO: Define variables
+    // Declare all module-scoped variables.
+    for (let [, symbol] of module.meta.scope.symbols) {
+        // TODO: ensure no clashes with ES names, eg Object, String, etc
+        emit.text(`const ${symbol.name} = ℙ.declare();`).nl();
+    }
     emit.nl();
+
+    // // Define all module-scoped variables.
+    // for (let {pattern, value} of module.bindings) {
+    //     if (pattern.kind === 'ModulePattern') {
+    //         assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
+    //         let names = pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', ');
+    //         emit.text(`const {${names}} = imports[${JSON.stringify(value.moduleSpecifier)}];`).nl();
+    //     }
+    //     else {
+    //         emit.text(`const ${pattern.name} = {} as Rule;`).nl();
+    //     }
+    // }
+
+    // TODO: Define all module-scoped variables...
     for (let {pattern, value} of module.bindings) {
         if (pattern.kind === 'ModulePattern') {
             assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
-            // Already handled... no-op here...
+            // TODO: emit...
+            emit.nl().text('// TODO: define...').nl();
         }
         else {
-            emit.nl().text('define(').nl(+1);
+            emit.nl().text('ℙ.define(').nl(+1);
             emit.text(`${pattern.name},`).nl();
             emitExpression(emit, value);
             emit.nl(-1).text(');').nl();
 
         }
     }
+
+    // TODO: export stuff
+    emit.text(`return {`).nl(+1);
+    for (let [, symbol] of module.meta.scope.symbols) {
+        emit.text(`${symbol.name},`).nl(); // TODO: filter to only exported symbols
+    }
+    emit.nl(-1).text('};').nl();
+
+    emit.nl(-1).text('})());').nl();
 }
 
 

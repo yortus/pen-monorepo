@@ -4,6 +4,12 @@
  *      42*(333-2)
  */
 
+// TEMP TESTING...
+foo = import './import-graph/a.pen'
+{rec} = import './import-graph'
+
+
+
 
 {Memoize, i32} = import 'pen'
 

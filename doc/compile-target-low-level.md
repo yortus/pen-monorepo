@@ -185,3 +185,102 @@ define(
     )
 );
 ```
+
+
+
+
+#### TODO: new output WIP
+```ts
+// ==========  v:\projects\oss\penc\test\fixtures\math.pen  ==========
+import * as _0 from "pen";
+const imports = {
+    "pen": _0,
+};
+const {Memoize, i32} = imports["pen"]; // might still be undefined if imports are cyclic
+
+import blah from './blah'; // default import
+
+
+
+const foo: Rule = {
+    parse(...args) {
+        // replace parse/unparse functions with their targets on first call...
+        define(foo, blah.foo); // will be defined by now, even if part of an import cycle
+        return foo.parse(...args);
+    },
+    unparse(...args) {
+        // replace parse/unparse functions with their targets on first call...
+        define(foo, blah.foo); // will be defined by now, even if part of an import cycle
+        return foo.unparse(...args);
+    },
+};
+
+
+
+const math = {} as Rule;
+const expr = {} as Rule;
+const add = {} as Rule;
+const sub = {} as Rule;
+const term = {} as Rule;
+const mul = {} as Rule;
+const div = {} as Rule;
+const factor = {} as Rule;
+
+
+define(
+    math,
+    expr
+);
+
+define(
+    expr,
+    Memoize(
+        <expression>
+    )
+);
+
+define(
+    add,
+    <expression>
+);
+
+define(
+    sub,
+    <expression>
+);
+
+define(
+    term,
+    Memoize(
+        <expression>
+    )
+);
+
+define(
+    mul,
+    <expression>
+);
+
+define(
+    div,
+    <expression>
+);
+
+define(
+    factor,
+    Selection(
+        i32,
+        Sequence(
+            "(",
+            expr,
+            ")"
+        )
+    )
+);
+
+
+// ==========  v:\projects\oss\penc\penlib\penlib.pen  ==========
+const imports = {
+    
+};
+```

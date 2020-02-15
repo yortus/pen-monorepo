@@ -6,6 +6,7 @@ export type Symbol =
     | OtherSymbol;
 
 
+// TODO: remove ModuleSymbol? never used...
 export interface ModuleSymbol {
     kind: 'ModuleSymbol';
     name: string;
