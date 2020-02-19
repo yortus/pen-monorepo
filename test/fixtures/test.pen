@@ -1,0 +1,26 @@
+// TEMP TESTING...
+// foo = import './import-graph/a.pen'
+// {rec} = import './import-graph'
+
+
+{i32} = import 'pen'
+
+
+a = {a1 = b.b1}
+b = {b1 = a.a1}
+
+
+
+
+
+/*
+expr = add | sub | term
+add = {type: 'add', lhs: expr, rhs: "+" term}
+sub = {type: 'sub', lhs: expr, rhs: "\-" term}
+
+term = mul | div | factor
+mul = {type: 'mul', lhs: term, rhs: "*" factor}
+div = {type: 'div', lhs: term, rhs: "/" factor}
+
+factor = i32 | "(" expr ")"
+*/

@@ -205,7 +205,7 @@ export interface SequenceExpression<M extends Metadata = {}> {
 export interface StaticMemberExpression<M extends Metadata = {}> {
     readonly kind: 'StaticMemberExpression';
     readonly namespace: Expression<M>;
-    readonly name: string;
+    readonly memberName: string;
     readonly meta: M[this['kind']];
 }
 

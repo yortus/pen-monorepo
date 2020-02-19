@@ -13,7 +13,7 @@ export function compile(compilerOptions: CompilerOptions) {
     let ast03 = resolveSymbolReferences(ast02);
     let ast04 = generateTargetCode(ast03);
 
-    let result = '';
+    let result = `// tslint:disable: all\n`;
     for (let [, code] of ast04.entries()) {
         result += code;
     }

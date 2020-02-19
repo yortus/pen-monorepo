@@ -34,10 +34,9 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): Ta
 
 
 function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions & SymbolReferences>) {
-
     // TODO: every source file import the PEN standard library
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    emit.down(1).text(`import * as ℙ from "penlib;"`);
+    emit.down(1).text(`import * as __std from "penlib;"`);
 
     let modSpecs = Object.keys(sourceFile.imports);
     modSpecs.forEach((modSpec, _i) => {
@@ -45,6 +44,9 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
         // TODO: need to store this modspec->id association somewhere to refer back to it later
         emit.down(1).text(`import * as ${id} from ${JSON.stringify(modSpec)};`);
     });
+
+    // TODO: initial referencing environment
+    emit.down(2).text(`let __lexenv = __std.globalEnv;`);
 
     // emit.text(`const imports = {`).nl(+1);
     // modSpecs.forEach((moduleId, i) => {
@@ -59,20 +61,22 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
 }
 
 
+// TODO: doc... emits a function expression
 function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
+    emit.down(1).text('function __module() {').indent();
+    emit.down(1).text(`if (__module.cached) return __module.cached;`);
 
-    // remember, a module is an expression...
-    emit.down(1).text('(function getModule() {').indent();
-    emit.down(1).text(`let self = getModule.cached;`);
-    emit.down(1).text(`if (self) return self;`);
-    emit.down(2).text(`self = getModule.cached = {`).indent();
-
-    // Declare all module-scoped variables.
+    emit.down(2).text(`// Declare all module-scoped variables.`);
+    emit.down(1).text(`let self = __module.cached = {`).indent();
     for (let [, symbol] of module.meta.scope.symbols) {
         // TODO: ensure no clashes with ES names, eg Object, String, etc
-        emit.down(1).text(`${symbol.name}: ℙ.declare();`);
+        emit.down(1).text(`${symbol.name}: __std.declare(),`);
     }
     emit.dedent().down(1).text('};');
+
+    emit.down(2).text(`// Enter a new nested lexical referencing environment.`);
+    emit.down(1).text(`let outerEnv = __lexenv;`);
+    emit.down(1).text(`__lexenv = Object.assign(Object.create(outerEnv), self);`);
 
     // // Define all module-scoped variables.
     // for (let {pattern, value} of module.bindings) {
@@ -94,7 +98,7 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
             emit.down(2).text('// TODO: define...');
         }
         else {
-            emit.down(2).text('ℙ.define(').indent();
+            emit.down(2).text('__std.define(').indent();
             emit.down(1).text(`self.${pattern.name},`);
             emit.down(1);
             emitExpression(emit, value);
@@ -103,29 +107,59 @@ function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolRefe
         }
     }
 
-    // TODO: export stuff
-    emit.down(2).text(`return self;`);
-    emit.dedent().down(1).text('});');
+    emit.down(2).text(`// Restore previous lexical referencing environment before returning.`);
+    emit.down(1).text(`__lexenv = outerEnv;`);
+    // TODO: export only exported names...
+    emit.down(1).text(`return __module.cached;`);
+    emit.dedent().down(1).text('}');
 }
 
 
 function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & SymbolReferences>) {
     switch (expr.kind) {
-        case 'ApplicationExpression': return emitCall(emit, expr.function, [expr.argument]);
-        case 'CharacterExpression': break; // TODO...
-        case 'FunctionExpression': break; // TODO...
-        case 'ImportExpression': break; // TODO...
-        case 'LabelExpression': break; // TODO...
-        case 'ListExpression': break; // TODO...
-        case 'ModuleExpression': break; // TODO...
-        case 'ParenthesisedExpression': break; // TODO...
-        case 'RecordExpression': break; // TODO...
-        case 'ReferenceExpression': return emit.text(expr.name);
-        case 'SelectionExpression': return emitCall(emit, 'ℙ.selection', expr.expressions);
-        case 'SequenceExpression': return emitCall(emit, 'ℙ.sequence', expr.expressions);
-        case 'StaticMemberExpression': break; // TODO...
-        case 'StringExpression': return emit.text(JSON.stringify(expr.value));
-        default: throw new Error('Internal Error'); // TODO...
+        case 'ApplicationExpression':
+            emitCall(emit, expr.function, [expr.argument]);
+            return;
+        case 'CharacterExpression':
+            break; // TODO...
+        case 'FunctionExpression':
+            break; // TODO...
+        case 'ImportExpression':
+            break; // TODO...
+        case 'LabelExpression':
+            break; // TODO...
+        case 'ListExpression':
+            break; // TODO...
+        case 'ModuleExpression':
+            emit.text('(').indent();
+            emitModule(emit, expr.module);
+            emit.dedent().down(1).text(')()');
+            return;
+        case 'ParenthesisedExpression':
+            // TODO: emit extra parens?
+            emitExpression(emit, expr.expression);
+            return;
+        case 'RecordExpression':
+            break; // TODO...
+        case 'ReferenceExpression':
+            emit.text(`__lexenv.${expr.name}`);
+            return;
+        case 'SelectionExpression':
+            emitCall(emit, '__std.selection', expr.expressions);
+            return;
+        case 'SequenceExpression':
+            emitCall(emit, '__std.sequence', expr.expressions);
+            return;
+        case 'StaticMemberExpression':
+            emit.text('(');
+            emitExpression(emit, expr.namespace);
+            emit.text(`).${expr.memberName}`);
+            return;
+        case 'StringExpression':
+            emit.text(JSON.stringify(expr.value));
+            return;
+        default:
+            throw new Error('Internal Error'); // TODO...
     }
     emit.text('<expression>');
 }
