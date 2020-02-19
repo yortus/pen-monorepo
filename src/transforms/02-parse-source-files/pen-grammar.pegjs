@@ -205,7 +205,7 @@ HEX_DIGIT = [0-9a-fA-F]
 
 // ====================   Identifiers and Keywords   ====================
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
-IDENTIFIER_START        = [a-zA-Z_]
+IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
 RESERVED 'RESERVED'     = AS / EXPORT / IMPORT / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
