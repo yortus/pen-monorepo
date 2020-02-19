@@ -36,17 +36,17 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>): Ta
 function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions & SymbolReferences>) {
     // TODO: every source file import the PEN standard library
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    emit.down(1).text(`import * as __std from "penlib;"`);
+    emit.down(1).text(`//import * as __std from "penlib;"`);
 
     let modSpecs = Object.keys(sourceFile.imports);
     modSpecs.forEach((modSpec, _i) => {
         let id = identifierFromModuleSpecifier(modSpec);
         // TODO: need to store this modspec->id association somewhere to refer back to it later
-        emit.down(1).text(`import * as ${id} from ${JSON.stringify(modSpec)};`);
+        emit.down(1).text(`//import * as ${id} from ${JSON.stringify(modSpec)};`);
     });
 
     // TODO: initial referencing environment
-    emit.down(2).text(`let __lexenv = __std.globalEnv;`);
+    emit.down(2).text(`let __lexenv = {} as any; //__std.globalEnv;`);
 
     // emit.text(`const imports = {`).nl(+1);
     // modSpecs.forEach((moduleId, i) => {
@@ -55,63 +55,63 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
     // });
     // emit.nl(-1).text('};').nl();
 
-    emit.down(2).text('export default (').indent();
+    emit.down(2).text('export default ');
     emitModule(emit, sourceFile.module);
-    emit.dedent().down(1).text(');');
+    emit.text(';');
 }
 
 
-// TODO: doc... emits a function expression
+// TODO: doc... emits an IIFE
 function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
-    emit.down(1).text('function __module() {').indent();
-    emit.down(1).text(`if (__module.cached) return __module.cached;`);
+    emit.text('((() => {').indent();
 
-    emit.down(2).text(`// Declare all module-scoped variables.`);
-    emit.down(1).text(`let self = __module.cached = {`).indent();
-    for (let [, symbol] of module.meta.scope.symbols) {
-        // TODO: ensure no clashes with ES names, eg Object, String, etc
-        emit.down(1).text(`${symbol.name}: __std.declare(),`);
-    }
-    emit.dedent().down(1).text('};');
-
-    emit.down(2).text(`// Enter a new nested lexical referencing environment.`);
+    emit.down(1).text(`// Lazily define all bindings in this module.`);
+    emit.down(1).text(`let bindings = {};`);
     emit.down(1).text(`let outerEnv = __lexenv;`);
-    emit.down(1).text(`__lexenv = Object.assign(Object.create(outerEnv), self);`);
-
-    // // Define all module-scoped variables.
-    // for (let {pattern, value} of module.bindings) {
-    //     if (pattern.kind === 'ModulePattern') {
-    //         assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
-    //         let names = pattern.names.map(n => `${n.name}${n.alias ? ` as ${n.alias}` : ''}`).join(', ');
-    //         emit.text(`const {${names}} = imports[${JSON.stringify(value.moduleSpecifier)}];`).nl();
-    //     }
-    //     else {
-    //         emit.text(`const ${pattern.name} = {} as Rule;`).nl();
-    //     }
-    // }
-
-    // TODO: Define all module-scoped variables...
+    emit.down(1).text('{').indent();
+    emit.down(1).text(`__lexenv = Object.create(outerEnv);`);
     for (let {pattern, value} of module.bindings) {
         if (pattern.kind === 'ModulePattern') {
             assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
             // TODO: emit...
-            emit.down(2).text('// TODO: define...');
+            emit.down(2).text('// TODO: emit for ModulePattern...');
         }
         else {
-            emit.down(2).text('__std.define(').indent();
-            emit.down(1).text(`self.${pattern.name},`);
+            // TODO: ensure no clashes with ES names, eg Object, String, etc
+            emit.down(2).text(`Object.defineProperty(bindings, '${pattern.name}', {`).indent();
+            emit.down(1).text(`enumerable: true,`);
+            emit.down(1).text(`configurable: true,`);
+            emit.down(1).text(`get: () => {`).indent();
+
+
+
+            emit.down(1).text(`const value = {};`);
+            emit.down(1).text(`Object.defineProperty(bindings, '${pattern.name}', {enumerable: true, value});`);
+
+            emit.down(1).text(`Object.assign(`).indent();
+            emit.down(1).text(`value,`);
             emit.down(1);
             emitExpression(emit, value);
-            emit.text(',');
-            emit.dedent().down(1).text(');');
+            emit.text(`,`);
+            emit.dedent().down(1).text(`);`);
+            emit.down(1).text(`return value;`);
+            emit.dedent().down(1).text(`},`);
+            emit.dedent().down(1).text(`});`);
         }
     }
 
-    emit.down(2).text(`// Restore previous lexical referencing environment before returning.`);
-    emit.down(1).text(`__lexenv = outerEnv;`);
-    // TODO: export only exported names...
-    emit.down(1).text(`return __module.cached;`);
+    emit.down(2).text(`Object.assign(__lexenv, bindings);`);
     emit.dedent().down(1).text('}');
+    // emit.down(2).text(`// Enter a new nested lexical referencing environment.`);
+    // emit.down(1).text(`let outerEnv = __lexenv;`);
+    // emit.down(1).text(`__lexenv = Object.assign(Object.create(outerEnv), bindings);`);
+
+    // emit.down(2).text(`// Restore previous lexical referencing environment before returning.`);
+    // emit.down(1).text(`__lexenv = outerEnv;`);
+    // TODO: export only exported names...
+
+    emit.down(1).text(`return {bindings} as any;`);
+    emit.dedent().down(1).text('})())');
 }
 
 
@@ -131,9 +131,9 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
         case 'ListExpression':
             break; // TODO...
         case 'ModuleExpression':
-            emit.text('(').indent();
+            //emit.text('(').indent();
             emitModule(emit, expr.module);
-            emit.dedent().down(1).text(')()');
+            //emit.dedent().down(1).text(')()');
             return;
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
@@ -153,7 +153,7 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
         case 'StaticMemberExpression':
             emit.text('(');
             emitExpression(emit, expr.namespace);
-            emit.text(`).${expr.memberName}`);
+            emit.text(`).bindings.${expr.memberName}`);
             return;
         case 'StringExpression':
             emit.text(JSON.stringify(expr.value));

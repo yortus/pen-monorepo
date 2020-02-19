@@ -1,104 +1,91 @@
-// TODO: declare all bindings with lazy getters (ie Object.defineProperty)
-// - always inside 'Module' - since Module is the only node that introduces bindings
-Object.defineProperty(__lexenv, 'propName', {
-    configurable: true,
-    enumerable: true,
-    get: function self() {
-        const __VALUE = __std.declare();
-
-        Object.defineProperty(__lexenv, 'propName', {
-            configurable: false,
-            enumerable: true,
-            writable: false,
-            value: __VALUE,
-        });
-
-    },
-});
-
-
 // tslint:disable: all
 
 
 // ==========  v:\projects\oss\penc\test\fixtures\test.pen  ==========
-import * as __std from "penlib;"
-import * as __pen from "pen";
+//import * as __std from "penlib;"
+//import * as __pen from "pen";
 
-let __lexenv = {} as any;
+let __lexenv = {} as any; //__std.globalEnv;
 
-export default (
-    function __module() {
-        if (__module.cached) return __module.cached;
+export default ((() => {
+    // Lazily define all bindings in this module.
+    let bindings = {};
+    let outerEnv = __lexenv;
+    {
+        __lexenv = Object.create(outerEnv);
 
-        // Declare all module-scoped variables.
-        let self = __module.cached = {
-            i32: __std.declare(),
-            a: __std.declare(),
-            b: __std.declare(),
-        };
+        // TODO: emit for ModulePattern...
 
-        // Enter a new nested lexical referencing environment.
-        let outerEnv = __lexenv;
-        __lexenv = Object.assign(Object.create(outerEnv), self);
+        Object.defineProperty(bindings, 'a', {
+            configurable: true,
+            get: () => {
+                const value = {};
+                Object.defineProperty(bindings, 'a', {value});
+                Object.assign(
+                    value,
+                    ((() => {
+                        // Lazily define all bindings in this module.
+                        let bindings = {};
+                        let outerEnv = __lexenv;
+                        {
+                            __lexenv = Object.create(outerEnv);
 
-        // TODO: define...
+                            Object.defineProperty(bindings, 'a1', {
+                                configurable: true,
+                                get: () => {
+                                    const value = {};
+                                    Object.defineProperty(bindings, 'a1', {value});
+                                    Object.assign(
+                                        value,
+                                        (__lexenv.b).bindings.b1,
+                                    );
+                                    return value;
+                                },
+                            });
+                            Object.assign(__lexenv, bindings);
+                        }
+                        return {bindings} as any;
+                    })()),
+                );
+                return value;
+            },
+        });
 
-        __std.define(
-            self.a,
-            (
-                function __module() {
-                    if (__module.cached) return __module.cached;
+        Object.defineProperty(bindings, 'b', {
+            configurable: true,
+            get: () => {
+                const value = {};
+                Object.defineProperty(bindings, 'b', {value});
+                Object.assign(
+                    value,
+                    ((() => {
+                        // Lazily define all bindings in this module.
+                        let bindings = {};
+                        let outerEnv = __lexenv;
+                        {
+                            __lexenv = Object.create(outerEnv);
 
-                    // Declare all module-scoped variables.
-                    let self = __module.cached = {
-                        a1: __std.declare(),
-                    };
-
-                    // Enter a new nested lexical referencing environment.
-                    let outerEnv = __lexenv;
-                    __lexenv = Object.assign(Object.create(outerEnv), self);
-
-                    __std.define(
-                        self.a1,
-                        (__lexenv.b).b1, // ReferenceError: 'b1' not defined on object yet...
-                    );
-
-                    // Restore previous lexical referencing environment before returning.
-                    __lexenv = outerEnv;
-                    return __module.cached;
-                }
-            )(),
-        );
-
-        __std.define(
-            self.b,
-            (
-                function __module() {
-                    if (__module.cached) return __module.cached;
-
-                    // Declare all module-scoped variables.
-                    let self = __module.cached = {
-                        b1: __std.declare(),
-                    };
-
-                    // Enter a new nested lexical referencing environment.
-                    let outerEnv = __lexenv;
-                    __lexenv = Object.assign(Object.create(outerEnv), self);
-
-                    __std.define(
-                        self.b1,
-                        (__lexenv.a).a1,
-                    );
-
-                    // Restore previous lexical referencing environment before returning.
-                    __lexenv = outerEnv;
-                    return __module.cached;
-                }
-            )(),
-        );
-
-        // Restore previous lexical referencing environment before returning.
-        __lexenv = outerEnv;
-        return __module.cached;
+                            Object.defineProperty(bindings, 'b1', {
+                                configurable: true,
+                                get: () => {
+                                    const value = {};
+                                    Object.defineProperty(bindings, 'b1', {value});
+                                    Object.assign(
+                                        value,
+                                        (__lexenv.a).bindings.a1,
+                                    );
+                                    return value;
+                                },
+                            });
+                            Object.assign(__lexenv, bindings);
+                        }
+                        return {bindings} as any;
+                    })()),
+                );
+                return value;
+            },
+        });
+        Object.assign(__lexenv, bindings);
     }
-);
+    return {bindings} as any;
+})());
