@@ -1,6 +1,21 @@
 
 
 
-aaa = bbb
+start = expr.foo
 
-bbb = "blah"
+expr = {
+    foo = "foo"
+    bar = "bar"
+}
+
+baz = "baz"
+
+modExprMem = expr.foo | ({mem = "member"}).mem | baz
+
+// mutually recursive module expressions
+recA = { a = recB.b }
+recB = { b = recA.a }
+
+// function expressions, disabled for now
+// fn1 = a => a a
+// fn2 = {x, y} => x y

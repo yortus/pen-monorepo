@@ -32,7 +32,7 @@ export type Pattern<M extends Metadata = {}> =
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | CharacterExpression<M>
-    | FunctionExpression<M>
+    // | FunctionExpression<M>
     | ImportExpression<M>
     | LabelExpression<M>
     | ListExpression<M>
@@ -130,12 +130,12 @@ export interface CharacterExpression<M extends Metadata = {}> {
 }
 
 
-export interface FunctionExpression<M extends Metadata = {}> {
-    readonly kind: 'FunctionExpression';
-    readonly pattern: Pattern<M>;
-    readonly body: Expression<M>;
-    readonly meta: M[this['kind']];
-}
+// export interface FunctionExpression<M extends Metadata = {}> {
+//     readonly kind: 'FunctionExpression';
+//     readonly pattern: Pattern<M>;
+//     readonly body: Expression<M>;
+//     readonly meta: M[this['kind']];
+// }
 
 
 export interface ImportExpression<M extends Metadata = {}> {

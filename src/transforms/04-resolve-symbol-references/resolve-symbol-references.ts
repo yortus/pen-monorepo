@@ -28,12 +28,12 @@ export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
 
         },
 
-        FunctionExpression: fexpr => {
-            scopes.push(fexpr.meta.scope);
-            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
-            scopes.pop();
-            return fexprᐟ;
-        },
+        // FunctionExpression: fexpr => {
+        //     scopes.push(fexpr.meta.scope);
+        //     let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
+        //     scopes.pop();
+        //     return fexprᐟ;
+        // },
 
         // TODO: resolve symbol references...
         ReferenceExpression: ref => {

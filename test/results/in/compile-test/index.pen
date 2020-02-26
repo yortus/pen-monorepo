@@ -1,6 +1,13 @@
 
 
 
-aaa = bbb
+start = expr.foo
 
-bbb = "blah"
+expr = {
+    foo = "foo"
+    bar = "bar"
+}
+
+baz = "baz"
+
+modExprMem = expr.foo | ({mem = "member"}).mem | baz

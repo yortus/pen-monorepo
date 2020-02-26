@@ -1,5 +1,5 @@
 import {Expression, Module, Node, Program, SourceFile} from '../../ast-nodes';
-import {assert, makeNodeMapper} from '../../utils';
+import {makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {Emitter, makeEmitter} from './emitter';
@@ -63,55 +63,66 @@ function emitSourceFile(emit: Emitter, sourceFile: SourceFile<SymbolDefinitions 
 
 // TODO: doc... emits an IIFE
 function emitModule(emit: Emitter, module: Module<SymbolDefinitions & SymbolReferences>) {
-    emit.text('((() => {').indent();
 
-    emit.down(1).text(`// Lazily define all bindings in this module.`);
-    emit.down(1).text(`let bindings = {};`);
-    emit.down(1).text(`let outerEnv = __lexenv;`);
-    emit.down(1).text('{').indent();
-    emit.down(1).text(`__lexenv = Object.create(outerEnv);`);
-    for (let {pattern, value} of module.bindings) {
-        if (pattern.kind === 'ModulePattern') {
-            assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
-            // TODO: emit...
-            emit.down(2).text('// TODO: emit for ModulePattern...');
-        }
-        else {
-            // TODO: ensure no clashes with ES names, eg Object, String, etc
-            emit.down(2).text(`Object.defineProperty(bindings, '${pattern.name}', {`).indent();
-            emit.down(1).text(`enumerable: true,`);
-            emit.down(1).text(`configurable: true,`);
-            emit.down(1).text(`get: () => {`).indent();
+    const symbols = module.meta.scope.symbols;
+
+    emit.down(1).text('// emitting a module...');
+    emit.down(1).text(`// DECLARATIONS: ${[...symbols.keys()].join(', ')}`);
+    emit.down(1);
+    emit.down(1).text('// DEFINITIONS...');
 
 
 
-            emit.down(1).text(`const value = {};`);
-            emit.down(1).text(`Object.defineProperty(bindings, '${pattern.name}', {enumerable: true, value});`);
 
-            emit.down(1).text(`Object.assign(`).indent();
-            emit.down(1).text(`value,`);
-            emit.down(1);
-            emitExpression(emit, value);
-            emit.text(`,`);
-            emit.dedent().down(1).text(`);`);
-            emit.down(1).text(`return value;`);
-            emit.dedent().down(1).text(`},`);
-            emit.dedent().down(1).text(`});`);
-        }
-    }
+    // emit.text('((() => {').indent();
 
-    emit.down(2).text(`Object.assign(__lexenv, bindings);`);
-    emit.dedent().down(1).text('}');
-    // emit.down(2).text(`// Enter a new nested lexical referencing environment.`);
+    // emit.down(1).text(`// Lazily define all bindings in this module.`);
+    // emit.down(1).text(`let bindings = {};`);
     // emit.down(1).text(`let outerEnv = __lexenv;`);
-    // emit.down(1).text(`__lexenv = Object.assign(Object.create(outerEnv), bindings);`);
+    // emit.down(1).text('{').indent();
+    // emit.down(1).text(`__lexenv = Object.create(outerEnv);`);
+    // for (let {pattern, value} of module.bindings) {
+    //     if (pattern.kind === 'ModulePattern') {
+    //         assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
+    //         // TODO: emit...
+    //         emit.down(2).text('// TODO: emit for ModulePattern...');
+    //     }
+    //     else {
+    //         // TODO: ensure no clashes with ES names, eg Object, String, etc
+    //         emit.down(2).text(`Object.defineProperty(bindings, '${pattern.name}', {`).indent();
+    //         emit.down(1).text(`enumerable: true,`);
+    //         emit.down(1).text(`configurable: true,`);
+    //         emit.down(1).text(`get: () => {`).indent();
 
-    // emit.down(2).text(`// Restore previous lexical referencing environment before returning.`);
-    // emit.down(1).text(`__lexenv = outerEnv;`);
-    // TODO: export only exported names...
 
-    emit.down(1).text(`return {bindings} as any;`);
-    emit.dedent().down(1).text('})())');
+
+    //         emit.down(1).text(`const value = {};`);
+    //         emit.down(1).text(`Object.defineProperty(bindings, '${pattern.name}', {enumerable: true, value});`);
+
+    //         emit.down(1).text(`Object.assign(`).indent();
+    //         emit.down(1).text(`value,`);
+    //         emit.down(1);
+    //         emitExpression(emit, value);
+    //         emit.text(`,`);
+    //         emit.dedent().down(1).text(`);`);
+    //         emit.down(1).text(`return value;`);
+    //         emit.dedent().down(1).text(`},`);
+    //         emit.dedent().down(1).text(`});`);
+    //     }
+    // }
+
+    // emit.down(2).text(`Object.assign(__lexenv, bindings);`);
+    // emit.dedent().down(1).text('}');
+    // // emit.down(2).text(`// Enter a new nested lexical referencing environment.`);
+    // // emit.down(1).text(`let outerEnv = __lexenv;`);
+    // // emit.down(1).text(`__lexenv = Object.assign(Object.create(outerEnv), bindings);`);
+
+    // // emit.down(2).text(`// Restore previous lexical referencing environment before returning.`);
+    // // emit.down(1).text(`__lexenv = outerEnv;`);
+    // // TODO: export only exported names...
+
+    // emit.down(1).text(`return {bindings} as any;`);
+    // emit.dedent().down(1).text('})())');
 }
 
 
@@ -122,8 +133,8 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
             return;
         case 'CharacterExpression':
             break; // TODO...
-        case 'FunctionExpression':
-            break; // TODO...
+        // case 'FunctionExpression':
+        //     break; // TODO...
         case 'ImportExpression':
             break; // TODO...
         case 'LabelExpression':

@@ -25,12 +25,12 @@ export function createSymbolDefinitions(program: Program) {
             scopes.pop();
             return modᐟ;
         },
-        FunctionExpression: fexpr => {
-            let scope = scopes.push('FunctionScope');
-            let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), meta: {scope}};
-            scopes.pop();
-            return fexprᐟ;
-        },
+        // FunctionExpression: fexpr => {
+        //     let scope = scopes.push('FunctionScope');
+        //     let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), meta: {scope}};
+        //     scopes.pop();
+        //     return fexprᐟ;
+        // },
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {

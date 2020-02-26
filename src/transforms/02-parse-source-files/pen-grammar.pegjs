@@ -55,7 +55,7 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         StaticMemberExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 4 (HIGHEST):
-        FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
+        ---DISABLED FOR NOW--> FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
         RecordExpression            {a: b   c: d   [e]: f}   {a: b}   {}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
@@ -85,8 +85,8 @@ Precedence4OrHigher
     = PrimaryExpression
 
 PrimaryExpression
-    = FunctionExpression
-    / RecordExpression
+    // = FunctionExpression
+    = RecordExpression
     / ModuleExpression
     / ListExpression
     / ParenthesisedExpression
@@ -124,9 +124,9 @@ ApplicationArgument
     = arg:Precedence4OrHigher
     { return {arg}; }
 
-FunctionExpression
-    = pattern:Pattern   __   "=>"   __   body:Expression
-    { return {kind: 'FunctionExpression', pattern, body}; }
+// FunctionExpression
+//     = pattern:Pattern   __   "=>"   __   body:Expression
+//     { return {kind: 'FunctionExpression', pattern, body}; }
 
 RecordExpression
     = "{"   __   fields:FieldList   __   "}"

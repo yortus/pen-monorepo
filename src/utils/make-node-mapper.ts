@@ -30,7 +30,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
             case 'CharacterExpression': return n;
             case 'DynamicField': return {...n, name: rec(n.name), value: rec(n.value)};
-            case 'FunctionExpression': return n;
+            // case 'FunctionExpression': TODO: ...
             case 'ImportExpression': return n;
             case 'LabelExpression': return n;
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};

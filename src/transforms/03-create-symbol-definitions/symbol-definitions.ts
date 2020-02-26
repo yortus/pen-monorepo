@@ -11,9 +11,9 @@ export interface SymbolDefinitions {
         readonly scope: Scope;
     };
 
-    FunctionExpression: {
-        readonly scope: Scope;
-    };
+    // FunctionExpression: {
+    //     readonly scope: Scope;
+    // };
 
     VariablePattern: {
         readonly symbol: Symbol;
