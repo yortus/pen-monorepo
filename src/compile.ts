@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as mkdirp from 'mkdirp';
+import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
 import {parseSourceFiles} from './transforms';
@@ -17,5 +20,9 @@ export function compile(compilerOptions: CompilerOptions) {
     for (let [, code] of ast04.entries()) {
         result += code;
     }
-    return result;
+
+    // write the target code to the output directory
+    let tempOutFilePath = path.join(compilerOptions.outDir, 'temp.ts');
+    mkdirp.sync(compilerOptions.outDir);
+    fs.writeFileSync(tempOutFilePath, result);
 }
