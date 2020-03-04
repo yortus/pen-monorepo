@@ -1,25 +1,21 @@
-import {Scope} from '../../scopes';
-import {Symbol} from '../../symbols';
+import {Scope} from '../../scope';
+import {SymbolTable} from '../../symbol-table';
 
 
 export interface SymbolDefinitions {
     Program: {
-        readonly scope: Scope;
+        readonly symbolTable: SymbolTable;
     };
 
     Module: {
         readonly scope: Scope;
     };
 
-    // FunctionExpression: {
-    //     readonly scope: Scope;
-    // };
-
     VariablePattern: {
-        readonly symbol: Symbol;
+        readonly symbolId: number;
     };
 
     ModulePatternName: {
-        readonly symbol: Symbol;
+        readonly symbolId: number;
     };
 }

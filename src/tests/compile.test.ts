@@ -10,8 +10,7 @@ describe('compile', () => {
         let outDir = path.join(__dirname, `../../dist/out/${fixture}`);
         let options: CompilerOptions = {main, outDir};
         let result = compile(options);
-        expect(result).equals(undefined);
         // TODO: was... expect(result).to.be.a('string');
-        // TODO: was... expect(result).to.include({kind: 'Program'});
+        expect(result).to.include({kind: 'Program'});
     });
 });

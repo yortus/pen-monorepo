@@ -1,52 +1,48 @@
 import {Node, Program} from '../../ast-nodes';
-import {ScopeStack} from '../../scopes';
-import {createSymbol} from '../../symbols';
-import {assert, mapMap} from '../../utils';
-import {makeNodeMapper} from '../../utils/make-node-mapper';
+import {Scope} from '../../scope';
+import {SymbolTable} from '../../symbol-table';
+import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {SymbolDefinitions} from './symbol-definitions';
 
 
 // TODO: doc...
 export function createSymbolDefinitions(program: Program) {
-    const scopes = new ScopeStack();
-    const globalScope = scopes.push('GlobalScope');
+    const symbolTable = new SymbolTable();
+    let currentScope: Scope | undefined;
     let mapNode = makeNodeMapper<Node, Node<SymbolDefinitions>>();
     let result = mapNode(program, rec => ({
 
-        // Attach a scope to each Program, Module and FunctionExpression node.
+        // Attach the symbol table to the Program node.
         Program: prg => {
-            assert(scopes.current === globalScope);
-            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {scope: globalScope}};
+            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {symbolTable}};
             return prgᐟ;
         },
+
+        // Attach a scope to each Module node.
         Module: mod => {
-            let scope = scopes.push('ModuleScope');
+            let scope = currentScope = {parent: currentScope, symbols: new Map()};
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
-            scopes.pop();
+            currentScope = scope.parent;
             return modᐟ;
         },
-        // FunctionExpression: fexpr => {
-        //     let scope = scopes.push('FunctionScope');
-        //     let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body), meta: {scope}};
-        //     scopes.pop();
-        //     return fexprᐟ;
-        // },
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
-            let symbol = createSymbol('OtherSymbol', pat.name, scopes.current);
-            let patternᐟ = {...pat, meta: {symbol}};
+            assert(currentScope !== undefined);
+            let symbol = symbolTable.create(pat.name, currentScope);
+            let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
             return patternᐟ;
         },
         ModulePatternName: name => {
-            let symbol = createSymbol('OtherSymbol', name.alias || name.name, scopes.current);
-            let nameᐟ = {...name, meta: {symbol}};
+            assert(currentScope !== undefined);
+            let symbol = symbolTable.create(name.alias || name.name, currentScope);
+            let nameᐟ = {...name, meta: {symbolId: symbol.id}};
             return nameᐟ;
         },
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(scopes.current === globalScope);
+    assert(currentScope === undefined);
 
     // All done.
     return result;

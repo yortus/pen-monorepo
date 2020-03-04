@@ -1,44 +1,30 @@
 import {Node, Program} from '../../ast-nodes';
-import {ScopeStack} from '../../scopes';
-import {lookup} from '../../symbols';
-import {assert, makeNodeMapper, mapMap} from '../../utils';
+import {Scope} from '../../scope';
+import {assert, makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from './symbol-references';
 
 
 // TODO: doc...
 export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
-    const scopes = new ScopeStack();
+    const symbolTable = program.meta.symbolTable;
+    let currentScope: Scope | undefined;
     let mapNode = makeNodeMapper<Node<SymbolDefinitions>, Node<SymbolDefinitions & SymbolReferences>>();
     let result = mapNode(program, rec => ({
 
-        // TODO: keep track of the current scope...
-        Program: prg => {
-            scopes.push(prg.meta.scope);
-            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec)};
-            scopes.pop();
-            return prgᐟ;
-        },
-
+        // Keep track of the current scope.
         Module: mod => {
-            scopes.push(mod.meta.scope);
+            currentScope = mod.meta.scope;
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
-            scopes.pop();
+            currentScope = currentScope.parent;
             return modᐟ;
-
         },
 
-        // FunctionExpression: fexpr => {
-        //     scopes.push(fexpr.meta.scope);
-        //     let fexprᐟ = {...fexpr, pattern: rec(fexpr.pattern), body: rec(fexpr.body)};
-        //     scopes.pop();
-        //     return fexprᐟ;
-        // },
-
-        // TODO: resolve symbol references...
+        // Resolve symbol references.
         ReferenceExpression: ref => {
-            let symbol = lookup(scopes.current, ref.name);
-            let refᐟ = {...ref, meta: {symbol}};
+            assert(currentScope !== undefined);
+            let symbol = symbolTable.lookup(ref.name, currentScope);
+            let refᐟ = {...ref, meta: {symbolId: symbol.id}};
             return refᐟ;
         },
 
@@ -48,7 +34,7 @@ export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(scopes.isEmpty);
+    assert(currentScope === undefined);
 
     // All done.
     return result;

@@ -27,6 +27,6 @@ export function compile(compilerOptions: CompilerOptions) {
     // fs.writeFileSync(tempOutFilePath, result);
 
 
-    [] = [ast03];
+    return ast03;
 
 }
