@@ -15,7 +15,7 @@ export class SymbolTable {
         // ensure not already defined in this scope
         if (scope.symbols.has(nameInSource)) throw new Error(`Symbol '${nameInSource}' is already defined.`);
         let id = this.symbols.length;
-        let nameInTarget = `__${nameInSource}$_{id}`;
+        let nameInTarget = `__${nameInSource}_${id}`;
         let symbol: Symbol = {id, nameInSource, nameInTarget};
         scope.symbols.set(nameInSource, symbol);
         this.symbols.push(symbol);
@@ -30,6 +30,10 @@ export class SymbolTable {
         if (scope.symbols.has(idOrName)) return scope.symbols.get(idOrName)!;
         if (scope.parent) return this.lookup(idOrName, scope.parent);
         throw new Error(`Symbol '${idOrName}' is not defined.`);
+    }
+
+    forEach(cb: (symbol: Symbol, index: number) => void) {
+        this.symbols.forEach(cb);
     }
 
     private symbols: Symbol[] = [];

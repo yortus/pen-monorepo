@@ -6,7 +6,13 @@ start = expr.foo
 expr = {
     foo = "foo"
     bar = "bar"
+    a = b
+    //b = "b1"
 }
+
+a = b
+
+b = "b2"
 
 baz = "baz"
 
