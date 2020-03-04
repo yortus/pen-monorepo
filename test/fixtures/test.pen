@@ -6,8 +6,8 @@
 {i32} = import 'pen'
 
 
-a = {a1 = b.b1}
-b = {b1 = a.a1}
+a = {a1 = b.b1, b1 = "blah"}
+b = {b1 = a.a1, a1 = "aaaa"}
 
 
 

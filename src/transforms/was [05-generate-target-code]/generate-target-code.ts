@@ -131,6 +131,11 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
         case 'ApplicationExpression':
             emitCall(emit, expr.function, [expr.argument]);
             return;
+        case 'BindingLookupExpression':
+            emit.text('(');
+            emitExpression(emit, expr.module);
+            emit.text(`).bindings.${expr.bindingName}`);
+            return;
         case 'CharacterExpression':
             break; // TODO...
         // case 'FunctionExpression':
@@ -160,11 +165,6 @@ function emitExpression(emit: Emitter, expr: Expression<SymbolDefinitions & Symb
             return;
         case 'SequenceExpression':
             emitCall(emit, '__std.sequence', expr.expressions);
-            return;
-        case 'StaticMemberExpression':
-            emit.text('(');
-            emitExpression(emit, expr.namespace);
-            emit.text(`).bindings.${expr.memberName}`);
             return;
         case 'StringExpression':
             emit.text(JSON.stringify(expr.value));
@@ -297,7 +297,7 @@ export function generateTargetCodeOLD(program: Program) {
             return seq;
         },
 
-        StaticMemberExpression: (memb: any) => {
+        BindingLookupExpression: (memb: any) => {
             // TODO: ...
             // let namespaces = ref.namespaces ? ref.namespaces.map(ns => `${ns}.exports.`) : [];
             // emit.text(`Reference(${namespaces.join('')}${ref.name})`);

@@ -28,9 +28,13 @@ export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
             return refᐟ;
         },
 
-        // TODO:
-        // StaticMemberExpression
-        // - lookup sme.memberName inside scope of sme.namespace (recursive)
+        // TODO: lookup sme.memberName inside scope of sme.namespace (recursive)
+        // BindingLookupExpression: look => {
+        //     assert(currentScope !== undefined);
+
+        //     let lookᐟ = {...look, module: rec(look.module), meta: {symbolId: symbol.id}};
+        //     return lookᐟ;
+        // },
     }));
 
     // sanity check - we should be back to the scope we started with here.

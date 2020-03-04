@@ -31,6 +31,7 @@ export type Pattern<M extends Metadata = {}> =
 
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
+    | BindingLookupExpression<M>
     | CharacterExpression<M>
     // | FunctionExpression<M>
     | ImportExpression<M>
@@ -42,7 +43,6 @@ export type Expression<M extends Metadata = {}> =
     | ReferenceExpression<M>
     | SelectionExpression<M>
     | SequenceExpression<M>
-    | StaticMemberExpression<M>
     | StringExpression<M>;
 
 
@@ -118,6 +118,14 @@ export interface ApplicationExpression<M extends Metadata = {}> {
     readonly kind: 'ApplicationExpression';
     readonly function: Expression<M>;
     readonly argument: Expression<M>;
+    readonly meta: M[this['kind']];
+}
+
+
+export interface BindingLookupExpression<M extends Metadata = {}> {
+    readonly kind: 'BindingLookupExpression';
+    readonly module: Expression<M>;
+    readonly bindingName: string;
     readonly meta: M[this['kind']];
 }
 
@@ -198,14 +206,6 @@ export interface SelectionExpression<M extends Metadata = {}> {
 export interface SequenceExpression<M extends Metadata = {}> {
     readonly kind: 'SequenceExpression';
     readonly expressions: ReadonlyArray<Expression<M>>;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface StaticMemberExpression<M extends Metadata = {}> {
-    readonly kind: 'StaticMemberExpression';
-    readonly namespace: Expression<M>;
-    readonly memberName: string; // TODO: rename to bindingName or just name? The term 'member' isn't used anywhere else
     readonly meta: M[this['kind']];
 }
 

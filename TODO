@@ -11,7 +11,7 @@ Next up:
         [x] anything else?
     [x] revise scope rules in light of module/record separation (record field names don't get added to a scope)
     [x] finalise phase 3
-    [ ] resolve symbols for StaticMemberExpression
+    [ ] resolve symbols for BindingLookupExpression
         [ ] expand `Symbol` to allow for namespace symbols, which link to their own module scope
         [ ] rename `namespace` prop to `moduleRef`?
     [ ] implement phase 4 starting from stuff in `[TODO]`

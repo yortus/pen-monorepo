@@ -28,6 +28,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, function: rec(n.function), argument: rec(n.argument)};
             case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
+            case 'BindingLookupExpression': return {...n, module: rec(n.module)};
             case 'CharacterExpression': return n;
             case 'DynamicField': return {...n, name: rec(n.name), value: rec(n.value)};
             // case 'FunctionExpression': TODO: ...
@@ -46,7 +47,6 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SourceFile': return {...n, module: rec(n.module)};
             case 'StaticField': return {...n, value: rec(n.value)};
-            case 'StaticMemberExpression': return {...n, namespace: rec(n.namespace)};
             case 'StringExpression': return n;
             case 'VariablePattern': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);

@@ -52,7 +52,7 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
 
     PRECEDENCE 3
         ApplicationExpression       a(b)   (a)b   a'blah'   a(b)                                                        NB: no whitespace between terms, else is sequence
-        StaticMemberExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
+        BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 4 (HIGHEST):
         ---DISABLED FOR NOW--> FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
@@ -105,18 +105,18 @@ SequenceExpression
     { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
 Precedence3Expression
-    = head:Precedence4OrHigher   tail:(/* NO WHITESPACE */   StaticMemberReference / ApplicationArgument)+
+    = head:Precedence4OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
-                ? {kind: 'StaticMemberExpression', namespace: lhs, memberName: rhs.name}
+                ? {kind: 'BindingLookupExpression', module: lhs, bindingName: rhs.name}
                 : {kind: 'ApplicationExpression', function: lhs, argument: rhs.arg}
             ),
             head
         );
     }
 
-StaticMemberReference
+BindingNameLookup
     = "."   /* NO WHITESPACE */   name:IDENTIFIER
     { return {name}; }
 
