@@ -19,3 +19,18 @@ recB = { b = recA.a }
 // function expressions, disabled for now
 // fn1 = a => a a
 // fn2 = {x, y} => x y
+
+// deeper references
+refC = defC.c.c1
+defC = {
+    c = {
+        c1 = "c1"
+        c2 = "c2"
+
+        ref1 = c1
+        ref2 = c.c1
+        ref3 = defC.c.c1
+    }
+    ref5 = c.c1
+    ref6 = defC.c.c1
+}

@@ -29,3 +29,24 @@ There is no global scope accessible by `pen` source code. Symbols must be `impor
 - it must not matter in which order symbols are defined.
 - due to the above two, all symbols, including members of module expressions, must be declared before any symbols are defined.
 
+
+
+
+when emitting a SourceFile:
+- need to enumerate over all symbols that need declaring before any definitions appear
+- includes binding names directly in the source file's module
+- includes emit-referencable names for a bunch of RHS stuff:
+  - includes all import expressions
+  - includes all module expressions that appear directly in the source file (ie not inside a function expression)
+  - includes all application expressions ...
+
+an expression is emit-referencable iff:
+- it is an import expression
+- it is a module expression
+- it is an application expression
+
+-OR-
+- it is the RHS of a binding
+- it is the lhs of a member access expression
+- it is the argument in an application expression
+
