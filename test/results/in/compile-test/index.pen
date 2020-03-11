@@ -10,6 +10,9 @@ expr = {
     //b = "b1"
 }
 
+// Aliases
+{foo as foo1, bar, quux} = expr // NB: quux is an error
+
 a = b
 
 b = "b2"
