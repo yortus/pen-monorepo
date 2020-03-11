@@ -4,26 +4,25 @@ import {assert} from './utils';
 
 export interface Symbol {
     id: number;
-    nameInSource: string;
-    nameInTarget: string;
+    name: string;
+    scope: Scope;
 }
 
 
 export class SymbolTable {
 
-    create(nameInSource: string, scope: Scope): Symbol {
+    create(name: string, scope: Scope): Symbol {
         // ensure not already defined in this scope
-        if (scope.symbols.has(nameInSource)) throw new Error(`Symbol '${nameInSource}' is already defined.`);
+        if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
         let id = this.symbols.length;
-        let nameInTarget = `__${nameInSource}_${id}`;
-        let symbol: Symbol = {id, nameInSource, nameInTarget};
-        scope.symbols.set(nameInSource, symbol);
+        let symbol: Symbol = {id, name, scope};
+        scope.symbols.set(name, symbol);
         this.symbols.push(symbol);
         return symbol;
     }
 
     lookup(id: number): Symbol;
-    lookup(nameInSource: string, scope: Scope): Symbol;
+    lookup(name: string, scope: Scope): Symbol;
     lookup(idOrName: number | string, scope?: Scope): Symbol {
         if (typeof idOrName === 'number') return this.symbols[idOrName];
         assert(scope !== undefined);

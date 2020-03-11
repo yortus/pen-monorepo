@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {Scope} from '../../scope';
+import {createChildScope, createRootScope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {SymbolDefinitions} from './symbol-definitions';
@@ -8,19 +8,20 @@ import {SymbolDefinitions} from './symbol-definitions';
 // TODO: doc...
 export function createSymbolDefinitions(program: Program) {
     const symbolTable = new SymbolTable();
-    let currentScope: Scope | undefined;
+    const rootScope = createRootScope();
+    let currentScope = rootScope;
     let mapNode = makeNodeMapper<Node, Node<SymbolDefinitions>>();
     let result = mapNode(program, rec => ({
 
         // Attach the symbol table to the Program node.
         Program: prg => {
-            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {symbolTable}};
+            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {rootScope, symbolTable}};
             return prgᐟ;
         },
 
         // Attach a scope to each Module node.
         Module: mod => {
-            let scope = currentScope = {parent: currentScope, symbols: new Map()};
+            let scope = currentScope = createChildScope(currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = scope.parent;
             return modᐟ;
@@ -28,13 +29,11 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
-            assert(currentScope !== undefined);
             let symbol = symbolTable.create(pat.name, currentScope);
             let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
             return patternᐟ;
         },
         ModulePatternName: name => {
-            assert(currentScope !== undefined);
             let symbol = symbolTable.create(name.alias || name.name, currentScope);
             let nameᐟ = {...name, meta: {symbolId: symbol.id}};
             return nameᐟ;
@@ -42,7 +41,8 @@ export function createSymbolDefinitions(program: Program) {
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === undefined);
+    assert(currentScope === rootScope);
+    assert(rootScope.symbols.size === 0);
 
     // All done.
     return result;

@@ -1,4 +1,5 @@
 import {Program} from '../../ast-nodes';
+import {Scope} from '../../scope';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {makeEmitter} from './emitter';
@@ -12,7 +13,7 @@ export function generateTargetCode(program: Program<SymbolDefinitions & SymbolRe
 
 function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>) {
     const emit = makeEmitter();
-    const symbolTable = program.meta.symbolTable;
+    const {rootScope/*, symbolTable*/} = program.meta;
 
     // TODO: header stuff...
     // TODO: every source file import the PEN standard library
@@ -21,9 +22,17 @@ function emitProgram(program: Program<SymbolDefinitions & SymbolReferences>) {
     emit.down(2);
 
     // Declare all symbols before any are defined.
-    symbolTable.forEach(symbol => {
-        emit.down(1).text(`const ${symbol.nameInTarget} = {};`);
-    });
+    emit.down(1).text(`const 𝕊${rootScope.id} = {`).indent();
+    rootScope.children.forEach(visitScope);
+    emit.dedent().down(1).text(`};`);
+    function visitScope(scope: Scope) {
+        emit.down(1).text(`𝕊${scope.id}: {`).indent();
+        for (let symbol of scope.symbols.values()) {
+            emit.down(1).text(`${symbol.name}: {},`);
+        }
+        scope.children.forEach(visitScope);
+        emit.dedent().down(1).text(`},`);
+    }
 
 
 
