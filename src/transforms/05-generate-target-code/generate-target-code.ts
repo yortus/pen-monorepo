@@ -39,16 +39,21 @@ function emitProgram(program: Program) {
 
 
 function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
-    emit.down(1).text(`const 𝕊${rootScope.id} = {`).indent();
-    rootScope.children.forEach(visitScope);
-    emit.dedent().down(1).text(`};`);
+    // emit.down(1).text(`const 𝕊${rootScope.id} = {`).indent();
+    // rootScope.children.forEach(visitScope);
+    // emit.dedent().down(1).text(`};`);
+
+    visitScope(rootScope);
+
     function visitScope(scope: Scope) {
-        emit.down(1).text(`𝕊${scope.id}: {`).indent();
-        for (let symbol of scope.symbols.values()) {
-            emit.down(1).text(`${symbol.name}: {},`);
+        if (scope.symbols.size > 0) {
+            emit.down(2).text(`const 𝕊${scope.id} = {`).indent();
+            for (let symbol of scope.symbols.values()) {
+                emit.down(1).text(`${symbol.name}: {},`);
+            }
+            emit.dedent().down(1).text(`};`);
         }
         scope.children.forEach(visitScope);
-        emit.dedent().down(1).text(`},`);
     }
 }
 
@@ -74,7 +79,7 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
         }
         else /* pattern.kind === 'VariablePattern */{
             // TODO: ensure no clashes with ES names, eg Object, String, etc
-            emit.down(1).text(`Object.assign(`).indent();
+            emit.down(2).text(`Object.assign(`).indent();
             emit.down(1);
             emitSymbolReference(emit, symbolTable.lookup(pattern.meta.symbolId));
             emit.text(',').down(1);
@@ -87,12 +92,7 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
 
 function emitSymbolReference(emit: Emitter, symbol: Symbol) {
     let {name, scope} = symbol;
-    while (true) {
-        name = `𝕊${scope.id}.${name}`;
-        if (!scope.parent) break;
-        scope = scope.parent;
-    }
-    emit.text(name);
+    emit.text(`𝕊${scope.id}.${name}`);
 }
 
 
@@ -119,12 +119,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'ModuleExpression':
             // TODO: treat as reference
             let {scope} = expr.module.meta;
-            let name = `𝕊${scope.id}`;
-            while (scope.parent) {
-                scope = scope.parent;
-                name = `𝕊${scope.id}.${name}`;
-            }
-            emit.text(name);
+            emit.text(`𝕊${scope.id}`);
             return;
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
