@@ -133,7 +133,14 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ListExpression':
-            break; // TODO...
+            emit.text('std.list([').indent();
+            for (let element of expr.elements) {
+                emit.down(1);
+                emitExpression(emit, element, symbolTable);
+                emit.text(',');
+            }
+            emit.dedent().down(1).text('])');
+            return;
 
         case 'ModuleExpression':
             // TODO: treat as reference
@@ -186,7 +193,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         default:
             throw new Error('Internal Error'); // TODO...
     }
-    emit.text(`std.NOT_IMPLEMENTED('${expr.kind}')`);
 }
 
 

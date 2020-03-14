@@ -9,7 +9,7 @@ TODO 2020:
             - NB: disabled for now
         [x] ImportExpression
         [x] LabelExpression
-        [ ] ListExpression
+        [x] ListExpression
         [x] Module
         [x] ModuleExpression
         [x] ModulePattern
@@ -25,7 +25,7 @@ TODO 2020:
         [x] StringExpression
         [x] VariablePattern
 
-
+    [ ] implement FunctionExpressions
     [ ] complete stdlib
     [ ] link stdlib into emitted code
     [ ] specify extention (and declaration) modules properly
