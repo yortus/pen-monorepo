@@ -26,11 +26,12 @@ function emitProgram(program: Program) {
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
     // emit.down(1).text(`import * as std from "penlib;"`);
     // emit.down(2);
-    emit.down(1).text(`declare let reference: any;`);
-    emit.down(1).text(`declare let bindingLookup: any;`);
-    emit.down(1).text(`declare let sequence: any;`);
-    emit.down(1).text(`declare let selection: any;`);
-    emit.down(1).text(`declare let record: any;`);
+    emit.down(1).text(`let NOT_IMPLEMENTED;`);
+    emit.down(1).text(`let reference;`);
+    emit.down(1).text(`let bindingLookup;`);
+    emit.down(1).text(`let sequence;`);
+    emit.down(1).text(`let selection;`);
+    emit.down(1).text(`let record;`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -163,7 +164,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         default:
             throw new Error('Internal Error'); // TODO...
     }
-    emit.text(`<NotImplemented:${expr.kind}>`);
+    emit.text(`NOT_IMPLEMENTED('${expr.kind}')`);
 }
 
 
