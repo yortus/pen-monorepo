@@ -17,7 +17,11 @@ const 𝕊2 = {
     },
 };
 
-// TODO: emit for ModulePattern...
+{
+    let rhs = std.NOT_IMPLEMENTED('ImportExpression');
+    Object.assign(𝕊2.bindings.Memoize, std.bindingLookup(rhs, 'Memoize'));
+    Object.assign(𝕊2.bindings.i32, std.bindingLookup(rhs, 'i32'));
+}
 
 Object.assign(
     𝕊2.bindings.math,

@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-import * as mkdirp from 'mkdirp';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
@@ -18,6 +17,6 @@ export function compile(compilerOptions: CompilerOptions) {
 
     // write the target code to the output directory
     let tempOutFilePath = path.join(compilerOptions.outDir, 'temp.js');
-    mkdirp.sync(compilerOptions.outDir);
+    fs.ensureDirSync(compilerOptions.outDir);
     fs.writeFileSync(tempOutFilePath, targetCode);
 }

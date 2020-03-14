@@ -1,11 +1,8 @@
-import * as cpy from 'cpy';
+import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as rimrafModule from 'rimraf';
-import {promisify} from 'util';
 import {compile} from '../src';
 
 
-const rimraf = promisify(rimrafModule);
 const fixtureName = 'math';
 const fixturePath = path.join(__dirname, './fixtures', fixtureName);
 const resultsPath = path.join(__dirname, './results');
@@ -16,10 +13,10 @@ describe('compile', async () => {
     it('works', async () => {
 
         // Delete results dir
-        await rimraf(resultsPath);
+        await fs.remove(resultsPath);
 
         // Copy fixture source to results dir
-        await cpy(fixturePath, path.join(resultsPath, 'in', fixtureName));
+        await fs.copy(fixturePath, path.join(resultsPath, 'in', fixtureName));
 
         // Compile to output in results dir
         try {
