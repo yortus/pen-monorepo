@@ -3,45 +3,46 @@ type Field =
     | {dynamic: true, name: Production, value: Production};
 
 
-
-
 function record(fields: Field[]): Production {
     return {
         kind: 'production',
-        parse: (src, pos, result) => {
-            let obj = {} as any; // TODO: remove/improve cast
+
+        parse(text, pos, result) {
+            let obj = {} as Record<string, unknown>;
             for (let field of fields) {
-                let id: string;
+                let propName: string;
                 if (field.dynamic) {
-                    if (!field.name.parse(src, pos, result)) return false;
-                    assert(typeof result.ast === 'string');
-                    id = result.ast as string;
+                    if (!field.name.parse(text, pos, result)) return false;
+                    assert(typeof result.node === 'string');
+                    propName = result.node;
                     pos = result.posᐟ;
                 }
                 else /* field.dynamic === false */ {
-                    id = field.name;
+                    propName = field.name;
                 }
 
-                if (!field.value.parse(src, pos, result)) return false;
-                assert(result.ast !== undefined);
-                obj[id] = result.ast;
+                if (!field.value.parse(text, pos, result)) return false;
+                assert(result.node !== undefined);
+                obj[propName] = result.node;
                 pos = result.posᐟ;
             }
-            result.ast = obj;
+            result.node = obj;
             result.posᐟ = pos;
             return true;
         },
-        unparse: (ast, pos, result) => {
-            let src = '';
-            if (!isPlainObject(ast)) return false;
 
-            // TODO: ...
+        unparse(node, pos, result) {
+            let text = '';
+            if (!isPlainObject(node)) return false;
+
+            let propNames = Object.keys(node); // TODO: doc reliance on prop order and what this means
+            let propCount = propNames.length;
+            assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
+
+            // TODO: O(n^2)? Can we do better? More fast paths for common cases?
             outerLoop:
             for (let field of fields) {
                 // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(ast);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
                 for (let i = 0; i < propCount; ++i) {
                     let propName = propNames[i];
 
@@ -55,18 +56,18 @@ function record(fields: Field[]): Production {
                     if (field.dynamic) {
                         if (!field.name.unparse(propName, 0, result)) continue;
                         if (result.posᐟ !== propName.length) continue;
-                        src += result.src;
+                        text += result.text;
                     }
                     else /* field.dynamic === false */ {
                         if (propName !== field.name) continue;
                     }
 
                     // TODO: match field value
-                    if (!field.value.unparse((ast as any)[propName], 0, result)) continue;
-                    if (!isFullyConsumed((ast as any)[propName], result.posᐟ)) continue;
-                    src += result.src;
+                    if (!field.value.unparse(node[propName], 0, result)) continue; // TODO: bug? modifies result without guarantee of returning true
+                    if (!isFullyConsumed(node[propName], result.posᐟ)) continue;
+                    text += result.text;
 
-                    // TODO: we matched both name and value - consume them from ast
+                    // TODO: we matched both name and value - consume them from `node`
                     pos += posIncrement;
                     continue outerLoop;
                 }
@@ -74,7 +75,7 @@ function record(fields: Field[]): Production {
                 // If we get here, no match...
                 return false;
             }
-            result.src = src;
+            result.text = text;
             result.posᐟ = pos;
             return true;
         },

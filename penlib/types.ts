@@ -17,11 +17,15 @@
 
 
 
-
+/**
+ * TODO: doc...
+ * - modifies `result` iff return value is true -OR- if returns false, result may be garbage WHICH IS IT? 2nd is more flexible for impls
+ * - meaning of `pos` and `posᐟ` for nodes is production-specific
+ */
 interface Production {
     kind: 'production';
-    parse(src: string, pos: number, result: {ast: unknown, posᐟ: number}): boolean;
-    unparse(ast: unknown, pos: number, result: {src: string, posᐟ: number}): boolean;
+    parse(text: string, pos: number, result: {node: unknown, posᐟ: number}): boolean;
+    unparse(node: unknown, pos: number, result: {text: string, posᐟ: number}): boolean;
 }
 
 

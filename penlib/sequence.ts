@@ -2,30 +2,32 @@ function sequence(...expressions: Production[]): Production {
     const arity = expressions.length;
     return {
         kind: 'production',
-        parse: (src, pos, result) => {
-            let ast: unknown;
+
+        parse(text, pos, result) {
+            let node: unknown;
             for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].parse(src, pos, result)) return false;
+                if (!expressions[i].parse(text, pos, result)) return false;
                 pos = result.posᐟ;
-                if (ast === undefined) ast = result.ast;
-                else if (typeof ast === 'string' && typeof result.ast === 'string') ast += result.ast;
-                else if (Array.isArray(ast) && Array.isArray(result.ast)) ast = [...ast, ...result.ast];
-                else if (isPlainObject(ast) && isPlainObject(result.ast)) ast = {...ast, ...result.ast};
-                else if (result.ast !== undefined) throw new Error(`Internal error: invalid sequence`);
+                if (node === undefined) node = result.node;
+                else if (typeof node === 'string' && typeof result.node === 'string') node += result.node;
+                else if (Array.isArray(node) && Array.isArray(result.node)) node = [...node, ...result.node];
+                else if (isPlainObject(node) && isPlainObject(result.node)) node = {...node, ...result.node};
+                else if (result.node !== undefined) throw new Error(`Internal error: invalid sequence`);
             }
-            result.ast = ast;
+            result.node = node;
             result.posᐟ = pos;
             return true;
         },
-        unparse: (ast, pos, result) => {
-            let src = '';
+
+        unparse(node, pos, result) {
+            let text = '';
             for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].unparse(ast, pos, result)) return false;
+                if (!expressions[i].unparse(node, pos, result)) return false;
                 // TODO: more sanity checking in here, like for parse...
-                src += result.src;
+                text += result.text;
                 pos = result.posᐟ;
             }
-            result.src = src;
+            result.text = text;
             result.posᐟ = pos;
             return true;
         },
