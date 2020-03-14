@@ -24,8 +24,12 @@ function emitProgram(program: Program) {
     // TODO: header stuff...
     // TODO: every source file import the PEN standard library
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    emit.down(1).text(`import * as std from "penlib;"`);
-    emit.down(2);
+    // emit.down(1).text(`import * as std from "penlib;"`);
+    // emit.down(2);
+    emit.down(1).text(`declare let reference: any;`);
+    emit.down(1).text(`declare let bindingLookup: any;`);
+    emit.down(1).text(`declare let sequence: any;`);
+    emit.down(1).text(`declare let selection: any;`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -48,9 +52,12 @@ function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
     function visitScope(scope: Scope) {
         if (scope.symbols.size > 0) {
             emit.down(2).text(`const 𝕊${scope.id} = {`).indent();
+            emit.down(1).text(`kind: 'module',`);
+            emit.down(1).text(`bindings: {`).indent();
             for (let symbol of scope.symbols.values()) {
                 emit.down(1).text(`${symbol.name}: {},`);
             }
+            emit.dedent().down(1).text(`},`);
             emit.dedent().down(1).text(`};`);
         }
         scope.children.forEach(visitScope);
@@ -90,21 +97,16 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
 }
 
 
-function emitSymbolReference(emit: Emitter, symbol: Symbol) {
-    let {name, scope} = symbol;
-    emit.text(`𝕊${scope.id}.${name}`);
-}
-
-
 function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable) {
     switch (expr.kind) {
         case 'ApplicationExpression':
             emitCall(emit, expr.function, [expr.argument], symbolTable);
             return;
         case 'BindingLookupExpression':
-            emit.text('(');
+            emit.text('bindingLookup(').indent().down(1);
             emitExpression(emit, expr.module, symbolTable);
-            emit.text(`).${expr.bindingName}`);
+            emit.text(',').down(1).text(`'${expr.bindingName}'`);
+            emit.dedent().down(1).text(`)`);
             return;
         case 'CharacterExpression':
             break; // TODO...
@@ -131,18 +133,24 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emitSymbolReference(emit, symbolTable.lookup(expr.meta.symbolId));
             return;
         case 'SelectionExpression':
-            emitCall(emit, 'std.selection', expr.expressions, symbolTable);
+            emitCall(emit, 'selection', expr.expressions, symbolTable);
             return;
         case 'SequenceExpression':
-            emitCall(emit, 'std.sequence', expr.expressions, symbolTable);
+            emitCall(emit, 'sequence', expr.expressions, symbolTable);
             return;
         case 'StringExpression':
-            emit.text(JSON.stringify(expr.value));
+            emit.text(JSON.stringify(expr.value)); // TODO: needs work...
             return;
         default:
             throw new Error('Internal Error'); // TODO...
     }
     emit.text(`<NotImplemented:${expr.kind}>`);
+}
+
+
+function emitSymbolReference(emit: Emitter, symbol: Symbol) {
+    let {name, scope} = symbol;
+    emit.text(`reference(𝕊${scope.id}, '${name}')`);
 }
 
 
