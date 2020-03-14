@@ -39,6 +39,12 @@ TODO 2020:
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
     [ ] link stdlib into emitted code (idea: use same way as for extensions - ie decl/impl pair)
     [ ] specify extension (and declaration) modules properly
+        .d.pen for declaration file
+        assumes a .js file is there with the impl
+        can still type-check extensions using @check-js etc
+        specify a file formal that allows simple concatenation of impl files
+            is order important? Not if only containing function decls
+            must we disallow import/require in impl files? Would it ever work? Maybe for non-relative module ids?
     [ ] link extension modules into emitted code
     [ ] implement FunctionExpressions (NB still fully static, a bit like generic type instantiations)
 
