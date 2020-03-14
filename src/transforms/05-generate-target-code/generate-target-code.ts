@@ -77,12 +77,19 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
 function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
     for (let {pattern, value} of module.bindings) {
         if (pattern.kind === 'ModulePattern') {
-            // assert(value.kind === 'ImportExpression'); // TODO: relax this restriction later... Need different emit...
-            // TODO: emit...
-            emit.down(2).text('// TODO: emit for ModulePattern...');
+            emit.down(2).text('{').indent();
+            emit.down(1).text(`let rhs = `);
+            emitExpression(emit, value, symbolTable);
+            emit.text(';');
+            for (let {name, alias, meta: {symbolId}} of pattern.names) {
+                let {scope} = symbolTable.lookup(symbolId);
+                emit.down(1).text(`Object.assign(`);
+                emit.text(`𝕊${scope.id}.bindings.${alias || name}, `);
+                emit.text(`std.bindingLookup(rhs, '${name}'));`);
+            }
+            emit.dedent().down(1).text('}');
         }
         else /* pattern.kind === 'VariablePattern */{
-            // TODO: ensure no clashes with ES names, eg Object, String, etc
             let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
             emit.down(2).text(`Object.assign(`).indent();
             emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
