@@ -105,32 +105,46 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'ApplicationExpression':
             emitCall(emit, expr.function, [expr.argument], symbolTable);
             return;
+
         case 'BindingLookupExpression':
             emit.text('std.bindingLookup(').indent().down(1);
             emitExpression(emit, expr.module, symbolTable);
             emit.text(',').down(1).text(`'${expr.bindingName}'`);
             emit.dedent().down(1).text(`)`);
             return;
+
         case 'CharacterExpression':
-            break; // TODO...
+            emit.text('std.charRange(');
+            emit.text(JSON.stringify(expr.minValue)).text(', ');
+            emit.text(JSON.stringify(expr.maxValue));
+            emit.text(')');
+            return;
+
         // case 'FunctionExpression':
         //     break; // TODO...
+
         case 'ImportExpression':
             // TODO: treat as reference
             emit.text(`𝕊${expr.meta.scope.id}`);
             return;
+
         case 'LabelExpression':
-            break; // TODO...
+            emit.text(`std.label(${JSON.stringify(expr.value)})`);
+            return;
+
         case 'ListExpression':
             break; // TODO...
+
         case 'ModuleExpression':
             // TODO: treat as reference
             emit.text(`𝕊${expr.module.meta.scope.id}`);
             return;
+
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
             emitExpression(emit, expr.expression, symbolTable);
             return;
+
         case 'RecordExpression':
             emit.text('std.record([').indent();
             for (let field of expr.fields) {
@@ -151,19 +165,24 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             }
             emit.dedent().down(1).text('])');
             return;
+
         case 'ReferenceExpression':
             let ref = symbolTable.lookup(expr.meta.symbolId);
             emit.text(`std.reference(𝕊${ref.scope.id}, '${ref.name}')`);
             return;
+
         case 'SelectionExpression':
             emitCall(emit, 'std.selection', expr.expressions, symbolTable);
             return;
+
         case 'SequenceExpression':
             emitCall(emit, 'std.sequence', expr.expressions, symbolTable);
             return;
+
         case 'StringExpression':
-            emit.text(JSON.stringify(expr.value)); // TODO: needs work...
+            emit.text(`std.string(${JSON.stringify(expr.value)})`);
             return;
+
         default:
             throw new Error('Internal Error'); // TODO...
     }

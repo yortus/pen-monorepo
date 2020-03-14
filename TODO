@@ -3,26 +3,26 @@ TODO 2020:
         [x] ApplicationExpression
         [x] Binding
         [x] BindingLookupExpression
-        [ ] CharacterExpression
+        [x] CharacterExpression
         [x] DynamicField
         [ ] FunctionExpression
             - NB: disabled for now
         [x] ImportExpression
-        [ ] LabelExpression
+        [x] LabelExpression
         [ ] ListExpression
         [x] Module
         [x] ModuleExpression
         [x] ModulePattern
         [x] ModulePatternName
         [x] ParenthesisedExpression
-        [ ] Program
+        [x] Program
         [x] RecordExpression
         [x] ReferenceExpression
         [x] SelectionExpression
         [x] SequenceExpression
         [x] SourceFile
         [x] StaticField
-        [ ] StringExpression
+        [x] StringExpression
         [x] VariablePattern
 
 
