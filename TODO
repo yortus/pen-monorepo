@@ -1,3 +1,37 @@
+TODO 2020:
+    emit output for all node kinds:
+        [x] ApplicationExpression
+        [x] Binding
+        [x] BindingLookupExpression
+        [ ] CharacterExpression
+        [x] DynamicField
+        [ ] FunctionExpression
+            - NB: disabled for now
+        [x] ImportExpression
+        [ ] LabelExpression
+        [ ] ListExpression
+        [x] Module
+        [x] ModuleExpression
+        [x] ModulePattern
+        [x] ModulePatternName
+        [x] ParenthesisedExpression
+        [ ] Program
+        [x] RecordExpression
+        [x] ReferenceExpression
+        [x] SelectionExpression
+        [x] SequenceExpression
+        [x] SourceFile
+        [x] StaticField
+        [ ] StringExpression
+        [x] VariablePattern
+
+
+    [ ] complete stdlib
+    [ ] link stdlib into emitted code
+    [ ] specify extention (and declaration) modules properly
+    [ ] link extension modules into emitted code
+
+
 Next up:
     [x] Check if  Rep01 (source file graph) needs any changes for grammar update (don't think so) ANS: no changes required
     [x] Merge Module and ModuleExpression AST nodes? Why keep separate?
