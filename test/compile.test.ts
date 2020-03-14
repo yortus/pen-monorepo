@@ -6,7 +6,7 @@ import {compile} from '../src';
 
 
 const rimraf = promisify(rimrafModule);
-const fixtureName = 'compile-test';
+const fixtureName = 'math';
 const fixturePath = path.join(__dirname, './fixtures', fixtureName);
 const resultsPath = path.join(__dirname, './results');
 
@@ -30,6 +30,7 @@ describe('compile', async () => {
             [] = [str];
         }
         catch (err) {
+            console.log(err);
             [] = [err];
         }
     });

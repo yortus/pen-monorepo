@@ -30,6 +30,7 @@ function emitProgram(program: Program) {
     emit.down(1).text(`declare let bindingLookup: any;`);
     emit.down(1).text(`declare let sequence: any;`);
     emit.down(1).text(`declare let selection: any;`);
+    emit.down(1).text(`declare let record: any;`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -128,7 +129,25 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emitExpression(emit, expr.expression, symbolTable);
             return;
         case 'RecordExpression':
-            break; // TODO...
+            emit.text('record([').indent();
+            for (let field of expr.fields) {
+                let hasComputedName = field.kind === 'DynamicField';
+                emit.down(1).text('{').indent();
+                emit.down(1).text(`hasComputedName: ${hasComputedName},`);
+                emit.down(1).text(`name: `);
+                if (hasComputedName) {
+                    emitExpression(emit, field.name as any, symbolTable);
+                }
+                else {
+                    emit.text(`'${field.name}'`);
+                }
+                emit.text(',').down(1).text(`value: `);
+                emitExpression(emit, field.value, symbolTable);
+                emit.text(',');
+                emit.dedent().down(1).text('},');
+            }
+            emit.dedent().down(1).text('])');
+            return;
         case 'ReferenceExpression':
             emitSymbolReference(emit, symbolTable.lookup(expr.meta.symbolId));
             return;
@@ -163,10 +182,10 @@ function emitCall(emit: Emitter, fn: string | Expression, args: ReadonlyArray<Ex
         emitExpression(emit, fn, symbolTable);
     }
     emit.text(`(`).indent();
-    args.forEach((arg, _i) => {
+    args.forEach((arg, i) => {
         emit.down(1);
         emitExpression(emit, arg, symbolTable);
-        emit.text(',');
+        if (i < args.length - 1) emit.text(',');
     });
     emit.dedent().down(1).text(`)`);
 }
