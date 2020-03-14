@@ -3,7 +3,7 @@ import * as path from 'path';
 import {compile} from '../src';
 
 
-const fixtureName = 'math';
+const fixtureName = 'import-graph';
 const fixturePath = path.join(__dirname, './fixtures', fixtureName);
 const resultsPath = path.join(__dirname, './results');
 

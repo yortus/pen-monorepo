@@ -40,14 +40,10 @@ function emitProgram(program: Program) {
 
 
 function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
-    // emit.down(1).text(`const 𝕊${rootScope.id} = {`).indent();
-    // rootScope.children.forEach(visitScope);
-    // emit.dedent().down(1).text(`};`);
-
     visitScope(rootScope);
 
     function visitScope(scope: Scope) {
-        if (scope.symbols.size > 0) {
+        if (scope.parent) { // TODO: skip the root scope for now... revise?
             emit.down(2).text(`const 𝕊${scope.id} = {`).indent();
             emit.down(1).text(`kind: 'module',`);
             emit.down(1).text(`bindings: {`).indent();
@@ -66,6 +62,10 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<SymbolDefinitions & SymbolReferences>>();
     visitNode(program, rec => ({
+        SourceFile: sf => {
+            emit.down(2).text(`// -------------------- ${sf.path} --------------------`);
+            rec(sf.module);
+        },
         Module: module => {
             emitModule(emit, module, symbolTable);
             module.bindings.forEach(rec);
@@ -76,7 +76,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
 
 function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
     for (let {pattern, value} of module.bindings) {
-        if (pattern.kind === 'ModulePattern') {
+        if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
             emit.down(2).text('{').indent();
             emit.down(1).text(`let rhs = `);
             emitExpression(emit, value, symbolTable);
@@ -89,7 +89,7 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
             }
             emit.dedent().down(1).text('}');
         }
-        else /* pattern.kind === 'VariablePattern */{
+        else if (pattern.kind === 'VariablePattern') {
             let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
             emit.down(2).text(`Object.assign(`).indent();
             emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
@@ -116,15 +116,16 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         // case 'FunctionExpression':
         //     break; // TODO...
         case 'ImportExpression':
-            break; // TODO...
+            // TODO: treat as reference
+            emit.text(`𝕊${expr.meta.scope.id}`);
+            return;
         case 'LabelExpression':
             break; // TODO...
         case 'ListExpression':
             break; // TODO...
         case 'ModuleExpression':
             // TODO: treat as reference
-            let {scope} = expr.module.meta;
-            emit.text(`𝕊${scope.id}`);
+            emit.text(`𝕊${expr.module.meta.scope.id}`);
             return;
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?

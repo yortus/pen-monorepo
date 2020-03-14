@@ -16,7 +16,7 @@ export function compile(compilerOptions: CompilerOptions) {
     let targetCode = generateTargetCode(ast03);
 
     // write the target code to the output directory
-    let tempOutFilePath = path.join(compilerOptions.outDir, 'temp.js');
+    let tempOutFilePath = path.join(compilerOptions.outDir, 'out.js');
     fs.ensureDirSync(compilerOptions.outDir);
     fs.writeFileSync(tempOutFilePath, targetCode);
 }
