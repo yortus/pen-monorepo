@@ -1,6 +1,6 @@
 import * as AstNodes from '../../ast-nodes';
 import {Scope} from '../../scope';
-import {Symbol, SymbolTable} from '../../symbol-table';
+import {SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
@@ -26,12 +26,7 @@ function emitProgram(program: Program) {
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
     // emit.down(1).text(`import * as std from "penlib;"`);
     // emit.down(2);
-    emit.down(1).text(`let NOT_IMPLEMENTED;`);
-    emit.down(1).text(`let reference;`);
-    emit.down(1).text(`let bindingLookup;`);
-    emit.down(1).text(`let sequence;`);
-    emit.down(1).text(`let selection;`);
-    emit.down(1).text(`let record;`);
+    emit.down(1).text(`let std;`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -88,10 +83,9 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
         }
         else /* pattern.kind === 'VariablePattern */{
             // TODO: ensure no clashes with ES names, eg Object, String, etc
+            let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
             emit.down(2).text(`Object.assign(`).indent();
-            emit.down(1);
-            emitSymbolReference(emit, symbolTable.lookup(pattern.meta.symbolId));
-            emit.text(',').down(1);
+            emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
             emitExpression(emit, value, symbolTable);
             emit.dedent().down(1).text(`);`);
         }
@@ -105,7 +99,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emitCall(emit, expr.function, [expr.argument], symbolTable);
             return;
         case 'BindingLookupExpression':
-            emit.text('bindingLookup(').indent().down(1);
+            emit.text('std.bindingLookup(').indent().down(1);
             emitExpression(emit, expr.module, symbolTable);
             emit.text(',').down(1).text(`'${expr.bindingName}'`);
             emit.dedent().down(1).text(`)`);
@@ -130,7 +124,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emitExpression(emit, expr.expression, symbolTable);
             return;
         case 'RecordExpression':
-            emit.text('record([').indent();
+            emit.text('std.record([').indent();
             for (let field of expr.fields) {
                 let hasComputedName = field.kind === 'DynamicField';
                 emit.down(1).text('{').indent();
@@ -150,13 +144,14 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.dedent().down(1).text('])');
             return;
         case 'ReferenceExpression':
-            emitSymbolReference(emit, symbolTable.lookup(expr.meta.symbolId));
+            let ref = symbolTable.lookup(expr.meta.symbolId);
+            emit.text(`std.reference(𝕊${ref.scope.id}, '${ref.name}')`);
             return;
         case 'SelectionExpression':
-            emitCall(emit, 'selection', expr.expressions, symbolTable);
+            emitCall(emit, 'std.selection', expr.expressions, symbolTable);
             return;
         case 'SequenceExpression':
-            emitCall(emit, 'sequence', expr.expressions, symbolTable);
+            emitCall(emit, 'std.sequence', expr.expressions, symbolTable);
             return;
         case 'StringExpression':
             emit.text(JSON.stringify(expr.value)); // TODO: needs work...
@@ -164,13 +159,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         default:
             throw new Error('Internal Error'); // TODO...
     }
-    emit.text(`NOT_IMPLEMENTED('${expr.kind}')`);
-}
-
-
-function emitSymbolReference(emit: Emitter, symbol: Symbol) {
-    let {name, scope} = symbol;
-    emit.text(`reference(𝕊${scope.id}, '${name}')`);
+    emit.text(`std.NOT_IMPLEMENTED('${expr.kind}')`);
 }
 
 

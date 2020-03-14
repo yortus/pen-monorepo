@@ -1,10 +1,5 @@
 
-let NOT_IMPLEMENTED;
-let reference;
-let bindingLookup;
-let sequence;
-let selection;
-let record;
+let std;
 
 const 𝕊2 = {
     kind: 'module',
@@ -25,135 +20,135 @@ const 𝕊2 = {
 // TODO: emit for ModulePattern...
 
 Object.assign(
-    reference(𝕊2, 'math'),
-    reference(𝕊2, 'expr')
+    𝕊2.bindings.math,
+    std.reference(𝕊2, 'expr')
 );
 
 Object.assign(
-    reference(𝕊2, 'expr'),
-    reference(𝕊2, 'Memoize')(
-        selection(
-            reference(𝕊2, 'add'),
-            reference(𝕊2, 'sub'),
-            reference(𝕊2, 'term')
+    𝕊2.bindings.expr,
+    std.reference(𝕊2, 'Memoize')(
+        std.selection(
+            std.reference(𝕊2, 'add'),
+            std.reference(𝕊2, 'sub'),
+            std.reference(𝕊2, 'term')
         )
     )
 );
 
 Object.assign(
-    reference(𝕊2, 'add'),
-    record([
+    𝕊2.bindings.add,
+    std.record([
         {
             hasComputedName: false,
             name: 'type',
-            value: NOT_IMPLEMENTED('LabelExpression'),
+            value: std.NOT_IMPLEMENTED('LabelExpression'),
         },
         {
             hasComputedName: false,
             name: 'lhs',
-            value: reference(𝕊2, 'expr'),
+            value: std.reference(𝕊2, 'expr'),
         },
         {
             hasComputedName: false,
             name: 'rhs',
-            value: sequence(
+            value: std.sequence(
                 "+",
-                reference(𝕊2, 'term')
+                std.reference(𝕊2, 'term')
             ),
         },
     ])
 );
 
 Object.assign(
-    reference(𝕊2, 'sub'),
-    record([
+    𝕊2.bindings.sub,
+    std.record([
         {
             hasComputedName: false,
             name: 'type',
-            value: NOT_IMPLEMENTED('LabelExpression'),
+            value: std.NOT_IMPLEMENTED('LabelExpression'),
         },
         {
             hasComputedName: false,
             name: 'lhs',
-            value: reference(𝕊2, 'expr'),
+            value: std.reference(𝕊2, 'expr'),
         },
         {
             hasComputedName: false,
             name: 'rhs',
-            value: sequence(
+            value: std.sequence(
                 "\\-",
-                reference(𝕊2, 'term')
+                std.reference(𝕊2, 'term')
             ),
         },
     ])
 );
 
 Object.assign(
-    reference(𝕊2, 'term'),
-    reference(𝕊2, 'Memoize')(
-        selection(
-            reference(𝕊2, 'mul'),
-            reference(𝕊2, 'div'),
-            reference(𝕊2, 'factor')
+    𝕊2.bindings.term,
+    std.reference(𝕊2, 'Memoize')(
+        std.selection(
+            std.reference(𝕊2, 'mul'),
+            std.reference(𝕊2, 'div'),
+            std.reference(𝕊2, 'factor')
         )
     )
 );
 
 Object.assign(
-    reference(𝕊2, 'mul'),
-    record([
+    𝕊2.bindings.mul,
+    std.record([
         {
             hasComputedName: false,
             name: 'type',
-            value: NOT_IMPLEMENTED('LabelExpression'),
+            value: std.NOT_IMPLEMENTED('LabelExpression'),
         },
         {
             hasComputedName: false,
             name: 'lhs',
-            value: reference(𝕊2, 'term'),
+            value: std.reference(𝕊2, 'term'),
         },
         {
             hasComputedName: false,
             name: 'rhs',
-            value: sequence(
+            value: std.sequence(
                 "*",
-                reference(𝕊2, 'factor')
+                std.reference(𝕊2, 'factor')
             ),
         },
     ])
 );
 
 Object.assign(
-    reference(𝕊2, 'div'),
-    record([
+    𝕊2.bindings.div,
+    std.record([
         {
             hasComputedName: false,
             name: 'type',
-            value: NOT_IMPLEMENTED('LabelExpression'),
+            value: std.NOT_IMPLEMENTED('LabelExpression'),
         },
         {
             hasComputedName: false,
             name: 'lhs',
-            value: reference(𝕊2, 'term'),
+            value: std.reference(𝕊2, 'term'),
         },
         {
             hasComputedName: false,
             name: 'rhs',
-            value: sequence(
+            value: std.sequence(
                 "/",
-                reference(𝕊2, 'factor')
+                std.reference(𝕊2, 'factor')
             ),
         },
     ])
 );
 
 Object.assign(
-    reference(𝕊2, 'factor'),
-    selection(
-        reference(𝕊2, 'i32'),
-        sequence(
+    𝕊2.bindings.factor,
+    std.selection(
+        std.reference(𝕊2, 'i32'),
+        std.sequence(
             "(",
-            reference(𝕊2, 'expr'),
+            std.reference(𝕊2, 'expr'),
             ")"
         )
     )
