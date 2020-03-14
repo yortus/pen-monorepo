@@ -155,16 +155,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'RecordExpression':
             emit.text('std.record([').indent();
             for (let field of expr.fields) {
-                let hasComputedName = field.kind === 'DynamicField';
+                let dynamic = field.kind === 'DynamicField';
                 emit.down(1).text('{').indent();
-                emit.down(1).text(`hasComputedName: ${hasComputedName},`);
+                emit.down(1).text(`dynamic: ${dynamic},`);
                 emit.down(1).text(`name: `);
-                if (hasComputedName) {
-                    emitExpression(emit, field.name as any, symbolTable);
-                }
-                else {
-                    emit.text(`'${field.name}'`);
-                }
+                dynamic ? emitExpression(emit, field.name as any, symbolTable) : emit.text(`'${field.name}'`);
                 emit.text(',').down(1).text(`value: `);
                 emitExpression(emit, field.value, symbolTable);
                 emit.text(',');

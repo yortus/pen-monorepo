@@ -1,9 +1,9 @@
-function Sequence(...expressions: Relation[]): Relation {
+function sequence(...expressions: Production[]): Production {
     const arity = expressions.length;
     return {
-        kind: 'Relation',
+        kind: 'production',
         parse: (src, pos, result) => {
-            let ast: unknown = undefined;
+            let ast: unknown;
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].parse(src, pos, result)) return false;
                 pos = result.posᐟ;

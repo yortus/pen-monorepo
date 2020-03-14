@@ -1,24 +1,24 @@
-type RecordField =
-    | {hasComputedName: false, name: string, value: Relation}
-    | {hasComputedName: true, name: Relation, value: Relation};
+type Field =
+    | {dynamic: false, name: string, value: Production}
+    | {dynamic: true, name: Production, value: Production};
 
 
 
 
-function Record(fields: RecordField[]): Relation {
+function record(fields: Field[]): Production {
     return {
-        kind: 'Relation',
+        kind: 'production',
         parse: (src, pos, result) => {
             let obj = {} as any; // TODO: remove/improve cast
             for (let field of fields) {
                 let id: string;
-                if (field.hasComputedName) {
+                if (field.dynamic) {
                     if (!field.name.parse(src, pos, result)) return false;
                     assert(typeof result.ast === 'string');
                     id = result.ast as string;
                     pos = result.posᐟ;
                 }
-                else /* field.hasComputedName === false */ {
+                else /* field.dynamic === false */ {
                     id = field.name;
                 }
 
@@ -46,16 +46,18 @@ function Record(fields: RecordField[]): Relation {
                     let propName = propNames[i];
 
                     // TODO: skip already-consumed key/value pairs
+                    // tslint:disable-next-line: no-bitwise
                     const posIncrement = 1 << i;
+                    // tslint:disable-next-line: no-bitwise
                     if ((pos & posIncrement) !== 0) continue;
 
                     // TODO: match field name
-                    if (field.hasComputedName) {
+                    if (field.dynamic) {
                         if (!field.name.unparse(propName, 0, result)) continue;
                         if (result.posᐟ !== propName.length) continue;
                         src += result.src;
                     }
-                    else /* field.hasComputedName === false */ {
+                    else /* field.dynamic === false */ {
                         if (propName !== field.name) continue;
                     }
 

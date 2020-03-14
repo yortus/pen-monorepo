@@ -12,6 +12,7 @@ function isFullyConsumed(ast: unknown, pos: number) {
         let keyCount = Object.keys(ast).length;
         assert(keyCount <= 32);
         if (keyCount === 0) return true;
+        // tslint:disable-next-line: no-bitwise
         return pos = -1 >>> (32 - keyCount);
     }
     return pos === 1;

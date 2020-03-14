@@ -5,8 +5,7 @@ TODO 2020:
         [x] BindingLookupExpression
         [x] CharacterExpression
         [x] DynamicField
-        [ ] FunctionExpression
-            - NB: disabled for now
+        [ ] FunctionExpression (NB: disabled for now)
         [x] ImportExpression
         [x] LabelExpression
         [x] ListExpression
@@ -25,11 +24,22 @@ TODO 2020:
         [x] StringExpression
         [x] VariablePattern
 
-    [ ] implement FunctionExpressions
-    [ ] complete stdlib
+    [ ] complete stdlib (aka penlib)
+        [ ] types - Production, Module, Function
+        [ ] internal helpers: ???
+        [ ] bindingLookup (ensure name exists and is exported)
+        [ ] charRange
+        [ ] label
+        [ ] list
+        [ ] record
+        [ ] reference (only needed to support forward references. Optimisations may be possible)
+        [ ] selection
+        [ ] sequence
+        [ ] string
     [ ] link stdlib into emitted code
     [ ] specify extention (and declaration) modules properly
     [ ] link extension modules into emitted code
+    [ ] implement FunctionExpressions
 
 
 Next up:
