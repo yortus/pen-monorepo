@@ -9,9 +9,10 @@
     "typings": "dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "npm run build:penlib && npm run build:src",
-        "build:penlib": "tsc -p penlib",
+        "build": "npm run build:src && npm run build:sys",
         "build:src": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
+        "TODO... build:std": "",
+        "build:sys": "node scripts/build-runtime-system.js",
         "lint": "tslint src/**/*.ts",
         "test": "mocha --require ts-node/register src/**/*.test.ts"
     },

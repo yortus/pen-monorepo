@@ -24,9 +24,9 @@ function emitProgram(program: Program) {
     // TODO: header stuff...
     // TODO: every source file import the PEN standard library
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    // emit.down(1).text(`import * as std from "penlib;"`);
+    // emit.down(1).text(`import * as sys from "penlib;"`);
     // emit.down(2);
-    emit.down(1).text(`let std;`);
+    emit.down(1).text(`let sys;`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -85,7 +85,7 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
                 let {scope} = symbolTable.lookup(symbolId);
                 emit.down(1).text(`Object.assign(`);
                 emit.text(`𝕊${scope.id}.bindings.${alias || name}, `);
-                emit.text(`std.bindingLookup(rhs, '${name}'));`);
+                emit.text(`sys.bindingLookup(rhs, '${name}'));`);
             }
             emit.dedent().down(1).text('}');
         }
@@ -107,14 +107,14 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BindingLookupExpression':
-            emit.text('std.bindingLookup(').indent().down(1);
+            emit.text('sys.bindingLookup(').indent().down(1);
             emitExpression(emit, expr.module, symbolTable);
             emit.text(',').down(1).text(`'${expr.bindingName}'`);
             emit.dedent().down(1).text(`)`);
             return;
 
         case 'CharacterExpression':
-            emit.text('std.charRange(');
+            emit.text('sys.charRange(');
             emit.text(JSON.stringify(expr.minValue)).text(', ');
             emit.text(JSON.stringify(expr.maxValue));
             emit.text(')');
@@ -129,11 +129,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'LabelExpression':
-            emit.text(`std.label(${JSON.stringify(expr.value)})`);
+            emit.text(`sys.label(${JSON.stringify(expr.value)})`);
             return;
 
         case 'ListExpression':
-            emit.text('std.list([').indent();
+            emit.text('sys.list([').indent();
             for (let element of expr.elements) {
                 emit.down(1);
                 emitExpression(emit, element, symbolTable);
@@ -153,7 +153,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'RecordExpression':
-            emit.text('std.record([').indent();
+            emit.text('sys.record([').indent();
             for (let field of expr.fields) {
                 let dynamic = field.kind === 'DynamicField';
                 emit.down(1).text('{').indent();
@@ -170,19 +170,19 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ReferenceExpression':
             let ref = symbolTable.lookup(expr.meta.symbolId);
-            emit.text(`std.reference(𝕊${ref.scope.id}, '${ref.name}')`);
+            emit.text(`sys.reference(𝕊${ref.scope.id}, '${ref.name}')`);
             return;
 
         case 'SelectionExpression':
-            emitCall(emit, 'std.selection', expr.expressions, symbolTable);
+            emitCall(emit, 'sys.selection', expr.expressions, symbolTable);
             return;
 
         case 'SequenceExpression':
-            emitCall(emit, 'std.sequence', expr.expressions, symbolTable);
+            emitCall(emit, 'sys.sequence', expr.expressions, symbolTable);
             return;
 
         case 'StringExpression':
-            emit.text(`std.string(${JSON.stringify(expr.value)})`);
+            emit.text(`sys.string(${JSON.stringify(expr.value)})`);
             return;
 
         default:

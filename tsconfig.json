@@ -21,10 +21,5 @@
         "allowUnusedLabels": false,
     },
     "include": ["src/**/*.ts"],
-    "exclude": [
-//        "src/**/*.test.ts",
-
-        // TODO: temp testing... remove...
-        "src/**/stage-*/**/*.ts",
-    ],
+    "exclude": [],
 }
