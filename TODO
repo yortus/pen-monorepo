@@ -47,7 +47,22 @@ TODO 2020:
             must we disallow import/require in impl files? Would it ever work? Maybe for non-relative module ids?
     [ ] link extension modules into emitted code
     [ ] implement FunctionExpressions (NB still fully static, a bit like generic type instantiations)
-
+    [ ] Bikeshed names for parse/unparse rule:
+        relation (sounds like some abstract math concept - could be confusing)
+        rule
+        pattern (too generic?)
+        parser (one-sided - doesn't including unparsing)
+        production (proper term for this. But one-sided? nah seems ok actually - same term used in both generative grammars and recognizers
+        form
+        combinator
+        transducer
+        axiom
+        formula
+        model
+        shape
+        schema
+        definition
+        
 
 Next up:
     [x] Check if  Rep01 (source file graph) needs any changes for grammar update (don't think so) ANS: no changes required
