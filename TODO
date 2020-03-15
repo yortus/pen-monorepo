@@ -37,7 +37,7 @@ TODO 2020:
         [x] sequence
         [ ] string
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
-    [ ] link stdlib into emitted code (idea: use same way as for extensions - ie decl/impl pair)
+    [ ] link `sys.js` into emitted code (idea: use same way as for extensions - ie decl/impl pair)
     [ ] specify extension (and declaration) modules properly
         .d.pen for declaration file
         assumes a .js file is there with the impl
