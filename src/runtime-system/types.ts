@@ -16,4 +16,6 @@ interface Module {
 }
 
 
-// TODO: interface Function {...}
+interface Function {
+    // TODO: ...
+}
