@@ -1,5 +1,6 @@
 // @ts-ignore
 return {
+    bindingLookup,
     charRange,
     label,
     list,

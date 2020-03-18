@@ -183,6 +183,13 @@ Object.assign(
 );
 
 function initRuntimeSystem() {
+    function bindingLookup(module, name) {
+        var _a;
+        assert(module.kind === 'module' && ((_a = module.bindings) === null || _a === void 0 ? void 0 : _a[name]));
+        // TODO: ensure binding is exported/visible
+        return module.bindings[name];
+    }
+    
     function charRange(min, max) {
         return {
             kind: 'production',
@@ -211,6 +218,7 @@ function initRuntimeSystem() {
     
     // @ts-ignore
     return {
+        bindingLookup,
         charRange,
         label,
         list,

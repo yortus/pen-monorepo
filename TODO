@@ -25,9 +25,9 @@ TODO 2020:
         [x] VariablePattern
 
     [ ] complete `sys` (aka penlib)
-        [ ] types - Production, Module, Function
-        [ ] internal helpers: ???
-        [ ] bindingLookup (ensure name exists and is exported)
+        [x] types - Production, Module, Function
+        [x] internal helpers: ???
+        [x] bindingLookup (ensure name exists and is exported)
         [x] charRange
         [x] label
         [x] list
