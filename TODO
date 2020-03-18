@@ -28,7 +28,7 @@ TODO 2020:
         [ ] types - Production, Module, Function
         [ ] internal helpers: ???
         [ ] bindingLookup (ensure name exists and is exported)
-        [ ] charRange
+        [x] charRange
         [x] label
         [ ] list
         [x] record

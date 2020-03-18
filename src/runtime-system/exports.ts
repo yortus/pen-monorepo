@@ -1,5 +1,6 @@
 // @ts-ignore
 return {
+    charRange,
     label,
     record,
     sequence,
