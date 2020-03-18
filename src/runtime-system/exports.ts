@@ -3,4 +3,5 @@ return {
     record,
     sequence,
     selection,
+    string,
 };

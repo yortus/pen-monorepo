@@ -20,3 +20,13 @@ function isFullyConsumed(node: unknown, pos: number): boolean {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
+
+
+function matchesAt(text: string, substr: string, position: number) {
+    let lastPos = position + substr.length;
+    if (lastPos > text.length) return false;
+    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+        if (text.charAt(i) !== substr.charAt(j)) return false;
+    }
+    return true;
+}

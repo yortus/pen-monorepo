@@ -212,6 +212,16 @@ function initRuntimeSystem() {
     function isPlainObject(value) {
         return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
     }
+    function matchesAt(text, substr, position) {
+        let lastPos = position + substr.length;
+        if (lastPos > text.length)
+            return false;
+        for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+            if (text.charAt(i) !== substr.charAt(j))
+                return false;
+        }
+        return true;
+    }
     
     function record(fields) {
         return {
@@ -347,6 +357,26 @@ function initRuntimeSystem() {
                 }
                 result.text = text;
                 result.posᐟ = pos;
+                return true;
+            },
+        };
+    }
+    
+    function string(value) {
+        return {
+            kind: 'production',
+            parse(text, pos, result) {
+                if (!matchesAt(text, value, pos))
+                    return false;
+                result.node = value;
+                result.posᐟ = pos + value.length;
+                return true;
+            },
+            unparse(node, pos, result) {
+                if (typeof node !== 'string' || !matchesAt(node, value, pos))
+                    return false;
+                result.text = value;
+                result.posᐟ = pos + value.length;
                 return true;
             },
         };
