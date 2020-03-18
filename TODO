@@ -30,9 +30,9 @@ TODO 2020:
         [ ] bindingLookup (ensure name exists and is exported)
         [x] charRange
         [x] label
-        [ ] list
+        [x] list
         [x] record
-        [ ] reference (only needed to support forward references. Optimisations may be possible)
+        [x] reference (only needed to support forward references. Optimisations may be possible)
         [x] selection
         [x] sequence
         [x] string

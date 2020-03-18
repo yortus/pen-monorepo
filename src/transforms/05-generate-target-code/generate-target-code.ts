@@ -174,7 +174,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ReferenceExpression':
             let ref = symbolTable.lookup(expr.meta.symbolId);
-            emit.text(`sys.reference(𝕊${ref.scope.id}, '${ref.name}')`);
+            emit.text(`sys.reference(𝕊${ref.scope.id}.bindings.${ref.name})`);
             return;
 
         case 'SelectionExpression':

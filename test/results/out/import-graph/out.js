@@ -102,15 +102,15 @@ Object.assign(
 Object.assign(
     𝕊2.bindings.myList,
     sys.list([
-        sys.reference(𝕊2, 'digit'),
+        sys.reference(𝕊2.bindings.digit),
         sys.sequence(
-            sys.reference(𝕊2, 'digit'),
-            sys.reference(𝕊2, 'digit')
+            sys.reference(𝕊2.bindings.digit),
+            sys.reference(𝕊2.bindings.digit)
         ),
         sys.sequence(
-            sys.reference(𝕊2, 'digit'),
-            sys.reference(𝕊2, 'digit'),
-            sys.reference(𝕊2, 'digit')
+            sys.reference(𝕊2.bindings.digit),
+            sys.reference(𝕊2.bindings.digit),
+            sys.reference(𝕊2.bindings.digit)
         ),
     ])
 );
@@ -122,13 +122,13 @@ Object.assign(
 
 Object.assign(
     𝕊2.bindings.r2,
-    sys.reference(𝕊2, 'rec')
+    sys.reference(𝕊2.bindings.rec)
 );
 
 Object.assign(
     𝕊2.bindings.r2d,
     sys.bindingLookup(
-        sys.reference(𝕊2, 'rec'),
+        sys.reference(𝕊2.bindings.rec),
         'd'
     )
 );
@@ -215,6 +215,7 @@ function initRuntimeSystem() {
         label,
         list,
         record,
+        reference,
         sequence,
         selection,
         string,
@@ -383,6 +384,19 @@ function initRuntimeSystem() {
                 result.text = text;
                 result.posᐟ = pos;
                 return true;
+            },
+        };
+    }
+    
+    // TODO: investigate optimisations... Don't need to retain indirection in many cases. Or will V8 optimisations suffice?
+    function reference(target) {
+        return {
+            kind: 'production',
+            parse(text, pos, result) {
+                return target.parse(text, pos, result);
+            },
+            unparse(node, pos, result) {
+                return target.unparse(node, pos, result);
             },
         };
     }
