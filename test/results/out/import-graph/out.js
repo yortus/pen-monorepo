@@ -229,8 +229,6 @@ function initRuntimeSystem() {
         string,
     };
     
-    // TODO: is this just `undefined` in other bits of the sys code? Work out if still needed...
-    const NO_NODE = Symbol('NO_NODE');
     function assert(value) {
         if (!value)
             throw new Error(`Assertion failed`);
@@ -290,7 +288,7 @@ function initRuntimeSystem() {
                 for (let element of elements) {
                     if (!element.parse(text, pos, result))
                         return false;
-                    assert(result.node !== NO_NODE);
+                    assert(result.node !== undefined); // TODO: was NO_NODE. Does it mean the same thing?
                     arr.push(result.node);
                     pos = result.posᐟ;
                 }

@@ -6,7 +6,7 @@ function list(elements: Production[]): Production {
             let arr = [] as unknown[];
             for (let element of elements) {
                 if (!element.parse(text, pos, result)) return false;
-                assert(result.node !== NO_NODE);
+                assert(result.node !== undefined); // TODO: was NO_NODE. Does it mean the same thing?
                 arr.push(result.node);
                 pos = result.posᐟ;
             }
