@@ -1,3 +1,6 @@
+// TODO: ensure exports.js (ie return {...}) is emitted last, otherwise there may be unreachable code emitted
+// - maybe just put types+helpers+exports into a single specially-named file that is emitted last?
+
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as pkgDir from 'pkg-dir';

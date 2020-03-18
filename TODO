@@ -35,7 +35,21 @@ TODO 2020:
         [x] selection
         [x] sequence
         [x] string
-    [x] link `sys.js` into emitted code (idea: use same way as for extensions - ie decl/impl pair)
+    [x] link `sys.js` into emitted code
+    [ ] complete `std` (standard library)
+        [ ] memo (nb this is a function/combinator, not a production)
+        [ ] i32
+        [ ] char (ie anychar)
+        [ ] intrinsic_true
+        [ ] intrinsic_false
+        [ ] intrinsic_null
+        [ ] zeroOrMore (nb this is a function/combinator, not a production)
+        [ ] maybe / optional (nb this is a function/combinator, not a production)
+        [ ] not (nb this is a function/combinator, not a production)
+        [ ] epsilon, (ie ε-rule)
+    [ ] support importing productions from `std` (but no other non-relative modspecs yet)
+    [ ] link `std.js` into emitted code
+
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
     [ ] specify extension (and declaration) modules properly
         .d.pen for declaration file
