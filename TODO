@@ -29,13 +29,13 @@ TODO 2020:
         [ ] internal helpers: ???
         [ ] bindingLookup (ensure name exists and is exported)
         [ ] charRange
-        [ ] label
+        [x] label
         [ ] list
         [x] record
         [ ] reference (only needed to support forward references. Optimisations may be possible)
         [x] selection
         [x] sequence
-        [ ] string
+        [x] string
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
     [ ] link `sys.js` into emitted code (idea: use same way as for extensions - ie decl/impl pair)
     [ ] specify extension (and declaration) modules properly
