@@ -36,6 +36,7 @@ TODO 2020:
         [x] sequence
         [x] string
     [x] link `sys.js` into emitted code
+    [ ] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
     [ ] complete `std` (standard library)
         [ ] memo (nb this is a function/combinator, not a production)
         [ ] i32
