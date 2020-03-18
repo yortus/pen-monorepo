@@ -9,10 +9,7 @@
     "typings": "dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "npm run build:src && npm run build:sys",
-        "build:src": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
-        "TODO... build:std": "",
-        "build:sys": "node scripts/build-runtime-system.js",
+        "build": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
         "lint": "tslint src/**/*.ts",
         "test": "mocha --require ts-node/register src/**/*.test.ts"
     },
@@ -26,7 +23,8 @@
     "license": "MIT",
     "dependencies": {
         "fs-extra": "^8.1.0",
-        "pegjs": "^0.10.0"
+        "pegjs": "^0.10.0",
+        "pkg-dir": "^4.2.0"
     },
     "devDependencies": {
         "@types/chai": "^4.2.0",
@@ -34,6 +32,7 @@
         "@types/mocha": "^5.2.7",
         "@types/node": "^10.14.16",
         "@types/pegjs": "^0.10.1",
+        "@types/pkg-dir": "^2.0.1",
         "chai": "^4.2.0",
         "concurrently": "^3.5.1",
         "cpy-cli": "^2.0.0",

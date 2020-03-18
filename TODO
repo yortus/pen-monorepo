@@ -24,7 +24,7 @@ TODO 2020:
         [x] StringExpression
         [x] VariablePattern
 
-    [ ] complete stdlib (aka penlib)
+    [ ] complete `sys` (aka penlib)
         [ ] types - Production, Module, Function
         [ ] internal helpers: ???
         [ ] bindingLookup (ensure name exists and is exported)

@@ -4,6 +4,7 @@ import {SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
+import {emitInitRuntimeSystem} from './emit-init-runtime-system';
 import {Emitter, makeEmitter} from './emitter';
 
 
@@ -26,13 +27,16 @@ function emitProgram(program: Program) {
     // TODO: how to ensure it can be loaded? Use rel path and copy file there?
     // emit.down(1).text(`import * as sys from "penlib;"`);
     // emit.down(2);
-    emit.down(1).text(`let sys;`);
+    emit.down(1).text(`const sys = initRuntimeSystem();`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
 
     // Emit definitions for all symbols.
     emitSymbolDefinitions(emit, program);
+
+    // Emit code for the runtime system.
+    emitInitRuntimeSystem(emit);
 
     // All done.
     return emit.toString();
