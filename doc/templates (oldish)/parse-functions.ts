@@ -223,54 +223,54 @@ export function Memo(expr: Parser): Parser {
 
 
 // ---------- other built-ins ----------
-export function i32(src: string, pos: number, result: {ast: unknown, posᐟ: number}) {
+// export function i32(src: string, pos: number, result: {ast: unknown, posᐟ: number}) {
 
-    // Parse optional leading '-' sign...
-    let isNegative = false;
-    if (pos < src.length && src.charAt(pos) === '-') {
-        isNegative = true;
-        pos += 1;
-    }
+//     // Parse optional leading '-' sign...
+//     let isNegative = false;
+//     if (pos < src.length && src.charAt(pos) === '-') {
+//         isNegative = true;
+//         pos += 1;
+//     }
 
-    // ...followed by one or more decimal digits. (NB: no exponents).
-    let num = 0;
-    let digits = 0;
-    while (pos < src.length) {
+//     // ...followed by one or more decimal digits. (NB: no exponents).
+//     let num = 0;
+//     let digits = 0;
+//     while (pos < src.length) {
 
-        // Read a digit
-        let c = src.charCodeAt(pos);
-        if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
+//         // Read a digit
+//         let c = src.charCodeAt(pos);
+//         if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
 
-        // Check for overflow
-        if (num > ONE_TENTH_MAXINT32) {
-            return false;
-        }
+//         // Check for overflow
+//         if (num > ONE_TENTH_MAXINT32) {
+//             return false;
+//         }
 
-        // Update parsed number
-        num *= 10;
-        num += (c - UNICODE_ZERO_DIGIT);
-        pos += 1;
-        digits += 1;
-    }
+//         // Update parsed number
+//         num *= 10;
+//         num += (c - UNICODE_ZERO_DIGIT);
+//         pos += 1;
+//         digits += 1;
+//     }
 
-    // Check that we parsed at least one digit.
-    if (digits === 0) return false;
+//     // Check that we parsed at least one digit.
+//     if (digits === 0) return false;
 
-    // Apply the sign.
-    if (isNegative) num = -num;
+//     // Apply the sign.
+//     if (isNegative) num = -num;
 
-    // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-    if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0) return false;
+//     // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
+//     if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0) return false;
 
-    // Success
-    result.ast = num;
-    result.posᐟ = pos;
-    return true;
-}
+//     // Success
+//     result.ast = num;
+//     result.posᐟ = pos;
+//     return true;
+// }
 
-// These constants are used by the i32 parser.
-const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+// // These constants are used by the i32 parser.
+// const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
+// const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
 
 
 

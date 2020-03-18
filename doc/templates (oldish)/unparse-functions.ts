@@ -275,44 +275,44 @@ export function Memo(expr: Unparser): Unparser {
 
 
 // ---------- other built-ins ----------
-export function i32(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
+// export function i32(ast: unknown, pos: number, result: {src: string, posᐟ: number}) {
 
-    // TODO: ensure N is a 32-bit integer
-    if (typeof ast !== 'number' || pos !== 0) return false;
-    let num = ast;
-    if ((num & 0xFFFFFFFF) !== num) return false;
+//     // TODO: ensure N is a 32-bit integer
+//     if (typeof ast !== 'number' || pos !== 0) return false;
+//     let num = ast;
+//     if ((num & 0xFFFFFFFF) !== num) return false;
 
-    // TODO: check sign...
-    let isNegative = false;
-    if (num < 0) {
-        isNegative = true;
-        if (num === -2147483648) {
-            // Specially handle the one case where N = -N could overflow
-            result.src = '-2147483648';
-            result.posᐟ = 1;
-            return true;
-        }
-        num = -num as number;
-    }
+//     // TODO: check sign...
+//     let isNegative = false;
+//     if (num < 0) {
+//         isNegative = true;
+//         if (num === -2147483648) {
+//             // Specially handle the one case where N = -N could overflow
+//             result.src = '-2147483648';
+//             result.posᐟ = 1;
+//             return true;
+//         }
+//         num = -num as number;
+//     }
 
-    // TODO: ...then digits
-    let digits = [] as string[];
-    while (true) {
-        let d = num % 10;
-        num = (num / 10) | 0;
-        digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
-        if (num === 0) break;
-    }
+//     // TODO: ...then digits
+//     let digits = [] as string[];
+//     while (true) {
+//         let d = num % 10;
+//         num = (num / 10) | 0;
+//         digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
+//         if (num === 0) break;
+//     }
 
-    // TODO: compute final string...
-    if (isNegative) digits.push('-');
-    result.src = digits.reverse().join('');
-    result.posᐟ = 1;
-    return true;
-}
+//     // TODO: compute final string...
+//     if (isNegative) digits.push('-');
+//     result.src = digits.reverse().join('');
+//     result.posᐟ = 1;
+//     return true;
+// }
 
-// These constants are used by the i32 unparser.
-const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
+// // These constants are used by the i32 unparser.
+// const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 
 
 
