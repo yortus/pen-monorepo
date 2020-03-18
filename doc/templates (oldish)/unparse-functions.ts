@@ -95,181 +95,181 @@ export function Memo(expr: Unparser): Unparser {
 
 
 
-// ---------- built-in parser combinators ----------
-export function Selection(...expressions: Unparser[]): Unparser {
-    const arity = expressions.length;
-    return (ast, pos, result) => {
-        for (let i = 0; i < arity; ++i) {
-            if (expressions[i](ast, pos, result)) return true;
-        }
-        return false;
-    };
-}
+// // ---------- built-in parser combinators ----------
+// export function Selection(...expressions: Unparser[]): Unparser {
+//     const arity = expressions.length;
+//     return (ast, pos, result) => {
+//         for (let i = 0; i < arity; ++i) {
+//             if (expressions[i](ast, pos, result)) return true;
+//         }
+//         return false;
+//     };
+// }
 
-export function Sequence(...expressions: Unparser[]): Unparser {
-    const arity = expressions.length;
-    return (ast, pos, result) => {
-        let src = '';
-        for (let i = 0; i < arity; ++i) {
-            if (!expressions[i](ast, pos, result)) return false;
-            // TODO: more sanity checking in here, like for parse...
-            src += result.src;
-            pos = result.posᐟ;
-        }
-        result.src = src;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+// export function Sequence(...expressions: Unparser[]): Unparser {
+//     const arity = expressions.length;
+//     return (ast, pos, result) => {
+//         let src = '';
+//         for (let i = 0; i < arity; ++i) {
+//             if (!expressions[i](ast, pos, result)) return false;
+//             // TODO: more sanity checking in here, like for parse...
+//             src += result.src;
+//             pos = result.posᐟ;
+//         }
+//         result.src = src;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-type Field =
-    | {type: 'static', name: string, value: Unparser}
-    | {type: 'computed', name: Unparser, value: Unparser}
-    | {type: 'spread', expr: Unparser};
-export function Record(fields: Field[]): Unparser {
-    return (ast, pos, result) => {
-        let src = '';
-        if (!isPlainObject(ast)) return false;
+// type Field =
+//     | {type: 'static', name: string, value: Unparser}
+//     | {type: 'computed', name: Unparser, value: Unparser}
+//     | {type: 'spread', expr: Unparser};
+// export function Record(fields: Field[]): Unparser {
+//     return (ast, pos, result) => {
+//         let src = '';
+//         if (!isPlainObject(ast)) return false;
 
-        // TODO: ...
-        outerLoop:
-        for (let field of fields) {
-            if (field.type === 'spread') {
-                // TODO: ...
-                if (!field.expr(ast, pos, result)) return false;
-                src += result.src;
-                pos = result.posᐟ;
-            }
-            else {
-                // Find the first property key/value pair that matches this field name/value pair (if any)
-                let propNames = Object.keys(ast);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
+//         // TODO: ...
+//         outerLoop:
+//         for (let field of fields) {
+//             if (field.type === 'spread') {
+//                 // TODO: ...
+//                 if (!field.expr(ast, pos, result)) return false;
+//                 src += result.src;
+//                 pos = result.posᐟ;
+//             }
+//             else {
+//                 // Find the first property key/value pair that matches this field name/value pair (if any)
+//                 let propNames = Object.keys(ast);
+//                 let propCount = propNames.length;
+//                 assert(propCount <= 32);
+//                 for (let i = 0; i < propCount; ++i) {
+//                     let propName = propNames[i];
 
-                    // TODO: skip already-consumed key/value pairs
-                    const posIncrement = 1 << i;
-                    if ((pos & posIncrement) !== 0) continue;
+//                     // TODO: skip already-consumed key/value pairs
+//                     const posIncrement = 1 << i;
+//                     if ((pos & posIncrement) !== 0) continue;
 
-                    // TODO: match field name
-                    if (field.type === 'computed') {
-                        if (!field.name(propName, 0, result)) continue;
-                        if (result.posᐟ !== propName.length) continue;
-                        src += result.src;
-                    }
-                    else /* field.type === 'static' */ {
-                        if (propName !== field.name) continue;
-                    }
+//                     // TODO: match field name
+//                     if (field.type === 'computed') {
+//                         if (!field.name(propName, 0, result)) continue;
+//                         if (result.posᐟ !== propName.length) continue;
+//                         src += result.src;
+//                     }
+//                     else /* field.type === 'static' */ {
+//                         if (propName !== field.name) continue;
+//                     }
 
-                    // TODO: match field value
-                    if (!field.value((ast as any)[propName], 0, result)) continue;
-                    if (!isFullyConsumed((ast as any)[propName], result.posᐟ)) continue;
-                    src += result.src;
+//                     // TODO: match field value
+//                     if (!field.value((ast as any)[propName], 0, result)) continue;
+//                     if (!isFullyConsumed((ast as any)[propName], result.posᐟ)) continue;
+//                     src += result.src;
 
-                    // TODO: we matched both name and value - consume them from ast
-                    pos += posIncrement;
-                    continue outerLoop;
-                }
+//                     // TODO: we matched both name and value - consume them from ast
+//                     pos += posIncrement;
+//                     continue outerLoop;
+//                 }
 
-                // If we get here, no match...
-                return false;
-            }
-        }
-        result.src = src;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+//                 // If we get here, no match...
+//                 return false;
+//             }
+//         }
+//         result.src = src;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-type ListElement =
-    | {type: 'element', value: Unparser}
-    | {type: 'spread', expr: Unparser};
-export function List(elements: ListElement[]): Unparser {
-    return (ast, pos, result) => {
-        let src = '';
-        if (!Array.isArray(ast)) return false;
+// type ListElement =
+//     | {type: 'element', value: Unparser}
+//     | {type: 'spread', expr: Unparser};
+// export function List(elements: ListElement[]): Unparser {
+//     return (ast, pos, result) => {
+//         let src = '';
+//         if (!Array.isArray(ast)) return false;
 
-        for (let element of elements) {
-            if (element.type === 'spread') {
-                if (!element.expr(ast, pos, result)) return false;
-                src += result.src;
-                pos = result.posᐟ;
-            }
-            else /* element.type === 'element' */{
-                if (pos >= ast.length) return false;
-                if (!element.value(ast[pos], 0, result)) return false;
-                if (!isFullyConsumed(ast[pos], result.posᐟ)) return false;
-                src += result.src;
-                pos += 1;
-            }
-        }
-        result.src = src;
-        result.posᐟ = pos;
-        return true;
-    };
-}
-
-
+//         for (let element of elements) {
+//             if (element.type === 'spread') {
+//                 if (!element.expr(ast, pos, result)) return false;
+//                 src += result.src;
+//                 pos = result.posᐟ;
+//             }
+//             else /* element.type === 'element' */{
+//                 if (pos >= ast.length) return false;
+//                 if (!element.value(ast[pos], 0, result)) return false;
+//                 if (!isFullyConsumed(ast[pos], result.posᐟ)) return false;
+//                 src += result.src;
+//                 pos += 1;
+//             }
+//         }
+//         result.src = src;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
 
-// ---------- built-in parser factories ----------
-export function AbstractCharRange(min: string, max: string): Unparser {
-    return (ast, pos, result) => {
-        if (typeof ast !== 'string' || pos >= ast.length) return false;
-        let c = ast.charAt(pos);
-        if (c < min || c > max) return false;
-        result.src = '';
-        result.posᐟ = pos + 1;
-        return true;
-    };
-}
 
-export function ConcreteCharRange(min: string, max: string): Unparser {
-    [max]; // prevent 6133 unused decl
-    return (_, pos, result) => {
-        result.src = min;
-        result.posᐟ = pos;
-        return true;
-    };
-}
 
-export function UniformCharRange(min: string, max: string): Unparser {
-    return (ast, pos, result) => {
-        if (typeof ast !== 'string' || pos >= ast.length) return false;
-        let c = ast.charAt(pos);
-        if (c < min || c > max) return false;
-        result.src = c;
-        result.posᐟ = pos + 1;
-        return true;
-    };
-}
+// // ---------- built-in parser factories ----------
+// export function AbstractCharRange(min: string, max: string): Unparser {
+//     return (ast, pos, result) => {
+//         if (typeof ast !== 'string' || pos >= ast.length) return false;
+//         let c = ast.charAt(pos);
+//         if (c < min || c > max) return false;
+//         result.src = '';
+//         result.posᐟ = pos + 1;
+//         return true;
+//     };
+// }
 
-export function AbstractStringLiteral(value: string): Unparser {
-    return (ast, pos, result) => {
-        if (typeof ast !== 'string' || !matchesAt(ast, value, pos)) return false;
-        result.src = '';
-        result.posᐟ = pos + value.length;
-        return true;
-    };
-}
+// export function ConcreteCharRange(min: string, max: string): Unparser {
+//     [max]; // prevent 6133 unused decl
+//     return (_, pos, result) => {
+//         result.src = min;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-export function ConcreteStringLiteral(value: string): Unparser {
-    return (_, pos, result) => {
-        result.src = value;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+// export function UniformCharRange(min: string, max: string): Unparser {
+//     return (ast, pos, result) => {
+//         if (typeof ast !== 'string' || pos >= ast.length) return false;
+//         let c = ast.charAt(pos);
+//         if (c < min || c > max) return false;
+//         result.src = c;
+//         result.posᐟ = pos + 1;
+//         return true;
+//     };
+// }
 
-export function UniformStringLiteral(value: string): Unparser {
-    return (ast, pos, result) => {
-        if (typeof ast !== 'string' || !matchesAt(ast, value, pos)) return false;
-        result.src = value;
-        result.posᐟ = pos + value.length;
-        return true;
-    };
-}
+// export function AbstractStringLiteral(value: string): Unparser {
+//     return (ast, pos, result) => {
+//         if (typeof ast !== 'string' || !matchesAt(ast, value, pos)) return false;
+//         result.src = '';
+//         result.posᐟ = pos + value.length;
+//         return true;
+//     };
+// }
+
+// export function ConcreteStringLiteral(value: string): Unparser {
+//     return (_, pos, result) => {
+//         result.src = value;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
+
+// export function UniformStringLiteral(value: string): Unparser {
+//     return (ast, pos, result) => {
+//         if (typeof ast !== 'string' || !matchesAt(ast, value, pos)) return false;
+//         result.src = value;
+//         result.posᐟ = pos + value.length;
+//         return true;
+//     };
+// }
 
 
 

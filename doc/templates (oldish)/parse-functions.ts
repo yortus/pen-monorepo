@@ -85,139 +85,139 @@ export function Memo(expr: Parser): Parser {
 
 
 
-// ---------- built-in parser combinators ----------
-export function Selection(...expressions: Parser[]): Parser {
-    const arity = expressions.length;
-    return (src, pos, result) => {
-        for (let i = 0; i < arity; ++i) {
-            if (expressions[i](src, pos, result)) return true;
-        }
-        return false;
-    };
-}
+// // ---------- built-in parser combinators ----------
+// export function Selection(...expressions: Parser[]): Parser {
+//     const arity = expressions.length;
+//     return (src, pos, result) => {
+//         for (let i = 0; i < arity; ++i) {
+//             if (expressions[i](src, pos, result)) return true;
+//         }
+//         return false;
+//     };
+// }
 
-export function Sequence(...expressions: Parser[]): Parser {
-    const arity = expressions.length;
-    return (src, pos, result) => {
-        let ast: unknown = NO_NODE;
-        for (let i = 0; i < arity; ++i) {
-            if (!expressions[i](src, pos, result)) return false;
-            pos = result.posᐟ;
-            if (ast === NO_NODE) ast = result.ast;
-            else if (typeof ast === 'string' && typeof result.ast === 'string') ast += result.ast;
-            else if (Array.isArray(ast) && Array.isArray(result.ast)) ast = [...ast, ...result.ast];
-            else if (isPlainObject(ast) && isPlainObject(result.ast)) ast = {...ast, ...result.ast};
-            else if (result.ast !== NO_NODE) throw new Error(`Internal error: invalid sequence`);
-        }
-        result.ast = ast;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+// export function Sequence(...expressions: Parser[]): Parser {
+//     const arity = expressions.length;
+//     return (src, pos, result) => {
+//         let ast: unknown = NO_NODE;
+//         for (let i = 0; i < arity; ++i) {
+//             if (!expressions[i](src, pos, result)) return false;
+//             pos = result.posᐟ;
+//             if (ast === NO_NODE) ast = result.ast;
+//             else if (typeof ast === 'string' && typeof result.ast === 'string') ast += result.ast;
+//             else if (Array.isArray(ast) && Array.isArray(result.ast)) ast = [...ast, ...result.ast];
+//             else if (isPlainObject(ast) && isPlainObject(result.ast)) ast = {...ast, ...result.ast};
+//             else if (result.ast !== NO_NODE) throw new Error(`Internal error: invalid sequence`);
+//         }
+//         result.ast = ast;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-type RecordField = {type: 'static', name: string, value: Parser} | {type: 'computed', name: Parser, value: Parser};
-export function Record(fields: RecordField[]): Parser {
-    return (src, pos, result) => {
-        let obj = {} as any; // TODO: remove/improve cast
-        for (let field of fields) {
-            let id: string;
-            if (field.type === 'computed') {
-                if (!field.name(src, pos, result)) return false;
-                assert(typeof result.ast === 'string');
-                id = result.ast as string;
-                pos = result.posᐟ;
-            }
-            else /* field.type === 'static' */ {
-                id = field.name;
-            }
+// type RecordField = {type: 'static', name: string, value: Parser} | {type: 'computed', name: Parser, value: Parser};
+// export function Record(fields: RecordField[]): Parser {
+//     return (src, pos, result) => {
+//         let obj = {} as any; // TODO: remove/improve cast
+//         for (let field of fields) {
+//             let id: string;
+//             if (field.type === 'computed') {
+//                 if (!field.name(src, pos, result)) return false;
+//                 assert(typeof result.ast === 'string');
+//                 id = result.ast as string;
+//                 pos = result.posᐟ;
+//             }
+//             else /* field.type === 'static' */ {
+//                 id = field.name;
+//             }
 
-            if (!field.value(src, pos, result)) return false;
-            assert(result.ast !== NO_NODE);
-            obj[id] = result.ast;
-            pos = result.posᐟ;
-        }
-        result.ast = obj;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+//             if (!field.value(src, pos, result)) return false;
+//             assert(result.ast !== NO_NODE);
+//             obj[id] = result.ast;
+//             pos = result.posᐟ;
+//         }
+//         result.ast = obj;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-interface ListElement { type: 'element'; value: Parser; }
-export function List(elements: ListElement[]): Parser {
-    return (src, pos, result) => {
-        let arr = [] as Array<unknown>;
-        for (let element of elements) {
-            if (!element.value(src, pos, result)) return false;
-            assert(result.ast !== NO_NODE);
-            arr.push(result.ast);
-            pos = result.posᐟ;
-        }
-        result.ast = arr;
-        result.posᐟ = pos;
-        return true;
-    };
-}
-
-
+// interface ListElement { type: 'element'; value: Parser; }
+// export function List(elements: ListElement[]): Parser {
+//     return (src, pos, result) => {
+//         let arr = [] as Array<unknown>;
+//         for (let element of elements) {
+//             if (!element.value(src, pos, result)) return false;
+//             assert(result.ast !== NO_NODE);
+//             arr.push(result.ast);
+//             pos = result.posᐟ;
+//         }
+//         result.ast = arr;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
 
-// ---------- built-in parser factories ----------
-export function AbstractCharRange(min: string, max: string): Parser {
-    [max]; // prevent 6133 unused decl
-    return (_, pos, result) => {
-        result.ast = min;
-        result.posᐟ = pos;
-        return true;
-    };
-}
 
-export function ConcreteCharRange(min: string, max: string): Parser {
-    return (src, pos, result) => {
-        if (pos >= src.length) return false;
-        let c = src.charAt(pos);
-        if (c < min || c > max) return false;
-        result.ast = NO_NODE;
-        result.posᐟ = pos + 1;
-        return true;
-    };
-}
 
-export function UniformCharRange(min: string, max: string): Parser {
-    return (src, pos, result) => {
-        if (pos >= src.length) return false;
-        let c = src.charAt(pos);
-        if (c < min || c > max) return false;
-        result.ast = c;
-        result.posᐟ = pos + 1;
-        return true;
-    };
-}
+// // ---------- built-in parser factories ----------
+// export function AbstractCharRange(min: string, max: string): Parser {
+//     [max]; // prevent 6133 unused decl
+//     return (_, pos, result) => {
+//         result.ast = min;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
 
-export function AbstractStringLiteral(value: string): Parser {
-    return (_, pos, result) => {
-        result.ast = value;
-        result.posᐟ = pos;
-        return true;
-    };
-}
+// export function ConcreteCharRange(min: string, max: string): Parser {
+//     return (src, pos, result) => {
+//         if (pos >= src.length) return false;
+//         let c = src.charAt(pos);
+//         if (c < min || c > max) return false;
+//         result.ast = NO_NODE;
+//         result.posᐟ = pos + 1;
+//         return true;
+//     };
+// }
 
-export function ConcreteStringLiteral(value: string): Parser {
-    return (src, pos, result) => {
-        if (!matchesAt(src, value, pos)) return false;
-        result.ast = NO_NODE;
-        result.posᐟ = pos + value.length;
-        return true;
-    };
-}
+// export function UniformCharRange(min: string, max: string): Parser {
+//     return (src, pos, result) => {
+//         if (pos >= src.length) return false;
+//         let c = src.charAt(pos);
+//         if (c < min || c > max) return false;
+//         result.ast = c;
+//         result.posᐟ = pos + 1;
+//         return true;
+//     };
+// }
 
-export function UniformStringLiteral(value: string): Parser {
-    return (src, pos, result) => {
-        if (!matchesAt(src, value, pos)) return false;
-        result.ast = value;
-        result.posᐟ = pos + value.length;
-        return true;
-    };
-}
+// export function AbstractStringLiteral(value: string): Parser {
+//     return (_, pos, result) => {
+//         result.ast = value;
+//         result.posᐟ = pos;
+//         return true;
+//     };
+// }
+
+// export function ConcreteStringLiteral(value: string): Parser {
+//     return (src, pos, result) => {
+//         if (!matchesAt(src, value, pos)) return false;
+//         result.ast = NO_NODE;
+//         result.posᐟ = pos + value.length;
+//         return true;
+//     };
+// }
+
+// export function UniformStringLiteral(value: string): Parser {
+//     return (src, pos, result) => {
+//         if (!matchesAt(src, value, pos)) return false;
+//         result.ast = value;
+//         result.posᐟ = pos + value.length;
+//         return true;
+//     };
+// }
 
 
 

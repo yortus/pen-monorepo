@@ -3,9 +3,9 @@ function label(value: string): Production {
         kind: 'production',
 
         parse(_, pos, result) {
-                result.node = value;
-                result.posᐟ = pos;
-                return true;
+            result.node = value;
+            result.posᐟ = pos;
+            return true;
         },
 
         unparse(node, pos, result) {

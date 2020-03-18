@@ -2,6 +2,7 @@
 return {
     charRange,
     label,
+    list,
     record,
     sequence,
     selection,

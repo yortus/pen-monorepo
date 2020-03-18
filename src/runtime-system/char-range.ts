@@ -9,7 +9,7 @@ function charRange(min: string, max: string): Production {
             result.node = c;
             result.posᐟ = pos + 1;
             return true;
-            },
+        },
 
         unparse(node, pos, result) {
             if (typeof node !== 'string' || pos >= node.length) return false;
@@ -18,6 +18,6 @@ function charRange(min: string, max: string): Production {
             result.text = c;
             result.posᐟ = pos + 1;
             return true;
-            },
+        },
     };
 }

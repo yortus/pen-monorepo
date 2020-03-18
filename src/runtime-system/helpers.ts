@@ -1,3 +1,7 @@
+// TODO: is this just `undefined` in other bits of the sys code? Work out if still needed...
+const NO_NODE = Symbol('NO_NODE');
+
+
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
 }
