@@ -5,7 +5,6 @@ TODO 2020:
         [x] BindingLookupExpression
         [x] CharacterExpression
         [x] DynamicField
-        [ ] FunctionExpression (NB: disabled for now)
         [x] ImportExpression
         [x] LabelExpression
         [x] ListExpression
@@ -24,7 +23,7 @@ TODO 2020:
         [x] StringExpression
         [x] VariablePattern
 
-    [ ] complete `sys` (aka penlib)
+    [x] complete `sys` (aka penlib)
         [x] types - Production, Module, Function
         [x] internal helpers: ???
         [x] bindingLookup (ensure name exists and is exported)
@@ -36,8 +35,8 @@ TODO 2020:
         [x] selection
         [x] sequence
         [x] string
+    [x] link `sys.js` into emitted code (idea: use same way as for extensions - ie decl/impl pair)
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
-    [ ] link `sys.js` into emitted code (idea: use same way as for extensions - ie decl/impl pair)
     [ ] specify extension (and declaration) modules properly
         .d.pen for declaration file
         assumes a .js file is there with the impl
