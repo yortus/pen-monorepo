@@ -108,7 +108,11 @@ function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
 function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable) {
     switch (expr.kind) {
         case 'ApplicationExpression':
-            emitCall(emit, expr.function, [expr.argument], symbolTable);
+            emit.text('sys.apply(').indent().down(1);
+            emitExpression(emit, expr.function, symbolTable);
+            emit.text(',').down(1);
+            emitExpression(emit, expr.argument, symbolTable);
+            emit.dedent().down(1).text(`)`);
             return;
 
         case 'BindingLookupExpression':

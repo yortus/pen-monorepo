@@ -4,6 +4,8 @@
 digit = "0-9"
 alpha = "a-z" | "A-Z"
 
+result = foo(bar baz)
+
 myList = [digit, digit digit, digit digit digit]
 
 rec = {

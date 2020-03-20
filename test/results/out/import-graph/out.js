@@ -9,6 +9,7 @@ const 𝕊2 = {
         baz: {},
         digit: {},
         alpha: {},
+        result: {},
         myList: {},
         rec: {},
         r2: {},
@@ -100,6 +101,17 @@ Object.assign(
 );
 
 Object.assign(
+    𝕊2.bindings.result,
+    sys.apply(
+        sys.reference(𝕊2.bindings.foo),
+        sys.sequence(
+            sys.reference(𝕊2.bindings.bar),
+            sys.reference(𝕊2.bindings.baz)
+        )
+    )
+);
+
+Object.assign(
     𝕊2.bindings.myList,
     sys.list([
         sys.reference(𝕊2.bindings.digit),
@@ -185,6 +197,10 @@ Object.assign(
 // -------------------- RUNTIME SYSTEM --------------------
 
 function initRuntimeSystem() {
+    function apply(func, arg) {
+        assert(func.kind === 'function');
+        return func.apply(arg);
+    }
     function bindingLookup(module, name) {
         var _a;
         assert(module.kind === 'module' && ((_a = module.bindings) === null || _a === void 0 ? void 0 : _a[name]));

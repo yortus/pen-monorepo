@@ -1,6 +1,6 @@
 interface Function_ {
     kind: 'function';
-    // TODO: ...
+    apply: (arg: Function_ | Module | Production) => Function_ | Module | Production;
 }
 
 
