@@ -2,7 +2,6 @@ const i32: Production = {
     kind: 'production',
 
     parse(text, pos, result) {
-
         // Parse optional leading '-' sign...
         let isNegative = false;
         if (pos < text.length && text.charAt(pos) === '-') {
@@ -48,7 +47,6 @@ const i32: Production = {
     },
 
     unparse(node, pos, result) {
-
         // TODO: ensure N is a 32-bit integer
         if (typeof node !== 'number' || pos !== 0) return false;
         let num = node;
