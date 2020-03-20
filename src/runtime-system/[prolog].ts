@@ -1,12 +1,15 @@
+type Datatype = Function_ | Module | Production;
+
+
 interface Function_ {
     kind: 'function';
-    apply: (arg: Function_ | Module | Production) => Function_ | Module | Production;
+    apply: (arg: Datatype) => Datatype;
 }
 
 
 interface Module {
     kind: 'module';
-    bindings: Record<string, Function_ | Module | Production>;
+    bindings: Record<string, Datatype>;
 }
 
 

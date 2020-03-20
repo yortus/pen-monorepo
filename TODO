@@ -37,7 +37,8 @@ TODO 2020:
         [x] string
     [x] link `sys.js` into emitted code
     [x] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
-    [ ] add a union type for `Datatype` (currently can be function|module|production)
+    [x] add a union type for `Datatype` (currently can be function|module|production)
+    [ ] rename `Function_` to `Lambda`, `LambdaExpression` (best) or similar?
     [ ] complete `std` (standard library)
         [ ] memo (nb this is a function/combinator, not a production)
         [ ] i32
