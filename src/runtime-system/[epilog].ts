@@ -1,8 +1,10 @@
+// TODO: doc... helper...
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
 }
 
 
+// TODO: doc... helper...
 function isFullyConsumed(node: unknown, pos: number): boolean {
     if (typeof node === 'string') return pos === node.length;
     if (Array.isArray(node)) return pos === node.length;
@@ -17,11 +19,13 @@ function isFullyConsumed(node: unknown, pos: number): boolean {
 }
 
 
+// TODO: doc... helper...
 function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
 
 
+// TODO: doc... helper...
 function matchesAt(text: string, substr: string, position: number) {
     let lastPos = position + substr.length;
     if (lastPos > text.length) return false;
@@ -30,3 +34,17 @@ function matchesAt(text: string, substr: string, position: number) {
     }
     return true;
 }
+
+
+// @ts-ignore
+return {
+    bindingLookup,
+    charRange,
+    label,
+    list,
+    record,
+    reference,
+    sequence,
+    selection,
+    string,
+};

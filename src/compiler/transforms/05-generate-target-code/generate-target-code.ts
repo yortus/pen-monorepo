@@ -36,6 +36,7 @@ function emitProgram(program: Program) {
     emitSymbolDefinitions(emit, program);
 
     // Emit code for the runtime system.
+    emit.down(2).text(`// -------------------- RUNTIME SYSTEM --------------------`);
     emitInitRuntimeSystem(emit);
 
     // All done.

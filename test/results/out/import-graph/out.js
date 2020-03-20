@@ -182,6 +182,8 @@ Object.assign(
     sys.string("util2")
 );
 
+// -------------------- RUNTIME SYSTEM --------------------
+
 function initRuntimeSystem() {
     function bindingLookup(module, name) {
         var _a;
@@ -189,7 +191,6 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    
     function charRange(min, max) {
         return {
             kind: 'production',
@@ -215,53 +216,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
-    // @ts-ignore
-    return {
-        bindingLookup,
-        charRange,
-        label,
-        list,
-        record,
-        reference,
-        sequence,
-        selection,
-        string,
-    };
-    
-    function assert(value) {
-        if (!value)
-            throw new Error(`Assertion failed`);
-    }
-    function isFullyConsumed(node, pos) {
-        if (typeof node === 'string')
-            return pos === node.length;
-        if (Array.isArray(node))
-            return pos === node.length;
-        if (isPlainObject(node)) {
-            let keyCount = Object.keys(node).length;
-            assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-            if (keyCount === 0)
-                return true;
-            // tslint:disable-next-line: no-bitwise
-            return pos === -1 >>> (32 - keyCount);
-        }
-        return pos === 1; // TODO: doc which case(s) this covers. Better to just return false?
-    }
-    function isPlainObject(value) {
-        return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-    }
-    function matchesAt(text, substr, position) {
-        let lastPos = position + substr.length;
-        if (lastPos > text.length)
-            return false;
-        for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-            if (text.charAt(i) !== substr.charAt(j))
-                return false;
-        }
-        return true;
-    }
-    
     function label(value) {
         return {
             kind: 'production',
@@ -279,7 +233,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     function list(elements) {
         return {
             kind: 'production',
@@ -316,7 +269,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     function record(fields) {
         return {
             kind: 'production',
@@ -393,7 +345,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     // TODO: investigate optimisations... Don't need to retain indirection in many cases. Or will V8 optimisations suffice?
     function reference(target) {
         return {
@@ -406,7 +357,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     function selection(...expressions) {
         const arity = expressions.length;
         return {
@@ -427,7 +377,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     function sequence(...expressions) {
         const arity = expressions.length;
         return {
@@ -468,7 +417,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    
     function string(value) {
         return {
             kind: 'production',
@@ -488,7 +436,52 @@ function initRuntimeSystem() {
             },
         };
     }
-    
-    
-    
+    // TODO: doc... helper...
+    function assert(value) {
+        if (!value)
+            throw new Error(`Assertion failed`);
+    }
+    // TODO: doc... helper...
+    function isFullyConsumed(node, pos) {
+        if (typeof node === 'string')
+            return pos === node.length;
+        if (Array.isArray(node))
+            return pos === node.length;
+        if (isPlainObject(node)) {
+            let keyCount = Object.keys(node).length;
+            assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
+            if (keyCount === 0)
+                return true;
+            // tslint:disable-next-line: no-bitwise
+            return pos === -1 >>> (32 - keyCount);
+        }
+        return pos === 1; // TODO: doc which case(s) this covers. Better to just return false?
+    }
+    // TODO: doc... helper...
+    function isPlainObject(value) {
+        return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
+    }
+    // TODO: doc... helper...
+    function matchesAt(text, substr, position) {
+        let lastPos = position + substr.length;
+        if (lastPos > text.length)
+            return false;
+        for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+            if (text.charAt(i) !== substr.charAt(j))
+                return false;
+        }
+        return true;
+    }
+    // @ts-ignore
+    return {
+        bindingLookup,
+        charRange,
+        label,
+        list,
+        record,
+        reference,
+        sequence,
+        selection,
+        string,
+    };
 }

@@ -1,6 +1,3 @@
-// TODO: ensure exports.js (ie return {...}) is emitted last, otherwise there may be unreachable code emitted
-// - maybe just put types+helpers+exports into a single specially-named file that is emitted last?
-
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as pkgDir from 'pkg-dir';
@@ -17,13 +14,21 @@ assert(fs.existsSync(SYS_DIR));
 // TODO: temp testing...
 export function emitInitRuntimeSystem(emit: Emitter) {
     emit.down(2).text(`function initRuntimeSystem() {`).indent();
-    const filenames = fs.readdirSync(SYS_DIR).filter(fn => path.extname(fn) === '.js');
+    const filenames = fs.readdirSync(SYS_DIR).filter(fn => path.extname(fn) === '.js').sort(compareFilenames);
     for (let filename of filenames) {
-        let content = fs.readFileSync(path.join(SYS_DIR, filename), 'utf8') + '\n';
+        let absPath = path.join(SYS_DIR, filename);
+        let content = fs.readFileSync(absPath, 'utf8') + '\n';
         content = content.replace(/"use strict";[\r\n]*/, '').replace(/\/\/# sourceMappingURL.*/, '');
-        content.split(/[\r\n]+/).forEach(line => {
+        content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => {
             emit.down(1).text(line);
         });
     }
     emit.dedent().down(1).text('}\n');
+}
+
+
+function compareFilenames(a: string, b: string) {
+    if (a === '[prolog].js' || b === '[epilog].js') return -1;
+    if (a === '[epilog].js' || b === '[prolog].js') return 1;
+    return a === b ? 0 : a < b ? -1 : 1;
 }
