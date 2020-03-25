@@ -5,17 +5,22 @@ import {assert} from './utils';
 export interface Symbol {
     id: number;
     name: string;
+    type: SymbolType;
     scope: Scope;
 }
 
 
+// TODO: temp testing...
+export type SymbolType = 'function' | 'module' | 'production';
+
+
 export class SymbolTable {
 
-    create(name: string, scope: Scope): Symbol {
+    create(name: string, type: SymbolType, scope: Scope): Symbol {
         // ensure not already defined in this scope
         if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
         let id = this.symbols.length;
-        let symbol: Symbol = {id, name, scope};
+        let symbol: Symbol = {id, name, type, scope};
         scope.symbols.set(name, symbol);
         this.symbols.push(symbol);
         return symbol;
