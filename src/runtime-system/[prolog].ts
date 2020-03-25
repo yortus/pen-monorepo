@@ -3,7 +3,7 @@ type Datatype = Function_ | Module | Production;
 
 interface Function_ {
     kind: 'function';
-    apply: (arg: Datatype) => Datatype;
+    apply(arg: Datatype): Datatype;
 }
 
 

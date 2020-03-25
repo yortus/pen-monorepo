@@ -38,6 +38,7 @@ function matchesAt(text: string, substr: string, position: number) {
 
 // @ts-ignore
 return {
+    apply,
     bindingLookup,
     charRange,
     label,

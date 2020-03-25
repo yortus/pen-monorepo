@@ -5,17 +5,17 @@
  */
 
 
-{memoize, i32} = import 'std'
+{memoise, i32} = import 'std'
 
 
 export math = expr
 
 
-expr = memoize(add | sub | term)
+expr = memoise(add | sub | term)
 add = {type: 'add',  lhs: expr,  rhs: "+" term} // NB: commas allowed but optional
 sub = {type: 'sub'   lhs: expr   rhs: "\-" term}
 
-term = memoize(mul | div | factor)
+term = memoise(mul | div | factor)
 mul = {type: 'mul'   lhs: term   rhs: "*" factor}
 div = {type: 'div'   lhs: term   rhs: "/" factor}
 
