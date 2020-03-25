@@ -1,4 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
+import {STD_SCOPE} from '../../scope';
 import {assert, makeNodeMapper} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from './symbol-references';
@@ -22,10 +23,17 @@ export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
 
         // Resolve import expressions.
         ImportExpression: imp => {
-            let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
-            let scope = sourceFile?.module.meta.scope;
-            let impᐟ = {...imp, meta: {scope}};
-            return impᐟ;
+            // TODO: temp special-case 'std' handling. Unify these two cases better...
+            if (imp.moduleSpecifier === 'std') {
+                let impᐟ = {...imp, meta: {scope: STD_SCOPE}};
+                return impᐟ;
+            }
+            else {
+                let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
+                let scope = sourceFile.module.meta.scope;
+                let impᐟ = {...imp, meta: {scope}};
+                return impᐟ;
+            }
         },
 
         // Resolve symbol references.

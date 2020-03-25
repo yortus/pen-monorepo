@@ -21,4 +21,7 @@ export function createChildScope(parent: Scope): Scope & {parent: Scope} {
 }
 
 
+export const STD_SCOPE: Scope = {id: -1, children: [], symbols: new Map()};
+
+
 let counter = 0;

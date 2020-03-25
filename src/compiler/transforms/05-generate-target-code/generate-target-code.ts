@@ -5,6 +5,7 @@ import {makeNodeVisitor} from '../../utils';
 import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {emitInitRuntimeSystem} from './emit-init-runtime-system';
+import {emitInitStandardLibrary} from './emit-init-standard-library';
 import {Emitter, makeEmitter} from './emitter';
 
 
@@ -28,6 +29,7 @@ function emitProgram(program: Program) {
     // emit.down(1).text(`import * as sys from "penlib;"`);
     // emit.down(2);
     emit.down(1).text(`const sys = initRuntimeSystem();`);
+    emit.down(1).text(`const std = initStandardLibrary();`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -38,6 +40,10 @@ function emitProgram(program: Program) {
     // Emit code for the runtime system.
     emit.down(2).text(`// -------------------- RUNTIME SYSTEM --------------------`);
     emitInitRuntimeSystem(emit);
+
+    // Emit code for the standard library.
+    emit.down(2).text(`// -------------------- STANDARD LIBRARY --------------------`);
+    emitInitStandardLibrary(emit);
 
     // All done.
     return emit.toString();
@@ -133,9 +139,16 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         //     break; // TODO...
 
         case 'ImportExpression':
-            // TODO: treat as reference
-            emit.text(`𝕊${expr.meta.scope.id}`);
-            return;
+            // TODO: temp special-case 'std' handling. Unify these two cases better...
+            if (expr.moduleSpecifier === 'std') {
+                emit.text(`std`);
+                return;
+            }
+            else {
+                // TODO: treat as reference
+                emit.text(`𝕊${expr.meta.scope.id}`);
+                return;
+            }
 
         case 'LabelExpression':
             emit.text(`sys.label(${JSON.stringify(expr.value)})`);

@@ -11,8 +11,8 @@ export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsP
     let absPath: AbsPath;
 
     // 1. If `modSpec` is a core module
-    if (modSpec === 'pen') {
-        absPath = AbsPath('penlib.pen', CORE_LIBS_PATH);
+    if (modSpec === 'std') {
+        absPath = AbsPath('std');
     }
 
     // 2. If `modSpec` is a relative path
@@ -35,6 +35,7 @@ export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsP
 
 
 function tryPath(p: AbsPath) {
+    if (p === 'std') return p;
     if (!fs.existsSync(p)) return undefined;
     if (!fs.statSync(p).isFile()) return undefined;
     return p;
@@ -44,7 +45,3 @@ function tryPath(p: AbsPath) {
 function fail(modSpec: string): never {
     throw new Error(`Failed to resolve module '${modSpec}'`);
 }
-
-
-// TODO: use more robust way of locating lib files & third-party deps
-const CORE_LIBS_PATH = path.join(__dirname, '../../../penlib');

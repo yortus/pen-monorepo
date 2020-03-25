@@ -1,3 +1,0 @@
-{} = import './a.pen'
-{} = import './c'
-{} = import './d'

@@ -1,4 +1,0 @@
-export util = {
-    util1 = import './util1'
-    util2 = import './util2'
-}

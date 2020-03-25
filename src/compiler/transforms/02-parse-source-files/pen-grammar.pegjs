@@ -148,7 +148,7 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = options.sourceFile.imports[moduleSpecifier];
+        let sourceFilePath = moduleSpecifier === 'std' ? 'std' : options.sourceFile.imports[moduleSpecifier];
         return {kind: 'ImportExpression', moduleSpecifier, sourceFilePath};
     }
 

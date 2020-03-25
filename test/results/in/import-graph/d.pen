@@ -1,2 +1,0 @@
-//{} = import 'pen'
-{} = import './util'
