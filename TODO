@@ -39,9 +39,10 @@ TODO 2020:
     [x] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
     [x] add a union type for `Datatype` (currently can be function|module|production)
     [ ] rename `Function_` to `Lambda`, `LambdaExpression` (best), `LambdaForm` or similar?
+    [ ] revise naming conventions - capitalise combinator/lambda fns? Productions?
     [ ] complete `std` (standard library)
-        [ ] memo (nb this is a function/combinator, not a production)
-        [ ] i32
+        [x] memo (nb this is a function/combinator/lambda, not a production)
+        [x] i32
         [ ] char (ie anychar)
         [ ] intrinsic_true
         [ ] intrinsic_false
