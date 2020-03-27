@@ -44,7 +44,6 @@ return {
     label,
     list,
     record,
-    reference,
     sequence,
     selection,
     string,

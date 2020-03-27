@@ -10,7 +10,6 @@ import {Emitter, makeEmitter} from './emitter';
 
 
 type Program = AstNodes.Program<SymbolDefinitions & SymbolReferences>;
-type Module = AstNodes.Module<SymbolDefinitions & SymbolReferences>;
 type Expression = AstNodes.Expression<SymbolDefinitions & SymbolReferences>;
 
 
@@ -34,7 +33,7 @@ function emitProgram(program: Program) {
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
 
-    // Emit definitions for all symbols.
+    // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
 
     // Emit code for the runtime system.
@@ -78,36 +77,40 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             rec(sf.module);
         },
         Module: module => {
-            emitModule(emit, module, symbolTable);
+            for (let {pattern, value} of module.bindings) {
+                if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
+                    // TODO:
+                    // if rhs is a ReferenceExpression that refs a module, or is an ImportExpression, then its an alias
+                    // but does that matter for emit here?
+                    emit.down(2).text('{').indent();
+                    emit.down(1).text(`let rhs = `);
+                    emitExpression(emit, value, symbolTable);
+                    emit.text(';');
+                    for (let {name, alias, meta: {symbolId}} of pattern.names) {
+                        let {scope} = symbolTable.lookup(symbolId);
+                        emit.down(1).text(`𝕊${scope.id}.bindings.${alias || name} = `);
+                        emit.text(`sys.bindingLookup(rhs, '${name}');`);
+                    }
+                    emit.dedent().down(1).text('}');
+                }
+                else if (pattern.kind === 'VariablePattern') {
+                    let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
+                    if (value.kind === 'ReferenceExpression' || value.kind === 'ImportExpression') {
+                        emit.down(2).text(`𝕊${scope.id}.bindings.${name} = `);
+                        emitExpression(emit, value, symbolTable);
+                        emit.text(`; // alias`);
+                    }
+                    else {
+                        emit.down(2).text(`Object.assign(`).indent();
+                        emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
+                        emitExpression(emit, value, symbolTable);
+                        emit.dedent().down(1).text(`);`);
+                    }
+                }
+            }
             module.bindings.forEach(rec);
         },
     }));
-}
-
-
-function emitModule(emit: Emitter, module: Module, symbolTable: SymbolTable) {
-    for (let {pattern, value} of module.bindings) {
-        if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
-            emit.down(2).text('{').indent();
-            emit.down(1).text(`let rhs = `);
-            emitExpression(emit, value, symbolTable);
-            emit.text(';');
-            for (let {name, alias, meta: {symbolId}} of pattern.names) {
-                let {scope} = symbolTable.lookup(symbolId);
-                emit.down(1).text(`Object.assign(`);
-                emit.text(`𝕊${scope.id}.bindings.${alias || name}, `);
-                emit.text(`sys.bindingLookup(rhs, '${name}'));`);
-            }
-            emit.dedent().down(1).text('}');
-        }
-        else if (pattern.kind === 'VariablePattern') {
-            let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
-            emit.down(2).text(`Object.assign(`).indent();
-            emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
-            emitExpression(emit, value, symbolTable);
-            emit.dedent().down(1).text(`);`);
-        }
-    }
 }
 
 
@@ -145,7 +148,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
                 return;
             }
             else {
-                // TODO: treat as reference
                 emit.text(`𝕊${expr.meta.scope.id}`);
                 return;
             }
@@ -165,7 +167,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ModuleExpression':
-            // TODO: treat as reference
             emit.text(`𝕊${expr.module.meta.scope.id}`);
             return;
 
@@ -192,7 +193,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ReferenceExpression':
             let ref = symbolTable.lookup(expr.meta.symbolId);
-            emit.text(`sys.reference(𝕊${ref.scope.id}.bindings.${ref.name})`);
+            emit.text(`𝕊${ref.scope.id}.bindings.${ref.name}`);
             return;
 
         case 'SelectionExpression':

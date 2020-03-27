@@ -18,27 +18,24 @@ const 𝕊2 = {
     },
 };
 
-// -------------------- V:\projects\oss\penc\test\results\in\math\index.pen --------------------
+// -------------------- V:\oss\penc\test\results\in\math\index.pen --------------------
 
 {
     let rhs = std;
-    Object.assign(𝕊2.bindings.memoise, sys.bindingLookup(rhs, 'memoise'));
-    Object.assign(𝕊2.bindings.i32, sys.bindingLookup(rhs, 'i32'));
+    𝕊2.bindings.memoise = sys.bindingLookup(rhs, 'memoise');
+    𝕊2.bindings.i32 = sys.bindingLookup(rhs, 'i32');
 }
 
-Object.assign(
-    𝕊2.bindings.math,
-    sys.reference(𝕊2.bindings.expr)
-);
+𝕊2.bindings.math = 𝕊2.bindings.expr; // alias
 
 Object.assign(
     𝕊2.bindings.expr,
     sys.apply(
-        sys.reference(𝕊2.bindings.memoise),
+        𝕊2.bindings.memoise,
         sys.selection(
-            sys.reference(𝕊2.bindings.add),
-            sys.reference(𝕊2.bindings.sub),
-            sys.reference(𝕊2.bindings.term)
+            𝕊2.bindings.add,
+            𝕊2.bindings.sub,
+            𝕊2.bindings.term
         )
     )
 );
@@ -54,14 +51,14 @@ Object.assign(
         {
             dynamic: false,
             name: 'lhs',
-            value: sys.reference(𝕊2.bindings.expr),
+            value: 𝕊2.bindings.expr,
         },
         {
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
                 sys.string("+"),
-                sys.reference(𝕊2.bindings.term)
+                𝕊2.bindings.term
             ),
         },
     ])
@@ -78,14 +75,14 @@ Object.assign(
         {
             dynamic: false,
             name: 'lhs',
-            value: sys.reference(𝕊2.bindings.expr),
+            value: 𝕊2.bindings.expr,
         },
         {
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
                 sys.string("\\-"),
-                sys.reference(𝕊2.bindings.term)
+                𝕊2.bindings.term
             ),
         },
     ])
@@ -94,11 +91,11 @@ Object.assign(
 Object.assign(
     𝕊2.bindings.term,
     sys.apply(
-        sys.reference(𝕊2.bindings.memoise),
+        𝕊2.bindings.memoise,
         sys.selection(
-            sys.reference(𝕊2.bindings.mul),
-            sys.reference(𝕊2.bindings.div),
-            sys.reference(𝕊2.bindings.factor)
+            𝕊2.bindings.mul,
+            𝕊2.bindings.div,
+            𝕊2.bindings.factor
         )
     )
 );
@@ -114,14 +111,14 @@ Object.assign(
         {
             dynamic: false,
             name: 'lhs',
-            value: sys.reference(𝕊2.bindings.term),
+            value: 𝕊2.bindings.term,
         },
         {
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
                 sys.string("*"),
-                sys.reference(𝕊2.bindings.factor)
+                𝕊2.bindings.factor
             ),
         },
     ])
@@ -138,14 +135,14 @@ Object.assign(
         {
             dynamic: false,
             name: 'lhs',
-            value: sys.reference(𝕊2.bindings.term),
+            value: 𝕊2.bindings.term,
         },
         {
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
                 sys.string("/"),
-                sys.reference(𝕊2.bindings.factor)
+                𝕊2.bindings.factor
             ),
         },
     ])
@@ -154,10 +151,10 @@ Object.assign(
 Object.assign(
     𝕊2.bindings.factor,
     sys.selection(
-        sys.reference(𝕊2.bindings.i32),
+        𝕊2.bindings.i32,
         sys.sequence(
             sys.string("("),
-            sys.reference(𝕊2.bindings.expr),
+            𝕊2.bindings.expr,
             sys.string(")")
         )
     )
@@ -330,26 +327,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    // TODO: investigate optimisations... Don't need to retain indirection in many cases. Or will V8 optimisations suffice?
-    function reference(target) {
-        // TODO: hacky and repetitive, fix this. Prob: if its a forward ref, we don't know target type yet.
-        if (target.kind === 'production') {
-            return {
-                kind: 'production',
-                parse: (text, pos, result) => target.parse(text, pos, result),
-                unparse: (node, pos, result) => target.unparse(node, pos, result),
-            };
-        }
-        else if (target.kind === 'function') {
-            return {
-                kind: 'function',
-                apply: (arg) => target.apply(arg),
-            };
-        }
-        else {
-            throw new Error('Not implemented'); // TODO: ...
-        }
-    }
     function selection(...expressions) {
         const arity = expressions.length;
         return {
@@ -473,7 +450,6 @@ function initRuntimeSystem() {
         label,
         list,
         record,
-        reference,
         sequence,
         selection,
         string,
