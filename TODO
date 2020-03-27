@@ -38,11 +38,8 @@ TODO 2020:
     [x] link `sys.js` into emitted code
     [x] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
     [x] add a union type for `Datatype` (currently can be function|module|production)
-    [ ] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
-        [ ] but we know the expected target type due to static analysis
-        [ ] is it surfaced in the ast/meta? If not, surface it
-        [ ] use ast/meta to constrain which kind of reference we are creating
-        [ ] NB: we should *also* know whether it's a forward ref or not. Can emit better code in some cases using this fact.
+    [x] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
+        [x] make `reference` unnecessary by emitting better code for aliased symbols
     [ ] rename `Function_` to `Lambda`, `LambdaExpression` (best), `LambdaForm` or similar?
     [ ] revise naming conventions - capitalise combinator/lambda fns? Productions?
     [ ] complete `std` (standard library)

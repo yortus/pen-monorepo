@@ -81,7 +81,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // TODO:
                     // if rhs is a ReferenceExpression that refs a module, or is an ImportExpression, then its an alias
-                    // but does that matter for emit here?
+                    // but does that matter for emit here? If not, must prove current emit is always correct/safe, eg with forward refs
                     emit.down(2).text('{').indent();
                     emit.down(1).text(`let rhs = `);
                     emitExpression(emit, value, symbolTable);
