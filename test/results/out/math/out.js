@@ -7,6 +7,7 @@ const 𝕊2 = {
     bindings: {
         memoise: {},
         i32: {},
+        textOnly: {},
         math: {},
         expr: {},
         add: {},
@@ -41,6 +42,7 @@ function unparse(node) {
     let rhs = std;
     𝕊2.bindings.memoise = sys.bindingLookup(rhs, 'memoise');
     𝕊2.bindings.i32 = sys.bindingLookup(rhs, 'i32');
+    𝕊2.bindings.textOnly = sys.bindingLookup(rhs, 'textOnly');
 }
 
 𝕊2.bindings.math = 𝕊2.bindings.expr; // alias
@@ -74,7 +76,10 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.string("+"),
+                sys.apply(
+                    𝕊2.bindings.textOnly,
+                    sys.string("+")
+                ),
                 𝕊2.bindings.term
             ),
         },
@@ -98,7 +103,10 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.string("\\-"),
+                sys.apply(
+                    𝕊2.bindings.textOnly,
+                    sys.string("-")
+                ),
                 𝕊2.bindings.term
             ),
         },
@@ -134,7 +142,10 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.string("*"),
+                sys.apply(
+                    𝕊2.bindings.textOnly,
+                    sys.string("*")
+                ),
                 𝕊2.bindings.factor
             ),
         },
@@ -158,7 +169,10 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.string("/"),
+                sys.apply(
+                    𝕊2.bindings.textOnly,
+                    sys.string("/")
+                ),
                 𝕊2.bindings.factor
             ),
         },
@@ -687,12 +701,29 @@ function initStandardLibrary() {
     const PARSE_FAIL = Symbol('FAIL');
     // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
     const UNPARSE_FAIL = '\uD800';
+    const textOnly = {
+        kind: 'function',
+        apply(expr) {
+            return {
+                kind: 'production',
+                parse(text, pos, result) {
+                    let success = expr.parse(text, pos, result);
+                    if (success) result.node = undefined;
+                    return success;
+                },
+                unparse(_node, _pos, _result) {
+                    throw new Error('Not implemented');
+                },
+            };
+        },
+    };
     // @ts-ignore
     return {
         kind: 'module',
         bindings: {
             i32,
             memoise,
+            textOnly,
         },
     };
 }

@@ -5,18 +5,18 @@
  */
 
 
-{memoise, i32} = import 'std'
+{memoise, i32, textOnly} = import 'std'
 
 
 export math = expr
 
 
 expr = memoise(add | sub | term)
-add = {type: 'add',  lhs: expr,  rhs: "+" term} // NB: commas allowed but optional
-sub = {type: 'sub'   lhs: expr   rhs: "\-" term}
+add = {type: 'add',  lhs: expr,  rhs: textOnly("+") term} // NB: commas allowed but optional
+sub = {type: 'sub'   lhs: expr   rhs: textOnly("-") term}
 
 term = memoise(mul | div | factor)
-mul = {type: 'mul'   lhs: term   rhs: "*" factor}
-div = {type: 'div'   lhs: term   rhs: "/" factor}
+mul = {type: 'mul'   lhs: term   rhs: textOnly("*") factor}
+div = {type: 'div'   lhs: term   rhs: textOnly("/") factor}
 
 factor = i32 | "(" expr ")"
