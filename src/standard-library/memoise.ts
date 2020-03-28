@@ -1,6 +1,6 @@
 const memoise: Function_ = {
     kind: 'function',
-    apply(expr: Production): Production {
+    apply(expr: Rule): Rule {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
@@ -21,7 +21,7 @@ const memoise: Function_ = {
         >();
 
         return {
-            kind: 'production',
+            kind: 'rule',
 
             parse(text, pos, result) {
                 // Check whether the memo table already has an entry for the given initial state.

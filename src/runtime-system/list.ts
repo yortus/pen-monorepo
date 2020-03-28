@@ -1,6 +1,6 @@
-function list(elements: Production[]): Production {
+function list(elements: Rule[]): Rule {
     return {
-        kind: 'production',
+        kind: 'rule',
 
         parse(text, pos, result) {
             let arr = [] as unknown[];

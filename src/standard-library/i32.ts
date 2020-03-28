@@ -1,5 +1,5 @@
-const i32: Production = {
-    kind: 'production',
+const i32: Rule = {
+    kind: 'rule',
 
     parse(text, pos, result) {
         // Parse optional leading '-' sign...
@@ -85,6 +85,6 @@ const i32: Production = {
 };
 
 
-// These constants are used by the i32 production.
+// These constants are used by the i32 rule.
 const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;

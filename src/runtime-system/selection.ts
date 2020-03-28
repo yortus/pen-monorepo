@@ -1,7 +1,7 @@
-function selection(...expressions: Production[]): Production {
+function selection(...expressions: Rule[]): Rule {
     const arity = expressions.length;
     return {
-        kind: 'production',
+        kind: 'rule',
 
         parse(text, pos, result) {
             for (let i = 0; i < arity; ++i) {

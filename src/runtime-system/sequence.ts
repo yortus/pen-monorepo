@@ -1,7 +1,7 @@
-function sequence(...expressions: Production[]): Production {
+function sequence(...expressions: Rule[]): Rule {
     const arity = expressions.length;
     return {
-        kind: 'production',
+        kind: 'rule',
 
         parse(text, pos, result) {
             let node: unknown;

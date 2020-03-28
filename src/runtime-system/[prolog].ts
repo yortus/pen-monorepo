@@ -1,4 +1,4 @@
-type Datatype = Function_ | Module | Production;
+type Datatype = Function_ | Module | Rule;
 
 
 interface Function_ {
@@ -16,10 +16,10 @@ interface Module {
 /**
  * TODO: doc...
  * - modifies `result` iff return value is true -OR- if returns false, result may be garbage WHICH IS IT? 2nd is more flexible for impls
- * - meaning of `pos` and `posᐟ` for nodes is production-specific
+ * - meaning of `pos` and `posᐟ` for nodes is rule-specific
  */
-interface Production {
-    kind: 'production';
+interface Rule {
+    kind: 'rule';
     parse(text: string, pos: number, result: {node: unknown, posᐟ: number}): boolean;
     unparse(node: unknown, pos: number, result: {text: string, posᐟ: number}): boolean;
 }

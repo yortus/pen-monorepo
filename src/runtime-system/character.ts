@@ -1,7 +1,7 @@
-function character(min: string, max: string, modifier?: 'concrete' | 'abstract'): Production {
+function character(min: string, max: string, modifier?: 'concrete' | 'abstract'): Rule {
     if (modifier === 'abstract') {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(_, pos, result) {
                 result.node = min;
                 result.posᐟ = pos;
@@ -20,7 +20,7 @@ function character(min: string, max: string, modifier?: 'concrete' | 'abstract')
 
     if (modifier === 'concrete') {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 if (pos >= text.length) return false;
                 let c = text.charAt(pos);
@@ -38,7 +38,7 @@ function character(min: string, max: string, modifier?: 'concrete' | 'abstract')
     }
 
     return {
-        kind: 'production',
+        kind: 'rule',
         parse(text, pos, result) {
             if (pos >= text.length) return false;
             let c = text.charAt(pos);

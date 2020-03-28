@@ -1,7 +1,7 @@
-function string(value: string, modifier?: 'concrete' | 'abstract'): Production {
+function string(value: string, modifier?: 'concrete' | 'abstract'): Rule {
     if (modifier === 'abstract') {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(_, pos, result) {
                 result.node = value;
                 result.posᐟ = pos;
@@ -18,7 +18,7 @@ function string(value: string, modifier?: 'concrete' | 'abstract'): Production {
 
     if (modifier === 'concrete') {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 if (!matchesAt(text, value, pos)) return false;
                 result.node = undefined;
@@ -34,7 +34,7 @@ function string(value: string, modifier?: 'concrete' | 'abstract'): Production {
     }
 
     return {
-        kind: 'production',
+        kind: 'rule',
         parse(text, pos, result) {
             if (!matchesAt(text, value, pos)) return false;
             result.node = value;

@@ -1,11 +1,11 @@
 type Field =
-    | {dynamic: false, name: string, value: Production}
-    | {dynamic: true, name: Production, value: Production};
+    | {dynamic: false, name: string, value: Rule}
+    | {dynamic: true, name: Rule, value: Rule};
 
 
-function record(fields: Field[]): Production {
+function record(fields: Field[]): Rule {
     return {
-        kind: 'production',
+        kind: 'rule',
 
         parse(text, pos, result) {
             let obj = {} as Record<string, unknown>;

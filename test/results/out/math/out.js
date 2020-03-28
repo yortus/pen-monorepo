@@ -194,7 +194,7 @@ function initRuntimeSystem() {
     function character(min, max, modifier) {
         if (modifier === 'abstract') {
             return {
-                kind: 'production',
+                kind: 'rule',
                 parse(_, pos, result) {
                     result.node = min;
                     result.posᐟ = pos;
@@ -214,7 +214,7 @@ function initRuntimeSystem() {
         }
         if (modifier === 'concrete') {
             return {
-                kind: 'production',
+                kind: 'rule',
                 parse(text, pos, result) {
                     if (pos >= text.length)
                         return false;
@@ -233,7 +233,7 @@ function initRuntimeSystem() {
             };
         }
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 if (pos >= text.length)
                     return false;
@@ -258,7 +258,7 @@ function initRuntimeSystem() {
     }
     function list(elements) {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 let arr = [];
                 for (let element of elements) {
@@ -294,7 +294,7 @@ function initRuntimeSystem() {
     }
     function record(fields) {
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 let obj = {};
                 for (let field of fields) {
@@ -371,7 +371,7 @@ function initRuntimeSystem() {
     function selection(...expressions) {
         const arity = expressions.length;
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 for (let i = 0; i < arity; ++i) {
                     if (expressions[i].parse(text, pos, result))
@@ -391,7 +391,7 @@ function initRuntimeSystem() {
     function sequence(...expressions) {
         const arity = expressions.length;
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 let node;
                 for (let i = 0; i < arity; ++i) {
@@ -431,7 +431,7 @@ function initRuntimeSystem() {
     function string(value, modifier) {
         if (modifier === 'abstract') {
             return {
-                kind: 'production',
+                kind: 'rule',
                 parse(_, pos, result) {
                     result.node = value;
                     result.posᐟ = pos;
@@ -448,7 +448,7 @@ function initRuntimeSystem() {
         }
         if (modifier === 'concrete') {
             return {
-                kind: 'production',
+                kind: 'rule',
                 parse(text, pos, result) {
                     if (!matchesAt(text, value, pos))
                         return false;
@@ -464,7 +464,7 @@ function initRuntimeSystem() {
             };
         }
         return {
-            kind: 'production',
+            kind: 'rule',
             parse(text, pos, result) {
                 if (!matchesAt(text, value, pos))
                     return false;
@@ -540,7 +540,7 @@ function initRuntimeSystem() {
 
 function initStandardLibrary() {
     const i32 = {
-        kind: 'production',
+        kind: 'rule',
         parse(text, pos, result) {
             // Parse optional leading '-' sign...
             let isNegative = false;
@@ -619,7 +619,7 @@ function initStandardLibrary() {
             return true;
         },
     };
-    // These constants are used by the i32 production.
+    // These constants are used by the i32 rule.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     const memoise = {
@@ -630,7 +630,7 @@ function initStandardLibrary() {
             // TODO: revise memo key once using new ast/pos signature
             const unparseMemos = new Map();
             return {
-                kind: 'production',
+                kind: 'rule',
                 parse(text, pos, result) {
                     // Check whether the memo table already has an entry for the given initial state.
                     let memo = parseMemos.get(pos);
