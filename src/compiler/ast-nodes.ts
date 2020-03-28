@@ -33,8 +33,8 @@ export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BindingLookupExpression<M>
     | CharacterExpression<M>
-    // | FunctionExpression<M>
     | ImportExpression<M>
+    // | LambdaExpression<M>
     | ListExpression<M>
     | ModuleExpression<M>
     | ParenthesisedExpression<M>
@@ -115,7 +115,7 @@ export interface VariablePattern<M extends Metadata = {}> {
 // // ====================   Expression nodes   ====================
 export interface ApplicationExpression<M extends Metadata = {}> {
     readonly kind: 'ApplicationExpression';
-    readonly function: Expression<M>;
+    readonly lambda: Expression<M>;
     readonly argument: Expression<M>;
     readonly meta: M[this['kind']];
 }
@@ -139,14 +139,6 @@ export interface CharacterExpression<M extends Metadata = {}> {
 }
 
 
-// export interface FunctionExpression<M extends Metadata = {}> {
-//     readonly kind: 'FunctionExpression';
-//     readonly pattern: Pattern<M>;
-//     readonly body: Expression<M>;
-//     readonly meta: M[this['kind']];
-// }
-
-
 export interface ImportExpression<M extends Metadata = {}> {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
@@ -160,6 +152,14 @@ export interface ListExpression<M extends Metadata = {}> {
     readonly elements: ReadonlyArray<Expression<M>>;
     readonly meta: M[this['kind']];
 }
+
+
+// export interface LambdaExpression<M extends Metadata = {}> {
+//     readonly kind: 'LambdaExpression';
+//     readonly pattern: Pattern<M>;
+//     readonly body: Expression<M>;
+//     readonly meta: M[this['kind']];
+// }
 
 
 export interface ModuleExpression<M extends Metadata = {}> {

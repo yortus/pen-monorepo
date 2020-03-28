@@ -55,7 +55,7 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 4 (HIGHEST):
-        ---DISABLED FOR NOW--> FunctionExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
+        ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
         RecordExpression            {a: b   c: d   [e]: f}   {a: b}   {}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
@@ -84,7 +84,7 @@ Precedence4OrHigher
     = PrimaryExpression
 
 PrimaryExpression
-    // = FunctionExpression
+    // = LambdaExpression
     = RecordExpression
     / ModuleExpression
     / ListExpression
@@ -108,7 +108,7 @@ Precedence3Expression
         return tail.reduce(
             (lhs, rhs) => (rhs.name
                 ? {kind: 'BindingLookupExpression', module: lhs, bindingName: rhs.name}
-                : {kind: 'ApplicationExpression', function: lhs, argument: rhs.arg}
+                : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
             ),
             head
         );
@@ -122,9 +122,9 @@ ApplicationArgument
     = arg:Precedence4OrHigher
     { return {arg}; }
 
-// FunctionExpression
+// LambdaExpression
 //     = pattern:Pattern   __   "=>"   __   body:Expression
-//     { return {kind: 'FunctionExpression', pattern, body}; }
+//     { return {kind: 'LambdaExpression', pattern, body}; }
 
 RecordExpression
     = "{"   __   fields:FieldList   __   "}"

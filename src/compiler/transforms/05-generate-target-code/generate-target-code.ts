@@ -150,7 +150,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
     switch (expr.kind) {
         case 'ApplicationExpression':
             emit.text('sys.apply(').indent().down(1);
-            emitExpression(emit, expr.function, symbolTable);
+            emitExpression(emit, expr.lambda, symbolTable);
             emit.text(',').down(1);
             emitExpression(emit, expr.argument, symbolTable);
             emit.dedent().down(1).text(`)`);
@@ -171,9 +171,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`${charModifier})`);
             return;
 
-        // case 'FunctionExpression':
-        //     break; // TODO...
-
         case 'ImportExpression':
             // TODO: temp special-case 'std' handling. Unify these two cases better...
             if (expr.moduleSpecifier === 'std') {
@@ -184,6 +181,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
                 emit.text(`𝕊${expr.meta.scope.id}`);
                 return;
             }
+
+        // case 'LambdaExpression':
+        //     break; // TODO...
 
         case 'ListExpression':
             emit.text('sys.list([').indent();

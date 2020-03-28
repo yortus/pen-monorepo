@@ -26,13 +26,13 @@ export function makeNodeMapper<N extends Node, Nᐟ extends Node>() {
 function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) => SpecificNode) {
     return (n: Node): Node => {
         switch (n.kind) {
-            case 'ApplicationExpression': return {...n, function: rec(n.function), argument: rec(n.argument)};
+            case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
             case 'BindingLookupExpression': return {...n, module: rec(n.module)};
             case 'CharacterExpression': return n;
             case 'DynamicField': return {...n, name: rec(n.name), value: rec(n.value)};
-            // case 'FunctionExpression': TODO: ...
             case 'ImportExpression': return n;
+            // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};

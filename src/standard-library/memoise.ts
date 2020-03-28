@@ -1,5 +1,5 @@
-const memoise: Function_ = {
-    kind: 'function',
+const memoise: Lambda = {
+    kind: 'lambda',
     apply(expr: Rule): Rule {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.

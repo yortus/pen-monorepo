@@ -25,7 +25,7 @@ modExprMem = expr.foo | ({mem = "member"}).mem | baz
 recA = { a = recB.b }
 recB = { b = recA.a }
 
-// function expressions, disabled for now
+// lambda expressions, disabled for now
 // fn1 = a => a a
 // fn2 = {x, y} => x y
 

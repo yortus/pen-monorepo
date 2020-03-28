@@ -26,13 +26,13 @@ export function makeNodeVisitor<N extends Node>() {
 function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) => void) {
     return (n: Node): void => {
         switch (n.kind) {
-            case 'ApplicationExpression': return rec(n.function), rec(n.argument);
+            case 'ApplicationExpression': return rec(n.lambda), rec(n.argument);
             case 'Binding': return rec(n.pattern), rec(n.value);
             case 'BindingLookupExpression': return rec(n.module);
             case 'CharacterExpression': return;
             case 'DynamicField': return rec(n.name), rec(n.value);
-            // case 'FunctionExpression': TODO: ...
             case 'ImportExpression': return;
+            // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec);
             case 'Module': return n.bindings.forEach(rec);
             case 'ModuleExpression': return rec(n.module);

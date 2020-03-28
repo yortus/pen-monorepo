@@ -113,7 +113,7 @@ export string, array as a1, object
 // export none by default
 
 
-// Kinds of things: rule, function, namespace
+// Kinds of things: rule, lambda, module
 
 json = string | array | object | etc
 

@@ -1,8 +1,8 @@
-type Datatype = Function_ | Module | Rule;
+type Datatype = Lambda | Module | Rule;
 
 
-interface Function_ {
-    kind: 'function';
+interface Lambda {
+    kind: 'lambda';
     apply(arg: Datatype): Datatype;
 }
 

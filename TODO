@@ -24,7 +24,7 @@ TODO 2020:
         [x] VariablePattern
 
     [x] complete `sys` (aka penlib)
-        [x] types - Rule, Module, Function
+        [x] types - Rule, Module, Lambda
         [x] internal helpers: ???
         [x] bindingLookup (ensure name exists and is exported)
         [x] charRange
@@ -37,7 +37,7 @@ TODO 2020:
         [x] string
     [x] link `sys.js` into emitted code
     [x] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
-    [x] add a union type for `Datatype` (currently can be function|module|rule)
+    [x] add a union type for `Datatype` (currently can be lambda|module|rule)
     [x] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
         [x] make `reference` unnecessary by emitting better code for aliased symbols
     [x] require main module to have a `start` rule (not necessarily exported)
@@ -46,21 +46,21 @@ TODO 2020:
         [x] 'foo' ast only
         [x] "foo" both <->
         [x] `foo` text only
-    [ ] rename the three datatypes (so far) as follows (update comments in code too):
+    [x] rename the three datatypes (so far) as follows (update comments in code too):
         [x] `Production` to `Rule`
-        [ ] `Function_` to `Lambda`
-        [ ] `Module` stays as-is
+        [x] `Function_` to `Lambda`
+        [x] `Module` stays as-is
     [ ] revise naming conventions - capitalise combinator/lambda fns? Rules?
     [ ] complete `std` (standard library)
-        [x] memo (nb this is a function/combinator/lambda, not a rule)
+        [x] memo (nb this is a lambda, not a rule)
         [x] i32
         [ ] char (ie anychar)
         [ ] intrinsic_true
         [ ] intrinsic_false
         [ ] intrinsic_null
-        [ ] zeroOrMore (nb this is a function/combinator, not a rule)
-        [ ] maybe / optional (nb this is a function/combinator, not a rule)
-        [ ] not (nb this is a function/combinator, not a rule)
+        [ ] zeroOrMore (nb this is a lambda, not a rule)
+        [ ] maybe / optional (nb this is a lambda, not a rule)
+        [ ] not (nb this is a lambda, not a rule)
         [ ] epsilon, (ie ε-rule)
         [ ] textOnly / concrete
         [ ] astOnly / abstract

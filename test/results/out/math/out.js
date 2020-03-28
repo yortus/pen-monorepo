@@ -181,9 +181,9 @@ Object.assign(
 // -------------------- RUNTIME SYSTEM --------------------
 
 function initRuntimeSystem() {
-    function apply(func, arg) {
-        assert(func.kind === 'function');
-        return func.apply(arg);
+    function apply(lambda, arg) {
+        assert(lambda.kind === 'lambda');
+        return lambda.apply(arg);
     }
     function bindingLookup(module, name) {
         var _a;
@@ -623,7 +623,7 @@ function initStandardLibrary() {
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     const memoise = {
-        kind: 'function',
+        kind: 'lambda',
         apply(expr) {
             // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
             const parseMemos = new Map();
