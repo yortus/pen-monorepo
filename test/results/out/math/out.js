@@ -18,6 +18,23 @@ const 𝕊2 = {
     },
 };
 
+module.exports = {parse, unparse};
+function parse(text) {
+    let start = 𝕊2.bindings.math;
+    let result = {node: null, posᐟ: 0};
+    if (!start.parse(text, 0, result)) throw new Error(`parse failed`);
+    if (result.posᐟ !== text.length) throw new Error(`parse didn't consume entire input`);
+    if (result.node === undefined) throw new Error(`parse didn't return a value`);
+    return result.node;
+}
+function unparse(node) {
+    let start = 𝕊2.bindings.math;
+    let result = {text: '', posᐟ: 0};
+    if (!start.unparse(node, 0, result)) throw new Error(`parse failed`);
+    if (!isFullyConsumed(node, result.posᐟ)) throw new Error(`unparse didn't consume entire input`);
+    return result.text;
+}
+
 // -------------------- V:\oss\penc\test\results\in\math\index.pen --------------------
 
 {

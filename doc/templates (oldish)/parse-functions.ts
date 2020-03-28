@@ -351,20 +351,20 @@ export function epsilon(_: string, pos: number, result: {ast: unknown, posᐟ: n
 
 
 
-// TODO: internal helpers...
-function isPlainObject(value: unknown): value is object {
-    return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-}
+// // TODO: internal helpers...
+// function isPlainObject(value: unknown): value is object {
+//     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
+// }
 
-function matchesAt(text: string, substr: string, position: number) {
-    let lastPos = position + substr.length;
-    if (lastPos > text.length) return false;
-    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-        if (text.charAt(i) !== substr.charAt(j)) return false;
-    }
-    return true;
-}
+// function matchesAt(text: string, substr: string, position: number) {
+//     let lastPos = position + substr.length;
+//     if (lastPos > text.length) return false;
+//     for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+//         if (text.charAt(i) !== substr.charAt(j)) return false;
+//     }
+//     return true;
+// }
 
-function assert(value: unknown) {
-    if (!value) throw new Error(`Assertion failed`);
-}
+// function assert(value: unknown) {
+//     if (!value) throw new Error(`Assertion failed`);
+// }
