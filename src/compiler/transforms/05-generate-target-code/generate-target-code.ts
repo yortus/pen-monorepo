@@ -22,12 +22,11 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: header stuff...
-    // TODO: every source file import the PEN standard library
-    // TODO: how to ensure it can be loaded? Use rel path and copy file there?
-    // emit.down(1).text(`import * as sys from "penlib;"`);
-    // emit.down(2);
-    emit.down(1).text(`const sys = initRuntimeSystem();`);
+    // TODO: Emit main exports...
+    emitMainExports(emit, program);
+
+    // TODO: Emit header stuff...
+    emit.down(2).text(`const sys = initRuntimeSystem();`);
     emit.down(1).text(`const std = initStandardLibrary();`);
 
     // Emit declarations for all symbols before any are defined.
@@ -46,6 +45,38 @@ function emitProgram(program: Program) {
 
     // All done.
     return emit.toString();
+}
+
+
+function emitMainExports(emit: Emitter, program: Program) {
+    let mainModule = program.sourceFiles.get(program.mainPath)!.module;
+    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
+    let lines = `
+        module.exports = {parse, unparse};
+
+        function parse(text) {
+            let start = 𝕊${mainModule.meta.scope.id}.bindings.start;
+            let result = {node: null, posᐟ: 0};
+            if (!start.parse(text, 0, result)) throw new Error('parse failed');
+            if (result.posᐟ !== text.length) throw new Error('parse didn\\'t consume entire input');
+            if (result.node === undefined) throw new Error('parse didn\\'t return a value');
+            return result.node;
+        }
+
+        function unparse(node) {
+            let start = 𝕊${mainModule.meta.scope.id}.bindings.start;
+            let result = {text: '', posᐟ: 0};
+            if (!start.unparse(node, 0, result)) throw new Error('parse failed');
+            if (!isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\\'t consume entire input');
+            return result.text;
+        }
+    `.split(/\r\n?|\n/).slice(1, -1);
+    let indent = lines[0].length - lines[0].trimLeft().length;
+    lines = lines.map(line => line.slice(indent));
+    lines.forEach((line, i) => {
+        if (i > 0) emit.down(1);
+        emit.text(line);
+    });
 }
 
 
@@ -81,7 +112,8 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // TODO:
                     // if rhs is a ReferenceExpression that refs a module, or is an ImportExpression, then its an alias
-                    // but does that matter for emit here? If not, must prove current emit is always correct/safe, eg with forward refs
+                    // but does that matter for emit here? If not, must prove current emit is always correct/safe,
+                    // eg with forward refs
                     emit.down(2).text('{').indent();
                     emit.down(1).text(`let rhs = `);
                     emitExpression(emit, value, symbolTable);

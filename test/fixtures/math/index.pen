@@ -8,7 +8,7 @@
 {memoise, i32, textOnly} = import 'std'
 
 
-export math = expr
+start = expr
 
 
 expr = memoise(add | sub | term)

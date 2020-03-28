@@ -40,8 +40,8 @@ TODO 2020:
     [x] add a union type for `Datatype` (currently can be function|module|production)
     [x] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
         [x] make `reference` unnecessary by emitting better code for aliased symbols
-    [ ] require main module to have a `start` rule (not necessarily exported)
-    [ ] add emit for exported `parse` and `unparse` functions, which call `start.parse` and `start.unparse`
+    [x] require main module to have a `start` rule (not necessarily exported)
+    [x] add emit for exported `parse` and `unparse` functions, which call `start.parse` and `start.unparse`
     [ ] update PEN syntax for string literals and char ranges as follows:
         [ ] 'foo' ast only
         [ ] "foo" both <->

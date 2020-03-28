@@ -1,3 +1,21 @@
+module.exports = {parse, unparse};
+
+function parse(text) {
+    let start = 𝕊2.bindings.start;
+    let result = {node: null, posᐟ: 0};
+    if (!start.parse(text, 0, result)) throw new Error('parse failed');
+    if (result.posᐟ !== text.length) throw new Error('parse didn\'t consume entire input');
+    if (result.node === undefined) throw new Error('parse didn\'t return a value');
+    return result.node;
+}
+
+function unparse(node) {
+    let start = 𝕊2.bindings.start;
+    let result = {text: '', posᐟ: 0};
+    if (!start.unparse(node, 0, result)) throw new Error('parse failed');
+    if (!isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\'t consume entire input');
+    return result.text;
+}
 
 const sys = initRuntimeSystem();
 const std = initStandardLibrary();
@@ -8,7 +26,7 @@ const 𝕊2 = {
         memoise: {},
         i32: {},
         textOnly: {},
-        math: {},
+        start: {},
         expr: {},
         add: {},
         sub: {},
@@ -19,23 +37,6 @@ const 𝕊2 = {
     },
 };
 
-module.exports = {parse, unparse};
-function parse(text) {
-    let start = 𝕊2.bindings.math;
-    let result = {node: null, posᐟ: 0};
-    if (!start.parse(text, 0, result)) throw new Error(`parse failed`);
-    if (result.posᐟ !== text.length) throw new Error(`parse didn't consume entire input`);
-    if (result.node === undefined) throw new Error(`parse didn't return a value`);
-    return result.node;
-}
-function unparse(node) {
-    let start = 𝕊2.bindings.math;
-    let result = {text: '', posᐟ: 0};
-    if (!start.unparse(node, 0, result)) throw new Error(`parse failed`);
-    if (!isFullyConsumed(node, result.posᐟ)) throw new Error(`unparse didn't consume entire input`);
-    return result.text;
-}
-
 // -------------------- V:\oss\penc\test\results\in\math\index.pen --------------------
 
 {
@@ -45,7 +46,7 @@ function unparse(node) {
     𝕊2.bindings.textOnly = sys.bindingLookup(rhs, 'textOnly');
 }
 
-𝕊2.bindings.math = 𝕊2.bindings.expr; // alias
+𝕊2.bindings.start = 𝕊2.bindings.expr; // alias
 
 Object.assign(
     𝕊2.bindings.expr,
@@ -708,7 +709,8 @@ function initStandardLibrary() {
                 kind: 'production',
                 parse(text, pos, result) {
                     let success = expr.parse(text, pos, result);
-                    if (success) result.node = undefined;
+                    if (success)
+                        result.node = undefined;
                     return success;
                 },
                 unparse(_node, _pos, _result) {
