@@ -13,7 +13,7 @@ describe('testdrive', async () => {
         try {
             let punp = require(outFilePath);
 
-            let ast = punp.parse('1+1');
+            let ast = punp.parse('1+-1-22*333');
             [] = [ast];
 
         }

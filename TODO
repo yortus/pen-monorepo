@@ -40,7 +40,16 @@ TODO 2020:
     [x] add a union type for `Datatype` (currently can be function|module|production)
     [x] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
         [x] make `reference` unnecessary by emitting better code for aliased symbols
-    [ ] rename `Function_` to `Lambda`, `LambdaExpression` (best), `LambdaForm` or similar?
+    [ ] require main module to have a `start` rule (not necessarily exported)
+    [ ] add emit for exported `parse` and `unparse` functions, which call `start.parse` and `start.unparse`
+    [ ] update PEN syntax for string literals and char ranges as follows:
+        [ ] 'foo' ast only
+        [ ] "foo" both <->
+        [ ] `foo` text only
+    [ ] rename the three datatypes (so far) as follows (update comments in code too):
+        [ ] `Production` to `Rule`
+        [ ] `Function_` to `Lambda`
+        [ ] `Module` stays as-is
     [ ] revise naming conventions - capitalise combinator/lambda fns? Productions?
     [ ] complete `std` (standard library)
         [x] memo (nb this is a function/combinator/lambda, not a production)
@@ -53,9 +62,10 @@ TODO 2020:
         [ ] maybe / optional (nb this is a function/combinator, not a production)
         [ ] not (nb this is a function/combinator, not a production)
         [ ] epsilon, (ie ε-rule)
-    [ ] support importing productions from `std` (but no other non-relative modspecs yet)
-    [ ] link `std.js` into emitted code
-
+        [ ] textOnly / concrete
+        [ ] astOnly / abstract
+    [x] support importing productions from `std` (but no other non-relative modspecs yet)
+    [x] link `std.js` into emitted code
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
     [ ] specify extension (and declaration) modules properly
         .d.pen for declaration file
