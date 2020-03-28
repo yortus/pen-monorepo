@@ -13,7 +13,7 @@ function unparse(node) {
     let start = 𝕊2.bindings.start;
     let result = {text: '', posᐟ: 0};
     if (!start.unparse(node, 0, result)) throw new Error('parse failed');
-    if (!isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\'t consume entire input');
+    if (!sys.isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\'t consume entire input');
     return result.text;
 }
 
@@ -25,7 +25,6 @@ const 𝕊2 = {
     bindings: {
         memoise: {},
         i32: {},
-        textOnly: {},
         start: {},
         expr: {},
         add: {},
@@ -43,7 +42,6 @@ const 𝕊2 = {
     let rhs = std;
     𝕊2.bindings.memoise = sys.bindingLookup(rhs, 'memoise');
     𝕊2.bindings.i32 = sys.bindingLookup(rhs, 'i32');
-    𝕊2.bindings.textOnly = sys.bindingLookup(rhs, 'textOnly');
 }
 
 𝕊2.bindings.start = 𝕊2.bindings.expr; // alias
@@ -66,7 +64,7 @@ Object.assign(
         {
             dynamic: false,
             name: 'type',
-            value: sys.label("add"),
+            value: sys.string("add", 'abstract'),
         },
         {
             dynamic: false,
@@ -77,10 +75,7 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.apply(
-                    𝕊2.bindings.textOnly,
-                    sys.string("+")
-                ),
+                sys.string("+", 'concrete'),
                 𝕊2.bindings.term
             ),
         },
@@ -93,7 +88,7 @@ Object.assign(
         {
             dynamic: false,
             name: 'type',
-            value: sys.label("sub"),
+            value: sys.string("sub", 'abstract'),
         },
         {
             dynamic: false,
@@ -104,10 +99,7 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.apply(
-                    𝕊2.bindings.textOnly,
-                    sys.string("-")
-                ),
+                sys.string("-", 'concrete'),
                 𝕊2.bindings.term
             ),
         },
@@ -132,7 +124,7 @@ Object.assign(
         {
             dynamic: false,
             name: 'type',
-            value: sys.label("mul"),
+            value: sys.string("mul", 'abstract'),
         },
         {
             dynamic: false,
@@ -143,10 +135,7 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.apply(
-                    𝕊2.bindings.textOnly,
-                    sys.string("*")
-                ),
+                sys.string("*", 'concrete'),
                 𝕊2.bindings.factor
             ),
         },
@@ -159,7 +148,7 @@ Object.assign(
         {
             dynamic: false,
             name: 'type',
-            value: sys.label("div"),
+            value: sys.string("div", 'abstract'),
         },
         {
             dynamic: false,
@@ -170,10 +159,7 @@ Object.assign(
             dynamic: false,
             name: 'rhs',
             value: sys.sequence(
-                sys.apply(
-                    𝕊2.bindings.textOnly,
-                    sys.string("/")
-                ),
+                sys.string("/", 'concrete'),
                 𝕊2.bindings.factor
             ),
         },
@@ -185,9 +171,9 @@ Object.assign(
     sys.selection(
         𝕊2.bindings.i32,
         sys.sequence(
-            sys.string("("),
+            sys.string("(", 'concrete'),
             𝕊2.bindings.expr,
-            sys.string(")")
+            sys.string(")", 'concrete')
         )
     )
 );
@@ -205,7 +191,47 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    function charRange(min, max) {
+    function character(min, max, modifier) {
+        if (modifier === 'abstract') {
+            return {
+                kind: 'production',
+                parse(_, pos, result) {
+                    result.node = min;
+                    result.posᐟ = pos;
+                    return true;
+                },
+                unparse(node, pos, result) {
+                    if (typeof node !== 'string' || pos >= node.length)
+                        return false;
+                    let c = node.charAt(pos);
+                    if (c < min || c > max)
+                        return false;
+                    result.text = '';
+                    result.posᐟ = pos + 1;
+                    return true;
+                },
+            };
+        }
+        if (modifier === 'concrete') {
+            return {
+                kind: 'production',
+                parse(text, pos, result) {
+                    if (pos >= text.length)
+                        return false;
+                    let c = text.charAt(pos);
+                    if (c < min || c > max)
+                        return false;
+                    result.node = undefined;
+                    result.posᐟ = pos + 1;
+                    return true;
+                },
+                unparse(_, pos, result) {
+                    result.text = min;
+                    result.posᐟ = pos;
+                    return true;
+                },
+            };
+        }
         return {
             kind: 'production',
             parse(text, pos, result) {
@@ -226,23 +252,6 @@ function initRuntimeSystem() {
                     return false;
                 result.text = c;
                 result.posᐟ = pos + 1;
-                return true;
-            },
-        };
-    }
-    function label(value) {
-        return {
-            kind: 'production',
-            parse(_, pos, result) {
-                result.node = value;
-                result.posᐟ = pos;
-                return true;
-            },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || !matchesAt(node, value, pos))
-                    return false;
-                result.text = '';
-                result.posᐟ = pos + value.length;
                 return true;
             },
         };
@@ -419,7 +428,41 @@ function initRuntimeSystem() {
             },
         };
     }
-    function string(value) {
+    function string(value, modifier) {
+        if (modifier === 'abstract') {
+            return {
+                kind: 'production',
+                parse(_, pos, result) {
+                    result.node = value;
+                    result.posᐟ = pos;
+                    return true;
+                },
+                unparse(node, pos, result) {
+                    if (typeof node !== 'string' || !matchesAt(node, value, pos))
+                        return false;
+                    result.text = '';
+                    result.posᐟ = pos + value.length;
+                    return true;
+                },
+            };
+        }
+        if (modifier === 'concrete') {
+            return {
+                kind: 'production',
+                parse(text, pos, result) {
+                    if (!matchesAt(text, value, pos))
+                        return false;
+                    result.node = undefined;
+                    result.posᐟ = pos + value.length;
+                    return true;
+                },
+                unparse(_, pos, result) {
+                    result.text = value;
+                    result.posᐟ = pos;
+                    return true;
+                },
+            };
+        }
         return {
             kind: 'production',
             parse(text, pos, result) {
@@ -478,13 +521,17 @@ function initRuntimeSystem() {
     return {
         apply,
         bindingLookup,
-        charRange,
-        label,
+        character,
         list,
         record,
         sequence,
         selection,
         string,
+        // export helpers too so std can reference them
+        assert,
+        isFullyConsumed,
+        isPlainObject,
+        matchesAt,
     };
 }
 
@@ -677,7 +724,7 @@ function initStandardLibrary() {
                                 break;
                             if (result.posᐟ === memo.result.posᐟ)
                                 break;
-                            if (!isFullyConsumed(node, result.posᐟ))
+                            if (!sys.isFullyConsumed(node, result.posᐟ))
                                 break;
                             Object.assign(memo.result, result);
                         }
@@ -702,30 +749,12 @@ function initStandardLibrary() {
     const PARSE_FAIL = Symbol('FAIL');
     // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
     const UNPARSE_FAIL = '\uD800';
-    const textOnly = {
-        kind: 'function',
-        apply(expr) {
-            return {
-                kind: 'production',
-                parse(text, pos, result) {
-                    let success = expr.parse(text, pos, result);
-                    if (success)
-                        result.node = undefined;
-                    return success;
-                },
-                unparse(_node, _pos, _result) {
-                    throw new Error('Not implemented');
-                },
-            };
-        },
-    };
     // @ts-ignore
     return {
         kind: 'module',
         bindings: {
             i32,
             memoise,
-            textOnly,
         },
     };
 }

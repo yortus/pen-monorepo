@@ -59,9 +59,8 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         RecordExpression            {a: b   c: d   [e]: f}   {a: b}   {}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
-        CharacterExpression         "a-z"   "0-9"
-        StringExpression            "foo"   "a string!"
-        LabelExpression             'foo'   'bar'
+        CharacterExpression         "a-z"   '0-9'   `A-F`
+        StringExpression            "foo"   'a string!'   `a`
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression            import './foo'   import 'somelib'
 */
@@ -93,7 +92,6 @@ PrimaryExpression
     / ImportExpression
     / CharacterExpression
     / StringExpression
-    / LabelExpression
     / ReferenceExpression
 
 SelectionExpression
@@ -153,16 +151,24 @@ ImportExpression
     }
 
 CharacterExpression
-    = '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
-    { return {kind: 'CharacterExpression', minValue, maxValue}; }
+    = "'"   !['-]   minValue:CHARACTER   "-"   !['-]   maxValue:CHARACTER   "'"
+    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: true}; }
+
+    / '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
+    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: true}; }
+
+    / "`"   ![`-]   minValue:CHARACTER   "-"   ![`-]   maxValue:CHARACTER   "`"
+    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
 
 StringExpression
-    = !CharacterExpression   '"'   (!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringExpression', value: text().slice(1, -1)}; }
+    = !CharacterExpression   "'"   (!"'"   CHARACTER)*   "'"
+    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: false, abstract: true}; }
 
-LabelExpression
-    = "'"   (!"'"   CHARACTER)*   "'"
-    { return {kind: 'LabelExpression', value: text().slice(1, -1)}; }
+    / !CharacterExpression   '"'   (!'"'   CHARACTER)*   '"'
+    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: true, abstract: true}; }
+
+    / !CharacterExpression   "`"   (!"`"   CHARACTER)*   "`"
+    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: true, abstract: false}; }
 
 ReferenceExpression
     = name:IDENTIFIER

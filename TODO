@@ -42,10 +42,10 @@ TODO 2020:
         [x] make `reference` unnecessary by emitting better code for aliased symbols
     [x] require main module to have a `start` rule (not necessarily exported)
     [x] add emit for exported `parse` and `unparse` functions, which call `start.parse` and `start.unparse`
-    [ ] update PEN syntax for string literals and char ranges as follows:
-        [ ] 'foo' ast only
-        [ ] "foo" both <->
-        [ ] `foo` text only
+    [x] update PEN syntax for string literals and char ranges as follows:
+        [x] 'foo' ast only
+        [x] "foo" both <->
+        [x] `foo` text only
     [ ] rename the three datatypes (so far) as follows (update comments in code too):
         [ ] `Production` to `Rule`
         [ ] `Function_` to `Lambda`
@@ -66,6 +66,7 @@ TODO 2020:
         [ ] astOnly / abstract
     [x] support importing productions from `std` (but no other non-relative modspecs yet)
     [x] link `std.js` into emitted code
+    [ ] possible to detect left recursion, and automatically insert `memoise` (then move memoize from `std` to `sys`)?
     [ ] better way of tracking `isFullyConsumed` for record/object nodes? 32 prop limit is limiting
     [ ] specify extension (and declaration) modules properly
         .d.pen for declaration file

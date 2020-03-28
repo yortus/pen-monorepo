@@ -67,7 +67,7 @@ function emitMainExports(emit: Emitter, program: Program) {
             let start = 𝕊${mainModule.meta.scope.id}.bindings.start;
             let result = {text: '', posᐟ: 0};
             if (!start.unparse(node, 0, result)) throw new Error('parse failed');
-            if (!isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\\'t consume entire input');
+            if (!sys.isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\\'t consume entire input');
             return result.text;
         }
     `.split(/\r\n?|\n/).slice(1, -1);
@@ -164,10 +164,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'CharacterExpression':
-            emit.text('sys.charRange(');
+            const charModifier = expr.concrete ? (expr.abstract ? '' : `, 'concrete'`) : `, 'abstract'`;
+            emit.text('sys.character(');
             emit.text(JSON.stringify(expr.minValue)).text(', ');
             emit.text(JSON.stringify(expr.maxValue));
-            emit.text(')');
+            emit.text(`${charModifier})`);
             return;
 
         // case 'FunctionExpression':
@@ -183,10 +184,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
                 emit.text(`𝕊${expr.meta.scope.id}`);
                 return;
             }
-
-        case 'LabelExpression':
-            emit.text(`sys.label(${JSON.stringify(expr.value)})`);
-            return;
 
         case 'ListExpression':
             emit.text('sys.list([').indent();
@@ -237,7 +234,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'StringExpression':
-            emit.text(`sys.string(${JSON.stringify(expr.value)})`);
+            const strModifier = expr.concrete ? (expr.abstract ? '' : `, 'concrete'`) : `, 'abstract'`;
+            emit.text(`sys.string(${JSON.stringify(expr.value)}${strModifier})`);
             return;
 
         default:

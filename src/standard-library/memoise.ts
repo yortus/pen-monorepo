@@ -118,7 +118,7 @@ const memoise: Function_ = {
                         // some node --> some different non-empty node (assert: should never happen!)
                         if (result.text === UNPARSE_FAIL) break;
                         if (result.posᐟ === memo.result.posᐟ) break;
-                        if (!isFullyConsumed(node, result.posᐟ)) break;
+                        if (!sys.isFullyConsumed(node, result.posᐟ)) break;
                         Object.assign(memo.result, result);
                     }
                 }

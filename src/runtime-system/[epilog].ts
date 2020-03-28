@@ -26,7 +26,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 
 // TODO: doc... helper...
-function matchesAt(text: string, substr: string, position: number) {
+function matchesAt(text: string, substr: string, position: number): boolean {
     let lastPos = position + substr.length;
     if (lastPos > text.length) return false;
     for (let i = position, j = 0; i < lastPos; ++i, ++j) {
@@ -40,11 +40,16 @@ function matchesAt(text: string, substr: string, position: number) {
 return {
     apply,
     bindingLookup,
-    charRange,
-    label,
+    character,
     list,
     record,
     sequence,
     selection,
     string,
+
+    // export helpers too so std can reference them
+    assert,
+    isFullyConsumed,
+    isPlainObject,
+    matchesAt,
 };

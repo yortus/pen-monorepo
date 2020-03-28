@@ -33,7 +33,6 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'DynamicField': return rec(n.name), rec(n.value);
             // case 'FunctionExpression': TODO: ...
             case 'ImportExpression': return;
-            case 'LabelExpression': return;
             case 'ListExpression': return n.elements.forEach(rec);
             case 'Module': return n.bindings.forEach(rec);
             case 'ModuleExpression': return rec(n.module);

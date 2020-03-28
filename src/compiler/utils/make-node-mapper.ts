@@ -33,7 +33,6 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'DynamicField': return {...n, name: rec(n.name), value: rec(n.value)};
             // case 'FunctionExpression': TODO: ...
             case 'ImportExpression': return n;
-            case 'LabelExpression': return n;
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};

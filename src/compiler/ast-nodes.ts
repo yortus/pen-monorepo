@@ -35,7 +35,6 @@ export type Expression<M extends Metadata = {}> =
     | CharacterExpression<M>
     // | FunctionExpression<M>
     | ImportExpression<M>
-    | LabelExpression<M>
     | ListExpression<M>
     | ModuleExpression<M>
     | ParenthesisedExpression<M>
@@ -134,6 +133,8 @@ export interface CharacterExpression<M extends Metadata = {}> {
     readonly kind: 'CharacterExpression';
     readonly minValue: string;
     readonly maxValue: string;
+    readonly concrete: boolean;
+    readonly abstract: boolean;
     readonly meta: M[this['kind']];
 }
 
@@ -150,13 +151,6 @@ export interface ImportExpression<M extends Metadata = {}> {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
     readonly sourceFilePath: AbsPath;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface LabelExpression<M extends Metadata = {}> {
-    readonly kind: 'LabelExpression';
-    readonly value: string;
     readonly meta: M[this['kind']];
 }
 
@@ -213,6 +207,8 @@ export interface SequenceExpression<M extends Metadata = {}> {
 export interface StringExpression<M extends Metadata = {}> {
     readonly kind: 'StringExpression';
     readonly value: string;
+    readonly concrete: boolean;
+    readonly abstract: boolean;
     readonly meta: M[this['kind']];
 }
 

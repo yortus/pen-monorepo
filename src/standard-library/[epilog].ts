@@ -4,6 +4,5 @@ return {
     bindings: {
         i32,
         memoise,
-        textOnly,
     },
 };
