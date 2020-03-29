@@ -1,15 +1,15 @@
 // ===============================================================================
 // |                                  Imports                                    |
 // ===============================================================================
-{false, null, true, i32}    = import './js-intrinsics.pen.ts'
-{Maybe, Not, ZeroOrMore}    = import './utils.pen'
-{Translit}                  = import 'pen'
+{i32} = import 'std'
+{intrinsicFalse, intrinsicNull, intrinsicTrue} = import 'experimental'
+{anyChar, Maybe, Not, ZeroOrMore} = import 'experimental'
 
 
 // ===============================================================================
 // |                                  Exports                                    |
 // ===============================================================================
-export json = WS   Value   WS
+start = WS   Value   WS
 
 
 // ===============================================================================
@@ -27,9 +27,9 @@ Value =
     |   String
 
 // ---------- Primitive values ----------
-False   = "false"   false
-Null    = "null"   null
-True    = "true"   true
+False   = `false`   intrinsicFalse
+Null    = `null`   intrinsicNull
+True    = `true`   intrinsicTrue
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
@@ -47,8 +47,8 @@ String = DOUBLE_QUOTE   ZeroOrMore(CHAR)   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
-    |   Not("\x00-\x1f"   |   "\""   |   "\\")   char           // any char except control char, " or \
-    |   "\\\""   '"'                                             // quotation mark
+    |   Not("\x00-\x1f"   |   "\""   |   "\\")   anyChar        // any char except control char, " or \
+    |   "\\\""   '"'                                            // quotation mark
     |   "\\\\"   '\\'                                           // reverse solidus
     |   "\\/"   '/'                                             // solidus
     |   "\\b"   '\b'                                            // backspace
@@ -66,11 +66,11 @@ CHAR =
     // HEXDIG = `0`..`9`   |   `a`..`f`   |   `A`..`F`
 
 // ---------- Literal characters ----------
-LBRACE          = WS "{" WS
-RBRACE          = WS "}" WS
-LBRACKET        = WS "[" WS
-RBRACKET        = WS "]" WS
-COLON           = WS ":" WS
-COMMA           = WS "," WS
-DOUBLE_QUOTE    = "\""
-WS              = ZeroOrMore(" " | "\t" | "\n" | "\r")
+LBRACE          = WS `{` WS
+RBRACE          = WS `}` WS
+LBRACKET        = WS `[` WS
+RBRACKET        = WS `]` WS
+COLON           = WS `:` WS
+COMMA           = WS `,` WS
+DOUBLE_QUOTE    = `"`
+WS              = ZeroOrMore(` ` | `\t` | `\n` | `\r`)
