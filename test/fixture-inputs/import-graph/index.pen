@@ -1,6 +1,8 @@
 {f as foo, b as bar, baz} = import './a'
 {} = import './b.pen'
 
+start = result
+
 digit = "0-9"
 alpha = "a-z" | "A-Z"
 
