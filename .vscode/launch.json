@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "compile-and-run.test.ts",
+            "name": "Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-r",
@@ -17,7 +17,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/test/compile-and-run.test.ts"
+                "${workspaceFolder}/test/**/*.test.ts"
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
