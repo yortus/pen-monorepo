@@ -22,11 +22,8 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: Emit main exports...
-    emitMainExports(emit, program);
-
-    // TODO: Emit header stuff...
-    emit.down(2).text(`const sys = initRuntimeSystem();`);
+    // TODO: Emit sys and std...
+    emit.text(`const sys = initRuntimeSystem();`);
     emit.down(1).text(`const std = initStandardLibrary();`);
 
     // Emit declarations for all symbols before any are defined.
@@ -34,6 +31,10 @@ function emitProgram(program: Program) {
 
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
+
+    // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
+    emit.down(2).text(`// -------------------- MAIN EXPORTS --------------------`);
+    emitMainExports(emit, program);
 
     // Emit code for the runtime system.
     emit.down(2).text(`// -------------------- RUNTIME SYSTEM --------------------`);
@@ -51,32 +52,7 @@ function emitProgram(program: Program) {
 function emitMainExports(emit: Emitter, program: Program) {
     let mainModule = program.sourceFiles.get(program.mainPath)!.module;
     if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
-    let lines = `
-        module.exports = {parse, unparse};
-
-        function parse(text) {
-            let start = 𝕊${mainModule.meta.scope.id}.bindings.start;
-            let result = {node: null, posᐟ: 0};
-            if (!start.parse(text, 0, result)) throw new Error('parse failed');
-            if (result.posᐟ !== text.length) throw new Error('parse didn\\'t consume entire input');
-            if (result.node === undefined) throw new Error('parse didn\\'t return a value');
-            return result.node;
-        }
-
-        function unparse(node) {
-            let start = 𝕊${mainModule.meta.scope.id}.bindings.start;
-            let result = {text: '', posᐟ: 0};
-            if (!start.unparse(node, 0, result)) throw new Error('parse failed');
-            if (!sys.isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\\'t consume entire input');
-            return result.text;
-        }
-    `.split(/\r\n?|\n/).slice(1, -1);
-    let indent = lines[0].length - lines[0].trimLeft().length;
-    lines = lines.map(line => line.slice(indent));
-    lines.forEach((line, i) => {
-        if (i > 0) emit.down(1);
-        emit.text(line);
-    });
+    emit.down(2).text(`module.exports = sys.createMainExports(𝕊${mainModule.meta.scope.id}.bindings.start);`);
 }
 
 

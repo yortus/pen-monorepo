@@ -1,22 +1,3 @@
-module.exports = {parse, unparse};
-
-function parse(text) {
-    let start = 𝕊2.bindings.start;
-    let result = {node: null, posᐟ: 0};
-    if (!start.parse(text, 0, result)) throw new Error('parse failed');
-    if (result.posᐟ !== text.length) throw new Error('parse didn\'t consume entire input');
-    if (result.node === undefined) throw new Error('parse didn\'t return a value');
-    return result.node;
-}
-
-function unparse(node) {
-    let start = 𝕊2.bindings.start;
-    let result = {text: '', posᐟ: 0};
-    if (!start.unparse(node, 0, result)) throw new Error('parse failed');
-    if (!sys.isFullyConsumed(node, result.posᐟ)) throw new Error('unparse didn\'t consume entire input');
-    return result.text;
-}
-
 const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 
@@ -178,6 +159,10 @@ Object.assign(
     )
 );
 
+// -------------------- MAIN EXPORTS --------------------
+
+module.exports = sys.createMainExports(𝕊2.bindings.start);
+
 // -------------------- RUNTIME SYSTEM --------------------
 
 function initRuntimeSystem() {
@@ -253,6 +238,28 @@ function initRuntimeSystem() {
                 result.text = c;
                 result.posᐟ = pos + 1;
                 return true;
+            },
+        };
+    }
+    function createMainExports(start) {
+        return {
+            parse: (text) => {
+                let result = { node: null, posᐟ: 0 };
+                if (!start.parse(text, 0, result))
+                    throw new Error('parse failed');
+                if (result.posᐟ !== text.length)
+                    throw new Error(`parse didn't consume entire input`);
+                if (result.node === undefined)
+                    throw new Error(`parse didn't return a value`);
+                return result.node;
+            },
+            unparse: (node) => {
+                let result = { text: '', posᐟ: 0 };
+                if (!start.unparse(node, 0, result))
+                    throw new Error('parse failed');
+                if (!isFullyConsumed(node, result.posᐟ))
+                    throw new Error(`unparse didn't consume entire input`);
+                return result.text;
             },
         };
     }
@@ -521,6 +528,7 @@ function initRuntimeSystem() {
     return {
         apply,
         bindingLookup,
+        createMainExports,
         character,
         list,
         record,

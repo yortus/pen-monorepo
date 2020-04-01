@@ -40,6 +40,7 @@ function matchesAt(text: string, substr: string, position: number): boolean {
 return {
     apply,
     bindingLookup,
+    createMainExports,
     character,
     list,
     record,
