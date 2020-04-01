@@ -2,7 +2,7 @@ import * as path from 'path';
 
 
 const fixtureName = 'math';
-const outFilePath = path.join(__dirname, './results/out', fixtureName, 'out.js');
+const outFilePath = path.join(__dirname, './results/out.js');
 
 
 describe('testdrive', async () => {

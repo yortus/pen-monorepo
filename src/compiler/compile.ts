@@ -9,14 +9,17 @@ import {generateTargetCode} from './transforms';
 
 
 export function compile(compilerOptions: CompilerOptions) {
+
+    // Collect all source files in the compilation.
     let sourceFiles = createSourceFileGraph(compilerOptions);
+
+    // Proceed through all stages in the compiler pipeline.
     let ast01 = parseSourceFiles(sourceFiles);
     let ast02 = createSymbolDefinitions(ast01);
     let ast03 = resolveSymbolReferences(ast02);
     let targetCode = generateTargetCode(ast03);
 
-    // write the target code to the output directory
-    let tempOutFilePath = path.join(compilerOptions.outDir, 'out.js');
-    fs.ensureDirSync(compilerOptions.outDir);
-    fs.writeFileSync(tempOutFilePath, targetCode);
+    // write the target code to the output file path. Creating containing dirs if necessary.
+    fs.ensureDir(path.dirname(compilerOptions.outFile));
+    fs.writeFileSync(path.resolve(compilerOptions.outFile), targetCode);
 }

@@ -5,6 +5,7 @@ export interface CompilerOptions {
 
     // TODO: temp testing...
     // -required-
-    // where the output package will be generated. If already exists, new files will overwrite existing ones.
-    outDir: string;
+    // Path where the output file will be generated. If the file already exists, it will be overwritten.
+    // If relative, will be resolved against the CWD.
+    outFile: string;
 }

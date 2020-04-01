@@ -17,7 +17,7 @@ const 𝕊2 = {
     },
 };
 
-// -------------------- V:\oss\penc\test\results\in\math\index.pen --------------------
+// -------------------- V:\oss\penc\test\fixture-inputs\math.pen --------------------
 
 {
     let rhs = std;
