@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "compile.test.ts",
+            "name": "compile-and-run.test.ts",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-r",
@@ -17,7 +17,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/test/compile.test.ts"
+                "${workspaceFolder}/test/compile-and-run.test.ts"
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
@@ -25,26 +25,5 @@
                 "${workspaceRoot}/node_modules/**"
             ]
         },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "testdrive.test.ts",
-            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-            "args": [
-                "-r",
-                "ts-node/register",
-                "-u",
-                "tdd",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceFolder}/test/testdrive.test.ts"
-            ],
-            "internalConsoleOptions": "openOnSessionStart",
-            "skipFiles": [
-                "<node_internals>/**",
-                "${workspaceRoot}/node_modules/**"
-            ]
-        }
     ]
 }
