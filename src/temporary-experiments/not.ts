@@ -2,14 +2,18 @@ function not(expr: Rule): Rule {
     return {
         kind: 'rule',
 
-        parse(text, pos, result) {
-            if (expr.parse(text, pos, result)) return false;
-            return epsilon.parse(text, pos, result);
+        parse() {
+            let stateₒ = getState();
+            if (!expr.parse()) return epsilon.parse();
+            setState(stateₒ);
+            return true;
         },
 
-        unparse(node, pos, result) {
-            if (expr.unparse(node, pos, result)) return false;
-            return epsilon.unparse(node, pos, result);
+        unparse() {
+            let stateₒ = getState();
+            if (!expr.unparse()) return epsilon.unparse();
+            setState(stateₒ);
+            return true;
         },
     };
 }

@@ -1,3 +1,30 @@
+// TODO: new 'registers'... temp testing...
+let IBUF: unknown;
+let IPTR: number;
+let OUT: unknown;
+
+
+function getState(): {IBUF: unknown, IPTR: number, OUT: unknown} {
+    return {IBUF, IPTR, OUT};
+}
+
+
+function setState(value: {IBUF: unknown, IPTR: number, OUT: unknown}): void {
+    ({IBUF, IPTR, OUT} = value);
+}
+
+
+function setInState(IBUFᐟ: unknown, IPTRᐟ: number): void {
+    IBUF = IBUFᐟ;
+    IPTR = IPTRᐟ;
+}
+
+
+function assumeType<T>(_: unknown): asserts _ is T {
+    // since its *assume*, body is a no-op
+}
+
+
 // TODO: doc... helper...
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
@@ -50,7 +77,10 @@ return {
 
     // export helpers too so std can reference them
     assert,
+    assumeType,
+    getState,
     isFullyConsumed,
     isPlainObject,
     matchesAt,
+    setState,
 };

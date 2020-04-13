@@ -1,17 +1,18 @@
 const anyChar: Rule = {
     kind: 'rule',
 
-    parse(text, pos, result) {
-        if (pos >= text.length) return false;
-        result.node = text.charAt(pos);
-        result.posᐟ = pos + 1;
+    parse() {
+        assumeType<string>(IBUF);
+        if (IPTR >= IBUF.length) return false;
+        IPTR += 1;
+        OUT = IBUF.charAt(IPTR);
         return true;
     },
 
-    unparse(node, pos, result) {
-        if (typeof node !== 'string' || pos >= node.length) return false;
-        result.text = node.charAt(pos);
-        result.posᐟ = pos + 1;
+    unparse() {
+        if (typeof IBUF !== 'string' || IPTR >= IBUF.length) return false;
+        IPTR += 1;
+        OUT = IBUF.charAt(IPTR);
         return true;
     },
 };

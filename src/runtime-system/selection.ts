@@ -3,16 +3,16 @@ function selection(...expressions: Rule[]): Rule {
     return {
         kind: 'rule',
 
-        parse(text, pos, result) {
+        parse() {
             for (let i = 0; i < arity; ++i) {
-                if (expressions[i].parse(text, pos, result)) return true;
+                if (expressions[i].parse()) return true;
             }
             return false;
         },
 
-        unparse(node, pos, result) {
+        unparse() {
             for (let i = 0; i < arity; ++i) {
-                if (expressions[i].unparse(node, pos, result)) return true;
+                if (expressions[i].unparse()) return true;
             }
             return false;
         },

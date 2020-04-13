@@ -2,14 +2,12 @@ function maybe(expr: Rule): Rule {
     return {
         kind: 'rule',
 
-        parse(text, pos, result) {
-            if (expr.parse(text, pos, result)) return true;
-            return epsilon.parse(text, pos, result);
+        parse() {
+            return expr.parse() || epsilon.parse();
         },
 
-        unparse(node, pos, result) {
-            if (expr.unparse(node, pos, result)) return true;
-            return epsilon.unparse(node, pos, result);
+        unparse() {
+            return expr.unparse() || epsilon.unparse();
         },
     };
 }

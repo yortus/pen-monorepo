@@ -1,15 +1,13 @@
 const epsilon: Rule = {
     kind: 'rule',
 
-    parse(_, pos, result) {
-        result.node = undefined;
-        result.posᐟ = pos;
+    parse() {
+        OUT = undefined;
         return true;
     },
 
-    unparse(_, pos, result) {
-        result.text = '';
-        result.posᐟ = pos;
+    unparse() {
+        OUT = '';
         return true;
     },
 };

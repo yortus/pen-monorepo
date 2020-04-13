@@ -3,32 +3,32 @@ function sequence(...expressions: Rule[]): Rule {
     return {
         kind: 'rule',
 
-        parse(text, pos, result) {
+        parse() {
+            let stateₒ = getState();
             let node: unknown;
             for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].parse(text, pos, result)) return false;
-                pos = result.posᐟ;
-                if (node === undefined) node = result.node;
-                else if (typeof node === 'string' && typeof result.node === 'string') node += result.node;
-                else if (Array.isArray(node) && Array.isArray(result.node)) node = [...node, ...result.node];
-                else if (isPlainObject(node) && isPlainObject(result.node)) node = {...node, ...result.node};
-                else if (result.node !== undefined) throw new Error(`Internal error: invalid sequence`);
+                if (!expressions[i].parse()) return setState(stateₒ), false;
+                if (node === undefined) node = OUT;
+                // TODO: generalise below cases to a helper function that can be extended for new formats / blob types
+                else if (typeof node === 'string' && typeof OUT === 'string') node += OUT;
+                else if (Array.isArray(node) && Array.isArray(OUT)) node = [...node, ...OUT];
+                else if (isPlainObject(node) && isPlainObject(OUT)) node = {...node, ...OUT};
+                else if (OUT !== undefined) throw new Error(`Internal error: invalid sequence`);
             }
-            result.node = node;
-            result.posᐟ = pos;
+            OUT = node;
             return true;
         },
 
-        unparse(node, pos, result) {
+        unparse() {
+            let stateₒ = getState();
             let text = '';
             for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].unparse(node, pos, result)) return false;
-                // TODO: more sanity checking in here, like for parse...
-                text += result.text;
-                pos = result.posᐟ;
+                if (!expressions[i].unparse()) return setState(stateₒ), false;
+                // TODO: support more formats / blob types here, like for parse...
+                assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
+                text += OUT;
             }
-            result.text = text;
-            result.posᐟ = pos;
+            OUT = text;
             return true;
         },
     };

@@ -180,19 +180,21 @@ function initRuntimeSystem() {
         if (modifier === 'abstract') {
             return {
                 kind: 'rule',
-                parse(_, pos, result) {
-                    result.node = min;
-                    result.posᐟ = pos;
+                parse() {
+                    // NB: nothing consumed
+                    OUT = min;
                     return true;
                 },
-                unparse(node, pos, result) {
-                    if (typeof node !== 'string' || pos >= node.length)
+                unparse() {
+                    if (typeof IBUF !== 'string')
                         return false;
-                    let c = node.charAt(pos);
+                    if (IPTR < 0 || IPTR >= IBUF.length)
+                        return false;
+                    let c = IBUF.charAt(IPTR);
                     if (c < min || c > max)
                         return false;
-                    result.text = '';
-                    result.posᐟ = pos + 1;
+                    IPTR += 1;
+                    OUT = '';
                     return true;
                 },
             };
@@ -200,43 +202,47 @@ function initRuntimeSystem() {
         if (modifier === 'concrete') {
             return {
                 kind: 'rule',
-                parse(text, pos, result) {
-                    if (pos >= text.length)
+                parse() {
+                    assumeType(IBUF);
+                    if (IPTR < 0 || IPTR >= IBUF.length)
                         return false;
-                    let c = text.charAt(pos);
+                    let c = IBUF.charAt(IPTR);
                     if (c < min || c > max)
                         return false;
-                    result.node = undefined;
-                    result.posᐟ = pos + 1;
+                    IPTR += 1;
+                    OUT = undefined;
                     return true;
                 },
-                unparse(_, pos, result) {
-                    result.text = min;
-                    result.posᐟ = pos;
+                unparse() {
+                    // NB: nothing consumed
+                    OUT = min;
                     return true;
                 },
             };
         }
         return {
             kind: 'rule',
-            parse(text, pos, result) {
-                if (pos >= text.length)
+            parse() {
+                assumeType(IBUF);
+                if (IPTR < 0 || IPTR >= IBUF.length)
                     return false;
-                let c = text.charAt(pos);
+                let c = IBUF.charAt(IPTR);
                 if (c < min || c > max)
                     return false;
-                result.node = c;
-                result.posᐟ = pos + 1;
+                IPTR += 1;
+                OUT = c;
                 return true;
             },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || pos >= node.length)
+            unparse() {
+                if (typeof IBUF !== 'string')
                     return false;
-                let c = node.charAt(pos);
+                if (IPTR < 0 || IPTR >= IBUF.length)
+                    return false;
+                let c = IBUF.charAt(IPTR);
                 if (c < min || c > max)
                     return false;
-                result.text = c;
-                result.posᐟ = pos + 1;
+                IPTR += 1;
+                OUT = c;
                 return true;
             },
         };
@@ -244,57 +250,62 @@ function initRuntimeSystem() {
     function createMainExports(start) {
         return {
             parse: (text) => {
-                let result = { node: null, posᐟ: 0 };
-                if (!start.parse(text, 0, result))
+                setInState(text, 0);
+                if (!start.parse())
                     throw new Error('parse failed');
-                if (result.posᐟ !== text.length)
+                if (!isFullyConsumed(IBUF, IPTR))
                     throw new Error(`parse didn't consume entire input`);
-                if (result.node === undefined)
+                if (OUT === undefined)
                     throw new Error(`parse didn't return a value`);
-                return result.node;
+                return OUT;
             },
             unparse: (node) => {
-                let result = { text: '', posᐟ: 0 };
-                if (!start.unparse(node, 0, result))
+                setInState(node, 0);
+                if (!start.unparse())
                     throw new Error('parse failed');
-                if (!isFullyConsumed(node, result.posᐟ))
+                if (!isFullyConsumed(IBUF, IPTR))
                     throw new Error(`unparse didn't consume entire input`);
-                return result.text;
+                if (OUT === undefined)
+                    throw new Error(`parse didn't return a value`);
+                return OUT;
             },
         };
     }
     function list(elements) {
+        const elementsLength = elements.length;
         return {
             kind: 'rule',
-            parse(text, pos, result) {
+            parse() {
+                let stateₒ = getState();
                 let arr = [];
-                for (let element of elements) {
-                    if (!element.parse(text, pos, result))
-                        return false;
-                    assert(result.node !== undefined); // TODO: was NO_NODE. Does it mean the same thing?
-                    arr.push(result.node);
-                    pos = result.posᐟ;
+                for (let i = 0; i < elementsLength; ++i) {
+                    if (!elements[i].parse())
+                        return setState(stateₒ), false;
+                    assert(OUT !== undefined);
+                    arr.push(OUT);
                 }
-                result.node = arr;
-                result.posᐟ = pos;
+                OUT = arr;
                 return true;
             },
-            unparse(node, pos, result) {
+            unparse() {
+                let stateₒ = getState();
                 let text = '';
-                if (!Array.isArray(node))
+                if (!Array.isArray(IBUF))
                     return false;
-                for (let element of elements) {
-                    if (pos >= node.length)
-                        return false;
-                    if (!element.unparse(node[pos], 0, result))
-                        return false;
-                    if (!isFullyConsumed(node[pos], result.posᐟ))
-                        return false;
-                    text += result.text;
-                    pos += 1;
+                if (IPTR < 0 || IPTR + elementsLength >= IBUF.length)
+                    return false;
+                const arr = IBUF;
+                const off = IPTR;
+                for (let i = 0; i < elementsLength; ++i) {
+                    setInState(arr[off + i], 0);
+                    if (!elements[i].unparse())
+                        return setState(stateₒ), false;
+                    if (!isFullyConsumed(IBUF, IPTR))
+                        return setState(stateₒ), false;
+                    text += OUT;
                 }
-                result.text = text;
-                result.posᐟ = pos;
+                setInState(arr, off + elementsLength);
+                OUT = text;
                 return true;
             },
         };
@@ -302,37 +313,39 @@ function initRuntimeSystem() {
     function record(fields) {
         return {
             kind: 'rule',
-            parse(text, pos, result) {
+            parse() {
+                let stateₒ = getState();
                 let obj = {};
                 for (let field of fields) {
                     let propName;
                     if (field.dynamic) {
-                        if (!field.name.parse(text, pos, result))
-                            return false;
-                        assert(typeof result.node === 'string');
-                        propName = result.node;
-                        pos = result.posᐟ;
+                        if (!field.name.parse())
+                            return setState(stateₒ), false;
+                        assert(typeof OUT === 'string');
+                        propName = OUT;
                     }
                     else /* field.dynamic === false */ {
                         propName = field.name;
                     }
-                    if (!field.value.parse(text, pos, result))
-                        return false;
-                    assert(result.node !== undefined);
-                    obj[propName] = result.node;
-                    pos = result.posᐟ;
+                    if (!field.value.parse())
+                        return setState(stateₒ), false;
+                    assert(OUT !== undefined);
+                    obj[propName] = OUT;
                 }
-                result.node = obj;
-                result.posᐟ = pos;
+                OUT = obj;
                 return true;
             },
-            unparse(node, pos, result) {
+            unparse() {
+                let stateₒ = getState();
                 let text = '';
-                if (!isPlainObject(node))
+                if (!isPlainObject(IBUF))
                     return false;
-                let propNames = Object.keys(node); // TODO: doc reliance on prop order and what this means
+                let propNames = Object.keys(IBUF); // TODO: doc reliance on prop order and what this means
                 let propCount = propNames.length;
                 assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
+                // TODO: temp testing...
+                const obj = IBUF;
+                let bitmask = IPTR;
                 // TODO: O(n^2)? Can we do better? More fast paths for common cases?
                 outerLoop: for (let field of fields) {
                     // Find the first property key/value pair that matches this field name/value pair (if any)
@@ -340,37 +353,40 @@ function initRuntimeSystem() {
                         let propName = propNames[i];
                         // TODO: skip already-consumed key/value pairs
                         // tslint:disable-next-line: no-bitwise
-                        const posIncrement = 1 << i;
+                        const propBit = 1 << i;
                         // tslint:disable-next-line: no-bitwise
-                        if ((pos & posIncrement) !== 0)
+                        if ((bitmask & propBit) !== 0)
                             continue;
                         // TODO: match field name
                         if (field.dynamic) {
-                            if (!field.name.unparse(propName, 0, result))
+                            setInState(propName, 0);
+                            if (!field.name.unparse())
                                 continue;
-                            if (result.posᐟ !== propName.length)
+                            if (IPTR !== propName.length)
                                 continue;
-                            text += result.text;
+                            text += OUT;
                         }
                         else /* field.dynamic === false */ {
                             if (propName !== field.name)
                                 continue;
                         }
                         // TODO: match field value
-                        if (!field.value.unparse(node[propName], 0, result))
-                            continue; // TODO: bug? modifies result without guarantee of returning true
-                        if (!isFullyConsumed(node[propName], result.posᐟ))
+                        setInState(obj[propName], 0);
+                        if (!field.value.unparse())
                             continue;
-                        text += result.text;
+                        if (!isFullyConsumed(obj[propName], IPTR))
+                            continue;
+                        text += OUT;
                         // TODO: we matched both name and value - consume them from `node`
-                        pos += posIncrement;
+                        bitmask += propBit;
                         continue outerLoop;
                     }
                     // If we get here, no match...
+                    setState(stateₒ);
                     return false;
                 }
-                result.text = text;
-                result.posᐟ = pos;
+                setInState(obj, bitmask);
+                OUT = text;
                 return true;
             },
         };
@@ -379,16 +395,16 @@ function initRuntimeSystem() {
         const arity = expressions.length;
         return {
             kind: 'rule',
-            parse(text, pos, result) {
+            parse() {
                 for (let i = 0; i < arity; ++i) {
-                    if (expressions[i].parse(text, pos, result))
+                    if (expressions[i].parse())
                         return true;
                 }
                 return false;
             },
-            unparse(node, pos, result) {
+            unparse() {
                 for (let i = 0; i < arity; ++i) {
-                    if (expressions[i].unparse(node, pos, result))
+                    if (expressions[i].unparse())
                         return true;
                 }
                 return false;
@@ -399,38 +415,38 @@ function initRuntimeSystem() {
         const arity = expressions.length;
         return {
             kind: 'rule',
-            parse(text, pos, result) {
+            parse() {
+                let stateₒ = getState();
                 let node;
                 for (let i = 0; i < arity; ++i) {
-                    if (!expressions[i].parse(text, pos, result))
-                        return false;
-                    pos = result.posᐟ;
+                    if (!expressions[i].parse())
+                        return setState(stateₒ), false;
                     if (node === undefined)
-                        node = result.node;
-                    else if (typeof node === 'string' && typeof result.node === 'string')
-                        node += result.node;
-                    else if (Array.isArray(node) && Array.isArray(result.node))
-                        node = [...node, ...result.node];
-                    else if (isPlainObject(node) && isPlainObject(result.node))
-                        node = Object.assign(Object.assign({}, node), result.node);
-                    else if (result.node !== undefined)
+                        node = OUT;
+                    // TODO: generalise below cases to a helper function that can be extended for new formats / blob types
+                    else if (typeof node === 'string' && typeof OUT === 'string')
+                        node += OUT;
+                    else if (Array.isArray(node) && Array.isArray(OUT))
+                        node = [...node, ...OUT];
+                    else if (isPlainObject(node) && isPlainObject(OUT))
+                        node = Object.assign(Object.assign({}, node), OUT);
+                    else if (OUT !== undefined)
                         throw new Error(`Internal error: invalid sequence`);
                 }
-                result.node = node;
-                result.posᐟ = pos;
+                OUT = node;
                 return true;
             },
-            unparse(node, pos, result) {
+            unparse() {
+                let stateₒ = getState();
                 let text = '';
                 for (let i = 0; i < arity; ++i) {
-                    if (!expressions[i].unparse(node, pos, result))
-                        return false;
-                    // TODO: more sanity checking in here, like for parse...
-                    text += result.text;
-                    pos = result.posᐟ;
+                    if (!expressions[i].unparse())
+                        return setState(stateₒ), false;
+                    // TODO: support more formats / blob types here, like for parse...
+                    assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
+                    text += OUT;
                 }
-                result.text = text;
-                result.posᐟ = pos;
+                OUT = text;
                 return true;
             },
         };
@@ -439,16 +455,18 @@ function initRuntimeSystem() {
         if (modifier === 'abstract') {
             return {
                 kind: 'rule',
-                parse(_, pos, result) {
-                    result.node = value;
-                    result.posᐟ = pos;
+                parse() {
+                    // NB: nothing consumed
+                    OUT = value;
                     return true;
                 },
-                unparse(node, pos, result) {
-                    if (typeof node !== 'string' || !matchesAt(node, value, pos))
+                unparse() {
+                    if (typeof IBUF !== 'string')
                         return false;
-                    result.text = '';
-                    result.posᐟ = pos + value.length;
+                    if (!matchesAt(IBUF, value, IPTR))
+                        return false;
+                    IPTR += value.length;
+                    OUT = '';
                     return true;
                 },
             };
@@ -456,37 +474,58 @@ function initRuntimeSystem() {
         if (modifier === 'concrete') {
             return {
                 kind: 'rule',
-                parse(text, pos, result) {
-                    if (!matchesAt(text, value, pos))
+                parse() {
+                    assumeType(IBUF);
+                    if (!matchesAt(IBUF, value, IPTR))
                         return false;
-                    result.node = undefined;
-                    result.posᐟ = pos + value.length;
+                    IPTR += value.length;
+                    OUT = undefined;
                     return true;
                 },
-                unparse(_, pos, result) {
-                    result.text = value;
-                    result.posᐟ = pos;
+                unparse() {
+                    // NB: nothing consumed
+                    OUT = value;
                     return true;
                 },
             };
         }
         return {
             kind: 'rule',
-            parse(text, pos, result) {
-                if (!matchesAt(text, value, pos))
+            parse() {
+                assumeType(IBUF);
+                if (!matchesAt(IBUF, value, IPTR))
                     return false;
-                result.node = value;
-                result.posᐟ = pos + value.length;
+                IPTR += value.length;
+                OUT = value;
                 return true;
             },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || !matchesAt(node, value, pos))
+            unparse() {
+                if (typeof IBUF !== 'string')
                     return false;
-                result.text = value;
-                result.posᐟ = pos + value.length;
+                if (!matchesAt(IBUF, value, IPTR))
+                    return false;
+                IPTR += value.length;
+                OUT = value;
                 return true;
             },
         };
+    }
+    // TODO: new 'registers'... temp testing...
+    let IBUF;
+    let IPTR;
+    let OUT;
+    function getState() {
+        return { IBUF, IPTR, OUT };
+    }
+    function setState(value) {
+        ({ IBUF, IPTR, OUT } = value);
+    }
+    function setInState(IBUFᐟ, IPTRᐟ) {
+        IBUF = IBUFᐟ;
+        IPTR = IPTRᐟ;
+    }
+    function assumeType(_) {
+        // since its *assume*, body is a no-op
     }
     // TODO: doc... helper...
     function assert(value) {
@@ -537,9 +576,12 @@ function initRuntimeSystem() {
         string,
         // export helpers too so std can reference them
         assert,
+        assumeType,
+        getState,
         isFullyConsumed,
         isPlainObject,
         matchesAt,
+        setState,
     };
 }
 
@@ -549,51 +591,53 @@ function initRuntimeSystem() {
 function initStandardLibrary() {
     const i32 = {
         kind: 'rule',
-        parse(text, pos, result) {
+        parse() {
+            let stateₒ = sys.getState();
+            let { IBUF, IPTR } = stateₒ;
+            sys.assumeType(IBUF);
             // Parse optional leading '-' sign...
             let isNegative = false;
-            if (pos < text.length && text.charAt(pos) === '-') {
+            if (IPTR < IBUF.length && IBUF.charAt(IPTR) === '-') {
                 isNegative = true;
-                pos += 1;
+                IPTR += 1;
             }
             // ...followed by one or more decimal digits. (NB: no exponents).
             let num = 0;
             let digits = 0;
-            while (pos < text.length) {
+            while (IPTR < IBUF.length) {
                 // Read a digit
-                let c = text.charCodeAt(pos);
+                let c = IBUF.charCodeAt(IPTR);
                 if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9)
                     break;
                 // Check for overflow
-                if (num > ONE_TENTH_MAXINT32) {
-                    return false;
-                }
+                if (num > ONE_TENTH_MAXINT32)
+                    return sys.setState(stateₒ), false;
                 // Update parsed number
                 num *= 10;
                 num += (c - UNICODE_ZERO_DIGIT);
-                pos += 1;
+                IPTR += 1;
                 digits += 1;
             }
             // Check that we parsed at least one digit.
             if (digits === 0)
-                return false;
+                return sys.setState(stateₒ), false;
             // Apply the sign.
             if (isNegative)
                 num = -num;
             // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
             // tslint:disable-next-line: no-bitwise
             if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0)
-                return false;
+                return sys.setState(stateₒ), false;
             // Success
-            result.node = num;
-            result.posᐟ = pos;
+            sys.setState({ IBUF, IPTR, OUT: num });
             return true;
         },
-        unparse(node, pos, result) {
+        unparse() {
             // TODO: ensure N is a 32-bit integer
-            if (typeof node !== 'number' || pos !== 0)
+            let { IBUF, IPTR } = sys.getState();
+            if (typeof IBUF !== 'number' || IPTR !== 0)
                 return false;
-            let num = node;
+            let num = IBUF;
             // tslint:disable-next-line: no-bitwise
             if ((num & 0xFFFFFFFF) !== num)
                 return false;
@@ -603,8 +647,7 @@ function initStandardLibrary() {
                 isNegative = true;
                 if (num === -2147483648) {
                     // Specially handle the one case where N = -N could overflow
-                    result.text = '-2147483648';
-                    result.posᐟ = 1;
+                    sys.setState({ IBUF, IPTR: 1, OUT: '-2147483648' });
                     return true;
                 }
                 num = -num;
@@ -622,8 +665,7 @@ function initStandardLibrary() {
             // TODO: compute final string...
             if (isNegative)
                 digits.push('-');
-            result.text = digits.reverse().join('');
-            result.posᐟ = 1;
+            sys.setState({ IBUF, IPTR: 1, OUT: digits.reverse().join('') });
             return true;
         },
     };
@@ -639,124 +681,137 @@ function initStandardLibrary() {
             const unparseMemos = new Map();
             return {
                 kind: 'rule',
-                parse(text, pos, result) {
+                parse() {
                     // Check whether the memo table already has an entry for the given initial state.
-                    let memo = parseMemos.get(pos);
+                    let stateₒ = sys.getState();
+                    let memo = parseMemos.get(stateₒ.IPTR);
                     if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
-                        // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
-                        // All future applications of this rule with the same initial state will find this memo. If a future
-                        // application finds the memo still unresolved, then we know we have encountered left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: { node: PARSE_FAIL, posᐟ: 0 } };
-                        parseMemos.set(pos, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
-                        // this point, any left-recursive paths encountered during application are guaranteed to have been noted
-                        // and aborted (see below).
-                        if (!expr.parse(text, pos, memo.result))
-                            memo.result.node = PARSE_FAIL;
+                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                        // this initial state. The first thing we do is create a memo table entry, which is marked as
+                        // *unresolved*. All future applications of this rule with the same initial state will find this
+                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                        // left-recursion.
+                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
+                        parseMemos.set(stateₒ.IPTR, memo);
+                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                        // At this point, any left-recursive paths encountered during application are guaranteed to have
+                        // been noted and aborted (see below).
+                        if (expr.parse()) {
+                            memo.result = true;
+                            memo.stateᐟ = sys.getState();
+                        }
                         memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
+                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                        // final.
                         if (!memo.isLeftRecursive) {
-                            Object.assign(result, memo.result);
-                            return result.node !== PARSE_FAIL;
+                            setState(memo.stateᐟ);
+                            return memo.result;
                         }
                         // If we get here, then the above application of the rule invoked itself left-recursively, but we
                         // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying the
-                        // same rule with the same initial state. We continue to iterate as long as the application succeeds
-                        // and consumes more input than the previous iteration did, in which case we update the memo with the
-                        // new result. We thus 'grow' the result, stopping when application either fails or does not consume
-                        // more input, at which point we take the result of the previous iteration as final.
-                        while (memo.result.node !== PARSE_FAIL) {
-                            if (!expr.parse(text, pos, result))
-                                result.node = PARSE_FAIL;
-                            if (result.node === PARSE_FAIL || result.posᐟ <= memo.result.posᐟ)
+                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                        // the same rule with the same initial state. We continue to iterate as long as the application
+                        // succeeds and consumes more input than the previous iteration did, in which case we update the
+                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                        // does not consume more input, at which point we take the result of the previous iteration as
+                        // final.
+                        while (memo.result === true) {
+                            sys.setState(stateₒ);
+                            if (!expr.parse())
                                 break;
-                            Object.assign(memo.result, result);
+                            let state = sys.getState();
+                            if (state.IPTR <= memo.stateᐟ.IPTR)
+                                break;
+                            memo.stateᐟ = state;
                         }
                     }
                     else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet resolved
-                        // it. That means we must have entered a left-recursive path of the rule. All we do here is note that
-                        // the rule application encountered left-recursion, and return with failure. This means that the initial
-                        // application of the rule for this initial state can only possibly succeed along a non-left-recursive
-                        // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
+                        // If we get here, then we have already applied the rule with this initial state, but not yet
+                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                        // note that the rule application encountered left-recursion, and return with failure. This means
+                        // that the initial application of the rule for this initial state can only possibly succeed along a
+                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                        // left-recursive rules.
                         memo.isLeftRecursive = true;
                         return false;
                     }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has already
-                    // been computed. Return it from the memo.
-                    Object.assign(result, memo.result);
-                    return result.node !== PARSE_FAIL;
+                    // We have a resolved memo, so the result of the rule application for the given initial state has
+                    // already been computed. Return it from the memo.
+                    sys.setState(memo.stateᐟ);
+                    return memo.result;
                 },
-                unparse(node, pos, result) {
+                unparse() {
                     // Check whether the memo table already has an entry for the given initial state.
-                    let memos2 = unparseMemos.get(node);
+                    let stateₒ = sys.getState();
+                    let memos2 = unparseMemos.get(stateₒ.IBUF);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        unparseMemos.set(node, memos2);
+                        unparseMemos.set(stateₒ.IBUF, memos2);
                     }
-                    let memo = memos2.get(pos);
+                    let memo = memos2.get(stateₒ.IPTR);
                     if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with this
-                        // initial state. The first thing we do is create a memo table entry, which is marked as *unresolved*.
-                        // All future applications of this rule with the same initial state will find this memo. If a future
-                        // application finds the memo still unresolved, then we know we have encountered left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: { text: UNPARSE_FAIL, posᐟ: 0 } };
-                        memos2.set(pos, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result. At
-                        // this point, any left-recursive paths encountered during application are guaranteed to have been noted
-                        // and aborted (see below).
-                        if (!expr.unparse(node, pos, memo.result))
-                            memo.result.text = UNPARSE_FAIL;
+                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                        // this initial state. The first thing we do is create a memo table entry, which is marked as
+                        // *unresolved*. All future applications of this rule with the same initial state will find this
+                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                        // left-recursion.
+                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
+                        memos2.set(stateₒ.IPTR, memo);
+                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                        // At this point, any left-recursive paths encountered during application are guaranteed to have
+                        // been noted and aborted (see below).
+                        if (expr.unparse()) {
+                            memo.result = true;
+                            memo.stateᐟ = sys.getState();
+                        }
                         memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is final.
+                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                        // final.
                         if (!memo.isLeftRecursive) {
-                            Object.assign(result, memo.result);
-                            return result.text !== UNPARSE_FAIL;
+                            sys.setState(memo.stateᐟ);
+                            return memo.result;
                         }
                         // If we get here, then the above application of the rule invoked itself left-recursively, but we
                         // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying the
-                        // same rule with the same initial state. We continue to iterate as long as the application succeeds
-                        // and consumes more input than the previous iteration did, in which case we update the memo with the
-                        // new result. We thus 'grow' the result, stopping when application either fails or does not consume
-                        // more input, at which point we take the result of the previous iteration as final.
-                        while (memo.result.text !== UNPARSE_FAIL) {
-                            if (!expr.unparse(node, pos, result))
-                                result.text = UNPARSE_FAIL;
+                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                        // the same rule with the same initial state. We continue to iterate as long as the application
+                        // succeeds and consumes more input than the previous iteration did, in which case we update the
+                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                        // does not consume more input, at which point we take the result of the previous iteration as
+                        // final.
+                        while (memo.result === true) {
+                            sys.setState(stateₒ);
                             // TODO: break cases:
                             // anything --> same thing (covers all string cases, since they can only be same or shorter)
                             // some node --> some different non-empty node (assert: should never happen!)
-                            if (result.text === UNPARSE_FAIL)
+                            if (!expr.parse())
                                 break;
-                            if (result.posᐟ === memo.result.posᐟ)
+                            let state = sys.getState();
+                            if (state.IPTR === memo.stateᐟ.IPTR)
                                 break;
-                            if (!sys.isFullyConsumed(node, result.posᐟ))
+                            if (!sys.isFullyConsumed(state.IBUF, state.IPTR))
                                 break;
-                            Object.assign(memo.result, result);
+                            memo.stateᐟ = state;
                         }
                     }
                     else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet resolved
-                        // it. That means we must have entered a left-recursive path of the rule. All we do here is note that
-                        // the rule application encountered left-recursion, and return with failure. This means that the initial
-                        // application of the rule for this initial state can only possibly succeed along a non-left-recursive
-                        // path. More importantly, it means the parser will never loop endlessly on left-recursive rules.
+                        // If we get here, then we have already applied the rule with this initial state, but not yet
+                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                        // note that the rule application encountered left-recursion, and return with failure. This means
+                        // that the initial application of the rule for this initial state can only possibly succeed along a
+                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                        // left-recursive rules.
                         memo.isLeftRecursive = true;
                         return false;
                     }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has already
-                    // been computed. Return it from the memo.
-                    Object.assign(result, memo.result);
-                    return result.text !== UNPARSE_FAIL;
+                    // We have a resolved memo, so the result of the rule application for the given initial state has
+                    // already been computed. Return it from the memo.
+                    sys.setState(memo.stateᐟ);
+                    return memo.result;
                 },
             };
         },
     };
-    const PARSE_FAIL = Symbol('FAIL');
-    // NB: this is an invalid code point (lead surrogate with no pair). It is used as a sentinel.
-    const UNPARSE_FAIL = '\uD800';
     // @ts-ignore
     return {
         kind: 'module',

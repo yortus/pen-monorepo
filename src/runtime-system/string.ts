@@ -2,15 +2,16 @@ function string(value: string, modifier?: 'concrete' | 'abstract'): Rule {
     if (modifier === 'abstract') {
         return {
             kind: 'rule',
-            parse(_, pos, result) {
-                result.node = value;
-                result.posᐟ = pos;
+            parse() {
+                // NB: nothing consumed
+                OUT = value;
                 return true;
             },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || !matchesAt(node, value, pos)) return false;
-                result.text = '';
-                result.posᐟ = pos + value.length;
+            unparse() {
+                if (typeof IBUF !== 'string') return false;
+                if (!matchesAt(IBUF, value, IPTR)) return false;
+                IPTR += value.length;
+                OUT = '';
                 return true;
             },
         };
@@ -19,15 +20,16 @@ function string(value: string, modifier?: 'concrete' | 'abstract'): Rule {
     if (modifier === 'concrete') {
         return {
             kind: 'rule',
-            parse(text, pos, result) {
-                if (!matchesAt(text, value, pos)) return false;
-                result.node = undefined;
-                result.posᐟ = pos + value.length;
+            parse() {
+                assumeType<string>(IBUF);
+                if (!matchesAt(IBUF, value, IPTR)) return false;
+                IPTR += value.length;
+                OUT = undefined;
                 return true;
             },
-            unparse(_, pos, result) {
-                result.text = value;
-                result.posᐟ = pos;
+            unparse() {
+                // NB: nothing consumed
+                OUT = value;
                 return true;
             },
         };
@@ -35,16 +37,18 @@ function string(value: string, modifier?: 'concrete' | 'abstract'): Rule {
 
     return {
         kind: 'rule',
-        parse(text, pos, result) {
-            if (!matchesAt(text, value, pos)) return false;
-            result.node = value;
-            result.posᐟ = pos + value.length;
+        parse() {
+            assumeType<string>(IBUF);
+            if (!matchesAt(IBUF, value, IPTR)) return false;
+            IPTR += value.length;
+            OUT = value;
             return true;
         },
-        unparse(node, pos, result) {
-            if (typeof node !== 'string' || !matchesAt(node, value, pos)) return false;
-            result.text = value;
-            result.posᐟ = pos + value.length;
+        unparse() {
+            if (typeof IBUF !== 'string') return false;
+            if (!matchesAt(IBUF, value, IPTR)) return false;
+            IPTR += value.length;
+            OUT = value;
             return true;
         },
     };

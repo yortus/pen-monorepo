@@ -50,6 +50,23 @@ TODO 2020:
         [x] `Production` to `Rule`
         [x] `Function_` to `Lambda`
         [x] `Module` stays as-is
+    [ ] unit tests for parse and unparse:
+        [ ] anyChar
+        [ ] character
+        [ ] epsilon
+        [ ] i32
+        [ ] intrinsicFalse
+        [ ] intrinsicNull
+        [ ] intrinsicTrue
+        [ ] list
+        [ ] maybe
+        [ ] memoise
+        [ ] not
+        [ ] selection
+        [ ] sequence
+        [ ] string
+        [ ] record
+        [ ] zeroOrMore
     [ ] revise naming conventions - capitalise combinator/lambda fns? Rules?
     [ ] complete `std` (standard library)
         [x] memo (nb this is a lambda, not a rule)

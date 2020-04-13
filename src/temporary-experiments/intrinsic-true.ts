@@ -1,16 +1,15 @@
 const intrinsicTrue: Rule = {
     kind: 'rule',
 
-    parse(_, pos, result) {
-        result.node = true;
-        result.posᐟ = pos;
+    parse() {
+        OUT = true;
         return true;
     },
 
-    unparse(node, pos, result) {
-        if (node !== true || pos !== 0) return false;
-        result.text = '';
-        result.posᐟ = 1;
+    unparse() {
+        if (IBUF !== true || IPTR !== 0) return false;
+        IPTR = 1;
+        OUT = '';
         return true;
     },
 };

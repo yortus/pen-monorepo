@@ -20,15 +20,18 @@ interface Module {
  */
 interface Rule {
     kind: 'rule';
-    parse(text: string, pos: number, result: {node: unknown, posᐟ: number}): boolean;
-    unparse(node: unknown, pos: number, result: {text: string, posᐟ: number}): boolean;
+    parse(): boolean;
+    unparse(): boolean;
 }
 
 
 // TODO: explain... so stdlib and experiments can reference the helpers
 declare const sys: {
     assert: (value: unknown) => asserts value;
+    assumeType: <T>(value: unknown) => asserts value is T;
+    getState: () => {IBUF: unknown, IPTR: number, OUT: unknown};
     isFullyConsumed: (node: unknown, pos: number) => boolean;
     isPlainObject: (value: unknown) => value is Record<string, unknown>;
     matchesAt: (text: string, substr: string, position: number) => boolean;
+    setState: (value: {IBUF: unknown, IPTR: number, OUT: unknown}) => void;
 };

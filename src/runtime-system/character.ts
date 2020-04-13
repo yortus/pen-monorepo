@@ -2,17 +2,19 @@ function character(min: string, max: string, modifier?: 'concrete' | 'abstract')
     if (modifier === 'abstract') {
         return {
             kind: 'rule',
-            parse(_, pos, result) {
-                result.node = min;
-                result.posᐟ = pos;
+            parse() {
+                // NB: nothing consumed
+                OUT = min;
                 return true;
             },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || pos >= node.length) return false;
-                let c = node.charAt(pos);
+            unparse() {
+                if (typeof IBUF !== 'string') return false;
+                if (IPTR < 0 || IPTR >= IBUF.length) return false;
+                let c = IBUF.charAt(IPTR);
                 if (c < min || c > max) return false;
-                result.text = '';
-                result.posᐟ = pos + 1;
+
+                IPTR += 1;
+                OUT = '';
                 return true;
             },
         };
@@ -21,17 +23,19 @@ function character(min: string, max: string, modifier?: 'concrete' | 'abstract')
     if (modifier === 'concrete') {
         return {
             kind: 'rule',
-            parse(text, pos, result) {
-                if (pos >= text.length) return false;
-                let c = text.charAt(pos);
+            parse() {
+                assumeType<string>(IBUF);
+                if (IPTR < 0 || IPTR >= IBUF.length) return false;
+                let c = IBUF.charAt(IPTR);
                 if (c < min || c > max) return false;
-                result.node = undefined;
-                result.posᐟ = pos + 1;
+
+                IPTR += 1;
+                OUT = undefined;
                 return true;
             },
-            unparse(_, pos, result) {
-                result.text = min;
-                result.posᐟ = pos;
+            unparse() {
+                // NB: nothing consumed
+                OUT = min;
                 return true;
             },
         };
@@ -39,20 +43,24 @@ function character(min: string, max: string, modifier?: 'concrete' | 'abstract')
 
     return {
         kind: 'rule',
-        parse(text, pos, result) {
-            if (pos >= text.length) return false;
-            let c = text.charAt(pos);
+        parse() {
+            assumeType<string>(IBUF);
+            if (IPTR < 0 || IPTR >= IBUF.length) return false;
+            let c = IBUF.charAt(IPTR);
             if (c < min || c > max) return false;
-            result.node = c;
-            result.posᐟ = pos + 1;
+
+            IPTR += 1;
+            OUT = c;
             return true;
-        },
-        unparse(node, pos, result) {
-            if (typeof node !== 'string' || pos >= node.length) return false;
-            let c = node.charAt(pos);
+    },
+        unparse() {
+            if (typeof IBUF !== 'string') return false;
+            if (IPTR < 0 || IPTR >= IBUF.length) return false;
+            let c = IBUF.charAt(IPTR);
             if (c < min || c > max) return false;
-            result.text = c;
-            result.posᐟ = pos + 1;
+
+            IPTR += 1;
+            OUT = c;
             return true;
         },
     };

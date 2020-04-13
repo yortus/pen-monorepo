@@ -2,44 +2,44 @@ function zeroOrMore(expr: Rule): Rule {
     return {
         kind: 'rule',
 
-        parse(text, pos, result) {
+        parse() {
+            let IPTRₒ = IPTR;
             let node: unknown;
             while (true) {
-                if (!expr.parse(text, pos, result)) break;
+                if (!expr.parse()) break;
 
                 // TODO: check if any input was consumed...
                 // if not, stop iterating, since otherwise we may loop forever
-                if (pos === result.posᐟ) break;
+                if (IPTR === IPTRₒ) break;
 
                 // TODO: copypasta from Sequence above... make DRY
-                pos = result.posᐟ;
-                if (node === undefined) node = result.node;
-                else if (typeof node === 'string' && typeof result.node === 'string') node += result.node;
-                else if (Array.isArray(node) && Array.isArray(result.node)) node = [...node, ...result.node];
-                else if (isPlainObject(node) && isPlainObject(result.node)) node = {...node, ...result.node};
-                else if (result.node !== undefined) throw new Error(`Internal error: invalid sequence`);
+                if (node === undefined) node = OUT;
+                // TODO: generalise below cases to a helper function that can be extended for new formats / blob types
+                else if (typeof node === 'string' && typeof OUT === 'string') node += OUT;
+                else if (Array.isArray(node) && Array.isArray(OUT)) node = [...node, ...OUT];
+                else if (isPlainObject(node) && isPlainObject(OUT)) node = {...node, ...OUT};
+                else if (OUT !== undefined) throw new Error(`Internal error: invalid sequence`);
             }
-
-            result.node = node;
-            result.posᐟ = pos;
+            OUT = node;
             return true;
         },
 
-        unparse(node, pos, result) {
+        unparse() {
+            let IPTRₒ = IPTR;
             let text = '';
             while (true) {
-                if (!expr.unparse(node, pos, result)) break;
+                if (!expr.unparse()) break;
 
                 // TODO: check if any input was consumed...
                 // if not, stop iterating, since otherwise we may loop forever
                 // TODO: any other checks needed? review...
-                if (pos === result.posᐟ) break;
-                text += result.text;
-                pos = result.posᐟ;
+                if (IPTR === IPTRₒ) break;
+                // TODO: support more formats / blob types here, like for parse...
+                assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
+                text += OUT;
             }
 
-            result.text = text;
-            result.posᐟ = pos;
+            OUT = text;
             return true;
         },
     };
