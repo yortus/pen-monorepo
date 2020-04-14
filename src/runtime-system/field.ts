@@ -1,16 +1,19 @@
-function record(fields: Array<{name: string, value: Rule}>): Rule {
+function field(name: Rule, value: Rule): Rule {
     return {
         kind: 'rule',
 
         parse() {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
-            for (let field of fields) {
-                let propName = field.name;
-                if (!field.value.parse()) return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-            }
+
+            if (!name.parse()) return setState(stateₒ), false;
+            assert(typeof OUT === 'string');
+            let propName = OUT;
+
+            if (!value.parse()) return setState(stateₒ), false;
+            assert(OUT !== undefined);
+            obj[propName] = OUT;
+
             OUT = obj;
             return true;
         },
@@ -28,31 +31,38 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
             const obj = IBUF;
             let bitmask = IPTR;
 
-            for (let field of fields) {
-
-                // Find the property key/value pair that matches this field name/value pair (if any)
-                let i = propNames.indexOf(field.name);
-                if (i < 0) return setState(stateₒ), false;
+            // Find the first property key/value pair that matches this field name/value pair (if any)
+            for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
 
                 // TODO: skip already-consumed key/value pairs
                 // tslint:disable-next-line: no-bitwise
                 const propBit = 1 << i;
                 // tslint:disable-next-line: no-bitwise
-                if ((bitmask & propBit) !== 0) return setState(stateₒ), false;
+                if ((bitmask & propBit) !== 0) continue;
+
+                // TODO: match field name
+                setInState(propName, 0);
+                if (!name.unparse()) continue;
+                if (IPTR !== propName.length) continue;
+                text += OUT;
 
                 // TODO: match field value
                 setInState(obj[propName], 0);
-                if (!field.value.unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IPTR)) return setState(stateₒ), false;
+                if (!value.unparse()) continue;
+                if (!isFullyConsumed(obj[propName], IPTR)) continue;
                 text += OUT;
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
+                setInState(obj, bitmask);
+                OUT = text;
+                return true;
             }
-            setInState(obj, bitmask);
-            OUT = text;
-            return true;
+
+            // If we get here, no match...
+            setState(stateₒ);
+            return false;
         },
     };
 }

@@ -147,6 +147,14 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`${charModifier})`);
             return;
 
+        case 'FieldExpression':
+            emit.text('sys.field(').indent().down(1);
+            emitExpression(emit, expr.name, symbolTable);
+            emit.text(',').down(1);
+            emitExpression(emit, expr.value, symbolTable);
+            emit.dedent().down(1).text(')');
+            return;
+
         case 'ImportExpression':
             // TODO: temp special-case 'std' handling. Unify these two cases better...
             if (expr.moduleSpecifier === 'std') {
@@ -183,15 +191,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'RecordExpression':
             emit.text('sys.record([').indent();
             for (let field of expr.fields) {
-                let dynamic = field.kind === 'DynamicField';
                 emit.down(1).text('{').indent();
-                emit.down(1).text(`dynamic: ${dynamic},`);
-                emit.down(1).text(`name: `);
-                dynamic ? emitExpression(emit, field.name as any, symbolTable) : emit.text(`'${field.name}'`);
-                emit.text(',').down(1).text(`value: `);
+                emit.down(1).text(`name: '${field.name}',`);
+                emit.down(1).text(`value: `);
                 emitExpression(emit, field.value, symbolTable);
-                emit.text(',');
-                emit.dedent().down(1).text('},');
+                emit.text(',').dedent().down(1).text('},');
             }
             emit.dedent().down(1).text('])');
             return;

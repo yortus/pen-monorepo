@@ -30,7 +30,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'Binding': return rec(n.pattern), rec(n.value);
             case 'BindingLookupExpression': return rec(n.module);
             case 'CharacterExpression': return;
-            case 'DynamicField': return rec(n.name), rec(n.value);
+            case 'FieldExpression': return rec(n.name), rec(n.value);
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec);

@@ -16,7 +16,7 @@ add = {type: 'add',  lhs: expr,  rhs: `+` term} // NB: commas allowed but option
 sub = {type: 'sub'   lhs: expr   rhs: `-` term}
 
 term = memoise(mul | div | factor)
-mul = {type: 'mul'   lhs: term   rhs: `*` factor}
+mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Record and Field exprs
 div = {type: 'div'   lhs: term   rhs: `/` factor}
 
 factor = i32 | `(` expr `)`

@@ -56,7 +56,8 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
 
     PRECEDENCE 4 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
-        RecordExpression            {a: b   c: d   [e]: f}   {a: b}   {}
+        RecordExpression            {a: b   c: d   e: f}   {a: b}   {}
+        FieldExpression             {[a]: b}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
         CharacterExpression         "a-z"   '0-9'   `A-F`
@@ -86,6 +87,7 @@ Precedence4OrHigher
 PrimaryExpression
     // = LambdaExpression
     = RecordExpression
+    / FieldExpression
     / ModuleExpression
     / ListExpression
     / ParenthesisedExpression
@@ -127,8 +129,12 @@ ApplicationArgument
 //     { return {kind: 'LambdaExpression', pattern, body}; }
 
 RecordExpression
-    = "{"   __   fields:FieldList   __   "}"
+    = "{"   __   fields:StaticFieldList   __   "}"
     { return {kind: 'RecordExpression', fields}; }
+
+FieldExpression
+    = "{"   __   "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression   __   "}"
+    { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
     = "{"   __   module:Module   __   "}"
@@ -176,21 +182,13 @@ ReferenceExpression
 
 
 // ====================   Fields and Elements   ====================
-FieldList
-    = !","   head:Field?   tail:((__   ",")?   __   Field)*   (__   ",")?
+StaticFieldList
+    = !","   head:StaticField?   tail:((__   ",")?   __   StaticField)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
-
-Field
-    = StaticField
-    / DynamicField
 
 StaticField
     = name:IDENTIFIER   __   ":"   __   value:Expression
     { return {kind: 'StaticField', name, value}; }
-
-DynamicField
-    = "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression
-    { return {kind: 'DynamicField', name, value}; }
 
 ElementList
     = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?

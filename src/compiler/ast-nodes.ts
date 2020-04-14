@@ -14,7 +14,6 @@ export type Node<M extends Metadata = {}> =
     | Expression<M>
 
     // Other nodes
-    | DynamicField<M>
     | ModulePatternName<M>
     | StaticField<M>;
 
@@ -33,6 +32,7 @@ export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BindingLookupExpression<M>
     | CharacterExpression<M>
+    | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
     | ListExpression<M>
@@ -139,6 +139,14 @@ export interface CharacterExpression<M extends Metadata = {}> {
 }
 
 
+export interface FieldExpression<M extends Metadata = {}> {
+    readonly kind: 'FieldExpression';
+    readonly name: Expression<M>;
+    readonly value: Expression<M>;
+    readonly meta: M[this['kind']];
+}
+
+
 export interface ImportExpression<M extends Metadata = {}> {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
@@ -178,7 +186,7 @@ export interface ParenthesisedExpression<M extends Metadata = {}> {
 
 export interface RecordExpression<M extends Metadata = {}> {
     readonly kind: 'RecordExpression';
-    readonly fields: ReadonlyArray<StaticField<M> | DynamicField<M>>;
+    readonly fields: ReadonlyArray<StaticField<M>>;
     readonly meta: M[this['kind']];
 }
 
@@ -214,14 +222,6 @@ export interface StringExpression<M extends Metadata = {}> {
 
 
 // // ====================   Other nodes   ====================
-export interface DynamicField<M extends Metadata = {}> {
-    readonly kind: 'DynamicField';
-    readonly name: Expression<M>;
-    readonly value: Expression<M>;
-    readonly meta: M[this['kind']];
-}
-
-
 export interface ModulePatternName<M extends Metadata = {}> {
     readonly kind: 'ModulePatternName';
     readonly name: string;

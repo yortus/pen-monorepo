@@ -69,6 +69,7 @@ return {
     bindingLookup,
     createMainExports,
     character,
+    field,
     list,
     record,
     sequence,
