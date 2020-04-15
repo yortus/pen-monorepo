@@ -4,12 +4,15 @@ const memoise: Lambda = {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
-        const parseMemos = new Map<number, {
-            resolved: boolean,
-            isLeftRecursive: boolean,
-            result: boolean;
-            stateᐟ: {IBUF: unknown, IPTR: number, OUT: unknown/*, OPTR: number*/};
-        }>();
+        const parseMemos = new Map<
+            string,
+            Map<number, {
+                resolved: boolean,
+                isLeftRecursive: boolean,
+                result: boolean;
+                stateᐟ: {IBUF: unknown, IPTR: number, OUT: unknown/*, OPTR: number*/};
+            }>
+        >();
 
         // TODO: revise memo key once using new ast/pos signature
         const unparseMemos = new Map<
@@ -28,7 +31,13 @@ const memoise: Lambda = {
             parse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = sys.getState();
-                let memo = parseMemos.get(stateₒ.IPTR);
+                sys.assumeType<string>(stateₒ.IBUF);
+                let memos2 = parseMemos.get(stateₒ.IBUF);
+                if (memos2 === undefined) {
+                    memos2 = new Map();
+                    parseMemos.set(stateₒ.IBUF, memos2);
+                }
+                let memo = memos2.get(stateₒ.IPTR);
                 if (!memo) {
                     // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                     // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -36,7 +45,7 @@ const memoise: Lambda = {
                     // memo. If a future application finds the memo still unresolved, then we know we have encountered
                     // left-recursion.
                     memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                    parseMemos.set(stateₒ.IPTR, memo);
+                    memos2.set(stateₒ.IPTR, memo);
 
                     // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                     // At this point, any left-recursive paths encountered during application are guaranteed to have
