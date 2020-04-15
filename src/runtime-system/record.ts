@@ -17,7 +17,7 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
 
         unparse() {
             let stateₒ = getState();
-            let text = '';
+            let text: unknown;
             if (!isPlainObject(IDOC)) return false;
 
             let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
@@ -45,7 +45,7 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
                 setInState(obj[propName], 0);
                 if (!field.value.unparse()) return setState(stateₒ), false;
                 if (!isFullyConsumed(obj[propName], IMEM)) return setState(stateₒ), false;
-                text += ODOC;
+                text = concat(text, ODOC);
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;

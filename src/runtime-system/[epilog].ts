@@ -34,6 +34,17 @@ function assert(value: unknown): asserts value {
 
 
 // TODO: doc... helper...
+function concat(a: unknown, b: unknown): unknown {
+    if (a === undefined) return b;
+    if (b === undefined) return a;
+    if (typeof a === 'string' && typeof b === 'string') return a + b;
+    if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
+    if (isPlainObject(a) && isPlainObject(b)) return {...a, ...b};
+    throw new Error(`Internal error: invalid sequence`);
+}
+
+
+// TODO: doc... helper...
 function isFullyConsumed(node: unknown, pos: number): boolean {
     if (typeof node === 'string') return pos === node.length;
     if (Array.isArray(node)) return pos === node.length;

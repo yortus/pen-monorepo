@@ -11,7 +11,7 @@ function character(min: string, max: string): Rule {
                 if (c < min || c > max) return false;
                 IMEM += 1;
             }
-            ODOC = ONUL ? undefined : c;                            // <===== (2)
+            ODOC = ONUL ? undefined : c;
             return true;
         },
 
@@ -24,7 +24,7 @@ function character(min: string, max: string): Rule {
                 if (c < min || c > max) return false;
                 IMEM += 1;
             }
-            ODOC = ONUL ? '' : c;                                   // <===== (2)
+            ODOC = ONUL ? undefined : c;
             return true;
         },
     };

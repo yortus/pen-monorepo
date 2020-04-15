@@ -7,7 +7,7 @@ const epsilon: Rule = {
     },
 
     unparse() {
-        ODOC = '';
+        ODOC = undefined;
         return true;
     },
 };

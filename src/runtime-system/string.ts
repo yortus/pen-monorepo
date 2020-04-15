@@ -8,8 +8,7 @@ function string(value: string): Rule {
                 if (!matchesAt(IDOC, value, IMEM)) return false;
                 IMEM += value.length;
             }
-
-            ODOC = ONUL ? undefined : value;                        // <===== (2)
+            ODOC = ONUL ? undefined : value;
             return true;
         },
 
@@ -19,7 +18,7 @@ function string(value: string): Rule {
                 if (!matchesAt(IDOC, value, IMEM)) return false;
                 IMEM += value.length;
             }
-            ODOC = ONUL ? '' : value;                               // <===== (2)
+            ODOC = ONUL ? undefined : value;
             return true;
         },
     };

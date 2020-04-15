@@ -20,7 +20,7 @@ function field(name: Rule, value: Rule): Rule {
 
         unparse() {
             let stateₒ = getState();
-            let text = '';
+            let text: unknown;
             if (!isPlainObject(IDOC)) return false;
 
             let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
@@ -45,13 +45,13 @@ function field(name: Rule, value: Rule): Rule {
                 setInState(propName, 0);
                 if (!name.unparse()) continue;
                 if (IMEM !== propName.length) continue;
-                text += ODOC;
+                text = concat(text, ODOC);
 
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!value.unparse()) continue;
                 if (!isFullyConsumed(obj[propName], IMEM)) continue;
-                text += ODOC;
+                text = concat(text, ODOC);
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;

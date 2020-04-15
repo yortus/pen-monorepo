@@ -2,14 +2,16 @@ const intrinsicTrue: Rule = {
     kind: 'rule',
 
     parse() {
-        ODOC = true;
+        ODOC = ONUL ? undefined : true;
         return true;
     },
 
     unparse() {
-        if (IDOC !== true || IMEM !== 0) return false;
-        IMEM = 1;
-        ODOC = '';
+        if (!INUL) {
+            if (IDOC !== true || IMEM !== 0) return false;
+            IMEM = 1;
+        }
+        ODOC = undefined;
         return true;
     },
 };

@@ -29,6 +29,7 @@ interface Rule {
 declare const sys: {
     assert: (value: unknown) => asserts value;
     assumeType: <T>(value: unknown) => asserts value is T;
+    concat: (a: unknown, b: unknown) => unknown;
     getState: () => {IDOC: unknown, IMEM: number, ODOC: unknown};
     isFullyConsumed: (node: unknown, pos: number) => boolean;
     isPlainObject: (value: unknown) => value is Record<string, unknown>;

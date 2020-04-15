@@ -207,7 +207,7 @@ function initRuntimeSystem() {
                         return false;
                     IMEM += 1;
                 }
-                ODOC = ONUL ? undefined : c; // <===== (2)
+                ODOC = ONUL ? undefined : c;
                 return true;
             },
             unparse() {
@@ -222,7 +222,7 @@ function initRuntimeSystem() {
                         return false;
                     IMEM += 1;
                 }
-                ODOC = ONUL ? '' : c; // <===== (2)
+                ODOC = ONUL ? undefined : c;
                 return true;
             },
         };
@@ -289,7 +289,7 @@ function initRuntimeSystem() {
             },
             unparse() {
                 let stateₒ = getState();
-                let text = '';
+                let text;
                 if (!isPlainObject(IDOC))
                     return false;
                 let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
@@ -313,14 +313,14 @@ function initRuntimeSystem() {
                         continue;
                     if (IMEM !== propName.length)
                         continue;
-                    text += ODOC;
+                    text = concat(text, ODOC);
                     // TODO: match field value
                     setInState(obj[propName], 0);
                     if (!value.unparse())
                         continue;
                     if (!isFullyConsumed(obj[propName], IMEM))
                         continue;
-                    text += ODOC;
+                    text = concat(text, ODOC);
                     // TODO: we matched both name and value - consume them from `node`
                     bitmask += propBit;
                     setInState(obj, bitmask);
@@ -351,7 +351,7 @@ function initRuntimeSystem() {
             },
             unparse() {
                 let stateₒ = getState();
-                let text = '';
+                let text;
                 if (!Array.isArray(IDOC))
                     return false;
                 if (IMEM < 0 || IMEM + elementsLength >= IDOC.length)
@@ -364,7 +364,7 @@ function initRuntimeSystem() {
                         return setState(stateₒ), false;
                     if (!isFullyConsumed(IDOC, IMEM))
                         return setState(stateₒ), false;
-                    text += ODOC;
+                    text = concat(text, ODOC);
                 }
                 setInState(arr, off + elementsLength);
                 ODOC = text;
@@ -390,7 +390,7 @@ function initRuntimeSystem() {
             },
             unparse() {
                 let stateₒ = getState();
-                let text = '';
+                let text;
                 if (!isPlainObject(IDOC))
                     return false;
                 let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
@@ -417,7 +417,7 @@ function initRuntimeSystem() {
                         return setState(stateₒ), false;
                     if (!isFullyConsumed(obj[propName], IMEM))
                         return setState(stateₒ), false;
-                    text += ODOC;
+                    text = concat(text, ODOC);
                     // TODO: we matched both name and value - consume them from `node`
                     bitmask += propBit;
                 }
@@ -457,30 +457,18 @@ function initRuntimeSystem() {
                 for (let i = 0; i < arity; ++i) {
                     if (!expressions[i].parse())
                         return setState(stateₒ), false;
-                    if (node === undefined)
-                        node = ODOC;
-                    // TODO: generalise below cases to a helper function that can be extended for new formats / blob types
-                    else if (typeof node === 'string' && typeof ODOC === 'string')
-                        node += ODOC;
-                    else if (Array.isArray(node) && Array.isArray(ODOC))
-                        node = [...node, ...ODOC];
-                    else if (isPlainObject(node) && isPlainObject(ODOC))
-                        node = Object.assign(Object.assign({}, node), ODOC);
-                    else if (ODOC !== undefined)
-                        throw new Error(`Internal error: invalid sequence`);
+                    node = concat(node, ODOC);
                 }
                 ODOC = node;
                 return true;
             },
             unparse() {
                 let stateₒ = getState();
-                let text = '';
+                let text;
                 for (let i = 0; i < arity; ++i) {
                     if (!expressions[i].unparse())
                         return setState(stateₒ), false;
-                    // TODO: support more formats / blob types here, like for parse...
-                    assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                    text += ODOC;
+                    text = concat(text, ODOC);
                 }
                 ODOC = text;
                 return true;
@@ -497,7 +485,7 @@ function initRuntimeSystem() {
                         return false;
                     IMEM += value.length;
                 }
-                ODOC = ONUL ? undefined : value; // <===== (2)
+                ODOC = ONUL ? undefined : value;
                 return true;
             },
             unparse() {
@@ -508,7 +496,7 @@ function initRuntimeSystem() {
                         return false;
                     IMEM += value.length;
                 }
-                ODOC = ONUL ? '' : value; // <===== (2)
+                ODOC = ONUL ? undefined : value;
                 return true;
             },
         };
@@ -536,6 +524,20 @@ function initRuntimeSystem() {
     function assert(value) {
         if (!value)
             throw new Error(`Assertion failed`);
+    }
+    // TODO: doc... helper...
+    function concat(a, b) {
+        if (a === undefined)
+            return b;
+        if (b === undefined)
+            return a;
+        if (typeof a === 'string' && typeof b === 'string')
+            return a + b;
+        if (Array.isArray(a) && Array.isArray(b))
+            return [...a, ...b];
+        if (isPlainObject(a) && isPlainObject(b))
+            return Object.assign(Object.assign({}, a), b);
+        throw new Error(`Internal error: invalid sequence`);
     }
     // TODO: doc... helper...
     function isFullyConsumed(node, pos) {
