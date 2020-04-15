@@ -2,8 +2,8 @@
 // |                                  Imports                                    |
 // ===============================================================================
 {i32} = import 'std'
-{intrinsicFalse, intrinsicNull, intrinsicTrue} = import 'experimental'
-{anyChar, Maybe, Not, ZeroOrMore} = import 'experimental'
+{intrinsicFalse, intrinsicNull, intrinsicTrue} = import 'experiments'
+{anyChar, maybe, not, zeroOrMore} = import 'experiments'
 
 
 // ===============================================================================
@@ -33,29 +33,29 @@ True    = `true`   intrinsicTrue
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String]: COLON Value}   Maybe(COMMA Properties)
+Properties  = {[String]: COLON Value}   maybe(COMMA Properties)
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET
-Elements    = [Value]   Maybe(COMMA Elements)
+Elements    = [Value]   maybe(COMMA Elements)
 
 // ---------- Numbers ----------
 Number = i32 // TODO: should be f64? check JS specs
 
 // ---------- Strings ----------
-String = DOUBLE_QUOTE   ZeroOrMore(CHAR)   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   zeroOrMore(CHAR)   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
-    |   Not("\x00-\x1f"   |   "\""   |   "\\")   anyChar        // any char except control char, " or \
-    |   "\\\""   '"'                                            // quotation mark
-    |   "\\\\"   '\\'                                           // reverse solidus
-    |   "\\/"   '/'                                             // solidus
-    |   "\\b"   '\b'                                            // backspace
-    |   "\\f"   '\f'                                            // formfeed
-    |   "\\n"   '\n'                                            // newline
-    |   "\\r"   '\r'                                            // carriage return
-    |   "\\t"   '\t'                                            // horizontal tab
+    |   not(`\x00-\x1f`   |   `\"`   |   `\\`)   anyChar        // any char except control char, " or \
+    |   `\\\"`   '"'                                            // quotation mark
+    |   `\\\\`   '\\'                                           // reverse solidus
+    |   `\\/`   '/'                                             // solidus
+    |   `\\b`   '\b'                                            // backspace
+    |   `\\f`   '\f'                                            // formfeed
+    |   `\\n`   '\n'                                            // newline
+    |   `\\r`   '\r'                                            // carriage return
+    |   `\\t`   '\t'                                            // horizontal tab
 
     // TODO: support \uXXXX for completeness...
     //       but how to convert esc seq in text to/from char in ast node? custom transcoder?
@@ -73,4 +73,4 @@ RBRACKET        = WS `]` WS
 COLON           = WS `:` WS
 COMMA           = WS `,` WS
 DOUBLE_QUOTE    = `"`
-WS              = ZeroOrMore(` ` | `\t` | `\n` | `\r`)
+WS              = zeroOrMore(` ` | `\t` | `\n` | `\r`)

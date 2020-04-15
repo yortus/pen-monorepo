@@ -151,9 +151,9 @@ ParenthesisedExpression
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
-        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = moduleSpecifier === 'std' ? 'std' : options.sourceFile.imports[moduleSpecifier];
-        return {kind: 'ImportExpression', moduleSpecifier, sourceFilePath};
+        let modspec = specifierChars.map(el => el[1]).join('');
+        let sourceFilePath = ['std', 'experiments'].includes(modspec) ? modspec : options.sourceFile.imports[modspec];
+        return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 
 CharacterExpression
@@ -161,7 +161,7 @@ CharacterExpression
     { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: true}; }
 
     / '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: true}; }
+    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: false}; }
 
     / "`"   ![`-]   minValue:CHARACTER   "-"   ![`-]   maxValue:CHARACTER   "`"
     { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
@@ -171,7 +171,7 @@ StringExpression
     { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: false, abstract: true}; }
 
     / !CharacterExpression   '"'   (!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: true, abstract: true}; }
+    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: false, abstract: false}; }
 
     / !CharacterExpression   "`"   (!"`"   CHARACTER)*   "`"
     { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: true, abstract: false}; }

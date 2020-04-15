@@ -6,6 +6,7 @@ import {SymbolDefinitions} from '../03-create-symbol-definitions';
 import {SymbolReferences} from '../04-resolve-symbol-references';
 import {emitInitRuntimeSystem} from './emit-init-runtime-system';
 import {emitInitStandardLibrary} from './emit-init-standard-library';
+import {emitInitTemporaryExperiments} from './emit-init-temporary-experiments';
 import {Emitter, makeEmitter} from './emitter';
 
 
@@ -25,6 +26,7 @@ function emitProgram(program: Program) {
     // TODO: Emit sys and std...
     emit.text(`const sys = initRuntimeSystem();`);
     emit.down(1).text(`const std = initStandardLibrary();`);
+    emit.down(1).text(`const experiments = initTemporaryExperiments();`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -46,6 +48,10 @@ function emitProgram(program: Program) {
     // Emit code for the standard library.
     emit.down(2).text(`// -------------------- STANDARD LIBRARY --------------------`);
     emitInitStandardLibrary(emit);
+
+    // Emit code for temporary experiments.
+    emit.down(2).text(`// -------------------- TEMPORARY EXPERIMENTS --------------------`);
+    emitInitTemporaryExperiments(emit);
 
     // All done.
     return emit.toString();
@@ -177,9 +183,13 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ImportExpression':
-            // TODO: temp special-case 'std' handling. Unify these two cases better...
+            // TODO: temp special-case 'std' and 'experiments' handling. Unify these three cases better...
             if (expr.moduleSpecifier === 'std') {
                 emit.text(`std`);
+                return;
+            }
+            else if (expr.moduleSpecifier === 'experiments') {
+                emit.text(`experiments`);
                 return;
             }
             else {

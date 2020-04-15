@@ -11,8 +11,8 @@ export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsP
     let absPath: AbsPath;
 
     // 1. If `modSpec` is a core module
-    if (modSpec === 'std') {
-        absPath = AbsPath('std');
+    if (modSpec === 'std' || modSpec === 'experiments') {
+        absPath = AbsPath(modSpec);
     }
 
     // 2. If `modSpec` is a relative path
@@ -35,7 +35,7 @@ export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsP
 
 
 function tryPath(p: AbsPath) {
-    if (p === 'std') return p;
+    if (p === 'std' || p === 'experiments') return p;
     if (!fs.existsSync(p)) return undefined;
     if (!fs.statSync(p).isFile()) return undefined;
     return p;

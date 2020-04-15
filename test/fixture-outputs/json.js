@@ -2,165 +2,334 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊4 = {
+const 𝕊2 = {
     kind: 'module',
     bindings: {
-        memoise: {},
         i32: {},
+        intrinsicFalse: {},
+        intrinsicNull: {},
+        intrinsicTrue: {},
+        anyChar: {},
+        maybe: {},
+        not: {},
+        zeroOrMore: {},
         start: {},
-        expr: {},
-        add: {},
-        sub: {},
-        term: {},
-        mul: {},
-        div: {},
-        factor: {},
+        Value: {},
+        False: {},
+        Null: {},
+        True: {},
+        Object: {},
+        Properties: {},
+        Array: {},
+        Elements: {},
+        Number: {},
+        String: {},
+        CHAR: {},
+        LBRACE: {},
+        RBRACE: {},
+        LBRACKET: {},
+        RBRACKET: {},
+        COLON: {},
+        COMMA: {},
+        DOUBLE_QUOTE: {},
+        WS: {},
     },
 };
 
 // -------------------- aliases --------------------
 
-𝕊4.bindings.start = 𝕊4.bindings.expr;
+𝕊2.bindings.Number = 𝕊2.bindings.i32;
 
-// -------------------- V:\oss\penc\test\fixture-inputs\math.pen --------------------
+// -------------------- V:\oss\penc\test\fixture-inputs\json\index.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊4.bindings.memoise,
-        sys.bindingLookup(rhs, 'memoise')
-    );
-    Object.assign(
-        𝕊4.bindings.i32,
+        𝕊2.bindings.i32,
         sys.bindingLookup(rhs, 'i32')
     );
 }
 
+{
+    let rhs = experiments;
+    Object.assign(
+        𝕊2.bindings.intrinsicFalse,
+        sys.bindingLookup(rhs, 'intrinsicFalse')
+    );
+    Object.assign(
+        𝕊2.bindings.intrinsicNull,
+        sys.bindingLookup(rhs, 'intrinsicNull')
+    );
+    Object.assign(
+        𝕊2.bindings.intrinsicTrue,
+        sys.bindingLookup(rhs, 'intrinsicTrue')
+    );
+}
+
+{
+    let rhs = experiments;
+    Object.assign(
+        𝕊2.bindings.anyChar,
+        sys.bindingLookup(rhs, 'anyChar')
+    );
+    Object.assign(
+        𝕊2.bindings.maybe,
+        sys.bindingLookup(rhs, 'maybe')
+    );
+    Object.assign(
+        𝕊2.bindings.not,
+        sys.bindingLookup(rhs, 'not')
+    );
+    Object.assign(
+        𝕊2.bindings.zeroOrMore,
+        sys.bindingLookup(rhs, 'zeroOrMore')
+    );
+}
+
 Object.assign(
-    𝕊4.bindings.expr,
-    sys.apply(
-        𝕊4.bindings.memoise,
-        sys.selection(
-            𝕊4.bindings.add,
-            𝕊4.bindings.sub,
-            𝕊4.bindings.term
-        )
+    𝕊2.bindings.start,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        𝕊2.bindings.Value,
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.add,
-    sys.record([
-        {
-            name: 'type',
-            value: sys.abstract(sys.string("add")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊4.bindings.expr,
-        },
-        {
-            name: 'rhs',
-            value: sys.sequence(
-                sys.concrete(sys.string("+")),
-                𝕊4.bindings.term
-            ),
-        },
-    ])
-);
-
-Object.assign(
-    𝕊4.bindings.sub,
-    sys.record([
-        {
-            name: 'type',
-            value: sys.abstract(sys.string("sub")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊4.bindings.expr,
-        },
-        {
-            name: 'rhs',
-            value: sys.sequence(
-                sys.concrete(sys.string("-")),
-                𝕊4.bindings.term
-            ),
-        },
-    ])
-);
-
-Object.assign(
-    𝕊4.bindings.term,
-    sys.apply(
-        𝕊4.bindings.memoise,
-        sys.selection(
-            𝕊4.bindings.mul,
-            𝕊4.bindings.div,
-            𝕊4.bindings.factor
-        )
+    𝕊2.bindings.Value,
+    sys.selection(
+        𝕊2.bindings.False,
+        𝕊2.bindings.Null,
+        𝕊2.bindings.True,
+        𝕊2.bindings.Object,
+        𝕊2.bindings.Array,
+        𝕊2.bindings.Number,
+        𝕊2.bindings.String
     )
 );
 
 Object.assign(
-    𝕊4.bindings.mul,
+    𝕊2.bindings.False,
+    sys.sequence(
+        sys.concrete(sys.string("false")),
+        𝕊2.bindings.intrinsicFalse
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.Null,
+    sys.sequence(
+        sys.concrete(sys.string("null")),
+        𝕊2.bindings.intrinsicNull
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.True,
+    sys.sequence(
+        sys.concrete(sys.string("true")),
+        𝕊2.bindings.intrinsicTrue
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.Object,
+    sys.sequence(
+        𝕊2.bindings.LBRACE,
+        sys.selection(
+            𝕊2.bindings.Properties,
+            sys.record([
+            ])
+        ),
+        𝕊2.bindings.RBRACE
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.Properties,
     sys.sequence(
         sys.field(
-            sys.abstract(sys.string("type")),
-            sys.abstract(sys.string("mul"))
-        ),
-        sys.record([
-            {
-                name: 'lhs',
-                value: 𝕊4.bindings.term,
-            },
-        ]),
-        sys.field(
-            sys.abstract(sys.string("rhs")),
+            𝕊2.bindings.String,
             sys.sequence(
-                sys.concrete(sys.string("*")),
-                𝕊4.bindings.factor
+                𝕊2.bindings.COLON,
+                𝕊2.bindings.Value
+            )
+        ),
+        sys.apply(
+            𝕊2.bindings.maybe,
+            sys.sequence(
+                𝕊2.bindings.COMMA,
+                𝕊2.bindings.Properties
             )
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.div,
-    sys.record([
-        {
-            name: 'type',
-            value: sys.abstract(sys.string("div")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊4.bindings.term,
-        },
-        {
-            name: 'rhs',
-            value: sys.sequence(
-                sys.concrete(sys.string("/")),
-                𝕊4.bindings.factor
-            ),
-        },
-    ])
+    𝕊2.bindings.Array,
+    sys.sequence(
+        𝕊2.bindings.LBRACKET,
+        sys.selection(
+            𝕊2.bindings.Elements,
+            sys.list([
+            ])
+        ),
+        𝕊2.bindings.RBRACKET
+    )
 );
 
 Object.assign(
-    𝕊4.bindings.factor,
+    𝕊2.bindings.Elements,
+    sys.sequence(
+        sys.list([
+            𝕊2.bindings.Value,
+        ]),
+        sys.apply(
+            𝕊2.bindings.maybe,
+            sys.sequence(
+                𝕊2.bindings.COMMA,
+                𝕊2.bindings.Elements
+            )
+        )
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.String,
+    sys.sequence(
+        𝕊2.bindings.DOUBLE_QUOTE,
+        sys.apply(
+            𝕊2.bindings.zeroOrMore,
+            𝕊2.bindings.CHAR
+        ),
+        𝕊2.bindings.DOUBLE_QUOTE
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.CHAR,
     sys.selection(
-        𝕊4.bindings.i32,
         sys.sequence(
-            sys.concrete(sys.character("(", "(")),
-            𝕊4.bindings.expr,
-            sys.concrete(sys.character(")", ")"))
+            sys.apply(
+                𝕊2.bindings.not,
+                sys.selection(
+                    sys.concrete(sys.character("\u0000", "\u001f")),
+                    sys.concrete(sys.string("\\\"")),
+                    sys.concrete(sys.string("\\\\"))
+                )
+            ),
+            𝕊2.bindings.anyChar
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\\\\"")),
+            sys.abstract(sys.string("\""))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\\\\\")),
+            sys.abstract(sys.string("\\\\"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\/")),
+            sys.abstract(sys.string("/"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\b")),
+            sys.abstract(sys.string("\\b"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\f")),
+            sys.abstract(sys.string("\\f"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\n")),
+            sys.abstract(sys.string("\\n"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\r")),
+            sys.abstract(sys.string("\\r"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.string("\\\\t")),
+            sys.abstract(sys.string("\\t"))
+        )
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.LBRACE,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string("{")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.RBRACE,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string("}")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.LBRACKET,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string("[")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.RBRACKET,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string("]")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.COLON,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string(":")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.COMMA,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        sys.concrete(sys.string(",")),
+        𝕊2.bindings.WS
+    )
+);
+
+Object.assign(
+    𝕊2.bindings.DOUBLE_QUOTE,
+    sys.concrete(sys.string("\""))
+);
+
+Object.assign(
+    𝕊2.bindings.WS,
+    sys.apply(
+        𝕊2.bindings.zeroOrMore,
+        sys.selection(
+            sys.concrete(sys.string(" ")),
+            sys.concrete(sys.string("\\t")),
+            sys.concrete(sys.string("\\n")),
+            sys.concrete(sys.string("\\r"))
         )
     )
 );
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊4.bindings.start);
+module.exports = sys.createMainExports(𝕊2.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 

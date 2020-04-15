@@ -1,13 +1,16 @@
-function maybe(expr: Rule): Rule {
-    return {
-        kind: 'rule',
+const maybe: Lambda = {
+    kind: 'lambda',
+    apply(expr: Rule): Rule {
+        return {
+            kind: 'rule',
 
-        parse() {
-            return expr.parse() || epsilon.parse();
-        },
+            parse() {
+                return expr.parse() || epsilon.parse();
+            },
 
-        unparse() {
-            return expr.unparse() || epsilon.unparse();
-        },
-    };
-}
+            unparse() {
+                return expr.unparse() || epsilon.unparse();
+            },
+        };
+    },
+};
