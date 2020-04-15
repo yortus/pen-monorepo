@@ -4,7 +4,7 @@ function string(value: string): Rule {
 
         parse() {
             if (!INUL) {
-                assumeType<string>(IDOC);                           // <===== (1)
+                if (!isString(IDOC)) return false;
                 if (!matchesAt(IDOC, value, IMEM)) return false;
                 IMEM += value.length;
             }
@@ -14,7 +14,7 @@ function string(value: string): Rule {
 
         unparse() {
             if (!INUL) {
-                if (typeof IDOC !== 'string') return false;         // <===== (1)
+                if (!isString(IDOC)) return false;
                 if (!matchesAt(IDOC, value, IMEM)) return false;
                 IMEM += value.length;
             }

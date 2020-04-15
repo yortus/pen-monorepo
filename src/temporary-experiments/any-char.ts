@@ -4,7 +4,7 @@ const anyChar: Rule = {
     parse() {
         let c = '?';
         if (!INUL) {
-            assumeType<string>(IDOC);                           // <===== (1)
+            if (!isString(IDOC)) return false;
             if (IMEM < 0 || IMEM >= IDOC.length) return false;
             c = IDOC.charAt(IMEM);
             IMEM += 1;
@@ -16,7 +16,7 @@ const anyChar: Rule = {
     unparse() {
         let c = '?';
         if (!INUL) {
-            if (typeof IDOC !== 'string') return false;         // <===== (1)
+            if (!isString(IDOC)) return false;
             if (IMEM < 0 || IMEM >= IDOC.length) return false;
             c = IDOC.charAt(IMEM);
             IMEM += 1;

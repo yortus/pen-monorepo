@@ -4,7 +4,7 @@ const i32: Rule = {
     parse() {
         let stateₒ = sys.getState();
         let {IDOC, IMEM} = stateₒ;
-        sys.assumeType<string>(IDOC);
+        if (!sys.isString(IDOC)) return false;
 
         // Parse optional leading '-' sign...
         let isNegative = false;

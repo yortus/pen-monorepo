@@ -5,7 +5,7 @@ function character(min: string, max: string): Rule {
         parse() {
             let c = min;
             if (!INUL) {
-                assumeType<string>(IDOC);                           // <===== (1)
+                if (!isString(IDOC)) return false;
                 if (IMEM < 0 || IMEM >= IDOC.length) return false;
                 c = IDOC.charAt(IMEM);
                 if (c < min || c > max) return false;
@@ -18,7 +18,7 @@ function character(min: string, max: string): Rule {
         unparse() {
             let c = min;
             if (!INUL) {
-                if (typeof IDOC !== 'string') return false;         // <===== (1)
+                if (!isString(IDOC)) return false;
                 if (IMEM < 0 || IMEM >= IDOC.length) return false;
                 c = IDOC.charAt(IMEM);
                 if (c < min || c > max) return false;

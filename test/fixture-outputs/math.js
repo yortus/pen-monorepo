@@ -199,7 +199,8 @@ function initRuntimeSystem() {
             parse() {
                 let c = min;
                 if (!INUL) {
-                    assumeType(IDOC); // <===== (1)
+                    if (!isString(IDOC))
+                        return false;
                     if (IMEM < 0 || IMEM >= IDOC.length)
                         return false;
                     c = IDOC.charAt(IMEM);
@@ -213,8 +214,8 @@ function initRuntimeSystem() {
             unparse() {
                 let c = min;
                 if (!INUL) {
-                    if (typeof IDOC !== 'string')
-                        return false; // <===== (1)
+                    if (!isString(IDOC))
+                        return false;
                     if (IMEM < 0 || IMEM >= IDOC.length)
                         return false;
                     c = IDOC.charAt(IMEM);
@@ -480,7 +481,8 @@ function initRuntimeSystem() {
             kind: 'rule',
             parse() {
                 if (!INUL) {
-                    assumeType(IDOC); // <===== (1)
+                    if (!isString(IDOC))
+                        return false;
                     if (!matchesAt(IDOC, value, IMEM))
                         return false;
                     IMEM += value.length;
@@ -490,8 +492,8 @@ function initRuntimeSystem() {
             },
             unparse() {
                 if (!INUL) {
-                    if (typeof IDOC !== 'string')
-                        return false; // <===== (1)
+                    if (!isString(IDOC))
+                        return false;
                     if (!matchesAt(IDOC, value, IMEM))
                         return false;
                     IMEM += value.length;
@@ -517,15 +519,13 @@ function initRuntimeSystem() {
         IDOC = IDOCᐟ;
         IMEM = IMEMᐟ;
     }
-    function assumeType(_) {
-        // since its *assume*, body is a no-op
-    }
     // TODO: doc... helper...
     function assert(value) {
         if (!value)
             throw new Error(`Assertion failed`);
     }
     // TODO: doc... helper...
+    // TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling (but instrument first)
     function concat(a, b) {
         if (a === undefined)
             return b;
@@ -560,6 +560,11 @@ function initRuntimeSystem() {
         return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
     }
     // TODO: doc... helper...
+    // TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing (but instrument first)
+    function isString(value) {
+        return typeof value === 'string';
+    }
+    // TODO: doc... helper...
     function matchesAt(text, substr, position) {
         let lastPos = position + substr.length;
         if (lastPos > text.length)
@@ -586,10 +591,10 @@ function initRuntimeSystem() {
         string,
         // export helpers too so std can reference them
         assert,
-        assumeType,
         getState,
         isFullyConsumed,
         isPlainObject,
+        isString,
         matchesAt,
         setState,
     };
@@ -604,7 +609,8 @@ function initStandardLibrary() {
         parse() {
             let stateₒ = sys.getState();
             let { IDOC, IMEM } = stateₒ;
-            sys.assumeType(IDOC);
+            if (!sys.isString(IDOC))
+                return false;
             // Parse optional leading '-' sign...
             let isNegative = false;
             if (IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
@@ -694,7 +700,6 @@ function initStandardLibrary() {
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = sys.getState();
-                    sys.assumeType(stateₒ.IDOC);
                     let memos2 = parseMemos.get(stateₒ.IDOC);
                     if (memos2 === undefined) {
                         memos2 = new Map();

@@ -22,11 +22,6 @@ function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
 }
 
 
-function assumeType<T>(_: unknown): asserts _ is T {
-    // since its *assume*, body is a no-op
-}
-
-
 // TODO: doc... helper...
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
@@ -34,6 +29,7 @@ function assert(value: unknown): asserts value {
 
 
 // TODO: doc... helper...
+// TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling (but instrument first)
 function concat(a: unknown, b: unknown): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
@@ -66,6 +62,13 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 
 // TODO: doc... helper...
+// TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing (but instrument first)
+function isString(value: unknown): value is string {
+    return typeof value === 'string';
+}
+
+
+// TODO: doc... helper...
 function matchesAt(text: string, substr: string, position: number): boolean {
     let lastPos = position + substr.length;
     if (lastPos > text.length) return false;
@@ -93,10 +96,10 @@ return {
 
     // export helpers too so std can reference them
     assert,
-    assumeType,
     getState,
     isFullyConsumed,
     isPlainObject,
+    isString,
     matchesAt,
     setState,
 };

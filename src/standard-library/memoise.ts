@@ -5,7 +5,7 @@ const memoise: Lambda = {
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
         const parseMemos = new Map<
-            string,
+            unknown,
             Map<number, {
                 resolved: boolean,
                 isLeftRecursive: boolean,
@@ -31,7 +31,6 @@ const memoise: Lambda = {
             parse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = sys.getState();
-                sys.assumeType<string>(stateₒ.IDOC);
                 let memos2 = parseMemos.get(stateₒ.IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
