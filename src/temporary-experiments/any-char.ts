@@ -2,17 +2,26 @@ const anyChar: Rule = {
     kind: 'rule',
 
     parse() {
-        assumeType<string>(IDOC);
-        if (IMEM >= IDOC.length) return false;
-        IMEM += 1;
-        ODOC = IDOC.charAt(IMEM);
+        let c = '?';
+        if (!INUL) {
+            assumeType<string>(IDOC);                           // <===== (1)
+            if (IMEM < 0 || IMEM >= IDOC.length) return false;
+            c = IDOC.charAt(IMEM);
+            IMEM += 1;
+        }
+        ODOC = ONUL ? undefined : c;
         return true;
     },
 
     unparse() {
-        if (typeof IDOC !== 'string' || IMEM >= IDOC.length) return false;
-        IMEM += 1;
-        ODOC = IDOC.charAt(IMEM);
+        let c = '?';
+        if (!INUL) {
+            if (typeof IDOC !== 'string') return false;         // <===== (1)
+            if (IMEM < 0 || IMEM >= IDOC.length) return false;
+            c = IDOC.charAt(IMEM);
+            IMEM += 1;
+        }
+        ODOC = ONUL ? undefined : c;
         return true;
     },
 };
