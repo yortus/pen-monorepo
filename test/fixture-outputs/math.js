@@ -197,30 +197,32 @@ function initRuntimeSystem() {
         return {
             kind: 'rule',
             parse() {
-                if (INUL)
-                    return ODOC = ONUL ? undefined : min, true; // <===== (1a)
-                assumeType(IDOC); // <===== (2)
-                if (IMEM < 0 || IMEM >= IDOC.length)
-                    return false;
-                let c = IDOC.charAt(IMEM);
-                if (c < min || c > max)
-                    return false;
-                IMEM += 1;
-                ODOC = ONUL ? undefined : c; // <===== (1b)
+                let c = min;
+                if (!INUL) {
+                    assumeType(IDOC); // <===== (1)
+                    if (IMEM < 0 || IMEM >= IDOC.length)
+                        return false;
+                    c = IDOC.charAt(IMEM);
+                    if (c < min || c > max)
+                        return false;
+                    IMEM += 1;
+                }
+                ODOC = ONUL ? undefined : c; // <===== (2)
                 return true;
             },
             unparse() {
-                if (INUL)
-                    return ODOC = ONUL ? '' : min, true; // <===== (1a)
-                if (typeof IDOC !== 'string')
-                    return false; // <===== (2)
-                if (IMEM < 0 || IMEM >= IDOC.length)
-                    return false;
-                let c = IDOC.charAt(IMEM);
-                if (c < min || c > max)
-                    return false;
-                IMEM += 1;
-                ODOC = ONUL ? '' : c; // <===== (1b)
+                let c = min;
+                if (!INUL) {
+                    if (typeof IDOC !== 'string')
+                        return false; // <===== (1)
+                    if (IMEM < 0 || IMEM >= IDOC.length)
+                        return false;
+                    c = IDOC.charAt(IMEM);
+                    if (c < min || c > max)
+                        return false;
+                    IMEM += 1;
+                }
+                ODOC = ONUL ? '' : c; // <===== (2)
                 return true;
             },
         };
@@ -489,24 +491,24 @@ function initRuntimeSystem() {
         return {
             kind: 'rule',
             parse() {
-                if (INUL)
-                    return ODOC = ONUL ? undefined : value, true; // <===== (1a)
-                assumeType(IDOC); // <===== (2)
-                if (!matchesAt(IDOC, value, IMEM))
-                    return false;
-                IMEM += value.length;
-                ODOC = ONUL ? undefined : value; // <===== (1b)
+                if (!INUL) {
+                    assumeType(IDOC); // <===== (1)
+                    if (!matchesAt(IDOC, value, IMEM))
+                        return false;
+                    IMEM += value.length;
+                }
+                ODOC = ONUL ? undefined : value; // <===== (2)
                 return true;
             },
             unparse() {
-                if (INUL)
-                    return ODOC = ONUL ? '' : value, true; // <===== (1a)
-                if (typeof IDOC !== 'string')
-                    return false; // <===== (2)
-                if (!matchesAt(IDOC, value, IMEM))
-                    return false;
-                IMEM += value.length;
-                ODOC = ONUL ? '' : value; // <===== (1b)
+                if (!INUL) {
+                    if (typeof IDOC !== 'string')
+                        return false; // <===== (1)
+                    if (!matchesAt(IDOC, value, IMEM))
+                        return false;
+                    IMEM += value.length;
+                }
+                ODOC = ONUL ? '' : value; // <===== (2)
                 return true;
             },
         };

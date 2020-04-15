@@ -3,24 +3,23 @@ function string(value: string): Rule {
         kind: 'rule',
 
         parse() {
-            if (INUL) return ODOC = ONUL ? undefined : value, true;  // <===== (1a)
+            if (!INUL) {
+                assumeType<string>(IDOC);                           // <===== (1)
+                if (!matchesAt(IDOC, value, IMEM)) return false;
+                IMEM += value.length;
+            }
 
-            assumeType<string>(IDOC);                               // <===== (2)
-            if (!matchesAt(IDOC, value, IMEM)) return false;
-
-            IMEM += value.length;
-            ODOC = ONUL ? undefined : value;                         // <===== (1b)
+            ODOC = ONUL ? undefined : value;                        // <===== (2)
             return true;
         },
 
         unparse() {
-            if (INUL) return ODOC = ONUL ? '' : value, true;         // <===== (1a)
-
-            if (typeof IDOC !== 'string') return false;             // <===== (2)
-            if (!matchesAt(IDOC, value, IMEM)) return false;
-
-            IMEM += value.length;
-            ODOC = ONUL ? '' : value;                                // <===== (1b)
+            if (!INUL) {
+                if (typeof IDOC !== 'string') return false;         // <===== (1)
+                if (!matchesAt(IDOC, value, IMEM)) return false;
+                IMEM += value.length;
+            }
+            ODOC = ONUL ? '' : value;                               // <===== (2)
             return true;
         },
     };
