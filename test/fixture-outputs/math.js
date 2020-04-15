@@ -198,29 +198,29 @@ function initRuntimeSystem() {
             kind: 'rule',
             parse() {
                 if (INUL)
-                    return OUT = ONUL ? undefined : min, true; // <===== (1a)
-                assumeType(IBUF); // <===== (2)
-                if (IPTR < 0 || IPTR >= IBUF.length)
+                    return ODOC = ONUL ? undefined : min, true; // <===== (1a)
+                assumeType(IDOC); // <===== (2)
+                if (IMEM < 0 || IMEM >= IDOC.length)
                     return false;
-                let c = IBUF.charAt(IPTR);
+                let c = IDOC.charAt(IMEM);
                 if (c < min || c > max)
                     return false;
-                IPTR += 1;
-                OUT = ONUL ? undefined : c; // <===== (1b)
+                IMEM += 1;
+                ODOC = ONUL ? undefined : c; // <===== (1b)
                 return true;
             },
             unparse() {
                 if (INUL)
-                    return OUT = ONUL ? '' : min, true; // <===== (1a)
-                if (typeof IBUF !== 'string')
+                    return ODOC = ONUL ? '' : min, true; // <===== (1a)
+                if (typeof IDOC !== 'string')
                     return false; // <===== (2)
-                if (IPTR < 0 || IPTR >= IBUF.length)
+                if (IMEM < 0 || IMEM >= IDOC.length)
                     return false;
-                let c = IBUF.charAt(IPTR);
+                let c = IDOC.charAt(IMEM);
                 if (c < min || c > max)
                     return false;
-                IPTR += 1;
-                OUT = ONUL ? '' : c; // <===== (1b)
+                IMEM += 1;
+                ODOC = ONUL ? '' : c; // <===== (1b)
                 return true;
             },
         };
@@ -250,21 +250,21 @@ function initRuntimeSystem() {
                 setInState(text, 0);
                 if (!start.parse())
                     throw new Error('parse failed');
-                if (!isFullyConsumed(IBUF, IPTR))
+                if (!isFullyConsumed(IDOC, IMEM))
                     throw new Error(`parse didn't consume entire input`);
-                if (OUT === undefined)
+                if (ODOC === undefined)
                     throw new Error(`parse didn't return a value`);
-                return OUT;
+                return ODOC;
             },
             unparse: (node) => {
                 setInState(node, 0);
                 if (!start.unparse())
                     throw new Error('parse failed');
-                if (!isFullyConsumed(IBUF, IPTR))
+                if (!isFullyConsumed(IDOC, IMEM))
                     throw new Error(`unparse didn't consume entire input`);
-                if (OUT === undefined)
+                if (ODOC === undefined)
                     throw new Error(`parse didn't return a value`);
-                return OUT;
+                return ODOC;
             },
         };
     }
@@ -276,26 +276,26 @@ function initRuntimeSystem() {
                 let obj = {};
                 if (!name.parse())
                     return setState(stateₒ), false;
-                assert(typeof OUT === 'string');
-                let propName = OUT;
+                assert(typeof ODOC === 'string');
+                let propName = ODOC;
                 if (!value.parse())
                     return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                OUT = obj;
+                assert(ODOC !== undefined);
+                obj[propName] = ODOC;
+                ODOC = obj;
                 return true;
             },
             unparse() {
                 let stateₒ = getState();
                 let text = '';
-                if (!isPlainObject(IBUF))
+                if (!isPlainObject(IDOC))
                     return false;
-                let propNames = Object.keys(IBUF); // TODO: doc reliance on prop order and what this means
+                let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
                 let propCount = propNames.length;
                 assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
                 // TODO: temp testing...
-                const obj = IBUF;
-                let bitmask = IPTR;
+                const obj = IDOC;
+                let bitmask = IMEM;
                 // Find the first property key/value pair that matches this field name/value pair (if any)
                 for (let i = 0; i < propCount; ++i) {
                     let propName = propNames[i];
@@ -309,20 +309,20 @@ function initRuntimeSystem() {
                     setInState(propName, 0);
                     if (!name.unparse())
                         continue;
-                    if (IPTR !== propName.length)
+                    if (IMEM !== propName.length)
                         continue;
-                    text += OUT;
+                    text += ODOC;
                     // TODO: match field value
                     setInState(obj[propName], 0);
                     if (!value.unparse())
                         continue;
-                    if (!isFullyConsumed(obj[propName], IPTR))
+                    if (!isFullyConsumed(obj[propName], IMEM))
                         continue;
-                    text += OUT;
+                    text += ODOC;
                     // TODO: we matched both name and value - consume them from `node`
                     bitmask += propBit;
                     setInState(obj, bitmask);
-                    OUT = text;
+                    ODOC = text;
                     return true;
                 }
                 // If we get here, no match...
@@ -341,31 +341,31 @@ function initRuntimeSystem() {
                 for (let i = 0; i < elementsLength; ++i) {
                     if (!elements[i].parse())
                         return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    arr.push(OUT);
+                    assert(ODOC !== undefined);
+                    arr.push(ODOC);
                 }
-                OUT = arr;
+                ODOC = arr;
                 return true;
             },
             unparse() {
                 let stateₒ = getState();
                 let text = '';
-                if (!Array.isArray(IBUF))
+                if (!Array.isArray(IDOC))
                     return false;
-                if (IPTR < 0 || IPTR + elementsLength >= IBUF.length)
+                if (IMEM < 0 || IMEM + elementsLength >= IDOC.length)
                     return false;
-                const arr = IBUF;
-                const off = IPTR;
+                const arr = IDOC;
+                const off = IMEM;
                 for (let i = 0; i < elementsLength; ++i) {
                     setInState(arr[off + i], 0);
                     if (!elements[i].unparse())
                         return setState(stateₒ), false;
-                    if (!isFullyConsumed(IBUF, IPTR))
+                    if (!isFullyConsumed(IDOC, IMEM))
                         return setState(stateₒ), false;
-                    text += OUT;
+                    text += ODOC;
                 }
                 setInState(arr, off + elementsLength);
-                OUT = text;
+                ODOC = text;
                 return true;
             },
         };
@@ -380,23 +380,23 @@ function initRuntimeSystem() {
                     let propName = field.name;
                     if (!field.value.parse())
                         return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    obj[propName] = OUT;
+                    assert(ODOC !== undefined);
+                    obj[propName] = ODOC;
                 }
-                OUT = obj;
+                ODOC = obj;
                 return true;
             },
             unparse() {
                 let stateₒ = getState();
                 let text = '';
-                if (!isPlainObject(IBUF))
+                if (!isPlainObject(IDOC))
                     return false;
-                let propNames = Object.keys(IBUF); // TODO: doc reliance on prop order and what this means
+                let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
                 let propCount = propNames.length;
                 assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
                 // TODO: temp testing...
-                const obj = IBUF;
-                let bitmask = IPTR;
+                const obj = IDOC;
+                let bitmask = IMEM;
                 for (let field of fields) {
                     // Find the property key/value pair that matches this field name/value pair (if any)
                     let i = propNames.indexOf(field.name);
@@ -413,14 +413,14 @@ function initRuntimeSystem() {
                     setInState(obj[propName], 0);
                     if (!field.value.unparse())
                         return setState(stateₒ), false;
-                    if (!isFullyConsumed(obj[propName], IPTR))
+                    if (!isFullyConsumed(obj[propName], IMEM))
                         return setState(stateₒ), false;
-                    text += OUT;
+                    text += ODOC;
                     // TODO: we matched both name and value - consume them from `node`
                     bitmask += propBit;
                 }
                 setInState(obj, bitmask);
-                OUT = text;
+                ODOC = text;
                 return true;
             },
         };
@@ -456,18 +456,18 @@ function initRuntimeSystem() {
                     if (!expressions[i].parse())
                         return setState(stateₒ), false;
                     if (node === undefined)
-                        node = OUT;
+                        node = ODOC;
                     // TODO: generalise below cases to a helper function that can be extended for new formats / blob types
-                    else if (typeof node === 'string' && typeof OUT === 'string')
-                        node += OUT;
-                    else if (Array.isArray(node) && Array.isArray(OUT))
-                        node = [...node, ...OUT];
-                    else if (isPlainObject(node) && isPlainObject(OUT))
-                        node = Object.assign(Object.assign({}, node), OUT);
-                    else if (OUT !== undefined)
+                    else if (typeof node === 'string' && typeof ODOC === 'string')
+                        node += ODOC;
+                    else if (Array.isArray(node) && Array.isArray(ODOC))
+                        node = [...node, ...ODOC];
+                    else if (isPlainObject(node) && isPlainObject(ODOC))
+                        node = Object.assign(Object.assign({}, node), ODOC);
+                    else if (ODOC !== undefined)
                         throw new Error(`Internal error: invalid sequence`);
                 }
-                OUT = node;
+                ODOC = node;
                 return true;
             },
             unparse() {
@@ -477,10 +477,10 @@ function initRuntimeSystem() {
                     if (!expressions[i].unparse())
                         return setState(stateₒ), false;
                     // TODO: support more formats / blob types here, like for parse...
-                    assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
-                    text += OUT;
+                    assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
+                    text += ODOC;
                 }
-                OUT = text;
+                ODOC = text;
                 return true;
             },
         };
@@ -490,42 +490,42 @@ function initRuntimeSystem() {
             kind: 'rule',
             parse() {
                 if (INUL)
-                    return OUT = ONUL ? undefined : value, true; // <===== (1a)
-                assumeType(IBUF); // <===== (2)
-                if (!matchesAt(IBUF, value, IPTR))
+                    return ODOC = ONUL ? undefined : value, true; // <===== (1a)
+                assumeType(IDOC); // <===== (2)
+                if (!matchesAt(IDOC, value, IMEM))
                     return false;
-                IPTR += value.length;
-                OUT = ONUL ? undefined : value; // <===== (1b)
+                IMEM += value.length;
+                ODOC = ONUL ? undefined : value; // <===== (1b)
                 return true;
             },
             unparse() {
                 if (INUL)
-                    return OUT = ONUL ? '' : value, true; // <===== (1a)
-                if (typeof IBUF !== 'string')
+                    return ODOC = ONUL ? '' : value, true; // <===== (1a)
+                if (typeof IDOC !== 'string')
                     return false; // <===== (2)
-                if (!matchesAt(IBUF, value, IPTR))
+                if (!matchesAt(IDOC, value, IMEM))
                     return false;
-                IPTR += value.length;
-                OUT = ONUL ? '' : value; // <===== (1b)
+                IMEM += value.length;
+                ODOC = ONUL ? '' : value; // <===== (1b)
                 return true;
             },
         };
     }
     // TODO: new 'registers'... temp testing...
-    let IBUF; // TODO: --> IDOC
-    let IPTR; // TODO: --> IMEM
+    let IDOC;
+    let IMEM;
     let INUL = false;
-    let OUT; // TODO: --> ODOC
+    let ODOC;
     let ONUL = false;
     function getState() {
-        return { IBUF, IPTR, OUT };
+        return { IDOC, IMEM, ODOC };
     }
     function setState(value) {
-        ({ IBUF, IPTR, OUT } = value);
+        ({ IDOC, IMEM, ODOC } = value);
     }
-    function setInState(IBUFᐟ, IPTRᐟ) {
-        IBUF = IBUFᐟ;
-        IPTR = IPTRᐟ;
+    function setInState(IDOCᐟ, IMEMᐟ) {
+        IDOC = IDOCᐟ;
+        IMEM = IMEMᐟ;
     }
     function assumeType(_) {
         // since its *assume*, body is a no-op
@@ -599,20 +599,20 @@ function initStandardLibrary() {
         kind: 'rule',
         parse() {
             let stateₒ = sys.getState();
-            let { IBUF, IPTR } = stateₒ;
-            sys.assumeType(IBUF);
+            let { IDOC, IMEM } = stateₒ;
+            sys.assumeType(IDOC);
             // Parse optional leading '-' sign...
             let isNegative = false;
-            if (IPTR < IBUF.length && IBUF.charAt(IPTR) === '-') {
+            if (IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
                 isNegative = true;
-                IPTR += 1;
+                IMEM += 1;
             }
             // ...followed by one or more decimal digits. (NB: no exponents).
             let num = 0;
             let digits = 0;
-            while (IPTR < IBUF.length) {
+            while (IMEM < IDOC.length) {
                 // Read a digit
-                let c = IBUF.charCodeAt(IPTR);
+                let c = IDOC.charCodeAt(IMEM);
                 if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9)
                     break;
                 // Check for overflow
@@ -621,7 +621,7 @@ function initStandardLibrary() {
                 // Update parsed number
                 num *= 10;
                 num += (c - UNICODE_ZERO_DIGIT);
-                IPTR += 1;
+                IMEM += 1;
                 digits += 1;
             }
             // Check that we parsed at least one digit.
@@ -635,15 +635,15 @@ function initStandardLibrary() {
             if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0)
                 return sys.setState(stateₒ), false;
             // Success
-            sys.setState({ IBUF, IPTR, OUT: num });
+            sys.setState({ IDOC, IMEM, ODOC: num });
             return true;
         },
         unparse() {
             // TODO: ensure N is a 32-bit integer
-            let { IBUF, IPTR } = sys.getState();
-            if (typeof IBUF !== 'number' || IPTR !== 0)
+            let { IDOC, IMEM } = sys.getState();
+            if (typeof IDOC !== 'number' || IMEM !== 0)
                 return false;
-            let num = IBUF;
+            let num = IDOC;
             // tslint:disable-next-line: no-bitwise
             if ((num & 0xFFFFFFFF) !== num)
                 return false;
@@ -653,7 +653,7 @@ function initStandardLibrary() {
                 isNegative = true;
                 if (num === -2147483648) {
                     // Specially handle the one case where N = -N could overflow
-                    sys.setState({ IBUF, IPTR: 1, OUT: '-2147483648' });
+                    sys.setState({ IDOC, IMEM: 1, ODOC: '-2147483648' });
                     return true;
                 }
                 num = -num;
@@ -671,7 +671,7 @@ function initStandardLibrary() {
             // TODO: compute final string...
             if (isNegative)
                 digits.push('-');
-            sys.setState({ IBUF, IPTR: 1, OUT: digits.reverse().join('') });
+            sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join('') });
             return true;
         },
     };
@@ -690,13 +690,13 @@ function initStandardLibrary() {
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = sys.getState();
-                    sys.assumeType(stateₒ.IBUF);
-                    let memos2 = parseMemos.get(stateₒ.IBUF);
+                    sys.assumeType(stateₒ.IDOC);
+                    let memos2 = parseMemos.get(stateₒ.IDOC);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        parseMemos.set(stateₒ.IBUF, memos2);
+                        parseMemos.set(stateₒ.IDOC, memos2);
                     }
-                    let memo = memos2.get(stateₒ.IPTR);
+                    let memo = memos2.get(stateₒ.IMEM);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -704,7 +704,7 @@ function initStandardLibrary() {
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
                         memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                        memos2.set(stateₒ.IPTR, memo);
+                        memos2.set(stateₒ.IMEM, memo);
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
                         // been noted and aborted (see below).
@@ -732,7 +732,7 @@ function initStandardLibrary() {
                             if (!expr.parse())
                                 break;
                             let state = sys.getState();
-                            if (state.IPTR <= memo.stateᐟ.IPTR)
+                            if (state.IMEM <= memo.stateᐟ.IMEM)
                                 break;
                             memo.stateᐟ = state;
                         }
@@ -755,12 +755,12 @@ function initStandardLibrary() {
                 unparse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = sys.getState();
-                    let memos2 = unparseMemos.get(stateₒ.IBUF);
+                    let memos2 = unparseMemos.get(stateₒ.IDOC);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        unparseMemos.set(stateₒ.IBUF, memos2);
+                        unparseMemos.set(stateₒ.IDOC, memos2);
                     }
-                    let memo = memos2.get(stateₒ.IPTR);
+                    let memo = memos2.get(stateₒ.IMEM);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -768,7 +768,7 @@ function initStandardLibrary() {
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
                         memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                        memos2.set(stateₒ.IPTR, memo);
+                        memos2.set(stateₒ.IMEM, memo);
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
                         // been noted and aborted (see below).
@@ -799,9 +799,9 @@ function initStandardLibrary() {
                             if (!expr.parse())
                                 break;
                             let state = sys.getState();
-                            if (state.IPTR === memo.stateᐟ.IPTR)
+                            if (state.IMEM === memo.stateᐟ.IMEM)
                                 break;
-                            if (!sys.isFullyConsumed(state.IBUF, state.IPTR))
+                            if (!sys.isFullyConsumed(state.IDOC, state.IMEM))
                                 break;
                             memo.stateᐟ = state;
                         }

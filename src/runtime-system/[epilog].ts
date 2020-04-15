@@ -1,24 +1,24 @@
 // TODO: new 'registers'... temp testing...
-let IBUF: unknown;  // TODO: --> IDOC
-let IPTR: number;   // TODO: --> IMEM
+let IDOC: unknown;
+let IMEM: number;
 let INUL = false;
-let OUT: unknown;   // TODO: --> ODOC
+let ODOC: unknown;
 let ONUL = false;
 
 
-function getState(): {IBUF: unknown, IPTR: number, OUT: unknown} {
-    return {IBUF, IPTR, OUT};
+function getState(): {IDOC: unknown, IMEM: number, ODOC: unknown} {
+    return {IDOC, IMEM, ODOC};
 }
 
 
-function setState(value: {IBUF: unknown, IPTR: number, OUT: unknown}): void {
-    ({IBUF, IPTR, OUT} = value);
+function setState(value: {IDOC: unknown, IMEM: number, ODOC: unknown}): void {
+    ({IDOC, IMEM, ODOC} = value);
 }
 
 
-function setInState(IBUFᐟ: unknown, IPTRᐟ: number): void {
-    IBUF = IBUFᐟ;
-    IPTR = IPTRᐟ;
+function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
+    IDOC = IDOCᐟ;
+    IMEM = IMEMᐟ;
 }
 
 

@@ -3,23 +3,23 @@ const i32: Rule = {
 
     parse() {
         let stateₒ = sys.getState();
-        let {IBUF, IPTR} = stateₒ;
-        sys.assumeType<string>(IBUF);
+        let {IDOC, IMEM} = stateₒ;
+        sys.assumeType<string>(IDOC);
 
         // Parse optional leading '-' sign...
         let isNegative = false;
-        if (IPTR < IBUF.length && IBUF.charAt(IPTR) === '-') {
+        if (IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
             isNegative = true;
-            IPTR += 1;
+            IMEM += 1;
         }
 
         // ...followed by one or more decimal digits. (NB: no exponents).
         let num = 0;
         let digits = 0;
-        while (IPTR < IBUF.length) {
+        while (IMEM < IDOC.length) {
 
             // Read a digit
-            let c = IBUF.charCodeAt(IPTR);
+            let c = IDOC.charCodeAt(IMEM);
             if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9) break;
 
             // Check for overflow
@@ -28,7 +28,7 @@ const i32: Rule = {
             // Update parsed number
             num *= 10;
             num += (c - UNICODE_ZERO_DIGIT);
-            IPTR += 1;
+            IMEM += 1;
             digits += 1;
         }
 
@@ -43,15 +43,15 @@ const i32: Rule = {
         if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0) return sys.setState(stateₒ), false;
 
         // Success
-        sys.setState({IBUF, IPTR, OUT: num})
+        sys.setState({IDOC, IMEM, ODOC: num})
         return true;
     },
 
     unparse() {
         // TODO: ensure N is a 32-bit integer
-        let {IBUF, IPTR} = sys.getState();
-        if (typeof IBUF !== 'number' || IPTR !== 0) return false;
-        let num = IBUF;
+        let {IDOC, IMEM} = sys.getState();
+        if (typeof IDOC !== 'number' || IMEM !== 0) return false;
+        let num = IDOC;
         // tslint:disable-next-line: no-bitwise
         if ((num & 0xFFFFFFFF) !== num) return false;
 
@@ -61,7 +61,7 @@ const i32: Rule = {
             isNegative = true;
             if (num === -2147483648) {
                 // Specially handle the one case where N = -N could overflow
-                sys.setState({IBUF, IPTR: 1, OUT: '-2147483648'});
+                sys.setState({IDOC, IMEM: 1, ODOC: '-2147483648'});
                 return true;
             }
             num = -num as number;
@@ -79,7 +79,7 @@ const i32: Rule = {
 
         // TODO: compute final string...
         if (isNegative) digits.push('-');
-        sys.setState({IBUF, IPTR: 1, OUT: digits.reverse().join('')});
+        sys.setState({IDOC, IMEM: 1, ODOC: digits.reverse().join('')});
         return true;
     },
 };

@@ -2,17 +2,17 @@ const anyChar: Rule = {
     kind: 'rule',
 
     parse() {
-        assumeType<string>(IBUF);
-        if (IPTR >= IBUF.length) return false;
-        IPTR += 1;
-        OUT = IBUF.charAt(IPTR);
+        assumeType<string>(IDOC);
+        if (IMEM >= IDOC.length) return false;
+        IMEM += 1;
+        ODOC = IDOC.charAt(IMEM);
         return true;
     },
 
     unparse() {
-        if (typeof IBUF !== 'string' || IPTR >= IBUF.length) return false;
-        IPTR += 1;
-        OUT = IBUF.charAt(IPTR);
+        if (typeof IDOC !== 'string' || IMEM >= IDOC.length) return false;
+        IMEM += 1;
+        ODOC = IDOC.charAt(IMEM);
         return true;
     },
 };

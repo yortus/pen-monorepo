@@ -8,25 +8,25 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
             for (let field of fields) {
                 let propName = field.name;
                 if (!field.value.parse()) return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
+                assert(ODOC !== undefined);
+                obj[propName] = ODOC;
             }
-            OUT = obj;
+            ODOC = obj;
             return true;
         },
 
         unparse() {
             let stateₒ = getState();
             let text = '';
-            if (!isPlainObject(IBUF)) return false;
+            if (!isPlainObject(IDOC)) return false;
 
-            let propNames = Object.keys(IBUF); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = IBUF;
-            let bitmask = IPTR;
+            const obj = IDOC;
+            let bitmask = IMEM;
 
             for (let field of fields) {
 
@@ -44,14 +44,14 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!field.value.unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IPTR)) return setState(stateₒ), false;
-                text += OUT;
+                if (!isFullyConsumed(obj[propName], IMEM)) return setState(stateₒ), false;
+                text += ODOC;
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
             }
             setInState(obj, bitmask);
-            OUT = text;
+            ODOC = text;
             return true;
         },
     };

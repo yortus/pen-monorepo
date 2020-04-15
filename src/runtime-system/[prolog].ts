@@ -29,9 +29,9 @@ interface Rule {
 declare const sys: {
     assert: (value: unknown) => asserts value;
     assumeType: <T>(value: unknown) => asserts value is T;
-    getState: () => {IBUF: unknown, IPTR: number, OUT: unknown};
+    getState: () => {IDOC: unknown, IMEM: number, ODOC: unknown};
     isFullyConsumed: (node: unknown, pos: number) => boolean;
     isPlainObject: (value: unknown) => value is Record<string, unknown>;
     matchesAt: (text: string, substr: string, position: number) => boolean;
-    setState: (value: {IBUF: unknown, IPTR: number, OUT: unknown}) => void;
+    setState: (value: {IDOC: unknown, IMEM: number, ODOC: unknown}) => void;
 };

@@ -10,7 +10,7 @@ const memoise: Lambda = {
                 resolved: boolean,
                 isLeftRecursive: boolean,
                 result: boolean;
-                stateᐟ: {IBUF: unknown, IPTR: number, OUT: unknown/*, OPTR: number*/};
+                stateᐟ: {IDOC: unknown, IMEM: number, ODOC: unknown/*, OPTR: number*/};
             }>
         >();
 
@@ -21,7 +21,7 @@ const memoise: Lambda = {
                 resolved: boolean,
                 isLeftRecursive: boolean,
                 result: boolean;
-                stateᐟ: {IBUF: unknown, IPTR: number, OUT: unknown/*, OPTR: number*/};
+                stateᐟ: {IDOC: unknown, IMEM: number, ODOC: unknown/*, OPTR: number*/};
             }>
         >();
 
@@ -31,13 +31,13 @@ const memoise: Lambda = {
             parse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = sys.getState();
-                sys.assumeType<string>(stateₒ.IBUF);
-                let memos2 = parseMemos.get(stateₒ.IBUF);
+                sys.assumeType<string>(stateₒ.IDOC);
+                let memos2 = parseMemos.get(stateₒ.IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    parseMemos.set(stateₒ.IBUF, memos2);
+                    parseMemos.set(stateₒ.IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IPTR);
+                let memo = memos2.get(stateₒ.IMEM);
                 if (!memo) {
                     // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                     // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -45,7 +45,7 @@ const memoise: Lambda = {
                     // memo. If a future application finds the memo still unresolved, then we know we have encountered
                     // left-recursion.
                     memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                    memos2.set(stateₒ.IPTR, memo);
+                    memos2.set(stateₒ.IMEM, memo);
 
                     // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                     // At this point, any left-recursive paths encountered during application are guaranteed to have
@@ -75,7 +75,7 @@ const memoise: Lambda = {
                         sys.setState(stateₒ);
                         if (!expr.parse()) break;
                         let state = sys.getState();
-                        if (state.IPTR <= memo.stateᐟ.IPTR) break;
+                        if (state.IMEM <= memo.stateᐟ.IMEM) break;
                         memo.stateᐟ = state;
                     }
                 }
@@ -99,12 +99,12 @@ const memoise: Lambda = {
             unparse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = sys.getState();
-                let memos2 = unparseMemos.get(stateₒ.IBUF);
+                let memos2 = unparseMemos.get(stateₒ.IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    unparseMemos.set(stateₒ.IBUF, memos2);
+                    unparseMemos.set(stateₒ.IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IPTR);
+                let memo = memos2.get(stateₒ.IMEM);
                 if (!memo) {
                     // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                     // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -112,7 +112,7 @@ const memoise: Lambda = {
                     // memo. If a future application finds the memo still unresolved, then we know we have encountered
                     // left-recursion.
                     memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                    memos2.set(stateₒ.IPTR, memo);
+                    memos2.set(stateₒ.IMEM, memo);
 
                     // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                     // At this point, any left-recursive paths encountered during application are guaranteed to have
@@ -146,8 +146,8 @@ const memoise: Lambda = {
                         // some node --> some different non-empty node (assert: should never happen!)
                         if (!expr.parse()) break;
                         let state = sys.getState();
-                        if (state.IPTR === memo.stateᐟ.IPTR) break;
-                        if (!sys.isFullyConsumed(state.IBUF, state.IPTR)) break;
+                        if (state.IMEM === memo.stateᐟ.IMEM) break;
+                        if (!sys.isFullyConsumed(state.IDOC, state.IMEM)) break;
                         memo.stateᐟ = state;
                     }
                 }

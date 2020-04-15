@@ -3,28 +3,28 @@ function character(min: string, max: string): Rule {
         kind: 'rule',
 
         parse() {
-            if (INUL) return OUT = ONUL ? undefined : min, true;    // <===== (1a)
+            if (INUL) return ODOC = ONUL ? undefined : min, true;    // <===== (1a)
 
-            assumeType<string>(IBUF);                               // <===== (2)
-            if (IPTR < 0 || IPTR >= IBUF.length) return false;
-            let c = IBUF.charAt(IPTR);
+            assumeType<string>(IDOC);                               // <===== (2)
+            if (IMEM < 0 || IMEM >= IDOC.length) return false;
+            let c = IDOC.charAt(IMEM);
             if (c < min || c > max) return false;
 
-            IPTR += 1;
-            OUT = ONUL ? undefined : c;                             // <===== (1b)
+            IMEM += 1;
+            ODOC = ONUL ? undefined : c;                             // <===== (1b)
             return true;
         },
 
         unparse() {
-            if (INUL) return OUT = ONUL ? '' : min, true;           // <===== (1a)
+            if (INUL) return ODOC = ONUL ? '' : min, true;           // <===== (1a)
 
-            if (typeof IBUF !== 'string') return false;             // <===== (2)
-            if (IPTR < 0 || IPTR >= IBUF.length) return false;
-            let c = IBUF.charAt(IPTR);
+            if (typeof IDOC !== 'string') return false;             // <===== (2)
+            if (IMEM < 0 || IMEM >= IDOC.length) return false;
+            let c = IDOC.charAt(IMEM);
             if (c < min || c > max) return false;
 
-            IPTR += 1;
-            OUT = ONUL ? '' : c;                                    // <===== (1b)
+            IMEM += 1;
+            ODOC = ONUL ? '' : c;                                    // <===== (1b)
             return true;
         },
     };

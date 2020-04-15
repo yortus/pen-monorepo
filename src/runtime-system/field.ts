@@ -7,29 +7,29 @@ function field(name: Rule, value: Rule): Rule {
             let obj = {} as Record<string, unknown>;
 
             if (!name.parse()) return setState(stateₒ), false;
-            assert(typeof OUT === 'string');
-            let propName = OUT;
+            assert(typeof ODOC === 'string');
+            let propName = ODOC;
 
             if (!value.parse()) return setState(stateₒ), false;
-            assert(OUT !== undefined);
-            obj[propName] = OUT;
+            assert(ODOC !== undefined);
+            obj[propName] = ODOC;
 
-            OUT = obj;
+            ODOC = obj;
             return true;
         },
 
         unparse() {
             let stateₒ = getState();
             let text = '';
-            if (!isPlainObject(IBUF)) return false;
+            if (!isPlainObject(IDOC)) return false;
 
-            let propNames = Object.keys(IBUF); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = IBUF;
-            let bitmask = IPTR;
+            const obj = IDOC;
+            let bitmask = IMEM;
 
             // Find the first property key/value pair that matches this field name/value pair (if any)
             for (let i = 0; i < propCount; ++i) {
@@ -44,19 +44,19 @@ function field(name: Rule, value: Rule): Rule {
                 // TODO: match field name
                 setInState(propName, 0);
                 if (!name.unparse()) continue;
-                if (IPTR !== propName.length) continue;
-                text += OUT;
+                if (IMEM !== propName.length) continue;
+                text += ODOC;
 
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!value.unparse()) continue;
-                if (!isFullyConsumed(obj[propName], IPTR)) continue;
-                text += OUT;
+                if (!isFullyConsumed(obj[propName], IMEM)) continue;
+                text += ODOC;
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
                 setInState(obj, bitmask);
-                OUT = text;
+                ODOC = text;
                 return true;
             }
 

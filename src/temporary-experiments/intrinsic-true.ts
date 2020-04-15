@@ -2,14 +2,14 @@ const intrinsicTrue: Rule = {
     kind: 'rule',
 
     parse() {
-        OUT = true;
+        ODOC = true;
         return true;
     },
 
     unparse() {
-        if (IBUF !== true || IPTR !== 0) return false;
-        IPTR = 1;
-        OUT = '';
+        if (IDOC !== true || IMEM !== 0) return false;
+        IMEM = 1;
+        ODOC = '';
         return true;
     },
 };

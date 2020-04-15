@@ -8,28 +8,28 @@ function list(elements: Rule[]): Rule {
             let arr = [] as unknown[];
             for (let i = 0; i < elementsLength; ++i) {
                 if (!elements[i].parse()) return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
+                assert(ODOC !== undefined);
+                arr.push(ODOC);
             }
-            OUT = arr;
+            ODOC = arr;
             return true;
         },
 
         unparse() {
             let stateₒ = getState();
             let text = '';
-            if (!Array.isArray(IBUF)) return false;
-            if (IPTR < 0 || IPTR + elementsLength >= IBUF.length) return false;
-            const arr = IBUF;
-            const off = IPTR;
+            if (!Array.isArray(IDOC)) return false;
+            if (IMEM < 0 || IMEM + elementsLength >= IDOC.length) return false;
+            const arr = IDOC;
+            const off = IMEM;
             for (let i = 0; i < elementsLength; ++i) {
                 setInState(arr[off + i], 0);
                 if (!elements[i].unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(IBUF, IPTR)) return setState(stateₒ), false;
-                text += OUT;
+                if (!isFullyConsumed(IDOC, IMEM)) return setState(stateₒ), false;
+                text += ODOC;
             }
             setInState(arr, off + elementsLength);
-            OUT = text;
+            ODOC = text;
             return true;
         },
     };
