@@ -19,4 +19,4 @@ term = memoise(mul | div | factor)
 mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Record and Field exprs
 div = {type: 'div'   lhs: term   rhs: `/` factor}
 
-factor = i32 | `(` expr `)`
+factor = i32 | `(-(` expr `)-)` // test char ranges

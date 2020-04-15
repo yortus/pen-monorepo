@@ -162,11 +162,10 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'CharacterExpression':
-            const charModifier = expr.concrete ? (expr.abstract ? '' : `, 'concrete'`) : `, 'abstract'`;
+            if (expr.abstract || expr.concrete) emit.text(`sys.${expr.abstract ? 'abstract' : 'concrete'}(`);
             emit.text('sys.character(');
-            emit.text(JSON.stringify(expr.minValue)).text(', ');
-            emit.text(JSON.stringify(expr.maxValue));
-            emit.text(`${charModifier})`);
+            emit.text(JSON.stringify(expr.minValue)).text(', ').text(JSON.stringify(expr.maxValue)).text(')');
+            if (expr.abstract || expr.concrete) emit.text(')');
             return;
 
         case 'FieldExpression':
@@ -236,8 +235,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'StringExpression':
-            const strModifier = expr.concrete ? (expr.abstract ? '' : `, 'concrete'`) : `, 'abstract'`;
-            emit.text(`sys.string(${JSON.stringify(expr.value)}${strModifier})`);
+            if (expr.abstract || expr.concrete) emit.text(`sys.${expr.abstract ? 'abstract' : 'concrete'}(`);
+            emit.text(`sys.string(${JSON.stringify(expr.value)})`);
+            if (expr.abstract || expr.concrete) emit.text(')');
             return;
 
         default:

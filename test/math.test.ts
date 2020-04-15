@@ -12,6 +12,14 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
 
     const tests = [
         {
+            text: '1+2',
+            ast: {
+                type: 'add',
+                lhs: 1,
+                rhs: 2,
+            },
+        },
+        {
             text: '1+(-1-22)*333',
             ast: {
                 type: 'add',

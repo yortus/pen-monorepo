@@ -1,66 +1,30 @@
-function character(min: string, max: string, modifier?: 'concrete' | 'abstract'): Rule {
-    if (modifier === 'abstract') {
-        return {
-            kind: 'rule',
-            parse() {
-                // NB: nothing consumed
-                OUT = min;
-                return true;
-            },
-            unparse() {
-                if (typeof IBUF !== 'string') return false;
-                if (IPTR < 0 || IPTR >= IBUF.length) return false;
-                let c = IBUF.charAt(IPTR);
-                if (c < min || c > max) return false;
-
-                IPTR += 1;
-                OUT = '';
-                return true;
-            },
-        };
-    }
-
-    if (modifier === 'concrete') {
-        return {
-            kind: 'rule',
-            parse() {
-                assumeType<string>(IBUF);
-                if (IPTR < 0 || IPTR >= IBUF.length) return false;
-                let c = IBUF.charAt(IPTR);
-                if (c < min || c > max) return false;
-
-                IPTR += 1;
-                OUT = undefined;
-                return true;
-            },
-            unparse() {
-                // NB: nothing consumed
-                OUT = min;
-                return true;
-            },
-        };
-    }
-
+function character(min: string, max: string): Rule {
     return {
         kind: 'rule',
+
         parse() {
-            assumeType<string>(IBUF);
+            if (INUL) return OUT = ONUL ? undefined : min, true;    // <===== (1a)
+
+            assumeType<string>(IBUF);                               // <===== (2)
             if (IPTR < 0 || IPTR >= IBUF.length) return false;
             let c = IBUF.charAt(IPTR);
             if (c < min || c > max) return false;
 
             IPTR += 1;
-            OUT = c;
+            OUT = ONUL ? undefined : c;                             // <===== (1b)
             return true;
-    },
+        },
+
         unparse() {
-            if (typeof IBUF !== 'string') return false;
+            if (INUL) return OUT = ONUL ? '' : min, true;           // <===== (1a)
+
+            if (typeof IBUF !== 'string') return false;             // <===== (2)
             if (IPTR < 0 || IPTR >= IBUF.length) return false;
             let c = IBUF.charAt(IPTR);
             if (c < min || c > max) return false;
 
             IPTR += 1;
-            OUT = c;
+            OUT = ONUL ? '' : c;                                    // <===== (1b)
             return true;
         },
     };

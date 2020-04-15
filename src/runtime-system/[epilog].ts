@@ -1,7 +1,9 @@
 // TODO: new 'registers'... temp testing...
-let IBUF: unknown;
-let IPTR: number;
-let OUT: unknown;
+let IBUF: unknown;  // TODO: --> IDOC
+let IPTR: number;   // TODO: --> IMEM
+let INUL = false;
+let OUT: unknown;   // TODO: --> ODOC
+let ONUL = false;
 
 
 function getState(): {IBUF: unknown, IPTR: number, OUT: unknown} {
@@ -65,8 +67,10 @@ function matchesAt(text: string, substr: string, position: number): boolean {
 
 // @ts-ignore
 return {
+    abstract,
     apply,
     bindingLookup,
+    concrete,
     createMainExports,
     character,
     field,

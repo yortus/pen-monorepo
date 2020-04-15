@@ -17,15 +17,23 @@ const 𝕊2 = {
     },
 };
 
+// -------------------- aliases --------------------
+
+𝕊2.bindings.start = 𝕊2.bindings.expr;
+
 // -------------------- V:\oss\penc\test\fixture-inputs\math.pen --------------------
 
 {
     let rhs = std;
-    𝕊2.bindings.memoise = sys.bindingLookup(rhs, 'memoise');
-    𝕊2.bindings.i32 = sys.bindingLookup(rhs, 'i32');
+    Object.assign(
+        𝕊2.bindings.memoise,
+        sys.bindingLookup(rhs, 'memoise')
+    );
+    Object.assign(
+        𝕊2.bindings.i32,
+        sys.bindingLookup(rhs, 'i32')
+    );
 }
-
-𝕊2.bindings.start = 𝕊2.bindings.expr; // alias
 
 Object.assign(
     𝕊2.bindings.expr,
@@ -44,7 +52,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.string("add", 'abstract'),
+            value: sys.abstract(sys.string("add")),
         },
         {
             name: 'lhs',
@@ -53,7 +61,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.string("+", 'concrete'),
+                sys.concrete(sys.string("+")),
                 𝕊2.bindings.term
             ),
         },
@@ -65,7 +73,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.string("sub", 'abstract'),
+            value: sys.abstract(sys.string("sub")),
         },
         {
             name: 'lhs',
@@ -74,7 +82,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.string("-", 'concrete'),
+                sys.concrete(sys.string("-")),
                 𝕊2.bindings.term
             ),
         },
@@ -97,8 +105,8 @@ Object.assign(
     𝕊2.bindings.mul,
     sys.sequence(
         sys.field(
-            sys.string("type", 'abstract'),
-            sys.string("mul", 'abstract')
+            sys.abstract(sys.string("type")),
+            sys.abstract(sys.string("mul"))
         ),
         sys.record([
             {
@@ -107,9 +115,9 @@ Object.assign(
             },
         ]),
         sys.field(
-            sys.string("rhs", 'abstract'),
+            sys.abstract(sys.string("rhs")),
             sys.sequence(
-                sys.string("*", 'concrete'),
+                sys.concrete(sys.string("*")),
                 𝕊2.bindings.factor
             )
         )
@@ -121,7 +129,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.string("div", 'abstract'),
+            value: sys.abstract(sys.string("div")),
         },
         {
             name: 'lhs',
@@ -130,7 +138,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.string("/", 'concrete'),
+                sys.concrete(sys.string("/")),
                 𝕊2.bindings.factor
             ),
         },
@@ -142,9 +150,9 @@ Object.assign(
     sys.selection(
         𝕊2.bindings.i32,
         sys.sequence(
-            sys.string("(", 'concrete'),
+            sys.concrete(sys.character("(", "(")),
             𝕊2.bindings.expr,
-            sys.string(")", 'concrete')
+            sys.concrete(sys.character(")", ")"))
         )
     )
 );
@@ -156,6 +164,25 @@ module.exports = sys.createMainExports(𝕊2.bindings.start);
 // -------------------- RUNTIME SYSTEM --------------------
 
 function initRuntimeSystem() {
+    function abstract(expr) {
+        return {
+            kind: 'rule',
+            parse() {
+                let INULₒ = INUL;
+                INUL = true;
+                let result = expr.parse();
+                INUL = INULₒ;
+                return result;
+            },
+            unparse() {
+                let ONULₒ = ONUL;
+                ONUL = true;
+                let result = expr.unparse();
+                ONUL = ONULₒ;
+                return result;
+            },
+        };
+    }
     function apply(lambda, arg) {
         assert(lambda.kind === 'lambda');
         return lambda.apply(arg);
@@ -166,74 +193,54 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    function character(min, max, modifier) {
-        if (modifier === 'abstract') {
-            return {
-                kind: 'rule',
-                parse() {
-                    // NB: nothing consumed
-                    OUT = min;
-                    return true;
-                },
-                unparse() {
-                    if (typeof IBUF !== 'string')
-                        return false;
-                    if (IPTR < 0 || IPTR >= IBUF.length)
-                        return false;
-                    let c = IBUF.charAt(IPTR);
-                    if (c < min || c > max)
-                        return false;
-                    IPTR += 1;
-                    OUT = '';
-                    return true;
-                },
-            };
-        }
-        if (modifier === 'concrete') {
-            return {
-                kind: 'rule',
-                parse() {
-                    assumeType(IBUF);
-                    if (IPTR < 0 || IPTR >= IBUF.length)
-                        return false;
-                    let c = IBUF.charAt(IPTR);
-                    if (c < min || c > max)
-                        return false;
-                    IPTR += 1;
-                    OUT = undefined;
-                    return true;
-                },
-                unparse() {
-                    // NB: nothing consumed
-                    OUT = min;
-                    return true;
-                },
-            };
-        }
+    function character(min, max) {
         return {
             kind: 'rule',
             parse() {
-                assumeType(IBUF);
+                if (INUL)
+                    return OUT = ONUL ? undefined : min, true; // <===== (1a)
+                assumeType(IBUF); // <===== (2)
                 if (IPTR < 0 || IPTR >= IBUF.length)
                     return false;
                 let c = IBUF.charAt(IPTR);
                 if (c < min || c > max)
                     return false;
                 IPTR += 1;
-                OUT = c;
+                OUT = ONUL ? undefined : c; // <===== (1b)
                 return true;
             },
             unparse() {
+                if (INUL)
+                    return OUT = ONUL ? '' : min, true; // <===== (1a)
                 if (typeof IBUF !== 'string')
-                    return false;
+                    return false; // <===== (2)
                 if (IPTR < 0 || IPTR >= IBUF.length)
                     return false;
                 let c = IBUF.charAt(IPTR);
                 if (c < min || c > max)
                     return false;
                 IPTR += 1;
-                OUT = c;
+                OUT = ONUL ? '' : c; // <===== (1b)
                 return true;
+            },
+        };
+    }
+    function concrete(expr) {
+        return {
+            kind: 'rule',
+            parse() {
+                let ONULₒ = ONUL;
+                ONUL = true;
+                let result = expr.parse();
+                ONUL = ONULₒ;
+                return result;
+            },
+            unparse() {
+                let INULₒ = INUL;
+                INUL = true;
+                let result = expr.unparse();
+                INUL = INULₒ;
+                return result;
             },
         };
     }
@@ -478,69 +485,38 @@ function initRuntimeSystem() {
             },
         };
     }
-    function string(value, modifier) {
-        if (modifier === 'abstract') {
-            return {
-                kind: 'rule',
-                parse() {
-                    // NB: nothing consumed
-                    OUT = value;
-                    return true;
-                },
-                unparse() {
-                    if (typeof IBUF !== 'string')
-                        return false;
-                    if (!matchesAt(IBUF, value, IPTR))
-                        return false;
-                    IPTR += value.length;
-                    OUT = '';
-                    return true;
-                },
-            };
-        }
-        if (modifier === 'concrete') {
-            return {
-                kind: 'rule',
-                parse() {
-                    assumeType(IBUF);
-                    if (!matchesAt(IBUF, value, IPTR))
-                        return false;
-                    IPTR += value.length;
-                    OUT = undefined;
-                    return true;
-                },
-                unparse() {
-                    // NB: nothing consumed
-                    OUT = value;
-                    return true;
-                },
-            };
-        }
+    function string(value) {
         return {
             kind: 'rule',
             parse() {
-                assumeType(IBUF);
+                if (INUL)
+                    return OUT = ONUL ? undefined : value, true; // <===== (1a)
+                assumeType(IBUF); // <===== (2)
                 if (!matchesAt(IBUF, value, IPTR))
                     return false;
                 IPTR += value.length;
-                OUT = value;
+                OUT = ONUL ? undefined : value; // <===== (1b)
                 return true;
             },
             unparse() {
+                if (INUL)
+                    return OUT = ONUL ? '' : value, true; // <===== (1a)
                 if (typeof IBUF !== 'string')
-                    return false;
+                    return false; // <===== (2)
                 if (!matchesAt(IBUF, value, IPTR))
                     return false;
                 IPTR += value.length;
-                OUT = value;
+                OUT = ONUL ? '' : value; // <===== (1b)
                 return true;
             },
         };
     }
     // TODO: new 'registers'... temp testing...
-    let IBUF;
-    let IPTR;
-    let OUT;
+    let IBUF; // TODO: --> IDOC
+    let IPTR; // TODO: --> IMEM
+    let INUL = false;
+    let OUT; // TODO: --> ODOC
+    let ONUL = false;
     function getState() {
         return { IBUF, IPTR, OUT };
     }
@@ -592,8 +568,10 @@ function initRuntimeSystem() {
     }
     // @ts-ignore
     return {
+        abstract,
         apply,
         bindingLookup,
+        concrete,
         createMainExports,
         character,
         field,
@@ -712,7 +690,13 @@ function initStandardLibrary() {
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = sys.getState();
-                    let memo = parseMemos.get(stateₒ.IPTR);
+                    sys.assumeType(stateₒ.IBUF);
+                    let memos2 = parseMemos.get(stateₒ.IBUF);
+                    if (memos2 === undefined) {
+                        memos2 = new Map();
+                        parseMemos.set(stateₒ.IBUF, memos2);
+                    }
+                    let memo = memos2.get(stateₒ.IPTR);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -720,7 +704,7 @@ function initStandardLibrary() {
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
                         memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                        parseMemos.set(stateₒ.IPTR, memo);
+                        memos2.set(stateₒ.IPTR, memo);
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
                         // been noted and aborted (see below).
