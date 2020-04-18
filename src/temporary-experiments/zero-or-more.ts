@@ -34,8 +34,8 @@ const zeroOrMore: Lambda = {
                     if (state.IMEM === stateₒ.IMEM) break;
 
                     // TODO: support more formats / blob types here, like for parse...
-                    sys.assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                    text = sys.concat(text, ODOC);
+                    sys.assert(typeof state.ODOC === 'string'); // just for now... remove after addressing above TODO
+                    text = sys.concat(text, state.ODOC);
                 }
 
                 sys.setOutState(text);

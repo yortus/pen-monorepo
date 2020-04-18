@@ -38,11 +38,9 @@ const 𝕊2 = {
 
 // -------------------- aliases --------------------
 
-𝕊2.bindings.start = 𝕊2.bindings.String;
-
 𝕊2.bindings.Number = 𝕊2.bindings.i32;
 
-// -------------------- V:\oss\penc\test\fixture-inputs\json\index.pen --------------------
+// -------------------- v:\projects\oss\penc\test\fixture-inputs\json.pen --------------------
 
 {
     let rhs = std;
@@ -87,6 +85,15 @@ const 𝕊2 = {
         sys.bindingLookup(rhs, 'zeroOrMore')
     );
 }
+
+Object.assign(
+    𝕊2.bindings.start,
+    sys.sequence(
+        𝕊2.bindings.WS,
+        𝕊2.bindings.Value,
+        𝕊2.bindings.WS
+    )
+);
 
 Object.assign(
     𝕊2.bindings.Value,
@@ -206,9 +213,9 @@ Object.assign(
             sys.apply(
                 𝕊2.bindings.not,
                 sys.selection(
-                    sys.concrete(sys.character("\u0000", "\u001f")),
-                    sys.concrete(sys.string("\"")),
-                    sys.concrete(sys.string("\\"))
+                    sys.character("\u0000", "\u001f"),
+                    sys.string("\""),
+                    sys.string("\\")
                 )
             ),
             𝕊2.bindings.anyChar
@@ -356,6 +363,31 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
+    function charRange(min, max) {
+        return {
+            kind: 'production',
+            parse(text, pos, result) {
+                if (pos >= text.length)
+                    return false;
+                let c = text.charAt(pos);
+                if (c < min || c > max)
+                    return false;
+                result.node = c;
+                result.posᐟ = pos + 1;
+                return true;
+            },
+            unparse(node, pos, result) {
+                if (typeof node !== 'string' || pos >= node.length)
+                    return false;
+                let c = node.charAt(pos);
+                if (c < min || c > max)
+                    return false;
+                result.text = c;
+                result.posᐟ = pos + 1;
+                return true;
+            },
+        };
+    }
     function character(min, max) {
         return {
             kind: 'rule',
@@ -497,6 +529,23 @@ function initRuntimeSystem() {
             },
         };
     }
+    function label(value) {
+        return {
+            kind: 'production',
+            parse(_, pos, result) {
+                result.node = value;
+                result.posᐟ = pos;
+                return true;
+            },
+            unparse(node, pos, result) {
+                if (typeof node !== 'string' || !matchesAt(node, value, pos))
+                    return false;
+                result.text = '';
+                result.posᐟ = pos + value.length;
+                return true;
+            },
+        };
+    }
     function list(elements) {
         const elementsLength = elements.length;
         return {
@@ -518,7 +567,7 @@ function initRuntimeSystem() {
                 let text;
                 if (!Array.isArray(IDOC))
                     return false;
-                if (IMEM < 0 || IMEM + elementsLength >= IDOC.length)
+                if (IMEM < 0 || IMEM + elementsLength > IDOC.length)
                     return false;
                 const arr = IDOC;
                 const off = IMEM;
@@ -590,6 +639,26 @@ function initRuntimeSystem() {
                 return true;
             },
         };
+    }
+    // TODO: investigate optimisations... Don't need to retain indirection in many cases. Or will V8 optimisations suffice?
+    function reference(target) {
+        // TODO: hacky and repetitive, fix this. Prob: if its a forward ref, we don't know target type yet.
+        if (target.kind === 'production') {
+            return {
+                kind: 'production',
+                parse: (text, pos, result) => target.parse(text, pos, result),
+                unparse: (node, pos, result) => target.unparse(node, pos, result),
+            };
+        }
+        else if (target.kind === 'function') {
+            return {
+                kind: 'function',
+                apply: (arg) => target.apply(arg),
+            };
+        }
+        else {
+            throw new Error('Not implemented'); // TODO: ...
+        }
     }
     function selection(...expressions) {
         const arity = expressions.length;
@@ -1185,8 +1254,8 @@ function initTemporaryExperiments() {
                         if (state.IMEM === stateₒ.IMEM)
                             break;
                         // TODO: support more formats / blob types here, like for parse...
-                        sys.assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                        text = sys.concat(text, ODOC);
+                        sys.assert(typeof state.ODOC === 'string'); // just for now... remove after addressing above TODO
+                        text = sys.concat(text, state.ODOC);
                     }
                     sys.setOutState(text);
                     return true;

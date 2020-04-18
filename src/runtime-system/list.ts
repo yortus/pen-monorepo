@@ -19,7 +19,7 @@ function list(elements: Rule[]): Rule {
             let stateₒ = getState();
             let text: unknown;
             if (!Array.isArray(IDOC)) return false;
-            if (IMEM < 0 || IMEM + elementsLength >= IDOC.length) return false;
+            if (IMEM < 0 || IMEM + elementsLength > IDOC.length) return false;
             const arr = IDOC;
             const off = IMEM;
             for (let i = 0; i < elementsLength; ++i) {

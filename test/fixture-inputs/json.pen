@@ -47,7 +47,7 @@ String = DOUBLE_QUOTE   zeroOrMore(CHAR)   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
-    |   not(`\x00-\x1f`   |   `\"`   |   `\\`)   anyChar        // any char except control char, " or \
+    |   not("\x00-\x1f"   |   "\""   |   "\\")   anyChar        // any char except control char, " or \
     |   `\\\"`   '"'                                            // quotation mark
     |   `\\\\`   '\\'                                           // reverse solidus
     |   `\\/`   '/'                                             // solidus
