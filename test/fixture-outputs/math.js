@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊4 = {
+const 𝕊6 = {
     kind: 'module',
     bindings: {
         memoise: {},
@@ -20,36 +20,36 @@ const 𝕊4 = {
 
 // -------------------- aliases --------------------
 
-𝕊4.bindings.start = 𝕊4.bindings.expr;
+𝕊6.bindings.start = 𝕊6.bindings.expr;
 
-// -------------------- v:\projects\oss\penc\test\fixture-inputs\math.pen --------------------
+// -------------------- V:\projects\oss\penc\test\fixture-inputs\math.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊4.bindings.memoise,
+        𝕊6.bindings.memoise,
         sys.bindingLookup(rhs, 'memoise')
     );
     Object.assign(
-        𝕊4.bindings.i32,
+        𝕊6.bindings.i32,
         sys.bindingLookup(rhs, 'i32')
     );
 }
 
 Object.assign(
-    𝕊4.bindings.expr,
+    𝕊6.bindings.expr,
     sys.apply(
-        𝕊4.bindings.memoise,
+        𝕊6.bindings.memoise,
         sys.selection(
-            𝕊4.bindings.add,
-            𝕊4.bindings.sub,
-            𝕊4.bindings.term
+            𝕊6.bindings.add,
+            𝕊6.bindings.sub,
+            𝕊6.bindings.term
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.add,
+    𝕊6.bindings.add,
     sys.record([
         {
             name: 'type',
@@ -57,20 +57,20 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊4.bindings.expr,
+            value: 𝕊6.bindings.expr,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.string("+")),
-                𝕊4.bindings.term
+                𝕊6.bindings.term
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊4.bindings.sub,
+    𝕊6.bindings.sub,
     sys.record([
         {
             name: 'type',
@@ -78,32 +78,32 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊4.bindings.expr,
+            value: 𝕊6.bindings.expr,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.string("-")),
-                𝕊4.bindings.term
+                𝕊6.bindings.term
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊4.bindings.term,
+    𝕊6.bindings.term,
     sys.apply(
-        𝕊4.bindings.memoise,
+        𝕊6.bindings.memoise,
         sys.selection(
-            𝕊4.bindings.mul,
-            𝕊4.bindings.div,
-            𝕊4.bindings.factor
+            𝕊6.bindings.mul,
+            𝕊6.bindings.div,
+            𝕊6.bindings.factor
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.mul,
+    𝕊6.bindings.mul,
     sys.sequence(
         sys.field(
             sys.abstract(sys.string("type")),
@@ -112,21 +112,21 @@ Object.assign(
         sys.record([
             {
                 name: 'lhs',
-                value: 𝕊4.bindings.term,
+                value: 𝕊6.bindings.term,
             },
         ]),
         sys.field(
             sys.abstract(sys.string("rhs")),
             sys.sequence(
                 sys.concrete(sys.string("*")),
-                𝕊4.bindings.factor
+                𝕊6.bindings.factor
             )
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.div,
+    𝕊6.bindings.div,
     sys.record([
         {
             name: 'type',
@@ -134,25 +134,25 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊4.bindings.term,
+            value: 𝕊6.bindings.term,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.string("/")),
-                𝕊4.bindings.factor
+                𝕊6.bindings.factor
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊4.bindings.factor,
+    𝕊6.bindings.factor,
     sys.selection(
-        𝕊4.bindings.i32,
+        𝕊6.bindings.i32,
         sys.sequence(
             sys.concrete(sys.character("(", "(")),
-            𝕊4.bindings.expr,
+            𝕊6.bindings.expr,
             sys.concrete(sys.character(")", ")"))
         )
     )
@@ -160,7 +160,7 @@ Object.assign(
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊4.bindings.start);
+module.exports = sys.createMainExports(𝕊6.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 

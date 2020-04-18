@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊2 = {
+const 𝕊4 = {
     kind: 'module',
     bindings: {
         i32: {},
@@ -38,14 +38,14 @@ const 𝕊2 = {
 
 // -------------------- aliases --------------------
 
-𝕊2.bindings.Number = 𝕊2.bindings.i32;
+𝕊4.bindings.Number = 𝕊4.bindings.i32;
 
-// -------------------- v:\projects\oss\penc\test\fixture-inputs\json.pen --------------------
+// -------------------- V:\projects\oss\penc\test\fixture-inputs\json.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊2.bindings.i32,
+        𝕊4.bindings.i32,
         sys.bindingLookup(rhs, 'i32')
     );
 }
@@ -53,15 +53,15 @@ const 𝕊2 = {
 {
     let rhs = experiments;
     Object.assign(
-        𝕊2.bindings.intrinsicFalse,
+        𝕊4.bindings.intrinsicFalse,
         sys.bindingLookup(rhs, 'intrinsicFalse')
     );
     Object.assign(
-        𝕊2.bindings.intrinsicNull,
+        𝕊4.bindings.intrinsicNull,
         sys.bindingLookup(rhs, 'intrinsicNull')
     );
     Object.assign(
-        𝕊2.bindings.intrinsicTrue,
+        𝕊4.bindings.intrinsicTrue,
         sys.bindingLookup(rhs, 'intrinsicTrue')
     );
 }
@@ -69,156 +69,156 @@ const 𝕊2 = {
 {
     let rhs = experiments;
     Object.assign(
-        𝕊2.bindings.anyChar,
+        𝕊4.bindings.anyChar,
         sys.bindingLookup(rhs, 'anyChar')
     );
     Object.assign(
-        𝕊2.bindings.maybe,
+        𝕊4.bindings.maybe,
         sys.bindingLookup(rhs, 'maybe')
     );
     Object.assign(
-        𝕊2.bindings.not,
+        𝕊4.bindings.not,
         sys.bindingLookup(rhs, 'not')
     );
     Object.assign(
-        𝕊2.bindings.zeroOrMore,
+        𝕊4.bindings.zeroOrMore,
         sys.bindingLookup(rhs, 'zeroOrMore')
     );
 }
 
 Object.assign(
-    𝕊2.bindings.start,
+    𝕊4.bindings.start,
     sys.sequence(
-        𝕊2.bindings.WS,
-        𝕊2.bindings.Value,
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS,
+        𝕊4.bindings.Value,
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Value,
+    𝕊4.bindings.Value,
     sys.selection(
-        𝕊2.bindings.False,
-        𝕊2.bindings.Null,
-        𝕊2.bindings.True,
-        𝕊2.bindings.Object,
-        𝕊2.bindings.Array,
-        𝕊2.bindings.Number,
-        𝕊2.bindings.String
+        𝕊4.bindings.False,
+        𝕊4.bindings.Null,
+        𝕊4.bindings.True,
+        𝕊4.bindings.Object,
+        𝕊4.bindings.Array,
+        𝕊4.bindings.Number,
+        𝕊4.bindings.String
     )
 );
 
 Object.assign(
-    𝕊2.bindings.False,
+    𝕊4.bindings.False,
     sys.sequence(
         sys.concrete(sys.string("false")),
-        𝕊2.bindings.intrinsicFalse
+        𝕊4.bindings.intrinsicFalse
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Null,
+    𝕊4.bindings.Null,
     sys.sequence(
         sys.concrete(sys.string("null")),
-        𝕊2.bindings.intrinsicNull
+        𝕊4.bindings.intrinsicNull
     )
 );
 
 Object.assign(
-    𝕊2.bindings.True,
+    𝕊4.bindings.True,
     sys.sequence(
         sys.concrete(sys.string("true")),
-        𝕊2.bindings.intrinsicTrue
+        𝕊4.bindings.intrinsicTrue
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Object,
+    𝕊4.bindings.Object,
     sys.sequence(
-        𝕊2.bindings.LBRACE,
+        𝕊4.bindings.LBRACE,
         sys.selection(
-            𝕊2.bindings.Properties,
+            𝕊4.bindings.Properties,
             sys.record([
             ])
         ),
-        𝕊2.bindings.RBRACE
+        𝕊4.bindings.RBRACE
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Properties,
+    𝕊4.bindings.Properties,
     sys.sequence(
         sys.field(
-            𝕊2.bindings.String,
+            𝕊4.bindings.String,
             sys.sequence(
-                𝕊2.bindings.COLON,
-                𝕊2.bindings.Value
+                𝕊4.bindings.COLON,
+                𝕊4.bindings.Value
             )
         ),
         sys.apply(
-            𝕊2.bindings.maybe,
+            𝕊4.bindings.maybe,
             sys.sequence(
-                𝕊2.bindings.COMMA,
-                𝕊2.bindings.Properties
+                𝕊4.bindings.COMMA,
+                𝕊4.bindings.Properties
             )
         )
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Array,
+    𝕊4.bindings.Array,
     sys.sequence(
-        𝕊2.bindings.LBRACKET,
+        𝕊4.bindings.LBRACKET,
         sys.selection(
-            𝕊2.bindings.Elements,
+            𝕊4.bindings.Elements,
             sys.list([
             ])
         ),
-        𝕊2.bindings.RBRACKET
+        𝕊4.bindings.RBRACKET
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Elements,
+    𝕊4.bindings.Elements,
     sys.sequence(
         sys.list([
-            𝕊2.bindings.Value,
+            𝕊4.bindings.Value,
         ]),
         sys.apply(
-            𝕊2.bindings.maybe,
+            𝕊4.bindings.maybe,
             sys.sequence(
-                𝕊2.bindings.COMMA,
-                𝕊2.bindings.Elements
+                𝕊4.bindings.COMMA,
+                𝕊4.bindings.Elements
             )
         )
     )
 );
 
 Object.assign(
-    𝕊2.bindings.String,
+    𝕊4.bindings.String,
     sys.sequence(
-        𝕊2.bindings.DOUBLE_QUOTE,
+        𝕊4.bindings.DOUBLE_QUOTE,
         sys.apply(
-            𝕊2.bindings.zeroOrMore,
-            𝕊2.bindings.CHAR
+            𝕊4.bindings.zeroOrMore,
+            𝕊4.bindings.CHAR
         ),
-        𝕊2.bindings.DOUBLE_QUOTE
+        𝕊4.bindings.DOUBLE_QUOTE
     )
 );
 
 Object.assign(
-    𝕊2.bindings.CHAR,
+    𝕊4.bindings.CHAR,
     sys.selection(
         sys.sequence(
             sys.apply(
-                𝕊2.bindings.not,
+                𝕊4.bindings.not,
                 sys.selection(
                     sys.character("\u0000", "\u001f"),
                     sys.string("\""),
                     sys.string("\\")
                 )
             ),
-            𝕊2.bindings.anyChar
+            𝕊4.bindings.anyChar
         ),
         sys.sequence(
             sys.concrete(sys.string("\\\"")),
@@ -256,68 +256,68 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊2.bindings.LBRACE,
+    𝕊4.bindings.LBRACE,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string("{")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.RBRACE,
+    𝕊4.bindings.RBRACE,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string("}")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.LBRACKET,
+    𝕊4.bindings.LBRACKET,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string("[")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.RBRACKET,
+    𝕊4.bindings.RBRACKET,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string("]")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.COLON,
+    𝕊4.bindings.COLON,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string(":")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.COMMA,
+    𝕊4.bindings.COMMA,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊4.bindings.WS,
         sys.concrete(sys.string(",")),
-        𝕊2.bindings.WS
+        𝕊4.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.DOUBLE_QUOTE,
+    𝕊4.bindings.DOUBLE_QUOTE,
     sys.concrete(sys.string("\""))
 );
 
 Object.assign(
-    𝕊2.bindings.WS,
+    𝕊4.bindings.WS,
     sys.apply(
-        𝕊2.bindings.zeroOrMore,
+        𝕊4.bindings.zeroOrMore,
         sys.selection(
             sys.concrete(sys.string(" ")),
             sys.concrete(sys.string("\t")),
@@ -329,7 +329,7 @@ Object.assign(
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊2.bindings.start);
+module.exports = sys.createMainExports(𝕊4.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 
