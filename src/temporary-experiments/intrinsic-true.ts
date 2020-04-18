@@ -2,16 +2,18 @@ const intrinsicTrue: Rule = {
     kind: 'rule',
 
     parse() {
-        ODOC = ONUL ? undefined : true;
+        let {ONUL} = sys.getState();
+        sys.setOutState(ONUL ? undefined : true);
         return true;
     },
 
     unparse() {
+        let {IDOC, IMEM, INUL, ONUL} = sys.getState();
         if (!INUL) {
             if (IDOC !== true || IMEM !== 0) return false;
             IMEM = 1;
         }
-        ODOC = undefined;
+        sys.setState({IDOC, IMEM, ODOC: undefined, INUL, ONUL});
         return true;
     },
 };

@@ -29,10 +29,12 @@ interface Rule {
 declare const sys: {
     assert: (value: unknown) => asserts value;
     concat: (a: unknown, b: unknown) => unknown;
-    getState: () => {IDOC: unknown, IMEM: number, ODOC: unknown};
+    getState: () => Registers;
     isFullyConsumed: (node: unknown, pos: number) => boolean;
     isPlainObject: (value: unknown) => value is Record<string, unknown>;
     isString: (value: unknown) => value is string;
     matchesAt: (text: string, substr: string, position: number) => boolean;
-    setState: (value: {IDOC: unknown, IMEM: number, ODOC: unknown}) => void;
+    setInState: (IDOCᐟ: unknown, IMEMᐟ: number) => void;
+    setOutState: (ODOCᐟ: unknown) => void;
+    setState: (value: Registers) => void;
 };

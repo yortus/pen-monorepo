@@ -12,11 +12,12 @@ const zeroOrMore: Lambda = {
 
                     // TODO: check if any input was consumed...
                     // if not, stop iterating, since otherwise we may loop forever
-                    if (IMEM === stateₒ.IMEM) break;
+                    let state = sys.getState();
+                    if (state.IMEM === stateₒ.IMEM) break;
 
-                    node = sys.concat(node, ODOC);
+                    node = sys.concat(node, state.ODOC);
                 }
-                ODOC = node;
+                sys.setOutState(node);
                 return true;
             },
 
@@ -29,14 +30,15 @@ const zeroOrMore: Lambda = {
                     // TODO: check if any input was consumed...
                     // if not, stop iterating, since otherwise we may loop forever
                     // TODO: any other checks needed? review...
-                    if (IMEM === stateₒ.IMEM) break;
+                    let state = sys.getState();
+                    if (state.IMEM === stateₒ.IMEM) break;
 
                     // TODO: support more formats / blob types here, like for parse...
                     sys.assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
                     text = sys.concat(text, ODOC);
                 }
 
-                ODOC = text;
+                sys.setOutState(text);
                 return true;
             },
         };

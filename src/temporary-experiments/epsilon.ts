@@ -2,12 +2,12 @@ const epsilon: Rule = {
     kind: 'rule',
 
     parse() {
-        ODOC = undefined;
+        sys.setOutState(undefined);
         return true;
     },
 
     unparse() {
-        ODOC = undefined;
+        sys.setOutState(undefined);
         return true;
     },
 };

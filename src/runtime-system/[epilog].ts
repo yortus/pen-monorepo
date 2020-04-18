@@ -1,24 +1,32 @@
 // TODO: new 'registers'... temp testing...
 let IDOC: unknown;
 let IMEM: number;
-let INUL = false;
 let ODOC: unknown;
+let INUL = false;
 let ONUL = false;
 
 
-function getState(): {IDOC: unknown, IMEM: number, ODOC: unknown} {
-    return {IDOC, IMEM, ODOC};
+interface Registers {IDOC: unknown; IMEM: number; ODOC: unknown; INUL: boolean; ONUL: boolean; }
+
+
+function getState(): Registers {
+    return {IDOC, IMEM, ODOC, INUL, ONUL};
 }
 
 
-function setState(value: {IDOC: unknown, IMEM: number, ODOC: unknown}): void {
-    ({IDOC, IMEM, ODOC} = value);
+function setState(value: Registers): void {
+    ({IDOC, IMEM, ODOC, INUL, ONUL} = value);
 }
 
 
 function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
     IDOC = IDOCᐟ;
     IMEM = IMEMᐟ;
+}
+
+
+function setOutState(ODOCᐟ: unknown): void {
+    ODOC = ODOCᐟ;
 }
 
 
@@ -96,10 +104,13 @@ return {
 
     // export helpers too so std can reference them
     assert,
+    concat,
     getState,
     isFullyConsumed,
     isPlainObject,
     isString,
     matchesAt,
+    setInState,
+    setOutState,
     setState,
 };

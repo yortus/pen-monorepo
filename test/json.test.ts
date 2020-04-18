@@ -11,9 +11,24 @@ const outputPath = path.join(__dirname, './fixture-outputs', fixtureName + '.js'
 describe(`Compiling and executing the 'json.pen' program`, async () => {
 
     const tests = [
+        // Working:
+        // {
+        //     text: '{}',
+        //     ast: {},
+        // },
+        // {
+        //     text: '123',
+        //     ast: 123,
+        // },
+
+        // Not working:
+        // {
+        //     text: '"abc"',
+        //     ast: 'abc',
+        // },
         {
-            text: '{}',
-            ast: '???',
+            text: '[]',
+            ast: [],
         },
     ];
 

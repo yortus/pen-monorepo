@@ -1,9 +1,12 @@
+// TODO: habdle abstract/concrete...
+
+
 const i32: Rule = {
     kind: 'rule',
 
     parse() {
         let stateₒ = sys.getState();
-        let {IDOC, IMEM} = stateₒ;
+        let {IDOC, IMEM, INUL, ONUL} = stateₒ;
         if (!sys.isString(IDOC)) return false;
 
         // Parse optional leading '-' sign...
@@ -43,13 +46,13 @@ const i32: Rule = {
         if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0) return sys.setState(stateₒ), false;
 
         // Success
-        sys.setState({IDOC, IMEM, ODOC: num})
+        sys.setState({IDOC, IMEM, ODOC: num, INUL, ONUL});
         return true;
     },
 
     unparse() {
         // TODO: ensure N is a 32-bit integer
-        let {IDOC, IMEM} = sys.getState();
+        let {IDOC, IMEM, INUL, ONUL} = sys.getState();
         if (typeof IDOC !== 'number' || IMEM !== 0) return false;
         let num = IDOC;
         // tslint:disable-next-line: no-bitwise
@@ -61,7 +64,7 @@ const i32: Rule = {
             isNegative = true;
             if (num === -2147483648) {
                 // Specially handle the one case where N = -N could overflow
-                sys.setState({IDOC, IMEM: 1, ODOC: '-2147483648'});
+                sys.setState({IDOC, IMEM: 1, ODOC: '-2147483648', INUL, ONUL});
                 return true;
             }
             num = -num as number;
@@ -79,7 +82,7 @@ const i32: Rule = {
 
         // TODO: compute final string...
         if (isNegative) digits.push('-');
-        sys.setState({IDOC, IMEM: 1, ODOC: digits.reverse().join('')});
+        sys.setState({IDOC, IMEM: 1, ODOC: digits.reverse().join(''), INUL, ONUL});
         return true;
     },
 };

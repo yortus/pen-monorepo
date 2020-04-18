@@ -167,14 +167,14 @@ CharacterExpression
     { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
 
 StringExpression
-    = !CharacterExpression   "'"   (!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: false, abstract: true}; }
+    = !CharacterExpression   "'"   chars:(!"'"   CHARACTER)*   "'"
+    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
-    / !CharacterExpression   '"'   (!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: false, abstract: false}; }
+    / !CharacterExpression   '"'   chars:(!'"'   CHARACTER)*   '"'
+    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
-    / !CharacterExpression   "`"   (!"`"   CHARACTER)*   "`"
-    { return {kind: 'StringExpression', value: text().slice(1, -1), concrete: true, abstract: false}; }
+    / !CharacterExpression   "`"   chars:(!"`"   CHARACTER)*   "`"
+    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
 ReferenceExpression
     = name:IDENTIFIER

@@ -2,6 +2,7 @@ const anyChar: Rule = {
     kind: 'rule',
 
     parse() {
+        let {IDOC, IMEM, INUL, ONUL} = sys.getState();
         let c = '?';
         if (!INUL) {
             if (!sys.isString(IDOC)) return false;
@@ -9,11 +10,13 @@ const anyChar: Rule = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        ODOC = ONUL ? undefined : c;
+        let ODOC = ONUL ? undefined : c;
+        sys.setState({IDOC, IMEM, ODOC, INUL, ONUL});
         return true;
     },
 
     unparse() {
+        let {IDOC, IMEM, INUL, ONUL} = sys.getState();
         let c = '?';
         if (!INUL) {
             if (!sys.isString(IDOC)) return false;
@@ -21,7 +24,8 @@ const anyChar: Rule = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        ODOC = ONUL ? undefined : c;
+        let ODOC = ONUL ? undefined : c;
+        sys.setState({IDOC, IMEM, ODOC, INUL, ONUL});
         return true;
     },
 };

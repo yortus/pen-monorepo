@@ -10,7 +10,7 @@ const memoise: Lambda = {
                 resolved: boolean,
                 isLeftRecursive: boolean,
                 result: boolean;
-                stateᐟ: {IDOC: unknown, IMEM: number, ODOC: unknown/*, OPTR: number*/};
+                stateᐟ: Registers;
             }>
         >();
 
@@ -21,7 +21,7 @@ const memoise: Lambda = {
                 resolved: boolean,
                 isLeftRecursive: boolean,
                 result: boolean;
-                stateᐟ: {IDOC: unknown, IMEM: number, ODOC: unknown/*, OPTR: number*/};
+                stateᐟ: Registers;
             }>
         >();
 

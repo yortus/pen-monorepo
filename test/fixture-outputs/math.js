@@ -507,18 +507,21 @@ function initRuntimeSystem() {
     // TODO: new 'registers'... temp testing...
     let IDOC;
     let IMEM;
-    let INUL = false;
     let ODOC;
+    let INUL = false;
     let ONUL = false;
     function getState() {
-        return { IDOC, IMEM, ODOC };
+        return { IDOC, IMEM, ODOC, INUL, ONUL };
     }
     function setState(value) {
-        ({ IDOC, IMEM, ODOC } = value);
+        ({ IDOC, IMEM, ODOC, INUL, ONUL } = value);
     }
     function setInState(IDOCᐟ, IMEMᐟ) {
         IDOC = IDOCᐟ;
         IMEM = IMEMᐟ;
+    }
+    function setOutState(ODOCᐟ) {
+        ODOC = ODOCᐟ;
     }
     // TODO: doc... helper...
     function assert(value) {
@@ -592,11 +595,14 @@ function initRuntimeSystem() {
         string,
         // export helpers too so std can reference them
         assert,
+        concat,
         getState,
         isFullyConsumed,
         isPlainObject,
         isString,
         matchesAt,
+        setInState,
+        setOutState,
         setState,
     };
 }
@@ -605,11 +611,12 @@ function initRuntimeSystem() {
 // -------------------- STANDARD LIBRARY --------------------
 
 function initStandardLibrary() {
+    // TODO: habdle abstract/concrete...
     const i32 = {
         kind: 'rule',
         parse() {
             let stateₒ = sys.getState();
-            let { IDOC, IMEM } = stateₒ;
+            let { IDOC, IMEM, INUL, ONUL } = stateₒ;
             if (!sys.isString(IDOC))
                 return false;
             // Parse optional leading '-' sign...
@@ -646,12 +653,12 @@ function initStandardLibrary() {
             if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0)
                 return sys.setState(stateₒ), false;
             // Success
-            sys.setState({ IDOC, IMEM, ODOC: num });
+            sys.setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
             return true;
         },
         unparse() {
             // TODO: ensure N is a 32-bit integer
-            let { IDOC, IMEM } = sys.getState();
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             if (typeof IDOC !== 'number' || IMEM !== 0)
                 return false;
             let num = IDOC;
@@ -664,7 +671,7 @@ function initStandardLibrary() {
                 isNegative = true;
                 if (num === -2147483648) {
                     // Specially handle the one case where N = -N could overflow
-                    sys.setState({ IDOC, IMEM: 1, ODOC: '-2147483648' });
+                    sys.setState({ IDOC, IMEM: 1, ODOC: '-2147483648', INUL, ONUL });
                     return true;
                 }
                 num = -num;
@@ -682,7 +689,7 @@ function initStandardLibrary() {
             // TODO: compute final string...
             if (isNegative)
                 digits.push('-');
-            sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join('') });
+            sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join(''), INUL, ONUL });
             return true;
         },
     };
@@ -851,6 +858,7 @@ function initTemporaryExperiments() {
     const anyChar = {
         kind: 'rule',
         parse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             let c = '?';
             if (!INUL) {
                 if (!sys.isString(IDOC))
@@ -860,10 +868,12 @@ function initTemporaryExperiments() {
                 c = IDOC.charAt(IMEM);
                 IMEM += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            let ODOC = ONUL ? undefined : c;
+            sys.setState({ IDOC, IMEM, ODOC, INUL, ONUL });
             return true;
         },
         unparse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             let c = '?';
             if (!INUL) {
                 if (!sys.isString(IDOC))
@@ -873,66 +883,73 @@ function initTemporaryExperiments() {
                 c = IDOC.charAt(IMEM);
                 IMEM += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            let ODOC = ONUL ? undefined : c;
+            sys.setState({ IDOC, IMEM, ODOC, INUL, ONUL });
             return true;
         },
     };
     const epsilon = {
         kind: 'rule',
         parse() {
-            ODOC = undefined;
+            sys.setOutState(undefined);
             return true;
         },
         unparse() {
-            ODOC = undefined;
+            sys.setOutState(undefined);
             return true;
         },
     };
     const intrinsicFalse = {
         kind: 'rule',
         parse() {
-            ODOC = ONUL ? undefined : false;
+            let { ONUL } = sys.getState();
+            sys.setOutState(ONUL ? undefined : false);
             return true;
         },
         unparse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             if (!INUL) {
                 if (IDOC !== false || IMEM !== 0)
                     return false;
                 IMEM = 1;
             }
-            ODOC = undefined;
+            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
             return true;
         },
     };
     const intrinsicNull = {
         kind: 'rule',
         parse() {
-            ODOC = ONUL ? undefined : null;
+            let { ONUL } = sys.getState();
+            sys.setOutState(ONUL ? undefined : null);
             return true;
         },
         unparse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             if (!INUL) {
                 if (IDOC !== null || IMEM !== 0)
                     return false;
                 IMEM = 1;
             }
-            ODOC = undefined;
+            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
             return true;
         },
     };
     const intrinsicTrue = {
         kind: 'rule',
         parse() {
-            ODOC = ONUL ? undefined : true;
+            let { ONUL } = sys.getState();
+            sys.setOutState(ONUL ? undefined : true);
             return true;
         },
         unparse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             if (!INUL) {
                 if (IDOC !== true || IMEM !== 0)
                     return false;
                 IMEM = 1;
             }
-            ODOC = undefined;
+            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
             return true;
         },
     };
@@ -960,14 +977,14 @@ function initTemporaryExperiments() {
                     if (!expr.parse())
                         return epsilon.parse();
                     sys.setState(stateₒ);
-                    return true;
+                    return false;
                 },
                 unparse() {
                     let stateₒ = sys.getState();
                     if (!expr.unparse())
                         return epsilon.unparse();
                     sys.setState(stateₒ);
-                    return true;
+                    return false;
                 },
             };
         },
@@ -985,11 +1002,12 @@ function initTemporaryExperiments() {
                             break;
                         // TODO: check if any input was consumed...
                         // if not, stop iterating, since otherwise we may loop forever
-                        if (IMEM === stateₒ.IMEM)
+                        let state = sys.getState();
+                        if (state.IMEM === stateₒ.IMEM)
                             break;
-                        node = sys.concat(node, ODOC);
+                        node = sys.concat(node, state.ODOC);
                     }
-                    ODOC = node;
+                    sys.setOutState(node);
                     return true;
                 },
                 unparse() {
@@ -1001,13 +1019,14 @@ function initTemporaryExperiments() {
                         // TODO: check if any input was consumed...
                         // if not, stop iterating, since otherwise we may loop forever
                         // TODO: any other checks needed? review...
-                        if (IMEM === stateₒ.IMEM)
+                        let state = sys.getState();
+                        if (state.IMEM === stateₒ.IMEM)
                             break;
                         // TODO: support more formats / blob types here, like for parse...
                         sys.assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
                         text = sys.concat(text, ODOC);
                     }
-                    ODOC = text;
+                    sys.setOutState(text);
                     return true;
                 },
             };
