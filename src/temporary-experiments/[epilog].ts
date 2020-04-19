@@ -4,9 +4,6 @@ return {
     bindings: {
         anyChar,
         epsilon,
-        intrinsicFalse,
-        intrinsicNull,
-        intrinsicTrue,
         maybe,
         not,
         zeroOrMore,

@@ -55,9 +55,8 @@ TODO 2020:
         [ ] character
         [ ] epsilon
         [ ] i32
-        [ ] intrinsicFalse
-        [ ] intrinsicNull
-        [ ] intrinsicTrue
+        [ ] null
+        [ ] boolean
         [ ] list
         [ ] maybe
         [ ] memoise
@@ -242,7 +241,7 @@ TODOs from the pegjs grammar file:
 
 Older:
     [ ] rename `char` to `any-char`
-    [ ] rename `intrinsic-*` to ???
+    [x] rename `intrinsic-*` to null/boolean
 
 
 
@@ -294,8 +293,8 @@ Todo:
         [ ] use `&` or `;` as sequence operator, but make it always optional?
             [ ] this could allow `fn(arg)` syntax instead of `fn<arg>`, since can disambiguate with `nonFn ; (arg)`
         [ ] `not` operator
-        [ ] first-class intrinsic keywords for booleans (`true`|`false`)
-        [ ] first class intrinsic keyword for null (`null`? `void`? `()`? `nil`?)
+        [x] first-class intrinsic keywords for booleans (`true`|`false`)
+        [x] first class intrinsic keyword for null (`null`? `void`? `()`? `nil`?)
         [ ] `OneOrMore` instead of `ZeroOrMore`? Then ZeroOrMore = maybe OneOrMore (call it `repeat` or `iter` or some such?)
     [ ] support `i32` literals in different bases (hex at least. See Java source code which does this)
     modules:

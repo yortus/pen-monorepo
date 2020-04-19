@@ -31,12 +31,14 @@ export type Pattern<M extends Metadata = {}> =
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BindingLookupExpression<M>
+    | BooleanExpression<M>
     | CharacterExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
     | ListExpression<M>
     | ModuleExpression<M>
+    | NullExpression<M>
     | ParenthesisedExpression<M>
     | RecordExpression<M>
     | ReferenceExpression<M>
@@ -129,6 +131,13 @@ export interface BindingLookupExpression<M extends Metadata = {}> {
 }
 
 
+export interface BooleanExpression<M extends Metadata = {}> {
+    readonly kind: 'BooleanExpression';
+    readonly value: boolean;
+    readonly meta: M[this['kind']];
+}
+
+
 export interface CharacterExpression<M extends Metadata = {}> {
     readonly kind: 'CharacterExpression';
     readonly minValue: string;
@@ -176,6 +185,11 @@ export interface ModuleExpression<M extends Metadata = {}> {
     readonly meta: M[this['kind']];
 }
 
+export interface NullExpression<M extends Metadata = {}> {
+    readonly kind: 'NullExpression';
+    readonly value: null;
+    readonly meta: M[this['kind']];
+}
 
 export interface ParenthesisedExpression<M extends Metadata = {}> {
     readonly kind: 'ParenthesisedExpression';

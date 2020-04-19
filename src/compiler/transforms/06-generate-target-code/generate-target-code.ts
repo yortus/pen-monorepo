@@ -167,6 +167,10 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.dedent().down(1).text(`)`);
             return;
 
+        case 'BooleanExpression':
+            emit.text(`sys.boolean(${expr.value})`);
+            return;
+
         case 'CharacterExpression':
             if (expr.abstract || expr.concrete) emit.text(`sys.${expr.abstract ? 'abstract' : 'concrete'}(`);
             emit.text('sys.character(');
@@ -212,6 +216,10 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ModuleExpression':
             emit.text(`𝕊${expr.module.meta.scope.id}`);
+            return;
+
+        case 'NullExpression':
+            emit.text(`sys.null`);
             return;
 
         case 'ParenthesisedExpression':

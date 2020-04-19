@@ -11,6 +11,7 @@ export function checkSemantics(program: Program<SymbolDefinitions & SymbolRefere
         RecordExpression: ({fields}) => {
             fields.reduce(
                 (names, field) => {
+                    // Ensure Record field names are unique within the record definition
                     if (names.has(field.name)) throw new Error(`Duplicate field name '${field.name}'`);
                     rec(field);
                     return names.add(field.name);

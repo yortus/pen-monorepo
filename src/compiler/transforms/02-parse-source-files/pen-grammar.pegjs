@@ -60,6 +60,8 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         FieldExpression             {[a]: b}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
+        NullExpression              null
+        BooleanExpression           false   true
         CharacterExpression         "a-z"   '0-9'   `A-F`
         StringExpression            "foo"   'a string!'   `a`
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
@@ -92,6 +94,8 @@ PrimaryExpression
     / ListExpression
     / ParenthesisedExpression
     / ImportExpression
+    / NullExpression
+    / BooleanExpression
     / CharacterExpression
     / StringExpression
     / ReferenceExpression
@@ -156,6 +160,13 @@ ImportExpression
         return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 
+NullExpression
+    = NULL   { return {kind: 'NullExpression', value: null}; }
+
+BooleanExpression
+    = TRUE   { return {kind: 'BooleanExpression', value: true}; }
+    / FALSE   { return {kind: 'BooleanExpression', value: false}; }
+
 CharacterExpression
     = "'"   !['-]   minValue:CHARACTER   "-"   !['-]   maxValue:CHARACTER   "'"
     { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: true}; }
@@ -211,10 +222,13 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / EXPORT / IMPORT / UNDERSCORE
+RESERVED 'RESERVED'     = AS / EXPORT / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 EXPORT                  = "export"   !IDENTIFIER_PART   { return text(); }
+FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
+NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
+TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
 
 

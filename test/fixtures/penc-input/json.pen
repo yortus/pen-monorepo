@@ -2,7 +2,6 @@
 // |                                  Imports                                    |
 // ===============================================================================
 {i32} = import 'std'
-{intrinsicFalse, intrinsicNull, intrinsicTrue} = import 'experiments'
 {anyChar, maybe, not, zeroOrMore} = import 'experiments'
 
 
@@ -27,9 +26,9 @@ Value =
     |   String
 
 // ---------- Primitive values ----------
-False   = `false`   intrinsicFalse
-Null    = `null`   intrinsicNull
-True    = `true`   intrinsicTrue
+False   = `false`   false
+Null    = `null`   null
+True    = `true`   true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE

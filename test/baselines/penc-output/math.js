@@ -22,7 +22,7 @@ const 𝕊6 = {
 
 𝕊6.bindings.start = 𝕊6.bindings.expr;
 
-// -------------------- v:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
+// -------------------- V:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
 
 {
     let rhs = std;
@@ -194,27 +194,22 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    function charRange(min, max) {
+    function boolean(value) {
         return {
-            kind: 'production',
-            parse(text, pos, result) {
-                if (pos >= text.length)
-                    return false;
-                let c = text.charAt(pos);
-                if (c < min || c > max)
-                    return false;
-                result.node = c;
-                result.posᐟ = pos + 1;
+            kind: 'rule',
+            parse() {
+                let { ONUL } = sys.getState();
+                sys.setOutState(ONUL ? undefined : value);
                 return true;
             },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || pos >= node.length)
-                    return false;
-                let c = node.charAt(pos);
-                if (c < min || c > max)
-                    return false;
-                result.text = c;
-                result.posᐟ = pos + 1;
+            unparse() {
+                let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                if (!INUL) {
+                    if (IDOC !== value || IMEM !== 0)
+                        return false;
+                    IMEM = 1;
+                }
+                sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
                 return true;
             },
         };
@@ -360,23 +355,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    function label(value) {
-        return {
-            kind: 'production',
-            parse(_, pos, result) {
-                result.node = value;
-                result.posᐟ = pos;
-                return true;
-            },
-            unparse(node, pos, result) {
-                if (typeof node !== 'string' || !matchesAt(node, value, pos))
-                    return false;
-                result.text = '';
-                result.posᐟ = pos + value.length;
-                return true;
-            },
-        };
-    }
     function list(elements) {
         const elementsLength = elements.length;
         return {
@@ -416,6 +394,25 @@ function initRuntimeSystem() {
             },
         };
     }
+    // NB: can't call it 'null' here since its a reserved identifier
+    const nullLiteral = {
+        kind: 'rule',
+        parse() {
+            let { ONUL } = sys.getState();
+            sys.setOutState(ONUL ? undefined : null);
+            return true;
+        },
+        unparse() {
+            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+            if (!INUL) {
+                if (IDOC !== null || IMEM !== 0)
+                    return false;
+                IMEM = 1;
+            }
+            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
+            return true;
+        },
+    };
     function record(fields) {
         return {
             kind: 'rule',
@@ -470,26 +467,6 @@ function initRuntimeSystem() {
                 return true;
             },
         };
-    }
-    // TODO: investigate optimisations... Don't need to retain indirection in many cases. Or will V8 optimisations suffice?
-    function reference(target) {
-        // TODO: hacky and repetitive, fix this. Prob: if its a forward ref, we don't know target type yet.
-        if (target.kind === 'production') {
-            return {
-                kind: 'production',
-                parse: (text, pos, result) => target.parse(text, pos, result),
-                unparse: (node, pos, result) => target.unparse(node, pos, result),
-            };
-        }
-        else if (target.kind === 'function') {
-            return {
-                kind: 'function',
-                apply: (arg) => target.apply(arg),
-            };
-        }
-        else {
-            throw new Error('Not implemented'); // TODO: ...
-        }
     }
     function selection(...expressions) {
         const arity = expressions.length;
@@ -646,11 +623,13 @@ function initRuntimeSystem() {
         abstract,
         apply,
         bindingLookup,
+        boolean,
         concrete,
         createMainExports,
         character,
         field,
         list,
+        null: nullLiteral,
         record,
         sequence,
         selection,
@@ -961,60 +940,6 @@ function initTemporaryExperiments() {
             return true;
         },
     };
-    const intrinsicFalse = {
-        kind: 'rule',
-        parse() {
-            let { ONUL } = sys.getState();
-            sys.setOutState(ONUL ? undefined : false);
-            return true;
-        },
-        unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (!INUL) {
-                if (IDOC !== false || IMEM !== 0)
-                    return false;
-                IMEM = 1;
-            }
-            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
-            return true;
-        },
-    };
-    const intrinsicNull = {
-        kind: 'rule',
-        parse() {
-            let { ONUL } = sys.getState();
-            sys.setOutState(ONUL ? undefined : null);
-            return true;
-        },
-        unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (!INUL) {
-                if (IDOC !== null || IMEM !== 0)
-                    return false;
-                IMEM = 1;
-            }
-            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
-            return true;
-        },
-    };
-    const intrinsicTrue = {
-        kind: 'rule',
-        parse() {
-            let { ONUL } = sys.getState();
-            sys.setOutState(ONUL ? undefined : true);
-            return true;
-        },
-        unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (!INUL) {
-                if (IDOC !== true || IMEM !== 0)
-                    return false;
-                IMEM = 1;
-            }
-            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
-            return true;
-        },
-    };
     const maybe = {
         kind: 'lambda',
         apply(expr) {
@@ -1100,9 +1025,6 @@ function initTemporaryExperiments() {
         bindings: {
             anyChar,
             epsilon,
-            intrinsicFalse,
-            intrinsicNull,
-            intrinsicTrue,
             maybe,
             not,
             zeroOrMore,
