@@ -1,45 +1,36 @@
 TODO 2020:
-    emit output for all node kinds:
-        [x] ApplicationExpression
-        [x] Binding
-        [x] BindingLookupExpression
-        [x] CharacterExpression
-        [x] DynamicField
-        [x] ImportExpression
-        [x] LabelExpression
-        [x] ListExpression
-        [x] Module
-        [x] ModuleExpression
-        [x] ModulePattern
-        [x] ModulePatternName
-        [x] ParenthesisedExpression
-        [x] Program
-        [x] RecordExpression
-        [x] ReferenceExpression
-        [x] SelectionExpression
-        [x] SequenceExpression
-        [x] SourceFile
-        [x] StaticField
-        [x] StringExpression
-        [x] VariablePattern
-
+    [ ] f64
+    [ ] unicodeEscapeSequence
+        - syntax in some languages:
+            - JS/TS:    \uffff      \u{10ffff}
+            - Ruby:     \uffff      \u{10ffff}      NB: there is another form with \u{...} too
+            - C#:       \uffff      \U0010ffff
+            - C:        \uffff      \U0010ffff
+            - C++:      \uffff      \U0010ffff
+            - Python:   \uffff      \U0010ffff
+            - Rust:     \u{ffff}    \u{10ffff}      NB: 1-6 hex digits
+            - OCaml:    \u{ffff}    \u{10ffff}      NB: 1-6 hex digits
+            - Swift:    \u{ffff}    \u{10ffff}      NB: 1-8 hex digits
+            - Go:       \uffff
+            - Haskell:  \xffff      \x10ffff        NB: also supports decimal eg \99999 and octal eg \o777
+            - CSS:      \ffff       \10ffff         NB: variable length
+            - HTML:     &#xffff;                    NB: variable length; also supports decimal eg $#9999;
+            - Java      \uffff      \uuuuuuffff     NB: always 4 hex digits
+            - SQL:      -                           NB: no standard syntax?
+        - some of the above languages also support named unicode escapes
+        - conclusions:
+            - need to consume/produce just the *digits* on the text side (ie not the \u or \x or &# or whatever parts)
+            - need to allow for various number bases (usually hex, but also decimal, octal, maybe others)
+        - could this be an extension of the core `character` function?
+            - currently `character(min: string, max: string): Rule`
+            - change to `character(arg: string | {min: string, max: string} | {base: number, minDigits: number, maxDigits: number}`
+    [ ] emit more efficient code for `sequence` (instrument first)
+    [x] emit output for all node kinds:
     [x] complete `sys` (aka penlib)
-        [x] types - Rule, Module, Lambda
-        [x] internal helpers: ???
-        [x] bindingLookup (ensure name exists and is exported)
-        [x] charRange
-        [x] label
-        [x] list
-        [x] record
-        [x] reference (only needed to support forward references. Optimisations may be possible)
-        [x] selection
-        [x] sequence
-        [x] string
     [x] link `sys.js` into emitted code
     [x] emit application as `sys.apply(fn, arg)` where `apply` does some runtime checks on `fn`
     [x] add a union type for `Datatype` (currently can be lambda|module|rule)
     [x] `reference` needs fixing: can't assert on target.kind for forward refs since it's not set yet
-        [x] make `reference` unnecessary by emitting better code for aliased symbols
     [x] require main module to have a `start` rule (not necessarily exported)
     [x] add emit for exported `parse` and `unparse` functions, which call `start.parse` and `start.unparse`
     [x] update PEN syntax for string literals and char ranges as follows:
