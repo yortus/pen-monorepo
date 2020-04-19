@@ -1,5 +1,6 @@
 TODO 2020:
-    [ ] f64
+    [ ] make `i32` into core syntax (no need to import)
+    [ ] `f64`
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}
@@ -23,7 +24,8 @@ TODO 2020:
             - need to allow for various number bases (usually hex, but also decimal, octal, maybe others)
         - could this be an extension of the core `character` function?
             - currently `character(min: string, max: string): Rule`
-            - change to `character(arg: string | {min: string, max: string} | {base: number, minDigits: number, maxDigits: number}`
+            - change to `character(arg: string | {min: string, max: string} | {base: number, minDigits: number, maxDigits: number}: Rule`
+            - need core syntax for this, eg `unicode`, `u4`, `ux4`, `u1-6`, `u{1..6}`, `ux{1..8}`, `uo`, `ud`
     [ ] emit more efficient code for `sequence` (instrument first)
     [x] emit output for all node kinds:
     [x] complete `sys` (aka penlib)
