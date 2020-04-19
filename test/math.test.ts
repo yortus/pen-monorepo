@@ -4,8 +4,8 @@ import {compile} from '../src';
 
 
 const fixtureName = 'math';
-const inputPath = path.join(__dirname, './fixture-inputs', fixtureName);
-const outputPath = path.join(__dirname, './fixture-outputs', fixtureName + '.js');
+const inputPath = path.join(__dirname, './fixtures/penc-input', fixtureName);
+const outputPath = path.join(__dirname, './baselines/penc-output', fixtureName + '.js');
 
 
 describe(`Compiling and executing the 'math.pen' program`, async () => {

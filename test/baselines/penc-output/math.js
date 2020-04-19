@@ -22,7 +22,7 @@ const 𝕊6 = {
 
 𝕊6.bindings.start = 𝕊6.bindings.expr;
 
-// -------------------- V:\projects\oss\penc\test\fixture-inputs\math.pen --------------------
+// -------------------- v:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
 
 {
     let rhs = std;

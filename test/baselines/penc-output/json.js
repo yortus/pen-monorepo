@@ -40,7 +40,7 @@ const 𝕊4 = {
 
 𝕊4.bindings.Number = 𝕊4.bindings.i32;
 
-// -------------------- V:\projects\oss\penc\test\fixture-inputs\json.pen --------------------
+// -------------------- v:\projects\oss\penc\test\fixtures\penc-input\json.pen --------------------
 
 {
     let rhs = std;

@@ -6,9 +6,9 @@ import {compile} from '../src';
 
 
 const fixtureName = 'json';
-const inputPath = path.join(__dirname, './fixture-inputs', fixtureName);
-const outputPath = path.join(__dirname, './fixture-outputs', fixtureName + '.js');
-const jsonDocPath = path.join(__dirname, './fixtures/1mb.json');
+const inputPath = path.join(__dirname, './fixtures/penc-input', fixtureName);
+const outputPath = path.join(__dirname, './baselines/penc-output', fixtureName + '.js');
+const jsonDocPath = path.join(__dirname, './fixtures/documents/1mb.json');
 
 
 describe(`Procesing a large JSON document`, async () => {
