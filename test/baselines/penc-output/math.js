@@ -6,7 +6,7 @@ const 𝕊6 = {
     kind: 'module',
     bindings: {
         memoise: {},
-        i32: {},
+        int32: {},
         start: {},
         expr: {},
         add: {},
@@ -31,8 +31,8 @@ const 𝕊6 = {
         sys.bindingLookup(rhs, 'memoise')
     );
     Object.assign(
-        𝕊6.bindings.i32,
-        sys.bindingLookup(rhs, 'i32')
+        𝕊6.bindings.int32,
+        sys.bindingLookup(rhs, 'int32')
     );
 }
 
@@ -149,7 +149,7 @@ Object.assign(
 Object.assign(
     𝕊6.bindings.factor,
     sys.selection(
-        𝕊6.bindings.i32,
+        𝕊6.bindings.int32,
         sys.sequence(
             sys.concrete(sys.character("(", "(")),
             𝕊6.bindings.expr,
@@ -653,7 +653,7 @@ function initRuntimeSystem() {
 
 function initStandardLibrary() {
     // TODO: habdle abstract/concrete...
-    const i32 = {
+    const int32 = {
         kind: 'rule',
         parse() {
             let stateₒ = sys.getState();
@@ -734,7 +734,7 @@ function initStandardLibrary() {
             return true;
         },
     };
-    // These constants are used by the i32 rule.
+    // These constants are used by the int32 rule.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     const memoise = {
@@ -886,7 +886,7 @@ function initStandardLibrary() {
     return {
         kind: 'module',
         bindings: {
-            i32,
+            int32,
             memoise,
         },
     };

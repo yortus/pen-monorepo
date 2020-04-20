@@ -5,7 +5,7 @@ const experiments = initTemporaryExperiments();
 const 𝕊4 = {
     kind: 'module',
     bindings: {
-        i32: {},
+        int32: {},
         anyChar: {},
         maybe: {},
         not: {},
@@ -35,15 +35,15 @@ const 𝕊4 = {
 
 // -------------------- aliases --------------------
 
-𝕊4.bindings.Number = 𝕊4.bindings.i32;
+𝕊4.bindings.Number = 𝕊4.bindings.int32;
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\json.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊4.bindings.i32,
-        sys.bindingLookup(rhs, 'i32')
+        𝕊4.bindings.int32,
+        sys.bindingLookup(rhs, 'int32')
     );
 }
 
@@ -803,7 +803,7 @@ function initRuntimeSystem() {
 
 function initStandardLibrary() {
     // TODO: habdle abstract/concrete...
-    const i32 = {
+    const int32 = {
         kind: 'rule',
         parse() {
             let stateₒ = sys.getState();
@@ -884,7 +884,7 @@ function initStandardLibrary() {
             return true;
         },
     };
-    // These constants are used by the i32 rule.
+    // These constants are used by the int32 rule.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     const memoise = {
@@ -1036,7 +1036,7 @@ function initStandardLibrary() {
     return {
         kind: 'module',
         bindings: {
-            i32,
+            int32,
             memoise,
         },
     };

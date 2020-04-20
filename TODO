@@ -1,6 +1,6 @@
 TODO 2020:
-    [ ] make `i32` into core syntax (no need to import)
-    [ ] `f64`
+    [ ] make `int32` into core syntax (no need to import)
+    [ ] `float64`
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}
@@ -27,6 +27,8 @@ TODO 2020:
             - change to `character(arg: string | {min: string, max: string} | {base: number, minDigits: number, maxDigits: number}: Rule`
             - need core syntax for this, eg `unicode`, `u4`, `ux4`, `u1-6`, `u{1..6}`, `ux{1..8}`, `uo`, `ud`
     [ ] emit more efficient code for `sequence` (instrument first)
+    [ ] implement FunctionExpressions (NB still fully static, a bit like generic type instantiations)
+    [ ] link extension modules into emitted code
     [x] emit output for all node kinds:
     [x] complete `sys` (aka penlib)
     [x] link `sys.js` into emitted code
@@ -47,7 +49,7 @@ TODO 2020:
         [ ] anyChar
         [ ] character
         [ ] epsilon
-        [ ] i32
+        [ ] int32
         [ ] null
         [ ] boolean
         [ ] list
@@ -84,8 +86,6 @@ TODO 2020:
         specify a file formal that allows simple concatenation of impl files
             is order important? Not if only containing function decls
             must we disallow import/require in impl files? Would it ever work? Maybe for non-relative module ids?
-    [ ] link extension modules into emitted code
-    [ ] implement FunctionExpressions (NB still fully static, a bit like generic type instantiations)
     [ ] Bikeshed names for parse/unparse rule:
         relation (sounds like some abstract math concept - could be confusing)
         rule

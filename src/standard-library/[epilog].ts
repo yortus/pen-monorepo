@@ -2,7 +2,7 @@
 return {
     kind: 'module',
     bindings: {
-        i32,
+        int32,
         memoise,
     },
 };

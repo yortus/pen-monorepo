@@ -1,7 +1,7 @@
 // TODO: habdle abstract/concrete...
 
 
-const i32: Rule = {
+const int32: Rule = {
     kind: 'rule',
 
     parse() {
@@ -88,6 +88,6 @@ const i32: Rule = {
 };
 
 
-// These constants are used by the i32 rule.
+// These constants are used by the int32 rule.
 const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
 const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
