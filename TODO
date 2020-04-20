@@ -1,6 +1,8 @@
 TODO 2020:
+    [x] `float64`
     [ ] make `int32` into core syntax (no need to import)
-    [ ] `float64`
+    [ ] consider having global symbols/identifiers (instead of `import 'std'`)
+        - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`  
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}

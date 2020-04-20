@@ -5,7 +5,7 @@
  */
 
 
-{memoise, int32} = import 'std'
+{memoise, float64} = import 'std'
 
 
 start = expr
@@ -19,4 +19,4 @@ term = memoise(mul | div | factor)
 mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Record and Field exprs
 div = {type: 'div'   lhs: term   rhs: `/` factor}
 
-factor = int32 | `(-(` expr `)-)` // test char ranges
+factor = float64 | `(-(` expr `)-)` // test char ranges

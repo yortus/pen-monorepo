@@ -35,6 +35,23 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
                 },
             },
         },
+        {
+            text: '.2*3.14159+4e20*4.e-17',
+            ast: {
+                type: 'add',
+                lhs: {
+                    type: 'mul',
+                    lhs: 0.2,
+                    rhs: 3.14159,
+                },
+                rhs: {
+                    type: 'mul',
+                    lhs: 400_000_000_000_000_000_000,
+                    rhs: 4e-17,
+                },
+            },
+            textᐟ: '0.2*3.14159+400000000000000000000*4e-17',
+        },
     ];
 
     it('compiles', async () => {
@@ -50,7 +67,7 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
             let ast = parse(test.text);
             expect(ast).to.deep.equal(test.ast);
             let textᐟ = unparse(ast);
-            expect(textᐟ).to.equal(test.text);
+            expect(textᐟ).to.equal(test.textᐟ || test.text);
         });
     }
 });

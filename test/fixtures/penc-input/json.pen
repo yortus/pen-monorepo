@@ -1,7 +1,7 @@
 // ===============================================================================
 // |                                  Imports                                    |
 // ===============================================================================
-{int32} = import 'std'
+{float64} = import 'std'
 {anyChar, maybe, not, zeroOrMore} = import 'experiments'
 
 
@@ -39,7 +39,7 @@ Array       = LBRACKET   (Elements | [])   RBRACKET
 Elements    = [Value]   maybe(COMMA Elements)
 
 // ---------- Numbers ----------
-Number = int32 // TODO: should be f64? check JS specs
+Number = float64
 
 // ---------- Strings ----------
 String = DOUBLE_QUOTE   zeroOrMore(CHAR)   DOUBLE_QUOTE
