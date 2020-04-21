@@ -1,7 +1,11 @@
-const not: Lambda = {
-    kind: 'lambda',
-    apply(expr: Rule): Rule {
+const not: PenVal = {
+    bindings: {},
+    parse: sys.NOT_A_RULE,
+    unparse: sys.NOT_A_RULE,
+    apply(expr) {
         return {
+            bindings: {},
+
             kind: 'rule',
 
             parse() {
@@ -17,6 +21,8 @@ const not: Lambda = {
                 sys.setState(stateₒ);
                 return false;
             },
+
+            apply: sys.NOT_A_LAMBDA,
         };
     },
 };

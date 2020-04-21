@@ -1,7 +1,7 @@
-function list(elements: Rule[]): Rule {
+function list(elements: PenVal[]): PenVal {
     const elementsLength = elements.length;
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let stateₒ = getState();
@@ -32,5 +32,7 @@ function list(elements: Rule[]): Rule {
             ODOC = text;
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

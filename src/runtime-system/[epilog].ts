@@ -87,6 +87,11 @@ function matchesAt(text: string, substr: string, position: number): boolean {
 }
 
 
+// TODO: doc... helpers...
+function NOT_A_LAMBDA(): never { throw new Error('Not a lambda'); };
+function NOT_A_RULE(): never { throw new Error('Not a rule'); };
+
+
 // @ts-ignore
 return {
     abstract,
@@ -112,6 +117,8 @@ return {
     isPlainObject,
     isString,
     matchesAt,
+    NOT_A_LAMBDA,
+    NOT_A_RULE,
     setInState,
     setOutState,
     setState,

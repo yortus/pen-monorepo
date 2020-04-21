@@ -1,27 +1,13 @@
-type Datatype = Lambda | Module | Rule;
+interface PenVal {
+    // module
+    bindings: Record<string, PenVal>;
 
-
-interface Lambda {
-    kind: 'lambda';
-    apply(arg: Datatype): Datatype;
-}
-
-
-interface Module {
-    kind: 'module';
-    bindings: Record<string, Datatype>;
-}
-
-
-/**
- * TODO: doc...
- * - modifies `result` iff return value is true -OR- if returns false, result may be garbage WHICH IS IT? 2nd is more flexible for impls
- * - meaning of `pos` and `posᐟ` for nodes is rule-specific
- */
-interface Rule {
-    kind: 'rule';
+    // rule
     parse(): boolean;
     unparse(): boolean;
+
+    // lambda
+    apply(arg: PenVal): PenVal;
 }
 
 
@@ -34,6 +20,8 @@ declare const sys: {
     isPlainObject: (value: unknown) => value is Record<string, unknown>;
     isString: (value: unknown) => value is string;
     matchesAt: (text: string, substr: string, position: number) => boolean;
+    NOT_A_LAMBDA: never,
+    NOT_A_RULE: never,
     setInState: (IDOCᐟ: unknown, IMEMᐟ: number) => void;
     setOutState: (ODOCᐟ: unknown) => void;
     setState: (value: Registers) => void;

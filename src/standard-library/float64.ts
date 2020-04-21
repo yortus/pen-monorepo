@@ -1,8 +1,8 @@
 // TODO: handle abstract/concrete...
 
 
-const float64: Rule = {
-    kind: 'rule',
+const float64: PenVal = {
+    bindings: {},
 
     parse() {
         let stateₒ = sys.getState();
@@ -88,6 +88,8 @@ const float64: Rule = {
         sys.setState({IDOC, IMEM: 1, ODOC: str, INUL, ONUL});
         return true;
     },
+
+    apply: sys.NOT_A_LAMBDA,
 };
 
 

@@ -1,5 +1,5 @@
-const anyChar: Rule = {
-    kind: 'rule',
+const anyChar: PenVal = {
+    bindings: {},
 
     parse() {
         let {IDOC, IMEM, INUL, ONUL} = sys.getState();
@@ -28,4 +28,6 @@ const anyChar: Rule = {
         sys.setState({IDOC, IMEM, ODOC, INUL, ONUL});
         return true;
     },
+
+    apply: sys.NOT_A_LAMBDA,
 };

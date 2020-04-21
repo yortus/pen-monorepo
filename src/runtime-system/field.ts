@@ -1,6 +1,6 @@
-function field(name: Rule, value: Rule): Rule {
+function field(name: PenVal, value: PenVal): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let stateₒ = getState();
@@ -64,5 +64,7 @@ function field(name: Rule, value: Rule): Rule {
             setState(stateₒ);
             return false;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

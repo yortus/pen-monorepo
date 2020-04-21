@@ -1,5 +1,5 @@
-function bindingLookup(module: Module, name: string): Datatype {
-    assert(module.kind === 'module' && module.bindings?.[name]);
+function bindingLookup(module: PenVal, name: string): PenVal {
+    assert(module.bindings[name]);
     // TODO: ensure binding is exported/visible
     return module.bindings[name];
 }

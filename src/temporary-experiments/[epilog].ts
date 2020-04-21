@@ -1,6 +1,5 @@
 // @ts-ignore
 return {
-    kind: 'module',
     bindings: {
         anyChar,
         epsilon,
@@ -8,4 +7,7 @@ return {
         not,
         zeroOrMore,
     },
+    parse: sys.NOT_A_RULE,
+    unparse: sys.NOT_A_RULE,
+    apply: sys.NOT_A_LAMBDA,
 };

@@ -1,6 +1,6 @@
-function character(min: string, max: string): Rule {
+function character(min: string, max: string): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let c = min;
@@ -27,5 +27,7 @@ function character(min: string, max: string): Rule {
             ODOC = ONUL ? undefined : c;
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

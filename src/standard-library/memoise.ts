@@ -1,6 +1,8 @@
-const memoise: Lambda = {
-    kind: 'lambda',
-    apply(expr: Rule): Rule {
+const memoise: PenVal = {
+    bindings: {},
+    parse: sys.NOT_A_RULE,
+    unparse: sys.NOT_A_RULE,
+    apply(expr) {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
@@ -26,7 +28,7 @@ const memoise: Lambda = {
         >();
 
         return {
-            kind: 'rule',
+            bindings: {},
 
             parse() {
                 // Check whether the memo table already has an entry for the given initial state.
@@ -166,6 +168,8 @@ const memoise: Lambda = {
                 sys.setState(memo.stateᐟ);
                 return memo.result;
             },
+
+            apply: sys.NOT_A_LAMBDA,
         };
     },
 };

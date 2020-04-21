@@ -1,6 +1,6 @@
-function abstract(expr: Rule): Rule {
+function abstract(expr: PenVal): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let INULₒ = INUL;
@@ -17,5 +17,7 @@ function abstract(expr: Rule): Rule {
             ONUL = ONULₒ;
             return result;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

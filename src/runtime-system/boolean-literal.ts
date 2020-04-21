@@ -1,6 +1,6 @@
-function booleanLiteral(value: boolean): Rule {
+function booleanLiteral(value: boolean): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let {ONUL} = sys.getState();
@@ -17,5 +17,7 @@ function booleanLiteral(value: boolean): Rule {
             sys.setState({IDOC, IMEM, ODOC: undefined, INUL, ONUL});
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

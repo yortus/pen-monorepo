@@ -1,4 +1,4 @@
-function createMainExports(start: Rule) {
+function createMainExports(start: PenVal) {
     return {
         parse: (text: string) => {
             setInState(text, 0);

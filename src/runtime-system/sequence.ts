@@ -1,7 +1,7 @@
-function sequence(...expressions: Rule[]): Rule {
+function sequence(...expressions: PenVal[]): PenVal {
     const arity = expressions.length;
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let stateₒ = getState();
@@ -24,5 +24,7 @@ function sequence(...expressions: Rule[]): Rule {
             ODOC = text;
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

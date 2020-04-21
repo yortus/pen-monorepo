@@ -1,8 +1,10 @@
-const zeroOrMore: Lambda = {
-    kind: 'lambda',
-    apply(expr: Rule): Rule {
+const zeroOrMore: PenVal = {
+    bindings: {},
+    parse: sys.NOT_A_RULE,
+    unparse: sys.NOT_A_RULE,
+    apply(expr) {
         return {
-            kind: 'rule',
+            bindings: {},
 
             parse() {
                 let stateₒ = sys.getState();
@@ -41,6 +43,8 @@ const zeroOrMore: Lambda = {
                 sys.setOutState(text);
                 return true;
             },
+
+            apply: sys.NOT_A_LAMBDA,
         };
     },
 };

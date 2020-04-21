@@ -1,6 +1,6 @@
-function concrete(expr: Rule): Rule {
+function concrete(expr: PenVal): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let ONULₒ = ONUL;
@@ -17,5 +17,7 @@ function concrete(expr: Rule): Rule {
             INUL = INULₒ;
             return result;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

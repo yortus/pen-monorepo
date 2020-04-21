@@ -1,5 +1,5 @@
-const nullLiteral: Rule = {
-    kind: 'rule',
+const nullLiteral: PenVal = {
+    bindings: {},
 
     parse() {
         let {ONUL} = sys.getState();
@@ -16,4 +16,6 @@ const nullLiteral: Rule = {
         sys.setState({IDOC, IMEM, ODOC: undefined, INUL, ONUL});
         return true;
     },
+
+    apply: NOT_A_LAMBDA,
 };

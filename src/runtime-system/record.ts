@@ -1,6 +1,6 @@
-function record(fields: Array<{name: string, value: Rule}>): Rule {
+function record(fields: Array<{name: string, value: PenVal}>): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             let stateₒ = getState();
@@ -54,5 +54,7 @@ function record(fields: Array<{name: string, value: Rule}>): Rule {
             ODOC = text;
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

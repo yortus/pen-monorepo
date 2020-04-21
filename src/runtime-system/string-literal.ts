@@ -1,6 +1,6 @@
-function stringLiteral(value: string): Rule {
+function stringLiteral(value: string): PenVal {
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             if (!INUL) {
@@ -21,5 +21,7 @@ function stringLiteral(value: string): Rule {
             ODOC = ONUL ? undefined : value;
             return true;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

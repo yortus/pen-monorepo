@@ -1,7 +1,7 @@
-function selection(...expressions: Rule[]): Rule {
+function selection(...expressions: PenVal[]): PenVal {
     const arity = expressions.length;
     return {
-        kind: 'rule',
+        bindings: {},
 
         parse() {
             for (let i = 0; i < arity; ++i) {
@@ -16,5 +16,7 @@ function selection(...expressions: Rule[]): Rule {
             }
             return false;
         },
+
+        apply: NOT_A_LAMBDA,
     };
 }

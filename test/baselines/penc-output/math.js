@@ -167,7 +167,7 @@ module.exports = sys.createMainExports(𝕊6.bindings.start);
 function initRuntimeSystem() {
     function abstract(expr) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let INULₒ = INUL;
                 INUL = true;
@@ -182,21 +182,20 @@ function initRuntimeSystem() {
                 ONUL = ONULₒ;
                 return result;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function apply(lambda, arg) {
-        assert(lambda.kind === 'lambda');
         return lambda.apply(arg);
     }
     function bindingLookup(module, name) {
-        var _a;
-        assert(module.kind === 'module' && ((_a = module.bindings) === null || _a === void 0 ? void 0 : _a[name]));
+        assert(module.bindings[name]);
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
     function booleanLiteral(value) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let { ONUL } = sys.getState();
                 sys.setOutState(ONUL ? undefined : value);
@@ -212,11 +211,12 @@ function initRuntimeSystem() {
                 sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function character(min, max) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let c = min;
                 if (!INUL) {
@@ -247,11 +247,12 @@ function initRuntimeSystem() {
                 ODOC = ONUL ? undefined : c;
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function concrete(expr) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let ONULₒ = ONUL;
                 ONUL = true;
@@ -266,6 +267,7 @@ function initRuntimeSystem() {
                 INUL = INULₒ;
                 return result;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function createMainExports(start) {
@@ -294,7 +296,7 @@ function initRuntimeSystem() {
     }
     function field(name, value) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let stateₒ = getState();
                 let obj = {};
@@ -353,12 +355,13 @@ function initRuntimeSystem() {
                 setState(stateₒ);
                 return false;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function list(elements) {
         const elementsLength = elements.length;
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let stateₒ = getState();
                 let arr = [];
@@ -392,10 +395,11 @@ function initRuntimeSystem() {
                 ODOC = text;
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     const nullLiteral = {
-        kind: 'rule',
+        bindings: {},
         parse() {
             let { ONUL } = sys.getState();
             sys.setOutState(ONUL ? undefined : null);
@@ -411,10 +415,11 @@ function initRuntimeSystem() {
             sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
             return true;
         },
+        apply: NOT_A_LAMBDA,
     };
     function record(fields) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let stateₒ = getState();
                 let obj = {};
@@ -465,12 +470,13 @@ function initRuntimeSystem() {
                 ODOC = text;
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function selection(...expressions) {
         const arity = expressions.length;
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 for (let i = 0; i < arity; ++i) {
                     if (expressions[i].parse())
@@ -485,12 +491,13 @@ function initRuntimeSystem() {
                 }
                 return false;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function sequence(...expressions) {
         const arity = expressions.length;
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 let stateₒ = getState();
                 let node;
@@ -513,11 +520,12 @@ function initRuntimeSystem() {
                 ODOC = text;
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     function stringLiteral(value) {
         return {
-            kind: 'rule',
+            bindings: {},
             parse() {
                 if (!INUL) {
                     if (!isString(IDOC))
@@ -540,6 +548,7 @@ function initRuntimeSystem() {
                 ODOC = ONUL ? undefined : value;
                 return true;
             },
+            apply: NOT_A_LAMBDA,
         };
     }
     // TODO: new 'registers'... temp testing...
@@ -617,6 +626,11 @@ function initRuntimeSystem() {
         }
         return true;
     }
+    // TODO: doc... helpers...
+    function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
+    ;
+    function NOT_A_RULE() { throw new Error('Not a rule'); }
+    ;
     // @ts-ignore
     return {
         abstract,
@@ -641,6 +655,8 @@ function initRuntimeSystem() {
         isPlainObject,
         isString,
         matchesAt,
+        NOT_A_LAMBDA,
+        NOT_A_RULE,
         setInState,
         setOutState,
         setState,
@@ -653,7 +669,7 @@ function initRuntimeSystem() {
 function initStandardLibrary() {
     // TODO: handle abstract/concrete...
     const float64 = {
-        kind: 'rule',
+        bindings: {},
         parse() {
             let stateₒ = sys.getState();
             let { IDOC, IMEM, INUL, ONUL } = stateₒ;
@@ -734,6 +750,7 @@ function initStandardLibrary() {
             sys.setState({ IDOC, IMEM: 1, ODOC: str, INUL, ONUL });
             return true;
         },
+        apply: sys.NOT_A_LAMBDA,
     };
     // These constants are used by the float64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
@@ -745,7 +762,7 @@ function initStandardLibrary() {
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // TODO: handle abstract/concrete...
     const int32 = {
-        kind: 'rule',
+        bindings: {},
         parse() {
             let stateₒ = sys.getState();
             let { IDOC, IMEM, INUL, ONUL } = stateₒ;
@@ -824,19 +841,22 @@ function initStandardLibrary() {
             sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join(''), INUL, ONUL });
             return true;
         },
+        apply: sys.NOT_A_LAMBDA,
     };
     // These constants are used by the int32 rule.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     const memoise = {
-        kind: 'lambda',
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
         apply(expr) {
             // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
             const parseMemos = new Map();
             // TODO: revise memo key once using new ast/pos signature
             const unparseMemos = new Map();
             return {
-                kind: 'rule',
+                bindings: {},
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = sys.getState();
@@ -970,17 +990,20 @@ function initStandardLibrary() {
                     sys.setState(memo.stateᐟ);
                     return memo.result;
                 },
+                apply: sys.NOT_A_LAMBDA,
             };
         },
     };
     // @ts-ignore
     return {
-        kind: 'module',
         bindings: {
             float64,
             int32,
             memoise,
         },
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        apply: sys.NOT_A_LAMBDA,
     };
 }
 
@@ -989,7 +1012,7 @@ function initStandardLibrary() {
 
 function initTemporaryExperiments() {
     const anyChar = {
-        kind: 'rule',
+        bindings: {},
         parse() {
             let { IDOC, IMEM, INUL, ONUL } = sys.getState();
             let c = '?';
@@ -1020,9 +1043,10 @@ function initTemporaryExperiments() {
             sys.setState({ IDOC, IMEM, ODOC, INUL, ONUL });
             return true;
         },
+        apply: sys.NOT_A_LAMBDA,
     };
     const epsilon = {
-        kind: 'rule',
+        bindings: {},
         parse() {
             sys.setOutState(undefined);
             return true;
@@ -1031,25 +1055,32 @@ function initTemporaryExperiments() {
             sys.setOutState(undefined);
             return true;
         },
+        apply: sys.NOT_A_LAMBDA,
     };
     const maybe = {
-        kind: 'lambda',
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
         apply(expr) {
             return {
-                kind: 'rule',
+                bindings: {},
                 parse() {
                     return expr.parse() || epsilon.parse();
                 },
                 unparse() {
                     return expr.unparse() || epsilon.unparse();
                 },
+                apply: sys.NOT_A_LAMBDA,
             };
         },
     };
     const not = {
-        kind: 'lambda',
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
         apply(expr) {
             return {
+                bindings: {},
                 kind: 'rule',
                 parse() {
                     let stateₒ = sys.getState();
@@ -1065,14 +1096,17 @@ function initTemporaryExperiments() {
                     sys.setState(stateₒ);
                     return false;
                 },
+                apply: sys.NOT_A_LAMBDA,
             };
         },
     };
     const zeroOrMore = {
-        kind: 'lambda',
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
         apply(expr) {
             return {
-                kind: 'rule',
+                bindings: {},
                 parse() {
                     let stateₒ = sys.getState();
                     let node;
@@ -1108,12 +1142,12 @@ function initTemporaryExperiments() {
                     sys.setOutState(text);
                     return true;
                 },
+                apply: sys.NOT_A_LAMBDA,
             };
         },
     };
     // @ts-ignore
     return {
-        kind: 'module',
         bindings: {
             anyChar,
             epsilon,
@@ -1121,5 +1155,8 @@ function initTemporaryExperiments() {
             not,
             zeroOrMore,
         },
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        apply: sys.NOT_A_LAMBDA,
     };
 }

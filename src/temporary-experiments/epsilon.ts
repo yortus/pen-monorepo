@@ -1,5 +1,5 @@
-const epsilon: Rule = {
-    kind: 'rule',
+const epsilon: PenVal = {
+    bindings: {},
 
     parse() {
         sys.setOutState(undefined);
@@ -10,4 +10,6 @@ const epsilon: Rule = {
         sys.setOutState(undefined);
         return true;
     },
+
+    apply: sys.NOT_A_LAMBDA,
 };

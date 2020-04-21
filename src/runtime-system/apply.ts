@@ -1,4 +1,3 @@
-function apply(lambda: Lambda, arg: Datatype): Datatype {
-    assert(lambda.kind === 'lambda');
+function apply(lambda: PenVal, arg: PenVal): PenVal {
     return lambda.apply(arg);
 }
