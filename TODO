@@ -5,7 +5,8 @@ TODO 2020:
     [ ] integer ranges
     [ ] more numeric rules
     [ ] consider having global symbols/identifiers (instead of `import 'std'`)
-        - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`  
+        - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`
+    [ ] string/numeric literals have both text and ast forms, but null/boolean literals have only ast form. Inconsistency here?
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}
@@ -34,6 +35,10 @@ TODO 2020:
     [ ] emit more efficient code for `sequence` (instrument first)
     [ ] implement FunctionExpressions (NB still fully static, a bit like generic type instantiations)
     [ ] link extension modules into emitted code
+    [ ] document pre/post conds for `rule`s written in TS
+        - (i) may modify state iff returns true; if returns false must leave state as it was before the call
+        - meaning of `IMEM` for nodes is rule-specific
+
     [x] emit output for all node kinds:
     [x] complete `sys` (aka penlib)
     [x] link `sys.js` into emitted code
