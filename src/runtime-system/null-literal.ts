@@ -1,4 +1,3 @@
-// NB: can't call it 'null' here since its a reserved identifier
 const nullLiteral: Rule = {
     kind: 'rule',
 

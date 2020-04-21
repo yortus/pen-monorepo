@@ -1,6 +1,9 @@
 TODO 2020:
     [x] `float64`
     [ ] make `int32` into core syntax (no need to import)
+    [ ] numeric literals
+    [ ] integer ranges
+    [ ] more numeric rules
     [ ] consider having global symbols/identifiers (instead of `import 'std'`)
         - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`  
     [ ] unicodeEscapeSequence

@@ -1,4 +1,4 @@
-function boolean(value: boolean): Rule {
+function booleanLiteral(value: boolean): Rule {
     return {
         kind: 'rule',
 

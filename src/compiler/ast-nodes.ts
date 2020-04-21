@@ -31,20 +31,20 @@ export type Pattern<M extends Metadata = {}> =
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BindingLookupExpression<M>
-    | BooleanExpression<M>
+    | BooleanLiteralExpression<M>
     | CharacterExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
     | ListExpression<M>
     | ModuleExpression<M>
-    | NullExpression<M>
+    | NullLiteralExpression<M>
     | ParenthesisedExpression<M>
     | RecordExpression<M>
     | ReferenceExpression<M>
     | SelectionExpression<M>
     | SequenceExpression<M>
-    | StringExpression<M>;
+    | StringLiteralExpression<M>;
 
 
 // ====================   Top-level nodes   ====================
@@ -131,8 +131,8 @@ export interface BindingLookupExpression<M extends Metadata = {}> {
 }
 
 
-export interface BooleanExpression<M extends Metadata = {}> {
-    readonly kind: 'BooleanExpression';
+export interface BooleanLiteralExpression<M extends Metadata = {}> {
+    readonly kind: 'BooleanLiteralExpression';
     readonly value: boolean;
     readonly meta: M[this['kind']];
 }
@@ -185,9 +185,8 @@ export interface ModuleExpression<M extends Metadata = {}> {
     readonly meta: M[this['kind']];
 }
 
-export interface NullExpression<M extends Metadata = {}> {
-    readonly kind: 'NullExpression';
-    readonly value: null;
+export interface NullLiteralExpression<M extends Metadata = {}> {
+    readonly kind: 'NullLiteralExpression';
     readonly meta: M[this['kind']];
 }
 
@@ -226,8 +225,8 @@ export interface SequenceExpression<M extends Metadata = {}> {
 }
 
 
-export interface StringExpression<M extends Metadata = {}> {
-    readonly kind: 'StringExpression';
+export interface StringLiteralExpression<M extends Metadata = {}> {
+    readonly kind: 'StringLiteralExpression';
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;

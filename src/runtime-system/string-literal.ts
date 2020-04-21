@@ -1,4 +1,4 @@
-function string(value: string): Rule {
+function stringLiteral(value: string): Rule {
     return {
         kind: 'rule',
 

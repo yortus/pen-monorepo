@@ -29,7 +29,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
             case 'BindingLookupExpression': return {...n, module: rec(n.module)};
-            case 'BooleanExpression': return n;
+            case 'BooleanLiteralExpression': return n;
             case 'CharacterExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'ImportExpression': return n;
@@ -39,7 +39,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ModuleExpression': return {...n, module: rec(n.module)};
             case 'ModulePattern': return {...n, names: n.names.map(rec)};
             case 'ModulePatternName': return n;
-            case 'NullExpression': return n;
+            case 'NullLiteralExpression': return n;
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'RecordExpression': return {...n, fields: n.fields.map(rec)};
@@ -48,7 +48,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SourceFile': return {...n, module: rec(n.module)};
             case 'StaticField': return {...n, value: rec(n.value)};
-            case 'StringExpression': return n;
+            case 'StringLiteralExpression': return n;
             case 'VariablePattern': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

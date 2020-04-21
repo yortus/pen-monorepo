@@ -53,7 +53,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.abstract(sys.string("add")),
+            value: sys.abstract(sys.stringLiteral("add")),
         },
         {
             name: 'lhs',
@@ -62,7 +62,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.concrete(sys.string("+")),
+                sys.concrete(sys.stringLiteral("+")),
                 𝕊6.bindings.term
             ),
         },
@@ -74,7 +74,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.abstract(sys.string("sub")),
+            value: sys.abstract(sys.stringLiteral("sub")),
         },
         {
             name: 'lhs',
@@ -83,7 +83,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.concrete(sys.string("-")),
+                sys.concrete(sys.stringLiteral("-")),
                 𝕊6.bindings.term
             ),
         },
@@ -106,8 +106,8 @@ Object.assign(
     𝕊6.bindings.mul,
     sys.sequence(
         sys.field(
-            sys.abstract(sys.string("type")),
-            sys.abstract(sys.string("mul"))
+            sys.abstract(sys.stringLiteral("type")),
+            sys.abstract(sys.stringLiteral("mul"))
         ),
         sys.record([
             {
@@ -116,9 +116,9 @@ Object.assign(
             },
         ]),
         sys.field(
-            sys.abstract(sys.string("rhs")),
+            sys.abstract(sys.stringLiteral("rhs")),
             sys.sequence(
-                sys.concrete(sys.string("*")),
+                sys.concrete(sys.stringLiteral("*")),
                 𝕊6.bindings.factor
             )
         )
@@ -130,7 +130,7 @@ Object.assign(
     sys.record([
         {
             name: 'type',
-            value: sys.abstract(sys.string("div")),
+            value: sys.abstract(sys.stringLiteral("div")),
         },
         {
             name: 'lhs',
@@ -139,7 +139,7 @@ Object.assign(
         {
             name: 'rhs',
             value: sys.sequence(
-                sys.concrete(sys.string("/")),
+                sys.concrete(sys.stringLiteral("/")),
                 𝕊6.bindings.factor
             ),
         },
@@ -194,7 +194,7 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    function boolean(value) {
+    function booleanLiteral(value) {
         return {
             kind: 'rule',
             parse() {
@@ -394,7 +394,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    // NB: can't call it 'null' here since its a reserved identifier
     const nullLiteral = {
         kind: 'rule',
         parse() {
@@ -516,7 +515,7 @@ function initRuntimeSystem() {
             },
         };
     }
-    function string(value) {
+    function stringLiteral(value) {
         return {
             kind: 'rule',
             parse() {
@@ -623,17 +622,17 @@ function initRuntimeSystem() {
         abstract,
         apply,
         bindingLookup,
-        boolean,
+        booleanLiteral,
         concrete,
         createMainExports,
         character,
         field,
         list,
-        null: nullLiteral,
+        nullLiteral,
         record,
         sequence,
         selection,
-        string,
+        stringLiteral,
         // export helpers too so std can reference them
         assert,
         concat,

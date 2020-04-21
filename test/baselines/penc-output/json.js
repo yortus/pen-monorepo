@@ -92,24 +92,24 @@ Object.assign(
 Object.assign(
     𝕊4.bindings.False,
     sys.sequence(
-        sys.concrete(sys.string("false")),
-        sys.boolean(false)
+        sys.concrete(sys.stringLiteral("false")),
+        sys.booleanLiteral(false)
     )
 );
 
 Object.assign(
     𝕊4.bindings.Null,
     sys.sequence(
-        sys.concrete(sys.string("null")),
-        sys.null
+        sys.concrete(sys.stringLiteral("null")),
+        sys.nullLiteral
     )
 );
 
 Object.assign(
     𝕊4.bindings.True,
     sys.sequence(
-        sys.concrete(sys.string("true")),
-        sys.boolean(true)
+        sys.concrete(sys.stringLiteral("true")),
+        sys.booleanLiteral(true)
     )
 );
 
@@ -195,43 +195,43 @@ Object.assign(
                 𝕊4.bindings.not,
                 sys.selection(
                     sys.character("\u0000", "\u001f"),
-                    sys.string("\""),
-                    sys.string("\\")
+                    sys.stringLiteral("\""),
+                    sys.stringLiteral("\\")
                 )
             ),
             𝕊4.bindings.anyChar
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\\"")),
-            sys.abstract(sys.string("\""))
+            sys.concrete(sys.stringLiteral("\\\"")),
+            sys.abstract(sys.stringLiteral("\""))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\\\")),
-            sys.abstract(sys.string("\\"))
+            sys.concrete(sys.stringLiteral("\\\\")),
+            sys.abstract(sys.stringLiteral("\\"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\/")),
-            sys.abstract(sys.string("/"))
+            sys.concrete(sys.stringLiteral("\\/")),
+            sys.abstract(sys.stringLiteral("/"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\b")),
-            sys.abstract(sys.string("\b"))
+            sys.concrete(sys.stringLiteral("\\b")),
+            sys.abstract(sys.stringLiteral("\b"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\f")),
-            sys.abstract(sys.string("\f"))
+            sys.concrete(sys.stringLiteral("\\f")),
+            sys.abstract(sys.stringLiteral("\f"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\n")),
-            sys.abstract(sys.string("\n"))
+            sys.concrete(sys.stringLiteral("\\n")),
+            sys.abstract(sys.stringLiteral("\n"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\r")),
-            sys.abstract(sys.string("\r"))
+            sys.concrete(sys.stringLiteral("\\r")),
+            sys.abstract(sys.stringLiteral("\r"))
         ),
         sys.sequence(
-            sys.concrete(sys.string("\\t")),
-            sys.abstract(sys.string("\t"))
+            sys.concrete(sys.stringLiteral("\\t")),
+            sys.abstract(sys.stringLiteral("\t"))
         )
     )
 );
@@ -240,7 +240,7 @@ Object.assign(
     𝕊4.bindings.LBRACE,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string("{")),
+        sys.concrete(sys.stringLiteral("{")),
         𝕊4.bindings.WS
     )
 );
@@ -249,7 +249,7 @@ Object.assign(
     𝕊4.bindings.RBRACE,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string("}")),
+        sys.concrete(sys.stringLiteral("}")),
         𝕊4.bindings.WS
     )
 );
@@ -258,7 +258,7 @@ Object.assign(
     𝕊4.bindings.LBRACKET,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string("[")),
+        sys.concrete(sys.stringLiteral("[")),
         𝕊4.bindings.WS
     )
 );
@@ -267,7 +267,7 @@ Object.assign(
     𝕊4.bindings.RBRACKET,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string("]")),
+        sys.concrete(sys.stringLiteral("]")),
         𝕊4.bindings.WS
     )
 );
@@ -276,7 +276,7 @@ Object.assign(
     𝕊4.bindings.COLON,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string(":")),
+        sys.concrete(sys.stringLiteral(":")),
         𝕊4.bindings.WS
     )
 );
@@ -285,14 +285,14 @@ Object.assign(
     𝕊4.bindings.COMMA,
     sys.sequence(
         𝕊4.bindings.WS,
-        sys.concrete(sys.string(",")),
+        sys.concrete(sys.stringLiteral(",")),
         𝕊4.bindings.WS
     )
 );
 
 Object.assign(
     𝕊4.bindings.DOUBLE_QUOTE,
-    sys.concrete(sys.string("\""))
+    sys.concrete(sys.stringLiteral("\""))
 );
 
 Object.assign(
@@ -300,10 +300,10 @@ Object.assign(
     sys.apply(
         𝕊4.bindings.zeroOrMore,
         sys.selection(
-            sys.concrete(sys.string(" ")),
-            sys.concrete(sys.string("\t")),
-            sys.concrete(sys.string("\n")),
-            sys.concrete(sys.string("\r"))
+            sys.concrete(sys.stringLiteral(" ")),
+            sys.concrete(sys.stringLiteral("\t")),
+            sys.concrete(sys.stringLiteral("\n")),
+            sys.concrete(sys.stringLiteral("\r"))
         )
     )
 );
@@ -344,7 +344,7 @@ function initRuntimeSystem() {
         // TODO: ensure binding is exported/visible
         return module.bindings[name];
     }
-    function boolean(value) {
+    function booleanLiteral(value) {
         return {
             kind: 'rule',
             parse() {
@@ -544,7 +544,6 @@ function initRuntimeSystem() {
             },
         };
     }
-    // NB: can't call it 'null' here since its a reserved identifier
     const nullLiteral = {
         kind: 'rule',
         parse() {
@@ -666,7 +665,7 @@ function initRuntimeSystem() {
             },
         };
     }
-    function string(value) {
+    function stringLiteral(value) {
         return {
             kind: 'rule',
             parse() {
@@ -773,17 +772,17 @@ function initRuntimeSystem() {
         abstract,
         apply,
         bindingLookup,
-        boolean,
+        booleanLiteral,
         concrete,
         createMainExports,
         character,
         field,
         list,
-        null: nullLiteral,
+        nullLiteral,
         record,
         sequence,
         selection,
-        string,
+        stringLiteral,
         // export helpers too so std can reference them
         assert,
         concat,

@@ -60,10 +60,10 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         FieldExpression             {[a]: b}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
         ListExpression              [a, b, c]   [a]   []
-        NullExpression              null
-        BooleanExpression           false   true
+        NullLiteralExpression       null
+        BooleanLiteralExpression    false   true
         CharacterExpression         "a-z"   '0-9'   `A-F`
-        StringExpression            "foo"   'a string!'   `a`
+        StringLiteralExpression     "foo"   'a string!'   `a`
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression            import './foo'   import 'somelib'
 */
@@ -94,10 +94,10 @@ PrimaryExpression
     / ListExpression
     / ParenthesisedExpression
     / ImportExpression
-    / NullExpression
-    / BooleanExpression
+    / NullLiteralExpression
+    / BooleanLiteralExpression
     / CharacterExpression
-    / StringExpression
+    / StringLiteralExpression
     / ReferenceExpression
 
 SelectionExpression
@@ -160,12 +160,12 @@ ImportExpression
         return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 
-NullExpression
-    = NULL   { return {kind: 'NullExpression', value: null}; }
+NullLiteralExpression
+    = NULL   { return {kind: 'NullLiteralExpression'}; }
 
-BooleanExpression
-    = TRUE   { return {kind: 'BooleanExpression', value: true}; }
-    / FALSE   { return {kind: 'BooleanExpression', value: false}; }
+BooleanLiteralExpression
+    = TRUE   { return {kind: 'BooleanLiteralExpression', value: true}; }
+    / FALSE   { return {kind: 'BooleanLiteralExpression', value: false}; }
 
 CharacterExpression
     = "'"   !['-]   minValue:CHARACTER   "-"   !['-]   maxValue:CHARACTER   "'"
@@ -177,15 +177,15 @@ CharacterExpression
     / "`"   ![`-]   minValue:CHARACTER   "-"   ![`-]   maxValue:CHARACTER   "`"
     { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
 
-StringExpression
+StringLiteralExpression
     = !CharacterExpression   "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
     / !CharacterExpression   '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
     / !CharacterExpression   "`"   chars:(!"`"   CHARACTER)*   "`"
-    { return {kind: 'StringExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
 ReferenceExpression
     = name:IDENTIFIER
