@@ -39,6 +39,7 @@ export type Expression<M extends Metadata = {}> =
     | ListExpression<M>
     | ModuleExpression<M>
     | NullLiteralExpression<M>
+    | NumericLiteralExpression<M>
     | ParenthesisedExpression<M>
     | RecordExpression<M>
     | ReferenceExpression<M>
@@ -185,10 +186,19 @@ export interface ModuleExpression<M extends Metadata = {}> {
     readonly meta: M[this['kind']];
 }
 
+
 export interface NullLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'NullLiteralExpression';
     readonly meta: M[this['kind']];
 }
+
+
+export interface NumericLiteralExpression<M extends Metadata = {}> {
+    readonly kind: 'NumericLiteralExpression';
+    readonly value: number;
+    readonly meta: M[this['kind']];
+}
+
 
 export interface ParenthesisedExpression<M extends Metadata = {}> {
     readonly kind: 'ParenthesisedExpression';

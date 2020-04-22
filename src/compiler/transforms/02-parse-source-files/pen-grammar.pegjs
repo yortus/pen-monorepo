@@ -98,6 +98,7 @@ PrimaryExpression
     / BooleanLiteralExpression
     / CharacterExpression
     / StringLiteralExpression
+    / NumericLiteralExpression
     / ReferenceExpression
 
 SelectionExpression
@@ -187,12 +188,22 @@ StringLiteralExpression
     / !CharacterExpression   "`"   chars:(!"`"   CHARACTER)*   "`"
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
+NumericLiteralExpression
+    = DecimalLiteral
+    {
+        let n = parseFloat(text());
+        if (!Number.isFinite(n)) error('cannot represent numeric literal'); // TODO: also ensure exact representation, aka safenum?
+        return {kind: 'NumericLiteralExpression', value: n}
+    }
+
+    // TODO: HexIntegerLiteral
+
 ReferenceExpression
     = name:IDENTIFIER
     { return {kind: 'ReferenceExpression', name}; }
 
 
-// ====================   Fields and Elements   ====================
+// ====================   Record/List Parts   ====================
 StaticFieldList
     = !","   head:StaticField?   tail:((__   ",")?   __   StaticField)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
@@ -204,6 +215,15 @@ StaticField
 ElementList
     = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
+
+
+// ====================   Numeric literal parts   ====================
+DecimalLiteral
+    = [+-]?   [0-9]+   ("."   [0-9]*)?   ExponentPart?   { return text(); }
+    / [+-]?   "."   [0-9]+   ExponentPart?   { return text(); }
+
+ExponentPart
+    = [eE]   [+-]?   [0-9]+
 
 
 // ====================   Literal characters and escape sequences   ====================

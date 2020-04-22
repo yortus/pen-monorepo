@@ -40,6 +40,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ModulePattern': return {...n, names: n.names.map(rec)};
             case 'ModulePatternName': return n;
             case 'NullLiteralExpression': return n;
+            case 'NumericLiteralExpression': return n;
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'RecordExpression': return {...n, fields: n.fields.map(rec)};

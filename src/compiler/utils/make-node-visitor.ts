@@ -40,6 +40,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ModulePattern': return n.names.forEach(rec);
             case 'ModulePatternName': return;
             case 'NullLiteralExpression': return;
+            case 'NumericLiteralExpression': return;
             case 'ParenthesisedExpression': return rec(n.expression);
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
             case 'RecordExpression': return n.fields.forEach(rec);

@@ -222,6 +222,10 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`sys.nullLiteral`);
             return;
 
+        case 'NumericLiteralExpression':
+            emit.text(`sys.numericLiteral(${expr.value})`);
+            return;
+
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
             emitExpression(emit, expr.expression, symbolTable);

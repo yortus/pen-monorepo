@@ -104,6 +104,7 @@ return {
     field,
     list,
     nullLiteral,
+    numericLiteral,
     record,
     sequence,
     selection,

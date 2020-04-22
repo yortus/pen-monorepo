@@ -6,7 +6,7 @@ TODO 2020:
     [ ] more numeric rules
     [ ] consider having global symbols/identifiers (instead of `import 'std'`)
         - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`
-    [ ] string/numeric literals have both text and ast forms, but null/boolean literals have only ast form. Inconsistency here?
+    [ ] string literals have both text and ast forms, but null/boolean/numeric literals have only ast form. Inconsistency here?
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}
