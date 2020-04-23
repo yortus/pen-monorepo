@@ -2,6 +2,7 @@ TODO 2020:
     [x] `float64`
     [x] numeric literals
     [ ] `unicode{base=? minDigits=? maxDigits=?}` in `std`
+    [ ] unicode surrogate pairs - how to parse/unparse them? Harder than just plain charCode <-> char
     [ ] `char` rule (was `anyChar`, and move to `std`)
     [ ] `char{min=? max=?}` lambda
     [ ] export `abstract` and `concrete` lambdas from `std` module
