@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊6 = {
+const 𝕊8 = {
     kind: 'module',
     bindings: {
         memoise: {},
@@ -20,36 +20,36 @@ const 𝕊6 = {
 
 // -------------------- aliases --------------------
 
-𝕊6.bindings.start = 𝕊6.bindings.expr;
+𝕊8.bindings.start = 𝕊8.bindings.expr;
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊6.bindings.memoise,
+        𝕊8.bindings.memoise,
         sys.bindingLookup(rhs, 'memoise')
     );
     Object.assign(
-        𝕊6.bindings.float64,
+        𝕊8.bindings.float64,
         sys.bindingLookup(rhs, 'float64')
     );
 }
 
 Object.assign(
-    𝕊6.bindings.expr,
+    𝕊8.bindings.expr,
     sys.apply(
-        𝕊6.bindings.memoise,
+        𝕊8.bindings.memoise,
         sys.selection(
-            𝕊6.bindings.add,
-            𝕊6.bindings.sub,
-            𝕊6.bindings.term
+            𝕊8.bindings.add,
+            𝕊8.bindings.sub,
+            𝕊8.bindings.term
         )
     )
 );
 
 Object.assign(
-    𝕊6.bindings.add,
+    𝕊8.bindings.add,
     sys.record([
         {
             name: 'type',
@@ -57,20 +57,20 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊6.bindings.expr,
+            value: 𝕊8.bindings.expr,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.stringLiteral("+")),
-                𝕊6.bindings.term
+                𝕊8.bindings.term
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊6.bindings.sub,
+    𝕊8.bindings.sub,
     sys.record([
         {
             name: 'type',
@@ -78,32 +78,32 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊6.bindings.expr,
+            value: 𝕊8.bindings.expr,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.stringLiteral("-")),
-                𝕊6.bindings.term
+                𝕊8.bindings.term
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊6.bindings.term,
+    𝕊8.bindings.term,
     sys.apply(
-        𝕊6.bindings.memoise,
+        𝕊8.bindings.memoise,
         sys.selection(
-            𝕊6.bindings.mul,
-            𝕊6.bindings.div,
-            𝕊6.bindings.factor
+            𝕊8.bindings.mul,
+            𝕊8.bindings.div,
+            𝕊8.bindings.factor
         )
     )
 );
 
 Object.assign(
-    𝕊6.bindings.mul,
+    𝕊8.bindings.mul,
     sys.sequence(
         sys.field(
             sys.abstract(sys.stringLiteral("type")),
@@ -112,21 +112,21 @@ Object.assign(
         sys.record([
             {
                 name: 'lhs',
-                value: 𝕊6.bindings.term,
+                value: 𝕊8.bindings.term,
             },
         ]),
         sys.field(
             sys.abstract(sys.stringLiteral("rhs")),
             sys.sequence(
                 sys.concrete(sys.stringLiteral("*")),
-                𝕊6.bindings.factor
+                𝕊8.bindings.factor
             )
         )
     )
 );
 
 Object.assign(
-    𝕊6.bindings.div,
+    𝕊8.bindings.div,
     sys.record([
         {
             name: 'type',
@@ -134,25 +134,25 @@ Object.assign(
         },
         {
             name: 'lhs',
-            value: 𝕊6.bindings.term,
+            value: 𝕊8.bindings.term,
         },
         {
             name: 'rhs',
             value: sys.sequence(
                 sys.concrete(sys.stringLiteral("/")),
-                𝕊6.bindings.factor
+                𝕊8.bindings.factor
             ),
         },
     ])
 );
 
 Object.assign(
-    𝕊6.bindings.factor,
+    𝕊8.bindings.factor,
     sys.selection(
-        𝕊6.bindings.float64,
+        𝕊8.bindings.float64,
         sys.sequence(
             sys.concrete(sys.character("(", "(")),
-            𝕊6.bindings.expr,
+            𝕊8.bindings.expr,
             sys.concrete(sys.character(")", ")"))
         )
     )
@@ -160,7 +160,7 @@ Object.assign(
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊6.bindings.start);
+module.exports = sys.createMainExports(𝕊8.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 
@@ -697,14 +697,14 @@ function initStandardLibrary() {
             let { IDOC, IMEM, INUL, ONUL } = stateₒ;
             if (!sys.isString(IDOC))
                 return false;
-            const len = IDOC.length;
+            const LEN = IDOC.length;
             const EOS = 0;
             let digitCount = 0;
             // Parse optional '+' or '-' sign
             let c = IDOC.charCodeAt(IMEM);
             if (c === PLUS_SIGN || c === MINUS_SIGN) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse 0..M digits
             while (true) {
@@ -712,12 +712,12 @@ function initStandardLibrary() {
                     break;
                 digitCount += 1;
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse optional '.'
             if (c === DECIMAL_POINT) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse 0..M digits
             while (true) {
@@ -725,7 +725,7 @@ function initStandardLibrary() {
                     break;
                 digitCount += 1;
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Ensure we have parsed at least one significant digit
             if (digitCount === 0)
@@ -733,11 +733,11 @@ function initStandardLibrary() {
             // Parse optional exponent
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 // Parse optional '+' or '-' sign
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
                     IMEM += 1;
-                    c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
                 // Parse 1..M digits
                 digitCount = 0;
@@ -746,7 +746,7 @@ function initStandardLibrary() {
                         break;
                     digitCount += 1;
                     IMEM += 1;
-                    c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
                 if (digitCount === 0)
                     return false;
@@ -1122,6 +1122,61 @@ function initTemporaryExperiments() {
             };
         },
     };
+    const unicode = {
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        apply(expr) {
+            // TODO: base, minDigits, maxDigits may not be defined yet. Is this fine, or a bug?
+            return {
+                bindings: {},
+                parse() {
+                    // TODO: move resolution of base/minDigits/maxDigits out of here, inefficient to repeat this work
+                    // on every parse/unparse call. It's here for now due to the above TODO (may not be defined when the
+                    // unicode() function is first called).
+                    sys.assert(expr.bindings);
+                    // TODO: temp testing...
+                    let { base, minDigits, maxDigits } = { base: 16, minDigits: 4, maxDigits: 4 };
+                    // TODO: was... let {base, minDigits, maxDigits} = expr.bindings;
+                    sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+                    sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+                    sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+                    // Construct a regex to match the digits
+                    let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
+                    let regex = RegExp(pattern, 'i');
+                    let { IDOC, IMEM } = sys.getState();
+                    if (!sys.isString(IDOC))
+                        return false;
+                    const LEN = IDOC.length;
+                    const EOS = '';
+                    let len = 0;
+                    let num = ''; // TODO: fix this - should actually keep count
+                    let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                    while (true) {
+                        if (!regex.test(c))
+                            break;
+                        num += c;
+                        IMEM += 1;
+                        len += 1;
+                        if (len === maxDigits)
+                            break;
+                        c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                    }
+                    if (len < minDigits)
+                        return false;
+                    sys.setInState(IDOC, IMEM);
+                    let result = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                    sys.setOutState(result);
+                    return true;
+                },
+                unparse: () => {
+                    // TODO: implement
+                    return false;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        },
+    };
     const zeroOrMore = {
         bindings: {},
         parse: sys.NOT_A_RULE,
@@ -1175,6 +1230,7 @@ function initTemporaryExperiments() {
             epsilon,
             maybe,
             not,
+            unicode,
             zeroOrMore,
         },
         parse: sys.NOT_A_RULE,

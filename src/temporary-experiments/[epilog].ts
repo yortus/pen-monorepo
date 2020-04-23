@@ -5,6 +5,7 @@ return {
         epsilon,
         maybe,
         not,
+        unicode,
         zeroOrMore,
     },
     parse: sys.NOT_A_RULE,

@@ -15,6 +15,11 @@ describe(`Compiling and executing the 'json.pen' program`, async () => {
         {text: '[]', ast: []},
         {text: '123', ast: 123},
         {text: '"abc"', ast: 'abc'},
+        {
+            // NB: JSON doesn't accept some number formats that JS does - eg +3, 1., .1
+            text: '[3.14, 5e-50, 200e3, -1.004]', // TODO: add more corner cases...
+            ast: [3.14, 5e-50, 200e3, -1.004],
+        },
         {text: '"\\t\\tabc\\r\\ndef"', ast: '\t\tabc\r\ndef'},
         {
             text: '[null, true, false]',
@@ -44,8 +49,13 @@ describe(`Compiling and executing the 'json.pen' program`, async () => {
             }`,
             ast: {foo: 'bar', baz: [1, null, 57, 'abc.def', {x: {x1: 0, x2: {eee: []}}}]},
         },
-        // TODO: unicode escapes in strings
-        // TODO: floating point numbers
+
+        // TODO: add more unicode escapes in strings, corner cases (eg surrogate pairs - do they work in JSON?)
+        {
+            text: '"\\u0041+\s\\u2368"',
+            ast: 'A+ ⍨',
+        },
+
     ];
 
     it('compiles', async () => {

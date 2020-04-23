@@ -1,9 +1,13 @@
 TODO 2020:
     [x] `float64`
-    [ ] make `int32` into core syntax (no need to import)
-    [ ] numeric literals
+    [x] numeric literals
+    [ ] `unicode{base=? minDigits=? maxDigits=?}` in `std`
+    [ ] `char` rule (was `anyChar`, and move to `std`)
+    [ ] `char{min=? max=?}` lambda
+    [ ] export `abstract` and `concrete` lambdas from `std` module
+    [ ] core syntax for predicates - `not` and `is`/`if`
     [ ] integer ranges
-    [ ] more numeric rules
+    [ ] more numeric rules - eg `HexIntegerLiteral`, `number`
     [ ] consider having global symbols/identifiers (instead of `import 'std'`)
         - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`
     [ ] string literals have both text and ast forms, but null/boolean/numeric literals have only ast form. Inconsistency here?

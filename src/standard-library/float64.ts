@@ -8,7 +8,7 @@ const float64: PenVal = {
         let stateₒ = sys.getState();
         let {IDOC, IMEM, INUL, ONUL} = stateₒ;
         if (!sys.isString(IDOC)) return false;
-        const len = IDOC.length;
+        const LEN = IDOC.length;
         const EOS = 0;
         let digitCount = 0;
 
@@ -16,7 +16,7 @@ const float64: PenVal = {
         let c = IDOC.charCodeAt(IMEM);
         if (c === PLUS_SIGN || c === MINUS_SIGN) {
             IMEM += 1;
-            c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+            c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
         }
 
         // Parse 0..M digits
@@ -24,13 +24,13 @@ const float64: PenVal = {
             if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
             digitCount += 1;
             IMEM += 1;
-            c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+            c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
         }
 
         // Parse optional '.'
         if (c === DECIMAL_POINT) {
             IMEM += 1;
-            c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+            c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
         }
 
         // Parse 0..M digits
@@ -38,7 +38,7 @@ const float64: PenVal = {
             if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
             digitCount += 1;
             IMEM += 1;
-            c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+            c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
         }
 
         // Ensure we have parsed at least one significant digit
@@ -47,12 +47,12 @@ const float64: PenVal = {
         // Parse optional exponent
         if (c === UPPERCASE_E || c === LOWERCASE_E) {
             IMEM += 1;
-            c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+            c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
 
             // Parse optional '+' or '-' sign
             if (c === PLUS_SIGN || c === MINUS_SIGN) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
 
             // Parse 1..M digits
@@ -61,7 +61,7 @@ const float64: PenVal = {
                 if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
                 digitCount += 1;
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             if (digitCount === 0) return false;
         }

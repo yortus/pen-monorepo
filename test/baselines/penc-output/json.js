@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊4 = {
+const 𝕊5 = {
     kind: 'module',
     bindings: {
         float64: {},
@@ -10,6 +10,7 @@ const 𝕊4 = {
         maybe: {},
         not: {},
         zeroOrMore: {},
+        unicode: {},
         start: {},
         Value: {},
         False: {},
@@ -33,16 +34,25 @@ const 𝕊4 = {
     },
 };
 
+const 𝕊6 = {
+    kind: 'module',
+    bindings: {
+        base: {},
+        minDigits: {},
+        maxDigits: {},
+    },
+};
+
 // -------------------- aliases --------------------
 
-𝕊4.bindings.Number = 𝕊4.bindings.float64;
+𝕊5.bindings.Number = 𝕊5.bindings.float64;
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\json.pen --------------------
 
 {
     let rhs = std;
     Object.assign(
-        𝕊4.bindings.float64,
+        𝕊5.bindings.float64,
         sys.bindingLookup(rhs, 'float64')
     );
 }
@@ -50,47 +60,51 @@ const 𝕊4 = {
 {
     let rhs = experiments;
     Object.assign(
-        𝕊4.bindings.anyChar,
+        𝕊5.bindings.anyChar,
         sys.bindingLookup(rhs, 'anyChar')
     );
     Object.assign(
-        𝕊4.bindings.maybe,
+        𝕊5.bindings.maybe,
         sys.bindingLookup(rhs, 'maybe')
     );
     Object.assign(
-        𝕊4.bindings.not,
+        𝕊5.bindings.not,
         sys.bindingLookup(rhs, 'not')
     );
     Object.assign(
-        𝕊4.bindings.zeroOrMore,
+        𝕊5.bindings.zeroOrMore,
         sys.bindingLookup(rhs, 'zeroOrMore')
+    );
+    Object.assign(
+        𝕊5.bindings.unicode,
+        sys.bindingLookup(rhs, 'unicode')
     );
 }
 
 Object.assign(
-    𝕊4.bindings.start,
+    𝕊5.bindings.start,
     sys.sequence(
-        𝕊4.bindings.WS,
-        𝕊4.bindings.Value,
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS,
+        𝕊5.bindings.Value,
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.Value,
+    𝕊5.bindings.Value,
     sys.selection(
-        𝕊4.bindings.False,
-        𝕊4.bindings.Null,
-        𝕊4.bindings.True,
-        𝕊4.bindings.Object,
-        𝕊4.bindings.Array,
-        𝕊4.bindings.Number,
-        𝕊4.bindings.String
+        𝕊5.bindings.False,
+        𝕊5.bindings.Null,
+        𝕊5.bindings.True,
+        𝕊5.bindings.Object,
+        𝕊5.bindings.Array,
+        𝕊5.bindings.Number,
+        𝕊5.bindings.String
     )
 );
 
 Object.assign(
-    𝕊4.bindings.False,
+    𝕊5.bindings.False,
     sys.sequence(
         sys.concrete(sys.stringLiteral("false")),
         sys.booleanLiteral(false)
@@ -98,7 +112,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊4.bindings.Null,
+    𝕊5.bindings.Null,
     sys.sequence(
         sys.concrete(sys.stringLiteral("null")),
         sys.nullLiteral
@@ -106,7 +120,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊4.bindings.True,
+    𝕊5.bindings.True,
     sys.sequence(
         sys.concrete(sys.stringLiteral("true")),
         sys.booleanLiteral(true)
@@ -114,92 +128,92 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊4.bindings.Object,
+    𝕊5.bindings.Object,
     sys.sequence(
-        𝕊4.bindings.LBRACE,
+        𝕊5.bindings.LBRACE,
         sys.selection(
-            𝕊4.bindings.Properties,
+            𝕊5.bindings.Properties,
             sys.record([
             ])
         ),
-        𝕊4.bindings.RBRACE
+        𝕊5.bindings.RBRACE
     )
 );
 
 Object.assign(
-    𝕊4.bindings.Properties,
+    𝕊5.bindings.Properties,
     sys.sequence(
         sys.field(
-            𝕊4.bindings.String,
+            𝕊5.bindings.String,
             sys.sequence(
-                𝕊4.bindings.COLON,
-                𝕊4.bindings.Value
+                𝕊5.bindings.COLON,
+                𝕊5.bindings.Value
             )
         ),
         sys.apply(
-            𝕊4.bindings.maybe,
+            𝕊5.bindings.maybe,
             sys.sequence(
-                𝕊4.bindings.COMMA,
-                𝕊4.bindings.Properties
+                𝕊5.bindings.COMMA,
+                𝕊5.bindings.Properties
             )
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.Array,
+    𝕊5.bindings.Array,
     sys.sequence(
-        𝕊4.bindings.LBRACKET,
+        𝕊5.bindings.LBRACKET,
         sys.selection(
-            𝕊4.bindings.Elements,
+            𝕊5.bindings.Elements,
             sys.list([
             ])
         ),
-        𝕊4.bindings.RBRACKET
+        𝕊5.bindings.RBRACKET
     )
 );
 
 Object.assign(
-    𝕊4.bindings.Elements,
+    𝕊5.bindings.Elements,
     sys.sequence(
         sys.list([
-            𝕊4.bindings.Value,
+            𝕊5.bindings.Value,
         ]),
         sys.apply(
-            𝕊4.bindings.maybe,
+            𝕊5.bindings.maybe,
             sys.sequence(
-                𝕊4.bindings.COMMA,
-                𝕊4.bindings.Elements
+                𝕊5.bindings.COMMA,
+                𝕊5.bindings.Elements
             )
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.String,
+    𝕊5.bindings.String,
     sys.sequence(
-        𝕊4.bindings.DOUBLE_QUOTE,
+        𝕊5.bindings.DOUBLE_QUOTE,
         sys.apply(
-            𝕊4.bindings.zeroOrMore,
-            𝕊4.bindings.CHAR
+            𝕊5.bindings.zeroOrMore,
+            𝕊5.bindings.CHAR
         ),
-        𝕊4.bindings.DOUBLE_QUOTE
+        𝕊5.bindings.DOUBLE_QUOTE
     )
 );
 
 Object.assign(
-    𝕊4.bindings.CHAR,
+    𝕊5.bindings.CHAR,
     sys.selection(
         sys.sequence(
             sys.apply(
-                𝕊4.bindings.not,
+                𝕊5.bindings.not,
                 sys.selection(
                     sys.character("\u0000", "\u001f"),
                     sys.stringLiteral("\""),
                     sys.stringLiteral("\\")
                 )
             ),
-            𝕊4.bindings.anyChar
+            𝕊5.bindings.anyChar
         ),
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\\"")),
@@ -232,73 +246,80 @@ Object.assign(
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\t")),
             sys.abstract(sys.stringLiteral("\t"))
+        ),
+        sys.sequence(
+            sys.concrete(sys.stringLiteral("\\u")),
+            sys.apply(
+                𝕊5.bindings.unicode,
+                𝕊6
+            )
         )
     )
 );
 
 Object.assign(
-    𝕊4.bindings.LBRACE,
+    𝕊5.bindings.LBRACE,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("{")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.RBRACE,
+    𝕊5.bindings.RBRACE,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("}")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.LBRACKET,
+    𝕊5.bindings.LBRACKET,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("[")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.RBRACKET,
+    𝕊5.bindings.RBRACKET,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("]")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.COLON,
+    𝕊5.bindings.COLON,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral(":")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.COMMA,
+    𝕊5.bindings.COMMA,
     sys.sequence(
-        𝕊4.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral(",")),
-        𝕊4.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊4.bindings.DOUBLE_QUOTE,
+    𝕊5.bindings.DOUBLE_QUOTE,
     sys.concrete(sys.stringLiteral("\""))
 );
 
 Object.assign(
-    𝕊4.bindings.WS,
+    𝕊5.bindings.WS,
     sys.apply(
-        𝕊4.bindings.zeroOrMore,
+        𝕊5.bindings.zeroOrMore,
         sys.selection(
             sys.concrete(sys.stringLiteral(" ")),
             sys.concrete(sys.stringLiteral("\t")),
@@ -308,9 +329,24 @@ Object.assign(
     )
 );
 
+Object.assign(
+    𝕊6.bindings.base,
+    sys.numericLiteral(16)
+);
+
+Object.assign(
+    𝕊6.bindings.minDigits,
+    sys.numericLiteral(4)
+);
+
+Object.assign(
+    𝕊6.bindings.maxDigits,
+    sys.numericLiteral(4)
+);
+
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊4.bindings.start);
+module.exports = sys.createMainExports(𝕊5.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 
@@ -847,14 +883,14 @@ function initStandardLibrary() {
             let { IDOC, IMEM, INUL, ONUL } = stateₒ;
             if (!sys.isString(IDOC))
                 return false;
-            const len = IDOC.length;
+            const LEN = IDOC.length;
             const EOS = 0;
             let digitCount = 0;
             // Parse optional '+' or '-' sign
             let c = IDOC.charCodeAt(IMEM);
             if (c === PLUS_SIGN || c === MINUS_SIGN) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse 0..M digits
             while (true) {
@@ -862,12 +898,12 @@ function initStandardLibrary() {
                     break;
                 digitCount += 1;
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse optional '.'
             if (c === DECIMAL_POINT) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Parse 0..M digits
             while (true) {
@@ -875,7 +911,7 @@ function initStandardLibrary() {
                     break;
                 digitCount += 1;
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             // Ensure we have parsed at least one significant digit
             if (digitCount === 0)
@@ -883,11 +919,11 @@ function initStandardLibrary() {
             // Parse optional exponent
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
                 IMEM += 1;
-                c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 // Parse optional '+' or '-' sign
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
                     IMEM += 1;
-                    c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
                 // Parse 1..M digits
                 digitCount = 0;
@@ -896,7 +932,7 @@ function initStandardLibrary() {
                         break;
                     digitCount += 1;
                     IMEM += 1;
-                    c = IMEM < len ? IDOC.charCodeAt(IMEM) : EOS;
+                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
                 if (digitCount === 0)
                     return false;
@@ -1272,6 +1308,61 @@ function initTemporaryExperiments() {
             };
         },
     };
+    const unicode = {
+        bindings: {},
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        apply(expr) {
+            // TODO: base, minDigits, maxDigits may not be defined yet. Is this fine, or a bug?
+            return {
+                bindings: {},
+                parse() {
+                    // TODO: move resolution of base/minDigits/maxDigits out of here, inefficient to repeat this work
+                    // on every parse/unparse call. It's here for now due to the above TODO (may not be defined when the
+                    // unicode() function is first called).
+                    sys.assert(expr.bindings);
+                    // TODO: temp testing...
+                    let { base, minDigits, maxDigits } = { base: 16, minDigits: 4, maxDigits: 4 };
+                    // TODO: was... let {base, minDigits, maxDigits} = expr.bindings;
+                    sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+                    sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+                    sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+                    // Construct a regex to match the digits
+                    let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
+                    let regex = RegExp(pattern, 'i');
+                    let { IDOC, IMEM } = sys.getState();
+                    if (!sys.isString(IDOC))
+                        return false;
+                    const LEN = IDOC.length;
+                    const EOS = '';
+                    let len = 0;
+                    let num = ''; // TODO: fix this - should actually keep count
+                    let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                    while (true) {
+                        if (!regex.test(c))
+                            break;
+                        num += c;
+                        IMEM += 1;
+                        len += 1;
+                        if (len === maxDigits)
+                            break;
+                        c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                    }
+                    if (len < minDigits)
+                        return false;
+                    sys.setInState(IDOC, IMEM);
+                    let result = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                    sys.setOutState(result);
+                    return true;
+                },
+                unparse: () => {
+                    // TODO: implement
+                    return false;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        },
+    };
     const zeroOrMore = {
         bindings: {},
         parse: sys.NOT_A_RULE,
@@ -1325,6 +1416,7 @@ function initTemporaryExperiments() {
             epsilon,
             maybe,
             not,
+            unicode,
             zeroOrMore,
         },
         parse: sys.NOT_A_RULE,
