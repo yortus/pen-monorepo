@@ -18,11 +18,6 @@ export type Node<M extends Metadata = {}> =
     | StaticField<M>;
 
 
-export type Binding<M extends Metadata = {}> =
-    | InternalBinding<M>
-    | ExportedBinding<M>;
-
-
 export type Pattern<M extends Metadata = {}> =
     | ModulePattern<M>
     | VariablePattern<M>;
@@ -83,19 +78,11 @@ export interface Module<M extends Metadata = {}> {
 
 
 // ====================   Binding nodes   ====================
-export interface ExportedBinding<M extends Metadata = {}> {
+export interface Binding<M extends Metadata = {}> {
     readonly kind: 'Binding';
     readonly pattern: Pattern<M>;
     readonly value: Expression<M>;
-    readonly exported: true;
-    readonly meta: M[this['kind']];
-}
-
-export interface InternalBinding<M extends Metadata = {}> {
-    readonly kind: 'Binding';
-    readonly pattern: Pattern<M>;
-    readonly value: Expression<M>;
-    readonly exported?: false;
+    readonly exported: boolean;
     readonly meta: M[this['kind']];
 }
 

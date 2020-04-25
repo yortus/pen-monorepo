@@ -1,7 +1,8 @@
 import {Scope} from '../../scope';
+import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
 
 
-export interface SymbolReferences {
+export type Metadata = OldMetadata & {
     ImportExpression: {
         readonly scope: Scope;
     };
@@ -9,4 +10,4 @@ export interface SymbolReferences {
     ReferenceExpression: {
         readonly symbolId: number;
     };
-}
+};

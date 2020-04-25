@@ -6,6 +6,7 @@ export interface Symbol {
     id: number;
     name: string;
     scope: Scope;
+    constant?: {value: unknown};
 }
 
 

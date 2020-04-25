@@ -1,15 +1,15 @@
 import {Node, Program} from '../../ast-nodes';
 import {EXPERIMENTS_SCOPE, STD_SCOPE} from '../../scope';
 import {assert, makeNodeMapper} from '../../utils';
-import {SymbolDefinitions} from '../03-create-symbol-definitions';
-import {SymbolReferences} from './symbol-references';
+import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
+import {Metadata as NewMetadata} from './metadata';
 
 
 // TODO: doc...
-export function resolveSymbolReferences(program: Program<SymbolDefinitions>) {
+export function resolveSymbolReferences(program: Program<OldMetadata>) {
     const {rootScope, symbolTable} = program.meta;
     let currentScope = rootScope;
-    let mapNode = makeNodeMapper<Node<SymbolDefinitions>, Node<SymbolDefinitions & SymbolReferences>>();
+    let mapNode = makeNodeMapper<Node<OldMetadata>, Node<NewMetadata>>();
     let result = mapNode(program, rec => ({
 
         // Keep track of the current scope.

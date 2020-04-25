@@ -3,7 +3,6 @@ const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
 const 𝕊8 = {
-    kind: 'module',
     bindings: {
         memoise: {},
         float64: {},
@@ -19,22 +18,11 @@ const 𝕊8 = {
 };
 
 // -------------------- aliases --------------------
-
+𝕊8.bindings.memoise = std.bindings.memoise;
+𝕊8.bindings.float64 = std.bindings.float64;
 𝕊8.bindings.start = 𝕊8.bindings.expr;
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
-
-{
-    let rhs = std;
-    Object.assign(
-        𝕊8.bindings.memoise,
-        sys.bindingLookup(rhs, 'memoise')
-    );
-    Object.assign(
-        𝕊8.bindings.float64,
-        sys.bindingLookup(rhs, 'float64')
-    );
-}
 
 Object.assign(
     𝕊8.bindings.expr,
@@ -187,11 +175,6 @@ function initRuntimeSystem() {
     }
     function apply(lambda, arg) {
         return lambda.apply(arg);
-    }
-    function bindingLookup(module, name) {
-        assert(module.bindings[name]);
-        // TODO: ensure binding is exported/visible
-        return module.bindings[name];
     }
     function booleanLiteral(value) {
         return {
@@ -656,7 +639,6 @@ function initRuntimeSystem() {
     return {
         abstract,
         apply,
-        bindingLookup,
         booleanLiteral,
         concrete,
         createMainExports,
@@ -868,6 +850,26 @@ function initStandardLibrary() {
     // These constants are used by the int32 rule.
     const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
     const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
+    // TODO: temp testing...
+    // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
+    const DIGIT_VALUES = [
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 80, 80, 80, 80, 80, 80,
+        80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
+        80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    ];
     const memoise = {
         bindings: {},
         parse: sys.NOT_A_RULE,

@@ -3,9 +3,9 @@ import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function makeNodeVisitor<N extends Node>() {
-    return function visitNode<SpecificNode extends N, VisObj>(node: SpecificNode, makeVisitors: MakeVisitors<N, VisObj>) {
-        const rec: <NN extends N>(n: NN) => void = n => {
+export function makeNodeVisitor<N extends Node, R = void>() {
+    return function visitNode<SpecificNode extends N, VisObj>(node: SpecificNode, makeVisitors: MakeVisitors<N, VisObj, R>) {
+        const rec: <NN extends N>(n: NN) => R = n => {
             try {
                 let visFn = visitors[n.kind];
                 return visFn ? visFn(n) : defaultVisitors(n);
@@ -26,29 +26,29 @@ export function makeNodeVisitor<N extends Node>() {
 function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) => void) {
     return (n: Node): void => {
         switch (n.kind) {
-            case 'ApplicationExpression': return rec(n.lambda), rec(n.argument);
-            case 'Binding': return rec(n.pattern), rec(n.value);
-            case 'BindingLookupExpression': return rec(n.module);
+            case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
+            case 'Binding': return rec(n.pattern), rec(n.value), undefined;
+            case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
             case 'CharacterExpression': return;
-            case 'FieldExpression': return rec(n.name), rec(n.value);
+            case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
-            case 'ListExpression': return n.elements.forEach(rec);
-            case 'Module': return n.bindings.forEach(rec);
-            case 'ModuleExpression': return rec(n.module);
-            case 'ModulePattern': return n.names.forEach(rec);
+            case 'ListExpression': return n.elements.forEach(rec), undefined;
+            case 'Module': return n.bindings.forEach(rec), undefined;
+            case 'ModuleExpression': return rec(n.module), undefined;
+            case 'ModulePattern': return n.names.forEach(rec), undefined;
             case 'ModulePatternName': return;
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
-            case 'ParenthesisedExpression': return rec(n.expression);
+            case 'ParenthesisedExpression': return rec(n.expression), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
-            case 'RecordExpression': return n.fields.forEach(rec);
+            case 'RecordExpression': return n.fields.forEach(rec), undefined;
             case 'ReferenceExpression': return;
-            case 'SelectionExpression': return n.expressions.forEach(rec);
-            case 'SequenceExpression': return n.expressions.forEach(rec);
-            case 'SourceFile': return rec(n.module);
-            case 'StaticField': return rec(n.value);
+            case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
+            case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
+            case 'SourceFile': return rec(n.module), undefined;
+            case 'StaticField': return rec(n.value), undefined;
             case 'StringLiteralExpression': return;
             case 'VariablePattern': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
@@ -58,11 +58,11 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
 
 
 // TODO: doc...
-type MakeVisitors<N extends Node, VisObj> =
-    (rec: <SpecificNode extends N>(n: SpecificNode) => void) => (
+type MakeVisitors<N extends Node, VisObj, R> =
+    (rec: <SpecificNode extends N>(n: SpecificNode) => R) => (
         & VisObj
-        & {[K in keyof VisObj]: K extends Node['kind'] ? unknown : never}
-        & {[K in Node['kind']]?: (n: NodeOfKind<N, K>) => void}
+        & {[K in keyof VisObj]: K extends Node['kind'] ? unknown : never}   // all keys must be node kinds
+        & {[K in Node['kind']]?: (n: NodeOfKind<N, K>) => R}                // all values must be visitor functions
     );
 
 

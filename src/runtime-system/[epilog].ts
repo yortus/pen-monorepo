@@ -96,7 +96,6 @@ function NOT_A_RULE(): never { throw new Error('Not a rule'); };
 return {
     abstract,
     apply,
-    bindingLookup,
     booleanLiteral,
     concrete,
     createMainExports,

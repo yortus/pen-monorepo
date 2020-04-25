@@ -2,16 +2,15 @@ import * as AstNodes from '../../ast-nodes';
 import {Scope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
-import {SymbolDefinitions} from '../03-create-symbol-definitions';
-import {SymbolReferences} from '../04-resolve-symbol-references';
+import {Metadata} from '../05-resolve-constant-values';
 import {emitInitRuntimeSystem} from './emit-init-runtime-system';
 import {emitInitStandardLibrary} from './emit-init-standard-library';
 import {emitInitTemporaryExperiments} from './emit-init-temporary-experiments';
 import {Emitter, makeEmitter} from './emitter';
 
 
-type Program = AstNodes.Program<SymbolDefinitions & SymbolReferences>;
-type Expression = AstNodes.Expression<SymbolDefinitions & SymbolReferences>;
+type Program = AstNodes.Program<Metadata>;
+type Expression = AstNodes.Expression<Metadata>;
 
 
 // TODO: doc...
@@ -69,9 +68,9 @@ function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
     visitScope(rootScope);
 
     function visitScope(scope: Scope) {
+        // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
         if (scope.parent) { // TODO: skip the root scope for now... revise?
             emit.down(2).text(`const 𝕊${scope.id} = {`).indent();
-            emit.down(1).text(`kind: 'module',`);
             emit.down(1).text(`bindings: {`).indent();
             for (let symbol of scope.symbols.values()) {
                 emit.down(1).text(`${symbol.name}: {},`);
@@ -86,18 +85,25 @@ function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
 
 function emitSymbolAliases(emit: Emitter, program: Program) {
     const {symbolTable} = program.meta;
-    let visitNode = makeNodeVisitor<AstNodes.Node<SymbolDefinitions & SymbolReferences>>();
+    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     emit.down(2).text(`// -------------------- aliases --------------------`);
     visitNode(program, rec => ({
         Module: module => {
             for (let {pattern, value} of module.bindings) {
-                if (pattern.kind === 'VariablePattern') {
-                    let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
-                    if (value.kind === 'ReferenceExpression' || value.kind === 'ImportExpression') {
-                        emit.down(2).text(`𝕊${scope.id}.bindings.${name} = `);
-                        emitExpression(emit, value, symbolTable);
-                        emit.text(';');
+                if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
+                    // Each ModulePatternName *must* be an alias to a name in the rhs module
+                    for (let {name, alias, meta: {symbolId}} of pattern.names) {
+                        let {scope} = symbolTable.lookup(symbolId);
+                        emit.down(1).text(`𝕊${scope.id}.bindings.${alias || name} = `);
+                        emitExpression(emit, value, symbolTable); // rhs *must* be a module
+                        emit.text(`.bindings.${name};`);
                     }
+                }
+                else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
+                    let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
+                    emit.down(1).text(`𝕊${scope.id}.bindings.${name} = `);
+                    emitExpression(emit, value, symbolTable);
+                    emit.text(';');
                 }
             }
             module.bindings.forEach(rec);
@@ -108,40 +114,21 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
 
 function emitSymbolDefinitions(emit: Emitter, program: Program) {
     const {symbolTable} = program.meta;
-    let visitNode = makeNodeVisitor<AstNodes.Node<SymbolDefinitions & SymbolReferences>>();
+    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     visitNode(program, rec => ({
         SourceFile: sf => {
             emit.down(2).text(`// -------------------- ${sf.path} --------------------`);
             rec(sf.module);
         },
         Module: module => {
+            // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
             for (let {pattern, value} of module.bindings) {
-                if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
-                    // TODO:
-                    // if rhs is a ReferenceExpression that refs a module, or is an ImportExpression, then its an alias
-                    // but does that matter for emit here? If not, must prove current emit is always correct/safe,
-                    // eg with forward refs
-                    emit.down(2).text('{').indent();
-                    emit.down(1).text(`let rhs = `);
-                    emitExpression(emit, value, symbolTable);
-                    emit.text(';');
-                    for (let {name, alias, meta: {symbolId}} of pattern.names) {
-                        let {scope} = symbolTable.lookup(symbolId);
-                        emit.down(1).text(`Object.assign(`).indent();
-                        emit.down(1).text(`𝕊${scope.id}.bindings.${alias || name},`);
-                        emit.down(1).text(`sys.bindingLookup(rhs, '${name}')`);
-                        emit.dedent().down(1).text(`);`);
-                    }
-                    emit.dedent().down(1).text('}');
-                }
-                else if (pattern.kind === 'VariablePattern') {
+                if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
                     let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
-                    if (value.kind !== 'ReferenceExpression' && value.kind !== 'ImportExpression') {
-                        emit.down(2).text(`Object.assign(`).indent();
-                        emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
-                        emitExpression(emit, value, symbolTable);
-                        emit.dedent().down(1).text(`);`);
-                    }
+                    emit.down(2).text(`Object.assign(`).indent();
+                    emit.down(1).text(`𝕊${scope.id}.bindings.${name},`).down(1);
+                    emitExpression(emit, value, symbolTable);
+                    emit.dedent().down(1).text(`);`);
                 }
             }
             module.bindings.forEach(rec);
@@ -161,10 +148,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BindingLookupExpression':
-            emit.text('sys.bindingLookup(').indent().down(1);
             emitExpression(emit, expr.module, symbolTable);
-            emit.text(',').down(1).text(`'${expr.bindingName}'`);
-            emit.dedent().down(1).text(`)`);
+            emit.text(`.bindings.${expr.bindingName}`);
             return;
 
         case 'BooleanLiteralExpression':
@@ -283,4 +268,10 @@ function emitCall(emit: Emitter, fn: string | Expression, args: ReadonlyArray<Ex
         if (i < args.length - 1) emit.text(',');
     });
     emit.dedent().down(1).text(`)`);
+}
+
+
+// TODO: helper function
+function isLValue(e: Expression) {
+    return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 }

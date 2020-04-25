@@ -1,12 +1,11 @@
 import {Node, Program} from '../../ast-nodes';
 import {makeNodeVisitor} from '../../utils';
-import {SymbolDefinitions} from '../03-create-symbol-definitions';
-import {SymbolReferences} from '../04-resolve-symbol-references';
+import {Metadata} from '../05-resolve-constant-values';
 
 
 // TODO: doc...
-export function checkSemantics(program: Program<SymbolDefinitions & SymbolReferences>) {
-    let visitNode = makeNodeVisitor<Node<SymbolDefinitions & SymbolReferences>>();
+export function checkSemantics(program: Program<Metadata>) {
+    let visitNode = makeNodeVisitor<Node<Metadata>>();
     visitNode(program, rec => ({
         RecordExpression: ({fields}) => {
             fields.reduce(

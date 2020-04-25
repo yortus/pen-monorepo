@@ -2,7 +2,7 @@ import {Scope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
 
 
-export interface SymbolDefinitions {
+export interface Metadata {
     Program: {
         readonly rootScope: Scope;
         readonly symbolTable: SymbolTable;

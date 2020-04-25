@@ -2,7 +2,7 @@ import {Node, Program} from '../../ast-nodes';
 import {createChildScope, createRootScope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
-import {SymbolDefinitions} from './symbol-definitions';
+import {Metadata} from './metadata';
 
 
 // TODO: doc...
@@ -10,7 +10,7 @@ export function createSymbolDefinitions(program: Program) {
     const symbolTable = new SymbolTable();
     const rootScope = createRootScope();
     let currentScope = rootScope;
-    let mapNode = makeNodeMapper<Node, Node<SymbolDefinitions>>();
+    let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 
         // Attach the symbol table to the Program node.
