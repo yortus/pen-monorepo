@@ -44,22 +44,6 @@
             "options": [120]
         },
         "member-access": {"options": ["no-public"]},                                // <===== changed from recommended
-        "member-ordering": {                                                        // <===== changed from recommended
-            "options": {
-                "order": [
-                    // NB: no enforced order for statics
-                    "public-constructor",
-                    "public-instance-field",
-                    "public-instance-method",
-                    "protected-constructor",
-                    "protected-instance-field",
-                    "protected-instance-method",
-                    "private-constructor",
-                    "private-instance-field",
-                    "private-instance-method"
-                ]
-            }
-        },
         "new-parens": true,
         "no-angle-bracket-type-assertion": true,
         "no-any": false,

@@ -3,22 +3,17 @@ const unicode: PenVal = {
     parse: sys.NOT_A_RULE,
     unparse: sys.NOT_A_RULE,
     apply(expr) {
-        // TODO: base, minDigits, maxDigits may not be defined yet. Is this fine, or a bug?
+        let base = expr.bindings.base?.constant?.value as number;
+        let minDigits = expr.bindings.minDigits?.constant?.value as number;
+        let maxDigits = expr.bindings.maxDigits?.constant?.value as number;
+        sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+        sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+        sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+
         return {
             bindings: {},
 
             parse() {
-                // TODO: move resolution of base/minDigits/maxDigits out of here, inefficient to repeat this work
-                // on every parse/unparse call. It's here for now due to the above TODO (may not be defined when the
-                // unicode() function is first called).
-                sys.assert(expr.bindings);
-                // TODO: temp testing...
-                let {base, minDigits, maxDigits} = {base: 16, minDigits: 4, maxDigits: 4};
-                // TODO: was... let {base, minDigits, maxDigits} = expr.bindings;
-                sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
-                sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
-                sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
-
                 // Construct a regex to match the digits
                 let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                 let regex = RegExp(pattern, 'i');

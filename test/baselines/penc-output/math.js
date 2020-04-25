@@ -22,6 +22,8 @@ const 𝕊8 = {
 𝕊8.bindings.float64 = std.bindings.float64;
 𝕊8.bindings.start = 𝕊8.bindings.expr;
 
+// -------------------- compile-time constants --------------------
+
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
 
 Object.assign(
@@ -1129,20 +1131,16 @@ function initTemporaryExperiments() {
         parse: sys.NOT_A_RULE,
         unparse: sys.NOT_A_RULE,
         apply(expr) {
-            // TODO: base, minDigits, maxDigits may not be defined yet. Is this fine, or a bug?
+            var _a, _b, _c, _d, _e, _f;
+            let base = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
+            let minDigits = (_d = (_c = expr.bindings.minDigits) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
+            let maxDigits = (_f = (_e = expr.bindings.maxDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+            sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+            sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+            sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
             return {
                 bindings: {},
                 parse() {
-                    // TODO: move resolution of base/minDigits/maxDigits out of here, inefficient to repeat this work
-                    // on every parse/unparse call. It's here for now due to the above TODO (may not be defined when the
-                    // unicode() function is first called).
-                    sys.assert(expr.bindings);
-                    // TODO: temp testing...
-                    let { base, minDigits, maxDigits } = { base: 16, minDigits: 4, maxDigits: 4 };
-                    // TODO: was... let {base, minDigits, maxDigits} = expr.bindings;
-                    sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
-                    sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
-                    sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
                     // Construct a regex to match the digits
                     let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                     let regex = RegExp(pattern, 'i');

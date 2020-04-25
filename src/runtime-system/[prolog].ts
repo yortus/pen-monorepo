@@ -8,6 +8,9 @@ interface PenVal {
 
     // lambda
     apply(arg: PenVal): PenVal;
+
+    // compile-time constant
+    constant?: {value: unknown};
 }
 
 

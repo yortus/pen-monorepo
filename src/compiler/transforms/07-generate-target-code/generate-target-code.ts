@@ -33,6 +33,9 @@ function emitProgram(program: Program) {
     // TODO: Emit aliases...
     emitSymbolAliases(emit, program);
 
+    // TODO: Emit compile-time constants...
+    emitConstants(emit, program);
+
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
 
@@ -104,6 +107,28 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                     emit.down(1).text(`𝕊${scope.id}.bindings.${name} = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(';');
+                }
+            }
+            module.bindings.forEach(rec);
+        },
+    }));
+}
+
+
+function emitConstants(emit: Emitter, program: Program) {
+    const {symbolTable} = program.meta;
+    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
+    emit.down(2).text(`// -------------------- compile-time constants --------------------`);
+    visitNode(program, rec => ({
+        Module: module => {
+            for (let {pattern} of module.bindings) {
+                if (pattern.kind === 'VariablePattern') {
+                    let {scope, name, constant} = symbolTable.lookup(pattern.meta.symbolId);
+                    if (!constant) continue;
+                    emit.down(1).text(`𝕊${scope.id}.bindings.${name}.constant = {value: `);
+                    emitConstant(emit, constant.value);
+                    emit.text('};');
+
                 }
             }
             module.bindings.forEach(rec);
@@ -253,25 +278,33 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 }
 
 
-// TODO: temp testing...
-function emitCall(emit: Emitter, fn: string | Expression, args: ReadonlyArray<Expression>, symbolTable: SymbolTable) {
-    if (typeof fn === 'string') {
-        emit.text(fn);
+// TODO: helper function
+function isLValue(e: Expression) {
+    return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
+}
+
+
+// TODO: helper function
+function emitConstant(emit: Emitter, value: unknown) {
+    if (typeof value === 'number' || typeof value === 'boolean' || value === 'null') {
+        emit.text(String(value));
+    }
+    else if (typeof value === 'string') {
+        emit.text(JSON.stringify(value));
     }
     else {
-        emitExpression(emit, fn, symbolTable);
+        throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
     }
-    emit.text(`(`).indent();
+}
+
+
+// TODO: helper function
+function emitCall(emit: Emitter, fn: string, args: ReadonlyArray<Expression>, symbolTable: SymbolTable) {
+    emit.text(fn).text(`(`).indent();
     args.forEach((arg, i) => {
         emit.down(1);
         emitExpression(emit, arg, symbolTable);
         if (i < args.length - 1) emit.text(',');
     });
     emit.dedent().down(1).text(`)`);
-}
-
-
-// TODO: helper function
-function isLValue(e: Expression) {
-    return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 }

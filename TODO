@@ -4,6 +4,11 @@ TODO 2020:
     [x] numeric literals
     [ ] `unicode{base=? minDigits=? maxDigits=?}` in `std`
     [ ] unicode surrogate pairs - how to parse/unparse them? Harder than just plain charCode <-> char
+    [ ] compile-time constants
+        [ ] doc current partial support:
+            - only bool/num/null/str literals can be compile-time constants (no higher structures yet)
+            - the const value is only tracked to the lhs symbol of VariablePatterns, where the rhs is a const expr.
+            - `unicode` lambda relies on `base`/`minDigits`/`maxDigits` being compile-time constants
     [ ] `char` rule (was `anyChar`, and move to `std`)
     [ ] `char{min=? max=?}` lambda
     [ ] export `abstract` and `concrete` lambdas from `std` module

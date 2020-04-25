@@ -5,13 +5,16 @@ import {Metadata} from '../04-resolve-symbol-references';
 
 // TODO: doc...
 export function resolveConstantValues(program: Program<Metadata>) {
-    //const {symbolTable} = program.meta;
+    const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<Node<Metadata>, {value: unknown} | void>();
-    visitNode(program, _rec => ({
-
+    visitNode(program, rec => ({
         // ApplicationExpression: return rec(n.lambda), rec(n.argument), undefined;
-        Binding: _bnd => {
-            // TODO: ...
+        Binding: ({pattern, value}) => {
+            // TODO: temp testing...
+            if (pattern.kind === 'VariablePattern') {
+                let symbol = symbolTable.lookup(pattern.meta.symbolId);
+                symbol.constant = rec(value) || undefined;
+            }
         },
         // BindingLookupExpression: return rec(n.module), undefined;
         BooleanLiteralExpression: expr => ({value: expr.value}),
@@ -36,12 +39,7 @@ export function resolveConstantValues(program: Program<Metadata>) {
         // StaticField: return rec(n.value), undefined;
         StringLiteralExpression: expr => ({value: expr.value}),
         // VariablePattern: return;
-
-
-
-
     }));
-
 
     // TODO: temp testing...
     let result = program;

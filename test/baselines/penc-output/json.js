@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊5 = {
+const 𝕊2 = {
     bindings: {
         float64: {},
         anyChar: {},
@@ -10,7 +10,6 @@ const 𝕊5 = {
         not: {},
         zeroOrMore: {},
         unicode: {},
-        f64: {},
         start: {},
         Value: {},
         False: {},
@@ -34,7 +33,7 @@ const 𝕊5 = {
     },
 };
 
-const 𝕊6 = {
+const 𝕊3 = {
     bindings: {
         base: {},
         minDigits: {},
@@ -43,41 +42,46 @@ const 𝕊6 = {
 };
 
 // -------------------- aliases --------------------
-𝕊5.bindings.float64 = std.bindings.float64;
-𝕊5.bindings.anyChar = experiments.bindings.anyChar;
-𝕊5.bindings.maybe = experiments.bindings.maybe;
-𝕊5.bindings.not = experiments.bindings.not;
-𝕊5.bindings.zeroOrMore = experiments.bindings.zeroOrMore;
-𝕊5.bindings.unicode = experiments.bindings.unicode;
-𝕊5.bindings.f64 = std.bindings.float64;
-𝕊5.bindings.Number = 𝕊5.bindings.float64;
+𝕊2.bindings.float64 = std.bindings.float64;
+𝕊2.bindings.anyChar = experiments.bindings.anyChar;
+𝕊2.bindings.maybe = experiments.bindings.maybe;
+𝕊2.bindings.not = experiments.bindings.not;
+𝕊2.bindings.zeroOrMore = experiments.bindings.zeroOrMore;
+𝕊2.bindings.unicode = experiments.bindings.unicode;
+𝕊2.bindings.Number = 𝕊2.bindings.float64;
+
+// -------------------- compile-time constants --------------------
+𝕊2.bindings.DOUBLE_QUOTE.constant = {value: "\""};
+𝕊3.bindings.base.constant = {value: 16};
+𝕊3.bindings.minDigits.constant = {value: 4};
+𝕊3.bindings.maxDigits.constant = {value: 4};
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\json.pen --------------------
 
 Object.assign(
-    𝕊5.bindings.start,
+    𝕊2.bindings.start,
     sys.sequence(
-        𝕊5.bindings.WS,
-        𝕊5.bindings.Value,
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS,
+        𝕊2.bindings.Value,
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.Value,
+    𝕊2.bindings.Value,
     sys.selection(
-        𝕊5.bindings.False,
-        𝕊5.bindings.Null,
-        𝕊5.bindings.True,
-        𝕊5.bindings.Object,
-        𝕊5.bindings.Array,
-        𝕊5.bindings.Number,
-        𝕊5.bindings.String
+        𝕊2.bindings.False,
+        𝕊2.bindings.Null,
+        𝕊2.bindings.True,
+        𝕊2.bindings.Object,
+        𝕊2.bindings.Array,
+        𝕊2.bindings.Number,
+        𝕊2.bindings.String
     )
 );
 
 Object.assign(
-    𝕊5.bindings.False,
+    𝕊2.bindings.False,
     sys.sequence(
         sys.concrete(sys.stringLiteral("false")),
         sys.booleanLiteral(false)
@@ -85,7 +89,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊5.bindings.Null,
+    𝕊2.bindings.Null,
     sys.sequence(
         sys.concrete(sys.stringLiteral("null")),
         sys.nullLiteral
@@ -93,7 +97,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊5.bindings.True,
+    𝕊2.bindings.True,
     sys.sequence(
         sys.concrete(sys.stringLiteral("true")),
         sys.booleanLiteral(true)
@@ -101,92 +105,92 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊5.bindings.Object,
+    𝕊2.bindings.Object,
     sys.sequence(
-        𝕊5.bindings.LBRACE,
+        𝕊2.bindings.LBRACE,
         sys.selection(
-            𝕊5.bindings.Properties,
+            𝕊2.bindings.Properties,
             sys.record([
             ])
         ),
-        𝕊5.bindings.RBRACE
+        𝕊2.bindings.RBRACE
     )
 );
 
 Object.assign(
-    𝕊5.bindings.Properties,
+    𝕊2.bindings.Properties,
     sys.sequence(
         sys.field(
-            𝕊5.bindings.String,
+            𝕊2.bindings.String,
             sys.sequence(
-                𝕊5.bindings.COLON,
-                𝕊5.bindings.Value
+                𝕊2.bindings.COLON,
+                𝕊2.bindings.Value
             )
         ),
         sys.apply(
-            𝕊5.bindings.maybe,
+            𝕊2.bindings.maybe,
             sys.sequence(
-                𝕊5.bindings.COMMA,
-                𝕊5.bindings.Properties
+                𝕊2.bindings.COMMA,
+                𝕊2.bindings.Properties
             )
         )
     )
 );
 
 Object.assign(
-    𝕊5.bindings.Array,
+    𝕊2.bindings.Array,
     sys.sequence(
-        𝕊5.bindings.LBRACKET,
+        𝕊2.bindings.LBRACKET,
         sys.selection(
-            𝕊5.bindings.Elements,
+            𝕊2.bindings.Elements,
             sys.list([
             ])
         ),
-        𝕊5.bindings.RBRACKET
+        𝕊2.bindings.RBRACKET
     )
 );
 
 Object.assign(
-    𝕊5.bindings.Elements,
+    𝕊2.bindings.Elements,
     sys.sequence(
         sys.list([
-            𝕊5.bindings.Value,
+            𝕊2.bindings.Value,
         ]),
         sys.apply(
-            𝕊5.bindings.maybe,
+            𝕊2.bindings.maybe,
             sys.sequence(
-                𝕊5.bindings.COMMA,
-                𝕊5.bindings.Elements
+                𝕊2.bindings.COMMA,
+                𝕊2.bindings.Elements
             )
         )
     )
 );
 
 Object.assign(
-    𝕊5.bindings.String,
+    𝕊2.bindings.String,
     sys.sequence(
-        𝕊5.bindings.DOUBLE_QUOTE,
+        𝕊2.bindings.DOUBLE_QUOTE,
         sys.apply(
-            𝕊5.bindings.zeroOrMore,
-            𝕊5.bindings.CHAR
+            𝕊2.bindings.zeroOrMore,
+            𝕊2.bindings.CHAR
         ),
-        𝕊5.bindings.DOUBLE_QUOTE
+        𝕊2.bindings.DOUBLE_QUOTE
     )
 );
 
 Object.assign(
-    𝕊5.bindings.CHAR,
+    𝕊2.bindings.CHAR,
     sys.selection(
         sys.sequence(
             sys.apply(
-                𝕊5.bindings.not,
+                𝕊2.bindings.not,
                 sys.selection(
                     sys.character("\u0000", "\u001f"),
                     sys.stringLiteral("\""),
                     sys.stringLiteral("\\")
                 )
             ),
-            𝕊5.bindings.anyChar
+            𝕊2.bindings.anyChar
         ),
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\\"")),
@@ -223,76 +227,76 @@ Object.assign(
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\u")),
             sys.apply(
-                𝕊5.bindings.unicode,
-                𝕊6
+                𝕊2.bindings.unicode,
+                𝕊3
             )
         )
     )
 );
 
 Object.assign(
-    𝕊5.bindings.LBRACE,
+    𝕊2.bindings.LBRACE,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral("{")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.RBRACE,
+    𝕊2.bindings.RBRACE,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral("}")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.LBRACKET,
+    𝕊2.bindings.LBRACKET,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral("[")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.RBRACKET,
+    𝕊2.bindings.RBRACKET,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral("]")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.COLON,
+    𝕊2.bindings.COLON,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral(":")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.COMMA,
+    𝕊2.bindings.COMMA,
     sys.sequence(
-        𝕊5.bindings.WS,
+        𝕊2.bindings.WS,
         sys.concrete(sys.stringLiteral(",")),
-        𝕊5.bindings.WS
+        𝕊2.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊5.bindings.DOUBLE_QUOTE,
+    𝕊2.bindings.DOUBLE_QUOTE,
     sys.concrete(sys.stringLiteral("\""))
 );
 
 Object.assign(
-    𝕊5.bindings.WS,
+    𝕊2.bindings.WS,
     sys.apply(
-        𝕊5.bindings.zeroOrMore,
+        𝕊2.bindings.zeroOrMore,
         sys.selection(
             sys.concrete(sys.stringLiteral(" ")),
             sys.concrete(sys.stringLiteral("\t")),
@@ -303,23 +307,23 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊6.bindings.base,
+    𝕊3.bindings.base,
     sys.numericLiteral(16)
 );
 
 Object.assign(
-    𝕊6.bindings.minDigits,
+    𝕊3.bindings.minDigits,
     sys.numericLiteral(4)
 );
 
 Object.assign(
-    𝕊6.bindings.maxDigits,
+    𝕊3.bindings.maxDigits,
     sys.numericLiteral(4)
 );
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊5.bindings.start);
+module.exports = sys.createMainExports(𝕊2.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 
@@ -1300,20 +1304,16 @@ function initTemporaryExperiments() {
         parse: sys.NOT_A_RULE,
         unparse: sys.NOT_A_RULE,
         apply(expr) {
-            // TODO: base, minDigits, maxDigits may not be defined yet. Is this fine, or a bug?
+            var _a, _b, _c, _d, _e, _f;
+            let base = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
+            let minDigits = (_d = (_c = expr.bindings.minDigits) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
+            let maxDigits = (_f = (_e = expr.bindings.maxDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+            sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+            sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+            sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
             return {
                 bindings: {},
                 parse() {
-                    // TODO: move resolution of base/minDigits/maxDigits out of here, inefficient to repeat this work
-                    // on every parse/unparse call. It's here for now due to the above TODO (may not be defined when the
-                    // unicode() function is first called).
-                    sys.assert(expr.bindings);
-                    // TODO: temp testing...
-                    let { base, minDigits, maxDigits } = { base: 16, minDigits: 4, maxDigits: 4 };
-                    // TODO: was... let {base, minDigits, maxDigits} = expr.bindings;
-                    sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
-                    sys.assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
-                    sys.assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
                     // Construct a regex to match the digits
                     let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                     let regex = RegExp(pattern, 'i');
