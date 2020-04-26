@@ -28,3 +28,8 @@ factor =
     | `0b`   int32{base=2 signed=false}
     | `i`   int32{signed=false}
     | `(` expr `)`
+
+
+// TODO: temp testing
+// {Maybe, OneOrMore} = 'experiments'
+// myNum = int32{digits = Maybe("-")   `0x`   OneOrMore("0-9" | "a-f" | "A-F")}

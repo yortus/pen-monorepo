@@ -2,7 +2,12 @@ TODO 2020:
     [ ] unparse --> print
     [x] `float64`
     [x] numeric literals
-    [ ] `int32{base?: 2..36, unsigned?: boolean}`
+    [ ] `int32{base?: 2..36, signed?: boolean}`
+        [ ] rename back to `i32`
+        [ ] add `u32` rule, remove `signed` param
+        [ ] take a rule param that parses out the digits of the number incl opt `-` prefix (ie skips `0x`, `_`, etc)
+            [ ] provide a default (for base 10)
+            [ ] likely need something like 1..M operator
         [ ] Q: what about the pesky optional leading `-` sign? A: make it another param to the lambda form of `int32`
         [ ] use the impl to share common code with `unicode` (unicode wraps `int32` and converts to/from a char)
     [ ] `unicode{base?: 2..36, minDigits?: 1, maxDigits?: number}` in `std`
