@@ -6,6 +6,8 @@ const 𝕊8 = {
     bindings: {
         memoise: {},
         float64: {},
+        int32: {},
+        not: {},
         start: {},
         expr: {},
         add: {},
@@ -17,12 +19,39 @@ const 𝕊8 = {
     },
 };
 
+const 𝕊9 = {
+    bindings: {
+        base: {},
+        signed: {},
+    },
+};
+
+const 𝕊10 = {
+    bindings: {
+        base: {},
+        signed: {},
+    },
+};
+
+const 𝕊11 = {
+    bindings: {
+        signed: {},
+    },
+};
+
 // -------------------- aliases --------------------
 𝕊8.bindings.memoise = std.bindings.memoise;
 𝕊8.bindings.float64 = std.bindings.float64;
+𝕊8.bindings.int32 = std.bindings.int32;
+𝕊8.bindings.not = experiments.bindings.not;
 𝕊8.bindings.start = 𝕊8.bindings.expr;
 
 // -------------------- compile-time constants --------------------
+𝕊9.bindings.base.constant = {value: 16};
+𝕊9.bindings.signed.constant = {value: false};
+𝕊10.bindings.base.constant = {value: 2};
+𝕊10.bindings.signed.constant = {value: false};
+𝕊11.bindings.signed.constant = {value: false};
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\math.pen --------------------
 
@@ -139,13 +168,68 @@ Object.assign(
 Object.assign(
     𝕊8.bindings.factor,
     sys.selection(
-        𝕊8.bindings.float64,
         sys.sequence(
-            sys.concrete(sys.character("(", "(")),
+            sys.apply(
+                𝕊8.bindings.not,
+                sys.selection(
+                    sys.stringLiteral("0x"),
+                    sys.stringLiteral("0b")
+                )
+            ),
+            𝕊8.bindings.float64
+        ),
+        sys.sequence(
+            sys.concrete(sys.stringLiteral("0x")),
+            sys.apply(
+                𝕊8.bindings.int32,
+                𝕊9
+            )
+        ),
+        sys.sequence(
+            sys.concrete(sys.stringLiteral("0b")),
+            sys.apply(
+                𝕊8.bindings.int32,
+                𝕊10
+            )
+        ),
+        sys.sequence(
+            sys.concrete(sys.stringLiteral("i")),
+            sys.apply(
+                𝕊8.bindings.int32,
+                𝕊11
+            )
+        ),
+        sys.sequence(
+            sys.concrete(sys.stringLiteral("(")),
             𝕊8.bindings.expr,
-            sys.concrete(sys.character(")", ")"))
+            sys.concrete(sys.stringLiteral(")"))
         )
     )
+);
+
+Object.assign(
+    𝕊9.bindings.base,
+    sys.numericLiteral(16)
+);
+
+Object.assign(
+    𝕊9.bindings.signed,
+    sys.booleanLiteral(false)
+);
+
+Object.assign(
+    𝕊10.bindings.base,
+    sys.numericLiteral(2)
+);
+
+Object.assign(
+    𝕊10.bindings.signed,
+    sys.booleanLiteral(false)
+);
+
+Object.assign(
+    𝕊11.bindings.signed,
+    sys.booleanLiteral(false)
 );
 
 // -------------------- MAIN EXPORTS --------------------
@@ -767,93 +851,113 @@ function initStandardLibrary() {
     const LOWERCASE_E = 'e'.charCodeAt(0);
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // TODO: handle abstract/concrete...
+    // tslint:disable: no-bitwise
     const int32 = {
         bindings: {},
-        parse() {
-            let stateₒ = sys.getState();
-            let { IDOC, IMEM, INUL, ONUL } = stateₒ;
-            if (!sys.isString(IDOC))
-                return false;
-            // Parse optional leading '-' sign...
-            let isNegative = false;
-            if (IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
-                isNegative = true;
-                IMEM += 1;
-            }
-            // ...followed by one or more decimal digits. (NB: no exponents).
-            let num = 0;
-            let digits = 0;
-            while (IMEM < IDOC.length) {
-                // Read a digit
-                let c = IDOC.charCodeAt(IMEM);
-                if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9)
-                    break;
-                // Check for overflow
-                if (num > ONE_TENTH_MAXINT32)
-                    return sys.setState(stateₒ), false;
-                // Update parsed number
-                num *= 10;
-                num += (c - UNICODE_ZERO_DIGIT);
-                IMEM += 1;
-                digits += 1;
-            }
-            // Check that we parsed at least one digit.
-            if (digits === 0)
-                return sys.setState(stateₒ), false;
-            // Apply the sign.
-            if (isNegative)
-                num = -num;
-            // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-            // tslint:disable-next-line: no-bitwise
-            if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0)
-                return sys.setState(stateₒ), false;
-            // Success
-            sys.setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
-            return true;
-        },
-        unparse() {
-            // TODO: ensure N is a 32-bit integer
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (typeof IDOC !== 'number' || IMEM !== 0)
-                return false;
-            let num = IDOC;
-            // tslint:disable-next-line: no-bitwise
-            if ((num & 0xFFFFFFFF) !== num)
-                return false;
-            // TODO: check sign...
-            let isNegative = false;
-            if (num < 0) {
-                isNegative = true;
-                if (num === -2147483648) {
-                    // Specially handle the one case where N = -N could overflow
-                    sys.setState({ IDOC, IMEM: 1, ODOC: '-2147483648', INUL, ONUL });
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        // TODO: temp testing... the lambda form which takes a `base` arg
+        apply(expr) {
+            var _a, _b, _c, _d, _e, _f;
+            let base = (_c = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+            let signed = (_f = (_e = (_d = expr.bindings.signed) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+            sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+            sys.assert(typeof signed === 'boolean');
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let { IDOC, IMEM, INUL, ONUL } = stateₒ;
+                    if (!sys.isString(IDOC))
+                        return false;
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        IMEM += 1;
+                    }
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let num = 0;
+                    let digits = 0;
+                    while (IMEM < IDOC.length) {
+                        // Read a digit.
+                        let c = IDOC.charCodeAt(IMEM);
+                        if (c >= 256)
+                            break;
+                        let digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base)
+                            break;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
+                        // Check for overflow.
+                        if (num > MAX_NUM)
+                            return sys.setState(stateₒ), false;
+                        // Loop again.
+                        IMEM += 1;
+                        digits += 1;
+                    }
+                    // Check that we parsed at least one digit.
+                    if (digits === 0)
+                        return sys.setState(stateₒ), false;
+                    // Apply the sign.
+                    if (isNegative)
+                        num = -num;
+                    // Success
+                    sys.setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
                     return true;
-                }
-                num = -num;
-            }
-            // TODO: ...then digits
-            let digits = [];
-            while (true) {
-                let d = num % 10;
-                // tslint:disable-next-line: no-bitwise
-                num = (num / 10) | 0;
-                digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
-                if (num === 0)
-                    break;
-            }
-            // TODO: compute final string...
-            if (isNegative)
-                digits.push('-');
-            sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join(''), INUL, ONUL });
-            return true;
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    if (typeof IDOC !== 'number' || IMEM !== 0)
+                        return false;
+                    let num = IDOC;
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed)
+                            return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM)
+                        return false;
+                    // Extract the digits.
+                    let digits = [];
+                    while (true) {
+                        let d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0)
+                            break;
+                    }
+                    // Compute the final string.
+                    if (isNegative)
+                        digits.push(0x2d); // char code for '-'
+                    let str = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                    sys.setState({ IDOC, IMEM: 1, ODOC: str, INUL, ONUL });
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
         },
-        apply: sys.NOT_A_LAMBDA,
     };
-    // These constants are used by the int32 rule.
-    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     // TODO: temp testing...
+    int32.parse = int32.apply({ bindings: {
+            base: { constant: { value: 10 } },
+            unsigned: { constant: { value: false } },
+        } }).parse;
+    int32.unparse = int32.apply({ bindings: {
+            base: { constant: { value: 10 } },
+            unsigned: { constant: { value: false } },
+        } }).unparse;
+    // TODO: doc...
     // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
+    // NB: the number 80 is not special, it's just greater than 36 which makes it a sentinel for 'not a digit'.
     const DIGIT_VALUES = [
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
@@ -871,6 +975,14 @@ function initStandardLibrary() {
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    ];
+    // TODO: doc...
+    const CHAR_CODES = [
+        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+        0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
+        0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e,
+        0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
+        0x57, 0x58, 0x59, 0x5a,
     ];
     const memoise = {
         bindings: {},

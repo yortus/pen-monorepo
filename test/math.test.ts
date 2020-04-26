@@ -11,6 +11,26 @@ const outputPath = path.join(__dirname, './baselines/penc-output', fixtureName +
 describe(`Compiling and executing the 'math.pen' program`, async () => {
 
     const tests = [
+        // {text: '1234', ast: 1234},
+        // {text: '-1.234', ast: -1.234},
+        // {text: '1.2e34', ast: 1.2e34, textᐟ: '1.2e+34'},
+        // {text: '-1.2e+34', ast: -1.2e34},
+        // {text: '1.', ast: 1, textᐟ: '1'},
+        // {text: '.234', ast: .234, textᐟ: '0.234'},
+        // {text: 'i1234', ast: 1234, textᐟ: '1234'},
+        // {text: 'i12345678', ast: 12345678, textᐟ: '12345678'},
+        {text: 'i12345678901', ast: Error},
+        {text: '-1234', ast: -1234},
+        {text: 'i-1234', ast: Error},
+        {text: 'DeadBeef', ast: Error},
+        {text: '0xDadBad', ast: 0xdadbad, textᐟ: '14343085'},
+        {text: 'dag', ast: Error},
+        {text: '0xdag', ast: Error},
+        {text: '0xdaf', ast: 0xdaf, textᐟ: '3503'},
+        {text: '0b012', ast: Error},
+        {text: '0b10101010', ast: 128 + 32 + 8 + 2, textᐟ: '170'},
+        {text: '0xDeadBeef', ast: 0xdeadbeef, textᐟ: '3735928559'},
+        // TODO: negative hex/bin numbers,
         {
             text: '1+2',
             ast: {
@@ -64,8 +84,10 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
     for (let test of tests) {
         it(test.text, () => {
             let {parse, unparse} = require(outputPath);
-            let ast = parse(test.text);
+            let ast: unknown;
+            try { ast = parse(test.text); } catch { ast = Error; }
             expect(ast).to.deep.equal(test.ast);
+            if (ast === Error) return;
             let textᐟ = unparse(ast);
             expect(textᐟ).to.equal(test.textᐟ || test.text);
         });

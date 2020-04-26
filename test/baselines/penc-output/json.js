@@ -2,7 +2,7 @@ const sys = initRuntimeSystem();
 const std = initStandardLibrary();
 const experiments = initTemporaryExperiments();
 
-const 𝕊2 = {
+const 𝕊5 = {
     bindings: {
         float64: {},
         anyChar: {},
@@ -33,7 +33,7 @@ const 𝕊2 = {
     },
 };
 
-const 𝕊3 = {
+const 𝕊6 = {
     bindings: {
         base: {},
         minDigits: {},
@@ -42,46 +42,46 @@ const 𝕊3 = {
 };
 
 // -------------------- aliases --------------------
-𝕊2.bindings.float64 = std.bindings.float64;
-𝕊2.bindings.anyChar = experiments.bindings.anyChar;
-𝕊2.bindings.maybe = experiments.bindings.maybe;
-𝕊2.bindings.not = experiments.bindings.not;
-𝕊2.bindings.zeroOrMore = experiments.bindings.zeroOrMore;
-𝕊2.bindings.unicode = experiments.bindings.unicode;
-𝕊2.bindings.Number = 𝕊2.bindings.float64;
+𝕊5.bindings.float64 = std.bindings.float64;
+𝕊5.bindings.anyChar = experiments.bindings.anyChar;
+𝕊5.bindings.maybe = experiments.bindings.maybe;
+𝕊5.bindings.not = experiments.bindings.not;
+𝕊5.bindings.zeroOrMore = experiments.bindings.zeroOrMore;
+𝕊5.bindings.unicode = experiments.bindings.unicode;
+𝕊5.bindings.Number = 𝕊5.bindings.float64;
 
 // -------------------- compile-time constants --------------------
-𝕊2.bindings.DOUBLE_QUOTE.constant = {value: "\""};
-𝕊3.bindings.base.constant = {value: 16};
-𝕊3.bindings.minDigits.constant = {value: 4};
-𝕊3.bindings.maxDigits.constant = {value: 4};
+𝕊5.bindings.DOUBLE_QUOTE.constant = {value: "\""};
+𝕊6.bindings.base.constant = {value: 16};
+𝕊6.bindings.minDigits.constant = {value: 4};
+𝕊6.bindings.maxDigits.constant = {value: 4};
 
 // -------------------- V:\projects\oss\penc\test\fixtures\penc-input\json.pen --------------------
 
 Object.assign(
-    𝕊2.bindings.start,
+    𝕊5.bindings.start,
     sys.sequence(
-        𝕊2.bindings.WS,
-        𝕊2.bindings.Value,
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS,
+        𝕊5.bindings.Value,
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Value,
+    𝕊5.bindings.Value,
     sys.selection(
-        𝕊2.bindings.False,
-        𝕊2.bindings.Null,
-        𝕊2.bindings.True,
-        𝕊2.bindings.Object,
-        𝕊2.bindings.Array,
-        𝕊2.bindings.Number,
-        𝕊2.bindings.String
+        𝕊5.bindings.False,
+        𝕊5.bindings.Null,
+        𝕊5.bindings.True,
+        𝕊5.bindings.Object,
+        𝕊5.bindings.Array,
+        𝕊5.bindings.Number,
+        𝕊5.bindings.String
     )
 );
 
 Object.assign(
-    𝕊2.bindings.False,
+    𝕊5.bindings.False,
     sys.sequence(
         sys.concrete(sys.stringLiteral("false")),
         sys.booleanLiteral(false)
@@ -89,7 +89,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊2.bindings.Null,
+    𝕊5.bindings.Null,
     sys.sequence(
         sys.concrete(sys.stringLiteral("null")),
         sys.nullLiteral
@@ -97,7 +97,7 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊2.bindings.True,
+    𝕊5.bindings.True,
     sys.sequence(
         sys.concrete(sys.stringLiteral("true")),
         sys.booleanLiteral(true)
@@ -105,92 +105,92 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊2.bindings.Object,
+    𝕊5.bindings.Object,
     sys.sequence(
-        𝕊2.bindings.LBRACE,
+        𝕊5.bindings.LBRACE,
         sys.selection(
-            𝕊2.bindings.Properties,
+            𝕊5.bindings.Properties,
             sys.record([
             ])
         ),
-        𝕊2.bindings.RBRACE
+        𝕊5.bindings.RBRACE
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Properties,
+    𝕊5.bindings.Properties,
     sys.sequence(
         sys.field(
-            𝕊2.bindings.String,
+            𝕊5.bindings.String,
             sys.sequence(
-                𝕊2.bindings.COLON,
-                𝕊2.bindings.Value
+                𝕊5.bindings.COLON,
+                𝕊5.bindings.Value
             )
         ),
         sys.apply(
-            𝕊2.bindings.maybe,
+            𝕊5.bindings.maybe,
             sys.sequence(
-                𝕊2.bindings.COMMA,
-                𝕊2.bindings.Properties
+                𝕊5.bindings.COMMA,
+                𝕊5.bindings.Properties
             )
         )
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Array,
+    𝕊5.bindings.Array,
     sys.sequence(
-        𝕊2.bindings.LBRACKET,
+        𝕊5.bindings.LBRACKET,
         sys.selection(
-            𝕊2.bindings.Elements,
+            𝕊5.bindings.Elements,
             sys.list([
             ])
         ),
-        𝕊2.bindings.RBRACKET
+        𝕊5.bindings.RBRACKET
     )
 );
 
 Object.assign(
-    𝕊2.bindings.Elements,
+    𝕊5.bindings.Elements,
     sys.sequence(
         sys.list([
-            𝕊2.bindings.Value,
+            𝕊5.bindings.Value,
         ]),
         sys.apply(
-            𝕊2.bindings.maybe,
+            𝕊5.bindings.maybe,
             sys.sequence(
-                𝕊2.bindings.COMMA,
-                𝕊2.bindings.Elements
+                𝕊5.bindings.COMMA,
+                𝕊5.bindings.Elements
             )
         )
     )
 );
 
 Object.assign(
-    𝕊2.bindings.String,
+    𝕊5.bindings.String,
     sys.sequence(
-        𝕊2.bindings.DOUBLE_QUOTE,
+        𝕊5.bindings.DOUBLE_QUOTE,
         sys.apply(
-            𝕊2.bindings.zeroOrMore,
-            𝕊2.bindings.CHAR
+            𝕊5.bindings.zeroOrMore,
+            𝕊5.bindings.CHAR
         ),
-        𝕊2.bindings.DOUBLE_QUOTE
+        𝕊5.bindings.DOUBLE_QUOTE
     )
 );
 
 Object.assign(
-    𝕊2.bindings.CHAR,
+    𝕊5.bindings.CHAR,
     sys.selection(
         sys.sequence(
             sys.apply(
-                𝕊2.bindings.not,
+                𝕊5.bindings.not,
                 sys.selection(
                     sys.character("\u0000", "\u001f"),
                     sys.stringLiteral("\""),
                     sys.stringLiteral("\\")
                 )
             ),
-            𝕊2.bindings.anyChar
+            𝕊5.bindings.anyChar
         ),
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\\"")),
@@ -227,76 +227,76 @@ Object.assign(
         sys.sequence(
             sys.concrete(sys.stringLiteral("\\u")),
             sys.apply(
-                𝕊2.bindings.unicode,
-                𝕊3
+                𝕊5.bindings.unicode,
+                𝕊6
             )
         )
     )
 );
 
 Object.assign(
-    𝕊2.bindings.LBRACE,
+    𝕊5.bindings.LBRACE,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("{")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.RBRACE,
+    𝕊5.bindings.RBRACE,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("}")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.LBRACKET,
+    𝕊5.bindings.LBRACKET,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("[")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.RBRACKET,
+    𝕊5.bindings.RBRACKET,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral("]")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.COLON,
+    𝕊5.bindings.COLON,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral(":")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.COMMA,
+    𝕊5.bindings.COMMA,
     sys.sequence(
-        𝕊2.bindings.WS,
+        𝕊5.bindings.WS,
         sys.concrete(sys.stringLiteral(",")),
-        𝕊2.bindings.WS
+        𝕊5.bindings.WS
     )
 );
 
 Object.assign(
-    𝕊2.bindings.DOUBLE_QUOTE,
+    𝕊5.bindings.DOUBLE_QUOTE,
     sys.concrete(sys.stringLiteral("\""))
 );
 
 Object.assign(
-    𝕊2.bindings.WS,
+    𝕊5.bindings.WS,
     sys.apply(
-        𝕊2.bindings.zeroOrMore,
+        𝕊5.bindings.zeroOrMore,
         sys.selection(
             sys.concrete(sys.stringLiteral(" ")),
             sys.concrete(sys.stringLiteral("\t")),
@@ -307,23 +307,23 @@ Object.assign(
 );
 
 Object.assign(
-    𝕊3.bindings.base,
+    𝕊6.bindings.base,
     sys.numericLiteral(16)
 );
 
 Object.assign(
-    𝕊3.bindings.minDigits,
+    𝕊6.bindings.minDigits,
     sys.numericLiteral(4)
 );
 
 Object.assign(
-    𝕊3.bindings.maxDigits,
+    𝕊6.bindings.maxDigits,
     sys.numericLiteral(4)
 );
 
 // -------------------- MAIN EXPORTS --------------------
 
-module.exports = sys.createMainExports(𝕊2.bindings.start);
+module.exports = sys.createMainExports(𝕊5.bindings.start);
 
 // -------------------- RUNTIME SYSTEM --------------------
 
@@ -940,93 +940,113 @@ function initStandardLibrary() {
     const LOWERCASE_E = 'e'.charCodeAt(0);
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // TODO: handle abstract/concrete...
+    // tslint:disable: no-bitwise
     const int32 = {
         bindings: {},
-        parse() {
-            let stateₒ = sys.getState();
-            let { IDOC, IMEM, INUL, ONUL } = stateₒ;
-            if (!sys.isString(IDOC))
-                return false;
-            // Parse optional leading '-' sign...
-            let isNegative = false;
-            if (IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
-                isNegative = true;
-                IMEM += 1;
-            }
-            // ...followed by one or more decimal digits. (NB: no exponents).
-            let num = 0;
-            let digits = 0;
-            while (IMEM < IDOC.length) {
-                // Read a digit
-                let c = IDOC.charCodeAt(IMEM);
-                if (c < UNICODE_ZERO_DIGIT || c > UNICODE_ZERO_DIGIT + 9)
-                    break;
-                // Check for overflow
-                if (num > ONE_TENTH_MAXINT32)
-                    return sys.setState(stateₒ), false;
-                // Update parsed number
-                num *= 10;
-                num += (c - UNICODE_ZERO_DIGIT);
-                IMEM += 1;
-                digits += 1;
-            }
-            // Check that we parsed at least one digit.
-            if (digits === 0)
-                return sys.setState(stateₒ), false;
-            // Apply the sign.
-            if (isNegative)
-                num = -num;
-            // Check for over/under-flow. This *is* needed to catch -2147483649, 2147483648 and 2147483649.
-            // tslint:disable-next-line: no-bitwise
-            if (isNegative ? (num & 0xFFFFFFFF) >= 0 : (num & 0xFFFFFFFF) < 0)
-                return sys.setState(stateₒ), false;
-            // Success
-            sys.setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
-            return true;
-        },
-        unparse() {
-            // TODO: ensure N is a 32-bit integer
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (typeof IDOC !== 'number' || IMEM !== 0)
-                return false;
-            let num = IDOC;
-            // tslint:disable-next-line: no-bitwise
-            if ((num & 0xFFFFFFFF) !== num)
-                return false;
-            // TODO: check sign...
-            let isNegative = false;
-            if (num < 0) {
-                isNegative = true;
-                if (num === -2147483648) {
-                    // Specially handle the one case where N = -N could overflow
-                    sys.setState({ IDOC, IMEM: 1, ODOC: '-2147483648', INUL, ONUL });
+        parse: sys.NOT_A_RULE,
+        unparse: sys.NOT_A_RULE,
+        // TODO: temp testing... the lambda form which takes a `base` arg
+        apply(expr) {
+            var _a, _b, _c, _d, _e, _f;
+            let base = (_c = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+            let signed = (_f = (_e = (_d = expr.bindings.signed) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+            sys.assert(typeof base === 'number' && base >= 2 && base <= 36);
+            sys.assert(typeof signed === 'boolean');
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let { IDOC, IMEM, INUL, ONUL } = stateₒ;
+                    if (!sys.isString(IDOC))
+                        return false;
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        IMEM += 1;
+                    }
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let num = 0;
+                    let digits = 0;
+                    while (IMEM < IDOC.length) {
+                        // Read a digit.
+                        let c = IDOC.charCodeAt(IMEM);
+                        if (c >= 256)
+                            break;
+                        let digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base)
+                            break;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
+                        // Check for overflow.
+                        if (num > MAX_NUM)
+                            return sys.setState(stateₒ), false;
+                        // Loop again.
+                        IMEM += 1;
+                        digits += 1;
+                    }
+                    // Check that we parsed at least one digit.
+                    if (digits === 0)
+                        return sys.setState(stateₒ), false;
+                    // Apply the sign.
+                    if (isNegative)
+                        num = -num;
+                    // Success
+                    sys.setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
                     return true;
-                }
-                num = -num;
-            }
-            // TODO: ...then digits
-            let digits = [];
-            while (true) {
-                let d = num % 10;
-                // tslint:disable-next-line: no-bitwise
-                num = (num / 10) | 0;
-                digits.push(String.fromCharCode(UNICODE_ZERO_DIGIT + d));
-                if (num === 0)
-                    break;
-            }
-            // TODO: compute final string...
-            if (isNegative)
-                digits.push('-');
-            sys.setState({ IDOC, IMEM: 1, ODOC: digits.reverse().join(''), INUL, ONUL });
-            return true;
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    if (typeof IDOC !== 'number' || IMEM !== 0)
+                        return false;
+                    let num = IDOC;
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed)
+                            return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM)
+                        return false;
+                    // Extract the digits.
+                    let digits = [];
+                    while (true) {
+                        let d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0)
+                            break;
+                    }
+                    // Compute the final string.
+                    if (isNegative)
+                        digits.push(0x2d); // char code for '-'
+                    let str = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                    sys.setState({ IDOC, IMEM: 1, ODOC: str, INUL, ONUL });
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
         },
-        apply: sys.NOT_A_LAMBDA,
     };
-    // These constants are used by the int32 rule.
-    const UNICODE_ZERO_DIGIT = '0'.charCodeAt(0);
-    const ONE_TENTH_MAXINT32 = 0x7FFFFFFF / 10;
     // TODO: temp testing...
+    int32.parse = int32.apply({ bindings: {
+            base: { constant: { value: 10 } },
+            unsigned: { constant: { value: false } },
+        } }).parse;
+    int32.unparse = int32.apply({ bindings: {
+            base: { constant: { value: 10 } },
+            unsigned: { constant: { value: false } },
+        } }).unparse;
+    // TODO: doc...
     // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
+    // NB: the number 80 is not special, it's just greater than 36 which makes it a sentinel for 'not a digit'.
     const DIGIT_VALUES = [
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
@@ -1044,6 +1064,14 @@ function initStandardLibrary() {
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    ];
+    // TODO: doc...
+    const CHAR_CODES = [
+        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+        0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
+        0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e,
+        0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
+        0x57, 0x58, 0x59, 0x5a,
     ];
     const memoise = {
         bindings: {},

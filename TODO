@@ -2,9 +2,15 @@ TODO 2020:
     [ ] unparse --> print
     [x] `float64`
     [x] numeric literals
-    [ ] `unicode{base=? minDigits=? maxDigits=?}` in `std`
+    [ ] `int32{base?: 2..36, unsigned?: boolean}`
+        [ ] Q: what about the pesky optional leading `-` sign? A: make it another param to the lambda form of `int32`
+        [ ] use the impl to share common code with `unicode` (unicode wraps `int32` and converts to/from a char)
+    [ ] `unicode{base?: 2..36, minDigits?: 1, maxDigits?: number}` in `std`
+        [x] parse
+        [ ] unparse
     [ ] unicode surrogate pairs - how to parse/unparse them? Harder than just plain charCode <-> char
     [ ] compile-time constants
+        [x] basic working support
         [ ] doc current partial support:
             - only bool/num/null/str literals can be compile-time constants (no higher structures yet)
             - the const value is only tracked to the lhs symbol of VariablePatterns, where the rhs is a const expr.
@@ -18,6 +24,7 @@ TODO 2020:
     [ ] consider having global symbols/identifiers (instead of `import 'std'`)
         - `int32`, `true`, `false`, `null`, `char`, `string`, `float64`, `unicode`
     [ ] string literals have both text and ast forms, but null/boolean/numeric literals have only ast form. Inconsistency here?
+    [ ] consider syntax to make things like `not("0x")` less tricky to understand, given the `0x` string is only in the text form and the predicate should always succeed during unparsing
     [ ] unicodeEscapeSequence
         - syntax in some languages:
             - JS/TS:    \uffff      \u{10ffff}
@@ -49,6 +56,7 @@ TODO 2020:
     [ ] document pre/post conds for `rule`s written in TS
         - (i) may modify state iff returns true; if returns false must leave state as it was before the call
         - meaning of `IMEM` for nodes is rule-specific
+    [ ] syntax support for optional bindings in modules (needs a type system first!)
 
     [x] emit output for all node kinds:
     [x] complete `sys` (aka penlib)

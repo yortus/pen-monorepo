@@ -1,11 +1,14 @@
 /*
  * egs:
  *      2+3*5
- *      42*(333-2)
+ *      42*(333.3-2e17)
+ *      0xff+0x100
+ *      %1001+%0011
  */
 
 
-{memoise, float64} = import 'std'
+{memoise, float64, int32} = import 'std'
+{not} = import 'experiments'
 
 
 start = expr
@@ -19,4 +22,9 @@ term = memoise(mul | div | factor)
 mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Record and Field exprs
 div = {type: 'div'   lhs: term   rhs: `/` factor}
 
-factor = float64 | `(-(` expr `)-)` // test char ranges
+factor =
+    | not("0x" | "0b")   float64
+    | `0x`   int32{base=16 signed=false}
+    | `0b`   int32{base=2 signed=false}
+    | `i`   int32{signed=false}
+    | `(` expr `)`
