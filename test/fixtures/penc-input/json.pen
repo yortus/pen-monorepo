@@ -66,3 +66,18 @@ COLON           = WS `:` WS
 COMMA           = WS `,` WS
 DOUBLE_QUOTE    = `"`
 WS              = zeroOrMore(` ` | `\t` | `\n` | `\r`)
+
+
+
+
+/* syntax ideas...
+CHAR =
+    |   ifnot   ("\x00-\x1f" | "\"" | "\\")   then   anyChar        // any char except control char, " or \
+    |   ...
+
+WS              = repeat (` ` | `\t` | `\n` | `\r`)
+WS              = repeat (` ` | `\t` | `\n` | `\r`) for 0..
+WS              = for 0.. repeat (` ` | `\t` | `\n` | `\r`)
+WS              = repeat (` ` | `\t` | `\n` | `\r`) 0.. times
+WS              = repeat 0.. times (` ` | `\t` | `\n` | `\r`)
+*/
