@@ -33,12 +33,12 @@ const memoise: PenVal = {
             parse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = getState();
-                let memos2 = parseMemos.get(stateₒ.IDOC);
+                let memos2 = parseMemos.get(IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    parseMemos.set(stateₒ.IDOC, memos2);
+                    parseMemos.set(IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IMEM);
+                let memo = memos2.get(IMEM);
                 if (!memo) {
                     // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                     // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -46,7 +46,7 @@ const memoise: PenVal = {
                     // memo. If a future application finds the memo still unresolved, then we know we have encountered
                     // left-recursion.
                     memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                    memos2.set(stateₒ.IMEM, memo);
+                    memos2.set(IMEM, memo);
 
                     // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                     // At this point, any left-recursive paths encountered during application are guaranteed to have
@@ -100,12 +100,12 @@ const memoise: PenVal = {
             unparse() {
                 // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = getState();
-                let memos2 = unparseMemos.get(stateₒ.IDOC);
+                let memos2 = unparseMemos.get(IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    unparseMemos.set(stateₒ.IDOC, memos2);
+                    unparseMemos.set(IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IMEM);
+                let memo = memos2.get(IMEM);
                 if (!memo) {
                     // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                     // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -113,7 +113,7 @@ const memoise: PenVal = {
                     // memo. If a future application finds the memo still unresolved, then we know we have encountered
                     // left-recursion.
                     memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                    memos2.set(stateₒ.IMEM, memo);
+                    memos2.set(IMEM, memo);
 
                     // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                     // At this point, any left-recursive paths encountered during application are guaranteed to have

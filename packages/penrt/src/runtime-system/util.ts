@@ -39,11 +39,6 @@ function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
 }
 
 
-function setOutState(ODOCᐟ: unknown): void {
-    ODOC = ODOCᐟ;
-}
-
-
 // TODO: doc... helper...
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);

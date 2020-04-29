@@ -8,26 +8,25 @@ function record(fields: Array<{name: string, value: PenVal}>): PenVal {
             for (let field of fields) {
                 let propName = field.name;
                 if (!field.value.parse()) return setState(stateₒ), false;
-                let {ODOC} = getState();
                 assert(ODOC !== undefined);
                 obj[propName] = ODOC;
             }
-            setOutState(obj);
+            ODOC = obj;
             return true;
         },
 
         unparse() {
+            if (!isPlainObject(IDOC)) return false;
             let stateₒ = getState();
             let text: unknown;
-            if (!isPlainObject(stateₒ.IDOC)) return false;
 
-            let propNames = Object.keys(stateₒ.IDOC); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = stateₒ.IDOC;
-            let bitmask = stateₒ.IMEM;
+            const obj = IDOC;
+            let bitmask = IMEM;
 
             for (let field of fields) {
 
@@ -45,7 +44,6 @@ function record(fields: Array<{name: string, value: PenVal}>): PenVal {
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!field.value.unparse()) return setState(stateₒ), false;
-                let {IMEM, ODOC} = getState();
                 if (!isFullyConsumed(obj[propName], IMEM)) return setState(stateₒ), false;
                 text = concat(text, ODOC);
 
@@ -53,7 +51,7 @@ function record(fields: Array<{name: string, value: PenVal}>): PenVal {
                 bitmask += propBit;
             }
             setInState(obj, bitmask);
-            setOutState(text);
+            ODOC = text;
             return true;
         },
 

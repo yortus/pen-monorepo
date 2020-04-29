@@ -3,24 +3,22 @@ function stringLiteral(value: string): PenVal {
         bindings: {},
 
         parse() {
-            let {IDOC, IMEM, INUL, ONUL} = getState();
             if (!INUL) {
                 if (!isString(IDOC)) return false;
                 if (!matchesAt(IDOC, value, IMEM)) return false;
-                setInState(IDOC, IMEM + value.length);
+                IMEM += value.length;
             }
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
 
         unparse() {
-            let {IDOC, IMEM, INUL, ONUL} = getState();
             if (!INUL) {
                 if (!isString(IDOC)) return false;
                 if (!matchesAt(IDOC, value, IMEM)) return false;
-                setInState(IDOC, IMEM + value.length);
+                IMEM += value.length;
             }
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
 

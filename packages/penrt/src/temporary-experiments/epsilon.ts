@@ -2,12 +2,12 @@ const epsilon: PenVal = {
     bindings: {},
 
     parse() {
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
 
     unparse() {
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
 

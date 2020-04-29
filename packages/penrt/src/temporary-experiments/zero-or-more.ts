@@ -14,12 +14,11 @@ const zeroOrMore: PenVal = {
 
                     // TODO: check if any input was consumed...
                     // if not, stop iterating, since otherwise we may loop forever
-                    let state = getState();
-                    if (state.IMEM === stateₒ.IMEM) break;
+                    if (IMEM === stateₒ.IMEM) break;
 
-                    node = concat(node, state.ODOC);
+                    node = concat(node, ODOC);
                 }
-                setOutState(node);
+                ODOC = node;
                 return true;
             },
 
@@ -32,15 +31,14 @@ const zeroOrMore: PenVal = {
                     // TODO: check if any input was consumed...
                     // if not, stop iterating, since otherwise we may loop forever
                     // TODO: any other checks needed? review...
-                    let state = getState();
-                    if (state.IMEM === stateₒ.IMEM) break;
+                    if (IMEM === stateₒ.IMEM) break;
 
                     // TODO: support more formats / blob types here, like for parse...
-                    assert(typeof state.ODOC === 'string'); // just for now... remove after addressing above TODO
-                    text = concat(text, state.ODOC);
+                    assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
+                    text = concat(text, ODOC);
                 }
 
-                setOutState(text);
+                ODOC = text;
                 return true;
             },
 

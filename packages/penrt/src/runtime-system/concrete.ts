@@ -1,29 +1,20 @@
-// TODO: need better helpers for get/setting INUL/ONUL... code below is just silly
 function concrete(expr: PenVal): PenVal {
     return {
         bindings: {},
 
         parse() {
-            let state = getState();
-            let ONULₒ = state.ONUL;
-            state.ONUL = true;
-            setState(state);
+            let ONULₒ = ONUL;
+            ONUL = true;
             let result = expr.parse();
-            state = getState();
-            state.ONUL = ONULₒ;
-            setState(state);
+            ONUL = ONULₒ;
             return result;
         },
 
         unparse() {
-            let state = getState();
-            let INULₒ = state.INUL;
-            state.INUL = true;
-            setState(state);
+            let INULₒ = INUL;
+            INUL = true;
             let result = expr.unparse();
-            state = getState();
-            state.INUL = INULₒ;
-            setState(state);
+            INUL = INULₒ;
             return result;
         },
 

@@ -10,16 +10,16 @@ const unicode: PenVal = {
         assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
         assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
 
+        // Construct a regex to match the digits
+        let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
+        let regex = RegExp(pattern, 'i');
+
         return {
             bindings: {},
 
             parse() {
-                // Construct a regex to match the digits
-                let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
-                let regex = RegExp(pattern, 'i');
-
-                let {IDOC, IMEM} = getState();
                 if (!isString(IDOC)) return false;
+                let stateₒ = getState();
                 const LEN = IDOC.length;
                 const EOS = '';
 
@@ -35,10 +35,8 @@ const unicode: PenVal = {
                     c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
                 }
 
-                if (len < minDigits) return false;
-                setInState(IDOC, IMEM);
-                let result = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
-                setOutState(result);
+                if (len < minDigits) return setState(stateₒ), false;
+                ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
                 return true;
             },
 

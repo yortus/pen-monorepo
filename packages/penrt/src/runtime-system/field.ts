@@ -6,32 +6,30 @@ function field(name: PenVal, value: PenVal): PenVal {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
 
-            if (!name.parse()) return setState(stateₒ), false;
-            let {ODOC} = getState();
+            if (!name.parse()) return false;
             assert(typeof ODOC === 'string');
             let propName = ODOC;
 
             if (!value.parse()) return setState(stateₒ), false;
-            ({ODOC} = getState());
             assert(ODOC !== undefined);
             obj[propName] = ODOC;
 
-            setOutState(obj);
+            ODOC = obj;
             return true;
         },
 
         unparse() {
+            if (!isPlainObject(IDOC)) return false;
             let stateₒ = getState();
             let text: unknown;
-            if (!isPlainObject(stateₒ.IDOC)) return false;
 
-            let propNames = Object.keys(stateₒ.IDOC); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = stateₒ.IDOC;
-            let bitmask = stateₒ.IMEM;
+            const obj = IDOC;
+            let bitmask = IMEM;
 
             // Find the first property key/value pair that matches this field name/value pair (if any)
             for (let i = 0; i < propCount; ++i) {
@@ -46,21 +44,19 @@ function field(name: PenVal, value: PenVal): PenVal {
                 // TODO: match field name
                 setInState(propName, 0);
                 if (!name.unparse()) continue;
-                let {IMEM, ODOC} = getState();
                 if (IMEM !== propName.length) continue;
                 text = concat(text, ODOC);
 
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!value.unparse()) continue;
-                ({IMEM, ODOC} = getState());
                 if (!isFullyConsumed(obj[propName], IMEM)) continue;
                 text = concat(text, ODOC);
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
                 setInState(obj, bitmask);
-                setOutState(text);
+                ODOC = text;
                 return true;
             }
 

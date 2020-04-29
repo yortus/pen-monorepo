@@ -16,9 +16,8 @@ const float64 = ((): PenVal => {
         bindings: {},
 
         parse() {
-            let stateₒ = getState();
-            let {IDOC, IMEM, INUL, ONUL} = stateₒ;
             if (!isString(IDOC)) return false;
+            let stateₒ = getState();
             const LEN = IDOC.length;
             const EOS = 0;
             let digitCount = 0;
@@ -53,7 +52,7 @@ const float64 = ((): PenVal => {
             }
 
             // Ensure we have parsed at least one significant digit
-            if (digitCount === 0) return false;
+            if (digitCount === 0) return setState(stateₒ), false;
 
             // Parse optional exponent
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
@@ -74,29 +73,28 @@ const float64 = ((): PenVal => {
                     IMEM += 1;
                     c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
-                if (digitCount === 0) return false;
+                if (digitCount === 0) return setState(stateₒ), false;
             }
 
             // There is a syntactically valid float. Delegate parsing to the JS runtime.
             // Reject the number if it parses to Infinity or Nan.
             // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
             let num = Number.parseFloat(IDOC.slice(stateₒ.IMEM, IMEM));
-            if (!Number.isFinite(num)) return false;
+            if (!Number.isFinite(num)) return setState(stateₒ), false;
 
             // Success
-            setState({IDOC, IMEM, ODOC: num, INUL, ONUL});
+            ODOC = num;
             return true;
         },
 
         unparse() {
             // Ensure N is a number.
-            let {IDOC, IMEM, INUL, ONUL} = getState();
             if (typeof IDOC !== 'number' || IMEM !== 0) return false;
 
             // Delegate unparsing to the JS runtime.
             // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-            let str = String(IDOC);
-            setState({IDOC, IMEM: 1, ODOC: str, INUL, ONUL});
+            ODOC = String(IDOC);
+            IMEM = 1;
             return true;
         },
 

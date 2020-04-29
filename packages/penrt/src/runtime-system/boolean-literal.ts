@@ -3,18 +3,16 @@ function booleanLiteral(value: boolean): PenVal {
         bindings: {},
 
         parse() {
-            let {ONUL} = getState();
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
 
         unparse() {
-            let {IDOC, IMEM, INUL} = getState();
             if (!INUL) {
                 if (IDOC !== value || IMEM !== 0) return false;
-                setInState(IDOC, 1);
+                IMEM += 1;
             }
-            setOutState(undefined);
+            ODOC = undefined;
             return true;
         },
 

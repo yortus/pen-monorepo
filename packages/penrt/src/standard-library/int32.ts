@@ -21,9 +21,8 @@ const int32 = ((): PenVal => {
                 bindings: {},
 
                 parse() {
-                    let stateₒ = getState();
-                    let {IDOC, IMEM, INUL, ONUL} = stateₒ;
                     if (!isString(IDOC)) return false;
+                    let stateₒ = getState();
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
@@ -64,12 +63,11 @@ const int32 = ((): PenVal => {
                     if (isNegative) num = -num;
 
                     // Success
-                    setState({IDOC, IMEM, ODOC: num, INUL, ONUL});
+                    ODOC = num;
                     return true;
                 },
 
                 unparse() {
-                    let {IDOC, IMEM, INUL, ONUL} = getState();
                     if (typeof IDOC !== 'number' || IMEM !== 0) return false;
                     let num = IDOC;
 
@@ -95,8 +93,8 @@ const int32 = ((): PenVal => {
 
                     // Compute the final string.
                     if (isNegative) digits.push(0x2d); // char code for '-'
-                    let str = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
-                    setState({IDOC, IMEM: 1, ODOC: str, INUL, ONUL});
+                    ODOC = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                    IMEM = 1;
                     return true;
                 },
 

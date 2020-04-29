@@ -4,25 +4,17 @@ function abstract(expr) {
     return {
         bindings: {},
         parse() {
-            let state = getState();
-            let INULₒ = state.INUL;
-            state.INUL = true;
-            setState(state);
+            let INULₒ = INUL;
+            INUL = true;
             let result = expr.parse();
-            state = getState();
-            state.INUL = INULₒ;
-            setState(state);
+            INUL = INULₒ;
             return result;
         },
         unparse() {
-            let state = getState();
-            let ONULₒ = state.ONUL;
-            state.ONUL = true;
-            setState(state);
+            let ONULₒ = ONUL;
+            ONUL = true;
             let result = expr.unparse();
-            state = getState();
-            state.ONUL = ONULₒ;
-            setState(state);
+            ONUL = ONULₒ;
             return result;
         },
         apply: NOT_A_LAMBDA,
@@ -35,18 +27,16 @@ function booleanLiteral(value) {
     return {
         bindings: {},
         parse() {
-            let { ONUL } = getState();
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
         unparse() {
-            let { IDOC, IMEM, INUL } = getState();
             if (!INUL) {
                 if (IDOC !== value || IMEM !== 0)
                     return false;
-                setInState(IDOC, 1);
+                IMEM += 1;
             }
-            setOutState(undefined);
+            ODOC = undefined;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -56,7 +46,6 @@ function character(min, max) {
     return {
         bindings: {},
         parse() {
-            let { IDOC, IMEM, INUL, ONUL } = getState();
             let c = min;
             if (!INUL) {
                 if (!isString(IDOC))
@@ -66,13 +55,12 @@ function character(min, max) {
                 c = IDOC.charAt(IMEM);
                 if (c < min || c > max)
                     return false;
-                setInState(IDOC, IMEM + 1);
+                IMEM += 1;
             }
-            setOutState(ONUL ? undefined : c);
+            ODOC = ONUL ? undefined : c;
             return true;
         },
         unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = getState();
             let c = min;
             if (!INUL) {
                 if (!isString(IDOC))
@@ -82,9 +70,9 @@ function character(min, max) {
                 c = IDOC.charAt(IMEM);
                 if (c < min || c > max)
                     return false;
-                setInState(IDOC, IMEM + 1);
+                IMEM += 1;
             }
-            setOutState(ONUL ? undefined : c);
+            ODOC = ONUL ? undefined : c;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -94,25 +82,17 @@ function concrete(expr) {
     return {
         bindings: {},
         parse() {
-            let state = getState();
-            let ONULₒ = state.ONUL;
-            state.ONUL = true;
-            setState(state);
+            let ONULₒ = ONUL;
+            ONUL = true;
             let result = expr.parse();
-            state = getState();
-            state.ONUL = ONULₒ;
-            setState(state);
+            ONUL = ONULₒ;
             return result;
         },
         unparse() {
-            let state = getState();
-            let INULₒ = state.INUL;
-            state.INUL = true;
-            setState(state);
+            let INULₒ = INUL;
+            INUL = true;
             let result = expr.unparse();
-            state = getState();
-            state.INUL = INULₒ;
-            setState(state);
+            INUL = INULₒ;
             return result;
         },
         apply: NOT_A_LAMBDA,
@@ -124,7 +104,6 @@ function createMainExports(start) {
             setInState(text, 0);
             if (!start.parse())
                 throw new Error('parse failed');
-            let { IDOC, IMEM, ODOC } = getState();
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`parse didn't consume entire input`);
             if (ODOC === undefined)
@@ -135,7 +114,6 @@ function createMainExports(start) {
             setInState(node, 0);
             if (!start.unparse())
                 throw new Error('parse failed');
-            let { IDOC, IMEM, ODOC } = getState();
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`unparse didn't consume entire input`);
             if (ODOC === undefined)
@@ -151,28 +129,26 @@ function field(name, value) {
             let stateₒ = getState();
             let obj = {};
             if (!name.parse())
-                return setState(stateₒ), false;
-            let { ODOC } = getState();
+                return false;
             assert(typeof ODOC === 'string');
             let propName = ODOC;
             if (!value.parse())
                 return setState(stateₒ), false;
-            ({ ODOC } = getState());
             assert(ODOC !== undefined);
             obj[propName] = ODOC;
-            setOutState(obj);
+            ODOC = obj;
             return true;
         },
         unparse() {
+            if (!isPlainObject(IDOC))
+                return false;
             let stateₒ = getState();
             let text;
-            if (!isPlainObject(stateₒ.IDOC))
-                return false;
-            let propNames = Object.keys(stateₒ.IDOC);
+            let propNames = Object.keys(IDOC);
             let propCount = propNames.length;
             assert(propCount <= 32);
-            const obj = stateₒ.IDOC;
-            let bitmask = stateₒ.IMEM;
+            const obj = IDOC;
+            let bitmask = IMEM;
             for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
                 const propBit = 1 << i;
@@ -181,20 +157,18 @@ function field(name, value) {
                 setInState(propName, 0);
                 if (!name.unparse())
                     continue;
-                let { IMEM, ODOC } = getState();
                 if (IMEM !== propName.length)
                     continue;
                 text = concat(text, ODOC);
                 setInState(obj[propName], 0);
                 if (!value.unparse())
                     continue;
-                ({ IMEM, ODOC } = getState());
                 if (!isFullyConsumed(obj[propName], IMEM))
                     continue;
                 text = concat(text, ODOC);
                 bitmask += propBit;
                 setInState(obj, bitmask);
-                setOutState(text);
+                ODOC = text;
                 return true;
             }
             setState(stateₒ);
@@ -213,33 +187,31 @@ function list(elements) {
             for (let i = 0; i < elementsLength; ++i) {
                 if (!elements[i].parse())
                     return setState(stateₒ), false;
-                let { ODOC } = getState();
                 assert(ODOC !== undefined);
                 arr.push(ODOC);
             }
-            setOutState(arr);
+            ODOC = arr;
             return true;
         },
         unparse() {
+            if (!Array.isArray(IDOC))
+                return false;
+            if (IMEM < 0 || IMEM + elementsLength > IDOC.length)
+                return false;
             let stateₒ = getState();
             let text;
-            if (!Array.isArray(stateₒ.IDOC))
-                return false;
-            if (stateₒ.IMEM < 0 || stateₒ.IMEM + elementsLength > stateₒ.IDOC.length)
-                return false;
-            const arr = stateₒ.IDOC;
-            const off = stateₒ.IMEM;
+            const arr = IDOC;
+            const off = IMEM;
             for (let i = 0; i < elementsLength; ++i) {
                 setInState(arr[off + i], 0);
                 if (!elements[i].unparse())
                     return setState(stateₒ), false;
-                let { IDOC, IMEM, ODOC } = getState();
                 if (!isFullyConsumed(IDOC, IMEM))
                     return setState(stateₒ), false;
                 text = concat(text, ODOC);
             }
             setInState(arr, off + elementsLength);
-            setOutState(text);
+            ODOC = text;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -248,18 +220,16 @@ function list(elements) {
 const nullLiteral = {
     bindings: {},
     parse() {
-        let { ONUL } = getState();
-        setOutState(ONUL ? undefined : null);
+        ODOC = ONUL ? undefined : null;
         return true;
     },
     unparse() {
-        let { IDOC, IMEM, INUL } = getState();
         if (!INUL) {
             if (IDOC !== null || IMEM !== 0)
                 return false;
-            setInState(IDOC, 1);
+            IMEM = 1;
         }
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
     apply: NOT_A_LAMBDA,
@@ -268,18 +238,16 @@ function numericLiteral(value) {
     return {
         bindings: {},
         parse() {
-            let { ONUL } = getState();
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
         unparse() {
-            let { IDOC, IMEM, INUL } = getState();
             if (!INUL) {
                 if (IDOC !== value || IMEM !== 0)
                     return false;
-                setInState(IDOC, 1);
+                IMEM = 1;
             }
-            setOutState(undefined);
+            ODOC = undefined;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -295,23 +263,22 @@ function record(fields) {
                 let propName = field.name;
                 if (!field.value.parse())
                     return setState(stateₒ), false;
-                let { ODOC } = getState();
                 assert(ODOC !== undefined);
                 obj[propName] = ODOC;
             }
-            setOutState(obj);
+            ODOC = obj;
             return true;
         },
         unparse() {
+            if (!isPlainObject(IDOC))
+                return false;
             let stateₒ = getState();
             let text;
-            if (!isPlainObject(stateₒ.IDOC))
-                return false;
-            let propNames = Object.keys(stateₒ.IDOC);
+            let propNames = Object.keys(IDOC);
             let propCount = propNames.length;
             assert(propCount <= 32);
-            const obj = stateₒ.IDOC;
-            let bitmask = stateₒ.IMEM;
+            const obj = IDOC;
+            let bitmask = IMEM;
             for (let field of fields) {
                 let i = propNames.indexOf(field.name);
                 if (i < 0)
@@ -323,14 +290,13 @@ function record(fields) {
                 setInState(obj[propName], 0);
                 if (!field.value.unparse())
                     return setState(stateₒ), false;
-                let { IMEM, ODOC } = getState();
                 if (!isFullyConsumed(obj[propName], IMEM))
                     return setState(stateₒ), false;
                 text = concat(text, ODOC);
                 bitmask += propBit;
             }
             setInState(obj, bitmask);
-            setOutState(text);
+            ODOC = text;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -367,10 +333,9 @@ function sequence(...expressions) {
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].parse())
                     return setState(stateₒ), false;
-                let { ODOC } = getState();
                 node = concat(node, ODOC);
             }
-            setOutState(node);
+            ODOC = node;
             return true;
         },
         unparse() {
@@ -379,10 +344,9 @@ function sequence(...expressions) {
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].unparse())
                     return setState(stateₒ), false;
-                let { ODOC } = getState();
                 text = concat(text, ODOC);
             }
-            setOutState(text);
+            ODOC = text;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -392,27 +356,25 @@ function stringLiteral(value) {
     return {
         bindings: {},
         parse() {
-            let { IDOC, IMEM, INUL, ONUL } = getState();
             if (!INUL) {
                 if (!isString(IDOC))
                     return false;
                 if (!matchesAt(IDOC, value, IMEM))
                     return false;
-                setInState(IDOC, IMEM + value.length);
+                IMEM += value.length;
             }
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
         unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = getState();
             if (!INUL) {
                 if (!isString(IDOC))
                     return false;
                 if (!matchesAt(IDOC, value, IMEM))
                     return false;
-                setInState(IDOC, IMEM + value.length);
+                IMEM += value.length;
             }
-            setOutState(ONUL ? undefined : value);
+            ODOC = ONUL ? undefined : value;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -432,9 +394,6 @@ function setState(value) {
 function setInState(IDOCᐟ, IMEMᐟ) {
     IDOC = IDOCᐟ;
     IMEM = IMEMᐟ;
-}
-function setOutState(ODOCᐟ) {
-    ODOC = ODOCᐟ;
 }
 function assert(value) {
     if (!value)
@@ -498,10 +457,9 @@ const float64 = (() => {
     return {
         bindings: {},
         parse() {
-            let stateₒ = getState();
-            let { IDOC, IMEM, INUL, ONUL } = stateₒ;
             if (!isString(IDOC))
                 return false;
+            let stateₒ = getState();
             const LEN = IDOC.length;
             const EOS = 0;
             let digitCount = 0;
@@ -529,7 +487,7 @@ const float64 = (() => {
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
             if (digitCount === 0)
-                return false;
+                return setState(stateₒ), false;
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
@@ -546,20 +504,19 @@ const float64 = (() => {
                     c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
                 if (digitCount === 0)
-                    return false;
+                    return setState(stateₒ), false;
             }
             let num = Number.parseFloat(IDOC.slice(stateₒ.IMEM, IMEM));
             if (!Number.isFinite(num))
-                return false;
-            setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
+                return setState(stateₒ), false;
+            ODOC = num;
             return true;
         },
         unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = getState();
             if (typeof IDOC !== 'number' || IMEM !== 0)
                 return false;
-            let str = String(IDOC);
-            setState({ IDOC, IMEM: 1, ODOC: str, INUL, ONUL });
+            ODOC = String(IDOC);
+            IMEM = 1;
             return true;
         },
         apply: NOT_A_LAMBDA,
@@ -579,10 +536,9 @@ const int32 = (() => {
             return {
                 bindings: {},
                 parse() {
-                    let stateₒ = getState();
-                    let { IDOC, IMEM, INUL, ONUL } = stateₒ;
                     if (!isString(IDOC))
                         return false;
+                    let stateₒ = getState();
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
                     if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
@@ -610,11 +566,10 @@ const int32 = (() => {
                         return setState(stateₒ), false;
                     if (isNegative)
                         num = -num;
-                    setState({ IDOC, IMEM, ODOC: num, INUL, ONUL });
+                    ODOC = num;
                     return true;
                 },
                 unparse() {
-                    let { IDOC, IMEM, INUL, ONUL } = getState();
                     if (typeof IDOC !== 'number' || IMEM !== 0)
                         return false;
                     let num = IDOC;
@@ -639,8 +594,8 @@ const int32 = (() => {
                     }
                     if (isNegative)
                         digits.push(0x2d);
-                    let str = String.fromCharCode(...digits.reverse());
-                    setState({ IDOC, IMEM: 1, ODOC: str, INUL, ONUL });
+                    ODOC = String.fromCharCode(...digits.reverse());
+                    IMEM = 1;
                     return true;
                 },
                 apply: NOT_A_LAMBDA,
@@ -693,15 +648,15 @@ const memoise = {
             bindings: {},
             parse() {
                 let stateₒ = getState();
-                let memos2 = parseMemos.get(stateₒ.IDOC);
+                let memos2 = parseMemos.get(IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    parseMemos.set(stateₒ.IDOC, memos2);
+                    parseMemos.set(IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IMEM);
+                let memo = memos2.get(IMEM);
                 if (!memo) {
                     memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                    memos2.set(stateₒ.IMEM, memo);
+                    memos2.set(IMEM, memo);
                     if (expr.parse()) {
                         memo.result = true;
                         memo.stateᐟ = getState();
@@ -730,15 +685,15 @@ const memoise = {
             },
             unparse() {
                 let stateₒ = getState();
-                let memos2 = unparseMemos.get(stateₒ.IDOC);
+                let memos2 = unparseMemos.get(IDOC);
                 if (memos2 === undefined) {
                     memos2 = new Map();
-                    unparseMemos.set(stateₒ.IDOC, memos2);
+                    unparseMemos.set(IDOC, memos2);
                 }
-                let memo = memos2.get(stateₒ.IMEM);
+                let memo = memos2.get(IMEM);
                 if (!memo) {
                     memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                    memos2.set(stateₒ.IMEM, memo);
+                    memos2.set(IMEM, memo);
                     if (expr.unparse()) {
                         memo.result = true;
                         memo.stateᐟ = getState();
@@ -784,7 +739,6 @@ const std = {
 const anyChar = {
     bindings: {},
     parse() {
-        let { IDOC, IMEM, INUL, ONUL } = getState();
         let c = '?';
         if (!INUL) {
             if (!isString(IDOC))
@@ -794,12 +748,10 @@ const anyChar = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        let ODOC = ONUL ? undefined : c;
-        setState({ IDOC, IMEM, ODOC, INUL, ONUL });
+        ODOC = ONUL ? undefined : c;
         return true;
     },
     unparse() {
-        let { IDOC, IMEM, INUL, ONUL } = getState();
         let c = '?';
         if (!INUL) {
             if (!isString(IDOC))
@@ -809,8 +761,7 @@ const anyChar = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        let ODOC = ONUL ? undefined : c;
-        setState({ IDOC, IMEM, ODOC, INUL, ONUL });
+        ODOC = ONUL ? undefined : c;
         return true;
     },
     apply: NOT_A_LAMBDA,
@@ -818,11 +769,11 @@ const anyChar = {
 const epsilon = {
     bindings: {},
     parse() {
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
     unparse() {
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
     apply: NOT_A_LAMBDA,
@@ -882,14 +833,14 @@ const unicode = {
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
         assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+        let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
+        let regex = RegExp(pattern, 'i');
         return {
             bindings: {},
             parse() {
-                let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
-                let regex = RegExp(pattern, 'i');
-                let { IDOC, IMEM } = getState();
                 if (!isString(IDOC))
                     return false;
+                let stateₒ = getState();
                 const LEN = IDOC.length;
                 const EOS = '';
                 let len = 0;
@@ -906,10 +857,8 @@ const unicode = {
                     c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
                 }
                 if (len < minDigits)
-                    return false;
-                setInState(IDOC, IMEM);
-                let result = eval(`"\\u{${num}}"`);
-                setOutState(result);
+                    return setState(stateₒ), false;
+                ODOC = eval(`"\\u{${num}}"`);
                 return true;
             },
             unparse: () => {
@@ -932,12 +881,11 @@ const zeroOrMore = {
                 while (true) {
                     if (!expr.parse())
                         break;
-                    let state = getState();
-                    if (state.IMEM === stateₒ.IMEM)
+                    if (IMEM === stateₒ.IMEM)
                         break;
-                    node = concat(node, state.ODOC);
+                    node = concat(node, ODOC);
                 }
-                setOutState(node);
+                ODOC = node;
                 return true;
             },
             unparse() {
@@ -946,13 +894,12 @@ const zeroOrMore = {
                 while (true) {
                     if (!expr.unparse())
                         break;
-                    let state = getState();
-                    if (state.IMEM === stateₒ.IMEM)
+                    if (IMEM === stateₒ.IMEM)
                         break;
-                    assert(typeof state.ODOC === 'string');
-                    text = concat(text, state.ODOC);
+                    assert(typeof ODOC === 'string');
+                    text = concat(text, ODOC);
                 }
-                setOutState(text);
+                ODOC = text;
                 return true;
             },
             apply: NOT_A_LAMBDA,

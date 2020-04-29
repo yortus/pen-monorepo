@@ -8,30 +8,29 @@ function list(elements: PenVal[]): PenVal {
             let arr = [] as unknown[];
             for (let i = 0; i < elementsLength; ++i) {
                 if (!elements[i].parse()) return setState(stateₒ), false;
-                let {ODOC} = getState();
                 assert(ODOC !== undefined);
                 arr.push(ODOC);
             }
-            setOutState(arr);
+            ODOC = arr;
             return true;
         },
 
         unparse() {
+            if (!Array.isArray(IDOC)) return false;
+            if (IMEM < 0 || IMEM + elementsLength > IDOC.length) return false;
+
             let stateₒ = getState();
             let text: unknown;
-            if (!Array.isArray(stateₒ.IDOC)) return false;
-            if (stateₒ.IMEM < 0 || stateₒ.IMEM + elementsLength > stateₒ.IDOC.length) return false;
-            const arr = stateₒ.IDOC;
-            const off = stateₒ.IMEM;
+            const arr = IDOC;
+            const off = IMEM;
             for (let i = 0; i < elementsLength; ++i) {
                 setInState(arr[off + i], 0);
                 if (!elements[i].unparse()) return setState(stateₒ), false;
-                let {IDOC, IMEM, ODOC} = getState();
                 if (!isFullyConsumed(IDOC, IMEM)) return setState(stateₒ), false;
                 text = concat(text, ODOC);
             }
             setInState(arr, off + elementsLength);
-            setOutState(text);
+            ODOC = text;
             return true;
         },
 

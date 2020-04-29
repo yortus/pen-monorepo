@@ -2,7 +2,6 @@ const anyChar: PenVal = {
     bindings: {},
 
     parse() {
-        let {IDOC, IMEM, INUL, ONUL} = getState();
         let c = '?';
         if (!INUL) {
             if (!isString(IDOC)) return false;
@@ -10,13 +9,11 @@ const anyChar: PenVal = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        let ODOC = ONUL ? undefined : c;
-        setState({IDOC, IMEM, ODOC, INUL, ONUL});
+        ODOC = ONUL ? undefined : c;
         return true;
     },
 
     unparse() {
-        let {IDOC, IMEM, INUL, ONUL} = getState();
         let c = '?';
         if (!INUL) {
             if (!isString(IDOC)) return false;
@@ -24,8 +21,7 @@ const anyChar: PenVal = {
             c = IDOC.charAt(IMEM);
             IMEM += 1;
         }
-        let ODOC = ONUL ? undefined : c;
-        setState({IDOC, IMEM, ODOC, INUL, ONUL});
+        ODOC = ONUL ? undefined : c;
         return true;
     },
 

@@ -2,18 +2,16 @@ const nullLiteral: PenVal = {
     bindings: {},
 
     parse() {
-        let {ONUL} = getState();
-        setOutState(ONUL ? undefined : null);
+        ODOC = ONUL ? undefined : null;
         return true;
     },
 
     unparse() {
-        let {IDOC, IMEM, INUL} = getState();
         if (!INUL) {
             if (IDOC !== null || IMEM !== 0) return false;
-            setInState(IDOC, 1);
+            IMEM = 1;
         }
-        setOutState(undefined);
+        ODOC = undefined;
         return true;
     },
 
