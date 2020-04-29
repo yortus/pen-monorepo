@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "target": "es2017",
+        "module": "None",
+        "lib": ["es2017"],
+        "types": [],
+
+        "rootDir": "src",
+        "outFile": "dist/penrt.js",
+        "removeComments": true,
+        "sourceMap": false,
+        "declaration": true,
+
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+    },
+    "include": ["src/"],
+    "references": []
+}

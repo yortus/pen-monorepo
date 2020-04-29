@@ -1,0 +1,33 @@
+{
+    "name": "penc",
+    "version": "0.4.0",
+    "description": "PEN Compiler",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Troy Gerwien",
+            "email": "yortus@gmail.com",
+            "url": "http://github.com/yortus/"
+        }
+    ],
+    "engines": {
+        "node": ">=8.2.1"
+    },
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "scripts": {
+        "postbuild": "run-p postbuild:*",
+        "postbuild:peg1": "pegjs -o dist/transforms/01-create-source-file-graph/pen-import-detection-grammar.js src/transforms/01-create-source-file-graph/pen-import-detection-grammar.pegjs",
+        "postbuild:peg2": "pegjs -o dist/transforms/02-parse-source-files/pen-grammar.js src/transforms/02-parse-source-files/pen-grammar.pegjs"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^8.1.0",
+        "@types/pkg-dir": "^2.0.1",
+        "pegjs": "^0.10.0",
+        "penrt": "*"
+    },
+    "dependencies": {
+        "fs-extra": "^8.1.0",
+        "pkg-dir": "^4.2.0"
+    }
+}

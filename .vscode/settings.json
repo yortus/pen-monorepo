@@ -7,14 +7,14 @@
 
 	// Hide files/folders in Explorer if they match any of the following patterns.
 	"files.exclude": {
-		"node_modules": false,
-		"dist": false,
-		"**/.git": false,
-		"**/.DS_Store": false
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/.git": true,
+		"**/.DS_Store": true
 	},
 
 	// Settings for "Mocha Test Explorer" extension.
-	"mochaExplorer.files": ["src/**/*.test.ts", "test/**/*.test.ts"],
+	"mochaExplorer.files": ["**/*.test.ts"],
 	"mochaExplorer.require": "ts-node/register",
 	"mochaExplorer.debuggerConfig": "Mocha Tests",
 }

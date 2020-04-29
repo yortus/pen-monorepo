@@ -1,20 +1,9 @@
 {
-    "name": "penc",
-    "version": "0.3.0",
-    "description": "PEN Compiler",
-    "engines": {
-        "node": ">=8.2.1"
-    },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
-    "scripts": {
-        "clean": "rimraf dist/",
-        "build": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
-        "lint": "tslint src/**/*.ts",
-        "test": "mocha --require ts-node/register test/**/*.test.ts",
-
-        "build2": "tsc -p src2"
-    },
+    "private": true,
+    "name": "pen-monorepo",
+    "version": "0.0.1",
+    "description": "PEN Compiler and Tools",
+    "license": "MIT",
     "contributors": [
         {
             "name": "Troy Gerwien",
@@ -22,23 +11,22 @@
             "url": "http://github.com/yortus/"
         }
     ],
-    "license": "MIT",
-    "dependencies": {
-        "fs-extra": "^8.1.0",
-        "pegjs": "^0.10.0",
-        "pkg-dir": "^4.2.0"
+    "scripts": {
+        "bootstrap": "npm install && lerna bootstrap",
+        "build": "tsc -b --verbose && lerna run postbuild",
+        "clean": "lerna exec rimraf dist/ *.tsbuildinfo",
+        "lint": "lerna exec tslint src/**/*.ts",
+        "test": "mocha --require ts-node/register **/*.test.ts"
     },
     "devDependencies": {
         "@types/chai": "^4.2.0",
-        "@types/fs-extra": "^8.1.0",
         "@types/mocha": "^5.2.7",
         "@types/node": "^10.14.16",
-        "@types/pegjs": "^0.10.1",
-        "@types/pkg-dir": "^2.0.1",
         "chai": "^4.2.0",
-        "concurrently": "^3.5.1",
         "cpy-cli": "^2.0.0",
+        "lerna": "^3.20.2",
         "mocha": "^5.2.0",
+        "npm-run-all": "^4.1.5",
         "rimraf": "^2.7.1",
         "ts-node": "^8.4.1",
         "tslint": "^5.19.0",

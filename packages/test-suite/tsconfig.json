@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "target": "es2017",
+        "module": "commonjs",
+        "lib": ["es2017"],
+        "types": ["mocha", "node"],
+
+        "rootDir": "src",
+        "outDir": "dist",
+        "removeComments": true,
+        "sourceMap": true,
+        "declaration": true,
+
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+    },
+    "include": ["src/"],
+    "references": [
+        {"path": "../penc"},
+        {"path": "../penrt"},
+    ]
+}
