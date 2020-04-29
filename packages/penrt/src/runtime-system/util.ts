@@ -46,7 +46,8 @@ function assert(value: unknown): asserts value {
 
 
 // TODO: doc... helper...
-// TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling (but instrument first)
+// TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling
+//       (but instrument first)
 function concat(a: unknown, b: unknown): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
@@ -79,7 +80,8 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 
 // TODO: doc... helper...
-// TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing (but instrument first)
+// TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing
+//       (but instrument first)
 function isString(value: unknown): value is string {
     return typeof value === 'string';
 }
@@ -97,5 +99,5 @@ function matchesAt(text: string, substr: string, position: number): boolean {
 
 
 // TODO: doc... helpers...
-function NOT_A_LAMBDA(): never { throw new Error('Not a lambda'); };
-function NOT_A_RULE(): never { throw new Error('Not a rule'); };
+function NOT_A_LAMBDA(): never { throw new Error('Not a lambda'); }
+function NOT_A_RULE(): never { throw new Error('Not a rule'); }

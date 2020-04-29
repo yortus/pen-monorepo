@@ -4,7 +4,7 @@ import {mapMap} from './map-map';
 
 // TODO: doc...
 export function makeNodeVisitor<N extends Node, R = void>() {
-    return function visitNode<SpecificNode extends N, VisObj>(node: SpecificNode, makeVisitors: MakeVisitors<N, VisObj, R>) {
+    return function nv<SpecificNode extends N, VisObj>(node: SpecificNode, makeVisitors: MakeVisitors<N, VisObj, R>) {
         const rec: <NN extends N>(n: NN) => R = n => {
             try {
                 let visFn = visitors[n.kind];

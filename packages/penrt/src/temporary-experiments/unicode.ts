@@ -36,6 +36,7 @@ const unicode: PenVal = {
                 }
 
                 if (len < minDigits) return setState(stateₒ), false;
+                // tslint:disable-next-line: no-eval
                 ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
                 return true;
             },
