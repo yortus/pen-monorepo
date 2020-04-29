@@ -11,7 +11,9 @@
         "clean": "rimraf dist/",
         "build": "tsc && cpy **/*.pegjs ../dist --cwd=src --parents",
         "lint": "tslint src/**/*.ts",
-        "test": "mocha --require ts-node/register test/**/*.test.ts"
+        "test": "mocha --require ts-node/register test/**/*.test.ts",
+
+        "build2": "tsc -p src2"
     },
     "contributors": [
         {

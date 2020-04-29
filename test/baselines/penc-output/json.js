@@ -328,518 +328,564 @@ module.exports = sys.createMainExports(𝕊5.bindings.start);
 // -------------------- RUNTIME SYSTEM --------------------
 
 function initRuntimeSystem() {
-    function abstract(expr) {
-        return {
-            bindings: {},
-            parse() {
-                let INULₒ = INUL;
-                INUL = true;
-                let result = expr.parse();
-                INUL = INULₒ;
-                return result;
-            },
-            unparse() {
-                let ONULₒ = ONUL;
-                ONUL = true;
-                let result = expr.unparse();
-                ONUL = ONULₒ;
-                return result;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function apply(lambda, arg) {
-        return lambda.apply(arg);
-    }
-    function booleanLiteral(value) {
-        return {
-            bindings: {},
-            parse() {
-                let { ONUL } = sys.getState();
-                sys.setOutState(ONUL ? undefined : value);
-                return true;
-            },
-            unparse() {
-                let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-                if (!INUL) {
-                    if (IDOC !== value || IMEM !== 0)
-                        return false;
-                    IMEM = 1;
-                }
-                sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function character(min, max) {
-        return {
-            bindings: {},
-            parse() {
-                let c = min;
-                if (!INUL) {
-                    if (!isString(IDOC))
-                        return false;
-                    if (IMEM < 0 || IMEM >= IDOC.length)
-                        return false;
-                    c = IDOC.charAt(IMEM);
-                    if (c < min || c > max)
-                        return false;
-                    IMEM += 1;
-                }
-                ODOC = ONUL ? undefined : c;
-                return true;
-            },
-            unparse() {
-                let c = min;
-                if (!INUL) {
-                    if (!isString(IDOC))
-                        return false;
-                    if (IMEM < 0 || IMEM >= IDOC.length)
-                        return false;
-                    c = IDOC.charAt(IMEM);
-                    if (c < min || c > max)
-                        return false;
-                    IMEM += 1;
-                }
-                ODOC = ONUL ? undefined : c;
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function concrete(expr) {
-        return {
-            bindings: {},
-            parse() {
-                let ONULₒ = ONUL;
-                ONUL = true;
-                let result = expr.parse();
-                ONUL = ONULₒ;
-                return result;
-            },
-            unparse() {
-                let INULₒ = INUL;
-                INUL = true;
-                let result = expr.unparse();
-                INUL = INULₒ;
-                return result;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function createMainExports(start) {
-        return {
-            parse: (text) => {
-                setInState(text, 0);
-                if (!start.parse())
-                    throw new Error('parse failed');
-                if (!isFullyConsumed(IDOC, IMEM))
-                    throw new Error(`parse didn't consume entire input`);
-                if (ODOC === undefined)
-                    throw new Error(`parse didn't return a value`);
-                return ODOC;
-            },
-            unparse: (node) => {
-                setInState(node, 0);
-                if (!start.unparse())
-                    throw new Error('parse failed');
-                if (!isFullyConsumed(IDOC, IMEM))
-                    throw new Error(`unparse didn't consume entire input`);
-                if (ODOC === undefined)
-                    throw new Error(`parse didn't return a value`);
-                return ODOC;
-            },
-        };
-    }
-    function field(name, value) {
-        return {
-            bindings: {},
-            parse() {
-                let stateₒ = getState();
-                let obj = {};
-                if (!name.parse())
-                    return setState(stateₒ), false;
-                assert(typeof ODOC === 'string');
-                let propName = ODOC;
-                if (!value.parse())
-                    return setState(stateₒ), false;
-                assert(ODOC !== undefined);
-                obj[propName] = ODOC;
-                ODOC = obj;
-                return true;
-            },
-            unparse() {
-                let stateₒ = getState();
-                let text;
-                if (!isPlainObject(IDOC))
-                    return false;
-                let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
-                let propCount = propNames.length;
-                assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-                // TODO: temp testing...
-                const obj = IDOC;
-                let bitmask = IMEM;
-                // Find the first property key/value pair that matches this field name/value pair (if any)
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
-                    // TODO: skip already-consumed key/value pairs
-                    // tslint:disable-next-line: no-bitwise
-                    const propBit = 1 << i;
-                    // tslint:disable-next-line: no-bitwise
-                    if ((bitmask & propBit) !== 0)
-                        continue;
-                    // TODO: match field name
-                    setInState(propName, 0);
-                    if (!name.unparse())
-                        continue;
-                    if (IMEM !== propName.length)
-                        continue;
-                    text = concat(text, ODOC);
-                    // TODO: match field value
-                    setInState(obj[propName], 0);
-                    if (!value.unparse())
-                        continue;
-                    if (!isFullyConsumed(obj[propName], IMEM))
-                        continue;
-                    text = concat(text, ODOC);
-                    // TODO: we matched both name and value - consume them from `node`
-                    bitmask += propBit;
-                    setInState(obj, bitmask);
-                    ODOC = text;
+    var sys;
+    (function (sys) {
+        function abstract(expr) {
+            return {
+                bindings: {},
+                parse() {
+                    let state = sys.getState();
+                    let INULₒ = state.INUL;
+                    state.INUL = true;
+                    sys.setState(state);
+                    let result = expr.parse();
+                    state = sys.getState();
+                    state.INUL = INULₒ;
+                    sys.setState(state);
+                    return result;
+                },
+                unparse() {
+                    let state = sys.getState();
+                    let ONULₒ = state.ONUL;
+                    state.ONUL = true;
+                    sys.setState(state);
+                    let result = expr.unparse();
+                    state = sys.getState();
+                    state.ONUL = ONULₒ;
+                    sys.setState(state);
+                    return result;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.abstract = abstract;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function apply(lambda, arg) {
+            return lambda.apply(arg);
+        }
+        sys.apply = apply;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function booleanLiteral(value) {
+            return {
+                bindings: {},
+                parse() {
+                    let { ONUL } = sys.getState();
+                    sys.setOutState(ONUL ? undefined : value);
                     return true;
-                }
-                // If we get here, no match...
-                setState(stateₒ);
-                return false;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function list(elements) {
-        const elementsLength = elements.length;
-        return {
-            bindings: {},
-            parse() {
-                let stateₒ = getState();
-                let arr = [];
-                for (let i = 0; i < elementsLength; ++i) {
-                    if (!elements[i].parse())
-                        return setState(stateₒ), false;
-                    assert(ODOC !== undefined);
-                    arr.push(ODOC);
-                }
-                ODOC = arr;
-                return true;
-            },
-            unparse() {
-                let stateₒ = getState();
-                let text;
-                if (!Array.isArray(IDOC))
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL } = sys.getState();
+                    if (!INUL) {
+                        if (IDOC !== value || IMEM !== 0)
+                            return false;
+                        sys.setInState(IDOC, 1);
+                    }
+                    sys.setOutState(undefined);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.booleanLiteral = booleanLiteral;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function character(min, max) {
+            return {
+                bindings: {},
+                parse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    let c = min;
+                    if (!INUL) {
+                        if (!sys.isString(IDOC))
+                            return false;
+                        if (IMEM < 0 || IMEM >= IDOC.length)
+                            return false;
+                        c = IDOC.charAt(IMEM);
+                        if (c < min || c > max)
+                            return false;
+                        sys.setInState(IDOC, IMEM + 1);
+                    }
+                    sys.setOutState(ONUL ? undefined : c);
+                    return true;
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    let c = min;
+                    if (!INUL) {
+                        if (!sys.isString(IDOC))
+                            return false;
+                        if (IMEM < 0 || IMEM >= IDOC.length)
+                            return false;
+                        c = IDOC.charAt(IMEM);
+                        if (c < min || c > max)
+                            return false;
+                        sys.setInState(IDOC, IMEM + 1);
+                    }
+                    sys.setOutState(ONUL ? undefined : c);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.character = character;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function concrete(expr) {
+            return {
+                bindings: {},
+                parse() {
+                    let state = sys.getState();
+                    let ONULₒ = state.ONUL;
+                    state.ONUL = true;
+                    sys.setState(state);
+                    let result = expr.parse();
+                    state = sys.getState();
+                    state.ONUL = ONULₒ;
+                    sys.setState(state);
+                    return result;
+                },
+                unparse() {
+                    let state = sys.getState();
+                    let INULₒ = state.INUL;
+                    state.INUL = true;
+                    sys.setState(state);
+                    let result = expr.unparse();
+                    state = sys.getState();
+                    state.INUL = INULₒ;
+                    sys.setState(state);
+                    return result;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.concrete = concrete;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function createMainExports(start) {
+            return {
+                parse: (text) => {
+                    sys.setInState(text, 0);
+                    if (!start.parse())
+                        throw new Error('parse failed');
+                    let { IDOC, IMEM, ODOC } = sys.getState();
+                    if (!sys.isFullyConsumed(IDOC, IMEM))
+                        throw new Error(`parse didn't consume entire input`);
+                    if (ODOC === undefined)
+                        throw new Error(`parse didn't return a value`);
+                    return ODOC;
+                },
+                unparse: (node) => {
+                    sys.setInState(node, 0);
+                    if (!start.unparse())
+                        throw new Error('parse failed');
+                    let { IDOC, IMEM, ODOC } = sys.getState();
+                    if (!sys.isFullyConsumed(IDOC, IMEM))
+                        throw new Error(`unparse didn't consume entire input`);
+                    if (ODOC === undefined)
+                        throw new Error(`parse didn't return a value`);
+                    return ODOC;
+                },
+            };
+        }
+        sys.createMainExports = createMainExports;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function field(name, value) {
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let obj = {};
+                    if (!name.parse())
+                        return sys.setState(stateₒ), false;
+                    let { ODOC } = sys.getState();
+                    sys.assert(typeof ODOC === 'string');
+                    let propName = ODOC;
+                    if (!value.parse())
+                        return sys.setState(stateₒ), false;
+                    ({ ODOC } = sys.getState());
+                    sys.assert(ODOC !== undefined);
+                    obj[propName] = ODOC;
+                    sys.setOutState(obj);
+                    return true;
+                },
+                unparse() {
+                    let stateₒ = sys.getState();
+                    let text;
+                    if (!sys.isPlainObject(stateₒ.IDOC))
+                        return false;
+                    let propNames = Object.keys(stateₒ.IDOC);
+                    let propCount = propNames.length;
+                    sys.assert(propCount <= 32);
+                    const obj = stateₒ.IDOC;
+                    let bitmask = stateₒ.IMEM;
+                    for (let i = 0; i < propCount; ++i) {
+                        let propName = propNames[i];
+                        const propBit = 1 << i;
+                        if ((bitmask & propBit) !== 0)
+                            continue;
+                        sys.setInState(propName, 0);
+                        if (!name.unparse())
+                            continue;
+                        let { IMEM, ODOC } = sys.getState();
+                        if (IMEM !== propName.length)
+                            continue;
+                        text = sys.concat(text, ODOC);
+                        sys.setInState(obj[propName], 0);
+                        if (!value.unparse())
+                            continue;
+                        ({ IMEM, ODOC } = sys.getState());
+                        if (!sys.isFullyConsumed(obj[propName], IMEM))
+                            continue;
+                        text = sys.concat(text, ODOC);
+                        bitmask += propBit;
+                        sys.setInState(obj, bitmask);
+                        sys.setOutState(text);
+                        return true;
+                    }
+                    sys.setState(stateₒ);
                     return false;
-                if (IMEM < 0 || IMEM + elementsLength > IDOC.length)
-                    return false;
-                const arr = IDOC;
-                const off = IMEM;
-                for (let i = 0; i < elementsLength; ++i) {
-                    setInState(arr[off + i], 0);
-                    if (!elements[i].unparse())
-                        return setState(stateₒ), false;
-                    if (!isFullyConsumed(IDOC, IMEM))
-                        return setState(stateₒ), false;
-                    text = concat(text, ODOC);
-                }
-                setInState(arr, off + elementsLength);
-                ODOC = text;
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    const nullLiteral = {
-        bindings: {},
-        parse() {
-            let { ONUL } = sys.getState();
-            sys.setOutState(ONUL ? undefined : null);
-            return true;
-        },
-        unparse() {
-            let { IDOC, IMEM, INUL, ONUL } = sys.getState();
-            if (!INUL) {
-                if (IDOC !== null || IMEM !== 0)
-                    return false;
-                IMEM = 1;
-            }
-            sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
-            return true;
-        },
-        apply: NOT_A_LAMBDA,
-    };
-    function numericLiteral(value) {
-        return {
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.field = field;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function list(elements) {
+            const elementsLength = elements.length;
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let arr = [];
+                    for (let i = 0; i < elementsLength; ++i) {
+                        if (!elements[i].parse())
+                            return sys.setState(stateₒ), false;
+                        let { ODOC } = sys.getState();
+                        sys.assert(ODOC !== undefined);
+                        arr.push(ODOC);
+                    }
+                    sys.setOutState(arr);
+                    return true;
+                },
+                unparse() {
+                    let stateₒ = sys.getState();
+                    let text;
+                    if (!Array.isArray(stateₒ.IDOC))
+                        return false;
+                    if (stateₒ.IMEM < 0 || stateₒ.IMEM + elementsLength > stateₒ.IDOC.length)
+                        return false;
+                    const arr = stateₒ.IDOC;
+                    const off = stateₒ.IMEM;
+                    for (let i = 0; i < elementsLength; ++i) {
+                        sys.setInState(arr[off + i], 0);
+                        if (!elements[i].unparse())
+                            return sys.setState(stateₒ), false;
+                        let { IDOC, IMEM, ODOC } = sys.getState();
+                        if (!sys.isFullyConsumed(IDOC, IMEM))
+                            return sys.setState(stateₒ), false;
+                        text = sys.concat(text, ODOC);
+                    }
+                    sys.setInState(arr, off + elementsLength);
+                    sys.setOutState(text);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.list = list;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        sys.nullLiteral = {
             bindings: {},
             parse() {
                 let { ONUL } = sys.getState();
-                sys.setOutState(ONUL ? undefined : value);
+                sys.setOutState(ONUL ? undefined : null);
                 return true;
             },
             unparse() {
-                let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                let { IDOC, IMEM, INUL } = sys.getState();
                 if (!INUL) {
-                    if (IDOC !== value || IMEM !== 0)
+                    if (IDOC !== null || IMEM !== 0)
                         return false;
-                    IMEM = 1;
+                    sys.setInState(IDOC, 1);
                 }
-                sys.setState({ IDOC, IMEM, ODOC: undefined, INUL, ONUL });
+                sys.setOutState(undefined);
                 return true;
             },
-            apply: NOT_A_LAMBDA,
+            apply: sys.NOT_A_LAMBDA,
         };
-    }
-    function record(fields) {
-        return {
-            bindings: {},
-            parse() {
-                let stateₒ = getState();
-                let obj = {};
-                for (let field of fields) {
-                    let propName = field.name;
-                    if (!field.value.parse())
-                        return setState(stateₒ), false;
-                    assert(ODOC !== undefined);
-                    obj[propName] = ODOC;
-                }
-                ODOC = obj;
-                return true;
-            },
-            unparse() {
-                let stateₒ = getState();
-                let text;
-                if (!isPlainObject(IDOC))
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function numericLiteral(value) {
+            return {
+                bindings: {},
+                parse() {
+                    let { ONUL } = sys.getState();
+                    sys.setOutState(ONUL ? undefined : value);
+                    return true;
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL } = sys.getState();
+                    if (!INUL) {
+                        if (IDOC !== value || IMEM !== 0)
+                            return false;
+                        sys.setInState(IDOC, 1);
+                    }
+                    sys.setOutState(undefined);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.numericLiteral = numericLiteral;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function record(fields) {
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let obj = {};
+                    for (let field of fields) {
+                        let propName = field.name;
+                        if (!field.value.parse())
+                            return sys.setState(stateₒ), false;
+                        let { ODOC } = sys.getState();
+                        sys.assert(ODOC !== undefined);
+                        obj[propName] = ODOC;
+                    }
+                    sys.setOutState(obj);
+                    return true;
+                },
+                unparse() {
+                    let stateₒ = sys.getState();
+                    let text;
+                    if (!sys.isPlainObject(stateₒ.IDOC))
+                        return false;
+                    let propNames = Object.keys(stateₒ.IDOC);
+                    let propCount = propNames.length;
+                    sys.assert(propCount <= 32);
+                    const obj = stateₒ.IDOC;
+                    let bitmask = stateₒ.IMEM;
+                    for (let field of fields) {
+                        let i = propNames.indexOf(field.name);
+                        if (i < 0)
+                            return sys.setState(stateₒ), false;
+                        let propName = propNames[i];
+                        const propBit = 1 << i;
+                        if ((bitmask & propBit) !== 0)
+                            return sys.setState(stateₒ), false;
+                        sys.setInState(obj[propName], 0);
+                        if (!field.value.unparse())
+                            return sys.setState(stateₒ), false;
+                        let { IMEM, ODOC } = sys.getState();
+                        if (!sys.isFullyConsumed(obj[propName], IMEM))
+                            return sys.setState(stateₒ), false;
+                        text = sys.concat(text, ODOC);
+                        bitmask += propBit;
+                    }
+                    sys.setInState(obj, bitmask);
+                    sys.setOutState(text);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.record = record;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function selection(...expressions) {
+            const arity = expressions.length;
+            return {
+                bindings: {},
+                parse() {
+                    for (let i = 0; i < arity; ++i) {
+                        if (expressions[i].parse())
+                            return true;
+                    }
                     return false;
-                let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
-                let propCount = propNames.length;
-                assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-                // TODO: temp testing...
-                const obj = IDOC;
-                let bitmask = IMEM;
-                for (let field of fields) {
-                    // Find the property key/value pair that matches this field name/value pair (if any)
-                    let i = propNames.indexOf(field.name);
-                    if (i < 0)
-                        return setState(stateₒ), false;
-                    let propName = propNames[i];
-                    // TODO: skip already-consumed key/value pairs
-                    // tslint:disable-next-line: no-bitwise
-                    const propBit = 1 << i;
-                    // tslint:disable-next-line: no-bitwise
-                    if ((bitmask & propBit) !== 0)
-                        return setState(stateₒ), false;
-                    // TODO: match field value
-                    setInState(obj[propName], 0);
-                    if (!field.value.unparse())
-                        return setState(stateₒ), false;
-                    if (!isFullyConsumed(obj[propName], IMEM))
-                        return setState(stateₒ), false;
-                    text = concat(text, ODOC);
-                    // TODO: we matched both name and value - consume them from `node`
-                    bitmask += propBit;
-                }
-                setInState(obj, bitmask);
-                ODOC = text;
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function selection(...expressions) {
-        const arity = expressions.length;
-        return {
-            bindings: {},
-            parse() {
-                for (let i = 0; i < arity; ++i) {
-                    if (expressions[i].parse())
-                        return true;
-                }
-                return false;
-            },
-            unparse() {
-                for (let i = 0; i < arity; ++i) {
-                    if (expressions[i].unparse())
-                        return true;
-                }
-                return false;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function sequence(...expressions) {
-        const arity = expressions.length;
-        return {
-            bindings: {},
-            parse() {
-                let stateₒ = getState();
-                let node;
-                for (let i = 0; i < arity; ++i) {
-                    if (!expressions[i].parse())
-                        return setState(stateₒ), false;
-                    node = concat(node, ODOC);
-                }
-                ODOC = node;
-                return true;
-            },
-            unparse() {
-                let stateₒ = getState();
-                let text;
-                for (let i = 0; i < arity; ++i) {
-                    if (!expressions[i].unparse())
-                        return setState(stateₒ), false;
-                    text = concat(text, ODOC);
-                }
-                ODOC = text;
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    function stringLiteral(value) {
-        return {
-            bindings: {},
-            parse() {
-                if (!INUL) {
-                    if (!isString(IDOC))
-                        return false;
-                    if (!matchesAt(IDOC, value, IMEM))
-                        return false;
-                    IMEM += value.length;
-                }
-                ODOC = ONUL ? undefined : value;
-                return true;
-            },
-            unparse() {
-                if (!INUL) {
-                    if (!isString(IDOC))
-                        return false;
-                    if (!matchesAt(IDOC, value, IMEM))
-                        return false;
-                    IMEM += value.length;
-                }
-                ODOC = ONUL ? undefined : value;
-                return true;
-            },
-            apply: NOT_A_LAMBDA,
-        };
-    }
-    // TODO: new 'registers'... temp testing...
-    let IDOC;
-    let IMEM;
-    let ODOC;
-    let INUL = false;
-    let ONUL = false;
-    function getState() {
-        return { IDOC, IMEM, ODOC, INUL, ONUL };
-    }
-    function setState(value) {
-        ({ IDOC, IMEM, ODOC, INUL, ONUL } = value);
-    }
-    function setInState(IDOCᐟ, IMEMᐟ) {
-        IDOC = IDOCᐟ;
-        IMEM = IMEMᐟ;
-    }
-    function setOutState(ODOCᐟ) {
-        ODOC = ODOCᐟ;
-    }
-    // TODO: doc... helper...
-    function assert(value) {
-        if (!value)
-            throw new Error(`Assertion failed`);
-    }
-    // TODO: doc... helper...
-    // TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling (but instrument first)
-    function concat(a, b) {
-        if (a === undefined)
-            return b;
-        if (b === undefined)
-            return a;
-        if (typeof a === 'string' && typeof b === 'string')
-            return a + b;
-        if (Array.isArray(a) && Array.isArray(b))
-            return [...a, ...b];
-        if (isPlainObject(a) && isPlainObject(b))
-            return Object.assign(Object.assign({}, a), b);
-        throw new Error(`Internal error: invalid sequence`);
-    }
-    // TODO: doc... helper...
-    function isFullyConsumed(node, pos) {
-        if (typeof node === 'string')
-            return pos === node.length;
-        if (Array.isArray(node))
-            return pos === node.length;
-        if (isPlainObject(node)) {
-            let keyCount = Object.keys(node).length;
-            assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-            if (keyCount === 0)
-                return true;
-            // tslint:disable-next-line: no-bitwise
-            return pos === -1 >>> (32 - keyCount);
+                },
+                unparse() {
+                    for (let i = 0; i < arity; ++i) {
+                        if (expressions[i].unparse())
+                            return true;
+                    }
+                    return false;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
         }
-        return pos === 1; // TODO: doc which case(s) this covers. Better to just return false?
-    }
-    // TODO: doc... helper...
-    function isPlainObject(value) {
-        return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-    }
-    // TODO: doc... helper...
-    // TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing (but instrument first)
-    function isString(value) {
-        return typeof value === 'string';
-    }
-    // TODO: doc... helper...
-    function matchesAt(text, substr, position) {
-        let lastPos = position + substr.length;
-        if (lastPos > text.length)
-            return false;
-        for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-            if (text.charAt(i) !== substr.charAt(j))
-                return false;
+        sys.selection = selection;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function sequence(...expressions) {
+            const arity = expressions.length;
+            return {
+                bindings: {},
+                parse() {
+                    let stateₒ = sys.getState();
+                    let node;
+                    for (let i = 0; i < arity; ++i) {
+                        if (!expressions[i].parse())
+                            return sys.setState(stateₒ), false;
+                        let { ODOC } = sys.getState();
+                        node = sys.concat(node, ODOC);
+                    }
+                    sys.setOutState(node);
+                    return true;
+                },
+                unparse() {
+                    let stateₒ = sys.getState();
+                    let text;
+                    for (let i = 0; i < arity; ++i) {
+                        if (!expressions[i].unparse())
+                            return sys.setState(stateₒ), false;
+                        let { ODOC } = sys.getState();
+                        text = sys.concat(text, ODOC);
+                    }
+                    sys.setOutState(text);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
         }
-        return true;
-    }
-    // TODO: doc... helpers...
-    function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
-    ;
-    function NOT_A_RULE() { throw new Error('Not a rule'); }
-    ;
-    // @ts-ignore
-    return {
-        abstract,
-        apply,
-        booleanLiteral,
-        concrete,
-        createMainExports,
-        character,
-        field,
-        list,
-        nullLiteral,
-        numericLiteral,
-        record,
-        sequence,
-        selection,
-        stringLiteral,
-        // export helpers too so std can reference them
-        assert,
-        concat,
-        getState,
-        isFullyConsumed,
-        isPlainObject,
-        isString,
-        matchesAt,
-        NOT_A_LAMBDA,
-        NOT_A_RULE,
-        setInState,
-        setOutState,
-        setState,
-    };
+        sys.sequence = sequence;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        function stringLiteral(value) {
+            return {
+                bindings: {},
+                parse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    if (!INUL) {
+                        if (!sys.isString(IDOC))
+                            return false;
+                        if (!sys.matchesAt(IDOC, value, IMEM))
+                            return false;
+                        sys.setInState(IDOC, IMEM + value.length);
+                    }
+                    sys.setOutState(ONUL ? undefined : value);
+                    return true;
+                },
+                unparse() {
+                    let { IDOC, IMEM, INUL, ONUL } = sys.getState();
+                    if (!INUL) {
+                        if (!sys.isString(IDOC))
+                            return false;
+                        if (!sys.matchesAt(IDOC, value, IMEM))
+                            return false;
+                        sys.setInState(IDOC, IMEM + value.length);
+                    }
+                    sys.setOutState(ONUL ? undefined : value);
+                    return true;
+                },
+                apply: sys.NOT_A_LAMBDA,
+            };
+        }
+        sys.stringLiteral = stringLiteral;
+    })(sys || (sys = {}));
+    var sys;
+    (function (sys) {
+        let IDOC;
+        let IMEM;
+        let ODOC;
+        let INUL = false;
+        let ONUL = false;
+        function getState() {
+            return { IDOC, IMEM, ODOC, INUL, ONUL };
+        }
+        sys.getState = getState;
+        function setState(value) {
+            ({ IDOC, IMEM, ODOC, INUL, ONUL } = value);
+        }
+        sys.setState = setState;
+        function setInState(IDOCᐟ, IMEMᐟ) {
+            IDOC = IDOCᐟ;
+            IMEM = IMEMᐟ;
+        }
+        sys.setInState = setInState;
+        function setOutState(ODOCᐟ) {
+            ODOC = ODOCᐟ;
+        }
+        sys.setOutState = setOutState;
+        function assert(value) {
+            if (!value)
+                throw new Error(`Assertion failed`);
+        }
+        sys.assert = assert;
+        function concat(a, b) {
+            if (a === undefined)
+                return b;
+            if (b === undefined)
+                return a;
+            if (typeof a === 'string' && typeof b === 'string')
+                return a + b;
+            if (Array.isArray(a) && Array.isArray(b))
+                return [...a, ...b];
+            if (isPlainObject(a) && isPlainObject(b))
+                return Object.assign(Object.assign({}, a), b);
+            throw new Error(`Internal error: invalid sequence`);
+        }
+        sys.concat = concat;
+        function isFullyConsumed(node, pos) {
+            if (typeof node === 'string')
+                return pos === node.length;
+            if (Array.isArray(node))
+                return pos === node.length;
+            if (isPlainObject(node)) {
+                let keyCount = Object.keys(node).length;
+                assert(keyCount <= 32);
+                if (keyCount === 0)
+                    return true;
+                return pos === -1 >>> (32 - keyCount);
+            }
+            return pos === 1;
+        }
+        sys.isFullyConsumed = isFullyConsumed;
+        function isPlainObject(value) {
+            return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
+        }
+        sys.isPlainObject = isPlainObject;
+        function isString(value) {
+            return typeof value === 'string';
+        }
+        sys.isString = isString;
+        function matchesAt(text, substr, position) {
+            let lastPos = position + substr.length;
+            if (lastPos > text.length)
+                return false;
+            for (let i = position, j = 0; i < lastPos; ++i, ++j) {
+                if (text.charAt(i) !== substr.charAt(j))
+                    return false;
+            }
+            return true;
+        }
+        sys.matchesAt = matchesAt;
+        function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
+        sys.NOT_A_LAMBDA = NOT_A_LAMBDA;
+        ;
+        function NOT_A_RULE() { throw new Error('Not a rule'); }
+        sys.NOT_A_RULE = NOT_A_RULE;
+        ;
+    })(sys || (sys = {}));
+    return sys;
 }
 
 
