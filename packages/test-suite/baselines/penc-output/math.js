@@ -443,9 +443,7 @@ function matchesAt(text, substr, position) {
     return true;
 }
 function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
-;
 function NOT_A_RULE() { throw new Error('Not a rule'); }
-;
 const float64 = (() => {
     const PLUS_SIGN = '+'.charCodeAt(0);
     const MINUS_SIGN = '-'.charCodeAt(0);
@@ -971,7 +969,7 @@ const 𝕊11 = {
 𝕊10.bindings.signed.constant = {value: false};
 𝕊11.bindings.signed.constant = {value: false};
 
-// -------------------- V:\projects\oss\pen-monorepo\packages\test-suite\fixtures\penc-input\math.pen --------------------
+// -------------------- math.pen --------------------
 
 Object.assign(
     𝕊8.bindings.expr,

@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as AstNodes from '../../ast-nodes';
 import {Scope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
@@ -151,7 +152,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     visitNode(program, rec => ({
         SourceFile: sf => {
-            emit.down(2).text(`// -------------------- ${sf.path} --------------------`);
+            emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
             rec(sf.module);
         },
         Module: module => {
