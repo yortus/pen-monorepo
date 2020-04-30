@@ -22,7 +22,7 @@ for (let i = 0; i < inputFiles.length; ++i) {
     }
     else {
         let src = fs.readFileSync(inputFile, 'utf8');
-        let out = pegjs.generate(src, {output: 'source'});
+        let out = pegjs.generate(src, {output: 'source', format: 'commonjs'});
         fs.writeFileSync(outputFile, out);
         process.stdout.write('DONE\n');
     }
