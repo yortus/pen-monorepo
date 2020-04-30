@@ -16,13 +16,12 @@
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "scripts": {
-        "postbuild": "run-p postbuild:*",
-        "postbuild:peg1": "pegjs -o dist/transforms/01-create-source-file-graph/pen-import-detection-grammar.js src/transforms/01-create-source-file-graph/pen-import-detection-grammar.pegjs",
-        "postbuild:peg2": "pegjs -o dist/transforms/02-parse-source-files/pen-grammar.js src/transforms/02-parse-source-files/pen-grammar.pegjs"
+        "postbuild": "node ./scripts/build-peg-grammars.js"
     },
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "@types/pkg-dir": "^2.0.1",
+        "fast-glob": "^3.2.2",
         "pegjs": "^0.10.0",
         "penrt": "*"
     },

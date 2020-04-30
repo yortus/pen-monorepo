@@ -13,7 +13,7 @@
     ],
     "scripts": {
         "bootstrap": "npm install && lerna bootstrap",
-        "build": "tsc -b --verbose && lerna run postbuild",
+        "build": "tsc -b --verbose && lerna run postbuild --stream",
         "clean": "lerna exec rimraf dist/ *.tsbuildinfo",
         "lint": "lerna exec tslint src/**/*.ts",
         "test": "mocha --require ts-node/register **/*.test.ts"
