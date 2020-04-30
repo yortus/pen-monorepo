@@ -1027,7 +1027,7 @@ const 𝕊6 = {
 𝕊6.bindings.minDigits.constant = {value: 4};
 𝕊6.bindings.maxDigits.constant = {value: 4};
 
-// -------------------- V:\projects\oss\pen-monorepo\packages\test-suite\fixtures\penc-input\json.pen --------------------
+// -------------------- json.pen --------------------
 
 Object.assign(
     𝕊5.bindings.start,
