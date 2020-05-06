@@ -21,7 +21,7 @@
     },
     "include": ["src/"],
     "references": [
-        {"path": "../penc"},
-        {"path": "../penrt"},
+        {"path": "../core/penc"},
+        {"path": "../core/penrt"},
     ]
 }

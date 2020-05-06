@@ -1,8 +1,8 @@
 {
     "files": [],
     "references": [
-        { "path": "packages/penc" },
-        { "path": "packages/penrt" },
+        { "path": "packages/core/penc" },
+        { "path": "packages/core/penrt" },
         { "path": "packages/test-suite" },
     ]
 }
