@@ -3,6 +3,8 @@
     "references": [
         { "path": "packages/core/penc" },
         { "path": "packages/core/penrt" },
+        { "path": "packages/extensions/experimental-features" },
+        { "path": "packages/extensions/standard-library" },
         { "path": "packages/test-suite" },
     ]
 }

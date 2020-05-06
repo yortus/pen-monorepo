@@ -444,7 +444,10 @@ function matchesAt(text, substr, position) {
 }
 function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
 function NOT_A_RULE() { throw new Error('Not a rule'); }
+"use strict";
+// TODO: handle abstract/concrete...
 const float64 = (() => {
+    // These constants are used by the float64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
     const MINUS_SIGN = '-'.charCodeAt(0);
     const DECIMAL_POINT = '.'.charCodeAt(0);
@@ -461,11 +464,13 @@ const float64 = (() => {
             const LEN = IDOC.length;
             const EOS = 0;
             let digitCount = 0;
+            // Parse optional '+' or '-' sign
             let c = IDOC.charCodeAt(IMEM);
             if (c === PLUS_SIGN || c === MINUS_SIGN) {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
+            // Parse 0..M digits
             while (true) {
                 if (c < ZERO_DIGIT || c > NINE_DIGIT)
                     break;
@@ -473,10 +478,12 @@ const float64 = (() => {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
+            // Parse optional '.'
             if (c === DECIMAL_POINT) {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
+            // Parse 0..M digits
             while (true) {
                 if (c < ZERO_DIGIT || c > NINE_DIGIT)
                     break;
@@ -484,15 +491,19 @@ const float64 = (() => {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
             }
+            // Ensure we have parsed at least one significant digit
             if (digitCount === 0)
                 return setState(stateₒ), false;
+            // Parse optional exponent
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
                 IMEM += 1;
                 c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                // Parse optional '+' or '-' sign
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
                     IMEM += 1;
                     c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
                 }
+                // Parse 1..M digits
                 digitCount = 0;
                 while (true) {
                     if (c < ZERO_DIGIT || c > NINE_DIGIT)
@@ -504,15 +515,22 @@ const float64 = (() => {
                 if (digitCount === 0)
                     return setState(stateₒ), false;
             }
+            // There is a syntactically valid float. Delegate parsing to the JS runtime.
+            // Reject the number if it parses to Infinity or Nan.
+            // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
             let num = Number.parseFloat(IDOC.slice(stateₒ.IMEM, IMEM));
             if (!Number.isFinite(num))
                 return setState(stateₒ), false;
+            // Success
             ODOC = num;
             return true;
         },
         unparse() {
+            // Ensure N is a number.
             if (typeof IDOC !== 'number' || IMEM !== 0)
                 return false;
+            // Delegate unparsing to the JS runtime.
+            // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
             ODOC = String(IDOC);
             IMEM = 1;
             return true;
@@ -520,11 +538,14 @@ const float64 = (() => {
         apply: NOT_A_LAMBDA,
     };
 })();
+// TODO: handle abstract/concrete...
+// tslint:disable: no-bitwise
 const int32 = (() => {
     let result = {
         bindings: {},
         parse: NOT_A_RULE,
         unparse: NOT_A_RULE,
+        // TODO: temp testing... the lambda form which takes a `base` arg
         apply(expr) {
             var _a, _b, _c, _d, _e, _f;
             let base = (_c = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
@@ -537,6 +558,7 @@ const int32 = (() => {
                     if (!isString(IDOC))
                         return false;
                     let stateₒ = getState();
+                    // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
                     if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
@@ -544,26 +566,34 @@ const int32 = (() => {
                         MAX_NUM = 0x80000000;
                         IMEM += 1;
                     }
+                    // ...followed by one or more decimal digits. (NB: no exponents).
                     let num = 0;
                     let digits = 0;
                     while (IMEM < IDOC.length) {
+                        // Read a digit.
                         let c = IDOC.charCodeAt(IMEM);
                         if (c >= 256)
                             break;
                         let digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base)
                             break;
+                        // Update parsed number.
                         num *= base;
                         num += digitValue;
+                        // Check for overflow.
                         if (num > MAX_NUM)
                             return setState(stateₒ), false;
+                        // Loop again.
                         IMEM += 1;
                         digits += 1;
                     }
+                    // Check that we parsed at least one digit.
                     if (digits === 0)
                         return setState(stateₒ), false;
+                    // Apply the sign.
                     if (isNegative)
                         num = -num;
+                    // Success
                     ODOC = num;
                     return true;
                 },
@@ -571,6 +601,7 @@ const int32 = (() => {
                     if (typeof IDOC !== 'number' || IMEM !== 0)
                         return false;
                     let num = IDOC;
+                    // Determine the number's sign and ensure it is in range.
                     let isNegative = false;
                     let MAX_NUM = 0x7FFFFFFF;
                     if (num < 0) {
@@ -582,6 +613,7 @@ const int32 = (() => {
                     }
                     if (num > MAX_NUM)
                         return false;
+                    // Extract the digits.
                     let digits = [];
                     while (true) {
                         let d = num % base;
@@ -590,9 +622,10 @@ const int32 = (() => {
                         if (num === 0)
                             break;
                     }
+                    // Compute the final string.
                     if (isNegative)
-                        digits.push(0x2d);
-                    ODOC = String.fromCharCode(...digits.reverse());
+                        digits.push(0x2d); // char code for '-'
+                    ODOC = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
                     IMEM = 1;
                     return true;
                 },
@@ -600,6 +633,7 @@ const int32 = (() => {
             };
         },
     };
+    // TODO: temp testing...
     result.parse = result.apply({ bindings: {
             base: { constant: { value: 10 } },
             unsigned: { constant: { value: false } },
@@ -608,6 +642,9 @@ const int32 = (() => {
             base: { constant: { value: 10 } },
             unsigned: { constant: { value: false } },
         } }).unparse;
+    // TODO: doc...
+    // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
+    // NB: the number 80 is not special, it's just greater than 36 which makes it a sentinel for 'not a digit'.
     const DIGIT_VALUES = [
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
@@ -626,6 +663,7 @@ const int32 = (() => {
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
     ];
+    // TODO: doc...
     const CHAR_CODES = [
         0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
         0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
@@ -640,11 +678,14 @@ const memoise = {
     parse: NOT_A_RULE,
     unparse: NOT_A_RULE,
     apply(expr) {
+        // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
         const parseMemos = new Map();
+        // TODO: revise memo key once using new ast/pos signature
         const unparseMemos = new Map();
         return {
             bindings: {},
             parse() {
+                // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = getState();
                 let memos2 = parseMemos.get(IDOC);
                 if (memos2 === undefined) {
@@ -653,17 +694,35 @@ const memoise = {
                 }
                 let memo = memos2.get(IMEM);
                 if (!memo) {
+                    // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                    // this initial state. The first thing we do is create a memo table entry, which is marked as
+                    // *unresolved*. All future applications of this rule with the same initial state will find this
+                    // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                    // left-recursion.
                     memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
                     memos2.set(IMEM, memo);
+                    // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                    // At this point, any left-recursive paths encountered during application are guaranteed to have
+                    // been noted and aborted (see below).
                     if (expr.parse()) {
                         memo.result = true;
                         memo.stateᐟ = getState();
                     }
                     memo.resolved = true;
+                    // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                    // final.
                     if (!memo.isLeftRecursive) {
                         setState(memo.stateᐟ);
                         return memo.result;
                     }
+                    // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                    // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                    // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                    // the same rule with the same initial state. We continue to iterate as long as the application
+                    // succeeds and consumes more input than the previous iteration did, in which case we update the
+                    // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                    // does not consume more input, at which point we take the result of the previous iteration as
+                    // final.
                     while (memo.result === true) {
                         setState(stateₒ);
                         if (!expr.parse())
@@ -675,13 +734,22 @@ const memoise = {
                     }
                 }
                 else if (!memo.resolved) {
+                    // If we get here, then we have already applied the rule with this initial state, but not yet
+                    // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                    // note that the rule application encountered left-recursion, and return with failure. This means
+                    // that the initial application of the rule for this initial state can only possibly succeed along a
+                    // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                    // left-recursive rules.
                     memo.isLeftRecursive = true;
                     return false;
                 }
+                // We have a resolved memo, so the result of the rule application for the given initial state has
+                // already been computed. Return it from the memo.
                 setState(memo.stateᐟ);
                 return memo.result;
             },
             unparse() {
+                // Check whether the memo table already has an entry for the given initial state.
                 let stateₒ = getState();
                 let memos2 = unparseMemos.get(IDOC);
                 if (memos2 === undefined) {
@@ -690,19 +758,40 @@ const memoise = {
                 }
                 let memo = memos2.get(IMEM);
                 if (!memo) {
+                    // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                    // this initial state. The first thing we do is create a memo table entry, which is marked as
+                    // *unresolved*. All future applications of this rule with the same initial state will find this
+                    // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                    // left-recursion.
                     memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
                     memos2.set(IMEM, memo);
+                    // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                    // At this point, any left-recursive paths encountered during application are guaranteed to have
+                    // been noted and aborted (see below).
                     if (expr.unparse()) {
                         memo.result = true;
                         memo.stateᐟ = getState();
                     }
                     memo.resolved = true;
+                    // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                    // final.
                     if (!memo.isLeftRecursive) {
                         setState(memo.stateᐟ);
                         return memo.result;
                     }
+                    // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                    // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                    // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                    // the same rule with the same initial state. We continue to iterate as long as the application
+                    // succeeds and consumes more input than the previous iteration did, in which case we update the
+                    // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                    // does not consume more input, at which point we take the result of the previous iteration as
+                    // final.
                     while (memo.result === true) {
                         setState(stateₒ);
+                        // TODO: break cases:
+                        // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                        // some node --> some different non-empty node (assert: should never happen!)
                         if (!expr.parse())
                             break;
                         let state = getState();
@@ -714,9 +803,17 @@ const memoise = {
                     }
                 }
                 else if (!memo.resolved) {
+                    // If we get here, then we have already applied the rule with this initial state, but not yet
+                    // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                    // note that the rule application encountered left-recursion, and return with failure. This means
+                    // that the initial application of the rule for this initial state can only possibly succeed along a
+                    // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                    // left-recursive rules.
                     memo.isLeftRecursive = true;
                     return false;
                 }
+                // We have a resolved memo, so the result of the rule application for the given initial state has
+                // already been computed. Return it from the memo.
                 setState(memo.stateᐟ);
                 return memo.result;
             },
@@ -724,16 +821,31 @@ const memoise = {
         };
     },
 };
+// TODO: temp testing... Improve emit for this. These refs resolve file ordering issues in the outfile.
+///<reference path="./float64.ts" />
+///<reference path="./int32.ts" />
+///<reference path="./memoise.ts" />
+// const std: PenVal = {
+//     bindings: {
+//         float64,
+//         int32,
+//         memoise,
+//     },
+//     parse: NOT_A_RULE,
+//     unparse: NOT_A_RULE,
+//     apply: NOT_A_LAMBDA,
+// };
+/* @pen exports = {
+    float64,
+    int32,
+    memoise,
+} */
 const std = {
     bindings: {
-        float64,
-        int32,
-        memoise,
-    },
-    parse: NOT_A_RULE,
-    unparse: NOT_A_RULE,
-    apply: NOT_A_LAMBDA,
+        float64, int32, memoise,
+    }
 };
+"use strict";
 const anyChar = {
     bindings: {},
     parse() {
@@ -831,6 +943,7 @@ const unicode = {
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
         assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+        // Construct a regex to match the digits
         let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
         let regex = RegExp(pattern, 'i');
         return {
@@ -842,7 +955,7 @@ const unicode = {
                 const LEN = IDOC.length;
                 const EOS = '';
                 let len = 0;
-                let num = '';
+                let num = ''; // TODO: fix this - should actually keep count
                 let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
                 while (true) {
                     if (!regex.test(c))
@@ -856,10 +969,12 @@ const unicode = {
                 }
                 if (len < minDigits)
                     return setState(stateₒ), false;
-                ODOC = eval(`"\\u{${num}}"`);
+                // tslint:disable-next-line: no-eval
+                ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
                 return true;
             },
             unparse: () => {
+                // TODO: implement
                 return false;
             },
             apply: NOT_A_LAMBDA,
@@ -879,6 +994,8 @@ const zeroOrMore = {
                 while (true) {
                     if (!expr.parse())
                         break;
+                    // TODO: check if any input was consumed...
+                    // if not, stop iterating, since otherwise we may loop forever
                     if (IMEM === stateₒ.IMEM)
                         break;
                     node = concat(node, ODOC);
@@ -892,9 +1009,13 @@ const zeroOrMore = {
                 while (true) {
                     if (!expr.unparse())
                         break;
+                    // TODO: check if any input was consumed...
+                    // if not, stop iterating, since otherwise we may loop forever
+                    // TODO: any other checks needed? review...
                     if (IMEM === stateₒ.IMEM)
                         break;
-                    assert(typeof ODOC === 'string');
+                    // TODO: support more formats / blob types here, like for parse...
+                    assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
                     text = concat(text, ODOC);
                 }
                 ODOC = text;
@@ -904,18 +1025,38 @@ const zeroOrMore = {
         };
     },
 };
+// TODO: temp testing... Improve emit for this. These refs resolve file ordering issues in the outfile.
+///<reference path="./any-char.ts" />
+///<reference path="./epsilon.ts" />
+///<reference path="./maybe.ts" />
+///<reference path="./not.ts" />
+///<reference path="./unicode.ts" />
+///<reference path="./zero-or-more.ts" />
+// const experiments: PenVal = {
+//     bindings: {
+//         anyChar,
+//         epsilon,
+//         maybe,
+//         not,
+//         unicode,
+//         zeroOrMore,
+//     },
+//     parse: NOT_A_RULE,
+//     unparse: NOT_A_RULE,
+//     apply: NOT_A_LAMBDA,
+// };
+/* @pen exports = {
+    anyChar,
+    epsilon,
+    maybe,
+    not,
+    unicode,
+    zeroOrMore
+} */
 const experiments = {
     bindings: {
-        anyChar,
-        epsilon,
-        maybe,
-        not,
-        unicode,
-        zeroOrMore,
-    },
-    parse: NOT_A_RULE,
-    unparse: NOT_A_RULE,
-    apply: NOT_A_LAMBDA,
+        anyChar, epsilon, maybe, not, unicode, zeroOrMore,
+    }
 };
 
 const 𝕊8 = {

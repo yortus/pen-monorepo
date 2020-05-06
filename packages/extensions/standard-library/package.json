@@ -1,8 +1,8 @@
 {
     "private": true,
-    "name": "penrt",
+    "name": "@ext/standard-library",
     "version": "0.4.0",
-    "description": "PEN Runtime system",
+    "description": "PEN Extension: standard library",
     "license": "MIT",
     "contributors": [
         {
@@ -11,8 +11,8 @@
             "url": "http://github.com/yortus/"
         }
     ],
-    "main": "./dist/penrt.js",
-    "typings": "./dist/penrt.d.ts",
+    "main": "./dist/std.js",
+    "typings": "./dist/std.d.ts",
     "scripts": {},
     "devDependencies": {},
     "dependencies": {}

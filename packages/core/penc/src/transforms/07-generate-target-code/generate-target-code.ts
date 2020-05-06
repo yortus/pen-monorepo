@@ -24,9 +24,21 @@ function emitProgram(program: Program) {
     // TODO: temp testing... emit runtime + builtins code
     const RUNTIME_PATH = require.resolve('penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
-    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => {
-        emit.down(1).text(line);
-    });
+    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+
+    const STD_PATH = require.resolve('@ext/standard-library');
+    content = fs.readFileSync(STD_PATH, 'utf8') + '\n';
+    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+    emit.down(1).text(`const std = {`).indent().down(1).text(`bindings: {`).indent();
+    ['float64, int32, memoise'].forEach(name => emit.down(1).text(`${name},`));
+    emit.dedent().down(1).text('}').dedent().down(1).text('};');
+
+    const EXPERIMENTS_PATH = require.resolve('@ext/experimental-features');
+    content = fs.readFileSync(EXPERIMENTS_PATH, 'utf8') + '\n';
+    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+    emit.down(1).text(`const experiments = {`).indent().down(1).text(`bindings: {`).indent();
+    ['anyChar, epsilon, maybe, not, unicode, zeroOrMore'].forEach(name => emit.down(1).text(`${name},`));
+    emit.dedent().down(1).text('}').dedent().down(1).text('};');
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);

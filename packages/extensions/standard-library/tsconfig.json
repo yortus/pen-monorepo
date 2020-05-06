@@ -2,14 +2,14 @@
     "compilerOptions": {
         "composite": true,
         "target": "es2017",
-        "module": "commonjs",
+        "module": "None",
         "lib": ["es2017"],
-        "types": ["node"],
+        "types": [],
 
         "rootDir": "src",
-        "outDir": "dist",
+        "outFile": "dist/std.js",
         "removeComments": false,
-        "sourceMap": true,
+        "sourceMap": false,
         "declaration": true,
 
         "strict": true,
@@ -21,8 +21,6 @@
     },
     "include": ["src/"],
     "references": [
-        {"path": "../penrt"},
-        {"path": "../../extensions/experimental-features"},
-        {"path": "../../extensions/standard-library"},
+        {"path": "../../core/penrt"},
     ]
 }
