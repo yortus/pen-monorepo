@@ -445,6 +445,11 @@ function matchesAt(text, substr, position) {
 function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
 function NOT_A_RULE() { throw new Error('Not a rule'); }
 "use strict";
+/* @pen exports = {
+    float64,
+    int32,
+    memoise,
+} */
 // TODO: handle abstract/concrete...
 const float64 = (() => {
     // These constants are used by the float64 rule.
@@ -821,31 +826,20 @@ const memoise = {
         };
     },
 };
-// TODO: temp testing... Improve emit for this. These refs resolve file ordering issues in the outfile.
-///<reference path="./float64.ts" />
-///<reference path="./int32.ts" />
-///<reference path="./memoise.ts" />
-// const std: PenVal = {
-//     bindings: {
-//         float64,
-//         int32,
-//         memoise,
-//     },
-//     parse: NOT_A_RULE,
-//     unparse: NOT_A_RULE,
-//     apply: NOT_A_LAMBDA,
-// };
-/* @pen exports = {
-    float64,
-    int32,
-    memoise,
-} */
 const std = {
     bindings: {
         float64, int32, memoise,
     }
 };
 "use strict";
+/* @pen exports = {
+    anyChar,
+    epsilon,
+    maybe,
+    not,
+    unicode,
+    zeroOrMore
+} */
 const anyChar = {
     bindings: {},
     parse() {
@@ -1025,34 +1019,6 @@ const zeroOrMore = {
         };
     },
 };
-// TODO: temp testing... Improve emit for this. These refs resolve file ordering issues in the outfile.
-///<reference path="./any-char.ts" />
-///<reference path="./epsilon.ts" />
-///<reference path="./maybe.ts" />
-///<reference path="./not.ts" />
-///<reference path="./unicode.ts" />
-///<reference path="./zero-or-more.ts" />
-// const experiments: PenVal = {
-//     bindings: {
-//         anyChar,
-//         epsilon,
-//         maybe,
-//         not,
-//         unicode,
-//         zeroOrMore,
-//     },
-//     parse: NOT_A_RULE,
-//     unparse: NOT_A_RULE,
-//     apply: NOT_A_LAMBDA,
-// };
-/* @pen exports = {
-    anyChar,
-    epsilon,
-    maybe,
-    not,
-    unicode,
-    zeroOrMore
-} */
 const experiments = {
     bindings: {
         anyChar, epsilon, maybe, not, unicode, zeroOrMore,

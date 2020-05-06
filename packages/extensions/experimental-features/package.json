@@ -11,8 +11,7 @@
             "url": "http://github.com/yortus/"
         }
     ],
-    "main": "./dist/experiments.js",
-    "typings": "./dist/experiments.d.ts",
+    "main": "./dist/experiments.pen.js",
     "scripts": {},
     "devDependencies": {},
     "dependencies": {}

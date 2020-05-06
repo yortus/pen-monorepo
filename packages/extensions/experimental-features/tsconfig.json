@@ -7,7 +7,7 @@
         "types": [],
 
         "rootDir": "src",
-        "outFile": "dist/experiments.js",
+        "outFile": "dist/experiments.pen.js",
         "removeComments": false,
         "sourceMap": false,
         "declaration": true,
