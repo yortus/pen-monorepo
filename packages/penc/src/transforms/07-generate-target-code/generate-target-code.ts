@@ -5,9 +5,6 @@ import {Scope} from '../../scope';
 import {SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
 import {Metadata} from '../05-resolve-constant-values';
-// import {emitInitRuntimeSystem} from './emit-init-runtime-system';
-// import {emitInitStandardLibrary} from './emit-init-standard-library';
-// import {emitInitTemporaryExperiments} from './emit-init-temporary-experiments';
 import {Emitter, makeEmitter} from './emitter';
 
 
@@ -24,18 +21,12 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: temp testing...
+    // TODO: temp testing... emit runtime + builtins code
     const RUNTIME_PATH = require.resolve('penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => {
         emit.down(1).text(line);
     });
-
-
-    // // TODO: Emit sys and std...
-    // emit.text(`const sys = initRuntimeSystem();`);
-    // emit.down(1).text(`const std = initStandardLibrary();`);
-    // emit.down(1).text(`const experiments = initTemporaryExperiments();`);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -52,18 +43,6 @@ function emitProgram(program: Program) {
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
     emit.down(2).text(`// -------------------- MAIN EXPORTS --------------------`);
     emitMainExports(emit, program);
-
-    // // Emit code for the runtime system.
-    // emit.down(2).text(`// -------------------- RUNTIME SYSTEM --------------------`);
-    // emitInitRuntimeSystem(emit);
-
-    // // Emit code for the standard library.
-    // emit.down(2).text(`// -------------------- STANDARD LIBRARY --------------------`);
-    // emitInitStandardLibrary(emit);
-
-    // // Emit code for temporary experiments.
-    // emit.down(2).text(`// -------------------- TEMPORARY EXPERIMENTS --------------------`);
-    // emitInitTemporaryExperiments(emit);
 
     // All done.
     return emit.toString();
