@@ -1,16 +1,19 @@
 import * as path from 'path';
+import {assert} from './assert';
 
 
 // TODO: doc... branded type
-export type AbsPath =
-    | (string & {__brand: 'Normalised Absolute Path'})
-    | 'std'
-    | 'experiments';
+export type AbsPath = string & {__brand: 'Normalised Absolute Path'};
 
 
-export function AbsPath(p: string, basePath?: string) {
-    if (p === 'std' && !basePath) return 'std';
-    if (p === 'experiments' && !basePath) return 'experiments';
-    let result = basePath ? path.resolve(basePath, p) : path.resolve(p);
-    return result as AbsPath;
+export function AbsPath(p: string, basePath?: string): AbsPath {
+    const isRelative = p.startsWith('.');
+    if (isRelative) {
+        assert(basePath); // sanity-check: must provide a base path if `p` is relative
+        return path.resolve(basePath, p) as AbsPath;
+    }
+    else {
+        assert(basePath === undefined); // sanity-check: must NOT provide a base path if `p` is absolute
+        return p as AbsPath;
+    }
 }

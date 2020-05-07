@@ -157,7 +157,7 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let modspec = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = ['std', 'experiments'].includes(modspec) ? modspec : options.sourceFile.imports[modspec];
+        let sourceFilePath = options.sourceFile.imports[modspec];
         return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 

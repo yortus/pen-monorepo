@@ -33,8 +33,6 @@ export function createSourceFileGraph(compilerOptions: CompilerOptions): SourceF
         let importModSpecs = detectImports(sourceText);
         for (let importModSpec of importModSpecs) {
             let importPath = resolveModuleSpecifier(importModSpec, sourceFilePath);
-            if (importPath === 'std') continue;
-            if (importPath === 'experiments') continue;
             sourceFile.imports[importModSpec] = getSourceFile(importPath).path;
             unprocessedPaths.push(importPath);
         }

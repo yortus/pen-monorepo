@@ -12,6 +12,10 @@ export interface Metadata {
         readonly scope: Scope;
     };
 
+    ExtensionFile: {
+        readonly scope: Scope;
+    };
+
     VariablePattern: {
         readonly symbolId: number;
     };

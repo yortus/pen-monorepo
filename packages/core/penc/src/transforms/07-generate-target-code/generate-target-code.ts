@@ -21,24 +21,13 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: temp testing... emit runtime + builtins code
+    // TODO: temp testing... emit runtime
     const RUNTIME_PATH = require.resolve('penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
-    const STD_PATH = require.resolve('@ext/standard-library');
-    content = fs.readFileSync(STD_PATH, 'utf8') + '\n';
-    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-    emit.down(1).text(`const std = {`).indent().down(1).text(`bindings: {`).indent();
-    ['float64, int32, memoise'].forEach(name => emit.down(1).text(`${name},`));
-    emit.dedent().down(1).text('}').dedent().down(1).text('};');
-
-    const EXPERIMENTS_PATH = require.resolve('@ext/experimental-features');
-    content = fs.readFileSync(EXPERIMENTS_PATH, 'utf8') + '\n';
-    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-    emit.down(1).text(`const experiments = {`).indent().down(1).text(`bindings: {`).indent();
-    ['anyChar, epsilon, maybe, not, unicode, zeroOrMore'].forEach(name => emit.down(1).text(`${name},`));
-    emit.dedent().down(1).text('}').dedent().down(1).text('};');
+    // TODO: emit extensions
+    emitExtensions(emit, program);
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -61,10 +50,21 @@ function emitProgram(program: Program) {
 }
 
 
-function emitMainExports(emit: Emitter, program: Program) {
-    let mainModule = program.sourceFiles.get(program.mainPath)!.module;
-    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
-    emit.down(2).text(`module.exports = createMainExports(𝕊${mainModule.meta.scope.id}.bindings.start);`);
+function emitExtensions(emit: Emitter, program: Program) {
+    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
+    emit.down(2).text(`// -------------------- extensions --------------------`);
+    visitNode(program, _ => ({
+        ExtensionFile: ext => {
+            if (ext.meta.scope.kind !== 'extension') return;
+            emit.down(1).text(`const 𝔼${ext.meta.scope.id} = (() => {`).indent();
+            let content = fs.readFileSync(ext.path, 'utf8') + '\n';
+            content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+            emit.down(2).text(`return {`).indent();
+            ext.exportedNames.forEach(name => emit.down(1).text(`${name},`));
+            emit.dedent().down(1).text('};');
+            emit.dedent().down(1).text('})();');
+        },
+    }));
 }
 
 
@@ -139,10 +139,23 @@ function emitConstants(emit: Emitter, program: Program) {
 
 
 function emitSymbolDefinitions(emit: Emitter, program: Program) {
+    // Emit extension definitions *before* definitions from pen modules
+    // TODO: this masks a def-ordering problem that will re-appear when lambda defns are implemented. Fix it properly...
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
+    visitNode(program, _ => ({
+        ExtensionFile: ef => {
+            emit.down(2).text(`// -------------------- ${path.basename(ef.path)} --------------------`);
+            for (let name of ef.exportedNames) {
+                emit.down(2).text(`Object.assign(`).indent();
+                emit.down(1).text(`𝕊${ef.meta.scope.id}.bindings.${name},`).down(1);
+                emit.text(`𝔼${ef.meta.scope.id}.${name},`);
+                emit.dedent().down(1).text(`);`);
+            }
+        },
+    }));
     visitNode(program, rec => ({
-        SourceFile: sf => {
+        PenSourceFile: sf => {
             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
             rec(sf.module);
         },
@@ -160,6 +173,15 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             module.bindings.forEach(rec);
         },
     }));
+}
+
+
+function emitMainExports(emit: Emitter, program: Program) {
+    let sourceFile = program.sourceFiles.get(program.mainPath)!;
+    if (sourceFile.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
+    let mainModule = sourceFile.module;
+    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
+    emit.down(2).text(`module.exports = createMainExports(𝕊${mainModule.meta.scope.id}.bindings.start);`);
 }
 
 
@@ -198,19 +220,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ImportExpression':
-            // TODO: temp special-case 'std' and 'experiments' handling. Unify these three cases better...
-            if (expr.moduleSpecifier === 'std') {
-                emit.text(`std`);
-                return;
-            }
-            else if (expr.moduleSpecifier === 'experiments') {
-                emit.text(`experiments`);
-                return;
-            }
-            else {
-                emit.text(`𝕊${expr.meta.scope.id}`);
-                return;
-            }
+            emit.text(`𝕊${expr.meta.scope.id}`);
+            return;
 
         // case 'LambdaExpression':
         //     break; // TODO...

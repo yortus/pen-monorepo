@@ -1,5 +1,4 @@
 import {Node, Program} from '../../ast-nodes';
-import {EXPERIMENTS_SCOPE, STD_SCOPE} from '../../scope';
 import {assert, makeNodeMapper} from '../../utils';
 import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
 import {Metadata as NewMetadata} from './metadata';
@@ -23,21 +22,10 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
 
         // Resolve import expressions.
         ImportExpression: imp => {
-            // TODO: temp special-case 'std' and 'experiments' handling. Unify these three cases better...
-            if (imp.moduleSpecifier === 'std') {
-                let impᐟ = {...imp, meta: {scope: STD_SCOPE}};
-                return impᐟ;
-            }
-            else if (imp.moduleSpecifier === 'experiments') {
-                let impᐟ = {...imp, meta: {scope: EXPERIMENTS_SCOPE}};
-                return impᐟ;
-            }
-            else {
-                let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
-                let scope = sourceFile.module.meta.scope;
-                let impᐟ = {...imp, meta: {scope}};
-                return impᐟ;
-            }
+            let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
+            let scope = sourceFile.kind === 'PenSourceFile' ? sourceFile.module.meta.scope : sourceFile.meta.scope;
+            let impᐟ = {...imp, meta: {scope}};
+            return impᐟ;
         },
 
         // Resolve symbol references.

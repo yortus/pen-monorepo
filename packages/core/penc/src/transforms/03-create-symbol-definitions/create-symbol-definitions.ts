@@ -21,10 +21,19 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a scope to each Module node.
         Module: mod => {
-            let scope = currentScope = createChildScope(currentScope);
+            let scope = currentScope = createChildScope(currentScope, 'module');
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = scope.parent;
             return modᐟ;
+        },
+
+        // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
+        ExtensionFile: ext => {
+            let scope = currentScope = createChildScope(currentScope, 'extension');
+            ext.exportedNames.forEach(name => symbolTable.create(name, scope));
+            let extᐟ = {...ext, meta: {scope}};
+            currentScope = scope.parent;
+            return extᐟ;
         },
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.

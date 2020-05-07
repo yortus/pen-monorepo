@@ -30,12 +30,12 @@ export function resolveConstantValues(program: Program<Metadata>) {
         NullLiteralExpression: () => ({value: null}),
         NumericLiteralExpression: expr => ({value: expr.value}),
         // ParenthesisedExpression: return rec(n.expression), undefined;
+        // PenSourceFile: return rec(n.module), undefined;
         // Program: return mapMap(n.sourceFiles, rec), undefined;
         // RecordExpression: return n.fields.forEach(rec), undefined;
         // ReferenceExpression: return;
         // SelectionExpression: return n.expressions.forEach(rec), undefined;
         // SequenceExpression: return n.expressions.forEach(rec), undefined;
-        // SourceFile: return rec(n.module), undefined;
         // StaticField: return rec(n.value), undefined;
         StringLiteralExpression: expr => ({value: expr.value}),
         // VariablePattern: return;

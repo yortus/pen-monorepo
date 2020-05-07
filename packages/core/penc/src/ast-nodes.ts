@@ -6,7 +6,8 @@ export type Node<M extends Metadata = {}> =
     // Top-level nodes
     | Module<M>
     | Program<M>
-    | SourceFile<M>
+    | PenSourceFile<M>
+    | ExtensionFile<M>
 
     // Bindings, Patterns, and Expressions
     | Binding<M>
@@ -46,26 +47,37 @@ export type Expression<M extends Metadata = {}> =
 // ====================   Top-level nodes   ====================
 export interface Program<M extends Metadata = {}> {
     readonly kind: 'Program';
-    readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<M>>;
-    readonly mainPath: AbsPath;
+    readonly sourceFiles: ReadonlyMap<AbsPath, PenSourceFile<M> | ExtensionFile<M>>;
+    readonly mainPath: AbsPath; // TODO: need check to ensure this maps to pen source, not an extension
     readonly meta: M[this['kind']];
 }
 
 
-export interface SourceFile<M extends Metadata = {}> {
-    readonly kind: 'SourceFile';
+export interface PenSourceFile<M extends Metadata = {}> {
+    readonly kind: 'PenSourceFile';
 
-    /** The source file's normalised absolute path. */
+    /** The normalised absolute path of the file. */
     readonly path: AbsPath;
 
     /**
      * A map with one entry for each import expression in this source file. The keys are the imported module
      * specifiers, exactly as they appear in the source text. The values are the normalised absolute paths of
-     * the corresponding imported SourceFiles.
+     * the corresponding imported source files.
      */
     readonly imports: {[moduleSpecifier: string]: AbsPath};
 
     readonly module: Module<M>;
+    readonly meta: M[this['kind']];
+}
+
+
+export interface ExtensionFile<M extends Metadata = {}> {
+    readonly kind: 'ExtensionFile';
+
+    /** The normalised absolute path of the file. */
+    readonly path: AbsPath;
+
+    readonly exportedNames: string[];
     readonly meta: M[this['kind']];
 }
 

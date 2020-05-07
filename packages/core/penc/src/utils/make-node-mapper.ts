@@ -31,6 +31,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'BindingLookupExpression': return {...n, module: rec(n.module)};
             case 'BooleanLiteralExpression': return n;
             case 'CharacterExpression': return n;
+            case 'ExtensionFile': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
@@ -42,12 +43,12 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
+            case 'PenSourceFile': return {...n, module: rec(n.module)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'RecordExpression': return {...n, fields: n.fields.map(rec)};
             case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'SourceFile': return {...n, module: rec(n.module)};
             case 'StaticField': return {...n, value: rec(n.value)};
             case 'StringLiteralExpression': return n;
             case 'VariablePattern': return n;

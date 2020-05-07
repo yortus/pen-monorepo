@@ -31,6 +31,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
             case 'CharacterExpression': return;
+            case 'ExtensionFile': return;
             case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
@@ -42,12 +43,12 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
             case 'ParenthesisedExpression': return rec(n.expression), undefined;
+            case 'PenSourceFile': return rec(n.module), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
             case 'RecordExpression': return n.fields.forEach(rec), undefined;
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
             case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
-            case 'SourceFile': return rec(n.module), undefined;
             case 'StaticField': return rec(n.value), undefined;
             case 'StringLiteralExpression': return;
             case 'VariablePattern': return;
