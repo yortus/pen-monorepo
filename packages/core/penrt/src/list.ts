@@ -24,12 +24,12 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
             const arr = IN;
             const off = IP;
             for (let i = 0; i < elementsLength; ++i) {
-                setInState(arr[off + i], 0);
+                setState({IN: arr[off + i], IP: 0});
                 if (!elements[i].unparse()) return setState(stateₒ), false;
                 if (!isFullyConsumed(IN, IP)) return setState(stateₒ), false;
                 text = concat(text, OUT);
             }
-            setInState(arr, off + elementsLength);
+            setState({IN: arr, IP: off + elementsLength});
             OUT = text;
             return true;
         },

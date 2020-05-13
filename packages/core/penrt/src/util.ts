@@ -27,25 +27,19 @@ interface PenVal {
 
 
 // TODO: new 'registers'... temp testing...
-interface Registers {IN: unknown; IP: number; OUT: unknown; }
 let IN: unknown;
 let IP: number;
 let OUT: unknown;
 
 
-function getState(): Registers {
-    return {IN, IP, OUT};
+function getState() {
+    return {IN, IP};
 }
 
 
-function setState(value: Registers): void {
-    ({IN, IP, OUT} = value);
-}
-
-
-function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
-    IN = IDOCᐟ;
-    IP = IMEMᐟ;
+function setState(state: {IN: unknown, IP: number}) {
+    IN = state.IN;
+    IP = state.IP;
 }
 
 

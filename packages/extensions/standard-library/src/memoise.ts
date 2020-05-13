@@ -14,7 +14,8 @@ function memoise(_options: StaticOptions): PenVal {
                     resolved: boolean,
                     isLeftRecursive: boolean,
                     result: boolean;
-                    stateᐟ: Registers;
+                    stateᐟ: {IN: unknown, IP: number};
+                    OUT: unknown;
                 }>
             >();
 
@@ -25,7 +26,8 @@ function memoise(_options: StaticOptions): PenVal {
                     resolved: boolean,
                     isLeftRecursive: boolean,
                     result: boolean;
-                    stateᐟ: Registers;
+                    stateᐟ: {IN: unknown, IP: number};
+                    OUT: unknown;
                 }>
             >();
 
@@ -45,7 +47,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // *unresolved*. All future applications of this rule with the same initial state will find this
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
-                        memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
+                        memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined};
                         memos2.set(IP, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
@@ -54,6 +56,7 @@ function memoise(_options: StaticOptions): PenVal {
                         if (expr.parse()) {
                             memo.result = true;
                             memo.stateᐟ = getState();
+                            memo.OUT = OUT;
                         }
                         memo.resolved = true;
 
@@ -61,6 +64,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // final.
                         if (!memo.isLeftRecursive) {
                             setState(memo.stateᐟ);
+                            OUT = memo.OUT;
                             return memo.result;
                         }
 
@@ -78,6 +82,7 @@ function memoise(_options: StaticOptions): PenVal {
                             let state = getState();
                             if (state.IP <= memo.stateᐟ.IP) break;
                             memo.stateᐟ = state;
+                            memo.OUT = OUT;
                         }
                     }
                     else if (!memo.resolved) {
@@ -94,6 +99,7 @@ function memoise(_options: StaticOptions): PenVal {
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
                     setState(memo.stateᐟ);
+                    OUT = memo.OUT;
                     return memo.result;
                 },
 
@@ -112,7 +118,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // *unresolved*. All future applications of this rule with the same initial state will find this
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
-                        memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
+                        memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined};
                         memos2.set(IP, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
@@ -121,6 +127,7 @@ function memoise(_options: StaticOptions): PenVal {
                         if (expr.unparse()) {
                             memo.result = true;
                             memo.stateᐟ = getState();
+                            memo.OUT = OUT;
                         }
                         memo.resolved = true;
 
@@ -128,6 +135,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // final.
                         if (!memo.isLeftRecursive) {
                             setState(memo.stateᐟ);
+                            OUT = memo.OUT;
                             return memo.result;
                         }
 
@@ -150,6 +158,7 @@ function memoise(_options: StaticOptions): PenVal {
                             if (state.IP === memo.stateᐟ.IP) break;
                             if (!isFullyConsumed(state.IN, state.IP)) break;
                             memo.stateᐟ = state;
+                            memo.OUT = OUT;
                         }
                     }
                     else if (!memo.resolved) {
@@ -166,6 +175,7 @@ function memoise(_options: StaticOptions): PenVal {
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
                     setState(memo.stateᐟ);
+                    OUT = memo.OUT;
                     return memo.result;
                 },
             };

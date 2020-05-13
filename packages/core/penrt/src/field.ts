@@ -42,20 +42,20 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
                 if ((bitmask & propBit) !== 0) continue;
 
                 // TODO: match field name
-                setInState(propName, 0);
+                setState({IN: propName, IP: 0});
                 if (!name.unparse()) continue;
                 if (IP !== propName.length) continue;
                 text = concat(text, OUT);
 
                 // TODO: match field value
-                setInState(obj[propName], 0);
+                setState({IN: obj[propName], IP: 0});
                 if (!value.unparse()) continue;
                 if (!isFullyConsumed(obj[propName], IP)) continue;
                 text = concat(text, OUT);
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
-                setInState(obj, bitmask);
+                setState({IN: obj, IP: bitmask});
                 OUT = text;
                 return true;
             }

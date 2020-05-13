@@ -2,57 +2,57 @@
 "use strict";
 function booleanLiteral(options) {
     const { value } = options;
-    const NO_INPUT = options.in === 'nil';
-    const NO_OUTPUT = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            ODOC = NO_OUTPUT ? undefined : value;
+            OUT = NO_PRODUCE ? undefined : value;
             return true;
         },
         unparse() {
-            if (!NO_INPUT) {
-                if (IDOC !== value || IMEM !== 0)
+            if (!NO_CONSUME) {
+                if (IN !== value || IP !== 0)
                     return false;
-                IMEM += 1;
+                IP += 1;
             }
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
     };
 }
 function character(options) {
     const { min, max } = options;
-    const NO_INPUT = options.in === 'nil';
-    const NO_OUTPUT = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
             let c = min;
-            if (!NO_INPUT) {
-                if (!isString(IDOC))
+            if (!NO_CONSUME) {
+                if (!isString(IN))
                     return false;
-                if (IMEM < 0 || IMEM >= IDOC.length)
+                if (IP < 0 || IP >= IN.length)
                     return false;
-                c = IDOC.charAt(IMEM);
+                c = IN.charAt(IP);
                 if (c < min || c > max)
                     return false;
-                IMEM += 1;
+                IP += 1;
             }
-            ODOC = NO_OUTPUT ? undefined : c;
+            OUT = NO_PRODUCE ? undefined : c;
             return true;
         },
         unparse() {
             let c = min;
-            if (!NO_INPUT) {
-                if (!isString(IDOC))
+            if (!NO_CONSUME) {
+                if (!isString(IN))
                     return false;
-                if (IMEM < 0 || IMEM >= IDOC.length)
+                if (IP < 0 || IP >= IN.length)
                     return false;
-                c = IDOC.charAt(IMEM);
+                c = IN.charAt(IP);
                 if (c < min || c > max)
                     return false;
-                IMEM += 1;
+                IP += 1;
             }
-            ODOC = NO_OUTPUT ? undefined : c;
+            OUT = NO_PRODUCE ? undefined : c;
             return true;
         },
     };
@@ -62,24 +62,24 @@ function createMainExports(createProgram) {
     const unparse = createProgram({ in: 'ast', out: 'txt' }).unparse;
     return {
         parse: (text) => {
-            setInState(text, 0);
+            setState({ IN: text, IP: 0 });
             if (!parse())
                 throw new Error('parse failed');
-            if (!isFullyConsumed(IDOC, IMEM))
+            if (!isFullyConsumed(IN, IP))
                 throw new Error(`parse didn't consume entire input`);
-            if (ODOC === undefined)
+            if (OUT === undefined)
                 throw new Error(`parse didn't return a value`);
-            return ODOC;
+            return OUT;
         },
         unparse: (node) => {
-            setInState(node, 0);
+            setState({ IN: node, IP: 0 });
             if (!unparse())
                 throw new Error('parse failed');
-            if (!isFullyConsumed(IDOC, IMEM))
+            if (!isFullyConsumed(IN, IP))
                 throw new Error(`unparse didn't consume entire input`);
-            if (ODOC === undefined)
+            if (OUT === undefined)
                 throw new Error(`parse didn't return a value`);
-            return ODOC;
+            return OUT;
         },
     };
 }
@@ -91,45 +91,45 @@ function field(options) {
             let obj = {};
             if (!name.parse())
                 return false;
-            assert(typeof ODOC === 'string');
-            let propName = ODOC;
+            assert(typeof OUT === 'string');
+            let propName = OUT;
             if (!value.parse())
                 return setState(stateₒ), false;
-            assert(ODOC !== undefined);
-            obj[propName] = ODOC;
-            ODOC = obj;
+            assert(OUT !== undefined);
+            obj[propName] = OUT;
+            OUT = obj;
             return true;
         },
         unparse() {
-            if (!isPlainObject(IDOC))
+            if (!isPlainObject(IN))
                 return false;
             let stateₒ = getState();
             let text;
-            let propNames = Object.keys(IDOC);
+            let propNames = Object.keys(IN);
             let propCount = propNames.length;
             assert(propCount <= 32);
-            const obj = IDOC;
-            let bitmask = IMEM;
+            const obj = IN;
+            let bitmask = IP;
             for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
                 const propBit = 1 << i;
                 if ((bitmask & propBit) !== 0)
                     continue;
-                setInState(propName, 0);
+                setState({ IN: propName, IP: 0 });
                 if (!name.unparse())
                     continue;
-                if (IMEM !== propName.length)
+                if (IP !== propName.length)
                     continue;
-                text = concat(text, ODOC);
-                setInState(obj[propName], 0);
+                text = concat(text, OUT);
+                setState({ IN: obj[propName], IP: 0 });
                 if (!value.unparse())
                     continue;
-                if (!isFullyConsumed(obj[propName], IMEM))
+                if (!isFullyConsumed(obj[propName], IP))
                     continue;
-                text = concat(text, ODOC);
+                text = concat(text, OUT);
                 bitmask += propBit;
-                setInState(obj, bitmask);
-                ODOC = text;
+                setState({ IN: obj, IP: bitmask });
+                OUT = text;
                 return true;
             }
             setState(stateₒ);
@@ -147,70 +147,70 @@ function list(options) {
             for (let i = 0; i < elementsLength; ++i) {
                 if (!elements[i].parse())
                     return setState(stateₒ), false;
-                assert(ODOC !== undefined);
-                arr.push(ODOC);
+                assert(OUT !== undefined);
+                arr.push(OUT);
             }
-            ODOC = arr;
+            OUT = arr;
             return true;
         },
         unparse() {
-            if (!Array.isArray(IDOC))
+            if (!Array.isArray(IN))
                 return false;
-            if (IMEM < 0 || IMEM + elementsLength > IDOC.length)
+            if (IP < 0 || IP + elementsLength > IN.length)
                 return false;
             let stateₒ = getState();
             let text;
-            const arr = IDOC;
-            const off = IMEM;
+            const arr = IN;
+            const off = IP;
             for (let i = 0; i < elementsLength; ++i) {
-                setInState(arr[off + i], 0);
+                setState({ IN: arr[off + i], IP: 0 });
                 if (!elements[i].unparse())
                     return setState(stateₒ), false;
-                if (!isFullyConsumed(IDOC, IMEM))
+                if (!isFullyConsumed(IN, IP))
                     return setState(stateₒ), false;
-                text = concat(text, ODOC);
+                text = concat(text, OUT);
             }
-            setInState(arr, off + elementsLength);
-            ODOC = text;
+            setState({ IN: arr, IP: off + elementsLength });
+            OUT = text;
             return true;
         },
     };
 }
 function nullLiteral(options) {
-    const NO_INPUT = options.in === 'nil';
-    const NO_OUTPUT = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            ODOC = NO_OUTPUT ? undefined : null;
+            OUT = NO_PRODUCE ? undefined : null;
             return true;
         },
         unparse() {
-            if (!NO_INPUT) {
-                if (IDOC !== null || IMEM !== 0)
+            if (!NO_CONSUME) {
+                if (IN !== null || IP !== 0)
                     return false;
-                IMEM = 1;
+                IP = 1;
             }
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
     };
 }
 function numericLiteral(options) {
     const { value } = options;
-    const NO_INPUT = options.in === 'nil';
-    const NO_OUTPUT = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            ODOC = NO_OUTPUT ? undefined : value;
+            OUT = NO_PRODUCE ? undefined : value;
             return true;
         },
         unparse() {
-            if (!NO_INPUT) {
-                if (IDOC !== value || IMEM !== 0)
+            if (!NO_CONSUME) {
+                if (IN !== value || IP !== 0)
                     return false;
-                IMEM = 1;
+                IP = 1;
             }
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
     };
@@ -225,22 +225,22 @@ function record(options) {
                 let propName = field.name;
                 if (!field.value.parse())
                     return setState(stateₒ), false;
-                assert(ODOC !== undefined);
-                obj[propName] = ODOC;
+                assert(OUT !== undefined);
+                obj[propName] = OUT;
             }
-            ODOC = obj;
+            OUT = obj;
             return true;
         },
         unparse() {
-            if (!isPlainObject(IDOC))
+            if (!isPlainObject(IN))
                 return false;
             let stateₒ = getState();
             let text;
-            let propNames = Object.keys(IDOC);
+            let propNames = Object.keys(IN);
             let propCount = propNames.length;
             assert(propCount <= 32);
-            const obj = IDOC;
-            let bitmask = IMEM;
+            const obj = IN;
+            let bitmask = IP;
             for (let field of fields) {
                 let i = propNames.indexOf(field.name);
                 if (i < 0)
@@ -249,16 +249,16 @@ function record(options) {
                 const propBit = 1 << i;
                 if ((bitmask & propBit) !== 0)
                     return setState(stateₒ), false;
-                setInState(obj[propName], 0);
+                setState({ IN: obj[propName], IP: 0 });
                 if (!field.value.unparse())
                     return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IMEM))
+                if (!isFullyConsumed(obj[propName], IP))
                     return setState(stateₒ), false;
-                text = concat(text, ODOC);
+                text = concat(text, OUT);
                 bitmask += propBit;
             }
-            setInState(obj, bitmask);
-            ODOC = text;
+            setState({ IN: obj, IP: bitmask });
+            OUT = text;
             return true;
         },
     };
@@ -293,9 +293,9 @@ function sequence(options) {
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].parse())
                     return setState(stateₒ), false;
-                node = concat(node, ODOC);
+                node = concat(node, OUT);
             }
-            ODOC = node;
+            OUT = node;
             return true;
         },
         unparse() {
@@ -304,54 +304,51 @@ function sequence(options) {
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].unparse())
                     return setState(stateₒ), false;
-                text = concat(text, ODOC);
+                text = concat(text, OUT);
             }
-            ODOC = text;
+            OUT = text;
             return true;
         },
     };
 }
 function stringLiteral(options) {
     const { value } = options;
-    const NO_INPUT = options.in === 'nil';
-    const NO_OUTPUT = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            if (!NO_INPUT) {
-                if (!isString(IDOC))
+            if (!NO_CONSUME) {
+                if (!isString(IN))
                     return false;
-                if (!matchesAt(IDOC, value, IMEM))
+                if (!matchesAt(IN, value, IP))
                     return false;
-                IMEM += value.length;
+                IP += value.length;
             }
-            ODOC = NO_OUTPUT ? undefined : value;
+            OUT = NO_PRODUCE ? undefined : value;
             return true;
         },
         unparse() {
-            if (!NO_INPUT) {
-                if (!isString(IDOC))
+            if (!NO_CONSUME) {
+                if (!isString(IN))
                     return false;
-                if (!matchesAt(IDOC, value, IMEM))
+                if (!matchesAt(IN, value, IP))
                     return false;
-                IMEM += value.length;
+                IP += value.length;
             }
-            ODOC = NO_OUTPUT ? undefined : value;
+            OUT = NO_PRODUCE ? undefined : value;
             return true;
         },
     };
 }
-let IDOC;
-let IMEM;
-let ODOC;
+let IN;
+let IP;
+let OUT;
 function getState() {
-    return { IDOC, IMEM, ODOC };
+    return { IN, IP };
 }
-function setState(value) {
-    ({ IDOC, IMEM, ODOC } = value);
-}
-function setInState(IDOCᐟ, IMEMᐟ) {
-    IDOC = IDOCᐟ;
-    IMEM = IMEMᐟ;
+function setState(state) {
+    IN = state.IN;
+    IP = state.IP;
 }
 function assert(value) {
     if (!value)
@@ -413,58 +410,58 @@ const 𝔼9 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function float64(options) {
-        const NO_INPUT = options.in === 'nil';
-        const NO_OUTPUT = options.out === 'nil';
+        const NO_CONSUME = options.in === 'nil';
+        const NO_PRODUCE = options.out === 'nil';
         return {
             parse() {
-                if (NO_INPUT) {
-                    ODOC = NO_OUTPUT ? undefined : 0;
+                if (NO_CONSUME) {
+                    OUT = NO_PRODUCE ? undefined : 0;
                     return true;
                 }
-                if (!isString(IDOC))
+                if (!isString(IN))
                     return false;
                 let stateₒ = getState();
-                const LEN = IDOC.length;
+                const LEN = IN.length;
                 const EOS = 0;
                 let digitCount = 0;
                 // Parse optional '+' or '-' sign
-                let c = IDOC.charCodeAt(IMEM);
+                let c = IN.charCodeAt(IP);
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
                 // Parse 0..M digits
                 while (true) {
                     if (c < ZERO_DIGIT || c > NINE_DIGIT)
                         break;
                     digitCount += 1;
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
                 // Parse optional '.'
                 if (c === DECIMAL_POINT) {
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
                 // Parse 0..M digits
                 while (true) {
                     if (c < ZERO_DIGIT || c > NINE_DIGIT)
                         break;
                     digitCount += 1;
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
                 // Ensure we have parsed at least one significant digit
                 if (digitCount === 0)
                     return setState(stateₒ), false;
                 // Parse optional exponent
                 if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     // Parse optional '+' or '-' sign
                     if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                        IMEM += 1;
-                        c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                        IP += 1;
+                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
                     // Parse 1..M digits
                     digitCount = 0;
@@ -472,8 +469,8 @@ const 𝔼9 = (() => {
                         if (c < ZERO_DIGIT || c > NINE_DIGIT)
                             break;
                         digitCount += 1;
-                        IMEM += 1;
-                        c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                        IP += 1;
+                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
                     if (digitCount === 0)
                         return setState(stateₒ), false;
@@ -481,25 +478,25 @@ const 𝔼9 = (() => {
                 // There is a syntactically valid float. Delegate parsing to the JS runtime.
                 // Reject the number if it parses to Infinity or Nan.
                 // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                let num = Number.parseFloat(IDOC.slice(stateₒ.IMEM, IMEM));
+                let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
                 if (!Number.isFinite(num))
                     return setState(stateₒ), false;
                 // Success
-                ODOC = NO_OUTPUT ? undefined : num;
+                OUT = NO_PRODUCE ? undefined : num;
                 return true;
             },
             unparse() {
-                if (NO_INPUT) {
-                    ODOC = NO_OUTPUT ? undefined : '0';
+                if (NO_CONSUME) {
+                    OUT = NO_PRODUCE ? undefined : '0';
                     return true;
                 }
                 // Ensure N is a number.
-                if (typeof IDOC !== 'number' || IMEM !== 0)
+                if (typeof IN !== 'number' || IP !== 0)
                     return false;
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                ODOC = NO_OUTPUT ? undefined : String(IDOC);
-                IMEM = 1;
+                OUT = NO_PRODUCE ? undefined : String(IN);
+                IP = 1;
                 return true;
             },
         };
@@ -515,8 +512,8 @@ const 𝔼9 = (() => {
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function int32(options) {
-        const NO_INPUT = options.in === 'nil';
-        const NO_OUTPUT = options.out === 'nil';
+        const NO_CONSUME = options.in === 'nil';
+        const NO_PRODUCE = options.out === 'nil';
         let result = {
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
@@ -529,27 +526,27 @@ const 𝔼9 = (() => {
                 assert(typeof signed === 'boolean');
                 return {
                     parse() {
-                        if (NO_INPUT) {
-                            ODOC = NO_OUTPUT ? undefined : 0;
+                        if (NO_CONSUME) {
+                            OUT = NO_PRODUCE ? undefined : 0;
                             return true;
                         }
-                        if (!isString(IDOC))
+                        if (!isString(IN))
                             return false;
                         let stateₒ = getState();
                         // Parse optional leading '-' sign (if signed)...
                         let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                         let isNegative = false;
-                        if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
+                        if (signed && IP < IN.length && IN.charAt(IP) === '-') {
                             isNegative = true;
                             MAX_NUM = 0x80000000;
-                            IMEM += 1;
+                            IP += 1;
                         }
                         // ...followed by one or more decimal digits. (NB: no exponents).
                         let num = 0;
                         let digits = 0;
-                        while (IMEM < IDOC.length) {
+                        while (IP < IN.length) {
                             // Read a digit.
-                            let c = IDOC.charCodeAt(IMEM);
+                            let c = IN.charCodeAt(IP);
                             if (c >= 256)
                                 break;
                             let digitValue = DIGIT_VALUES[c];
@@ -562,7 +559,7 @@ const 𝔼9 = (() => {
                             if (num > MAX_NUM)
                                 return setState(stateₒ), false;
                             // Loop again.
-                            IMEM += 1;
+                            IP += 1;
                             digits += 1;
                         }
                         // Check that we parsed at least one digit.
@@ -572,17 +569,17 @@ const 𝔼9 = (() => {
                         if (isNegative)
                             num = -num;
                         // Success
-                        ODOC = NO_OUTPUT ? undefined : num;
+                        OUT = NO_PRODUCE ? undefined : num;
                         return true;
                     },
                     unparse() {
-                        if (NO_INPUT) {
-                            ODOC = NO_OUTPUT ? undefined : '0';
+                        if (NO_CONSUME) {
+                            OUT = NO_PRODUCE ? undefined : '0';
                             return true;
                         }
-                        if (typeof IDOC !== 'number' || IMEM !== 0)
+                        if (typeof IN !== 'number' || IP !== 0)
                             return false;
-                        let num = IDOC;
+                        let num = IN;
                         // Determine the number's sign and ensure it is in range.
                         let isNegative = false;
                         let MAX_NUM = 0x7FFFFFFF;
@@ -607,8 +604,8 @@ const 𝔼9 = (() => {
                         // Compute the final string.
                         if (isNegative)
                             digits.push(0x2d); // char code for '-'
-                        ODOC = NO_OUTPUT ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
-                        IMEM = 1;
+                        OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                        IP = 1;
                         return true;
                     },
                 };
@@ -667,32 +664,34 @@ const 𝔼9 = (() => {
                     parse() {
                         // Check whether the memo table already has an entry for the given initial state.
                         let stateₒ = getState();
-                        let memos2 = parseMemos.get(IDOC);
+                        let memos2 = parseMemos.get(IN);
                         if (memos2 === undefined) {
                             memos2 = new Map();
-                            parseMemos.set(IDOC, memos2);
+                            parseMemos.set(IN, memos2);
                         }
-                        let memo = memos2.get(IMEM);
+                        let memo = memos2.get(IP);
                         if (!memo) {
                             // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                             // this initial state. The first thing we do is create a memo table entry, which is marked as
                             // *unresolved*. All future applications of this rule with the same initial state will find this
                             // memo. If a future application finds the memo still unresolved, then we know we have encountered
                             // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                            memos2.set(IMEM, memo);
+                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
+                            memos2.set(IP, memo);
                             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                             // At this point, any left-recursive paths encountered during application are guaranteed to have
                             // been noted and aborted (see below).
                             if (expr.parse()) {
                                 memo.result = true;
                                 memo.stateᐟ = getState();
+                                memo.OUT = OUT;
                             }
                             memo.resolved = true;
                             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
                             // final.
                             if (!memo.isLeftRecursive) {
                                 setState(memo.stateᐟ);
+                                OUT = memo.OUT;
                                 return memo.result;
                             }
                             // If we get here, then the above application of the rule invoked itself left-recursively, but we
@@ -708,9 +707,10 @@ const 𝔼9 = (() => {
                                 if (!expr.parse())
                                     break;
                                 let state = getState();
-                                if (state.IMEM <= memo.stateᐟ.IMEM)
+                                if (state.IP <= memo.stateᐟ.IP)
                                     break;
                                 memo.stateᐟ = state;
+                                memo.OUT = OUT;
                             }
                         }
                         else if (!memo.resolved) {
@@ -726,37 +726,40 @@ const 𝔼9 = (() => {
                         // We have a resolved memo, so the result of the rule application for the given initial state has
                         // already been computed. Return it from the memo.
                         setState(memo.stateᐟ);
+                        OUT = memo.OUT;
                         return memo.result;
                     },
                     unparse() {
                         // Check whether the memo table already has an entry for the given initial state.
                         let stateₒ = getState();
-                        let memos2 = unparseMemos.get(IDOC);
+                        let memos2 = unparseMemos.get(IN);
                         if (memos2 === undefined) {
                             memos2 = new Map();
-                            unparseMemos.set(IDOC, memos2);
+                            unparseMemos.set(IN, memos2);
                         }
-                        let memo = memos2.get(IMEM);
+                        let memo = memos2.get(IP);
                         if (!memo) {
                             // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                             // this initial state. The first thing we do is create a memo table entry, which is marked as
                             // *unresolved*. All future applications of this rule with the same initial state will find this
                             // memo. If a future application finds the memo still unresolved, then we know we have encountered
                             // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                            memos2.set(IMEM, memo);
+                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
+                            memos2.set(IP, memo);
                             // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                             // At this point, any left-recursive paths encountered during application are guaranteed to have
                             // been noted and aborted (see below).
                             if (expr.unparse()) {
                                 memo.result = true;
                                 memo.stateᐟ = getState();
+                                memo.OUT = OUT;
                             }
                             memo.resolved = true;
                             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
                             // final.
                             if (!memo.isLeftRecursive) {
                                 setState(memo.stateᐟ);
+                                OUT = memo.OUT;
                                 return memo.result;
                             }
                             // If we get here, then the above application of the rule invoked itself left-recursively, but we
@@ -775,11 +778,12 @@ const 𝔼9 = (() => {
                                 if (!expr.parse())
                                     break;
                                 let state = getState();
-                                if (state.IMEM === memo.stateᐟ.IMEM)
+                                if (state.IP === memo.stateᐟ.IP)
                                     break;
-                                if (!isFullyConsumed(state.IDOC, state.IMEM))
+                                if (!isFullyConsumed(state.IN, state.IP))
                                     break;
                                 memo.stateᐟ = state;
+                                memo.OUT = OUT;
                             }
                         }
                         else if (!memo.resolved) {
@@ -795,6 +799,7 @@ const 𝔼9 = (() => {
                         // We have a resolved memo, so the result of the rule application for the given initial state has
                         // already been computed. Return it from the memo.
                         setState(memo.stateᐟ);
+                        OUT = memo.OUT;
                         return memo.result;
                     },
                 };
@@ -820,33 +825,33 @@ const 𝔼10 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
-        const NO_INPUT = options.in === 'nil';
-        const NO_OUTPUT = options.out === 'nil';
+        const NO_CONSUME = options.in === 'nil';
+        const NO_PRODUCE = options.out === 'nil';
         return {
             parse() {
                 let c = '?';
-                if (!NO_INPUT) {
-                    if (!isString(IDOC))
+                if (!NO_CONSUME) {
+                    if (!isString(IN))
                         return false;
-                    if (IMEM < 0 || IMEM >= IDOC.length)
+                    if (IP < 0 || IP >= IN.length)
                         return false;
-                    c = IDOC.charAt(IMEM);
-                    IMEM += 1;
+                    c = IN.charAt(IP);
+                    IP += 1;
                 }
-                ODOC = NO_OUTPUT ? undefined : c;
+                OUT = NO_PRODUCE ? undefined : c;
                 return true;
             },
             unparse() {
                 let c = '?';
-                if (!NO_INPUT) {
-                    if (!isString(IDOC))
+                if (!NO_CONSUME) {
+                    if (!isString(IN))
                         return false;
-                    if (IMEM < 0 || IMEM >= IDOC.length)
+                    if (IP < 0 || IP >= IN.length)
                         return false;
-                    c = IDOC.charAt(IMEM);
-                    IMEM += 1;
+                    c = IN.charAt(IP);
+                    IP += 1;
                 }
-                ODOC = NO_OUTPUT ? undefined : c;
+                OUT = NO_PRODUCE ? undefined : c;
                 return true;
             },
         };
@@ -854,11 +859,11 @@ const 𝔼10 = (() => {
     function epsilon(_options) {
         return {
             parse() {
-                ODOC = undefined;
+                OUT = undefined;
                 return true;
             },
             unparse() {
-                ODOC = undefined;
+                OUT = undefined;
                 return true;
             },
         };
@@ -922,28 +927,28 @@ const 𝔼10 = (() => {
                 let regex = RegExp(pattern, 'i');
                 return {
                     parse() {
-                        if (!isString(IDOC))
+                        if (!isString(IN))
                             return false;
                         let stateₒ = getState();
-                        const LEN = IDOC.length;
+                        const LEN = IN.length;
                         const EOS = '';
                         let len = 0;
                         let num = ''; // TODO: fix this - should actually keep count
-                        let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                        let c = IP < LEN ? IN.charAt(IP) : EOS;
                         while (true) {
                             if (!regex.test(c))
                                 break;
                             num += c;
-                            IMEM += 1;
+                            IP += 1;
                             len += 1;
                             if (len === maxDigits)
                                 break;
-                            c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                            c = IP < LEN ? IN.charAt(IP) : EOS;
                         }
                         if (len < minDigits)
                             return setState(stateₒ), false;
                         // tslint:disable-next-line: no-eval
-                        ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                        OUT = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
                         return true;
                     },
                     unparse: () => {
@@ -968,11 +973,11 @@ const 𝔼10 = (() => {
                                 break;
                             // TODO: check if any input was consumed...
                             // if not, stop iterating, since otherwise we may loop forever
-                            if (IMEM === stateₒ.IMEM)
+                            if (IP === stateₒ.IP)
                                 break;
-                            node = concat(node, ODOC);
+                            node = concat(node, OUT);
                         }
-                        ODOC = node;
+                        OUT = node;
                         return true;
                     },
                     unparse() {
@@ -984,13 +989,13 @@ const 𝔼10 = (() => {
                             // TODO: check if any input was consumed...
                             // if not, stop iterating, since otherwise we may loop forever
                             // TODO: any other checks needed? review...
-                            if (IMEM === stateₒ.IMEM)
+                            if (IP === stateₒ.IP)
                                 break;
                             // TODO: support more formats / blob types here, like for parse...
-                            assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                            text = concat(text, ODOC);
+                            assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
+                            text = concat(text, OUT);
                         }
-                        ODOC = text;
+                        OUT = text;
                         return true;
                     },
                 };

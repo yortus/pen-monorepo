@@ -42,7 +42,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
                 if ((bitmask & propBit) !== 0) return setState(stateₒ), false;
 
                 // TODO: match field value
-                setInState(obj[propName], 0);
+                setState({IN: obj[propName], IP: 0});
                 if (!field.value.unparse()) return setState(stateₒ), false;
                 if (!isFullyConsumed(obj[propName], IP)) return setState(stateₒ), false;
                 text = concat(text, OUT);
@@ -50,7 +50,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
             }
-            setInState(obj, bitmask);
+            setState({IN: obj, IP: bitmask});
             OUT = text;
             return true;
         },
