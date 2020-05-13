@@ -24,7 +24,7 @@ function int32(options: StaticOptions): PenVal {
                         return true;
                     }
 
-                    if (!isString(IN)) return false;
+                    if (typeof IN !== 'string') return false;
                     let stateₒ = getState();
 
                     // Parse optional leading '-' sign (if signed)...

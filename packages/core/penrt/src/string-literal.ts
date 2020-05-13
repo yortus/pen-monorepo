@@ -6,8 +6,8 @@ function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     return {
         parse() {
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
-                if (!matchesAt(IN, value, IP)) return false;
+                if (typeof IN !== 'string') return false;
+                if (!isMatch(value)) return false;
                 IP += value.length;
             }
             OUT = NO_PRODUCE ? undefined : value;
@@ -16,12 +16,23 @@ function stringLiteral(options: StaticOptions & {value: string}): PenVal {
 
         unparse() {
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
-                if (!matchesAt(IN, value, IP)) return false;
+                if (typeof IN !== 'string') return false;
+                if (!isMatch(value)) return false;
                 IP += value.length;
             }
             OUT = NO_PRODUCE ? undefined : value;
             return true;
         },
     };
+}
+
+
+// TODO: doc... helper...
+function isMatch(substr: string): boolean {
+    let lastPos = IP + substr.length;
+    if (lastPos > (IN as string).length) return false;
+    for (let i = IP, j = 0; i < lastPos; ++i, ++j) {
+        if ((IN as string).charAt(i) !== substr.charAt(j)) return false;
+    }
+    return true;
 }

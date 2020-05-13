@@ -5,14 +5,14 @@ function createMainExports(createProgram: (options: StaticOptions) => PenVal) {
         parse: (text: string) => {
             setState({IN: text, IP: 0});
             if (!parse()) throw new Error('parse failed');
-            if (!isFullyConsumed(IN, IP)) throw new Error(`parse didn't consume entire input`);
+            if (!isInputFullyConsumed()) throw new Error(`parse didn't consume entire input`);
             if (OUT === undefined) throw new Error(`parse didn't return a value`);
             return OUT;
         },
         unparse: (node: unknown) => {
             setState({IN: node, IP: 0});
             if (!unparse()) throw new Error('parse failed');
-            if (!isFullyConsumed(IN, IP)) throw new Error(`unparse didn't consume entire input`);
+            if (!isInputFullyConsumed()) throw new Error(`unparse didn't consume entire input`);
             if (OUT === undefined) throw new Error(`parse didn't return a value`);
             return OUT;
         },

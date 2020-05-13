@@ -156,7 +156,7 @@ function memoise(_options: StaticOptions): PenVal {
                             if (!expr.parse()) break;
                             let state = getState();
                             if (state.IP === memo.stateᐟ.IP) break;
-                            if (!isFullyConsumed(state.IN, state.IP)) break;
+                            if (!isInputFullyConsumed()) break;
                             memo.stateᐟ = state;
                             memo.OUT = OUT;
                         }

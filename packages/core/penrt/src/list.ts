@@ -26,7 +26,7 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
             for (let i = 0; i < elementsLength; ++i) {
                 setState({IN: arr[off + i], IP: 0});
                 if (!elements[i].unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(IN, IP)) return setState(stateₒ), false;
+                if (!isInputFullyConsumed()) return setState(stateₒ), false;
                 text = concat(text, OUT);
             }
             setState({IN: arr, IP: off + elementsLength});

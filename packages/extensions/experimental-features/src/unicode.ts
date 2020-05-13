@@ -18,7 +18,7 @@ function unicode(_options: StaticOptions): PenVal {
 
             return {
                 parse() {
-                    if (!isString(IN)) return false;
+                    if (typeof IN !== 'string') return false;
                     let stateₒ = getState();
                     const LEN = IN.length;
                     const EOS = '';

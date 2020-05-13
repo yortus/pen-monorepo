@@ -7,7 +7,7 @@ function character(options: StaticOptions & {min: string, max: string}): PenVal 
         parse() {
             let c = min;
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
+                if (typeof IN !== 'string') return false;
                 if (IP < 0 || IP >= IN.length) return false;
                 c = IN.charAt(IP);
                 if (c < min || c > max) return false;
@@ -20,7 +20,7 @@ function character(options: StaticOptions & {min: string, max: string}): PenVal 
         unparse() {
             let c = min;
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
+                if (typeof IN !== 'string') return false;
                 if (IP < 0 || IP >= IN.length) return false;
                 c = IN.charAt(IP);
                 if (c < min || c > max) return false;

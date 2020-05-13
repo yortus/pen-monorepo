@@ -28,7 +28,7 @@ function character(options) {
         parse() {
             let c = min;
             if (!NO_CONSUME) {
-                if (!isString(IN))
+                if (typeof IN !== 'string')
                     return false;
                 if (IP < 0 || IP >= IN.length)
                     return false;
@@ -43,7 +43,7 @@ function character(options) {
         unparse() {
             let c = min;
             if (!NO_CONSUME) {
-                if (!isString(IN))
+                if (typeof IN !== 'string')
                     return false;
                 if (IP < 0 || IP >= IN.length)
                     return false;
@@ -65,7 +65,7 @@ function createMainExports(createProgram) {
             setState({ IN: text, IP: 0 });
             if (!parse())
                 throw new Error('parse failed');
-            if (!isFullyConsumed(IN, IP))
+            if (!isInputFullyConsumed())
                 throw new Error(`parse didn't consume entire input`);
             if (OUT === undefined)
                 throw new Error(`parse didn't return a value`);
@@ -75,7 +75,7 @@ function createMainExports(createProgram) {
             setState({ IN: node, IP: 0 });
             if (!unparse())
                 throw new Error('parse failed');
-            if (!isFullyConsumed(IN, IP))
+            if (!isInputFullyConsumed())
                 throw new Error(`unparse didn't consume entire input`);
             if (OUT === undefined)
                 throw new Error(`parse didn't return a value`);
@@ -124,7 +124,7 @@ function field(options) {
                 setState({ IN: obj[propName], IP: 0 });
                 if (!value.unparse())
                     continue;
-                if (!isFullyConsumed(obj[propName], IP))
+                if (!isInputFullyConsumed())
                     continue;
                 text = concat(text, OUT);
                 bitmask += propBit;
@@ -166,7 +166,7 @@ function list(options) {
                 setState({ IN: arr[off + i], IP: 0 });
                 if (!elements[i].unparse())
                     return setState(stateₒ), false;
-                if (!isFullyConsumed(IN, IP))
+                if (!isInputFullyConsumed())
                     return setState(stateₒ), false;
                 text = concat(text, OUT);
             }
@@ -252,7 +252,7 @@ function record(options) {
                 setState({ IN: obj[propName], IP: 0 });
                 if (!field.value.unparse())
                     return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IP))
+                if (!isInputFullyConsumed())
                     return setState(stateₒ), false;
                 text = concat(text, OUT);
                 bitmask += propBit;
@@ -318,9 +318,9 @@ function stringLiteral(options) {
     return {
         parse() {
             if (!NO_CONSUME) {
-                if (!isString(IN))
+                if (typeof IN !== 'string')
                     return false;
-                if (!matchesAt(IN, value, IP))
+                if (!isMatch(value))
                     return false;
                 IP += value.length;
             }
@@ -329,9 +329,9 @@ function stringLiteral(options) {
         },
         unparse() {
             if (!NO_CONSUME) {
-                if (!isString(IN))
+                if (typeof IN !== 'string')
                     return false;
-                if (!matchesAt(IN, value, IP))
+                if (!isMatch(value))
                     return false;
                 IP += value.length;
             }
@@ -339,6 +339,16 @@ function stringLiteral(options) {
             return true;
         },
     };
+}
+function isMatch(substr) {
+    let lastPos = IP + substr.length;
+    if (lastPos > IN.length)
+        return false;
+    for (let i = IP, j = 0; i < lastPos; ++i, ++j) {
+        if (IN.charAt(i) !== substr.charAt(j))
+            return false;
+    }
+    return true;
 }
 let IN;
 let IP;
@@ -363,41 +373,27 @@ function concat(a, b) {
         return a + b;
     if (Array.isArray(a) && Array.isArray(b))
         return [...a, ...b];
-    if (isPlainObject(a) && isPlainObject(b))
+    if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null)
         return Object.assign(Object.assign({}, a), b);
     throw new Error(`Internal error: invalid sequence`);
 }
-function isFullyConsumed(node, pos) {
-    if (typeof node === 'string')
-        return pos === node.length;
-    if (Array.isArray(node))
-        return pos === node.length;
-    if (isPlainObject(node)) {
-        let keyCount = Object.keys(node).length;
+function isInputFullyConsumed() {
+    if (typeof IN === 'string')
+        return IP === IN.length;
+    if (Array.isArray(IN))
+        return IP === IN.length;
+    if (typeof IN === 'object' && IN !== null) {
+        let keyCount = Object.keys(IN).length;
         assert(keyCount <= 32);
         if (keyCount === 0)
             return true;
-        return pos === -1 >>> (32 - keyCount);
+        return IP === -1 >>> (32 - keyCount);
     }
-    return pos === 1;
+    return IP === 1;
 }
 function isPlainObject(value) {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
-function isString(value) {
-    return typeof value === 'string';
-}
-function matchesAt(text, substr, position) {
-    let lastPos = position + substr.length;
-    if (lastPos > text.length)
-        return false;
-    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-        if (text.charAt(i) !== substr.charAt(j))
-            return false;
-    }
-    return true;
-}
-function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
 function NOT_A_RULE() { throw new Error('Not a rule'); }
 
 // -------------------- Extensions --------------------
@@ -418,7 +414,7 @@ const 𝔼16 = (() => {
                     OUT = NO_PRODUCE ? undefined : 0;
                     return true;
                 }
-                if (!isString(IN))
+                if (typeof IN !== 'string')
                     return false;
                 let stateₒ = getState();
                 const LEN = IN.length;
@@ -530,7 +526,7 @@ const 𝔼16 = (() => {
                             OUT = NO_PRODUCE ? undefined : 0;
                             return true;
                         }
-                        if (!isString(IN))
+                        if (typeof IN !== 'string')
                             return false;
                         let stateₒ = getState();
                         // Parse optional leading '-' sign (if signed)...
@@ -780,7 +776,7 @@ const 𝔼16 = (() => {
                                 let state = getState();
                                 if (state.IP === memo.stateᐟ.IP)
                                     break;
-                                if (!isFullyConsumed(state.IN, state.IP))
+                                if (!isInputFullyConsumed())
                                     break;
                                 memo.stateᐟ = state;
                                 memo.OUT = OUT;
@@ -831,7 +827,7 @@ const 𝔼17 = (() => {
             parse() {
                 let c = '?';
                 if (!NO_CONSUME) {
-                    if (!isString(IN))
+                    if (typeof IN !== 'string')
                         return false;
                     if (IP < 0 || IP >= IN.length)
                         return false;
@@ -844,7 +840,7 @@ const 𝔼17 = (() => {
             unparse() {
                 let c = '?';
                 if (!NO_CONSUME) {
-                    if (!isString(IN))
+                    if (typeof IN !== 'string')
                         return false;
                     if (IP < 0 || IP >= IN.length)
                         return false;
@@ -927,7 +923,7 @@ const 𝔼17 = (() => {
                 let regex = RegExp(pattern, 'i');
                 return {
                     parse() {
-                        if (!isString(IN))
+                        if (typeof IN !== 'string')
                             return false;
                         let stateₒ = getState();
                         const LEN = IN.length;

@@ -44,7 +44,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
                 // TODO: match field value
                 setState({IN: obj[propName], IP: 0});
                 if (!field.value.unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IP)) return setState(stateₒ), false;
+                if (!isInputFullyConsumed()) return setState(stateₒ), false;
                 text = concat(text, OUT);
 
                 // TODO: we matched both name and value - consume them from `node`

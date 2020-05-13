@@ -57,23 +57,23 @@ function concat(a: unknown, b: unknown): unknown {
     if (b === undefined) return a;
     if (typeof a === 'string' && typeof b === 'string') return a + b;
     if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
-    if (isPlainObject(a) && isPlainObject(b)) return {...a, ...b};
+    if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null) return {...a, ...b};
     throw new Error(`Internal error: invalid sequence`);
 }
 
 
 // TODO: doc... helper...
-function isFullyConsumed(node: unknown, pos: number): boolean {
-    if (typeof node === 'string') return pos === node.length;
-    if (Array.isArray(node)) return pos === node.length;
-    if (isPlainObject(node)) {
-        let keyCount = Object.keys(node).length;
+function isInputFullyConsumed(): boolean {
+    if (typeof IN === 'string') return IP === IN.length;
+    if (Array.isArray(IN)) return IP === IN.length;
+    if (typeof IN === 'object' && IN !== null) {
+        let keyCount = Object.keys(IN).length;
         assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
         if (keyCount === 0) return true;
         // tslint:disable-next-line: no-bitwise
-        return pos === -1 >>> (32 - keyCount);
+        return IP === -1 >>> (32 - keyCount);
     }
-    return pos === 1; // TODO: doc which case(s) this covers. Better to just return false?
+    return IP === 1; // TODO: doc which case(s) this covers. Better to just return false?
 }
 
 
@@ -83,25 +83,5 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 
-// TODO: doc... helper...
-// TODO: provide faster impl for known cases - eg when checking IN during text parsing, or OUT during text unparsing
-//       (but instrument first)
-function isString(value: unknown): value is string {
-    return typeof value === 'string';
-}
-
-
-// TODO: doc... helper...
-function matchesAt(text: string, substr: string, position: number): boolean {
-    let lastPos = position + substr.length;
-    if (lastPos > text.length) return false;
-    for (let i = position, j = 0; i < lastPos; ++i, ++j) {
-        if (text.charAt(i) !== substr.charAt(j)) return false;
-    }
-    return true;
-}
-
-
-// TODO: doc... helpers...
-function NOT_A_LAMBDA(): never { throw new Error('Not a lambda'); }
+// TODO: remove...
 function NOT_A_RULE(): never { throw new Error('Not a rule'); }

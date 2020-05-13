@@ -9,7 +9,7 @@ function float64(options: StaticOptions): PenVal {
                 return true;
             }
 
-            if (!isString(IN)) return false;
+            if (typeof IN !== 'string') return false;
             let stateₒ = getState();
             const LEN = IN.length;
             const EOS = 0;

@@ -50,7 +50,7 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
                 // TODO: match field value
                 setState({IN: obj[propName], IP: 0});
                 if (!value.unparse()) continue;
-                if (!isFullyConsumed(obj[propName], IP)) continue;
+                if (!isInputFullyConsumed()) continue;
                 text = concat(text, OUT);
 
                 // TODO: we matched both name and value - consume them from `node`

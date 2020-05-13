@@ -6,7 +6,7 @@ function anyChar(options: StaticOptions): PenVal {
         parse() {
             let c = '?';
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
+                if (typeof IN !== 'string') return false;
                 if (IP < 0 || IP >= IN.length) return false;
                 c = IN.charAt(IP);
                 IP += 1;
@@ -18,7 +18,7 @@ function anyChar(options: StaticOptions): PenVal {
         unparse() {
             let c = '?';
             if (!NO_CONSUME) {
-                if (!isString(IN)) return false;
+                if (typeof IN !== 'string') return false;
                 if (IP < 0 || IP >= IN.length) return false;
                 c = IN.charAt(IP);
                 IP += 1;
