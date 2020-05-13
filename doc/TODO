@@ -8,6 +8,9 @@ New TODOs May 2020:
         [ ] they never change during parse/print, except for self-contained abstract/concrete bits
         [ ] helpers to enter/exit abstract and concrete mode at static start time (not at parse time)
         [ ] rename them: `IN` -> `???`   `OUT` -> `???` eg INPUT_KIND, OUTPUT_KIND
+    [ ] try optimisations for `sequence` and `selection`
+        [ ] unroll loops
+        [ ] use `eval` to ensure every seq/sel rule instance is unique and has its own V8 optimisations applies
     [ ] helpers around *all* register get/set access
     [ ] helpers to work with input, eg generalised `match` helper(s), `typeOf`, etc
     [ ] force IN to always be set through a helper method, and cache info about it - eg type = string|array|object|other
