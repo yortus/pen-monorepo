@@ -3,8 +3,6 @@
 
 // TODO: doc... has both 'txt' and 'ast' representation
 function i32(options: StaticOptions): PenVal {
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
     let result: PenVal = {
         lambda(expr) {
             let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
@@ -12,14 +10,14 @@ function i32(options: StaticOptions): PenVal {
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
 
+            if (options.in === 'nil') {
+                const out = options.out === 'nil' ? undefined : 0;
+                return {rule: () => (OUT = out, true)};
+            }
+
             if (options.in === 'txt' || options.out === 'ast') {
                 return {
                     rule() {
-                        if (NO_CONSUME) {
-                            OUT = NO_PRODUCE ? undefined : 0;
-                            return true;
-                        }
-
                         if (typeof IN !== 'string') return false;
                         let stateₒ = getState();
 
@@ -62,7 +60,7 @@ function i32(options: StaticOptions): PenVal {
                         if (isNegative) num = -num;
 
                         // Success
-                        OUT = NO_PRODUCE ? undefined : num;
+                        OUT = options.out === 'nil' ? undefined : num;
                         return true;
                     },
                 };
@@ -71,11 +69,6 @@ function i32(options: StaticOptions): PenVal {
             if (options.in === 'ast' || options.out === 'txt') {
                 return {
                     rule() {
-                        if (NO_CONSUME) {
-                            OUT = NO_PRODUCE ? undefined : '0';
-                            return true;
-                        }
-
                         if (typeof IN !== 'number' || IP !== 0) return false;
                         let num = IN;
 
@@ -102,7 +95,7 @@ function i32(options: StaticOptions): PenVal {
                         // Compute the final string.
                         if (isNegative) digits.push(0x2d); // char code for '-'
                         // TODO: is String.fromCharCode(...) performant?
-                        OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse());
+                        OUT = options.out === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
                         IP = 1;
                         return true;
                     },

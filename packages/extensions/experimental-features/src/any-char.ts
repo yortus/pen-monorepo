@@ -1,17 +1,18 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function anyChar(options: StaticOptions): PenVal {
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
+
+    if (options.in === 'nil') {
+        const out = options.out === 'nil' ? undefined : '?';
+        return {rule: () => (OUT = out, true)};
+    }
+
     return {
         rule() {
-            let c = '?';
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string') return false;
-                if (IP < 0 || IP >= IN.length) return false;
-                c = IN.charAt(IP);
-                IP += 1;
-            }
-            OUT = NO_PRODUCE ? undefined : c;
+            if (typeof IN !== 'string') return false;
+            if (IP < 0 || IP >= IN.length) return false;
+            let c = IN.charAt(IP);
+            IP += 1;
+            OUT = options.out === 'nil' ? undefined : c;
             return true;
         },
     };

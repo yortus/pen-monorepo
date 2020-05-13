@@ -1,16 +1,13 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function f64(options: StaticOptions): PenVal {
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
+    if (options.in === 'nil') {
+        const out = options.out === 'nil' ? undefined : 0;
+        return {rule: () => (OUT = out, true)};
+    }
 
     if (options.in === 'txt' || options.out === 'ast') {
         return {
             rule() {
-                if (NO_CONSUME) {
-                    OUT = NO_PRODUCE ? undefined : 0;
-                    return true;
-                }
-
                 if (typeof IN !== 'string') return false;
                 let stateₒ = getState();
                 const LEN = IN.length;
@@ -78,7 +75,7 @@ function f64(options: StaticOptions): PenVal {
                 if (!Number.isFinite(num)) return setState(stateₒ), false;
 
                 // Success
-                OUT = NO_PRODUCE ? undefined : num;
+                OUT = options.out === 'nil' ? undefined : num;
                 return true;
             },
         };
@@ -87,17 +84,12 @@ function f64(options: StaticOptions): PenVal {
     if (options.in === 'ast' || options.out === 'txt') {
         return {
             rule() {
-                if (NO_CONSUME) {
-                    OUT = NO_PRODUCE ? undefined : '0';
-                    return true;
-                }
-
                 // Ensure N is a number.
                 if (typeof IN !== 'number' || IP !== 0) return false;
 
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                OUT = NO_PRODUCE ? undefined : String(IN);
+                OUT = options.out === 'nil' ? undefined : String(IN);
                 IP = 1;
                 return true;
             },

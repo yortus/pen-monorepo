@@ -2,30 +2,19 @@
 "use strict";
 function booleanLiteral(options) {
     const { value } = options;
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule() {
-                OUT = NO_PRODUCE ? undefined : value;
-                return true;
-            },
-        };
+    const out = options.out === 'ast' ? value : undefined;
+    if (options.in !== 'ast') {
+        return { rule: () => (OUT = out, true) };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule() {
-                if (!NO_CONSUME) {
-                    if (IN !== value || IP !== 0)
-                        return false;
-                    IP += 1;
-                }
-                OUT = undefined;
-                return true;
-            },
-        };
-    }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    return {
+        rule() {
+            if (IN !== value || IP !== 0)
+                return false;
+            IP += 1;
+            OUT = out;
+            return true;
+        },
+    };
 }
 function character(options) {
     const { min, max } = options;
@@ -182,57 +171,35 @@ function list(options) {
     throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
 }
 function nullLiteral(options) {
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule() {
-                OUT = NO_PRODUCE ? undefined : null;
-                return true;
-            },
-        };
+    const out = options.out === 'ast' ? null : undefined;
+    if (options.in !== 'ast') {
+        return { rule: () => (OUT = out, true) };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule() {
-                if (!NO_CONSUME) {
-                    if (IN !== null || IP !== 0)
-                        return false;
-                    IP = 1;
-                }
-                OUT = undefined;
-                return true;
-            },
-        };
-    }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    return {
+        rule() {
+            if (IN !== null || IP !== 0)
+                return false;
+            IP = 1;
+            OUT = out;
+            return true;
+        },
+    };
 }
 function numericLiteral(options) {
     const { value } = options;
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule() {
-                OUT = NO_PRODUCE ? undefined : value;
-                return true;
-            },
-        };
+    const out = options.out === 'ast' ? value : undefined;
+    if (options.in !== 'ast') {
+        return { rule: () => (OUT = out, true) };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule() {
-                if (!NO_CONSUME) {
-                    if (IN !== value || IP !== 0)
-                        return false;
-                    IP = 1;
-                }
-                OUT = undefined;
-                return true;
-            },
-        };
-    }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    return {
+        rule() {
+            if (IN !== value || IP !== 0)
+                return false;
+            IP = 1;
+            OUT = out;
+            return true;
+        },
+    };
 }
 function record(options) {
     const { fields } = options;
@@ -402,15 +369,13 @@ const 𝔼9 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
-        const NO_CONSUME = options.in === 'nil';
-        const NO_PRODUCE = options.out === 'nil';
+        if (options.in === 'nil') {
+            const out = options.out === 'nil' ? undefined : 0;
+            return { rule: () => (OUT = out, true) };
+        }
         if (options.in === 'txt' || options.out === 'ast') {
             return {
                 rule() {
-                    if (NO_CONSUME) {
-                        OUT = NO_PRODUCE ? undefined : 0;
-                        return true;
-                    }
                     if (typeof IN !== 'string')
                         return false;
                     let stateₒ = getState();
@@ -475,7 +440,7 @@ const 𝔼9 = (() => {
                     if (!Number.isFinite(num))
                         return setState(stateₒ), false;
                     // Success
-                    OUT = NO_PRODUCE ? undefined : num;
+                    OUT = options.out === 'nil' ? undefined : num;
                     return true;
                 },
             };
@@ -483,16 +448,12 @@ const 𝔼9 = (() => {
         if (options.in === 'ast' || options.out === 'txt') {
             return {
                 rule() {
-                    if (NO_CONSUME) {
-                        OUT = NO_PRODUCE ? undefined : '0';
-                        return true;
-                    }
                     // Ensure N is a number.
                     if (typeof IN !== 'number' || IP !== 0)
                         return false;
                     // Delegate unparsing to the JS runtime.
                     // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = NO_PRODUCE ? undefined : String(IN);
+                    OUT = options.out === 'nil' ? undefined : String(IN);
                     IP = 1;
                     return true;
                 },
@@ -511,8 +472,6 @@ const 𝔼9 = (() => {
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32(options) {
-        const NO_CONSUME = options.in === 'nil';
-        const NO_PRODUCE = options.out === 'nil';
         let result = {
             lambda(expr) {
                 var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -520,13 +479,13 @@ const 𝔼9 = (() => {
                 let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
+                if (options.in === 'nil') {
+                    const out = options.out === 'nil' ? undefined : 0;
+                    return { rule: () => (OUT = out, true) };
+                }
                 if (options.in === 'txt' || options.out === 'ast') {
                     return {
                         rule() {
-                            if (NO_CONSUME) {
-                                OUT = NO_PRODUCE ? undefined : 0;
-                                return true;
-                            }
                             if (typeof IN !== 'string')
                                 return false;
                             let stateₒ = getState();
@@ -566,7 +525,7 @@ const 𝔼9 = (() => {
                             if (isNegative)
                                 num = -num;
                             // Success
-                            OUT = NO_PRODUCE ? undefined : num;
+                            OUT = options.out === 'nil' ? undefined : num;
                             return true;
                         },
                     };
@@ -574,10 +533,6 @@ const 𝔼9 = (() => {
                 if (options.in === 'ast' || options.out === 'txt') {
                     return {
                         rule() {
-                            if (NO_CONSUME) {
-                                OUT = NO_PRODUCE ? undefined : '0';
-                                return true;
-                            }
                             if (typeof IN !== 'number' || IP !== 0)
                                 return false;
                             let num = IN;
@@ -606,7 +561,7 @@ const 𝔼9 = (() => {
                             if (isNegative)
                                 digits.push(0x2d); // char code for '-'
                             // TODO: is String.fromCharCode(...) performant?
-                            OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse());
+                            OUT = options.out === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
                             IP = 1;
                             return true;
                         },
@@ -753,20 +708,19 @@ const 𝔼10 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
-        const NO_CONSUME = options.in === 'nil';
-        const NO_PRODUCE = options.out === 'nil';
+        if (options.in === 'nil') {
+            const out = options.out === 'nil' ? undefined : '?';
+            return { rule: () => (OUT = out, true) };
+        }
         return {
             rule() {
-                let c = '?';
-                if (!NO_CONSUME) {
-                    if (typeof IN !== 'string')
-                        return false;
-                    if (IP < 0 || IP >= IN.length)
-                        return false;
-                    c = IN.charAt(IP);
-                    IP += 1;
-                }
-                OUT = NO_PRODUCE ? undefined : c;
+                if (typeof IN !== 'string')
+                    return false;
+                if (IP < 0 || IP >= IN.length)
+                    return false;
+                let c = IN.charAt(IP);
+                IP += 1;
+                OUT = options.out === 'nil' ? undefined : c;
                 return true;
             },
         };
