@@ -50,7 +50,7 @@ function character(options) {
 }
 function createMainExports(createProgram) {
     const parse = createProgram({ in: 'txt', out: 'ast' }).rule;
-    const unparse = createProgram({ in: 'ast', out: 'txt' }).rule;
+    const print = createProgram({ in: 'ast', out: 'txt' }).rule;
     return {
         parse: (text) => {
             setState({ IN: text, IP: 0 });
@@ -62,14 +62,14 @@ function createMainExports(createProgram) {
                 throw new Error(`parse didn't return a value`);
             return OUT;
         },
-        unparse: (node) => {
+        print: (node) => {
             setState({ IN: node, IP: 0 });
-            if (!unparse())
-                throw new Error('parse failed');
+            if (!print())
+                throw new Error('print failed');
             if (!isInputFullyConsumed())
-                throw new Error(`unparse didn't consume entire input`);
+                throw new Error(`print didn't consume entire input`);
             if (OUT === undefined)
-                throw new Error(`parse didn't return a value`);
+                throw new Error(`print didn't return a value`);
             return OUT;
         },
     };

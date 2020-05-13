@@ -1,7 +1,7 @@
 New TODOs May 2020:
     [x] add a timed test for unparse so perf improvements can be roughly measured
     [x] parse/unparse -> rule
-    [ ] top-level exports = `parse` and `print`
+    [x] top-level exports = `parse` and `print`
     [ ] force IN to always be set through a helper method, and cache info about it - eg type = string|array|object|other
         [ ] but continue allowing IP to be set directly
         [ ] so, eg, provide a helper to change IN to something, and set IP automatically depending on its type
@@ -11,7 +11,7 @@ New TODOs May 2020:
         [ ] TODO: list others...
 
 TODO 2020:
-    [ ] unparse --> print
+    [x] unparse --> print
     [x] `float64`
     [x] numeric literals
     [ ] `int32{base?: 2..36, signed?: boolean}`

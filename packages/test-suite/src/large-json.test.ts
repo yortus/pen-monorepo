@@ -34,16 +34,16 @@ describe(`Procesing a large JSON document`, async () => {
     });
 
     it('prints', () => {
-        let {unparse} = require(outputPath);
+        let {print} = require(outputPath);
 
         let json = require(jsonDocPath);
         let t0 = new Date().getTime();
         let text1 = JSON.stringify(json);
         let t1 = new Date().getTime();
-        let text2 = unparse(json);
+        let text2 = print(json);
         let t2 = new Date().getTime();
         expect(text2).to.equal(text1);
         console.log(`JSON.stringify took ${t1 - t0}ms`);
-        console.log(`penc unparse took ${t2 - t1}ms`);
+        console.log(`penc print took ${t2 - t1}ms`);
     });
 });

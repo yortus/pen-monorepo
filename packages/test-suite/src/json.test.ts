@@ -67,12 +67,12 @@ describe(`Compiling and executing the 'json.pen' program`, async () => {
 
     for (let test of tests) {
         it(test.text, () => {
-            let {parse, unparse} = require(outputPath);
+            let {parse, print} = require(outputPath);
 
             let ast = parse(test.text);
             expect(ast).to.deep.equal(JSON.parse(test.text));
 
-            let textᐟ = unparse(test.ast);
+            let textᐟ = print(test.ast);
             expect(JSON.parse(textᐟ)).to.deep.equal(test.ast);
         });
     }
