@@ -1,4 +1,5 @@
-function field(name: PenVal, value: PenVal): PenVal {
+function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
+    const {name, value} = options;
     return {
         bindings: {},
 

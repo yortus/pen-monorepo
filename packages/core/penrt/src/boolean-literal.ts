@@ -1,4 +1,5 @@
-function booleanLiteral(value: boolean): PenVal {
+function booleanLiteral(options: StaticOptions & {value: boolean}): PenVal {
+    const {value} = options;
     return {
         bindings: {},
 

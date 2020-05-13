@@ -1,4 +1,5 @@
-function abstract(expr: PenVal): PenVal {
+function abstract(options: StaticOptions & {expr: PenVal}): PenVal {
+    const {expr} = options;
     return {
         bindings: {},
 

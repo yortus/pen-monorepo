@@ -1,4 +1,5 @@
-function sequence(...expressions: PenVal[]): PenVal {
+function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
+    const {expressions} = options;
     const arity = expressions.length;
     return {
         bindings: {},

@@ -1,4 +1,5 @@
-function list(elements: PenVal[]): PenVal {
+function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
+    const {elements} = options;
     const elementsLength = elements.length;
     return {
         bindings: {},

@@ -1,4 +1,5 @@
-function record(fields: Array<{name: string, value: PenVal}>): PenVal {
+function record(options: StaticOptions & {fields: Array<{name: string, value: PenVal}>}): PenVal {
+    const {fields} = options;
     return {
         bindings: {},
 

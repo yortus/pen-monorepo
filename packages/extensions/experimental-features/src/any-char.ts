@@ -1,29 +1,31 @@
-const anyChar: PenVal = {
-    bindings: {},
+function anyChar(_options: StaticOptions): PenVal {
+    return {
+        bindings: {},
 
-    parse() {
-        let c = '?';
-        if (!INUL) {
-            if (!isString(IDOC)) return false;
-            if (IMEM < 0 || IMEM >= IDOC.length) return false;
-            c = IDOC.charAt(IMEM);
-            IMEM += 1;
-        }
-        ODOC = ONUL ? undefined : c;
-        return true;
-    },
+        parse() {
+            let c = '?';
+            if (!INUL) {
+                if (!isString(IDOC)) return false;
+                if (IMEM < 0 || IMEM >= IDOC.length) return false;
+                c = IDOC.charAt(IMEM);
+                IMEM += 1;
+            }
+            ODOC = ONUL ? undefined : c;
+            return true;
+        },
 
-    unparse() {
-        let c = '?';
-        if (!INUL) {
-            if (!isString(IDOC)) return false;
-            if (IMEM < 0 || IMEM >= IDOC.length) return false;
-            c = IDOC.charAt(IMEM);
-            IMEM += 1;
-        }
-        ODOC = ONUL ? undefined : c;
-        return true;
-    },
+        unparse() {
+            let c = '?';
+            if (!INUL) {
+                if (!isString(IDOC)) return false;
+                if (IMEM < 0 || IMEM >= IDOC.length) return false;
+                c = IDOC.charAt(IMEM);
+                IMEM += 1;
+            }
+            ODOC = ONUL ? undefined : c;
+            return true;
+        },
 
-    apply: NOT_A_LAMBDA,
-};
+        apply: NOT_A_LAMBDA,
+    };
+}

@@ -1,17 +1,7 @@
 // TODO: handle abstract/concrete...
 
 
-const float64 = ((): PenVal => {
-
-    // These constants are used by the float64 rule.
-    const PLUS_SIGN = '+'.charCodeAt(0);
-    const MINUS_SIGN = '-'.charCodeAt(0);
-    const DECIMAL_POINT = '.'.charCodeAt(0);
-    const ZERO_DIGIT = '0'.charCodeAt(0);
-    const NINE_DIGIT = '9'.charCodeAt(0);
-    const LOWERCASE_E = 'e'.charCodeAt(0);
-    const UPPERCASE_E = 'E'.charCodeAt(0);
-
+function float64(_options: StaticOptions): PenVal {
     return {
         bindings: {},
 
@@ -100,4 +90,14 @@ const float64 = ((): PenVal => {
 
         apply: NOT_A_LAMBDA,
     };
-})();
+}
+
+
+// These constants are used by the float64 rule.
+const PLUS_SIGN = '+'.charCodeAt(0);
+const MINUS_SIGN = '-'.charCodeAt(0);
+const DECIMAL_POINT = '.'.charCodeAt(0);
+const ZERO_DIGIT = '0'.charCodeAt(0);
+const NINE_DIGIT = '9'.charCodeAt(0);
+const LOWERCASE_E = 'e'.charCodeAt(0);
+const UPPERCASE_E = 'E'.charCodeAt(0);

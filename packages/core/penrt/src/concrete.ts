@@ -1,4 +1,5 @@
-function concrete(expr: PenVal): PenVal {
+function concrete(options: StaticOptions & {expr: PenVal}): PenVal {
+    const {expr} = options;
     return {
         bindings: {},
 

@@ -1,4 +1,5 @@
-function character(min: string, max: string): PenVal {
+function character(options: StaticOptions & {min: string, max: string}): PenVal {
+    const {min, max} = options;
     return {
         bindings: {},
 

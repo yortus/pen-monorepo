@@ -1,4 +1,5 @@
-function selection(...expressions: PenVal[]): PenVal {
+function selection(options: StaticOptions & {expressions: PenVal[]}): PenVal {
+    const {expressions} = options;
     const arity = expressions.length;
     return {
         bindings: {},

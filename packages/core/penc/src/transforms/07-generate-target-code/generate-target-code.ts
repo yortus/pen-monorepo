@@ -149,7 +149,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             for (let name of ef.exportedNames) {
                 emit.down(2).text(`Object.assign(`).indent();
                 emit.down(1).text(`𝕊${ef.meta.scope.id}.bindings.${name},`).down(1);
-                emit.text(`𝔼${ef.meta.scope.id}.${name},`);
+                emit.text(`𝔼${ef.meta.scope.id}.${name}({/*TODO: pass staticOptions*/}),`);
                 emit.dedent().down(1).text(`);`);
             }
         },
@@ -188,11 +188,11 @@ function emitMainExports(emit: Emitter, program: Program) {
 function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable) {
     switch (expr.kind) {
         case 'ApplicationExpression':
-            emit.text('apply(').indent().down(1);
+            emit.text('(');
             emitExpression(emit, expr.lambda, symbolTable);
-            emit.text(',').down(1);
+            emit.text(').apply(');
             emitExpression(emit, expr.argument, symbolTable);
-            emit.dedent().down(1).text(`)`);
+            emit.text(`)`);
             return;
 
         case 'BindingLookupExpression':
@@ -201,22 +201,22 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BooleanLiteralExpression':
-            emit.text(`booleanLiteral(${expr.value})`);
+            emit.text(`booleanLiteral({value: ${expr.value}})`);
             return;
 
         case 'CharacterExpression':
-            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}(`);
-            emit.text('character(');
-            emit.text(JSON.stringify(expr.minValue)).text(', ').text(JSON.stringify(expr.maxValue)).text(')');
-            if (expr.abstract || expr.concrete) emit.text(')');
+            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}({expr: `);
+            emit.text('character({min: ');
+            emit.text(JSON.stringify(expr.minValue)).text(', max: ').text(JSON.stringify(expr.maxValue)).text('})');
+            if (expr.abstract || expr.concrete) emit.text('})');
             return;
 
         case 'FieldExpression':
-            emit.text('field(').indent().down(1);
+            emit.text('field({').indent().down(1).text('name: ');
             emitExpression(emit, expr.name, symbolTable);
-            emit.text(',').down(1);
+            emit.text(',').down(1).text('value: ');
             emitExpression(emit, expr.value, symbolTable);
-            emit.dedent().down(1).text(')');
+            emit.text(',').dedent().down(1).text('})');
             return;
 
         case 'ImportExpression':
@@ -227,13 +227,17 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         //     break; // TODO...
 
         case 'ListExpression':
-            emit.text('list([').indent();
-            for (let element of expr.elements) {
-                emit.down(1);
-                emitExpression(emit, element, symbolTable);
-                emit.text(',');
+            emit.text('list({').indent().down(1).text('elements: [');
+            if (expr.elements.length > 0) {
+                emit.indent();
+                for (let element of expr.elements) {
+                    emit.down(1);
+                    emitExpression(emit, element, symbolTable);
+                    emit.text(',');
+                }
+                emit.dedent().down(1);
             }
-            emit.dedent().down(1).text('])');
+            emit.text('],').dedent().down(1).text('})');
             return;
 
         case 'ModuleExpression':
@@ -241,11 +245,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'NullLiteralExpression':
-            emit.text(`nullLiteral`);
+            emit.text(`nullLiteral({})`);
             return;
 
         case 'NumericLiteralExpression':
-            emit.text(`numericLiteral(${expr.value})`);
+            emit.text(`numericLiteral({value: ${expr.value}})`);
             return;
 
         case 'ParenthesisedExpression':
@@ -254,15 +258,19 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'RecordExpression':
-            emit.text('record([').indent();
-            for (let field of expr.fields) {
-                emit.down(1).text('{').indent();
-                emit.down(1).text(`name: '${field.name}',`);
-                emit.down(1).text(`value: `);
-                emitExpression(emit, field.value, symbolTable);
-                emit.text(',').dedent().down(1).text('},');
+            emit.text('record({').indent().down(1).text('fields: [');
+            if (expr.fields.length > 0) {
+                emit.indent();
+                for (let field of expr.fields) {
+                    emit.down(1).text('{').indent();
+                    emit.down(1).text(`name: '${field.name}',`);
+                    emit.down(1).text(`value: `);
+                    emitExpression(emit, field.value, symbolTable);
+                    emit.text(',').dedent().down(1).text('},');
+                }
+                emit.dedent().down(1);
             }
-            emit.dedent().down(1).text('])');
+            emit.text('],').dedent().down(1).text('})');
             return;
 
         case 'ReferenceExpression':
@@ -271,17 +279,29 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'SelectionExpression':
-            emitCall(emit, 'selection', expr.expressions, symbolTable);
+            emit.text('selection({').indent().down(1).text('expressions: [').indent();
+            for (let arg of expr.expressions) {
+                emit.down(1);
+                emitExpression(emit, arg, symbolTable);
+                emit.text(',');
+            }
+            emit.dedent().down(1).text('],').dedent().down(1).text(`})`);
             return;
 
         case 'SequenceExpression':
-            emitCall(emit, 'sequence', expr.expressions, symbolTable);
+            emit.text('sequence({').indent().down(1).text('expressions: [').indent();
+            for (let arg of expr.expressions) {
+                emit.down(1);
+                emitExpression(emit, arg, symbolTable);
+                emit.text(',');
+            }
+            emit.dedent().down(1).text('],').dedent().down(1).text(`})`);
             return;
 
         case 'StringLiteralExpression':
-            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}(`);
-            emit.text(`stringLiteral(${JSON.stringify(expr.value)})`);
-            if (expr.abstract || expr.concrete) emit.text(')');
+            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}({expr: `);
+            emit.text(`stringLiteral({value: ${JSON.stringify(expr.value)}})`);
+            if (expr.abstract || expr.concrete) emit.text('})');
             return;
 
         default:
@@ -307,16 +327,4 @@ function emitConstant(emit: Emitter, value: unknown) {
     else {
         throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
     }
-}
-
-
-// TODO: helper function
-function emitCall(emit: Emitter, fn: string, args: ReadonlyArray<Expression>, symbolTable: SymbolTable) {
-    emit.text(fn).text(`(`).indent();
-    args.forEach((arg, i) => {
-        emit.down(1);
-        emitExpression(emit, arg, symbolTable);
-        if (i < args.length - 1) emit.text(',');
-    });
-    emit.dedent().down(1).text(`)`);
 }

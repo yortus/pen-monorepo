@@ -1,4 +1,5 @@
-function stringLiteral(value: string): PenVal {
+function stringLiteral(options: StaticOptions & {value: string}): PenVal {
+    const {value} = options;
     return {
         bindings: {},
 

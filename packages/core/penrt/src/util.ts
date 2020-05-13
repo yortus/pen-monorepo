@@ -1,3 +1,15 @@
+// TODO: ...
+type StaticForm = (options: StaticOptions) => PenVal;
+interface StaticOptions {
+    in: 'txt' | 'ast' | 'nil';
+    out: 'txt' | 'ast' | 'nil';
+}
+
+
+
+
+
+
 interface PenVal {
     // module
     bindings: Record<string, PenVal>;

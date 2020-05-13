@@ -1,6 +1,7 @@
 
 "use strict";
-function abstract(expr) {
+function abstract(options) {
+    const { expr } = options;
     return {
         bindings: {},
         parse() {
@@ -20,10 +21,8 @@ function abstract(expr) {
         apply: NOT_A_LAMBDA,
     };
 }
-function apply(lambda, arg) {
-    return lambda.apply(arg);
-}
-function booleanLiteral(value) {
+function booleanLiteral(options) {
+    const { value } = options;
     return {
         bindings: {},
         parse() {
@@ -42,7 +41,8 @@ function booleanLiteral(value) {
         apply: NOT_A_LAMBDA,
     };
 }
-function character(min, max) {
+function character(options) {
+    const { min, max } = options;
     return {
         bindings: {},
         parse() {
@@ -78,7 +78,8 @@ function character(min, max) {
         apply: NOT_A_LAMBDA,
     };
 }
-function concrete(expr) {
+function concrete(options) {
+    const { expr } = options;
     return {
         bindings: {},
         parse() {
@@ -122,7 +123,8 @@ function createMainExports(start) {
         },
     };
 }
-function field(name, value) {
+function field(options) {
+    const { name, value } = options;
     return {
         bindings: {},
         parse() {
@@ -177,7 +179,8 @@ function field(name, value) {
         apply: NOT_A_LAMBDA,
     };
 }
-function list(elements) {
+function list(options) {
+    const { elements } = options;
     const elementsLength = elements.length;
     return {
         bindings: {},
@@ -217,24 +220,27 @@ function list(elements) {
         apply: NOT_A_LAMBDA,
     };
 }
-const nullLiteral = {
-    bindings: {},
-    parse() {
-        ODOC = ONUL ? undefined : null;
-        return true;
-    },
-    unparse() {
-        if (!INUL) {
-            if (IDOC !== null || IMEM !== 0)
-                return false;
-            IMEM = 1;
-        }
-        ODOC = undefined;
-        return true;
-    },
-    apply: NOT_A_LAMBDA,
-};
-function numericLiteral(value) {
+function nullLiteral(_options) {
+    return {
+        bindings: {},
+        parse() {
+            ODOC = ONUL ? undefined : null;
+            return true;
+        },
+        unparse() {
+            if (!INUL) {
+                if (IDOC !== null || IMEM !== 0)
+                    return false;
+                IMEM = 1;
+            }
+            ODOC = undefined;
+            return true;
+        },
+        apply: NOT_A_LAMBDA,
+    };
+}
+function numericLiteral(options) {
+    const { value } = options;
     return {
         bindings: {},
         parse() {
@@ -253,7 +259,8 @@ function numericLiteral(value) {
         apply: NOT_A_LAMBDA,
     };
 }
-function record(fields) {
+function record(options) {
+    const { fields } = options;
     return {
         bindings: {},
         parse() {
@@ -302,7 +309,8 @@ function record(fields) {
         apply: NOT_A_LAMBDA,
     };
 }
-function selection(...expressions) {
+function selection(options) {
+    const { expressions } = options;
     const arity = expressions.length;
     return {
         bindings: {},
@@ -323,7 +331,8 @@ function selection(...expressions) {
         apply: NOT_A_LAMBDA,
     };
 }
-function sequence(...expressions) {
+function sequence(options) {
+    const { expressions } = options;
     const arity = expressions.length;
     return {
         bindings: {},
@@ -352,7 +361,8 @@ function sequence(...expressions) {
         apply: NOT_A_LAMBDA,
     };
 }
-function stringLiteral(value) {
+function stringLiteral(options) {
+    const { value } = options;
     return {
         bindings: {},
         parse() {
@@ -454,15 +464,7 @@ const 𝔼16 = (() => {
         memoise,
     } */
     // TODO: handle abstract/concrete...
-    const float64 = (() => {
-        // These constants are used by the float64 rule.
-        const PLUS_SIGN = '+'.charCodeAt(0);
-        const MINUS_SIGN = '-'.charCodeAt(0);
-        const DECIMAL_POINT = '.'.charCodeAt(0);
-        const ZERO_DIGIT = '0'.charCodeAt(0);
-        const NINE_DIGIT = '9'.charCodeAt(0);
-        const LOWERCASE_E = 'e'.charCodeAt(0);
-        const UPPERCASE_E = 'E'.charCodeAt(0);
+    function float64(_options) {
         return {
             bindings: {},
             parse() {
@@ -545,10 +547,18 @@ const 𝔼16 = (() => {
             },
             apply: NOT_A_LAMBDA,
         };
-    })();
+    }
+    // These constants are used by the float64 rule.
+    const PLUS_SIGN = '+'.charCodeAt(0);
+    const MINUS_SIGN = '-'.charCodeAt(0);
+    const DECIMAL_POINT = '.'.charCodeAt(0);
+    const ZERO_DIGIT = '0'.charCodeAt(0);
+    const NINE_DIGIT = '9'.charCodeAt(0);
+    const LOWERCASE_E = 'e'.charCodeAt(0);
+    const UPPERCASE_E = 'E'.charCodeAt(0);
     // TODO: handle abstract/concrete...
     // tslint:disable: no-bitwise
-    const int32 = (() => {
+    function int32(_options) {
         let result = {
             bindings: {},
             parse: NOT_A_RULE,
@@ -650,185 +660,187 @@ const 𝔼16 = (() => {
                 base: { constant: { value: 10 } },
                 unsigned: { constant: { value: false } },
             } }).unparse;
-        // TODO: doc...
-        // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
-        // NB: the number 80 is not special, it's just greater than 36 which makes it a sentinel for 'not a digit'.
-        const DIGIT_VALUES = [
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 80, 80, 80, 80, 80, 80,
-            80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-            25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
-            80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-            25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-            80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
-        ];
-        // TODO: doc...
-        const CHAR_CODES = [
-            0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
-            0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
-            0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e,
-            0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
-            0x57, 0x58, 0x59, 0x5a,
-        ];
         return result;
-    })();
-    const memoise = {
-        bindings: {},
-        parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
-            const parseMemos = new Map();
-            // TODO: revise memo key once using new ast/pos signature
-            const unparseMemos = new Map();
-            return {
-                bindings: {},
-                parse() {
-                    // Check whether the memo table already has an entry for the given initial state.
-                    let stateₒ = getState();
-                    let memos2 = parseMemos.get(IDOC);
-                    if (memos2 === undefined) {
-                        memos2 = new Map();
-                        parseMemos.set(IDOC, memos2);
-                    }
-                    let memo = memos2.get(IMEM);
-                    if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                        // this initial state. The first thing we do is create a memo table entry, which is marked as
-                        // *unresolved*. All future applications of this rule with the same initial state will find this
-                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                        // left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                        memos2.set(IMEM, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                        // At this point, any left-recursive paths encountered during application are guaranteed to have
-                        // been noted and aborted (see below).
-                        if (expr.parse()) {
-                            memo.result = true;
-                            memo.stateᐟ = getState();
+    }
+    // TODO: doc...
+    // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
+    // NB: the number 80 is not special, it's just greater than 36 which makes it a sentinel for 'not a digit'.
+    const DIGIT_VALUES = [
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 80, 80, 80, 80, 80, 80,
+        80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
+        80, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+        80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+    ];
+    // TODO: doc...
+    const CHAR_CODES = [
+        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+        0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
+        0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e,
+        0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
+        0x57, 0x58, 0x59, 0x5a,
+    ];
+    function memoise(_options) {
+        return {
+            bindings: {},
+            parse: NOT_A_RULE,
+            unparse: NOT_A_RULE,
+            apply(expr) {
+                // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
+                const parseMemos = new Map();
+                // TODO: revise memo key once using new ast/pos signature
+                const unparseMemos = new Map();
+                return {
+                    bindings: {},
+                    parse() {
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let stateₒ = getState();
+                        let memos2 = parseMemos.get(IDOC);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            parseMemos.set(IDOC, memos2);
                         }
-                        memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                        // final.
-                        if (!memo.isLeftRecursive) {
-                            setState(memo.stateᐟ);
-                            return memo.result;
+                        let memo = memos2.get(IMEM);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
+                            memos2.set(IMEM, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr.parse()) {
+                                memo.result = true;
+                                memo.stateᐟ = getState();
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                setState(memo.stateᐟ);
+                                return memo.result;
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                setState(stateₒ);
+                                if (!expr.parse())
+                                    break;
+                                let state = getState();
+                                if (state.IMEM <= memo.stateᐟ.IMEM)
+                                    break;
+                                memo.stateᐟ = state;
+                            }
                         }
-                        // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                        // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                        // the same rule with the same initial state. We continue to iterate as long as the application
-                        // succeeds and consumes more input than the previous iteration did, in which case we update the
-                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                        // does not consume more input, at which point we take the result of the previous iteration as
-                        // final.
-                        while (memo.result === true) {
-                            setState(stateₒ);
-                            if (!expr.parse())
-                                break;
-                            let state = getState();
-                            if (state.IMEM <= memo.stateᐟ.IMEM)
-                                break;
-                            memo.stateᐟ = state;
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
                         }
-                    }
-                    else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet
-                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                        // note that the rule application encountered left-recursion, and return with failure. This means
-                        // that the initial application of the rule for this initial state can only possibly succeed along a
-                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                        // left-recursive rules.
-                        memo.isLeftRecursive = true;
-                        return false;
-                    }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has
-                    // already been computed. Return it from the memo.
-                    setState(memo.stateᐟ);
-                    return memo.result;
-                },
-                unparse() {
-                    // Check whether the memo table already has an entry for the given initial state.
-                    let stateₒ = getState();
-                    let memos2 = unparseMemos.get(IDOC);
-                    if (memos2 === undefined) {
-                        memos2 = new Map();
-                        unparseMemos.set(IDOC, memos2);
-                    }
-                    let memo = memos2.get(IMEM);
-                    if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                        // this initial state. The first thing we do is create a memo table entry, which is marked as
-                        // *unresolved*. All future applications of this rule with the same initial state will find this
-                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                        // left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
-                        memos2.set(IMEM, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                        // At this point, any left-recursive paths encountered during application are guaranteed to have
-                        // been noted and aborted (see below).
-                        if (expr.unparse()) {
-                            memo.result = true;
-                            memo.stateᐟ = getState();
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        setState(memo.stateᐟ);
+                        return memo.result;
+                    },
+                    unparse() {
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let stateₒ = getState();
+                        let memos2 = unparseMemos.get(IDOC);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            unparseMemos.set(IDOC, memos2);
                         }
-                        memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                        // final.
-                        if (!memo.isLeftRecursive) {
-                            setState(memo.stateᐟ);
-                            return memo.result;
+                        let memo = memos2.get(IMEM);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ };
+                            memos2.set(IMEM, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr.unparse()) {
+                                memo.result = true;
+                                memo.stateᐟ = getState();
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                setState(memo.stateᐟ);
+                                return memo.result;
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                setState(stateₒ);
+                                // TODO: break cases:
+                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                // some node --> some different non-empty node (assert: should never happen!)
+                                if (!expr.parse())
+                                    break;
+                                let state = getState();
+                                if (state.IMEM === memo.stateᐟ.IMEM)
+                                    break;
+                                if (!isFullyConsumed(state.IDOC, state.IMEM))
+                                    break;
+                                memo.stateᐟ = state;
+                            }
                         }
-                        // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                        // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                        // the same rule with the same initial state. We continue to iterate as long as the application
-                        // succeeds and consumes more input than the previous iteration did, in which case we update the
-                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                        // does not consume more input, at which point we take the result of the previous iteration as
-                        // final.
-                        while (memo.result === true) {
-                            setState(stateₒ);
-                            // TODO: break cases:
-                            // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                            // some node --> some different non-empty node (assert: should never happen!)
-                            if (!expr.parse())
-                                break;
-                            let state = getState();
-                            if (state.IMEM === memo.stateᐟ.IMEM)
-                                break;
-                            if (!isFullyConsumed(state.IDOC, state.IMEM))
-                                break;
-                            memo.stateᐟ = state;
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
                         }
-                    }
-                    else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet
-                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                        // note that the rule application encountered left-recursion, and return with failure. This means
-                        // that the initial application of the rule for this initial state can only possibly succeed along a
-                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                        // left-recursive rules.
-                        memo.isLeftRecursive = true;
-                        return false;
-                    }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has
-                    // already been computed. Return it from the memo.
-                    setState(memo.stateᐟ);
-                    return memo.result;
-                },
-                apply: NOT_A_LAMBDA,
-            };
-        },
-    };
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        setState(memo.stateᐟ);
+                        return memo.result;
+                    },
+                    apply: NOT_A_LAMBDA,
+                };
+            },
+        };
+    }
 
     return {
         float64,
@@ -846,185 +858,199 @@ const 𝔼17 = (() => {
         unicode,
         zeroOrMore
     } */
-    const anyChar = {
-        bindings: {},
-        parse() {
-            let c = '?';
-            if (!INUL) {
-                if (!isString(IDOC))
-                    return false;
-                if (IMEM < 0 || IMEM >= IDOC.length)
-                    return false;
-                c = IDOC.charAt(IMEM);
-                IMEM += 1;
-            }
-            ODOC = ONUL ? undefined : c;
-            return true;
-        },
-        unparse() {
-            let c = '?';
-            if (!INUL) {
-                if (!isString(IDOC))
-                    return false;
-                if (IMEM < 0 || IMEM >= IDOC.length)
-                    return false;
-                c = IDOC.charAt(IMEM);
-                IMEM += 1;
-            }
-            ODOC = ONUL ? undefined : c;
-            return true;
-        },
-        apply: NOT_A_LAMBDA,
-    };
-    const epsilon = {
-        bindings: {},
-        parse() {
-            ODOC = undefined;
-            return true;
-        },
-        unparse() {
-            ODOC = undefined;
-            return true;
-        },
-        apply: NOT_A_LAMBDA,
-    };
-    const maybe = {
-        bindings: {},
-        parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            return {
-                bindings: {},
-                parse() {
-                    return expr.parse() || epsilon.parse();
-                },
-                unparse() {
-                    return expr.unparse() || epsilon.unparse();
-                },
-                apply: NOT_A_LAMBDA,
-            };
-        },
-    };
-    const not = {
-        bindings: {},
-        parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            return {
-                bindings: {},
-                kind: 'rule',
-                parse() {
-                    let stateₒ = getState();
-                    if (!expr.parse())
-                        return epsilon.parse();
-                    setState(stateₒ);
-                    return false;
-                },
-                unparse() {
-                    let stateₒ = getState();
-                    if (!expr.unparse())
-                        return epsilon.unparse();
-                    setState(stateₒ);
-                    return false;
-                },
-                apply: NOT_A_LAMBDA,
-            };
-        },
-    };
-    const unicode = {
-        bindings: {},
-        parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            var _a, _b, _c, _d, _e, _f;
-            let base = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
-            let minDigits = (_d = (_c = expr.bindings.minDigits) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
-            let maxDigits = (_f = (_e = expr.bindings.maxDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
-            assert(typeof base === 'number' && base >= 2 && base <= 36);
-            assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
-            assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
-            // Construct a regex to match the digits
-            let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
-            let regex = RegExp(pattern, 'i');
-            return {
-                bindings: {},
-                parse() {
+    function anyChar(_options) {
+        return {
+            bindings: {},
+            parse() {
+                let c = '?';
+                if (!INUL) {
                     if (!isString(IDOC))
                         return false;
-                    let stateₒ = getState();
-                    const LEN = IDOC.length;
-                    const EOS = '';
-                    let len = 0;
-                    let num = ''; // TODO: fix this - should actually keep count
-                    let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
-                    while (true) {
-                        if (!regex.test(c))
-                            break;
-                        num += c;
-                        IMEM += 1;
-                        len += 1;
-                        if (len === maxDigits)
-                            break;
-                        c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
-                    }
-                    if (len < minDigits)
-                        return setState(stateₒ), false;
-                    // tslint:disable-next-line: no-eval
-                    ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
-                    return true;
-                },
-                unparse: () => {
-                    // TODO: implement
-                    return false;
-                },
-                apply: NOT_A_LAMBDA,
-            };
-        },
-    };
-    const zeroOrMore = {
-        bindings: {},
-        parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            return {
-                bindings: {},
-                parse() {
-                    let stateₒ = getState();
-                    let node;
-                    while (true) {
+                    if (IMEM < 0 || IMEM >= IDOC.length)
+                        return false;
+                    c = IDOC.charAt(IMEM);
+                    IMEM += 1;
+                }
+                ODOC = ONUL ? undefined : c;
+                return true;
+            },
+            unparse() {
+                let c = '?';
+                if (!INUL) {
+                    if (!isString(IDOC))
+                        return false;
+                    if (IMEM < 0 || IMEM >= IDOC.length)
+                        return false;
+                    c = IDOC.charAt(IMEM);
+                    IMEM += 1;
+                }
+                ODOC = ONUL ? undefined : c;
+                return true;
+            },
+            apply: NOT_A_LAMBDA,
+        };
+    }
+    function epsilon(_options) {
+        return {
+            bindings: {},
+            parse() {
+                ODOC = undefined;
+                return true;
+            },
+            unparse() {
+                ODOC = undefined;
+                return true;
+            },
+            apply: NOT_A_LAMBDA,
+        };
+    }
+    function maybe(options) {
+        const eps = epsilon(options); // TODO: remove this altogether?
+        return {
+            bindings: {},
+            parse: NOT_A_RULE,
+            unparse: NOT_A_RULE,
+            apply(expr) {
+                return {
+                    bindings: {},
+                    parse() {
+                        return expr.parse() || eps.parse();
+                    },
+                    unparse() {
+                        return expr.unparse() || eps.unparse();
+                    },
+                    apply: NOT_A_LAMBDA,
+                };
+            },
+        };
+    }
+    function not(options) {
+        const eps = epsilon(options); // TODO: remove this altogether?
+        return {
+            bindings: {},
+            parse: NOT_A_RULE,
+            unparse: NOT_A_RULE,
+            apply(expr) {
+                return {
+                    bindings: {},
+                    kind: 'rule',
+                    parse() {
+                        let stateₒ = getState();
                         if (!expr.parse())
-                            break;
-                        // TODO: check if any input was consumed...
-                        // if not, stop iterating, since otherwise we may loop forever
-                        if (IMEM === stateₒ.IMEM)
-                            break;
-                        node = concat(node, ODOC);
-                    }
-                    ODOC = node;
-                    return true;
-                },
-                unparse() {
-                    let stateₒ = getState();
-                    let text;
-                    while (true) {
+                            return eps.parse();
+                        setState(stateₒ);
+                        return false;
+                    },
+                    unparse() {
+                        let stateₒ = getState();
                         if (!expr.unparse())
-                            break;
-                        // TODO: check if any input was consumed...
-                        // if not, stop iterating, since otherwise we may loop forever
-                        // TODO: any other checks needed? review...
-                        if (IMEM === stateₒ.IMEM)
-                            break;
-                        // TODO: support more formats / blob types here, like for parse...
-                        assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                        text = concat(text, ODOC);
-                    }
-                    ODOC = text;
-                    return true;
-                },
-                apply: NOT_A_LAMBDA,
-            };
-        },
-    };
+                            return eps.unparse();
+                        setState(stateₒ);
+                        return false;
+                    },
+                    apply: NOT_A_LAMBDA,
+                };
+            },
+        };
+    }
+    function unicode(_options) {
+        return {
+            bindings: {},
+            parse: NOT_A_RULE,
+            unparse: NOT_A_RULE,
+            apply(expr) {
+                var _a, _b, _c, _d, _e, _f;
+                let base = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
+                let minDigits = (_d = (_c = expr.bindings.minDigits) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
+                let maxDigits = (_f = (_e = expr.bindings.maxDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+                assert(typeof base === 'number' && base >= 2 && base <= 36);
+                assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
+                assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
+                // Construct a regex to match the digits
+                let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
+                let regex = RegExp(pattern, 'i');
+                return {
+                    bindings: {},
+                    parse() {
+                        if (!isString(IDOC))
+                            return false;
+                        let stateₒ = getState();
+                        const LEN = IDOC.length;
+                        const EOS = '';
+                        let len = 0;
+                        let num = ''; // TODO: fix this - should actually keep count
+                        let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                        while (true) {
+                            if (!regex.test(c))
+                                break;
+                            num += c;
+                            IMEM += 1;
+                            len += 1;
+                            if (len === maxDigits)
+                                break;
+                            c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                        }
+                        if (len < minDigits)
+                            return setState(stateₒ), false;
+                        // tslint:disable-next-line: no-eval
+                        ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                        return true;
+                    },
+                    unparse: () => {
+                        // TODO: implement
+                        return false;
+                    },
+                    apply: NOT_A_LAMBDA,
+                };
+            },
+        };
+    }
+    function zeroOrMore(_options) {
+        return {
+            bindings: {},
+            parse: NOT_A_RULE,
+            unparse: NOT_A_RULE,
+            apply(expr) {
+                return {
+                    bindings: {},
+                    parse() {
+                        let stateₒ = getState();
+                        let node;
+                        while (true) {
+                            if (!expr.parse())
+                                break;
+                            // TODO: check if any input was consumed...
+                            // if not, stop iterating, since otherwise we may loop forever
+                            if (IMEM === stateₒ.IMEM)
+                                break;
+                            node = concat(node, ODOC);
+                        }
+                        ODOC = node;
+                        return true;
+                    },
+                    unparse() {
+                        let stateₒ = getState();
+                        let text;
+                        while (true) {
+                            if (!expr.unparse())
+                                break;
+                            // TODO: check if any input was consumed...
+                            // if not, stop iterating, since otherwise we may loop forever
+                            // TODO: any other checks needed? review...
+                            if (IMEM === stateₒ.IMEM)
+                                break;
+                            // TODO: support more formats / blob types here, like for parse...
+                            assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
+                            text = concat(text, ODOC);
+                        }
+                        ODOC = text;
+                        return true;
+                    },
+                    apply: NOT_A_LAMBDA,
+                };
+            },
+        };
+    }
 
     return {
         anyChar,
@@ -1110,228 +1136,246 @@ const 𝕊17 = {
 
 Object.assign(
     𝕊16.bindings.float64,
-    𝔼16.float64,
+    𝔼16.float64({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊16.bindings.int32,
-    𝔼16.int32,
+    𝔼16.int32({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊16.bindings.memoise,
-    𝔼16.memoise,
+    𝔼16.memoise({/*TODO: pass staticOptions*/}),
 );
 
 // -------------------- experiments.pen.js --------------------
 
 Object.assign(
     𝕊17.bindings.anyChar,
-    𝔼17.anyChar,
+    𝔼17.anyChar({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊17.bindings.epsilon,
-    𝔼17.epsilon,
+    𝔼17.epsilon({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊17.bindings.maybe,
-    𝔼17.maybe,
+    𝔼17.maybe({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊17.bindings.not,
-    𝔼17.not,
+    𝔼17.not({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊17.bindings.unicode,
-    𝔼17.unicode,
+    𝔼17.unicode({/*TODO: pass staticOptions*/}),
 );
 
 Object.assign(
     𝕊17.bindings.zeroOrMore,
-    𝔼17.zeroOrMore,
+    𝔼17.zeroOrMore({/*TODO: pass staticOptions*/}),
 );
 
 // -------------------- math.pen --------------------
 
 Object.assign(
     𝕊12.bindings.expr,
-    apply(
-        𝕊12.bindings.memoise,
-        selection(
+    (𝕊12.bindings.memoise).apply(selection({
+        expressions: [
             𝕊12.bindings.add,
             𝕊12.bindings.sub,
-            𝕊12.bindings.term
-        )
-    )
+            𝕊12.bindings.term,
+        ],
+    }))
 );
 
 Object.assign(
     𝕊12.bindings.add,
-    record([
-        {
-            name: 'type',
-            value: abstract(stringLiteral("add")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊12.bindings.expr,
-        },
-        {
-            name: 'rhs',
-            value: sequence(
-                concrete(stringLiteral("+")),
-                𝕊12.bindings.term
-            ),
-        },
-    ])
+    record({
+        fields: [
+            {
+                name: 'type',
+                value: abstract({expr: stringLiteral({value: "add"})}),
+            },
+            {
+                name: 'lhs',
+                value: 𝕊12.bindings.expr,
+            },
+            {
+                name: 'rhs',
+                value: sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "+"})}),
+                        𝕊12.bindings.term,
+                    ],
+                }),
+            },
+        ],
+    })
 );
 
 Object.assign(
     𝕊12.bindings.sub,
-    record([
-        {
-            name: 'type',
-            value: abstract(stringLiteral("sub")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊12.bindings.expr,
-        },
-        {
-            name: 'rhs',
-            value: sequence(
-                concrete(stringLiteral("-")),
-                𝕊12.bindings.term
-            ),
-        },
-    ])
+    record({
+        fields: [
+            {
+                name: 'type',
+                value: abstract({expr: stringLiteral({value: "sub"})}),
+            },
+            {
+                name: 'lhs',
+                value: 𝕊12.bindings.expr,
+            },
+            {
+                name: 'rhs',
+                value: sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "-"})}),
+                        𝕊12.bindings.term,
+                    ],
+                }),
+            },
+        ],
+    })
 );
 
 Object.assign(
     𝕊12.bindings.term,
-    apply(
-        𝕊12.bindings.memoise,
-        selection(
+    (𝕊12.bindings.memoise).apply(selection({
+        expressions: [
             𝕊12.bindings.mul,
             𝕊12.bindings.div,
-            𝕊12.bindings.factor
-        )
-    )
+            𝕊12.bindings.factor,
+        ],
+    }))
 );
 
 Object.assign(
     𝕊12.bindings.mul,
-    sequence(
-        field(
-            abstract(stringLiteral("type")),
-            abstract(stringLiteral("mul"))
-        ),
-        record([
-            {
-                name: 'lhs',
-                value: 𝕊12.bindings.term,
-            },
-        ]),
-        field(
-            abstract(stringLiteral("rhs")),
-            sequence(
-                concrete(stringLiteral("*")),
-                𝕊12.bindings.factor
-            )
-        )
-    )
+    sequence({
+        expressions: [
+            field({
+                name: abstract({expr: stringLiteral({value: "type"})}),
+                value: abstract({expr: stringLiteral({value: "mul"})}),
+            }),
+            record({
+                fields: [
+                    {
+                        name: 'lhs',
+                        value: 𝕊12.bindings.term,
+                    },
+                ],
+            }),
+            field({
+                name: abstract({expr: stringLiteral({value: "rhs"})}),
+                value: sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "*"})}),
+                        𝕊12.bindings.factor,
+                    ],
+                }),
+            }),
+        ],
+    })
 );
 
 Object.assign(
     𝕊12.bindings.div,
-    record([
-        {
-            name: 'type',
-            value: abstract(stringLiteral("div")),
-        },
-        {
-            name: 'lhs',
-            value: 𝕊12.bindings.term,
-        },
-        {
-            name: 'rhs',
-            value: sequence(
-                concrete(stringLiteral("/")),
-                𝕊12.bindings.factor
-            ),
-        },
-    ])
+    record({
+        fields: [
+            {
+                name: 'type',
+                value: abstract({expr: stringLiteral({value: "div"})}),
+            },
+            {
+                name: 'lhs',
+                value: 𝕊12.bindings.term,
+            },
+            {
+                name: 'rhs',
+                value: sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "/"})}),
+                        𝕊12.bindings.factor,
+                    ],
+                }),
+            },
+        ],
+    })
 );
 
 Object.assign(
     𝕊12.bindings.factor,
-    selection(
-        sequence(
-            apply(
-                𝕊12.bindings.not,
-                selection(
-                    stringLiteral("0x"),
-                    stringLiteral("0b")
-                )
-            ),
-            𝕊12.bindings.float64
-        ),
-        sequence(
-            concrete(stringLiteral("0x")),
-            apply(
-                𝕊12.bindings.int32,
-                𝕊13
-            )
-        ),
-        sequence(
-            concrete(stringLiteral("0b")),
-            apply(
-                𝕊12.bindings.int32,
-                𝕊14
-            )
-        ),
-        sequence(
-            concrete(stringLiteral("i")),
-            apply(
-                𝕊12.bindings.int32,
-                𝕊15
-            )
-        ),
-        sequence(
-            concrete(stringLiteral("(")),
-            𝕊12.bindings.expr,
-            concrete(stringLiteral(")"))
-        )
-    )
+    selection({
+        expressions: [
+            sequence({
+                expressions: [
+                    (𝕊12.bindings.not).apply(selection({
+                        expressions: [
+                            stringLiteral({value: "0x"}),
+                            stringLiteral({value: "0b"}),
+                        ],
+                    })),
+                    𝕊12.bindings.float64,
+                ],
+            }),
+            sequence({
+                expressions: [
+                    concrete({expr: stringLiteral({value: "0x"})}),
+                    (𝕊12.bindings.int32).apply(𝕊13),
+                ],
+            }),
+            sequence({
+                expressions: [
+                    concrete({expr: stringLiteral({value: "0b"})}),
+                    (𝕊12.bindings.int32).apply(𝕊14),
+                ],
+            }),
+            sequence({
+                expressions: [
+                    concrete({expr: stringLiteral({value: "i"})}),
+                    (𝕊12.bindings.int32).apply(𝕊15),
+                ],
+            }),
+            sequence({
+                expressions: [
+                    concrete({expr: stringLiteral({value: "("})}),
+                    𝕊12.bindings.expr,
+                    concrete({expr: stringLiteral({value: ")"})}),
+                ],
+            }),
+        ],
+    })
 );
 
 Object.assign(
     𝕊13.bindings.base,
-    numericLiteral(16)
+    numericLiteral({value: 16})
 );
 
 Object.assign(
     𝕊13.bindings.signed,
-    booleanLiteral(false)
+    booleanLiteral({value: false})
 );
 
 Object.assign(
     𝕊14.bindings.base,
-    numericLiteral(2)
+    numericLiteral({value: 2})
 );
 
 Object.assign(
     𝕊14.bindings.signed,
-    booleanLiteral(false)
+    booleanLiteral({value: false})
 );
 
 Object.assign(
     𝕊15.bindings.signed,
-    booleanLiteral(false)
+    booleanLiteral({value: false})
 );
 
 // -------------------- MAIN EXPORTS --------------------

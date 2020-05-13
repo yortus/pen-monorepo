@@ -1,4 +1,5 @@
-function numericLiteral(value: number): PenVal {
+function numericLiteral(options: StaticOptions & {value: number}): PenVal {
+    const {value} = options;
     return {
         bindings: {},
 
