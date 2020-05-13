@@ -28,7 +28,9 @@ export function makeEmitter() {
             parts.push(s);
             return emitter;
         },
-        toString: () => parts.join(''),
+        toString() {
+            return parts.join('');
+        },
     };
     return emitter;
 }

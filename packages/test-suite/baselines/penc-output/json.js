@@ -91,11 +91,13 @@ function concrete(options) {
         },
     };
 }
-function createMainExports(start) {
+function createMainExports(createProgram) {
+    const parse = createProgram({ in: 'txt', out: 'ast' }).parse;
+    const unparse = createProgram({ in: 'ast', out: 'txt' }).unparse;
     return {
         parse: (text) => {
             setInState(text, 0);
-            if (!start.parse())
+            if (!parse())
                 throw new Error('parse failed');
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`parse didn't consume entire input`);
@@ -105,7 +107,7 @@ function createMainExports(start) {
         },
         unparse: (node) => {
             setInState(node, 0);
-            if (!start.unparse())
+            if (!unparse())
                 throw new Error('parse failed');
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`unparse didn't consume entire input`);
@@ -431,7 +433,7 @@ function matchesAt(text, substr, position) {
 function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
 function NOT_A_RULE() { throw new Error('Not a rule'); }
 
-// -------------------- extensions --------------------
+// -------------------- Extensions --------------------
 const 𝔼9 = (() => {
     "use strict";
     /* @pen exports = {
@@ -1013,447 +1015,451 @@ const 𝔼10 = (() => {
     };
 })();
 
-const 𝕊7 = {
-    bindings: {
-        float64: {},
-        anyChar: {},
-        maybe: {},
-        not: {},
-        zeroOrMore: {},
-        unicode: {},
-        start: {},
-        Value: {},
-        False: {},
-        Null: {},
-        True: {},
-        Object: {},
-        Properties: {},
-        Array: {},
-        Elements: {},
-        Number: {},
-        String: {},
-        CHAR: {},
-        LBRACE: {},
-        RBRACE: {},
-        LBRACKET: {},
-        RBRACKET: {},
-        COLON: {},
-        COMMA: {},
-        DOUBLE_QUOTE: {},
-        WS: {},
-    },
-};
+function createProgram(options) {
 
-const 𝕊8 = {
-    bindings: {
-        base: {},
-        minDigits: {},
-        maxDigits: {},
-    },
-};
+    const 𝕊7 = {
+        bindings: {
+            float64: {},
+            anyChar: {},
+            maybe: {},
+            not: {},
+            zeroOrMore: {},
+            unicode: {},
+            start: {},
+            Value: {},
+            False: {},
+            Null: {},
+            True: {},
+            Object: {},
+            Properties: {},
+            Array: {},
+            Elements: {},
+            Number: {},
+            String: {},
+            CHAR: {},
+            LBRACE: {},
+            RBRACE: {},
+            LBRACKET: {},
+            RBRACKET: {},
+            COLON: {},
+            COMMA: {},
+            DOUBLE_QUOTE: {},
+            WS: {},
+        },
+    };
 
-const 𝕊9 = {
-    bindings: {
-        float64: {},
-        int32: {},
-        memoise: {},
-    },
-};
+    const 𝕊8 = {
+        bindings: {
+            base: {},
+            minDigits: {},
+            maxDigits: {},
+        },
+    };
 
-const 𝕊10 = {
-    bindings: {
-        anyChar: {},
-        epsilon: {},
-        maybe: {},
-        not: {},
-        unicode: {},
-        zeroOrMore: {},
-    },
-};
+    const 𝕊9 = {
+        bindings: {
+            float64: {},
+            int32: {},
+            memoise: {},
+        },
+    };
 
-// -------------------- aliases --------------------
-𝕊7.bindings.float64 = 𝕊9.bindings.float64;
-𝕊7.bindings.anyChar = 𝕊10.bindings.anyChar;
-𝕊7.bindings.maybe = 𝕊10.bindings.maybe;
-𝕊7.bindings.not = 𝕊10.bindings.not;
-𝕊7.bindings.zeroOrMore = 𝕊10.bindings.zeroOrMore;
-𝕊7.bindings.unicode = 𝕊10.bindings.unicode;
-𝕊7.bindings.Number = 𝕊7.bindings.float64;
+    const 𝕊10 = {
+        bindings: {
+            anyChar: {},
+            epsilon: {},
+            maybe: {},
+            not: {},
+            unicode: {},
+            zeroOrMore: {},
+        },
+    };
 
-// -------------------- compile-time constants --------------------
-𝕊7.bindings.DOUBLE_QUOTE.constant = {value: "\""};
-𝕊8.bindings.base.constant = {value: 16};
-𝕊8.bindings.minDigits.constant = {value: 4};
-𝕊8.bindings.maxDigits.constant = {value: 4};
+    // -------------------- Aliases --------------------
+    𝕊7.bindings.float64 = 𝕊9.bindings.float64;
+    𝕊7.bindings.anyChar = 𝕊10.bindings.anyChar;
+    𝕊7.bindings.maybe = 𝕊10.bindings.maybe;
+    𝕊7.bindings.not = 𝕊10.bindings.not;
+    𝕊7.bindings.zeroOrMore = 𝕊10.bindings.zeroOrMore;
+    𝕊7.bindings.unicode = 𝕊10.bindings.unicode;
+    𝕊7.bindings.Number = 𝕊7.bindings.float64;
 
-// -------------------- std.pen.js --------------------
+    // -------------------- Compile-time constants --------------------
+    𝕊7.bindings.DOUBLE_QUOTE.constant = {value: "\""};
+    𝕊8.bindings.base.constant = {value: 16};
+    𝕊8.bindings.minDigits.constant = {value: 4};
+    𝕊8.bindings.maxDigits.constant = {value: 4};
 
-Object.assign(
-    𝕊9.bindings.float64,
-    𝔼9.float64({/*TODO: pass staticOptions*/}),
-);
+    // -------------------- std.pen.js --------------------
 
-Object.assign(
-    𝕊9.bindings.int32,
-    𝔼9.int32({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊9.bindings.float64,
+        𝔼9.float64({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊9.bindings.memoise,
-    𝔼9.memoise({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊9.bindings.int32,
+        𝔼9.int32({/*TODO: pass staticOptions*/}),
+    );
 
-// -------------------- experiments.pen.js --------------------
+    Object.assign(
+        𝕊9.bindings.memoise,
+        𝔼9.memoise({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊10.bindings.anyChar,
-    𝔼10.anyChar({/*TODO: pass staticOptions*/}),
-);
+    // -------------------- experiments.pen.js --------------------
 
-Object.assign(
-    𝕊10.bindings.epsilon,
-    𝔼10.epsilon({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊10.bindings.anyChar,
+        𝔼10.anyChar({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊10.bindings.maybe,
-    𝔼10.maybe({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊10.bindings.epsilon,
+        𝔼10.epsilon({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊10.bindings.not,
-    𝔼10.not({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊10.bindings.maybe,
+        𝔼10.maybe({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊10.bindings.unicode,
-    𝔼10.unicode({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊10.bindings.not,
+        𝔼10.not({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊10.bindings.zeroOrMore,
-    𝔼10.zeroOrMore({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊10.bindings.unicode,
+        𝔼10.unicode({/*TODO: pass staticOptions*/}),
+    );
 
-// -------------------- json.pen --------------------
+    Object.assign(
+        𝕊10.bindings.zeroOrMore,
+        𝔼10.zeroOrMore({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊7.bindings.start,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            𝕊7.bindings.Value,
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    // -------------------- json.pen --------------------
 
-Object.assign(
-    𝕊7.bindings.Value,
-    selection({
-        expressions: [
-            𝕊7.bindings.False,
-            𝕊7.bindings.Null,
-            𝕊7.bindings.True,
-            𝕊7.bindings.Object,
-            𝕊7.bindings.Array,
-            𝕊7.bindings.Number,
-            𝕊7.bindings.String,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.start,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                𝕊7.bindings.Value,
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.False,
-    sequence({
-        expressions: [
-            concrete({expr: stringLiteral({value: "false"})}),
-            booleanLiteral({value: false}),
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.Value,
+        selection({
+            expressions: [
+                𝕊7.bindings.False,
+                𝕊7.bindings.Null,
+                𝕊7.bindings.True,
+                𝕊7.bindings.Object,
+                𝕊7.bindings.Array,
+                𝕊7.bindings.Number,
+                𝕊7.bindings.String,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.Null,
-    sequence({
-        expressions: [
-            concrete({expr: stringLiteral({value: "null"})}),
-            nullLiteral({}),
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.False,
+        sequence({
+            expressions: [
+                concrete({expr: stringLiteral({value: "false"})}),
+                booleanLiteral({value: false}),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.True,
-    sequence({
-        expressions: [
-            concrete({expr: stringLiteral({value: "true"})}),
-            booleanLiteral({value: true}),
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.Null,
+        sequence({
+            expressions: [
+                concrete({expr: stringLiteral({value: "null"})}),
+                nullLiteral({}),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.Object,
-    sequence({
-        expressions: [
-            𝕊7.bindings.LBRACE,
-            selection({
-                expressions: [
-                    𝕊7.bindings.Properties,
-                    record({
-                        fields: [],
-                    }),
-                ],
-            }),
-            𝕊7.bindings.RBRACE,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.True,
+        sequence({
+            expressions: [
+                concrete({expr: stringLiteral({value: "true"})}),
+                booleanLiteral({value: true}),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.Properties,
-    sequence({
-        expressions: [
-            field({
-                name: 𝕊7.bindings.String,
-                value: sequence({
+    Object.assign(
+        𝕊7.bindings.Object,
+        sequence({
+            expressions: [
+                𝕊7.bindings.LBRACE,
+                selection({
                     expressions: [
-                        𝕊7.bindings.COLON,
+                        𝕊7.bindings.Properties,
+                        record({
+                            fields: [],
+                        }),
+                    ],
+                }),
+                𝕊7.bindings.RBRACE,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊7.bindings.Properties,
+        sequence({
+            expressions: [
+                field({
+                    name: 𝕊7.bindings.String,
+                    value: sequence({
+                        expressions: [
+                            𝕊7.bindings.COLON,
+                            𝕊7.bindings.Value,
+                        ],
+                    }),
+                }),
+                (𝕊7.bindings.maybe).lambda(sequence({
+                    expressions: [
+                        𝕊7.bindings.COMMA,
+                        𝕊7.bindings.Properties,
+                    ],
+                })),
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊7.bindings.Array,
+        sequence({
+            expressions: [
+                𝕊7.bindings.LBRACKET,
+                selection({
+                    expressions: [
+                        𝕊7.bindings.Elements,
+                        list({
+                            elements: [],
+                        }),
+                    ],
+                }),
+                𝕊7.bindings.RBRACKET,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊7.bindings.Elements,
+        sequence({
+            expressions: [
+                list({
+                    elements: [
                         𝕊7.bindings.Value,
                     ],
                 }),
-            }),
-            (𝕊7.bindings.maybe).lambda(sequence({
-                expressions: [
-                    𝕊7.bindings.COMMA,
-                    𝕊7.bindings.Properties,
-                ],
-            })),
-        ],
-    })
-);
+                (𝕊7.bindings.maybe).lambda(sequence({
+                    expressions: [
+                        𝕊7.bindings.COMMA,
+                        𝕊7.bindings.Elements,
+                    ],
+                })),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.Array,
-    sequence({
-        expressions: [
-            𝕊7.bindings.LBRACKET,
-            selection({
-                expressions: [
-                    𝕊7.bindings.Elements,
-                    list({
-                        elements: [],
-                    }),
-                ],
-            }),
-            𝕊7.bindings.RBRACKET,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.String,
+        sequence({
+            expressions: [
+                𝕊7.bindings.DOUBLE_QUOTE,
+                (𝕊7.bindings.zeroOrMore).lambda(𝕊7.bindings.CHAR),
+                𝕊7.bindings.DOUBLE_QUOTE,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.Elements,
-    sequence({
-        expressions: [
-            list({
-                elements: [
-                    𝕊7.bindings.Value,
-                ],
-            }),
-            (𝕊7.bindings.maybe).lambda(sequence({
-                expressions: [
-                    𝕊7.bindings.COMMA,
-                    𝕊7.bindings.Elements,
-                ],
-            })),
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.CHAR,
+        selection({
+            expressions: [
+                sequence({
+                    expressions: [
+                        (𝕊7.bindings.not).lambda(selection({
+                            expressions: [
+                                character({min: "\u0000", max: "\u001f"}),
+                                stringLiteral({value: "\""}),
+                                stringLiteral({value: "\\"}),
+                            ],
+                        })),
+                        𝕊7.bindings.anyChar,
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\\""})}),
+                        abstract({expr: stringLiteral({value: "\""})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\\\"})}),
+                        abstract({expr: stringLiteral({value: "\\"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\/"})}),
+                        abstract({expr: stringLiteral({value: "/"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\b"})}),
+                        abstract({expr: stringLiteral({value: "\b"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\f"})}),
+                        abstract({expr: stringLiteral({value: "\f"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\n"})}),
+                        abstract({expr: stringLiteral({value: "\n"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\r"})}),
+                        abstract({expr: stringLiteral({value: "\r"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\t"})}),
+                        abstract({expr: stringLiteral({value: "\t"})}),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "\\u"})}),
+                        (𝕊7.bindings.unicode).lambda(𝕊8),
+                    ],
+                }),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.String,
-    sequence({
-        expressions: [
-            𝕊7.bindings.DOUBLE_QUOTE,
-            (𝕊7.bindings.zeroOrMore).lambda(𝕊7.bindings.CHAR),
-            𝕊7.bindings.DOUBLE_QUOTE,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.LBRACE,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: "{"})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.CHAR,
-    selection({
-        expressions: [
-            sequence({
-                expressions: [
-                    (𝕊7.bindings.not).lambda(selection({
-                        expressions: [
-                            character({min: "\u0000", max: "\u001f"}),
-                            stringLiteral({value: "\""}),
-                            stringLiteral({value: "\\"}),
-                        ],
-                    })),
-                    𝕊7.bindings.anyChar,
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\\""})}),
-                    abstract({expr: stringLiteral({value: "\""})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\\\"})}),
-                    abstract({expr: stringLiteral({value: "\\"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\/"})}),
-                    abstract({expr: stringLiteral({value: "/"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\b"})}),
-                    abstract({expr: stringLiteral({value: "\b"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\f"})}),
-                    abstract({expr: stringLiteral({value: "\f"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\n"})}),
-                    abstract({expr: stringLiteral({value: "\n"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\r"})}),
-                    abstract({expr: stringLiteral({value: "\r"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\t"})}),
-                    abstract({expr: stringLiteral({value: "\t"})}),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "\\u"})}),
-                    (𝕊7.bindings.unicode).lambda(𝕊8),
-                ],
-            }),
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.RBRACE,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: "}"})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.LBRACE,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: "{"})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.LBRACKET,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: "["})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.RBRACE,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: "}"})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.RBRACKET,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: "]"})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.LBRACKET,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: "["})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.COLON,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: ":"})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.RBRACKET,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: "]"})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.COMMA,
+        sequence({
+            expressions: [
+                𝕊7.bindings.WS,
+                concrete({expr: stringLiteral({value: ","})}),
+                𝕊7.bindings.WS,
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊7.bindings.COLON,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: ":"})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.DOUBLE_QUOTE,
+        concrete({expr: stringLiteral({value: "\""})})
+    );
 
-Object.assign(
-    𝕊7.bindings.COMMA,
-    sequence({
-        expressions: [
-            𝕊7.bindings.WS,
-            concrete({expr: stringLiteral({value: ","})}),
-            𝕊7.bindings.WS,
-        ],
-    })
-);
+    Object.assign(
+        𝕊7.bindings.WS,
+        (𝕊7.bindings.zeroOrMore).lambda(selection({
+            expressions: [
+                concrete({expr: stringLiteral({value: " "})}),
+                concrete({expr: stringLiteral({value: "\t"})}),
+                concrete({expr: stringLiteral({value: "\n"})}),
+                concrete({expr: stringLiteral({value: "\r"})}),
+            ],
+        }))
+    );
 
-Object.assign(
-    𝕊7.bindings.DOUBLE_QUOTE,
-    concrete({expr: stringLiteral({value: "\""})})
-);
+    Object.assign(
+        𝕊8.bindings.base,
+        numericLiteral({value: 16})
+    );
 
-Object.assign(
-    𝕊7.bindings.WS,
-    (𝕊7.bindings.zeroOrMore).lambda(selection({
-        expressions: [
-            concrete({expr: stringLiteral({value: " "})}),
-            concrete({expr: stringLiteral({value: "\t"})}),
-            concrete({expr: stringLiteral({value: "\n"})}),
-            concrete({expr: stringLiteral({value: "\r"})}),
-        ],
-    }))
-);
+    Object.assign(
+        𝕊8.bindings.minDigits,
+        numericLiteral({value: 4})
+    );
 
-Object.assign(
-    𝕊8.bindings.base,
-    numericLiteral({value: 16})
-);
+    Object.assign(
+        𝕊8.bindings.maxDigits,
+        numericLiteral({value: 4})
+    );
 
-Object.assign(
-    𝕊8.bindings.minDigits,
-    numericLiteral({value: 4})
-);
+    return 𝕊7.bindings.start;
+}
 
-Object.assign(
-    𝕊8.bindings.maxDigits,
-    numericLiteral({value: 4})
-);
-
-// -------------------- MAIN EXPORTS --------------------
-
-module.exports = createMainExports(𝕊7.bindings.start);
+// -------------------- Main exports --------------------
+module.exports = createMainExports(createProgram);

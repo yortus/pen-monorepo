@@ -21,6 +21,12 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
+    // TODO: top-level validation. Move these checks to an earlier transform step...
+    let sourceFile = program.sourceFiles.get(program.mainPath)!;
+    if (sourceFile.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
+    let mainModule = sourceFile.module;
+    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
+
     // TODO: temp testing... emit runtime
     const RUNTIME_PATH = require.resolve('penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
@@ -28,6 +34,9 @@ function emitProgram(program: Program) {
 
     // TODO: emit extensions
     emitExtensions(emit, program);
+
+    // TODO: emit prolog for `createProgram` function
+    emit.down(2).text('function createProgram(options) {').indent();
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -41,18 +50,22 @@ function emitProgram(program: Program) {
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
 
+    // TODO: emit epilog for `create` function
+    emit.down(2).text(`return 𝕊${mainModule.meta.scope.id}.bindings.start;`);
+    emit.dedent().down(1).text('}');
+
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
-    emit.down(2).text(`// -------------------- MAIN EXPORTS --------------------`);
-    emitMainExports(emit, program);
+    emit.down(2).text(`// -------------------- Main exports --------------------`);
+    emit.down(1).text(`module.exports = createMainExports(createProgram);`);
 
     // All done.
-    return emit.toString();
+    return emit.down(1).toString();
 }
 
 
 function emitExtensions(emit: Emitter, program: Program) {
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    emit.down(2).text(`// -------------------- extensions --------------------`);
+    emit.down(2).text(`// -------------------- Extensions --------------------`);
     visitNode(program, _ => ({
         ExtensionFile: ext => {
             if (ext.meta.scope.kind !== 'extension') return;
@@ -90,7 +103,7 @@ function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
 function emitSymbolAliases(emit: Emitter, program: Program) {
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    emit.down(2).text(`// -------------------- aliases --------------------`);
+    emit.down(2).text(`// -------------------- Aliases --------------------`);
     visitNode(program, rec => ({
         Module: module => {
             for (let {pattern, value} of module.bindings) {
@@ -119,7 +132,7 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
 function emitConstants(emit: Emitter, program: Program) {
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    emit.down(2).text(`// -------------------- compile-time constants --------------------`);
+    emit.down(2).text(`// -------------------- Compile-time constants --------------------`);
     visitNode(program, rec => ({
         Module: module => {
             for (let {pattern} of module.bindings) {
@@ -173,15 +186,6 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             module.bindings.forEach(rec);
         },
     }));
-}
-
-
-function emitMainExports(emit: Emitter, program: Program) {
-    let sourceFile = program.sourceFiles.get(program.mainPath)!;
-    if (sourceFile.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
-    let mainModule = sourceFile.module;
-    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
-    emit.down(2).text(`module.exports = createMainExports(𝕊${mainModule.meta.scope.id}.bindings.start);`);
 }
 
 

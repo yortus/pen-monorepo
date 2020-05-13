@@ -91,11 +91,13 @@ function concrete(options) {
         },
     };
 }
-function createMainExports(start) {
+function createMainExports(createProgram) {
+    const parse = createProgram({ in: 'txt', out: 'ast' }).parse;
+    const unparse = createProgram({ in: 'ast', out: 'txt' }).unparse;
     return {
         parse: (text) => {
             setInState(text, 0);
-            if (!start.parse())
+            if (!parse())
                 throw new Error('parse failed');
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`parse didn't consume entire input`);
@@ -105,7 +107,7 @@ function createMainExports(start) {
         },
         unparse: (node) => {
             setInState(node, 0);
-            if (!start.unparse())
+            if (!unparse())
                 throw new Error('parse failed');
             if (!isFullyConsumed(IDOC, IMEM))
                 throw new Error(`unparse didn't consume entire input`);
@@ -431,7 +433,7 @@ function matchesAt(text, substr, position) {
 function NOT_A_LAMBDA() { throw new Error('Not a lambda'); }
 function NOT_A_RULE() { throw new Error('Not a rule'); }
 
-// -------------------- extensions --------------------
+// -------------------- Extensions --------------------
 const 𝔼16 = (() => {
     "use strict";
     /* @pen exports = {
@@ -1013,322 +1015,326 @@ const 𝔼17 = (() => {
     };
 })();
 
-const 𝕊12 = {
-    bindings: {
-        memoise: {},
-        float64: {},
-        int32: {},
-        not: {},
-        start: {},
-        expr: {},
-        add: {},
-        sub: {},
-        term: {},
-        mul: {},
-        div: {},
-        factor: {},
-    },
-};
+function createProgram(options) {
 
-const 𝕊13 = {
-    bindings: {
-        base: {},
-        signed: {},
-    },
-};
+    const 𝕊12 = {
+        bindings: {
+            memoise: {},
+            float64: {},
+            int32: {},
+            not: {},
+            start: {},
+            expr: {},
+            add: {},
+            sub: {},
+            term: {},
+            mul: {},
+            div: {},
+            factor: {},
+        },
+    };
 
-const 𝕊14 = {
-    bindings: {
-        base: {},
-        signed: {},
-    },
-};
+    const 𝕊13 = {
+        bindings: {
+            base: {},
+            signed: {},
+        },
+    };
 
-const 𝕊15 = {
-    bindings: {
-        signed: {},
-    },
-};
+    const 𝕊14 = {
+        bindings: {
+            base: {},
+            signed: {},
+        },
+    };
 
-const 𝕊16 = {
-    bindings: {
-        float64: {},
-        int32: {},
-        memoise: {},
-    },
-};
+    const 𝕊15 = {
+        bindings: {
+            signed: {},
+        },
+    };
 
-const 𝕊17 = {
-    bindings: {
-        anyChar: {},
-        epsilon: {},
-        maybe: {},
-        not: {},
-        unicode: {},
-        zeroOrMore: {},
-    },
-};
+    const 𝕊16 = {
+        bindings: {
+            float64: {},
+            int32: {},
+            memoise: {},
+        },
+    };
 
-// -------------------- aliases --------------------
-𝕊12.bindings.memoise = 𝕊16.bindings.memoise;
-𝕊12.bindings.float64 = 𝕊16.bindings.float64;
-𝕊12.bindings.int32 = 𝕊16.bindings.int32;
-𝕊12.bindings.not = 𝕊17.bindings.not;
-𝕊12.bindings.start = 𝕊12.bindings.expr;
+    const 𝕊17 = {
+        bindings: {
+            anyChar: {},
+            epsilon: {},
+            maybe: {},
+            not: {},
+            unicode: {},
+            zeroOrMore: {},
+        },
+    };
 
-// -------------------- compile-time constants --------------------
-𝕊13.bindings.base.constant = {value: 16};
-𝕊13.bindings.signed.constant = {value: false};
-𝕊14.bindings.base.constant = {value: 2};
-𝕊14.bindings.signed.constant = {value: false};
-𝕊15.bindings.signed.constant = {value: false};
+    // -------------------- Aliases --------------------
+    𝕊12.bindings.memoise = 𝕊16.bindings.memoise;
+    𝕊12.bindings.float64 = 𝕊16.bindings.float64;
+    𝕊12.bindings.int32 = 𝕊16.bindings.int32;
+    𝕊12.bindings.not = 𝕊17.bindings.not;
+    𝕊12.bindings.start = 𝕊12.bindings.expr;
 
-// -------------------- std.pen.js --------------------
+    // -------------------- Compile-time constants --------------------
+    𝕊13.bindings.base.constant = {value: 16};
+    𝕊13.bindings.signed.constant = {value: false};
+    𝕊14.bindings.base.constant = {value: 2};
+    𝕊14.bindings.signed.constant = {value: false};
+    𝕊15.bindings.signed.constant = {value: false};
 
-Object.assign(
-    𝕊16.bindings.float64,
-    𝔼16.float64({/*TODO: pass staticOptions*/}),
-);
+    // -------------------- std.pen.js --------------------
 
-Object.assign(
-    𝕊16.bindings.int32,
-    𝔼16.int32({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊16.bindings.float64,
+        𝔼16.float64({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊16.bindings.memoise,
-    𝔼16.memoise({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊16.bindings.int32,
+        𝔼16.int32({/*TODO: pass staticOptions*/}),
+    );
 
-// -------------------- experiments.pen.js --------------------
+    Object.assign(
+        𝕊16.bindings.memoise,
+        𝔼16.memoise({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊17.bindings.anyChar,
-    𝔼17.anyChar({/*TODO: pass staticOptions*/}),
-);
+    // -------------------- experiments.pen.js --------------------
 
-Object.assign(
-    𝕊17.bindings.epsilon,
-    𝔼17.epsilon({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊17.bindings.anyChar,
+        𝔼17.anyChar({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊17.bindings.maybe,
-    𝔼17.maybe({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊17.bindings.epsilon,
+        𝔼17.epsilon({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊17.bindings.not,
-    𝔼17.not({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊17.bindings.maybe,
+        𝔼17.maybe({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊17.bindings.unicode,
-    𝔼17.unicode({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊17.bindings.not,
+        𝔼17.not({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊17.bindings.zeroOrMore,
-    𝔼17.zeroOrMore({/*TODO: pass staticOptions*/}),
-);
+    Object.assign(
+        𝕊17.bindings.unicode,
+        𝔼17.unicode({/*TODO: pass staticOptions*/}),
+    );
 
-// -------------------- math.pen --------------------
+    Object.assign(
+        𝕊17.bindings.zeroOrMore,
+        𝔼17.zeroOrMore({/*TODO: pass staticOptions*/}),
+    );
 
-Object.assign(
-    𝕊12.bindings.expr,
-    (𝕊12.bindings.memoise).lambda(selection({
-        expressions: [
-            𝕊12.bindings.add,
-            𝕊12.bindings.sub,
-            𝕊12.bindings.term,
-        ],
-    }))
-);
+    // -------------------- math.pen --------------------
 
-Object.assign(
-    𝕊12.bindings.add,
-    record({
-        fields: [
-            {
-                name: 'type',
-                value: abstract({expr: stringLiteral({value: "add"})}),
-            },
-            {
-                name: 'lhs',
-                value: 𝕊12.bindings.expr,
-            },
-            {
-                name: 'rhs',
-                value: sequence({
-                    expressions: [
-                        concrete({expr: stringLiteral({value: "+"})}),
-                        𝕊12.bindings.term,
-                    ],
-                }),
-            },
-        ],
-    })
-);
+    Object.assign(
+        𝕊12.bindings.expr,
+        (𝕊12.bindings.memoise).lambda(selection({
+            expressions: [
+                𝕊12.bindings.add,
+                𝕊12.bindings.sub,
+                𝕊12.bindings.term,
+            ],
+        }))
+    );
 
-Object.assign(
-    𝕊12.bindings.sub,
-    record({
-        fields: [
-            {
-                name: 'type',
-                value: abstract({expr: stringLiteral({value: "sub"})}),
-            },
-            {
-                name: 'lhs',
-                value: 𝕊12.bindings.expr,
-            },
-            {
-                name: 'rhs',
-                value: sequence({
-                    expressions: [
-                        concrete({expr: stringLiteral({value: "-"})}),
-                        𝕊12.bindings.term,
-                    ],
-                }),
-            },
-        ],
-    })
-);
-
-Object.assign(
-    𝕊12.bindings.term,
-    (𝕊12.bindings.memoise).lambda(selection({
-        expressions: [
-            𝕊12.bindings.mul,
-            𝕊12.bindings.div,
-            𝕊12.bindings.factor,
-        ],
-    }))
-);
-
-Object.assign(
-    𝕊12.bindings.mul,
-    sequence({
-        expressions: [
-            field({
-                name: abstract({expr: stringLiteral({value: "type"})}),
-                value: abstract({expr: stringLiteral({value: "mul"})}),
-            }),
-            record({
-                fields: [
-                    {
-                        name: 'lhs',
-                        value: 𝕊12.bindings.term,
-                    },
-                ],
-            }),
-            field({
-                name: abstract({expr: stringLiteral({value: "rhs"})}),
-                value: sequence({
-                    expressions: [
-                        concrete({expr: stringLiteral({value: "*"})}),
-                        𝕊12.bindings.factor,
-                    ],
-                }),
-            }),
-        ],
-    })
-);
-
-Object.assign(
-    𝕊12.bindings.div,
-    record({
-        fields: [
-            {
-                name: 'type',
-                value: abstract({expr: stringLiteral({value: "div"})}),
-            },
-            {
-                name: 'lhs',
-                value: 𝕊12.bindings.term,
-            },
-            {
-                name: 'rhs',
-                value: sequence({
-                    expressions: [
-                        concrete({expr: stringLiteral({value: "/"})}),
-                        𝕊12.bindings.factor,
-                    ],
-                }),
-            },
-        ],
-    })
-);
-
-Object.assign(
-    𝕊12.bindings.factor,
-    selection({
-        expressions: [
-            sequence({
-                expressions: [
-                    (𝕊12.bindings.not).lambda(selection({
+    Object.assign(
+        𝕊12.bindings.add,
+        record({
+            fields: [
+                {
+                    name: 'type',
+                    value: abstract({expr: stringLiteral({value: "add"})}),
+                },
+                {
+                    name: 'lhs',
+                    value: 𝕊12.bindings.expr,
+                },
+                {
+                    name: 'rhs',
+                    value: sequence({
                         expressions: [
-                            stringLiteral({value: "0x"}),
-                            stringLiteral({value: "0b"}),
+                            concrete({expr: stringLiteral({value: "+"})}),
+                            𝕊12.bindings.term,
                         ],
-                    })),
-                    𝕊12.bindings.float64,
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "0x"})}),
-                    (𝕊12.bindings.int32).lambda(𝕊13),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "0b"})}),
-                    (𝕊12.bindings.int32).lambda(𝕊14),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "i"})}),
-                    (𝕊12.bindings.int32).lambda(𝕊15),
-                ],
-            }),
-            sequence({
-                expressions: [
-                    concrete({expr: stringLiteral({value: "("})}),
-                    𝕊12.bindings.expr,
-                    concrete({expr: stringLiteral({value: ")"})}),
-                ],
-            }),
-        ],
-    })
-);
+                    }),
+                },
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊13.bindings.base,
-    numericLiteral({value: 16})
-);
+    Object.assign(
+        𝕊12.bindings.sub,
+        record({
+            fields: [
+                {
+                    name: 'type',
+                    value: abstract({expr: stringLiteral({value: "sub"})}),
+                },
+                {
+                    name: 'lhs',
+                    value: 𝕊12.bindings.expr,
+                },
+                {
+                    name: 'rhs',
+                    value: sequence({
+                        expressions: [
+                            concrete({expr: stringLiteral({value: "-"})}),
+                            𝕊12.bindings.term,
+                        ],
+                    }),
+                },
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊13.bindings.signed,
-    booleanLiteral({value: false})
-);
+    Object.assign(
+        𝕊12.bindings.term,
+        (𝕊12.bindings.memoise).lambda(selection({
+            expressions: [
+                𝕊12.bindings.mul,
+                𝕊12.bindings.div,
+                𝕊12.bindings.factor,
+            ],
+        }))
+    );
 
-Object.assign(
-    𝕊14.bindings.base,
-    numericLiteral({value: 2})
-);
+    Object.assign(
+        𝕊12.bindings.mul,
+        sequence({
+            expressions: [
+                field({
+                    name: abstract({expr: stringLiteral({value: "type"})}),
+                    value: abstract({expr: stringLiteral({value: "mul"})}),
+                }),
+                record({
+                    fields: [
+                        {
+                            name: 'lhs',
+                            value: 𝕊12.bindings.term,
+                        },
+                    ],
+                }),
+                field({
+                    name: abstract({expr: stringLiteral({value: "rhs"})}),
+                    value: sequence({
+                        expressions: [
+                            concrete({expr: stringLiteral({value: "*"})}),
+                            𝕊12.bindings.factor,
+                        ],
+                    }),
+                }),
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊14.bindings.signed,
-    booleanLiteral({value: false})
-);
+    Object.assign(
+        𝕊12.bindings.div,
+        record({
+            fields: [
+                {
+                    name: 'type',
+                    value: abstract({expr: stringLiteral({value: "div"})}),
+                },
+                {
+                    name: 'lhs',
+                    value: 𝕊12.bindings.term,
+                },
+                {
+                    name: 'rhs',
+                    value: sequence({
+                        expressions: [
+                            concrete({expr: stringLiteral({value: "/"})}),
+                            𝕊12.bindings.factor,
+                        ],
+                    }),
+                },
+            ],
+        })
+    );
 
-Object.assign(
-    𝕊15.bindings.signed,
-    booleanLiteral({value: false})
-);
+    Object.assign(
+        𝕊12.bindings.factor,
+        selection({
+            expressions: [
+                sequence({
+                    expressions: [
+                        (𝕊12.bindings.not).lambda(selection({
+                            expressions: [
+                                stringLiteral({value: "0x"}),
+                                stringLiteral({value: "0b"}),
+                            ],
+                        })),
+                        𝕊12.bindings.float64,
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "0x"})}),
+                        (𝕊12.bindings.int32).lambda(𝕊13),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "0b"})}),
+                        (𝕊12.bindings.int32).lambda(𝕊14),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "i"})}),
+                        (𝕊12.bindings.int32).lambda(𝕊15),
+                    ],
+                }),
+                sequence({
+                    expressions: [
+                        concrete({expr: stringLiteral({value: "("})}),
+                        𝕊12.bindings.expr,
+                        concrete({expr: stringLiteral({value: ")"})}),
+                    ],
+                }),
+            ],
+        })
+    );
 
-// -------------------- MAIN EXPORTS --------------------
+    Object.assign(
+        𝕊13.bindings.base,
+        numericLiteral({value: 16})
+    );
 
-module.exports = createMainExports(𝕊12.bindings.start);
+    Object.assign(
+        𝕊13.bindings.signed,
+        booleanLiteral({value: false})
+    );
+
+    Object.assign(
+        𝕊14.bindings.base,
+        numericLiteral({value: 2})
+    );
+
+    Object.assign(
+        𝕊14.bindings.signed,
+        booleanLiteral({value: false})
+    );
+
+    Object.assign(
+        𝕊15.bindings.signed,
+        booleanLiteral({value: false})
+    );
+
+    return 𝕊12.bindings.start;
+}
+
+// -------------------- Main exports --------------------
+module.exports = createMainExports(createProgram);
