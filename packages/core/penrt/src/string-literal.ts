@@ -1,16 +1,18 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const {value} = options;
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
+    const out = options.out === 'nil' ? undefined : value;
+
+    if (options.in === 'nil') {
+        return {rule: () => (OUT = out, true)};
+    }
+
     return {
         rule() {
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string') return false;
-                if (!isMatch(value)) return false;
-                IP += value.length;
-            }
-            OUT = NO_PRODUCE ? undefined : value;
+            if (typeof IN !== 'string') return false;
+            if (!isMatch(value)) return false;
+            IP += value.length;
+            OUT = out;
             return true;
         },
     };

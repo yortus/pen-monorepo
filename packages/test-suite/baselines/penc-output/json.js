@@ -29,22 +29,21 @@ function booleanLiteral(options) {
 }
 function character(options) {
     const { min, max } = options;
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
+    if (options.in === 'nil') {
+        const out = options.out === 'nil' ? undefined : min;
+        return { rule: () => (OUT = out, true) };
+    }
     return {
         rule() {
-            let c = min;
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string')
-                    return false;
-                if (IP < 0 || IP >= IN.length)
-                    return false;
-                c = IN.charAt(IP);
-                if (c < min || c > max)
-                    return false;
-                IP += 1;
-            }
-            OUT = NO_PRODUCE ? undefined : c;
+            if (typeof IN !== 'string')
+                return false;
+            if (IP < 0 || IP >= IN.length)
+                return false;
+            let c = IN.charAt(IP);
+            if (c < min || c > max)
+                return false;
+            IP += 1;
+            OUT = options.out === 'nil' ? undefined : c;
             return true;
         },
     };
@@ -322,18 +321,18 @@ function sequence(options) {
 }
 function stringLiteral(options) {
     const { value } = options;
-    const NO_CONSUME = options.in === 'nil';
-    const NO_PRODUCE = options.out === 'nil';
+    const out = options.out === 'nil' ? undefined : value;
+    if (options.in === 'nil') {
+        return { rule: () => (OUT = out, true) };
+    }
     return {
         rule() {
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string')
-                    return false;
-                if (!isMatch(value))
-                    return false;
-                IP += value.length;
-            }
-            OUT = NO_PRODUCE ? undefined : value;
+            if (typeof IN !== 'string')
+                return false;
+            if (!isMatch(value))
+                return false;
+            IP += value.length;
+            OUT = out;
             return true;
         },
     };
