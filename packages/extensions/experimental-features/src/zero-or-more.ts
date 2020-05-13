@@ -14,11 +14,11 @@ function zeroOrMore(_options: StaticOptions): PenVal {
 
                         // TODO: check if any input was consumed...
                         // if not, stop iterating, since otherwise we may loop forever
-                        if (IMEM === stateₒ.IMEM) break;
+                        if (IP === stateₒ.IP) break;
 
-                        node = concat(node, ODOC);
+                        node = concat(node, OUT);
                     }
-                    ODOC = node;
+                    OUT = node;
                     return true;
                 },
 
@@ -31,14 +31,14 @@ function zeroOrMore(_options: StaticOptions): PenVal {
                         // TODO: check if any input was consumed...
                         // if not, stop iterating, since otherwise we may loop forever
                         // TODO: any other checks needed? review...
-                        if (IMEM === stateₒ.IMEM) break;
+                        if (IP === stateₒ.IP) break;
 
                         // TODO: support more formats / blob types here, like for parse...
-                        assert(typeof ODOC === 'string'); // just for now... remove after addressing above TODO
-                        text = concat(text, ODOC);
+                        assert(typeof OUT === 'string'); // just for now... remove after addressing above TODO
+                        text = concat(text, OUT);
                     }
 
-                    ODOC = text;
+                    OUT = text;
                     return true;
                 },
             };

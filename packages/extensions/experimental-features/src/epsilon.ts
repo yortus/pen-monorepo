@@ -1,12 +1,12 @@
 function epsilon(_options: StaticOptions): PenVal {
     return {
         parse() {
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
 
         unparse() {
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
     };

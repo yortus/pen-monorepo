@@ -33,12 +33,12 @@ function memoise(_options: StaticOptions): PenVal {
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = getState();
-                    let memos2 = parseMemos.get(IDOC);
+                    let memos2 = parseMemos.get(IN);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        parseMemos.set(IDOC, memos2);
+                        parseMemos.set(IN, memos2);
                     }
-                    let memo = memos2.get(IMEM);
+                    let memo = memos2.get(IP);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -46,7 +46,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
                         memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                        memos2.set(IMEM, memo);
+                        memos2.set(IP, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
@@ -76,7 +76,7 @@ function memoise(_options: StaticOptions): PenVal {
                             setState(stateₒ);
                             if (!expr.parse()) break;
                             let state = getState();
-                            if (state.IMEM <= memo.stateᐟ.IMEM) break;
+                            if (state.IP <= memo.stateᐟ.IP) break;
                             memo.stateᐟ = state;
                         }
                     }
@@ -100,12 +100,12 @@ function memoise(_options: StaticOptions): PenVal {
                 unparse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = getState();
-                    let memos2 = unparseMemos.get(IDOC);
+                    let memos2 = unparseMemos.get(IN);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        unparseMemos.set(IDOC, memos2);
+                        unparseMemos.set(IN, memos2);
                     }
-                    let memo = memos2.get(IMEM);
+                    let memo = memos2.get(IP);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
@@ -113,7 +113,7 @@ function memoise(_options: StaticOptions): PenVal {
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
                         memo = {resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ};
-                        memos2.set(IMEM, memo);
+                        memos2.set(IP, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
@@ -147,8 +147,8 @@ function memoise(_options: StaticOptions): PenVal {
                             // some node --> some different non-empty node (assert: should never happen!)
                             if (!expr.parse()) break;
                             let state = getState();
-                            if (state.IMEM === memo.stateᐟ.IMEM) break;
-                            if (!isFullyConsumed(state.IDOC, state.IMEM)) break;
+                            if (state.IP === memo.stateᐟ.IP) break;
+                            if (!isFullyConsumed(state.IN, state.IP)) break;
                             memo.stateᐟ = state;
                         }
                     }

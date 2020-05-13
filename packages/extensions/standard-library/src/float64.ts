@@ -1,47 +1,47 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function float64(options: StaticOptions): PenVal {
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            if (INUL) {
-                ODOC = ONUL ? undefined : 0;
+            if (NO_CONSUME) {
+                OUT = NO_PRODUCE ? undefined : 0;
                 return true;
             }
 
-            if (!isString(IDOC)) return false;
+            if (!isString(IN)) return false;
             let stateₒ = getState();
-            const LEN = IDOC.length;
+            const LEN = IN.length;
             const EOS = 0;
             let digitCount = 0;
 
             // Parse optional '+' or '-' sign
-            let c = IDOC.charCodeAt(IMEM);
+            let c = IN.charCodeAt(IP);
             if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                IMEM += 1;
-                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                IP += 1;
+                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
             }
 
             // Parse 0..M digits
             while (true) {
                 if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
                 digitCount += 1;
-                IMEM += 1;
-                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                IP += 1;
+                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
             }
 
             // Parse optional '.'
             if (c === DECIMAL_POINT) {
-                IMEM += 1;
-                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                IP += 1;
+                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
             }
 
             // Parse 0..M digits
             while (true) {
                 if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
                 digitCount += 1;
-                IMEM += 1;
-                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                IP += 1;
+                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
             }
 
             // Ensure we have parsed at least one significant digit
@@ -49,13 +49,13 @@ function float64(options: StaticOptions): PenVal {
 
             // Parse optional exponent
             if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                IMEM += 1;
-                c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                IP += 1;
+                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
 
                 // Parse optional '+' or '-' sign
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
 
                 // Parse 1..M digits
@@ -63,8 +63,8 @@ function float64(options: StaticOptions): PenVal {
                 while (true) {
                     if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
                     digitCount += 1;
-                    IMEM += 1;
-                    c = IMEM < LEN ? IDOC.charCodeAt(IMEM) : EOS;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
                 if (digitCount === 0) return setState(stateₒ), false;
             }
@@ -72,27 +72,27 @@ function float64(options: StaticOptions): PenVal {
             // There is a syntactically valid float. Delegate parsing to the JS runtime.
             // Reject the number if it parses to Infinity or Nan.
             // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-            let num = Number.parseFloat(IDOC.slice(stateₒ.IMEM, IMEM));
+            let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
             if (!Number.isFinite(num)) return setState(stateₒ), false;
 
             // Success
-            ODOC = ONUL ? undefined : num;
+            OUT = NO_PRODUCE ? undefined : num;
             return true;
         },
 
         unparse() {
-            if (INUL) {
-                ODOC = ONUL ? undefined : '0';
+            if (NO_CONSUME) {
+                OUT = NO_PRODUCE ? undefined : '0';
                 return true;
             }
 
             // Ensure N is a number.
-            if (typeof IDOC !== 'number' || IMEM !== 0) return false;
+            if (typeof IN !== 'number' || IP !== 0) return false;
 
             // Delegate unparsing to the JS runtime.
             // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-            ODOC = ONUL ? undefined : String(IDOC);
-            IMEM = 1;
+            OUT = NO_PRODUCE ? undefined : String(IN);
+            IP = 1;
             return true;
         },
     };

@@ -2,15 +2,15 @@
 "use strict";
 function booleanLiteral(options) {
     const { value } = options;
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_INPUT = options.in === 'nil';
+    const NO_OUTPUT = options.out === 'nil';
     return {
         parse() {
-            ODOC = ONUL ? undefined : value;
+            ODOC = NO_OUTPUT ? undefined : value;
             return true;
         },
         unparse() {
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (IDOC !== value || IMEM !== 0)
                     return false;
                 IMEM += 1;
@@ -22,12 +22,12 @@ function booleanLiteral(options) {
 }
 function character(options) {
     const { min, max } = options;
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_INPUT = options.in === 'nil';
+    const NO_OUTPUT = options.out === 'nil';
     return {
         parse() {
             let c = min;
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (!isString(IDOC))
                     return false;
                 if (IMEM < 0 || IMEM >= IDOC.length)
@@ -37,12 +37,12 @@ function character(options) {
                     return false;
                 IMEM += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            ODOC = NO_OUTPUT ? undefined : c;
             return true;
         },
         unparse() {
             let c = min;
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (!isString(IDOC))
                     return false;
                 if (IMEM < 0 || IMEM >= IDOC.length)
@@ -52,7 +52,7 @@ function character(options) {
                     return false;
                 IMEM += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            ODOC = NO_OUTPUT ? undefined : c;
             return true;
         },
     };
@@ -177,15 +177,15 @@ function list(options) {
     };
 }
 function nullLiteral(options) {
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_INPUT = options.in === 'nil';
+    const NO_OUTPUT = options.out === 'nil';
     return {
         parse() {
-            ODOC = ONUL ? undefined : null;
+            ODOC = NO_OUTPUT ? undefined : null;
             return true;
         },
         unparse() {
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (IDOC !== null || IMEM !== 0)
                     return false;
                 IMEM = 1;
@@ -197,15 +197,15 @@ function nullLiteral(options) {
 }
 function numericLiteral(options) {
     const { value } = options;
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_INPUT = options.in === 'nil';
+    const NO_OUTPUT = options.out === 'nil';
     return {
         parse() {
-            ODOC = ONUL ? undefined : value;
+            ODOC = NO_OUTPUT ? undefined : value;
             return true;
         },
         unparse() {
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (IDOC !== value || IMEM !== 0)
                     return false;
                 IMEM = 1;
@@ -313,29 +313,29 @@ function sequence(options) {
 }
 function stringLiteral(options) {
     const { value } = options;
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_INPUT = options.in === 'nil';
+    const NO_OUTPUT = options.out === 'nil';
     return {
         parse() {
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (!isString(IDOC))
                     return false;
                 if (!matchesAt(IDOC, value, IMEM))
                     return false;
                 IMEM += value.length;
             }
-            ODOC = ONUL ? undefined : value;
+            ODOC = NO_OUTPUT ? undefined : value;
             return true;
         },
         unparse() {
-            if (!INUL) {
+            if (!NO_INPUT) {
                 if (!isString(IDOC))
                     return false;
                 if (!matchesAt(IDOC, value, IMEM))
                     return false;
                 IMEM += value.length;
             }
-            ODOC = ONUL ? undefined : value;
+            ODOC = NO_OUTPUT ? undefined : value;
             return true;
         },
     };
@@ -413,12 +413,12 @@ const 𝔼16 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function float64(options) {
-        const INUL = options.in === 'nil';
-        const ONUL = options.out === 'nil';
+        const NO_INPUT = options.in === 'nil';
+        const NO_OUTPUT = options.out === 'nil';
         return {
             parse() {
-                if (INUL) {
-                    ODOC = ONUL ? undefined : 0;
+                if (NO_INPUT) {
+                    ODOC = NO_OUTPUT ? undefined : 0;
                     return true;
                 }
                 if (!isString(IDOC))
@@ -485,12 +485,12 @@ const 𝔼16 = (() => {
                 if (!Number.isFinite(num))
                     return setState(stateₒ), false;
                 // Success
-                ODOC = ONUL ? undefined : num;
+                ODOC = NO_OUTPUT ? undefined : num;
                 return true;
             },
             unparse() {
-                if (INUL) {
-                    ODOC = ONUL ? undefined : '0';
+                if (NO_INPUT) {
+                    ODOC = NO_OUTPUT ? undefined : '0';
                     return true;
                 }
                 // Ensure N is a number.
@@ -498,7 +498,7 @@ const 𝔼16 = (() => {
                     return false;
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                ODOC = ONUL ? undefined : String(IDOC);
+                ODOC = NO_OUTPUT ? undefined : String(IDOC);
                 IMEM = 1;
                 return true;
             },
@@ -515,8 +515,8 @@ const 𝔼16 = (() => {
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function int32(options) {
-        const INUL = options.in === 'nil';
-        const ONUL = options.out === 'nil';
+        const NO_INPUT = options.in === 'nil';
+        const NO_OUTPUT = options.out === 'nil';
         let result = {
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
@@ -529,8 +529,8 @@ const 𝔼16 = (() => {
                 assert(typeof signed === 'boolean');
                 return {
                     parse() {
-                        if (INUL) {
-                            ODOC = ONUL ? undefined : 0;
+                        if (NO_INPUT) {
+                            ODOC = NO_OUTPUT ? undefined : 0;
                             return true;
                         }
                         if (!isString(IDOC))
@@ -572,12 +572,12 @@ const 𝔼16 = (() => {
                         if (isNegative)
                             num = -num;
                         // Success
-                        ODOC = ONUL ? undefined : num;
+                        ODOC = NO_OUTPUT ? undefined : num;
                         return true;
                     },
                     unparse() {
-                        if (INUL) {
-                            ODOC = ONUL ? undefined : '0';
+                        if (NO_INPUT) {
+                            ODOC = NO_OUTPUT ? undefined : '0';
                             return true;
                         }
                         if (typeof IDOC !== 'number' || IMEM !== 0)
@@ -607,7 +607,7 @@ const 𝔼16 = (() => {
                         // Compute the final string.
                         if (isNegative)
                             digits.push(0x2d); // char code for '-'
-                        ODOC = ONUL ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                        ODOC = NO_OUTPUT ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
                         IMEM = 1;
                         return true;
                     },
@@ -820,12 +820,12 @@ const 𝔼17 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
-        const INUL = options.in === 'nil';
-        const ONUL = options.out === 'nil';
+        const NO_INPUT = options.in === 'nil';
+        const NO_OUTPUT = options.out === 'nil';
         return {
             parse() {
                 let c = '?';
-                if (!INUL) {
+                if (!NO_INPUT) {
                     if (!isString(IDOC))
                         return false;
                     if (IMEM < 0 || IMEM >= IDOC.length)
@@ -833,12 +833,12 @@ const 𝔼17 = (() => {
                     c = IDOC.charAt(IMEM);
                     IMEM += 1;
                 }
-                ODOC = ONUL ? undefined : c;
+                ODOC = NO_OUTPUT ? undefined : c;
                 return true;
             },
             unparse() {
                 let c = '?';
-                if (!INUL) {
+                if (!NO_INPUT) {
                     if (!isString(IDOC))
                         return false;
                     if (IMEM < 0 || IMEM >= IDOC.length)
@@ -846,7 +846,7 @@ const 𝔼17 = (() => {
                     c = IDOC.charAt(IMEM);
                     IMEM += 1;
                 }
-                ODOC = ONUL ? undefined : c;
+                ODOC = NO_OUTPUT ? undefined : c;
                 return true;
             },
         };

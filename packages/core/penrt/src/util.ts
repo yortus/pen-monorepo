@@ -27,25 +27,25 @@ interface PenVal {
 
 
 // TODO: new 'registers'... temp testing...
-interface Registers {IDOC: unknown; IMEM: number; ODOC: unknown; }
-let IDOC: unknown;
-let IMEM: number;
-let ODOC: unknown;
+interface Registers {IN: unknown; IP: number; OUT: unknown; }
+let IN: unknown;
+let IP: number;
+let OUT: unknown;
 
 
 function getState(): Registers {
-    return {IDOC, IMEM, ODOC};
+    return {IN, IP, OUT};
 }
 
 
 function setState(value: Registers): void {
-    ({IDOC, IMEM, ODOC} = value);
+    ({IN, IP, OUT} = value);
 }
 
 
 function setInState(IDOCᐟ: unknown, IMEMᐟ: number): void {
-    IDOC = IDOCᐟ;
-    IMEM = IMEMᐟ;
+    IN = IDOCᐟ;
+    IP = IMEMᐟ;
 }
 
 
@@ -90,7 +90,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 
 // TODO: doc... helper...
-// TODO: provide faster impl for known cases - eg when checking IDOC during text parsing, or ODOC during text unparsing
+// TODO: provide faster impl for known cases - eg when checking IN during text parsing, or OUT during text unparsing
 //       (but instrument first)
 function isString(value: unknown): value is string {
     return typeof value === 'string';

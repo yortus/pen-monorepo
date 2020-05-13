@@ -8,9 +8,9 @@ function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
             let node: unknown;
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].parse()) return setState(stateₒ), false;
-                node = concat(node, ODOC);
+                node = concat(node, OUT);
             }
-            ODOC = node;
+            OUT = node;
             return true;
         },
 
@@ -19,9 +19,9 @@ function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
             let text: unknown;
             for (let i = 0; i < arity; ++i) {
                 if (!expressions[i].unparse()) return setState(stateₒ), false;
-                text = concat(text, ODOC);
+                text = concat(text, OUT);
             }
-            ODOC = text;
+            OUT = text;
             return true;
         },
     };

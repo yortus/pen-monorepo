@@ -18,26 +18,26 @@ function unicode(_options: StaticOptions): PenVal {
 
             return {
                 parse() {
-                    if (!isString(IDOC)) return false;
+                    if (!isString(IN)) return false;
                     let stateₒ = getState();
-                    const LEN = IDOC.length;
+                    const LEN = IN.length;
                     const EOS = '';
 
                     let len = 0;
                     let num = ''; // TODO: fix this - should actually keep count
-                    let c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                    let c = IP < LEN ? IN.charAt(IP) : EOS;
                     while (true) {
                         if (!regex.test(c)) break;
                         num += c;
-                        IMEM += 1;
+                        IP += 1;
                         len += 1;
                         if (len === maxDigits) break;
-                        c = IMEM < LEN ? IDOC.charAt(IMEM) : EOS;
+                        c = IP < LEN ? IN.charAt(IP) : EOS;
                     }
 
                     if (len < minDigits) return setState(stateₒ), false;
                     // tslint:disable-next-line: no-eval
-                    ODOC = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                    OUT = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
                     return true;
                 },
 

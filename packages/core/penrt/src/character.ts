@@ -1,32 +1,32 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function character(options: StaticOptions & {min: string, max: string}): PenVal {
     const {min, max} = options;
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
             let c = min;
-            if (!INUL) {
-                if (!isString(IDOC)) return false;
-                if (IMEM < 0 || IMEM >= IDOC.length) return false;
-                c = IDOC.charAt(IMEM);
+            if (!NO_CONSUME) {
+                if (!isString(IN)) return false;
+                if (IP < 0 || IP >= IN.length) return false;
+                c = IN.charAt(IP);
                 if (c < min || c > max) return false;
-                IMEM += 1;
+                IP += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            OUT = NO_PRODUCE ? undefined : c;
             return true;
         },
 
         unparse() {
             let c = min;
-            if (!INUL) {
-                if (!isString(IDOC)) return false;
-                if (IMEM < 0 || IMEM >= IDOC.length) return false;
-                c = IDOC.charAt(IMEM);
+            if (!NO_CONSUME) {
+                if (!isString(IN)) return false;
+                if (IP < 0 || IP >= IN.length) return false;
+                c = IN.charAt(IP);
                 if (c < min || c > max) return false;
-                IMEM += 1;
+                IP += 1;
             }
-            ODOC = ONUL ? undefined : c;
+            OUT = NO_PRODUCE ? undefined : c;
             return true;
         },
     };

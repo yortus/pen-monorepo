@@ -3,8 +3,8 @@
 
 // TODO: doc... has both 'txt' and 'ast' representation
 function int32(options: StaticOptions): PenVal {
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     let result: PenVal = {
         parse: NOT_A_RULE,
 
@@ -19,30 +19,30 @@ function int32(options: StaticOptions): PenVal {
 
             return {
                 parse() {
-                    if (INUL) {
-                        ODOC = ONUL ? undefined : 0;
+                    if (NO_CONSUME) {
+                        OUT = NO_PRODUCE ? undefined : 0;
                         return true;
                     }
 
-                    if (!isString(IDOC)) return false;
+                    if (!isString(IN)) return false;
                     let stateₒ = getState();
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && IMEM < IDOC.length && IDOC.charAt(IMEM) === '-') {
+                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
-                        IMEM += 1;
+                        IP += 1;
                     }
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let num = 0;
                     let digits = 0;
-                    while (IMEM < IDOC.length) {
+                    while (IP < IN.length) {
 
                         // Read a digit.
-                        let c = IDOC.charCodeAt(IMEM);
+                        let c = IN.charCodeAt(IP);
                         if (c >= 256) break;
                         let digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -55,7 +55,7 @@ function int32(options: StaticOptions): PenVal {
                         if (num > MAX_NUM) return setState(stateₒ), false;
 
                         // Loop again.
-                        IMEM += 1;
+                        IP += 1;
                         digits += 1;
                     }
 
@@ -66,18 +66,18 @@ function int32(options: StaticOptions): PenVal {
                     if (isNegative) num = -num;
 
                     // Success
-                    ODOC = ONUL ? undefined : num;
+                    OUT = NO_PRODUCE ? undefined : num;
                     return true;
                 },
 
                 unparse() {
-                    if (INUL) {
-                        ODOC = ONUL ? undefined : '0';
+                    if (NO_CONSUME) {
+                        OUT = NO_PRODUCE ? undefined : '0';
                         return true;
                     }
 
-                    if (typeof IDOC !== 'number' || IMEM !== 0) return false;
-                    let num = IDOC;
+                    if (typeof IN !== 'number' || IP !== 0) return false;
+                    let num = IN;
 
                     // Determine the number's sign and ensure it is in range.
                     let isNegative = false;
@@ -101,8 +101,8 @@ function int32(options: StaticOptions): PenVal {
 
                     // Compute the final string.
                     if (isNegative) digits.push(0x2d); // char code for '-'
-                    ODOC = ONUL ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
-                    IMEM = 1;
+                    OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                    IP = 1;
                     return true;
                 },
             };

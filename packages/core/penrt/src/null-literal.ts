@@ -1,19 +1,19 @@
 // TODO: doc... has only 'ast' representation
 function nullLiteral(options: StaticOptions): PenVal {
-    const INUL = options.in === 'nil';
-    const ONUL = options.out === 'nil';
+    const NO_CONSUME = options.in === 'nil';
+    const NO_PRODUCE = options.out === 'nil';
     return {
         parse() {
-            ODOC = ONUL ? undefined : null;
+            OUT = NO_PRODUCE ? undefined : null;
             return true;
         },
 
         unparse() {
-            if (!INUL) {
-                if (IDOC !== null || IMEM !== 0) return false;
-                IMEM = 1;
+            if (!NO_CONSUME) {
+                if (IN !== null || IP !== 0) return false;
+                IP = 1;
             }
-            ODOC = undefined;
+            OUT = undefined;
             return true;
         },
     };

@@ -8,25 +8,25 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
             for (let field of fields) {
                 let propName = field.name;
                 if (!field.value.parse()) return setState(stateₒ), false;
-                assert(ODOC !== undefined);
-                obj[propName] = ODOC;
+                assert(OUT !== undefined);
+                obj[propName] = OUT;
             }
-            ODOC = obj;
+            OUT = obj;
             return true;
         },
 
         unparse() {
-            if (!isPlainObject(IDOC)) return false;
+            if (!isPlainObject(IN)) return false;
             let stateₒ = getState();
             let text: unknown;
 
-            let propNames = Object.keys(IDOC); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IN); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = IDOC;
-            let bitmask = IMEM;
+            const obj = IN;
+            let bitmask = IP;
 
             for (let field of fields) {
 
@@ -44,14 +44,14 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
                 // TODO: match field value
                 setInState(obj[propName], 0);
                 if (!field.value.unparse()) return setState(stateₒ), false;
-                if (!isFullyConsumed(obj[propName], IMEM)) return setState(stateₒ), false;
-                text = concat(text, ODOC);
+                if (!isFullyConsumed(obj[propName], IP)) return setState(stateₒ), false;
+                text = concat(text, OUT);
 
                 // TODO: we matched both name and value - consume them from `node`
                 bitmask += propBit;
             }
             setInState(obj, bitmask);
-            ODOC = text;
+            OUT = text;
             return true;
         },
     };
