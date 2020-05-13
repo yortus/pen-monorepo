@@ -3,25 +3,14 @@ function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
     const {expressions} = options;
     const arity = expressions.length;
     return {
-        parse() {
+        rule() {
             let stateₒ = getState();
-            let node: unknown;
+            let out: unknown;
             for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].parse()) return setState(stateₒ), false;
-                node = concat(node, OUT);
+                if (!expressions[i].rule!()) return setState(stateₒ), false;
+                out = concat(out, OUT);
             }
-            OUT = node;
-            return true;
-        },
-
-        unparse() {
-            let stateₒ = getState();
-            let text: unknown;
-            for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].unparse()) return setState(stateₒ), false;
-                text = concat(text, OUT);
-            }
-            OUT = text;
+            OUT = out;
             return true;
         },
     };

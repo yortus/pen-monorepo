@@ -15,8 +15,7 @@ interface PenVal {
     bindings?: Record<string, PenVal>;
 
     // rule
-    parse(): boolean;
-    unparse(): boolean;
+    rule?(): boolean;
 
     // lambda
     lambda?(arg: PenVal): PenVal;
@@ -81,7 +80,3 @@ function isInputFullyConsumed(): boolean {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
-
-
-// TODO: remove...
-function NOT_A_RULE(): never { throw new Error('Not a rule'); }

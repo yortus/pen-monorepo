@@ -4,20 +4,7 @@ function character(options: StaticOptions & {min: string, max: string}): PenVal 
     const NO_CONSUME = options.in === 'nil';
     const NO_PRODUCE = options.out === 'nil';
     return {
-        parse() {
-            let c = min;
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string') return false;
-                if (IP < 0 || IP >= IN.length) return false;
-                c = IN.charAt(IP);
-                if (c < min || c > max) return false;
-                IP += 1;
-            }
-            OUT = NO_PRODUCE ? undefined : c;
-            return true;
-        },
-
-        unparse() {
+        rule() {
             let c = min;
             if (!NO_CONSUME) {
                 if (typeof IN !== 'string') return false;

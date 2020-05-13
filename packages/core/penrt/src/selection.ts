@@ -3,16 +3,9 @@ function selection(options: StaticOptions & {expressions: PenVal[]}): PenVal {
     const {expressions} = options;
     const arity = expressions.length;
     return {
-        parse() {
+        rule() {
             for (let i = 0; i < arity; ++i) {
-                if (expressions[i].parse()) return true;
-            }
-            return false;
-        },
-
-        unparse() {
-            for (let i = 0; i < arity; ++i) {
-                if (expressions[i].unparse()) return true;
+                if (expressions[i].rule!()) return true;
             }
             return false;
         },

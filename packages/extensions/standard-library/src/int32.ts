@@ -6,118 +6,118 @@ function int32(options: StaticOptions): PenVal {
     const NO_CONSUME = options.in === 'nil';
     const NO_PRODUCE = options.out === 'nil';
     let result: PenVal = {
-        parse: NOT_A_RULE,
-
-        unparse: NOT_A_RULE,
-
-        // TODO: temp testing... the lambda form which takes a `base` arg
         lambda(expr) {
             let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
             let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
 
-            return {
-                parse() {
-                    if (NO_CONSUME) {
-                        OUT = NO_PRODUCE ? undefined : 0;
+            if (options.in === 'txt' || options.out === 'ast') {
+                return {
+                    rule() {
+                        if (NO_CONSUME) {
+                            OUT = NO_PRODUCE ? undefined : 0;
+                            return true;
+                        }
+
+                        if (typeof IN !== 'string') return false;
+                        let stateₒ = getState();
+
+                        // Parse optional leading '-' sign (if signed)...
+                        let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                        let isNegative = false;
+                        if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                            isNegative = true;
+                            MAX_NUM = 0x80000000;
+                            IP += 1;
+                        }
+
+                        // ...followed by one or more decimal digits. (NB: no exponents).
+                        let num = 0;
+                        let digits = 0;
+                        while (IP < IN.length) {
+
+                            // Read a digit.
+                            let c = IN.charCodeAt(IP);
+                            if (c >= 256) break;
+                            let digitValue = DIGIT_VALUES[c];
+                            if (digitValue >= base) break;
+
+                            // Update parsed number.
+                            num *= base;
+                            num += digitValue;
+
+                            // Check for overflow.
+                            if (num > MAX_NUM) return setState(stateₒ), false;
+
+                            // Loop again.
+                            IP += 1;
+                            digits += 1;
+                        }
+
+                        // Check that we parsed at least one digit.
+                        if (digits === 0) return setState(stateₒ), false;
+
+                        // Apply the sign.
+                        if (isNegative) num = -num;
+
+                        // Success
+                        OUT = NO_PRODUCE ? undefined : num;
                         return true;
-                    }
+                    },
+                };
+            }
 
-                    if (typeof IN !== 'string') return false;
-                    let stateₒ = getState();
+            if (options.in === 'ast' || options.out === 'txt') {
+                return {
+                    rule() {
+                        if (NO_CONSUME) {
+                            OUT = NO_PRODUCE ? undefined : '0';
+                            return true;
+                        }
 
-                    // Parse optional leading '-' sign (if signed)...
-                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                    let isNegative = false;
-                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                        isNegative = true;
-                        MAX_NUM = 0x80000000;
-                        IP += 1;
-                    }
+                        if (typeof IN !== 'number' || IP !== 0) return false;
+                        let num = IN;
 
-                    // ...followed by one or more decimal digits. (NB: no exponents).
-                    let num = 0;
-                    let digits = 0;
-                    while (IP < IN.length) {
+                        // Determine the number's sign and ensure it is in range.
+                        let isNegative = false;
+                        let MAX_NUM = 0x7FFFFFFF;
+                        if (num < 0) {
+                            if (!signed) return false;
+                            isNegative = true;
+                            num = -num;
+                            MAX_NUM = 0x80000000;
+                        }
+                        if (num > MAX_NUM) return false;
 
-                        // Read a digit.
-                        let c = IN.charCodeAt(IP);
-                        if (c >= 256) break;
-                        let digitValue = DIGIT_VALUES[c];
-                        if (digitValue >= base) break;
+                        // Extract the digits.
+                        let digits = [] as number[];
+                        while (true) {
+                            let d = num % base;
+                            num = (num / base) | 0;
+                            digits.push(CHAR_CODES[d]);
+                            if (num === 0) break;
+                        }
 
-                        // Update parsed number.
-                        num *= base;
-                        num += digitValue;
-
-                        // Check for overflow.
-                        if (num > MAX_NUM) return setState(stateₒ), false;
-
-                        // Loop again.
-                        IP += 1;
-                        digits += 1;
-                    }
-
-                    // Check that we parsed at least one digit.
-                    if (digits === 0) return setState(stateₒ), false;
-
-                    // Apply the sign.
-                    if (isNegative) num = -num;
-
-                    // Success
-                    OUT = NO_PRODUCE ? undefined : num;
-                    return true;
-                },
-
-                unparse() {
-                    if (NO_CONSUME) {
-                        OUT = NO_PRODUCE ? undefined : '0';
+                        // Compute the final string.
+                        if (isNegative) digits.push(0x2d); // char code for '-'
+                        // TODO: is String.fromCharCode(...) performant?
+                        OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse());
+                        IP = 1;
                         return true;
-                    }
+                    },
+                };
+            }
 
-                    if (typeof IN !== 'number' || IP !== 0) return false;
-                    let num = IN;
-
-                    // Determine the number's sign and ensure it is in range.
-                    let isNegative = false;
-                    let MAX_NUM = 0x7FFFFFFF;
-                    if (num < 0) {
-                        if (!signed) return false;
-                        isNegative = true;
-                        num = -num;
-                        MAX_NUM = 0x80000000;
-                    }
-                    if (num > MAX_NUM) return false;
-
-                    // Extract the digits.
-                    let digits = [] as number[];
-                    while (true) {
-                        let d = num % base;
-                        num = (num / base) | 0;
-                        digits.push(CHAR_CODES[d]);
-                        if (num === 0) break;
-                    }
-
-                    // Compute the final string.
-                    if (isNegative) digits.push(0x2d); // char code for '-'
-                    OUT = NO_PRODUCE ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
-                    IP = 1;
-                    return true;
-                },
-            };
+            throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
         },
     };
 
     // TODO: temp testing...
-    result.parse = result.lambda!({bindings: {
+    result.rule = result.lambda!({bindings: {
         base: {constant: {value: 10}},
         unsigned: {constant: {value: false}},
-    }} as unknown as PenVal).parse;
-    result.unparse = result.lambda!({bindings: {
-        base: {constant: {value: 10}},
-        unsigned: {constant: {value: false}},
-    }} as unknown as PenVal).unparse;
+    }} as unknown as PenVal).rule;
 
     return result;
 }

@@ -1,6 +1,6 @@
 function createMainExports(createProgram: (options: StaticOptions) => PenVal) {
-    const parse = createProgram({in: 'txt', out: 'ast'}).parse;
-    const unparse = createProgram({in: 'ast', out: 'txt'}).unparse;
+    const parse = createProgram({in: 'txt', out: 'ast'}).rule!;
+    const unparse = createProgram({in: 'ast', out: 'txt'}).rule!;
     return {
         parse: (text: string) => {
             setState({IN: text, IP: 0});

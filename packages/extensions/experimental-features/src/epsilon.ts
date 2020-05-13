@@ -1,11 +1,6 @@
 function epsilon(_options: StaticOptions): PenVal {
     return {
-        parse() {
-            OUT = undefined;
-            return true;
-        },
-
-        unparse() {
+        rule() {
             OUT = undefined;
             return true;
         },

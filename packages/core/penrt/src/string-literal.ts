@@ -4,17 +4,7 @@ function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const NO_CONSUME = options.in === 'nil';
     const NO_PRODUCE = options.out === 'nil';
     return {
-        parse() {
-            if (!NO_CONSUME) {
-                if (typeof IN !== 'string') return false;
-                if (!isMatch(value)) return false;
-                IP += value.length;
-            }
-            OUT = NO_PRODUCE ? undefined : value;
-            return true;
-        },
-
-        unparse() {
+        rule() {
             if (!NO_CONSUME) {
                 if (typeof IN !== 'string') return false;
                 if (!isMatch(value)) return false;

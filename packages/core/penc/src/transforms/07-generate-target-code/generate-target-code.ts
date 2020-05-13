@@ -162,7 +162,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             for (let name of ef.exportedNames) {
                 emit.down(2).text(`Object.assign(`).indent();
                 emit.down(1).text(`𝕊${ef.meta.scope.id}.bindings.${name},`).down(1);
-                emit.text(`𝔼${ef.meta.scope.id}.${name}({/*TODO: pass staticOptions*/}),`);
+                emit.text(`𝔼${ef.meta.scope.id}.${name}({in: IN, out: OUT}),`);
                 emit.dedent().down(1).text(`);`);
             }
         },
@@ -205,7 +205,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BooleanLiteralExpression':
-            emit.text(`booleanLiteral({value: ${expr.value}})`);
+            emit.text(`booleanLiteral({in: IN, out: OUT, value: ${expr.value}})`);
             return;
 
         case 'CharacterExpression': {
@@ -220,7 +220,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         }
 
         case 'FieldExpression':
-            emit.text('field({').indent().down(1).text('name: ');
+            emit.text('field({').indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('name: ');
             emitExpression(emit, expr.name, symbolTable);
             emit.text(',').down(1).text('value: ');
             emitExpression(emit, expr.value, symbolTable);
@@ -235,7 +237,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         //     break; // TODO...
 
         case 'ListExpression':
-            emit.text('list({').indent().down(1).text('elements: [');
+            emit.text('list({').indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('elements: [');
             if (expr.elements.length > 0) {
                 emit.indent();
                 for (let element of expr.elements) {
@@ -253,11 +257,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'NullLiteralExpression':
-            emit.text(`nullLiteral({})`);
+            emit.text(`nullLiteral({in: IN, out: OUT})`);
             return;
 
         case 'NumericLiteralExpression':
-            emit.text(`numericLiteral({value: ${expr.value}})`);
+            emit.text(`numericLiteral({in: IN, out: OUT, value: ${expr.value}})`);
             return;
 
         case 'ParenthesisedExpression':
@@ -266,7 +270,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'RecordExpression':
-            emit.text('record({').indent().down(1).text('fields: [');
+            emit.text('record({').indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
                 emit.indent();
                 for (let field of expr.fields) {
@@ -287,7 +293,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'SelectionExpression':
-            emit.text('selection({').indent().down(1).text('expressions: [').indent();
+            emit.text('selection({').indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('expressions: [').indent();
             for (let arg of expr.expressions) {
                 emit.down(1);
                 emitExpression(emit, arg, symbolTable);
@@ -297,7 +305,9 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'SequenceExpression':
-            emit.text('sequence({').indent().down(1).text('expressions: [').indent();
+            emit.text('sequence({').indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('expressions: [').indent();
             for (let arg of expr.expressions) {
                 emit.down(1);
                 emitExpression(emit, arg, symbolTable);
