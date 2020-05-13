@@ -1,3 +1,4 @@
+// TODO: doc... this rule is representation-agnostic
 function selection(options: StaticOptions & {expressions: PenVal[]}): PenVal {
     const {expressions} = options;
     const arity = expressions.length;

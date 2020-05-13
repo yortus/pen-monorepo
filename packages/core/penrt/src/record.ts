@@ -1,3 +1,4 @@
+// TODO: doc... has only 'ast' representation
 function record(options: StaticOptions & {fields: Array<{name: string, value: PenVal}>}): PenVal {
     const {fields} = options;
     return {

@@ -1,4 +1,7 @@
-function nullLiteral(_options: StaticOptions): PenVal {
+// TODO: doc... has only 'ast' representation
+function nullLiteral(options: StaticOptions): PenVal {
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             ODOC = ONUL ? undefined : null;

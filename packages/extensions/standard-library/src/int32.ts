@@ -1,8 +1,10 @@
-// TODO: handle abstract/concrete...
 // tslint:disable: no-bitwise
 
 
-function int32(_options: StaticOptions): PenVal {
+// TODO: doc... has both 'txt' and 'ast' representation
+function int32(options: StaticOptions): PenVal {
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     let result: PenVal = {
         parse: NOT_A_RULE,
 
@@ -17,6 +19,11 @@ function int32(_options: StaticOptions): PenVal {
 
             return {
                 parse() {
+                    if (INUL) {
+                        ODOC = ONUL ? undefined : 0;
+                        return true;
+                    }
+
                     if (!isString(IDOC)) return false;
                     let stateₒ = getState();
 
@@ -59,11 +66,16 @@ function int32(_options: StaticOptions): PenVal {
                     if (isNegative) num = -num;
 
                     // Success
-                    ODOC = num;
+                    ODOC = ONUL ? undefined : num;
                     return true;
                 },
 
                 unparse() {
+                    if (INUL) {
+                        ODOC = ONUL ? undefined : '0';
+                        return true;
+                    }
+
                     if (typeof IDOC !== 'number' || IMEM !== 0) return false;
                     let num = IDOC;
 
@@ -89,7 +101,7 @@ function int32(_options: StaticOptions): PenVal {
 
                     // Compute the final string.
                     if (isNegative) digits.push(0x2d); // char code for '-'
-                    ODOC = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                    ODOC = ONUL ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
                     IMEM = 1;
                     return true;
                 },

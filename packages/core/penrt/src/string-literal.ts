@@ -1,5 +1,8 @@
+// TODO: doc... has both 'txt' and 'ast' representation
 function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const {value} = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             if (!INUL) {

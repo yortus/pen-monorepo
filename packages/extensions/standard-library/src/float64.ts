@@ -1,9 +1,14 @@
-// TODO: handle abstract/concrete...
-
-
-function float64(_options: StaticOptions): PenVal {
+// TODO: doc... has both 'txt' and 'ast' representation
+function float64(options: StaticOptions): PenVal {
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
+            if (INUL) {
+                ODOC = ONUL ? undefined : 0;
+                return true;
+            }
+
             if (!isString(IDOC)) return false;
             let stateₒ = getState();
             const LEN = IDOC.length;
@@ -71,17 +76,22 @@ function float64(_options: StaticOptions): PenVal {
             if (!Number.isFinite(num)) return setState(stateₒ), false;
 
             // Success
-            ODOC = num;
+            ODOC = ONUL ? undefined : num;
             return true;
         },
 
         unparse() {
+            if (INUL) {
+                ODOC = ONUL ? undefined : '0';
+                return true;
+            }
+
             // Ensure N is a number.
             if (typeof IDOC !== 'number' || IMEM !== 0) return false;
 
             // Delegate unparsing to the JS runtime.
             // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-            ODOC = String(IDOC);
+            ODOC = ONUL ? undefined : String(IDOC);
             IMEM = 1;
             return true;
         },

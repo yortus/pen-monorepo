@@ -1,26 +1,9 @@
 
 "use strict";
-function abstract(options) {
-    const { expr } = options;
-    return {
-        parse() {
-            let INULₒ = INUL;
-            INUL = true;
-            let result = expr.parse();
-            INUL = INULₒ;
-            return result;
-        },
-        unparse() {
-            let ONULₒ = ONUL;
-            ONUL = true;
-            let result = expr.unparse();
-            ONUL = ONULₒ;
-            return result;
-        },
-    };
-}
 function booleanLiteral(options) {
     const { value } = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             ODOC = ONUL ? undefined : value;
@@ -39,6 +22,8 @@ function booleanLiteral(options) {
 }
 function character(options) {
     const { min, max } = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             let c = min;
@@ -69,25 +54,6 @@ function character(options) {
             }
             ODOC = ONUL ? undefined : c;
             return true;
-        },
-    };
-}
-function concrete(options) {
-    const { expr } = options;
-    return {
-        parse() {
-            let ONULₒ = ONUL;
-            ONUL = true;
-            let result = expr.parse();
-            ONUL = ONULₒ;
-            return result;
-        },
-        unparse() {
-            let INULₒ = INUL;
-            INUL = true;
-            let result = expr.unparse();
-            INUL = INULₒ;
-            return result;
         },
     };
 }
@@ -210,7 +176,9 @@ function list(options) {
         },
     };
 }
-function nullLiteral(_options) {
+function nullLiteral(options) {
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             ODOC = ONUL ? undefined : null;
@@ -229,6 +197,8 @@ function nullLiteral(_options) {
 }
 function numericLiteral(options) {
     const { value } = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             ODOC = ONUL ? undefined : value;
@@ -343,6 +313,8 @@ function sequence(options) {
 }
 function stringLiteral(options) {
     const { value } = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             if (!INUL) {
@@ -371,13 +343,11 @@ function stringLiteral(options) {
 let IDOC;
 let IMEM;
 let ODOC;
-let INUL = false;
-let ONUL = false;
 function getState() {
-    return { IDOC, IMEM, ODOC, INUL, ONUL };
+    return { IDOC, IMEM, ODOC };
 }
 function setState(value) {
-    ({ IDOC, IMEM, ODOC, INUL, ONUL } = value);
+    ({ IDOC, IMEM, ODOC } = value);
 }
 function setInState(IDOCᐟ, IMEMᐟ) {
     IDOC = IDOCᐟ;
@@ -441,10 +411,16 @@ const 𝔼16 = (() => {
         int32,
         memoise,
     } */
-    // TODO: handle abstract/concrete...
-    function float64(_options) {
+    // TODO: doc... has both 'txt' and 'ast' representation
+    function float64(options) {
+        const INUL = options.in === 'nil';
+        const ONUL = options.out === 'nil';
         return {
             parse() {
+                if (INUL) {
+                    ODOC = ONUL ? undefined : 0;
+                    return true;
+                }
                 if (!isString(IDOC))
                     return false;
                 let stateₒ = getState();
@@ -509,16 +485,20 @@ const 𝔼16 = (() => {
                 if (!Number.isFinite(num))
                     return setState(stateₒ), false;
                 // Success
-                ODOC = num;
+                ODOC = ONUL ? undefined : num;
                 return true;
             },
             unparse() {
+                if (INUL) {
+                    ODOC = ONUL ? undefined : '0';
+                    return true;
+                }
                 // Ensure N is a number.
                 if (typeof IDOC !== 'number' || IMEM !== 0)
                     return false;
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                ODOC = String(IDOC);
+                ODOC = ONUL ? undefined : String(IDOC);
                 IMEM = 1;
                 return true;
             },
@@ -532,9 +512,11 @@ const 𝔼16 = (() => {
     const NINE_DIGIT = '9'.charCodeAt(0);
     const LOWERCASE_E = 'e'.charCodeAt(0);
     const UPPERCASE_E = 'E'.charCodeAt(0);
-    // TODO: handle abstract/concrete...
     // tslint:disable: no-bitwise
-    function int32(_options) {
+    // TODO: doc... has both 'txt' and 'ast' representation
+    function int32(options) {
+        const INUL = options.in === 'nil';
+        const ONUL = options.out === 'nil';
         let result = {
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
@@ -547,6 +529,10 @@ const 𝔼16 = (() => {
                 assert(typeof signed === 'boolean');
                 return {
                     parse() {
+                        if (INUL) {
+                            ODOC = ONUL ? undefined : 0;
+                            return true;
+                        }
                         if (!isString(IDOC))
                             return false;
                         let stateₒ = getState();
@@ -586,10 +572,14 @@ const 𝔼16 = (() => {
                         if (isNegative)
                             num = -num;
                         // Success
-                        ODOC = num;
+                        ODOC = ONUL ? undefined : num;
                         return true;
                     },
                     unparse() {
+                        if (INUL) {
+                            ODOC = ONUL ? undefined : '0';
+                            return true;
+                        }
                         if (typeof IDOC !== 'number' || IMEM !== 0)
                             return false;
                         let num = IDOC;
@@ -617,7 +607,7 @@ const 𝔼16 = (() => {
                         // Compute the final string.
                         if (isNegative)
                             digits.push(0x2d); // char code for '-'
-                        ODOC = String.fromCharCode(...digits.reverse()); // TODO: is this performant?
+                        ODOC = ONUL ? undefined : String.fromCharCode(...digits.reverse()); // TODO: is this performant?
                         IMEM = 1;
                         return true;
                     },
@@ -828,7 +818,10 @@ const 𝔼17 = (() => {
         unicode,
         zeroOrMore
     } */
-    function anyChar(_options) {
+    // TODO: doc... has both 'txt' and 'ast' representation
+    function anyChar(options) {
+        const INUL = options.in === 'nil';
+        const ONUL = options.out === 'nil';
         return {
             parse() {
                 let c = '?';
@@ -1015,7 +1008,7 @@ const 𝔼17 = (() => {
     };
 })();
 
-function createProgram(options) {
+function createProgram({in: IN, out: OUT}) {
 
     const 𝕊12 = {
         bindings: {
@@ -1155,7 +1148,11 @@ function createProgram(options) {
             fields: [
                 {
                     name: 'type',
-                    value: abstract({expr: stringLiteral({value: "add"})}),
+                    value: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "add",
+                    }),
                 },
                 {
                     name: 'lhs',
@@ -1165,7 +1162,11 @@ function createProgram(options) {
                     name: 'rhs',
                     value: sequence({
                         expressions: [
-                            concrete({expr: stringLiteral({value: "+"})}),
+                            stringLiteral({
+                                in: IN !== "txt" ? "nil" : IN,
+                                out: OUT !== "txt" ? "nil" : OUT,
+                                value: "+",
+                            }),
                             𝕊12.bindings.term,
                         ],
                     }),
@@ -1180,7 +1181,11 @@ function createProgram(options) {
             fields: [
                 {
                     name: 'type',
-                    value: abstract({expr: stringLiteral({value: "sub"})}),
+                    value: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "sub",
+                    }),
                 },
                 {
                     name: 'lhs',
@@ -1190,7 +1195,11 @@ function createProgram(options) {
                     name: 'rhs',
                     value: sequence({
                         expressions: [
-                            concrete({expr: stringLiteral({value: "-"})}),
+                            stringLiteral({
+                                in: IN !== "txt" ? "nil" : IN,
+                                out: OUT !== "txt" ? "nil" : OUT,
+                                value: "-",
+                            }),
                             𝕊12.bindings.term,
                         ],
                     }),
@@ -1215,8 +1224,16 @@ function createProgram(options) {
         sequence({
             expressions: [
                 field({
-                    name: abstract({expr: stringLiteral({value: "type"})}),
-                    value: abstract({expr: stringLiteral({value: "mul"})}),
+                    name: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "type",
+                    }),
+                    value: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "mul",
+                    }),
                 }),
                 record({
                     fields: [
@@ -1227,10 +1244,18 @@ function createProgram(options) {
                     ],
                 }),
                 field({
-                    name: abstract({expr: stringLiteral({value: "rhs"})}),
+                    name: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "rhs",
+                    }),
                     value: sequence({
                         expressions: [
-                            concrete({expr: stringLiteral({value: "*"})}),
+                            stringLiteral({
+                                in: IN !== "txt" ? "nil" : IN,
+                                out: OUT !== "txt" ? "nil" : OUT,
+                                value: "*",
+                            }),
                             𝕊12.bindings.factor,
                         ],
                     }),
@@ -1245,7 +1270,11 @@ function createProgram(options) {
             fields: [
                 {
                     name: 'type',
-                    value: abstract({expr: stringLiteral({value: "div"})}),
+                    value: stringLiteral({
+                        in: IN !== "ast" ? "nil" : IN,
+                        out: OUT !== "ast" ? "nil" : OUT,
+                        value: "div",
+                    }),
                 },
                 {
                     name: 'lhs',
@@ -1255,7 +1284,11 @@ function createProgram(options) {
                     name: 'rhs',
                     value: sequence({
                         expressions: [
-                            concrete({expr: stringLiteral({value: "/"})}),
+                            stringLiteral({
+                                in: IN !== "txt" ? "nil" : IN,
+                                out: OUT !== "txt" ? "nil" : OUT,
+                                value: "/",
+                            }),
                             𝕊12.bindings.factor,
                         ],
                     }),
@@ -1272,8 +1305,16 @@ function createProgram(options) {
                     expressions: [
                         (𝕊12.bindings.not).lambda(selection({
                             expressions: [
-                                stringLiteral({value: "0x"}),
-                                stringLiteral({value: "0b"}),
+                                stringLiteral({
+                                    in: IN,
+                                    out: OUT,
+                                    value: "0x",
+                                }),
+                                stringLiteral({
+                                    in: IN,
+                                    out: OUT,
+                                    value: "0b",
+                                }),
                             ],
                         })),
                         𝕊12.bindings.float64,
@@ -1281,27 +1322,47 @@ function createProgram(options) {
                 }),
                 sequence({
                     expressions: [
-                        concrete({expr: stringLiteral({value: "0x"})}),
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "0x",
+                        }),
                         (𝕊12.bindings.int32).lambda(𝕊13),
                     ],
                 }),
                 sequence({
                     expressions: [
-                        concrete({expr: stringLiteral({value: "0b"})}),
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "0b",
+                        }),
                         (𝕊12.bindings.int32).lambda(𝕊14),
                     ],
                 }),
                 sequence({
                     expressions: [
-                        concrete({expr: stringLiteral({value: "i"})}),
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "i",
+                        }),
                         (𝕊12.bindings.int32).lambda(𝕊15),
                     ],
                 }),
                 sequence({
                     expressions: [
-                        concrete({expr: stringLiteral({value: "("})}),
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "(",
+                        }),
                         𝕊12.bindings.expr,
-                        concrete({expr: stringLiteral({value: ")"})}),
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: ")",
+                        }),
                     ],
                 }),
             ],

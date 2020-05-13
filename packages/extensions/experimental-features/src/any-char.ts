@@ -1,4 +1,7 @@
-function anyChar(_options: StaticOptions): PenVal {
+// TODO: doc... has both 'txt' and 'ast' representation
+function anyChar(options: StaticOptions): PenVal {
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             let c = '?';

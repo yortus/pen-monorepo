@@ -1,3 +1,4 @@
+// TODO: doc... has only 'ast' representation
 function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
     const {name, value} = options;
     return {

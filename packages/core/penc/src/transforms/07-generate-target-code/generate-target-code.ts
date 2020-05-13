@@ -36,7 +36,7 @@ function emitProgram(program: Program) {
     emitExtensions(emit, program);
 
     // TODO: emit prolog for `createProgram` function
-    emit.down(2).text('function createProgram(options) {').indent();
+    emit.down(2).text('function createProgram({in: IN, out: OUT}) {').indent();
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -208,12 +208,16 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`booleanLiteral({value: ${expr.value}})`);
             return;
 
-        case 'CharacterExpression':
-            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}({expr: `);
-            emit.text('character({min: ');
-            emit.text(JSON.stringify(expr.minValue)).text(', max: ').text(JSON.stringify(expr.maxValue)).text('})');
-            if (expr.abstract || expr.concrete) emit.text('})');
+        case 'CharacterExpression': {
+            let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
+            emit.text('character({').indent();
+            emit.down(1).text(`in: ${m.replace(/_/g, 'IN')},`);
+            emit.down(1).text(`out: ${m.replace(/_/g, 'OUT')},`);
+            emit.down(1).text(`min: ${JSON.stringify(expr.minValue)},`);
+            emit.down(1).text(`max: ${JSON.stringify(expr.maxValue)},`);
+            emit.dedent().down(1).text('})');
             return;
+        }
 
         case 'FieldExpression':
             emit.text('field({').indent().down(1).text('name: ');
@@ -302,11 +306,15 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.dedent().down(1).text('],').dedent().down(1).text(`})`);
             return;
 
-        case 'StringLiteralExpression':
-            if (expr.abstract || expr.concrete) emit.text(`${expr.abstract ? 'abstract' : 'concrete'}({expr: `);
-            emit.text(`stringLiteral({value: ${JSON.stringify(expr.value)}})`);
-            if (expr.abstract || expr.concrete) emit.text('})');
+        case 'StringLiteralExpression': {
+            let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
+            emit.text('stringLiteral({').indent();
+            emit.down(1).text(`in: ${m.replace(/_/g, 'IN')},`);
+            emit.down(1).text(`out: ${m.replace(/_/g, 'OUT')},`);
+            emit.down(1).text(`value: ${JSON.stringify(expr.value)},`);
+            emit.dedent().down(1).text('})');
             return;
+        }
 
         default:
             throw new Error('Internal Error'); // TODO...

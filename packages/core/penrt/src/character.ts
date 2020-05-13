@@ -1,5 +1,8 @@
+// TODO: doc... has both 'txt' and 'ast' representation
 function character(options: StaticOptions & {min: string, max: string}): PenVal {
     const {min, max} = options;
+    const INUL = options.in === 'nil';
+    const ONUL = options.out === 'nil';
     return {
         parse() {
             let c = min;

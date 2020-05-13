@@ -27,21 +27,19 @@ interface PenVal {
 
 
 // TODO: new 'registers'... temp testing...
-interface Registers {IDOC: unknown; IMEM: number; ODOC: unknown; INUL: boolean; ONUL: boolean; }
+interface Registers {IDOC: unknown; IMEM: number; ODOC: unknown; }
 let IDOC: unknown;
 let IMEM: number;
 let ODOC: unknown;
-let INUL = false;
-let ONUL = false;
 
 
 function getState(): Registers {
-    return {IDOC, IMEM, ODOC, INUL, ONUL};
+    return {IDOC, IMEM, ODOC};
 }
 
 
 function setState(value: Registers): void {
-    ({IDOC, IMEM, ODOC, INUL, ONUL} = value);
+    ({IDOC, IMEM, ODOC} = value);
 }
 
 

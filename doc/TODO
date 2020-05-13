@@ -1,3 +1,6 @@
+New TODOs May 2020:
+    [ ] hoist all INUL/ONUL checks out of parse time and into static setup time - they are always known statically (for perf)
+
 TODO 2020:
     [ ] unparse --> print
     [x] `float64`

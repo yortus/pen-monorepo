@@ -1,3 +1,4 @@
+// TODO: doc... has only 'ast' representation
 function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
     const {elements} = options;
     const elementsLength = elements.length;
