@@ -1,5 +1,5 @@
 /* @pen exports = {
-    float64,
-    int32,
+    f64,
+    i32,
     memoise,
 } */

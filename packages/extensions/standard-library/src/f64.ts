@@ -1,5 +1,5 @@
 // TODO: doc... has both 'txt' and 'ast' representation
-function float64(options: StaticOptions): PenVal {
+function f64(options: StaticOptions): PenVal {
     const NO_CONSUME = options.in === 'nil';
     const NO_PRODUCE = options.out === 'nil';
 
@@ -108,7 +108,7 @@ function float64(options: StaticOptions): PenVal {
 }
 
 
-// These constants are used by the float64 rule.
+// These constants are used by the f64 rule.
 const PLUS_SIGN = '+'.charCodeAt(0);
 const MINUS_SIGN = '-'.charCodeAt(0);
 const DECIMAL_POINT = '.'.charCodeAt(0);

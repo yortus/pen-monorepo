@@ -5,17 +5,17 @@ New TODOs May 2020:
     [ ] force IN to always be set through a helper method, and cache info about it - eg type = string|array|object|other
         [ ] but continue allowing IP to be set directly
         [ ] so, eg, provide a helper to change IN to something, and set IP automatically depending on its type
-    [ ] hoist all INUL/ONUL checks out of parse time and into static setup time - they are always known statically (for perf)
+    [ ] hoist all NO_CONSUME/NO_PRODUCE checks out of parse time and into static setup time - they are always known statically (for perf)
         [x] character
         [x] stringLiteral
         [ ] TODO: list others...
 
 TODO 2020:
     [x] unparse --> print
-    [x] `float64`
+    [x] `float64` --> `f64`
     [x] numeric literals
     [ ] `int32{base?: 2..36, signed?: boolean}`
-        [ ] rename back to `i32`
+        [x] rename back to `i32`
         [ ] add `u32` rule, remove `signed` param
         [ ] take a rule param that parses out the digits of the number incl opt `-` prefix (ie skips `0x`, `_`, etc)
             [ ] provide a default (for base 10)

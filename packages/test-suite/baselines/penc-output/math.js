@@ -396,12 +396,12 @@ function isPlainObject(value) {
 const 𝔼16 = (() => {
     "use strict";
     /* @pen exports = {
-        float64,
-        int32,
+        f64,
+        i32,
         memoise,
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
-    function float64(options) {
+    function f64(options) {
         const NO_CONSUME = options.in === 'nil';
         const NO_PRODUCE = options.out === 'nil';
         if (options.in === 'txt' || options.out === 'ast') {
@@ -500,7 +500,7 @@ const 𝔼16 = (() => {
         }
         throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
     }
-    // These constants are used by the float64 rule.
+    // These constants are used by the f64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
     const MINUS_SIGN = '-'.charCodeAt(0);
     const DECIMAL_POINT = '.'.charCodeAt(0);
@@ -510,7 +510,7 @@ const 𝔼16 = (() => {
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
-    function int32(options) {
+    function i32(options) {
         const NO_CONSUME = options.in === 'nil';
         const NO_PRODUCE = options.out === 'nil';
         let result = {
@@ -736,8 +736,8 @@ const 𝔼16 = (() => {
     }
 
     return {
-        float64,
-        int32,
+        f64,
+        i32,
         memoise,
     };
 })();
@@ -901,8 +901,8 @@ function createProgram({in: IN, out: OUT}) {
     const 𝕊12 = {
         bindings: {
             memoise: {},
-            float64: {},
-            int32: {},
+            f64: {},
+            i32: {},
             not: {},
             start: {},
             expr: {},
@@ -937,8 +937,8 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊16 = {
         bindings: {
-            float64: {},
-            int32: {},
+            f64: {},
+            i32: {},
             memoise: {},
         },
     };
@@ -956,8 +956,8 @@ function createProgram({in: IN, out: OUT}) {
 
     // -------------------- Aliases --------------------
     𝕊12.bindings.memoise = 𝕊16.bindings.memoise;
-    𝕊12.bindings.float64 = 𝕊16.bindings.float64;
-    𝕊12.bindings.int32 = 𝕊16.bindings.int32;
+    𝕊12.bindings.f64 = 𝕊16.bindings.f64;
+    𝕊12.bindings.i32 = 𝕊16.bindings.i32;
     𝕊12.bindings.not = 𝕊17.bindings.not;
     𝕊12.bindings.start = 𝕊12.bindings.expr;
 
@@ -971,13 +971,13 @@ function createProgram({in: IN, out: OUT}) {
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊16.bindings.float64,
-        𝔼16.float64({in: IN, out: OUT}),
+        𝕊16.bindings.f64,
+        𝔼16.f64({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊16.bindings.int32,
-        𝔼16.int32({in: IN, out: OUT}),
+        𝕊16.bindings.i32,
+        𝔼16.i32({in: IN, out: OUT}),
     );
 
     Object.assign(
@@ -1237,7 +1237,7 @@ function createProgram({in: IN, out: OUT}) {
                                 }),
                             ],
                         })),
-                        𝕊12.bindings.float64,
+                        𝕊12.bindings.f64,
                     ],
                 }),
                 sequence({
@@ -1249,7 +1249,7 @@ function createProgram({in: IN, out: OUT}) {
                             out: OUT !== "txt" ? "nil" : OUT,
                             value: "0x",
                         }),
-                        (𝕊12.bindings.int32).lambda(𝕊13),
+                        (𝕊12.bindings.i32).lambda(𝕊13),
                     ],
                 }),
                 sequence({
@@ -1261,7 +1261,7 @@ function createProgram({in: IN, out: OUT}) {
                             out: OUT !== "txt" ? "nil" : OUT,
                             value: "0b",
                         }),
-                        (𝕊12.bindings.int32).lambda(𝕊14),
+                        (𝕊12.bindings.i32).lambda(𝕊14),
                     ],
                 }),
                 sequence({
@@ -1273,7 +1273,7 @@ function createProgram({in: IN, out: OUT}) {
                             out: OUT !== "txt" ? "nil" : OUT,
                             value: "i",
                         }),
-                        (𝕊12.bindings.int32).lambda(𝕊15),
+                        (𝕊12.bindings.i32).lambda(𝕊15),
                     ],
                 }),
                 sequence({

@@ -396,12 +396,12 @@ function isPlainObject(value) {
 const 𝔼9 = (() => {
     "use strict";
     /* @pen exports = {
-        float64,
-        int32,
+        f64,
+        i32,
         memoise,
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
-    function float64(options) {
+    function f64(options) {
         const NO_CONSUME = options.in === 'nil';
         const NO_PRODUCE = options.out === 'nil';
         if (options.in === 'txt' || options.out === 'ast') {
@@ -500,7 +500,7 @@ const 𝔼9 = (() => {
         }
         throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
     }
-    // These constants are used by the float64 rule.
+    // These constants are used by the f64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
     const MINUS_SIGN = '-'.charCodeAt(0);
     const DECIMAL_POINT = '.'.charCodeAt(0);
@@ -510,7 +510,7 @@ const 𝔼9 = (() => {
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
-    function int32(options) {
+    function i32(options) {
         const NO_CONSUME = options.in === 'nil';
         const NO_PRODUCE = options.out === 'nil';
         let result = {
@@ -736,8 +736,8 @@ const 𝔼9 = (() => {
     }
 
     return {
-        float64,
-        int32,
+        f64,
+        i32,
         memoise,
     };
 })();
@@ -900,7 +900,7 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊7 = {
         bindings: {
-            float64: {},
+            f64: {},
             anyChar: {},
             maybe: {},
             not: {},
@@ -939,8 +939,8 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊9 = {
         bindings: {
-            float64: {},
-            int32: {},
+            f64: {},
+            i32: {},
             memoise: {},
         },
     };
@@ -957,13 +957,13 @@ function createProgram({in: IN, out: OUT}) {
     };
 
     // -------------------- Aliases --------------------
-    𝕊7.bindings.float64 = 𝕊9.bindings.float64;
+    𝕊7.bindings.f64 = 𝕊9.bindings.f64;
     𝕊7.bindings.anyChar = 𝕊10.bindings.anyChar;
     𝕊7.bindings.maybe = 𝕊10.bindings.maybe;
     𝕊7.bindings.not = 𝕊10.bindings.not;
     𝕊7.bindings.zeroOrMore = 𝕊10.bindings.zeroOrMore;
     𝕊7.bindings.unicode = 𝕊10.bindings.unicode;
-    𝕊7.bindings.Number = 𝕊7.bindings.float64;
+    𝕊7.bindings.Number = 𝕊7.bindings.f64;
 
     // -------------------- Compile-time constants --------------------
     𝕊7.bindings.DOUBLE_QUOTE.constant = {value: "\""};
@@ -974,13 +974,13 @@ function createProgram({in: IN, out: OUT}) {
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊9.bindings.float64,
-        𝔼9.float64({in: IN, out: OUT}),
+        𝕊9.bindings.f64,
+        𝔼9.f64({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊9.bindings.int32,
-        𝔼9.int32({in: IN, out: OUT}),
+        𝕊9.bindings.i32,
+        𝔼9.i32({in: IN, out: OUT}),
     );
 
     Object.assign(

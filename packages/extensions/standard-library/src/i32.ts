@@ -2,7 +2,7 @@
 
 
 // TODO: doc... has both 'txt' and 'ast' representation
-function int32(options: StaticOptions): PenVal {
+function i32(options: StaticOptions): PenVal {
     const NO_CONSUME = options.in === 'nil';
     const NO_PRODUCE = options.out === 'nil';
     let result: PenVal = {
