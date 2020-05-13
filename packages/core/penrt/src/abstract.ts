@@ -1,8 +1,6 @@
 function abstract(options: StaticOptions & {expr: PenVal}): PenVal {
     const {expr} = options;
     return {
-        bindings: {},
-
         parse() {
             let INULₒ = INUL;
             INUL = true;
@@ -18,7 +16,5 @@ function abstract(options: StaticOptions & {expr: PenVal}): PenVal {
             ONUL = ONULₒ;
             return result;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

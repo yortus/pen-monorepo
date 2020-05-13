@@ -1,12 +1,13 @@
 function unicode(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
         parse: NOT_A_RULE,
+
         unparse: NOT_A_RULE,
-        apply(expr) {
-            let base = expr.bindings.base?.constant?.value as number;
-            let minDigits = expr.bindings.minDigits?.constant?.value as number;
-            let maxDigits = expr.bindings.maxDigits?.constant?.value as number;
+
+        lambda(expr) {
+            let base = expr.bindings?.base?.constant?.value as number;
+            let minDigits = expr.bindings?.minDigits?.constant?.value as number;
+            let maxDigits = expr.bindings?.maxDigits?.constant?.value as number;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
             assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
@@ -16,8 +17,6 @@ function unicode(_options: StaticOptions): PenVal {
             let regex = RegExp(pattern, 'i');
 
             return {
-                bindings: {},
-
                 parse() {
                     if (!isString(IDOC)) return false;
                     let stateₒ = getState();
@@ -46,8 +45,6 @@ function unicode(_options: StaticOptions): PenVal {
                     // TODO: implement
                     return false;
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };

@@ -1,9 +1,10 @@
 function memoise(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
         parse: NOT_A_RULE,
+
         unparse: NOT_A_RULE,
-        apply(expr) {
+
+        lambda(expr) {
 
             // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
@@ -29,8 +30,6 @@ function memoise(_options: StaticOptions): PenVal {
             >();
 
             return {
-                bindings: {},
-
                 parse() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = getState();
@@ -169,8 +168,6 @@ function memoise(_options: StaticOptions): PenVal {
                     setState(memo.stateᐟ);
                     return memo.result;
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };

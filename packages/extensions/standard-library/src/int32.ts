@@ -4,22 +4,18 @@
 
 function int32(_options: StaticOptions): PenVal {
     let result: PenVal = {
-        bindings: {},
-
         parse: NOT_A_RULE,
 
         unparse: NOT_A_RULE,
 
         // TODO: temp testing... the lambda form which takes a `base` arg
-        apply(expr) {
-            let base = expr.bindings.base?.constant?.value as number | undefined ?? 10;
-            let signed = expr.bindings.signed?.constant?.value as boolean | undefined ?? true;
+        lambda(expr) {
+            let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
+            let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
 
             return {
-                bindings: {},
-
                 parse() {
                     if (!isString(IDOC)) return false;
                     let stateₒ = getState();
@@ -97,18 +93,16 @@ function int32(_options: StaticOptions): PenVal {
                     IMEM = 1;
                     return true;
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };
 
     // TODO: temp testing...
-    result.parse = result.apply({bindings: {
+    result.parse = result.lambda!({bindings: {
         base: {constant: {value: 10}},
         unsigned: {constant: {value: false}},
     }} as unknown as PenVal).parse;
-    result.unparse = result.apply({bindings: {
+    result.unparse = result.lambda!({bindings: {
         base: {constant: {value: 10}},
         unsigned: {constant: {value: false}},
     }} as unknown as PenVal).unparse;

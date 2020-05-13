@@ -1,8 +1,6 @@
 function record(options: StaticOptions & {fields: Array<{name: string, value: PenVal}>}): PenVal {
     const {fields} = options;
     return {
-        bindings: {},
-
         parse() {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
@@ -55,7 +53,5 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
             ODOC = text;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

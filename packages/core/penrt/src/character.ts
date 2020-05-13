@@ -1,8 +1,6 @@
 function character(options: StaticOptions & {min: string, max: string}): PenVal {
     const {min, max} = options;
     return {
-        bindings: {},
-
         parse() {
             let c = min;
             if (!INUL) {
@@ -28,7 +26,5 @@ function character(options: StaticOptions & {min: string, max: string}): PenVal 
             ODOC = ONUL ? undefined : c;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

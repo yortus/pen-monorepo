@@ -1,12 +1,11 @@
 function zeroOrMore(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
         parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            return {
-                bindings: {},
 
+        unparse: NOT_A_RULE,
+
+        lambda(expr) {
+            return {
                 parse() {
                     let stateₒ = getState();
                     let node: unknown;
@@ -42,8 +41,6 @@ function zeroOrMore(_options: StaticOptions): PenVal {
                     ODOC = text;
                     return true;
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };

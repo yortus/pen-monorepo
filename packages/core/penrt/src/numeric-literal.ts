@@ -1,8 +1,6 @@
 function numericLiteral(options: StaticOptions & {value: number}): PenVal {
     const {value} = options;
     return {
-        bindings: {},
-
         parse() {
             ODOC = ONUL ? undefined : value;
             return true;
@@ -16,7 +14,5 @@ function numericLiteral(options: StaticOptions & {value: number}): PenVal {
             ODOC = undefined;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

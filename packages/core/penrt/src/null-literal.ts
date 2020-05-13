@@ -1,7 +1,5 @@
 function nullLiteral(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
-
         parse() {
             ODOC = ONUL ? undefined : null;
             return true;
@@ -15,7 +13,5 @@ function nullLiteral(_options: StaticOptions): PenVal {
             ODOC = undefined;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

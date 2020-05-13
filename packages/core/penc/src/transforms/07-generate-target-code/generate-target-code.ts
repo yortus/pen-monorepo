@@ -190,7 +190,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'ApplicationExpression':
             emit.text('(');
             emitExpression(emit, expr.lambda, symbolTable);
-            emit.text(').apply(');
+            emit.text(').lambda(');
             emitExpression(emit, expr.argument, symbolTable);
             emit.text(`)`);
             return;

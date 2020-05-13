@@ -1,7 +1,5 @@
 function anyChar(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
-
         parse() {
             let c = '?';
             if (!INUL) {
@@ -25,7 +23,5 @@ function anyChar(_options: StaticOptions): PenVal {
             ODOC = ONUL ? undefined : c;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

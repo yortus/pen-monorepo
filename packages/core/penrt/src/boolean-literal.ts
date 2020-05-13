@@ -1,8 +1,6 @@
 function booleanLiteral(options: StaticOptions & {value: boolean}): PenVal {
     const {value} = options;
     return {
-        bindings: {},
-
         parse() {
             ODOC = ONUL ? undefined : value;
             return true;
@@ -16,7 +14,5 @@ function booleanLiteral(options: StaticOptions & {value: boolean}): PenVal {
             ODOC = undefined;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

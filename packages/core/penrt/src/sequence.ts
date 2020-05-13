@@ -2,8 +2,6 @@ function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
     const {expressions} = options;
     const arity = expressions.length;
     return {
-        bindings: {},
-
         parse() {
             let stateₒ = getState();
             let node: unknown;
@@ -25,7 +23,5 @@ function sequence(options: StaticOptions & {expressions: PenVal[]}): PenVal {
             ODOC = text;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

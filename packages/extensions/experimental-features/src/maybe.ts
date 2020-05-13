@@ -1,13 +1,12 @@
 function maybe(options: StaticOptions): PenVal {
     const eps = epsilon(options); // TODO: remove this altogether?
     return {
-        bindings: {},
         parse: NOT_A_RULE,
-        unparse: NOT_A_RULE,
-        apply(expr) {
-            return {
-                bindings: {},
 
+        unparse: NOT_A_RULE,
+
+        lambda(expr) {
+            return {
                 parse() {
                     return expr.parse() || eps.parse();
                 },
@@ -15,8 +14,6 @@ function maybe(options: StaticOptions): PenVal {
                 unparse() {
                     return expr.unparse() || eps.unparse();
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };

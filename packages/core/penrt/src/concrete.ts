@@ -1,8 +1,6 @@
 function concrete(options: StaticOptions & {expr: PenVal}): PenVal {
     const {expr} = options;
     return {
-        bindings: {},
-
         parse() {
             let ONULₒ = ONUL;
             ONUL = true;
@@ -18,7 +16,5 @@ function concrete(options: StaticOptions & {expr: PenVal}): PenVal {
             INUL = INULₒ;
             return result;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

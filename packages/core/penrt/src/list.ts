@@ -2,8 +2,6 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
     const {elements} = options;
     const elementsLength = elements.length;
     return {
-        bindings: {},
-
         parse() {
             let stateₒ = getState();
             let arr = [] as unknown[];
@@ -34,7 +32,5 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
             ODOC = text;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

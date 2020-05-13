@@ -12,14 +12,14 @@ interface StaticOptions {
 
 interface PenVal {
     // module
-    bindings: Record<string, PenVal>;
+    bindings?: Record<string, PenVal>;
 
     // rule
     parse(): boolean;
     unparse(): boolean;
 
     // lambda
-    apply(arg: PenVal): PenVal;
+    lambda?(arg: PenVal): PenVal;
 
     // compile-time constant
     constant?: {value: unknown};

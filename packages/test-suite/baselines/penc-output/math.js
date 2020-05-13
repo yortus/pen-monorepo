@@ -3,7 +3,6 @@
 function abstract(options) {
     const { expr } = options;
     return {
-        bindings: {},
         parse() {
             let INULₒ = INUL;
             INUL = true;
@@ -18,13 +17,11 @@ function abstract(options) {
             ONUL = ONULₒ;
             return result;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function booleanLiteral(options) {
     const { value } = options;
     return {
-        bindings: {},
         parse() {
             ODOC = ONUL ? undefined : value;
             return true;
@@ -38,13 +35,11 @@ function booleanLiteral(options) {
             ODOC = undefined;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function character(options) {
     const { min, max } = options;
     return {
-        bindings: {},
         parse() {
             let c = min;
             if (!INUL) {
@@ -75,13 +70,11 @@ function character(options) {
             ODOC = ONUL ? undefined : c;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function concrete(options) {
     const { expr } = options;
     return {
-        bindings: {},
         parse() {
             let ONULₒ = ONUL;
             ONUL = true;
@@ -96,7 +89,6 @@ function concrete(options) {
             INUL = INULₒ;
             return result;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function createMainExports(start) {
@@ -126,7 +118,6 @@ function createMainExports(start) {
 function field(options) {
     const { name, value } = options;
     return {
-        bindings: {},
         parse() {
             let stateₒ = getState();
             let obj = {};
@@ -176,14 +167,12 @@ function field(options) {
             setState(stateₒ);
             return false;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function list(options) {
     const { elements } = options;
     const elementsLength = elements.length;
     return {
-        bindings: {},
         parse() {
             let stateₒ = getState();
             let arr = [];
@@ -217,12 +206,10 @@ function list(options) {
             ODOC = text;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function nullLiteral(_options) {
     return {
-        bindings: {},
         parse() {
             ODOC = ONUL ? undefined : null;
             return true;
@@ -236,13 +223,11 @@ function nullLiteral(_options) {
             ODOC = undefined;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function numericLiteral(options) {
     const { value } = options;
     return {
-        bindings: {},
         parse() {
             ODOC = ONUL ? undefined : value;
             return true;
@@ -256,13 +241,11 @@ function numericLiteral(options) {
             ODOC = undefined;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function record(options) {
     const { fields } = options;
     return {
-        bindings: {},
         parse() {
             let stateₒ = getState();
             let obj = {};
@@ -306,14 +289,12 @@ function record(options) {
             ODOC = text;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function selection(options) {
     const { expressions } = options;
     const arity = expressions.length;
     return {
-        bindings: {},
         parse() {
             for (let i = 0; i < arity; ++i) {
                 if (expressions[i].parse())
@@ -328,14 +309,12 @@ function selection(options) {
             }
             return false;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function sequence(options) {
     const { expressions } = options;
     const arity = expressions.length;
     return {
-        bindings: {},
         parse() {
             let stateₒ = getState();
             let node;
@@ -358,13 +337,11 @@ function sequence(options) {
             ODOC = text;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 function stringLiteral(options) {
     const { value } = options;
     return {
-        bindings: {},
         parse() {
             if (!INUL) {
                 if (!isString(IDOC))
@@ -387,7 +364,6 @@ function stringLiteral(options) {
             ODOC = ONUL ? undefined : value;
             return true;
         },
-        apply: NOT_A_LAMBDA,
     };
 }
 let IDOC;
@@ -466,7 +442,6 @@ const 𝔼16 = (() => {
     // TODO: handle abstract/concrete...
     function float64(_options) {
         return {
-            bindings: {},
             parse() {
                 if (!isString(IDOC))
                     return false;
@@ -545,7 +520,6 @@ const 𝔼16 = (() => {
                 IMEM = 1;
                 return true;
             },
-            apply: NOT_A_LAMBDA,
         };
     }
     // These constants are used by the float64 rule.
@@ -560,18 +534,16 @@ const 𝔼16 = (() => {
     // tslint:disable: no-bitwise
     function int32(_options) {
         let result = {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
             // TODO: temp testing... the lambda form which takes a `base` arg
-            apply(expr) {
-                var _a, _b, _c, _d, _e, _f;
-                let base = (_c = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
-                let signed = (_f = (_e = (_d = expr.bindings.signed) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+            lambda(expr) {
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
+                let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 return {
-                    bindings: {},
                     parse() {
                         if (!isString(IDOC))
                             return false;
@@ -647,16 +619,15 @@ const 𝔼16 = (() => {
                         IMEM = 1;
                         return true;
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
         // TODO: temp testing...
-        result.parse = result.apply({ bindings: {
+        result.parse = result.lambda({ bindings: {
                 base: { constant: { value: 10 } },
                 unsigned: { constant: { value: false } },
             } }).parse;
-        result.unparse = result.apply({ bindings: {
+        result.unparse = result.lambda({ bindings: {
                 base: { constant: { value: 10 } },
                 unsigned: { constant: { value: false } },
             } }).unparse;
@@ -693,16 +664,14 @@ const 𝔼16 = (() => {
     ];
     function memoise(_options) {
         return {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
-            apply(expr) {
+            lambda(expr) {
                 // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
                 const parseMemos = new Map();
                 // TODO: revise memo key once using new ast/pos signature
                 const unparseMemos = new Map();
                 return {
-                    bindings: {},
                     parse() {
                         // Check whether the memo table already has an entry for the given initial state.
                         let stateₒ = getState();
@@ -836,7 +805,6 @@ const 𝔼16 = (() => {
                         setState(memo.stateᐟ);
                         return memo.result;
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
@@ -860,7 +828,6 @@ const 𝔼17 = (() => {
     } */
     function anyChar(_options) {
         return {
-            bindings: {},
             parse() {
                 let c = '?';
                 if (!INUL) {
@@ -887,12 +854,10 @@ const 𝔼17 = (() => {
                 ODOC = ONUL ? undefined : c;
                 return true;
             },
-            apply: NOT_A_LAMBDA,
         };
     }
     function epsilon(_options) {
         return {
-            bindings: {},
             parse() {
                 ODOC = undefined;
                 return true;
@@ -901,25 +866,21 @@ const 𝔼17 = (() => {
                 ODOC = undefined;
                 return true;
             },
-            apply: NOT_A_LAMBDA,
         };
     }
     function maybe(options) {
         const eps = epsilon(options); // TODO: remove this altogether?
         return {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
-            apply(expr) {
+            lambda(expr) {
                 return {
-                    bindings: {},
                     parse() {
                         return expr.parse() || eps.parse();
                     },
                     unparse() {
                         return expr.unparse() || eps.unparse();
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
@@ -927,13 +888,10 @@ const 𝔼17 = (() => {
     function not(options) {
         const eps = epsilon(options); // TODO: remove this altogether?
         return {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
-            apply(expr) {
+            lambda(expr) {
                 return {
-                    bindings: {},
-                    kind: 'rule',
                     parse() {
                         let stateₒ = getState();
                         if (!expr.parse())
@@ -948,21 +906,19 @@ const 𝔼17 = (() => {
                         setState(stateₒ);
                         return false;
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
     }
     function unicode(_options) {
         return {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
-            apply(expr) {
-                var _a, _b, _c, _d, _e, _f;
-                let base = (_b = (_a = expr.bindings.base) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
-                let minDigits = (_d = (_c = expr.bindings.minDigits) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
-                let maxDigits = (_f = (_e = expr.bindings.maxDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+            lambda(expr) {
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+                let base = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value;
+                let minDigits = (_f = (_e = (_d = expr.bindings) === null || _d === void 0 ? void 0 : _d.minDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+                let maxDigits = (_j = (_h = (_g = expr.bindings) === null || _g === void 0 ? void 0 : _g.maxDigits) === null || _h === void 0 ? void 0 : _h.constant) === null || _j === void 0 ? void 0 : _j.value;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
                 assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
@@ -970,7 +926,6 @@ const 𝔼17 = (() => {
                 let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                 let regex = RegExp(pattern, 'i');
                 return {
-                    bindings: {},
                     parse() {
                         if (!isString(IDOC))
                             return false;
@@ -1000,19 +955,16 @@ const 𝔼17 = (() => {
                         // TODO: implement
                         return false;
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
     }
     function zeroOrMore(_options) {
         return {
-            bindings: {},
             parse: NOT_A_RULE,
             unparse: NOT_A_RULE,
-            apply(expr) {
+            lambda(expr) {
                 return {
-                    bindings: {},
                     parse() {
                         let stateₒ = getState();
                         let node;
@@ -1046,7 +998,6 @@ const 𝔼17 = (() => {
                         ODOC = text;
                         return true;
                     },
-                    apply: NOT_A_LAMBDA,
                 };
             },
         };
@@ -1185,7 +1136,7 @@ Object.assign(
 
 Object.assign(
     𝕊12.bindings.expr,
-    (𝕊12.bindings.memoise).apply(selection({
+    (𝕊12.bindings.memoise).lambda(selection({
         expressions: [
             𝕊12.bindings.add,
             𝕊12.bindings.sub,
@@ -1246,7 +1197,7 @@ Object.assign(
 
 Object.assign(
     𝕊12.bindings.term,
-    (𝕊12.bindings.memoise).apply(selection({
+    (𝕊12.bindings.memoise).lambda(selection({
         expressions: [
             𝕊12.bindings.mul,
             𝕊12.bindings.div,
@@ -1315,7 +1266,7 @@ Object.assign(
         expressions: [
             sequence({
                 expressions: [
-                    (𝕊12.bindings.not).apply(selection({
+                    (𝕊12.bindings.not).lambda(selection({
                         expressions: [
                             stringLiteral({value: "0x"}),
                             stringLiteral({value: "0b"}),
@@ -1327,19 +1278,19 @@ Object.assign(
             sequence({
                 expressions: [
                     concrete({expr: stringLiteral({value: "0x"})}),
-                    (𝕊12.bindings.int32).apply(𝕊13),
+                    (𝕊12.bindings.int32).lambda(𝕊13),
                 ],
             }),
             sequence({
                 expressions: [
                     concrete({expr: stringLiteral({value: "0b"})}),
-                    (𝕊12.bindings.int32).apply(𝕊14),
+                    (𝕊12.bindings.int32).lambda(𝕊14),
                 ],
             }),
             sequence({
                 expressions: [
                     concrete({expr: stringLiteral({value: "i"})}),
-                    (𝕊12.bindings.int32).apply(𝕊15),
+                    (𝕊12.bindings.int32).lambda(𝕊15),
                 ],
             }),
             sequence({

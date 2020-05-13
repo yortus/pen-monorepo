@@ -1,8 +1,6 @@
 function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const {value} = options;
     return {
-        bindings: {},
-
         parse() {
             if (!INUL) {
                 if (!isString(IDOC)) return false;
@@ -22,7 +20,5 @@ function stringLiteral(options: StaticOptions & {value: string}): PenVal {
             ODOC = ONUL ? undefined : value;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }

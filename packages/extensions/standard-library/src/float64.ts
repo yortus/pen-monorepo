@@ -3,8 +3,6 @@
 
 function float64(_options: StaticOptions): PenVal {
     return {
-        bindings: {},
-
         parse() {
             if (!isString(IDOC)) return false;
             let stateₒ = getState();
@@ -87,8 +85,6 @@ function float64(_options: StaticOptions): PenVal {
             IMEM = 1;
             return true;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }
 

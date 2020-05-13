@@ -1,15 +1,12 @@
 function not(options: StaticOptions): PenVal {
     const eps = epsilon(options); // TODO: remove this altogether?
     return {
-        bindings: {},
         parse: NOT_A_RULE,
+
         unparse: NOT_A_RULE,
-        apply(expr) {
+
+        lambda(expr) {
             return {
-                bindings: {},
-
-                kind: 'rule',
-
                 parse() {
                     let stateₒ = getState();
                     if (!expr.parse()) return eps.parse();
@@ -23,8 +20,6 @@ function not(options: StaticOptions): PenVal {
                     setState(stateₒ);
                     return false;
                 },
-
-                apply: NOT_A_LAMBDA,
             };
         },
     };

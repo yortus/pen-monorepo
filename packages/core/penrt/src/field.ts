@@ -1,8 +1,6 @@
 function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
     const {name, value} = options;
     return {
-        bindings: {},
-
         parse() {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
@@ -65,7 +63,5 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
             setState(stateₒ);
             return false;
         },
-
-        apply: NOT_A_LAMBDA,
     };
 }
