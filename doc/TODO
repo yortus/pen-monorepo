@@ -18,7 +18,7 @@ New TODOs May 2020:
                 return OUT = out, true;
             selection:
                 return rule0() || rule1() || rule2() || ...
-        
+        [x] tried for `sequence`, but it is slightly *slower* for large-json test (see stash `experiment-eval-sequence`)
         [ ] use `eval` to ensure every seq/sel rule instance is unique and has its own V8 optimisations applies
     [ ] helpers around *all* register get/set access
     [ ] helpers to work with input, eg generalised `match` helper(s), `typeOf`, etc
