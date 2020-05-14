@@ -14,10 +14,8 @@
     "scripts": {},
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
+        "fs-extra": "^8.1.0",
         "penc": "*",
         "penrt": "*"
-    },
-    "dependencies": {
-        "fs-extra": "^8.1.0"
     }
 }

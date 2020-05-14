@@ -2,6 +2,7 @@ New TODOs May 2020:
     [x] add a timed test for unparse so perf improvements can be roughly measured
     [x] parse/unparse -> rule
     [x] top-level exports = `parse` and `print`
+    [x] add pegjs JSON parser to large-json.test for comparison/reference
     [ ] don't pass IN/OUT everywhere
         [ ] needless complexity
         [ ] make them locals, like the other registers

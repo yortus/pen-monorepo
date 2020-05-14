@@ -1,8 +1,9 @@
-// tslint:disable: no-console
+// tslint:disable: no-console no-var-requires
 import {expect} from 'chai';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import {compile} from 'penc';
+const pegjsJson = require('../fixtures/scripts/pegjs-json-parser') as {parse: (json: string) => unknown};
 
 
 const fixtureName = 'json';
@@ -28,9 +29,13 @@ describe(`Procesing a large JSON document`, async () => {
         let t1 = new Date().getTime();
         let json2 = parse(text);
         let t2 = new Date().getTime();
+        let json3 = pegjsJson.parse(text);
+        let t3 = new Date().getTime();
         expect(json2).to.deep.equal(json1);
+        expect(json3).to.deep.equal(json1);
         console.log(`JSON.parse took ${t1 - t0}ms`);
         console.log(`penc parse took ${t2 - t1}ms`);
+        console.log(`pegjs parse took ${t3 - t2}ms`);
     });
 
     it('prints', () => {
