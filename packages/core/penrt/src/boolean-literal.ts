@@ -4,11 +4,11 @@ function booleanLiteral(options: StaticOptions & {value: boolean}): PenVal {
     const out = options.out === 'ast' ? value : undefined;
 
     if (options.in !== 'ast') {
-        return {rule: () => (OUT = out, true)};
+        return {rule: function BOO() { return OUT = out, true; }};
     }
 
     return {
-        rule() {
+        rule: function BOO() {
             if (IN !== value || IP !== 0) return false;
             IP += 1;
             OUT = out;

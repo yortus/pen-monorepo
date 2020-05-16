@@ -4,11 +4,11 @@ function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const out = options.out === 'nil' ? undefined : value;
 
     if (options.in === 'nil') {
-        return {rule: () => (OUT = out, true)};
+        return {rule: function STR() { return OUT = out, true; }};
     }
 
     return {
-        rule() {
+        rule: function STR() {
             if (typeof IN !== 'string') return false;
             if (!isMatch(value)) return false;
             IP += value.length;

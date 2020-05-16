@@ -5,7 +5,7 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
 
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function LST() {
                 let stateₒ = getState();
                 let arr = [] as unknown[];
                 for (let i = 0; i < elementsLength; ++i) {
@@ -21,7 +21,7 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
 
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function LST() {
                 if (!Array.isArray(IN)) return false;
                 if (IP < 0 || IP + elementsLength > IN.length) return false;
 

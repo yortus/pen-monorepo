@@ -4,10 +4,10 @@ function booleanLiteral(options) {
     const { value } = options;
     const out = options.out === 'ast' ? value : undefined;
     if (options.in !== 'ast') {
-        return { rule: () => (OUT = out, true) };
+        return { rule: function BOO() { return OUT = out, true; } };
     }
     return {
-        rule() {
+        rule: function BOO() {
             if (IN !== value || IP !== 0)
                 return false;
             IP += 1;
@@ -20,10 +20,10 @@ function character(options) {
     const { min, max } = options;
     if (options.in === 'nil') {
         const out = options.out === 'nil' ? undefined : min;
-        return { rule: () => (OUT = out, true) };
+        return { rule: function CHA() { return OUT = out, true; } };
     }
     return {
-        rule() {
+        rule: function CHA() {
             if (typeof IN !== 'string')
                 return false;
             if (IP < 0 || IP >= IN.length)
@@ -67,7 +67,7 @@ function field(options) {
     const { name, value } = options;
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function FLD() {
                 let stateₒ = getState();
                 let obj = {};
                 if (!name.rule())
@@ -85,7 +85,7 @@ function field(options) {
     }
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function FLD() {
                 if (!isPlainObject(IN))
                     return false;
                 let stateₒ = getState();
@@ -129,7 +129,7 @@ function list(options) {
     const elementsLength = elements.length;
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function LST() {
                 let stateₒ = getState();
                 let arr = [];
                 for (let i = 0; i < elementsLength; ++i) {
@@ -145,7 +145,7 @@ function list(options) {
     }
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function LST() {
                 if (!Array.isArray(IN))
                     return false;
                 if (IP < 0 || IP + elementsLength > IN.length)
@@ -173,10 +173,10 @@ function list(options) {
 function nullLiteral(options) {
     const out = options.out === 'ast' ? null : undefined;
     if (options.in !== 'ast') {
-        return { rule: () => (OUT = out, true) };
+        return { rule: function NUL() { return OUT = out, true; } };
     }
     return {
-        rule() {
+        rule: function NUL() {
             if (IN !== null || IP !== 0)
                 return false;
             IP = 1;
@@ -189,10 +189,10 @@ function numericLiteral(options) {
     const { value } = options;
     const out = options.out === 'ast' ? value : undefined;
     if (options.in !== 'ast') {
-        return { rule: () => (OUT = out, true) };
+        return { rule: function NUM() { return OUT = out, true; } };
     }
     return {
-        rule() {
+        rule: function NUM() {
             if (IN !== value || IP !== 0)
                 return false;
             IP = 1;
@@ -205,7 +205,7 @@ function record(options) {
     const { fields } = options;
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function RCD() {
                 let stateₒ = getState();
                 let obj = {};
                 for (let field of fields) {
@@ -222,7 +222,7 @@ function record(options) {
     }
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function RCD() {
                 if (!isPlainObject(IN))
                     return false;
                 let stateₒ = getState();
@@ -260,7 +260,7 @@ function selection(options) {
     const { expressions } = options;
     const arity = expressions.length;
     return {
-        rule() {
+        rule: function SEL() {
             for (let i = 0; i < arity; ++i) {
                 if (expressions[i].rule())
                     return true;
@@ -273,7 +273,7 @@ function sequence(options) {
     const { expressions } = options;
     const arity = expressions.length;
     return {
-        rule() {
+        rule: function SEQ() {
             let stateₒ = getState();
             let out;
             for (let i = 0; i < arity; ++i) {
@@ -290,10 +290,10 @@ function stringLiteral(options) {
     const { value } = options;
     const out = options.out === 'nil' ? undefined : value;
     if (options.in === 'nil') {
-        return { rule: () => (OUT = out, true) };
+        return { rule: function STR() { return OUT = out, true; } };
     }
     return {
-        rule() {
+        rule: function STR() {
             if (typeof IN !== 'string')
                 return false;
             if (!isMatch(value))
@@ -371,11 +371,11 @@ const 𝔼16 = (() => {
     function f64(options) {
         if (options.in === 'nil') {
             const out = options.out === 'nil' ? undefined : 0;
-            return { rule: () => (OUT = out, true) };
+            return { rule: function F64() { return OUT = out, true; } };
         }
         if (options.in === 'txt' || options.out === 'ast') {
             return {
-                rule() {
+                rule: function F64() {
                     if (typeof IN !== 'string')
                         return false;
                     let stateₒ = getState();
@@ -447,7 +447,7 @@ const 𝔼16 = (() => {
         }
         if (options.in === 'ast' || options.out === 'txt') {
             return {
-                rule() {
+                rule: function F64() {
                     // Ensure N is a number.
                     if (typeof IN !== 'number' || IP !== 0)
                         return false;
@@ -481,11 +481,11 @@ const 𝔼16 = (() => {
                 assert(typeof signed === 'boolean');
                 if (options.in === 'nil') {
                     const out = options.out === 'nil' ? undefined : 0;
-                    return { rule: () => (OUT = out, true) };
+                    return { rule: function I32() { return OUT = out, true; } };
                 }
                 if (options.in === 'txt' || options.out === 'ast') {
                     return {
-                        rule() {
+                        rule: function I32() {
                             if (typeof IN !== 'string')
                                 return false;
                             let stateₒ = getState();
@@ -610,15 +610,15 @@ const 𝔼16 = (() => {
         return {
             lambda(expr) {
                 // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
-                const parseMemos = new Map();
+                const memos = new Map();
                 return {
-                    rule() {
+                    rule: function MEM() {
                         // Check whether the memo table already has an entry for the given initial state.
                         let stateₒ = getState();
-                        let memos2 = parseMemos.get(IN);
+                        let memos2 = memos.get(IN);
                         if (memos2 === undefined) {
                             memos2 = new Map();
-                            parseMemos.set(IN, memos2);
+                            memos.set(IN, memos2);
                         }
                         let memo = memos2.get(IP);
                         if (!memo) {
@@ -710,10 +710,10 @@ const 𝔼17 = (() => {
     function anyChar(options) {
         if (options.in === 'nil') {
             const out = options.out === 'nil' ? undefined : '?';
-            return { rule: () => (OUT = out, true) };
+            return { rule: function ANY() { return OUT = out, true; } };
         }
         return {
-            rule() {
+            rule: function ANY() {
                 if (typeof IN !== 'string')
                     return false;
                 if (IP < 0 || IP >= IN.length)
@@ -727,7 +727,7 @@ const 𝔼17 = (() => {
     }
     function epsilon(_options) {
         return {
-            rule() {
+            rule: function EPS() {
                 OUT = undefined;
                 return true;
             },
@@ -738,7 +738,7 @@ const 𝔼17 = (() => {
         return {
             lambda(expr) {
                 return {
-                    rule() {
+                    rule: function Oⵈ1() {
                         return expr.rule() || eps.rule();
                     },
                 };
@@ -750,7 +750,7 @@ const 𝔼17 = (() => {
         return {
             lambda(expr) {
                 return {
-                    rule() {
+                    rule: function NOT() {
                         let stateₒ = getState();
                         if (!expr.rule())
                             return eps.rule();
@@ -776,7 +776,7 @@ const 𝔼17 = (() => {
                 let regex = RegExp(pattern, 'i');
                 if (options.in === 'txt' || options.out === 'ast') {
                     return {
-                        rule() {
+                        rule: function UNI() {
                             if (typeof IN !== 'string')
                                 return false;
                             let stateₒ = getState();
@@ -805,7 +805,7 @@ const 𝔼17 = (() => {
                 }
                 if (options.in === 'ast' || options.out === 'txt') {
                     return {
-                        rule: () => {
+                        rule: function UNI() {
                             // TODO: implement
                             return false;
                         },
@@ -819,7 +819,7 @@ const 𝔼17 = (() => {
         return {
             lambda(expr) {
                 return {
-                    rule() {
+                    rule: function OⵈM() {
                         let stateₒ = getState();
                         let out;
                         while (true) {

@@ -5,11 +5,11 @@ function numericLiteral(options: StaticOptions & {value: number}): PenVal {
     const out = options.out === 'ast' ? value : undefined;
 
     if (options.in !== 'ast') {
-        return {rule: () => (OUT = out, true)};
+        return {rule: function NUM() { return OUT = out, true; }};
     }
 
     return {
-        rule() {
+        rule: function NUM() {
             if (IN !== value || IP !== 0) return false;
             IP = 1;
             OUT = out;

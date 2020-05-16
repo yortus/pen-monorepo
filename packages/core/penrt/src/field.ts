@@ -4,7 +4,7 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
 
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function FLD() {
                 let stateₒ = getState();
                 let obj = {} as Record<string, unknown>;
 
@@ -24,7 +24,7 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
 
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function FLD() {
                 if (!isPlainObject(IN)) return false;
                 let stateₒ = getState();
                 let text: unknown;

@@ -4,7 +4,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
 
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function RCD() {
                 let stateₒ = getState();
                 let obj = {} as Record<string, unknown>;
                 for (let field of fields) {
@@ -21,7 +21,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
 
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function RCD() {
                 if (!isPlainObject(IN)) return false;
                 let stateₒ = getState();
                 let text: unknown;

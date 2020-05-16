@@ -3,7 +3,7 @@ function not(options: StaticOptions): PenVal {
     return {
         lambda(expr) {
             return {
-                rule() {
+                rule: function NOT() {
                     let stateₒ = getState();
                     if (!expr.rule!()) return eps.rule!();
                     setState(stateₒ);

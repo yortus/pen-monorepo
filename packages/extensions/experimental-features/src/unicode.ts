@@ -14,7 +14,7 @@ function unicode(options: StaticOptions): PenVal {
 
             if (options.in === 'txt' || options.out === 'ast') {
                 return {
-                    rule() {
+                    rule: function UNI() {
                         if (typeof IN !== 'string') return false;
                         let stateₒ = getState();
                         const LEN = IN.length;
@@ -42,7 +42,7 @@ function unicode(options: StaticOptions): PenVal {
 
             if (options.in === 'ast' || options.out === 'txt') {
                 return {
-                    rule: () => {
+                    rule: function UNI() {
                         // TODO: implement
                         return false;
                     },

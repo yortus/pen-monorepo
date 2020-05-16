@@ -3,7 +3,7 @@ function maybe(options: StaticOptions): PenVal {
     return {
         lambda(expr) {
             return {
-                rule() {
+                rule: function Oⵈ1() {
                     return expr.rule!() || eps.rule!();
                 },
             };

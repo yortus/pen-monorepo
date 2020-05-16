@@ -4,11 +4,11 @@ function character(options: StaticOptions & {min: string, max: string}): PenVal 
 
     if (options.in === 'nil') {
         const out = options.out === 'nil' ? undefined : min;
-        return {rule: () => (OUT = out, true)};
+        return {rule: function CHA() { return OUT = out, true; }};
     }
 
     return {
-        rule() {
+        rule: function CHA() {
             if (typeof IN !== 'string') return false;
             if (IP < 0 || IP >= IN.length) return false;
             let c = IN.charAt(IP);

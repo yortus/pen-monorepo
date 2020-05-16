@@ -2,7 +2,7 @@ function zeroOrMore(_options: StaticOptions): PenVal {
     return {
         lambda(expr) {
             return {
-                rule() {
+                rule: function OⵈM() {
                     let stateₒ = getState();
                     let out: unknown;
                     while (true) {

@@ -1,6 +1,6 @@
 function epsilon(_options: StaticOptions): PenVal {
     return {
-        rule() {
+        rule: function EPS() {
             OUT = undefined;
             return true;
         },

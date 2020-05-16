@@ -4,7 +4,7 @@ function memoise(_options: StaticOptions): PenVal {
 
             // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 
-            const parseMemos = new Map<
+            const memos = new Map<
                 unknown,
                 Map<number, {
                     resolved: boolean,
@@ -16,13 +16,13 @@ function memoise(_options: StaticOptions): PenVal {
             >();
 
             return {
-                rule() {
+                rule: function MEM() {
                     // Check whether the memo table already has an entry for the given initial state.
                     let stateₒ = getState();
-                    let memos2 = parseMemos.get(IN);
+                    let memos2 = memos.get(IN);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        parseMemos.set(IN, memos2);
+                        memos.set(IN, memos2);
                     }
                     let memo = memos2.get(IP);
                     if (!memo) {

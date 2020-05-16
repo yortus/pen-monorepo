@@ -12,12 +12,12 @@ function i32(options: StaticOptions): PenVal {
 
             if (options.in === 'nil') {
                 const out = options.out === 'nil' ? undefined : 0;
-                return {rule: () => (OUT = out, true)};
+                return {rule: function I32() { return OUT = out, true; }};
             }
 
             if (options.in === 'txt' || options.out === 'ast') {
                 return {
-                    rule() {
+                    rule: function I32() {
                         if (typeof IN !== 'string') return false;
                         let stateₒ = getState();
 

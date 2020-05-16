@@ -2,12 +2,12 @@
 function f64(options: StaticOptions): PenVal {
     if (options.in === 'nil') {
         const out = options.out === 'nil' ? undefined : 0;
-        return {rule: () => (OUT = out, true)};
+        return {rule: function F64() { return OUT = out, true; }};
     }
 
     if (options.in === 'txt' || options.out === 'ast') {
         return {
-            rule() {
+            rule: function F64() {
                 if (typeof IN !== 'string') return false;
                 let stateₒ = getState();
                 const LEN = IN.length;
@@ -83,7 +83,7 @@ function f64(options: StaticOptions): PenVal {
 
     if (options.in === 'ast' || options.out === 'txt') {
         return {
-            rule() {
+            rule: function F64() {
                 // Ensure N is a number.
                 if (typeof IN !== 'number' || IP !== 0) return false;
 
