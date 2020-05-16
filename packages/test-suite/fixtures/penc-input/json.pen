@@ -34,9 +34,45 @@ True    = `true`   true
 Object      = LBRACE   (Properties | {})   RBRACE
 Properties  = {[String]: COLON Value}   maybe(COMMA Properties)
 
+/* NEW: ====================
+// Option 1: ellipsis is followed by a field expression, which is iterated 0..M times. NB: requires records to support computed fieldname expressions again
+Object1     = LBRACE   ({[String]: COLON Value   ...COMMA [String]: COLON Value} | {})   RBRACE
+
+// Option 2: ellipsis is followed by record expression, with special syntax and/or handling for tail recursion -> iteration
+Object2a    = LBRACE   ({[String]: COLON Value   ...COMMA rec} | {})   RBRACE // NB: special 'rec' syntax, simpler impl but looks weird
+
+Object2b    = LBRACE   (Properties | {})   RBRACE // this way is cleanest, but hardest to impl
+Properties  = {[String]: COLON Value   ...COMMA Properties} // NB: special detection of this form as tail-recursive, impl via iteration
+
+// Option 3: extend 'field' syntax with optional ... before field name expression
+Object3     = LBRACE   ({[String]: COLON Value} {...[COMMA String]: COLON Value} | {})   RBRACE // NB need for repetition here
+
+// Option 4: generalised 0..M syntax with ellipsis, orthogonal to record syntax
+Object4     = LBRACE   (Properties | {})   RBRACE
+Properties  = {[String]: COLON Value}   ...COMMA Properties // NB: impl should detect this as tail-recursive and use iteration
+==================== */
+
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET
 Elements    = [Value]   maybe(COMMA Elements)
+
+/* NEW: ====================
+// Option 1: ellipsis is followed by an element expression, which is iterated 0..M times
+Array1      = LBRACKET   ([Value, ...COMMA Value] | [])   RBRACKET
+
+// Option 2: ellipsis is followed by list expression, with special syntax and/or handling for tail recursion -> iteration
+Array2a     = LBRACKET   ([Value, ...COMMA rec] | [])   RBRACKET // NB: special 'rec' syntax, simpler impl but looks weird
+
+Array2b     = LBRACKET   (Elements | [])   RBRACKET // this way is cleanest, but hardest to impl
+Elements    = [Value, ...COMMA Elements] // NB: special detection of this form as tail-recursive, impl via iteration
+
+// Option 3: N/A
+
+// Option 4: generalised 0..M syntax with ellipsis, orthogonal to list syntax
+Array       = LBRACKET   (Elements | [])   RBRACKET
+Elements    = [Value]   ...COMMA Elements // NB: impl should detect this as tail-recursive and use iteration
+
+==================== */
 
 // ---------- Numbers ----------
 Number = f64
