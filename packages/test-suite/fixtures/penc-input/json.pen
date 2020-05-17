@@ -2,7 +2,7 @@
 // |                                  Imports                                    |
 // ===============================================================================
 {f64} = import 'std'
-{anyChar, maybe, not, zeroOrMore, unicode} = import 'experiments'
+{anyChar, not, unicode} = import 'experiments'
 
 
 // ===============================================================================
@@ -32,7 +32,7 @@ True    = `true`   true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String]: COLON Value}   maybe(COMMA Properties)
+Properties  = {[String]: COLON Value}   (COMMA Properties)?
 
 /* NEW: ====================
 // Option 1: ellipsis is followed by a field expression, which is iterated 0..M times. NB: requires records to support computed fieldname expressions again
@@ -49,12 +49,12 @@ Object3     = LBRACE   ({[String]: COLON Value} {...[COMMA String]: COLON Value}
 
 // Option 4: generalised 0..M syntax with ellipsis, orthogonal to record syntax
 Object4     = LBRACE   (Properties | {})   RBRACE
-Properties  = {[String]: COLON Value}   ...COMMA Properties // NB: impl should detect this as tail-recursive and use iteration
+Properties  = {[String]: COLON Value}   ...(COMMA Properties) // NB: impl should detect this as tail-recursive and use iteration
 ==================== */
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements | [])   RBRACKET
-Elements    = [Value]   maybe(COMMA Elements)
+Elements    = [Value]   (COMMA Elements)?
 
 /* NEW: ====================
 // Option 1: ellipsis is followed by an element expression, which is iterated 0..M times
@@ -70,7 +70,7 @@ Elements    = [Value, ...COMMA Elements] // NB: special detection of this form a
 
 // Option 4: generalised 0..M syntax with ellipsis, orthogonal to list syntax
 Array       = LBRACKET   (Elements | [])   RBRACKET
-Elements    = [Value]   ...COMMA Elements // NB: impl should detect this as tail-recursive and use iteration
+Elements    = [Value]   ...(COMMA Elements) // NB: impl should detect this as tail-recursive and use iteration
 
 ==================== */
 
@@ -78,7 +78,7 @@ Elements    = [Value]   ...COMMA Elements // NB: impl should detect this as tail
 Number = f64
 
 // ---------- Strings ----------
-String = DOUBLE_QUOTE   zeroOrMore(CHAR)   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   CHAR*   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =
@@ -101,7 +101,7 @@ RBRACKET        = WS `]` WS
 COLON           = WS `:` WS
 COMMA           = WS `,` WS
 DOUBLE_QUOTE    = `"`
-WS              = zeroOrMore(` ` | `\t` | `\n` | `\r`)
+WS              = (` ` | `\t` | `\n` | `\r`)*
 
 
 

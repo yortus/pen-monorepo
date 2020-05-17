@@ -358,6 +358,34 @@ function isInputFullyConsumed() {
 function isPlainObject(value) {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
+function zeroOrMore(options) {
+    const { expression } = options;
+    return {
+        rule: function O_M() {
+            let stateₒ = getState();
+            let out;
+            while (true) {
+                if (!expression.rule())
+                    break;
+                if (IP === stateₒ.IP)
+                    break;
+                out = concat(out, OUT);
+            }
+            OUT = out;
+            return true;
+        },
+    };
+}
+function zeroOrOne(options) {
+    const { expression } = options;
+    return {
+        rule: function O_1() {
+            if (!expression.rule())
+                OUT = undefined;
+            return true;
+        },
+    };
+}
 
 // -------------------- Extensions --------------------
 const 𝔼9 = (() => {
@@ -701,10 +729,8 @@ const 𝔼10 = (() => {
     /* @pen exports = {
         anyChar,
         epsilon,
-        maybe,
         not,
-        unicode,
-        zeroOrMore
+        unicode
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
@@ -730,18 +756,6 @@ const 𝔼10 = (() => {
             rule: function EPS() {
                 OUT = undefined;
                 return true;
-            },
-        };
-    }
-    function maybe(options) {
-        const eps = epsilon(options); // TODO: remove this altogether?
-        return {
-            lambda(expr) {
-                return {
-                    rule: function Oⵈ1() {
-                        return expr.rule() || eps.rule();
-                    },
-                };
             },
         };
     }
@@ -815,38 +829,12 @@ const 𝔼10 = (() => {
             },
         };
     }
-    function zeroOrMore(_options) {
-        return {
-            lambda(expr) {
-                return {
-                    rule: function OⵈM() {
-                        let stateₒ = getState();
-                        let out;
-                        while (true) {
-                            if (!expr.rule())
-                                break;
-                            // TODO: check if any input was consumed...
-                            // if not, stop iterating, since otherwise we may loop forever
-                            // TODO: any other checks needed? review...
-                            if (IP === stateₒ.IP)
-                                break;
-                            out = concat(out, OUT);
-                        }
-                        OUT = out;
-                        return true;
-                    },
-                };
-            },
-        };
-    }
 
     return {
         anyChar,
         epsilon,
-        maybe,
         not,
         unicode,
-        zeroOrMore,
     };
 })();
 
@@ -856,9 +844,7 @@ function createProgram({in: IN, out: OUT}) {
         bindings: {
             f64: {},
             anyChar: {},
-            maybe: {},
             not: {},
-            zeroOrMore: {},
             unicode: {},
             start: {},
             Value: {},
@@ -903,19 +889,15 @@ function createProgram({in: IN, out: OUT}) {
         bindings: {
             anyChar: {},
             epsilon: {},
-            maybe: {},
             not: {},
             unicode: {},
-            zeroOrMore: {},
         },
     };
 
     // -------------------- Aliases --------------------
     𝕊7.bindings.f64 = 𝕊9.bindings.f64;
     𝕊7.bindings.anyChar = 𝕊10.bindings.anyChar;
-    𝕊7.bindings.maybe = 𝕊10.bindings.maybe;
     𝕊7.bindings.not = 𝕊10.bindings.not;
-    𝕊7.bindings.zeroOrMore = 𝕊10.bindings.zeroOrMore;
     𝕊7.bindings.unicode = 𝕊10.bindings.unicode;
     𝕊7.bindings.Number = 𝕊7.bindings.f64;
 
@@ -955,11 +937,6 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊10.bindings.maybe,
-        𝔼10.maybe({in: IN, out: OUT}),
-    );
-
-    Object.assign(
         𝕊10.bindings.not,
         𝔼10.not({in: IN, out: OUT}),
     );
@@ -967,11 +944,6 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊10.bindings.unicode,
         𝔼10.unicode({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊10.bindings.zeroOrMore,
-        𝔼10.zeroOrMore({in: IN, out: OUT}),
     );
 
     // -------------------- json.pen --------------------
@@ -1097,14 +1069,18 @@ function createProgram({in: IN, out: OUT}) {
                         ],
                     }),
                 }),
-                (𝕊7.bindings.maybe).lambda(sequence({
+                zeroOrOne({
                     in: IN,
                     out: OUT,
-                    expressions: [
-                        𝕊7.bindings.COMMA,
-                        𝕊7.bindings.Properties,
-                    ],
-                })),
+                    expression: sequence({
+                        in: IN,
+                        out: OUT,
+                        expressions: [
+                            𝕊7.bindings.COMMA,
+                            𝕊7.bindings.Properties,
+                        ],
+                    }),
+                }),
             ],
         })
     );
@@ -1146,14 +1122,18 @@ function createProgram({in: IN, out: OUT}) {
                         𝕊7.bindings.Value,
                     ],
                 }),
-                (𝕊7.bindings.maybe).lambda(sequence({
+                zeroOrOne({
                     in: IN,
                     out: OUT,
-                    expressions: [
-                        𝕊7.bindings.COMMA,
-                        𝕊7.bindings.Elements,
-                    ],
-                })),
+                    expression: sequence({
+                        in: IN,
+                        out: OUT,
+                        expressions: [
+                            𝕊7.bindings.COMMA,
+                            𝕊7.bindings.Elements,
+                        ],
+                    }),
+                }),
             ],
         })
     );
@@ -1165,7 +1145,11 @@ function createProgram({in: IN, out: OUT}) {
             out: OUT,
             expressions: [
                 𝕊7.bindings.DOUBLE_QUOTE,
-                (𝕊7.bindings.zeroOrMore).lambda(𝕊7.bindings.CHAR),
+                zeroOrMore({
+                    in: IN,
+                    out: OUT,
+                    expression: 𝕊7.bindings.CHAR,
+                }),
                 𝕊7.bindings.DOUBLE_QUOTE,
             ],
         })
@@ -1463,32 +1447,36 @@ function createProgram({in: IN, out: OUT}) {
 
     Object.assign(
         𝕊7.bindings.WS,
-        (𝕊7.bindings.zeroOrMore).lambda(selection({
+        zeroOrMore({
             in: IN,
             out: OUT,
-            expressions: [
-                stringLiteral({
-                    in: IN !== "txt" ? "nil" : IN,
-                    out: OUT !== "txt" ? "nil" : OUT,
-                    value: " ",
-                }),
-                stringLiteral({
-                    in: IN !== "txt" ? "nil" : IN,
-                    out: OUT !== "txt" ? "nil" : OUT,
-                    value: "\t",
-                }),
-                stringLiteral({
-                    in: IN !== "txt" ? "nil" : IN,
-                    out: OUT !== "txt" ? "nil" : OUT,
-                    value: "\n",
-                }),
-                stringLiteral({
-                    in: IN !== "txt" ? "nil" : IN,
-                    out: OUT !== "txt" ? "nil" : OUT,
-                    value: "\r",
-                }),
-            ],
-        }))
+            expression: selection({
+                in: IN,
+                out: OUT,
+                expressions: [
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: " ",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\t",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\n",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\r",
+                    }),
+                ],
+            }),
+        })
     );
 
     Object.assign(

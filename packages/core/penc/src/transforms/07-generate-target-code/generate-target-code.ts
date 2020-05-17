@@ -269,6 +269,15 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emitExpression(emit, expr.expression, symbolTable);
             return;
 
+        case 'QuantifiedExpression':
+            emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('expression: ');
+            emitExpression(emit, expr.expression, symbolTable);
+            emit.text(',');
+            emit.dedent().down(1).text('})');
+            return;
+
         case 'RecordExpression':
             emit.text('record({').indent();
             emit.down(1).text('in: IN,').down(1).text('out: OUT,');

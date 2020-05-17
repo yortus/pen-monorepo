@@ -51,10 +51,13 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         SequenceExpression          a b      a  b c                                                                     NB: whitespace between terms, else is application
 
     PRECEDENCE 3
-        ApplicationExpression       a(b)   (a)b   a'blah'   a(b)                                                        NB: no whitespace between terms, else is sequence
-        BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
+        QuantifiedExpression        a?   a(b)?   a.b?   {a: b}?
 
-    PRECEDENCE 4 (HIGHEST):
+    PRECEDENCE 4
+        ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                        NB: no whitespace between terms, else is sequence
+        BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                  NB: no whitespace between terms, may relax later
+
+    PRECEDENCE 5 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
         RecordExpression            {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression             {[a]: b}
@@ -80,10 +83,14 @@ Precedence2OrHigher
     / Precedence3OrHigher
 
 Precedence3OrHigher
-    = Precedence3Expression
+    = QuantifiedExpression
     / Precedence4OrHigher
 
 Precedence4OrHigher
+    = Precedence4Expression
+    / Precedence5OrHigher
+
+Precedence5OrHigher
     = PrimaryExpression
 
 PrimaryExpression
@@ -109,8 +116,12 @@ SequenceExpression
     = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))+
     { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
-Precedence3Expression
-    = head:Precedence4OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
+QuantifiedExpression
+    = expression:Precedence4OrHigher   quantifier:("?" / "*")
+    { return {kind: 'QuantifiedExpression', expression, quantifier}; }
+
+Precedence4Expression
+    = head:Precedence5OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
@@ -126,7 +137,7 @@ BindingNameLookup
     { return {name}; }
 
 ApplicationArgument
-    = arg:Precedence4OrHigher
+    = arg:Precedence5OrHigher
     { return {arg}; }
 
 // LambdaExpression

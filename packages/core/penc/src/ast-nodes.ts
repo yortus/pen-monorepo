@@ -37,6 +37,7 @@ export type Expression<M extends Metadata = {}> =
     | NullLiteralExpression<M>
     | NumericLiteralExpression<M>
     | ParenthesisedExpression<M>
+    | QuantifiedExpression<M>
     | RecordExpression<M>
     | ReferenceExpression<M>
     | SelectionExpression<M>
@@ -202,6 +203,14 @@ export interface NumericLiteralExpression<M extends Metadata = {}> {
 export interface ParenthesisedExpression<M extends Metadata = {}> {
     readonly kind: 'ParenthesisedExpression';
     readonly expression: Expression<M>;
+    readonly meta: M[this['kind']];
+}
+
+
+export interface QuantifiedExpression<M extends Metadata = {}> {
+    readonly kind: 'QuantifiedExpression';
+    readonly expression: Expression<M>;
+    readonly quantifier: '?' | '*';
     readonly meta: M[this['kind']];
 }
 

@@ -45,6 +45,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ParenthesisedExpression': return rec(n.expression), undefined;
             case 'PenSourceFile': return rec(n.module), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
+            case 'QuantifiedExpression': return rec(n.expression), undefined;
             case 'RecordExpression': return n.fields.forEach(rec), undefined;
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;

@@ -45,6 +45,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'PenSourceFile': return {...n, module: rec(n.module)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
+            case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
             case 'RecordExpression': return {...n, fields: n.fields.map(rec)};
             case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};

@@ -358,6 +358,34 @@ function isInputFullyConsumed() {
 function isPlainObject(value) {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
+function zeroOrMore(options) {
+    const { expression } = options;
+    return {
+        rule: function O_M() {
+            let stateₒ = getState();
+            let out;
+            while (true) {
+                if (!expression.rule())
+                    break;
+                if (IP === stateₒ.IP)
+                    break;
+                out = concat(out, OUT);
+            }
+            OUT = out;
+            return true;
+        },
+    };
+}
+function zeroOrOne(options) {
+    const { expression } = options;
+    return {
+        rule: function O_1() {
+            if (!expression.rule())
+                OUT = undefined;
+            return true;
+        },
+    };
+}
 
 // -------------------- Extensions --------------------
 const 𝔼16 = (() => {
@@ -701,10 +729,8 @@ const 𝔼17 = (() => {
     /* @pen exports = {
         anyChar,
         epsilon,
-        maybe,
         not,
-        unicode,
-        zeroOrMore
+        unicode
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
@@ -730,18 +756,6 @@ const 𝔼17 = (() => {
             rule: function EPS() {
                 OUT = undefined;
                 return true;
-            },
-        };
-    }
-    function maybe(options) {
-        const eps = epsilon(options); // TODO: remove this altogether?
-        return {
-            lambda(expr) {
-                return {
-                    rule: function Oⵈ1() {
-                        return expr.rule() || eps.rule();
-                    },
-                };
             },
         };
     }
@@ -815,38 +829,12 @@ const 𝔼17 = (() => {
             },
         };
     }
-    function zeroOrMore(_options) {
-        return {
-            lambda(expr) {
-                return {
-                    rule: function OⵈM() {
-                        let stateₒ = getState();
-                        let out;
-                        while (true) {
-                            if (!expr.rule())
-                                break;
-                            // TODO: check if any input was consumed...
-                            // if not, stop iterating, since otherwise we may loop forever
-                            // TODO: any other checks needed? review...
-                            if (IP === stateₒ.IP)
-                                break;
-                            out = concat(out, OUT);
-                        }
-                        OUT = out;
-                        return true;
-                    },
-                };
-            },
-        };
-    }
 
     return {
         anyChar,
         epsilon,
-        maybe,
         not,
         unicode,
-        zeroOrMore,
     };
 })();
 
@@ -901,10 +889,8 @@ function createProgram({in: IN, out: OUT}) {
         bindings: {
             anyChar: {},
             epsilon: {},
-            maybe: {},
             not: {},
             unicode: {},
-            zeroOrMore: {},
         },
     };
 
@@ -952,11 +938,6 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊17.bindings.maybe,
-        𝔼17.maybe({in: IN, out: OUT}),
-    );
-
-    Object.assign(
         𝕊17.bindings.not,
         𝔼17.not({in: IN, out: OUT}),
     );
@@ -964,11 +945,6 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊17.bindings.unicode,
         𝔼17.unicode({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊17.bindings.zeroOrMore,
-        𝔼17.zeroOrMore({in: IN, out: OUT}),
     );
 
     // -------------------- math.pen --------------------
