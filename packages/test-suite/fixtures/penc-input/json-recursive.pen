@@ -31,8 +31,8 @@ Null    = `null`   null
 True    = `true`   true
 
 // ---------- Objects ----------
-Object      = LBRACE   (Property (COMMA Property)* | {})   RBRACE
-Property  = {[String]: COLON Value}
+Object      = LBRACE   (Properties | {})   RBRACE
+Properties  = {[String]: COLON Value}   (COMMA Properties)?
 
 /* NEW: ====================
 // Option 1: ellipsis is followed by a field expression, which is iterated 0..M times. NB: requires records to support computed fieldname expressions again
@@ -53,8 +53,8 @@ Properties  = {[String]: COLON Value}   ...(COMMA Properties) // NB: impl should
 ==================== */
 
 // ---------- Arrays ----------
-Array       = LBRACKET   (Element (COMMA Element)* | [])   RBRACKET
-Element    = [Value]
+Array       = LBRACKET   (Elements | [])   RBRACKET
+Elements    = [Value]   (COMMA Elements)?
 
 /* NEW: ====================
 // Option 1: ellipsis is followed by an element expression, which is iterated 0..M times

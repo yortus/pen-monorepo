@@ -852,9 +852,9 @@ function createProgram({in: IN, out: OUT}) {
             Null: {},
             True: {},
             Object: {},
-            Properties: {},
+            Property: {},
             Array: {},
-            Elements: {},
+            Element: {},
             Number: {},
             String: {},
             CHAR: {},
@@ -1037,7 +1037,25 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        𝕊7.bindings.Properties,
+                        sequence({
+                            in: IN,
+                            out: OUT,
+                            expressions: [
+                                𝕊7.bindings.Property,
+                                zeroOrMore({
+                                    in: IN,
+                                    out: OUT,
+                                    expression: sequence({
+                                        in: IN,
+                                        out: OUT,
+                                        expressions: [
+                                            𝕊7.bindings.COMMA,
+                                            𝕊7.bindings.Property,
+                                        ],
+                                    }),
+                                }),
+                            ],
+                        }),
                         record({
                             in: IN,
                             out: OUT,
@@ -1051,37 +1069,19 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊7.bindings.Properties,
-        sequence({
+        𝕊7.bindings.Property,
+        field({
             in: IN,
             out: OUT,
-            expressions: [
-                field({
-                    in: IN,
-                    out: OUT,
-                    name: 𝕊7.bindings.String,
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            𝕊7.bindings.COLON,
-                            𝕊7.bindings.Value,
-                        ],
-                    }),
-                }),
-                zeroOrOne({
-                    in: IN,
-                    out: OUT,
-                    expression: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            𝕊7.bindings.COMMA,
-                            𝕊7.bindings.Properties,
-                        ],
-                    }),
-                }),
-            ],
+            name: 𝕊7.bindings.String,
+            value: sequence({
+                in: IN,
+                out: OUT,
+                expressions: [
+                    𝕊7.bindings.COLON,
+                    𝕊7.bindings.Value,
+                ],
+            }),
         })
     );
 
@@ -1096,7 +1096,25 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        𝕊7.bindings.Elements,
+                        sequence({
+                            in: IN,
+                            out: OUT,
+                            expressions: [
+                                𝕊7.bindings.Element,
+                                zeroOrMore({
+                                    in: IN,
+                                    out: OUT,
+                                    expression: sequence({
+                                        in: IN,
+                                        out: OUT,
+                                        expressions: [
+                                            𝕊7.bindings.COMMA,
+                                            𝕊7.bindings.Element,
+                                        ],
+                                    }),
+                                }),
+                            ],
+                        }),
                         list({
                             in: IN,
                             out: OUT,
@@ -1110,30 +1128,12 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊7.bindings.Elements,
-        sequence({
+        𝕊7.bindings.Element,
+        list({
             in: IN,
             out: OUT,
-            expressions: [
-                list({
-                    in: IN,
-                    out: OUT,
-                    elements: [
-                        𝕊7.bindings.Value,
-                    ],
-                }),
-                zeroOrOne({
-                    in: IN,
-                    out: OUT,
-                    expression: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            𝕊7.bindings.COMMA,
-                            𝕊7.bindings.Elements,
-                        ],
-                    }),
-                }),
+            elements: [
+                𝕊7.bindings.Value,
             ],
         })
     );

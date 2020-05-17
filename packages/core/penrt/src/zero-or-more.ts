@@ -13,6 +13,7 @@ function zeroOrMore(options: StaticOptions & {expression: PenVal}): PenVal {
                 // TODO: any other checks needed? review...
                 if (IP === stateₒ.IP) break;
 
+                // TODO: once we know what the value type is (str, obj or arr), keep appending to the same instance
                 out = concat(out, OUT);
             }
             OUT = out;
