@@ -1,3 +1,14 @@
+Optimisations to investigate:
+    * initially focus on sequence, string, and character constructs
+    * initial aim: performance parity with pegjs
+    [ ] sequence: emit sequence code directly; don't use the penrt sequence() function
+        [ ] *not* type-directed, so still need dynamic concat - may be string, object, array, undefined, or error
+    [ ] string: ???
+    [ ] character: emit character code directly; don't use the penrt character() function
+        [ ] Q: how to account for 6x modes (txt->ast, nil->txt, etc)? A: directly emit the specialised code
+
+
+
 New TODOs May 2020:
     [x] add a timed test for unparse so perf improvements can be roughly measured
     [x] parse/unparse -> rule
@@ -25,10 +36,10 @@ New TODOs May 2020:
     [ ] force IN to always be set through a helper method, and cache info about it - eg type = string|array|object|other
         [ ] but continue allowing IP to be set directly
         [ ] so, eg, provide a helper to change IN to something, and set IP automatically depending on its type
-    [ ] hoist all NO_CONSUME/NO_PRODUCE checks out of parse time and into static setup time - they are always known statically (for perf)
+    [x] hoist all NO_CONSUME/NO_PRODUCE checks out of parse time and into static setup time - they are always known statically (for perf)
         [x] character
         [x] stringLiteral
-        [ ] TODO: list others...
+        [x] TODO: list others...
 
 TODO 2020:
     [x] unparse --> print
