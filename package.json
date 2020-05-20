@@ -17,10 +17,10 @@
         "clean": "lerna exec rimraf dist/ *.tsbuildinfo --stream",
         "lint": "lerna exec tslint src/**/*.ts --stream",
         "test": "lerna exec mocha **/*.test.js --scope test-suite",
-        "parse-1mb": "node packages/test-suite/bench/scripts/parse-1mb.js",
-        "parse-1mb-opt": "node --trace-opt packages/test-suite/bench/scripts/parse-1mb.js",
-        "parse-1mb-deopt": "node --trace-deopt packages/test-suite/bench/scripts/parse-1mb.js",
-        "parse-1mb-x": "node --trace-ic packages/test-suite/bench/scripts/parse-1mb.js"
+        "parse-1mb": "node packages/test-suite/scripts/parse-1mb.js",
+        "parse-1mb-opt": "node --trace-opt packages/test-suite/scripts/parse-1mb.js",
+        "parse-1mb-deopt": "node --trace-deopt packages/test-suite/scripts/parse-1mb.js",
+        "parse-1mb-x": "node --trace-ic packages/test-suite/scripts/parse-1mb.js"
     },
     "devDependencies": {
         "@types/chai": "^4.2.0",

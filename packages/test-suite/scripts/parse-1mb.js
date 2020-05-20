@@ -4,8 +4,8 @@
 //require('heapdump').writeSnapshot();
 
 
-let {parse} = require('../../baselines/penc-output/json.js');
-let json = require('../../fixtures/documents/1mb.json');
+let {parse} = require('../baselines/pen-dist/json.js');
+let json = require('../fixtures/documents/1mb.json');
 let text = JSON.stringify(json, undefined, 4);
 let t0 = new Date().getTime();
 json = parse(text);

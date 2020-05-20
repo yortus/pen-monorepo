@@ -7,8 +7,8 @@
     {
         "type": "node",
         "request": "launch",
-        "name": "Parse 1mb",
-        "program": "${workspaceFolder}/packages/test-suite/bench/scripts/parse-1mb.js",
+        "name": "Parse 1MB",
+        "program": "${workspaceFolder}/packages/test-suite/scripts/parse-1mb.js",
         "skipFiles": [
             "<node_internals>/**",
             "**/node_modules/**"

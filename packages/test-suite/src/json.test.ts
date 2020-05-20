@@ -1,11 +1,6 @@
 import {expect} from 'chai';
-import * as path from 'path';
-import {compile} from 'penc';
-
-
-const fixtureName = 'json';
-const inputPath = path.join(__dirname, '../fixtures/penc-input', fixtureName);
-const outputPath = path.join(__dirname, '../baselines/penc-output', fixtureName + '.js');
+// @ts-expect-error Could not find a declaration file for module (7016)
+import {parse, print} from '../baselines/pen-dist/json.js';
 
 
 describe(`Compiling and executing the 'json.pen' program`, async () => {
@@ -58,17 +53,8 @@ describe(`Compiling and executing the 'json.pen' program`, async () => {
 
     ];
 
-    it('compiles', async () => {
-        compile({
-            main: inputPath,
-            outFile: outputPath,
-        });
-    });
-
     for (let test of tests) {
         it(test.text, () => {
-            let {parse, print} = require(outputPath);
-
             let ast = parse(test.text);
             expect(ast).to.deep.equal(JSON.parse(test.text));
 

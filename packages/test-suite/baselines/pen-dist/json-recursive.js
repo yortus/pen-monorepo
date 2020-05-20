@@ -388,7 +388,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const 𝔼16 = (() => {
+const 𝔼3 = (() => {
     "use strict";
     /* @pen exports = {
         f64,
@@ -724,7 +724,7 @@ const 𝔼16 = (() => {
         memoise,
     };
 })();
-const 𝔼17 = (() => {
+const 𝔼4 = (() => {
     "use strict";
     /* @pen exports = {
         anyChar,
@@ -840,44 +840,44 @@ const 𝔼17 = (() => {
 
 function createProgram({in: IN, out: OUT}) {
 
-    const 𝕊12 = {
+    const 𝕊1 = {
         bindings: {
-            memoise: {},
             f64: {},
-            i32: {},
+            anyChar: {},
             not: {},
+            unicode: {},
             start: {},
-            expr: {},
-            add: {},
-            sub: {},
-            term: {},
-            mul: {},
-            div: {},
-            factor: {},
+            Value: {},
+            False: {},
+            Null: {},
+            True: {},
+            Object: {},
+            Properties: {},
+            Array: {},
+            Elements: {},
+            Number: {},
+            String: {},
+            CHAR: {},
+            LBRACE: {},
+            RBRACE: {},
+            LBRACKET: {},
+            RBRACKET: {},
+            COLON: {},
+            COMMA: {},
+            DOUBLE_QUOTE: {},
+            WS: {},
         },
     };
 
-    const 𝕊13 = {
+    const 𝕊2 = {
         bindings: {
             base: {},
-            signed: {},
+            minDigits: {},
+            maxDigits: {},
         },
     };
 
-    const 𝕊14 = {
-        bindings: {
-            base: {},
-            signed: {},
-        },
-    };
-
-    const 𝕊15 = {
-        bindings: {
-            signed: {},
-        },
-    };
-
-    const 𝕊16 = {
+    const 𝕊3 = {
         bindings: {
             f64: {},
             i32: {},
@@ -885,7 +885,7 @@ function createProgram({in: IN, out: OUT}) {
         },
     };
 
-    const 𝕊17 = {
+    const 𝕊4 = {
         bindings: {
             anyChar: {},
             epsilon: {},
@@ -895,162 +895,163 @@ function createProgram({in: IN, out: OUT}) {
     };
 
     // -------------------- Aliases --------------------
-    𝕊12.bindings.memoise = 𝕊16.bindings.memoise;
-    𝕊12.bindings.f64 = 𝕊16.bindings.f64;
-    𝕊12.bindings.i32 = 𝕊16.bindings.i32;
-    𝕊12.bindings.not = 𝕊17.bindings.not;
-    𝕊12.bindings.start = 𝕊12.bindings.expr;
+    𝕊1.bindings.f64 = 𝕊3.bindings.f64;
+    𝕊1.bindings.anyChar = 𝕊4.bindings.anyChar;
+    𝕊1.bindings.not = 𝕊4.bindings.not;
+    𝕊1.bindings.unicode = 𝕊4.bindings.unicode;
+    𝕊1.bindings.Number = 𝕊1.bindings.f64;
 
     // -------------------- Compile-time constants --------------------
-    𝕊13.bindings.base.constant = {value: 16};
-    𝕊13.bindings.signed.constant = {value: false};
-    𝕊14.bindings.base.constant = {value: 2};
-    𝕊14.bindings.signed.constant = {value: false};
-    𝕊15.bindings.signed.constant = {value: false};
+    𝕊1.bindings.DOUBLE_QUOTE.constant = {value: "\""};
+    𝕊2.bindings.base.constant = {value: 16};
+    𝕊2.bindings.minDigits.constant = {value: 4};
+    𝕊2.bindings.maxDigits.constant = {value: 4};
 
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊16.bindings.f64,
-        𝔼16.f64({in: IN, out: OUT}),
+        𝕊3.bindings.f64,
+        𝔼3.f64({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊16.bindings.i32,
-        𝔼16.i32({in: IN, out: OUT}),
+        𝕊3.bindings.i32,
+        𝔼3.i32({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊16.bindings.memoise,
-        𝔼16.memoise({in: IN, out: OUT}),
+        𝕊3.bindings.memoise,
+        𝔼3.memoise({in: IN, out: OUT}),
     );
 
     // -------------------- experiments.pen.js --------------------
 
     Object.assign(
-        𝕊17.bindings.anyChar,
-        𝔼17.anyChar({in: IN, out: OUT}),
+        𝕊4.bindings.anyChar,
+        𝔼4.anyChar({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊17.bindings.epsilon,
-        𝔼17.epsilon({in: IN, out: OUT}),
+        𝕊4.bindings.epsilon,
+        𝔼4.epsilon({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊17.bindings.not,
-        𝔼17.not({in: IN, out: OUT}),
+        𝕊4.bindings.not,
+        𝔼4.not({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊17.bindings.unicode,
-        𝔼17.unicode({in: IN, out: OUT}),
+        𝕊4.bindings.unicode,
+        𝔼4.unicode({in: IN, out: OUT}),
     );
 
-    // -------------------- math.pen --------------------
+    // -------------------- json-recursive.pen --------------------
 
     Object.assign(
-        𝕊12.bindings.expr,
-        (𝕊12.bindings.memoise).lambda(selection({
+        𝕊1.bindings.start,
+        sequence({
             in: IN,
             out: OUT,
             expressions: [
-                𝕊12.bindings.add,
-                𝕊12.bindings.sub,
-                𝕊12.bindings.term,
-            ],
-        }))
-    );
-
-    Object.assign(
-        𝕊12.bindings.add,
-        record({
-            in: IN,
-            out: OUT,
-            fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "add",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊12.bindings.expr,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "+",
-                            }),
-                            𝕊12.bindings.term,
-                        ],
-                    }),
-                },
+                𝕊1.bindings.WS,
+                𝕊1.bindings.Value,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊12.bindings.sub,
-        record({
+        𝕊1.bindings.Value,
+        selection({
             in: IN,
             out: OUT,
-            fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "sub",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊12.bindings.expr,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "-",
-                            }),
-                            𝕊12.bindings.term,
-                        ],
-                    }),
-                },
+            expressions: [
+                𝕊1.bindings.False,
+                𝕊1.bindings.Null,
+                𝕊1.bindings.True,
+                𝕊1.bindings.Object,
+                𝕊1.bindings.Array,
+                𝕊1.bindings.Number,
+                𝕊1.bindings.String,
             ],
         })
     );
 
     Object.assign(
-        𝕊12.bindings.term,
-        (𝕊12.bindings.memoise).lambda(selection({
+        𝕊1.bindings.False,
+        sequence({
             in: IN,
             out: OUT,
             expressions: [
-                𝕊12.bindings.mul,
-                𝕊12.bindings.div,
-                𝕊12.bindings.factor,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "false",
+                }),
+                booleanLiteral({in: IN, out: OUT, value: false}),
             ],
-        }))
+        })
     );
 
     Object.assign(
-        𝕊12.bindings.mul,
+        𝕊1.bindings.Null,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "null",
+                }),
+                nullLiteral({in: IN, out: OUT}),
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.True,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "true",
+                }),
+                booleanLiteral({in: IN, out: OUT, value: true}),
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.Object,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.LBRACE,
+                selection({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        𝕊1.bindings.Properties,
+                        record({
+                            in: IN,
+                            out: OUT,
+                            fields: [],
+                        }),
+                    ],
+                }),
+                𝕊1.bindings.RBRACE,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.Properties,
         sequence({
             in: IN,
             out: OUT,
@@ -1058,45 +1059,25 @@ function createProgram({in: IN, out: OUT}) {
                 field({
                     in: IN,
                     out: OUT,
-                    name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "type",
-                    }),
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "mul",
-                    }),
-                }),
-                record({
-                    in: IN,
-                    out: OUT,
-                    fields: [
-                        {
-                            name: 'lhs',
-                            value: 𝕊12.bindings.term,
-                        },
-                    ],
-                }),
-                field({
-                    in: IN,
-                    out: OUT,
-                    name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "rhs",
-                    }),
+                    name: 𝕊1.bindings.String,
                     value: sequence({
                         in: IN,
                         out: OUT,
                         expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "*",
-                            }),
-                            𝕊12.bindings.factor,
+                            𝕊1.bindings.COLON,
+                            𝕊1.bindings.Value,
+                        ],
+                    }),
+                }),
+                zeroOrOne({
+                    in: IN,
+                    out: OUT,
+                    expression: sequence({
+                        in: IN,
+                        out: OUT,
+                        expressions: [
+                            𝕊1.bindings.COMMA,
+                            𝕊1.bindings.Properties,
                         ],
                     }),
                 }),
@@ -1105,44 +1086,77 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊12.bindings.div,
-        record({
+        𝕊1.bindings.Array,
+        sequence({
             in: IN,
             out: OUT,
-            fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "div",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊12.bindings.term,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "/",
-                            }),
-                            𝕊12.bindings.factor,
-                        ],
-                    }),
-                },
+            expressions: [
+                𝕊1.bindings.LBRACKET,
+                selection({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        𝕊1.bindings.Elements,
+                        list({
+                            in: IN,
+                            out: OUT,
+                            elements: [],
+                        }),
+                    ],
+                }),
+                𝕊1.bindings.RBRACKET,
             ],
         })
     );
 
     Object.assign(
-        𝕊12.bindings.factor,
+        𝕊1.bindings.Elements,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                list({
+                    in: IN,
+                    out: OUT,
+                    elements: [
+                        𝕊1.bindings.Value,
+                    ],
+                }),
+                zeroOrOne({
+                    in: IN,
+                    out: OUT,
+                    expression: sequence({
+                        in: IN,
+                        out: OUT,
+                        expressions: [
+                            𝕊1.bindings.COMMA,
+                            𝕊1.bindings.Elements,
+                        ],
+                    }),
+                }),
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.String,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.DOUBLE_QUOTE,
+                zeroOrMore({
+                    in: IN,
+                    out: OUT,
+                    expression: 𝕊1.bindings.CHAR,
+                }),
+                𝕊1.bindings.DOUBLE_QUOTE,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.CHAR,
         selection({
             in: IN,
             out: OUT,
@@ -1151,23 +1165,29 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        (𝕊12.bindings.not).lambda(selection({
+                        (𝕊1.bindings.not).lambda(selection({
                             in: IN,
                             out: OUT,
                             expressions: [
-                                stringLiteral({
+                                character({
                                     in: IN,
                                     out: OUT,
-                                    value: "0x",
+                                    min: "\u0000",
+                                    max: "\u001f",
                                 }),
                                 stringLiteral({
                                     in: IN,
                                     out: OUT,
-                                    value: "0b",
+                                    value: "\"",
+                                }),
+                                stringLiteral({
+                                    in: IN,
+                                    out: OUT,
+                                    value: "\\",
                                 }),
                             ],
                         })),
-                        𝕊12.bindings.f64,
+                        𝕊1.bindings.anyChar,
                     ],
                 }),
                 sequence({
@@ -1177,9 +1197,13 @@ function createProgram({in: IN, out: OUT}) {
                         stringLiteral({
                             in: IN !== "txt" ? "nil" : IN,
                             out: OUT !== "txt" ? "nil" : OUT,
-                            value: "0x",
+                            value: "\\\"",
                         }),
-                        (𝕊12.bindings.i32).lambda(𝕊13),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\"",
+                        }),
                     ],
                 }),
                 sequence({
@@ -1189,9 +1213,13 @@ function createProgram({in: IN, out: OUT}) {
                         stringLiteral({
                             in: IN !== "txt" ? "nil" : IN,
                             out: OUT !== "txt" ? "nil" : OUT,
-                            value: "0b",
+                            value: "\\\\",
                         }),
-                        (𝕊12.bindings.i32).lambda(𝕊14),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\\",
+                        }),
                     ],
                 }),
                 sequence({
@@ -1201,9 +1229,13 @@ function createProgram({in: IN, out: OUT}) {
                         stringLiteral({
                             in: IN !== "txt" ? "nil" : IN,
                             out: OUT !== "txt" ? "nil" : OUT,
-                            value: "i",
+                            value: "\\/",
                         }),
-                        (𝕊12.bindings.i32).lambda(𝕊15),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "/",
+                        }),
                     ],
                 }),
                 sequence({
@@ -1213,14 +1245,89 @@ function createProgram({in: IN, out: OUT}) {
                         stringLiteral({
                             in: IN !== "txt" ? "nil" : IN,
                             out: OUT !== "txt" ? "nil" : OUT,
-                            value: "(",
+                            value: "\\b",
                         }),
-                        𝕊12.bindings.expr,
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\b",
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
                         stringLiteral({
                             in: IN !== "txt" ? "nil" : IN,
                             out: OUT !== "txt" ? "nil" : OUT,
-                            value: ")",
+                            value: "\\f",
                         }),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\f",
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "\\n",
+                        }),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\n",
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "\\r",
+                        }),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\r",
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "\\t",
+                        }),
+                        stringLiteral({
+                            in: IN !== "ast" ? "nil" : IN,
+                            out: OUT !== "ast" ? "nil" : OUT,
+                            value: "\t",
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
+                        stringLiteral({
+                            in: IN !== "txt" ? "nil" : IN,
+                            out: OUT !== "txt" ? "nil" : OUT,
+                            value: "\\u",
+                        }),
+                        (𝕊1.bindings.unicode).lambda(𝕊2),
                     ],
                 }),
             ],
@@ -1228,31 +1335,166 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊13.bindings.base,
+        𝕊1.bindings.LBRACE,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "{",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.RBRACE,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "}",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.LBRACKET,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "[",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.RBRACKET,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: "]",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.COLON,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: ":",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.COMMA,
+        sequence({
+            in: IN,
+            out: OUT,
+            expressions: [
+                𝕊1.bindings.WS,
+                stringLiteral({
+                    in: IN !== "txt" ? "nil" : IN,
+                    out: OUT !== "txt" ? "nil" : OUT,
+                    value: ",",
+                }),
+                𝕊1.bindings.WS,
+            ],
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.DOUBLE_QUOTE,
+        stringLiteral({
+            in: IN !== "txt" ? "nil" : IN,
+            out: OUT !== "txt" ? "nil" : OUT,
+            value: "\"",
+        })
+    );
+
+    Object.assign(
+        𝕊1.bindings.WS,
+        zeroOrMore({
+            in: IN,
+            out: OUT,
+            expression: selection({
+                in: IN,
+                out: OUT,
+                expressions: [
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: " ",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\t",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\n",
+                    }),
+                    stringLiteral({
+                        in: IN !== "txt" ? "nil" : IN,
+                        out: OUT !== "txt" ? "nil" : OUT,
+                        value: "\r",
+                    }),
+                ],
+            }),
+        })
+    );
+
+    Object.assign(
+        𝕊2.bindings.base,
         numericLiteral({in: IN, out: OUT, value: 16})
     );
 
     Object.assign(
-        𝕊13.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
+        𝕊2.bindings.minDigits,
+        numericLiteral({in: IN, out: OUT, value: 4})
     );
 
     Object.assign(
-        𝕊14.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 2})
+        𝕊2.bindings.maxDigits,
+        numericLiteral({in: IN, out: OUT, value: 4})
     );
 
-    Object.assign(
-        𝕊14.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
-    );
-
-    Object.assign(
-        𝕊15.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
-    );
-
-    return 𝕊12.bindings.start;
+    return 𝕊1.bindings.start;
 }
 
 // -------------------- Main exports --------------------

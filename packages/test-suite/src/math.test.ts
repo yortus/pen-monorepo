@@ -1,24 +1,19 @@
 import {expect} from 'chai';
-import * as path from 'path';
-import {compile} from 'penc';
-
-
-const fixtureName = 'math';
-const inputPath = path.join(__dirname, '../fixtures/penc-input', fixtureName);
-const outputPath = path.join(__dirname, '../baselines/penc-output', fixtureName + '.js');
+// @ts-expect-error Could not find a declaration file for module (7016)
+import {parse, print} from '../baselines/pen-dist/math.js';
 
 
 describe(`Compiling and executing the 'math.pen' program`, async () => {
 
     const tests = [
-        // {text: '1234', ast: 1234},
-        // {text: '-1.234', ast: -1.234},
-        // {text: '1.2e34', ast: 1.2e34, textᐟ: '1.2e+34'},
-        // {text: '-1.2e+34', ast: -1.2e34},
-        // {text: '1.', ast: 1, textᐟ: '1'},
-        // {text: '.234', ast: .234, textᐟ: '0.234'},
-        // {text: 'i1234', ast: 1234, textᐟ: '1234'},
-        // {text: 'i12345678', ast: 12345678, textᐟ: '12345678'},
+        {text: '1234', ast: 1234},
+        {text: '-1.234', ast: -1.234},
+        {text: '1.2e34', ast: 1.2e34, textᐟ: '1.2e+34'},
+        {text: '-1.2e+34', ast: -1.2e34},
+        {text: '1.', ast: 1, textᐟ: '1'},
+        {text: '.234', ast: .234, textᐟ: '0.234'},
+        {text: 'i1234', ast: 1234, textᐟ: '1234'},
+        {text: 'i12345678', ast: 12345678, textᐟ: '12345678'},
         {text: 'i12345678901', ast: Error},
         {text: '-1234', ast: -1234},
         {text: 'i-1234', ast: Error},
@@ -74,16 +69,8 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
         },
     ];
 
-    it('compiles', async () => {
-        compile({
-            main: inputPath,
-            outFile: outputPath,
-        });
-    });
-
     for (let test of tests) {
         it(test.text, () => {
-            let {parse, print} = require(outputPath);
             let ast: unknown;
             try { ast = parse(test.text); } catch { ast = Error; }
             expect(ast).to.deep.equal(test.ast);

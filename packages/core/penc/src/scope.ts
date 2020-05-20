@@ -11,8 +11,9 @@ export interface Scope {
 
 
 export function createRootScope(): Scope {
+    counter = 0; // Reset the counter whenever we are asked to create a root scope, since it must be a different parse.
     return {
-        id: ++counter,
+        id: 0,
         kind: 'root',
         children: [],
         symbols: new Map(),

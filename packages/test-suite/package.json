@@ -11,7 +11,9 @@
             "url": "http://github.com/yortus/"
         }
     ],
-    "scripts": {},
+    "scripts": {
+        "postbuild": "node ./scripts/build-pen-grammars.js"
+    },
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "fs-extra": "^8.1.0",
