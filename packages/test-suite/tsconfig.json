@@ -6,7 +6,6 @@
         "lib": ["es2017"],
         "types": ["mocha", "node"],
 
-        "rootDir": "tests",
         "noEmit": true,
 
         "strict": true,
@@ -16,7 +15,7 @@
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
     },
-    "include": ["tests/"],
+    "include": ["bench/", "tests/"],
     "references": [
         {"path": "../core/penc"},
         {"path": "../core/penrt"},

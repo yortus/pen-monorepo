@@ -17,6 +17,7 @@
         "clean": "lerna exec rimraf dist/ *.tsbuildinfo --stream",
         "lint": "lerna exec tslint {src,tests}/**/*.ts --stream",
         "test": "lerna run test --scope test-suite --stream",
+        "bench": "lerna run bench --scope test-suite --stream",
         "parse-1mb": "node packages/test-suite/scripts/parse-1mb.js",
         "parse-1mb-opt": "node --trace-opt packages/test-suite/scripts/parse-1mb.js",
         "parse-1mb-deopt": "node --trace-deopt packages/test-suite/scripts/parse-1mb.js",
