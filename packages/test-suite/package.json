@@ -12,7 +12,8 @@
         }
     ],
     "scripts": {
-        "postbuild": "node ./scripts/build-pen-grammars.js"
+        "postbuild": "node ./scripts/build-pen-grammars.js",
+        "test": "mocha -r ts-node/register -u tdd --timeout 999999 --colors tests/**/*.test.ts"
     },
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
