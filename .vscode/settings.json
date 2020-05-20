@@ -16,5 +16,8 @@
 	// Settings for "Mocha Test Explorer" extension.
 	"mochaExplorer.files": ["**/*.test.ts"],
 	"mochaExplorer.require": "ts-node/register",
-	"mochaExplorer.debuggerConfig": "Mocha Tests",
+	"mochaExplorer.debuggerConfig": "Run Test Suite",
+	"mochaExplorer.env": {
+		"TS_NODE_PROJECT": "packages/test-suite/tsconfig.json"
+	}
 }

@@ -5,9 +5,9 @@
     "version": "0.2.0",
     "configurations": [
     {
+        "name": "Parse 1MB",
         "type": "node",
         "request": "launch",
-        "name": "Parse 1MB",
         "program": "${workspaceFolder}/packages/test-suite/scripts/parse-1mb.js",
         "skipFiles": [
             "<node_internals>/**",
@@ -15,7 +15,7 @@
         ]
     },
     {
-            "name": "Mocha Tests",
+            "name": "Run Test Suite",
             "type": "node",
             "request": "launch",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
@@ -27,8 +27,11 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "**/*.test.ts"
+                "${workspaceFolder}/packages/test-suite/**/*.test.ts"
             ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/packages/test-suite/tsconfig.json"
+            },
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
                 "<node_internals>/**",
