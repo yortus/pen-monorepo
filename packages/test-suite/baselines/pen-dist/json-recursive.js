@@ -18,13 +18,14 @@ function booleanLiteral(options) {
 }
 function character(options) {
     const { min, max } = options;
+    const checkInType = options.in !== 'txt';
     if (options.in === 'nil') {
         const out = options.out === 'nil' ? undefined : min;
         return { rule: function CHA() { return OUT = out, true; } };
     }
     return {
         rule: function CHA() {
-            if (typeof IN !== 'string')
+            if (checkInType && typeof IN !== 'string')
                 return false;
             if (IP < 0 || IP >= IN.length)
                 return false;
@@ -300,31 +301,27 @@ function sequence(options) {
 }
 function stringLiteral(options) {
     const { value } = options;
+    const length = value.length;
     const out = options.out === 'nil' ? undefined : value;
+    const checkInType = options.in !== 'txt';
     if (options.in === 'nil') {
         return { rule: function STR() { return OUT = out, true; } };
     }
     return {
         rule: function STR() {
-            if (typeof IN !== 'string')
+            if (checkInType && typeof IN !== 'string')
                 return false;
-            if (!isMatch(value))
+            if (IP + length > IN.length)
                 return false;
-            IP += value.length;
+            for (let i = 0; i < length; ++i) {
+                if (IN.charAt(IP + i) !== value.charAt(i))
+                    return false;
+            }
+            IP += length;
             OUT = out;
             return true;
         },
     };
-}
-function isMatch(substr) {
-    let lastPos = IP + substr.length;
-    if (lastPos > IN.length)
-        return false;
-    for (let i = IP, j = 0; i < lastPos; ++i, ++j) {
-        if (IN.charAt(i) !== substr.charAt(j))
-            return false;
-    }
-    return true;
 }
 let IN;
 let IP;
@@ -349,9 +346,7 @@ function concat(a, b) {
         return a + b;
     if (Array.isArray(a) && Array.isArray(b))
         return [...a, ...b];
-    if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null)
-        return Object.assign(Object.assign({}, a), b);
-    throw new Error(`Internal error: invalid sequence`);
+    return Object.assign(Object.assign({}, a), b);
 }
 function isInputFullyConsumed() {
     if (typeof IN === 'string')
@@ -744,13 +739,14 @@ const 𝔼4 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     function anyChar(options) {
+        const checkInType = options.in !== 'txt';
         if (options.in === 'nil') {
             const out = options.out === 'nil' ? undefined : '?';
             return { rule: function ANY() { return OUT = out, true; } };
         }
         return {
             rule: function ANY() {
-                if (typeof IN !== 'string')
+                if (checkInType && typeof IN !== 'string')
                     return false;
                 if (IP < 0 || IP >= IN.length)
                     return false;

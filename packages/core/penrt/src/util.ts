@@ -51,13 +51,14 @@ function assert(value: unknown): asserts value {
 // TODO: doc... helper...
 // TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling
 //       (but instrument first)
-function concat(a: unknown, b: unknown): unknown {
+function concat(a: any, b: any): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
     if (typeof a === 'string' && typeof b === 'string') return a + b;
+    // TODO: if program is statically proven valid, the following check isn't necessary
+    // if (typeof a !== 'object' || typeof b !== 'object') throw new Error(`Internal error: invalid sequence`);
     if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
-    if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null) return {...a, ...b};
-    throw new Error(`Internal error: invalid sequence`);
+    return {...a, ...b};
 }
 
 
