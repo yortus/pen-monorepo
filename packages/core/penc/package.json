@@ -1,6 +1,6 @@
 {
     "name": "penc",
-    "version": "0.5.0",
+    "version": "0.5.9",
     "description": "PEN Compiler",
     "license": "MIT",
     "contributors": [
@@ -19,7 +19,7 @@
         "penc": "./bin/penc.js"
     },
     "scripts": {
-        "postbuild": "node ./scripts/build-peg-grammars.js"
+        "postbuild": "node ./scripts/postbuild.js"
     },
     "devDependencies": {
         "@ext/experimental-features": "*",

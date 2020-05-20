@@ -50,5 +50,6 @@ function fail(modSpec: string): never {
 }
 
 
-const STD_PATH = require.resolve('@ext/standard-library');
-const EXPERIMENTS_PATH = require.resolve('@ext/experimental-features');
+// These are copied into the dist/ dir as part of the postbuild script
+const STD_PATH = require.resolve('../../deps/std.pen.js');
+const EXPERIMENTS_PATH = require.resolve('../../deps/experiments.pen.js');

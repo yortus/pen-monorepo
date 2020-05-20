@@ -5,23 +5,28 @@
 // chmod +x penc-cli.js # Make the file executable
 
 
+const path = require('path');
+
+
 // TODO: temp example...
 const program = require('commander'); // (normal include)
 
 program
-  .option('-f, --force', 'force installation')
-  .parse(process.argv);
+    .option('-o, --out-file <path>', 'output file path')
+    .parse(process.argv);
 
-const pkgs = program.args;
-
-if (!pkgs.length) {
-  console.error('packages required');
-  process.exit(1);
+if (program.args.length !== 1) {
+    console.error('main path required');
+    process.exit(1);
 }
 
-console.log();
-if (program.force) console.log('  force: install');
-pkgs.forEach(function(pkg) {
-  console.log('  install : %s', pkg);
-});
-console.log();
+const main = program.args[0];
+const outFile = program.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
+if (main === outFile) {
+    console.error('output would overwrite input');
+    process.exit(1);
+}
+
+
+const {compile} = require('..');
+compile({main, outFile});

@@ -27,8 +27,8 @@ function emitProgram(program: Program) {
     let mainModule = sourceFile.module;
     if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
 
-    // TODO: temp testing... emit runtime
-    const RUNTIME_PATH = require.resolve('penrt');
+    // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
+    const RUNTIME_PATH = require.resolve('../../deps/penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
