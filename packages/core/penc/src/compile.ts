@@ -26,6 +26,7 @@ export function compile(compilerOptions: CompilerOptions) {
     let targetCode = generateTargetCode(ast04);
 
     // write the target code to the output file path. Creating containing dirs if necessary.
-    fs.ensureDir(path.dirname(compilerOptions.outFile));
-    fs.writeFileSync(path.resolve(compilerOptions.outFile), targetCode);
+    let outFilePath = path.resolve(compilerOptions.outFile);
+    fs.ensureDirSync(path.dirname(outFilePath));
+    fs.writeFileSync(outFilePath, targetCode);
 }

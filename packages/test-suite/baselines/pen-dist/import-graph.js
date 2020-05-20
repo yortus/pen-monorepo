@@ -170,6 +170,18 @@ function list(options) {
     }
     throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
 }
+function not(options) {
+    const { expression } = options;
+    return {
+        rule: function NOT() {
+            let stateₒ = getState();
+            let result = !expression.rule();
+            setState(stateₒ);
+            OUT = undefined;
+            return result;
+        },
+    };
+}
 function nullLiteral(options) {
     const out = options.out === 'ast' ? null : undefined;
     if (options.in !== 'ast') {

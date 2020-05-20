@@ -170,6 +170,18 @@ function list(options) {
     }
     throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
 }
+function not(options) {
+    const { expression } = options;
+    return {
+        rule: function NOT() {
+            let stateₒ = getState();
+            let result = !expression.rule();
+            setState(stateₒ);
+            OUT = undefined;
+            return result;
+        },
+    };
+}
 function nullLiteral(options) {
     const out = options.out === 'ast' ? null : undefined;
     if (options.in !== 'ast') {
@@ -728,8 +740,6 @@ const 𝔼4 = (() => {
     "use strict";
     /* @pen exports = {
         anyChar,
-        epsilon,
-        not,
         unicode
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
@@ -748,30 +758,6 @@ const 𝔼4 = (() => {
                 IP += 1;
                 OUT = options.out === 'nil' ? undefined : c;
                 return true;
-            },
-        };
-    }
-    function epsilon(_options) {
-        return {
-            rule: function EPS() {
-                OUT = undefined;
-                return true;
-            },
-        };
-    }
-    function not(options) {
-        const eps = epsilon(options); // TODO: remove this altogether?
-        return {
-            lambda(expr) {
-                return {
-                    rule: function NOT() {
-                        let stateₒ = getState();
-                        if (!expr.rule())
-                            return eps.rule();
-                        setState(stateₒ);
-                        return false;
-                    },
-                };
             },
         };
     }
@@ -832,8 +818,6 @@ const 𝔼4 = (() => {
 
     return {
         anyChar,
-        epsilon,
-        not,
         unicode,
     };
 })();
@@ -844,7 +828,6 @@ function createProgram({in: IN, out: OUT}) {
         bindings: {
             f64: {},
             anyChar: {},
-            not: {},
             unicode: {},
             start: {},
             Value: {},
@@ -888,8 +871,6 @@ function createProgram({in: IN, out: OUT}) {
     const 𝕊4 = {
         bindings: {
             anyChar: {},
-            epsilon: {},
-            not: {},
             unicode: {},
         },
     };
@@ -897,7 +878,6 @@ function createProgram({in: IN, out: OUT}) {
     // -------------------- Aliases --------------------
     𝕊1.bindings.f64 = 𝕊3.bindings.f64;
     𝕊1.bindings.anyChar = 𝕊4.bindings.anyChar;
-    𝕊1.bindings.not = 𝕊4.bindings.not;
     𝕊1.bindings.unicode = 𝕊4.bindings.unicode;
     𝕊1.bindings.Number = 𝕊1.bindings.f64;
 
@@ -929,16 +909,6 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊4.bindings.anyChar,
         𝔼4.anyChar({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊4.bindings.epsilon,
-        𝔼4.epsilon({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊4.bindings.not,
-        𝔼4.not({in: IN, out: OUT}),
     );
 
     Object.assign(
@@ -1165,28 +1135,34 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        (𝕊1.bindings.not).lambda(selection({
+                        not({
                             in: IN,
                             out: OUT,
-                            expressions: [
-                                character({
-                                    in: IN,
-                                    out: OUT,
-                                    min: "\u0000",
-                                    max: "\u001f",
-                                }),
-                                stringLiteral({
-                                    in: IN,
-                                    out: OUT,
-                                    value: "\"",
-                                }),
-                                stringLiteral({
-                                    in: IN,
-                                    out: OUT,
-                                    value: "\\",
-                                }),
-                            ],
-                        })),
+                            expression: character({
+                                in: IN,
+                                out: OUT,
+                                min: "\u0000",
+                                max: "\u001f",
+                            }),
+                        }),
+                        not({
+                            in: IN,
+                            out: OUT,
+                            expression: stringLiteral({
+                                in: IN,
+                                out: OUT,
+                                value: "\"",
+                            }),
+                        }),
+                        not({
+                            in: IN,
+                            out: OUT,
+                            expression: stringLiteral({
+                                in: IN,
+                                out: OUT,
+                                value: "\\",
+                            }),
+                        }),
                         𝕊1.bindings.anyChar,
                     ],
                 }),

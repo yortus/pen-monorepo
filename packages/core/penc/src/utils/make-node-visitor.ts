@@ -40,6 +40,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ModuleExpression': return rec(n.module), undefined;
             case 'ModulePattern': return n.names.forEach(rec), undefined;
             case 'ModulePatternName': return;
+            case 'NotExpression': return rec(n.expression), undefined;
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
             case 'ParenthesisedExpression': return rec(n.expression), undefined;

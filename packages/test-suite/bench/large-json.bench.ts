@@ -1,6 +1,6 @@
 // tslint:disable: no-console
 import * as Benchmark from 'benchmark';
-import * as fs from 'fs-extra';
+import * as fs from 'fs';
 import * as path from 'path';
 // @ts-expect-error Could not find a declaration file for module (7016)
 import {parse as penParse} from '../baselines/pen-dist/json.js';

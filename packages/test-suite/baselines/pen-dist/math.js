@@ -170,6 +170,18 @@ function list(options) {
     }
     throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
 }
+function not(options) {
+    const { expression } = options;
+    return {
+        rule: function NOT() {
+            let stateₒ = getState();
+            let result = !expression.rule();
+            setState(stateₒ);
+            OUT = undefined;
+            return result;
+        },
+    };
+}
 function nullLiteral(options) {
     const out = options.out === 'ast' ? null : undefined;
     if (options.in !== 'ast') {
@@ -724,119 +736,6 @@ const 𝔼5 = (() => {
         memoise,
     };
 })();
-const 𝔼6 = (() => {
-    "use strict";
-    /* @pen exports = {
-        anyChar,
-        epsilon,
-        not,
-        unicode
-    } */
-    // TODO: doc... has both 'txt' and 'ast' representation
-    function anyChar(options) {
-        if (options.in === 'nil') {
-            const out = options.out === 'nil' ? undefined : '?';
-            return { rule: function ANY() { return OUT = out, true; } };
-        }
-        return {
-            rule: function ANY() {
-                if (typeof IN !== 'string')
-                    return false;
-                if (IP < 0 || IP >= IN.length)
-                    return false;
-                let c = IN.charAt(IP);
-                IP += 1;
-                OUT = options.out === 'nil' ? undefined : c;
-                return true;
-            },
-        };
-    }
-    function epsilon(_options) {
-        return {
-            rule: function EPS() {
-                OUT = undefined;
-                return true;
-            },
-        };
-    }
-    function not(options) {
-        const eps = epsilon(options); // TODO: remove this altogether?
-        return {
-            lambda(expr) {
-                return {
-                    rule: function NOT() {
-                        let stateₒ = getState();
-                        if (!expr.rule())
-                            return eps.rule();
-                        setState(stateₒ);
-                        return false;
-                    },
-                };
-            },
-        };
-    }
-    function unicode(options) {
-        return {
-            lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-                let base = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value;
-                let minDigits = (_f = (_e = (_d = expr.bindings) === null || _d === void 0 ? void 0 : _d.minDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
-                let maxDigits = (_j = (_h = (_g = expr.bindings) === null || _g === void 0 ? void 0 : _g.maxDigits) === null || _h === void 0 ? void 0 : _h.constant) === null || _j === void 0 ? void 0 : _j.value;
-                assert(typeof base === 'number' && base >= 2 && base <= 36);
-                assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
-                assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
-                // Construct a regex to match the digits
-                let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
-                let regex = RegExp(pattern, 'i');
-                if (options.in === 'txt' || options.out === 'ast') {
-                    return {
-                        rule: function UNI() {
-                            if (typeof IN !== 'string')
-                                return false;
-                            let stateₒ = getState();
-                            const LEN = IN.length;
-                            const EOS = '';
-                            let len = 0;
-                            let num = ''; // TODO: fix this - should actually keep count
-                            let c = IP < LEN ? IN.charAt(IP) : EOS;
-                            while (true) {
-                                if (!regex.test(c))
-                                    break;
-                                num += c;
-                                IP += 1;
-                                len += 1;
-                                if (len === maxDigits)
-                                    break;
-                                c = IP < LEN ? IN.charAt(IP) : EOS;
-                            }
-                            if (len < minDigits)
-                                return setState(stateₒ), false;
-                            // tslint:disable-next-line: no-eval
-                            OUT = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
-                            return true;
-                        },
-                    };
-                }
-                if (options.in === 'ast' || options.out === 'txt') {
-                    return {
-                        rule: function UNI() {
-                            // TODO: implement
-                            return false;
-                        },
-                    };
-                }
-                throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
-            },
-        };
-    }
-
-    return {
-        anyChar,
-        epsilon,
-        not,
-        unicode,
-    };
-})();
 
 function createProgram({in: IN, out: OUT}) {
 
@@ -845,7 +744,6 @@ function createProgram({in: IN, out: OUT}) {
             memoise: {},
             f64: {},
             i32: {},
-            not: {},
             start: {},
             expr: {},
             add: {},
@@ -885,20 +783,10 @@ function createProgram({in: IN, out: OUT}) {
         },
     };
 
-    const 𝕊6 = {
-        bindings: {
-            anyChar: {},
-            epsilon: {},
-            not: {},
-            unicode: {},
-        },
-    };
-
     // -------------------- Aliases --------------------
     𝕊1.bindings.memoise = 𝕊5.bindings.memoise;
     𝕊1.bindings.f64 = 𝕊5.bindings.f64;
     𝕊1.bindings.i32 = 𝕊5.bindings.i32;
-    𝕊1.bindings.not = 𝕊6.bindings.not;
     𝕊1.bindings.start = 𝕊1.bindings.expr;
 
     // -------------------- Compile-time constants --------------------
@@ -923,28 +811,6 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊5.bindings.memoise,
         𝔼5.memoise({in: IN, out: OUT}),
-    );
-
-    // -------------------- experiments.pen.js --------------------
-
-    Object.assign(
-        𝕊6.bindings.anyChar,
-        𝔼6.anyChar({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊6.bindings.epsilon,
-        𝔼6.epsilon({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊6.bindings.not,
-        𝔼6.not({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊6.bindings.unicode,
-        𝔼6.unicode({in: IN, out: OUT}),
     );
 
     // -------------------- math.pen --------------------
@@ -1151,22 +1017,24 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        (𝕊1.bindings.not).lambda(selection({
+                        not({
                             in: IN,
                             out: OUT,
-                            expressions: [
-                                stringLiteral({
-                                    in: IN,
-                                    out: OUT,
-                                    value: "0x",
-                                }),
-                                stringLiteral({
-                                    in: IN,
-                                    out: OUT,
-                                    value: "0b",
-                                }),
-                            ],
-                        })),
+                            expression: stringLiteral({
+                                in: IN,
+                                out: OUT,
+                                value: "0x",
+                            }),
+                        }),
+                        not({
+                            in: IN,
+                            out: OUT,
+                            expression: stringLiteral({
+                                in: IN,
+                                out: OUT,
+                                value: "0b",
+                            }),
+                        }),
                         𝕊1.bindings.f64,
                     ],
                 }),

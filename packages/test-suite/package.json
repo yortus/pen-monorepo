@@ -13,14 +13,13 @@
     ],
     "scripts": {
         "postbuild": "node ./scripts/build-pen-grammars.js",
+        "clean": "rimraf baselines/**/*.*",
         "test": "mocha -r ts-node/register -u tdd --timeout 999999 --colors tests/**/*.test.ts",
         "bench": "node -r ts-node/register bench/large-json.bench.ts"
     },
     "devDependencies": {
         "@types/benchmark": "^1.0.33",
-        "@types/fs-extra": "^8.1.0",
         "benchmark": "^2.1.4",
-        "fs-extra": "^8.1.0",
         "penc": "*",
         "penrt": "*"
     }

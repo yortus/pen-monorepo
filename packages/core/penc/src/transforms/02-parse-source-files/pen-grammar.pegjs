@@ -51,14 +51,17 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         SequenceExpression          a b      a  b c                                                                     NB: whitespace between terms, else is application
 
     PRECEDENCE 3
-        QuantifiedExpression        a?   a(b)?   a.b?   {a: b}?
+        NotExpression               !a   !a(b)   !a.b   !{a: b}
 
     PRECEDENCE 4
-        ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                        NB: no whitespace between terms, else is sequence
+        QuantifiedExpression        a?   a(b)?   a.b?   {a: b}?
+
+    PRECEDENCE 5
+        ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
         BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                  NB: no whitespace between terms, may relax later
 
-    PRECEDENCE 5 (HIGHEST):
-        ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                                             NB: lhs is just a Pattern!
+    PRECEDENCE 6 (HIGHEST):
+        ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
         RecordExpression            {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression             {[a]: b}
         ModuleExpression            {export a=b c=d e=f}   {a=b}
@@ -83,14 +86,18 @@ Precedence2OrHigher
     / Precedence3OrHigher
 
 Precedence3OrHigher
-    = QuantifiedExpression
+    = NotExpression
     / Precedence4OrHigher
 
 Precedence4OrHigher
-    = Precedence4Expression
+    = QuantifiedExpression
     / Precedence5OrHigher
 
 Precedence5OrHigher
+    = ApplicationOrBindingLookupExpression
+    / Precedence6OrHigher
+
+Precedence6OrHigher
     = PrimaryExpression
 
 PrimaryExpression
@@ -116,12 +123,16 @@ SequenceExpression
     = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))+
     { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
+NotExpression
+    = "!"   __   expression:Precedence4OrHigher
+    { return {kind: 'NotExpression', expression}; }
+
 QuantifiedExpression
-    = expression:Precedence4OrHigher   quantifier:("?" / "*")
+    = expression:Precedence5OrHigher   __   quantifier:("?" / "*")
     { return {kind: 'QuantifiedExpression', expression, quantifier}; }
 
-Precedence4Expression
-    = head:Precedence5OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
+ApplicationOrBindingLookupExpression
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
@@ -137,7 +148,7 @@ BindingNameLookup
     { return {name}; }
 
 ApplicationArgument
-    = arg:Precedence5OrHigher
+    = arg:Precedence6OrHigher
     { return {arg}; }
 
 // LambdaExpression

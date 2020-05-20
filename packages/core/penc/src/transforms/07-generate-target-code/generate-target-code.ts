@@ -256,6 +256,15 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`𝕊${expr.module.meta.scope.id}`);
             return;
 
+        case 'NotExpression':
+            emit.text(`not({`).indent();
+            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('expression: ');
+            emitExpression(emit, expr.expression, symbolTable);
+            emit.text(',');
+            emit.dedent().down(1).text('})');
+            return;
+
         case 'NullLiteralExpression':
             emit.text(`nullLiteral({in: IN, out: OUT})`);
             return;

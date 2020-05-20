@@ -8,7 +8,6 @@
 
 
 {memoise, f64, i32} = import 'std'
-{not} = import 'experiments'
 
 
 start = expr
@@ -23,7 +22,7 @@ mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Recor
 div = {type: 'div'   lhs: term   rhs: `/` factor}
 
 factor =
-    | not("0x" | "0b")   f64
+    | !"0x"   !"0b"   f64
     | `0x`   i32{base=16 signed=false}
     | `0b`   i32{base=2 signed=false}
     | `i`    i32{signed=false}
