@@ -10,10 +10,15 @@ import {checkSemantics} from './transforms';
 import {generateTargetCode} from './transforms';
 
 
-export function compile(compilerOptions: CompilerOptions) {
+export function compile(options: CompilerOptions) {
+
+    // Parse and validate compiler options
+    let main = path.resolve(options.main);
+    let outFile = options.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
+    if (main === outFile) throw new Error(`output would overwrite input`);
 
     // Collect all source files in the compilation.
-    let sourceFiles = createSourceFileGraph(compilerOptions);
+    let sourceFiles = createSourceFileGraph({main});
 
     // Proceed through all stages in the compiler pipeline.
     let ast01 = parseSourceFiles(sourceFiles);
@@ -26,7 +31,7 @@ export function compile(compilerOptions: CompilerOptions) {
     let targetCode = generateTargetCode(ast04);
 
     // write the target code to the output file path. Creating containing dirs if necessary.
-    let outFilePath = path.resolve(compilerOptions.outFile);
+    let outFilePath = path.resolve(outFile);
     fs.ensureDirSync(path.dirname(outFilePath));
     fs.writeFileSync(outFilePath, targetCode);
 }

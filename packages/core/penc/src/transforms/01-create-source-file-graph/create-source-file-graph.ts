@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import {CompilerOptions} from '../../compiler-options';
 import {AbsPath} from '../../utils';
 import {parse as detectImports} from './pen-import-detection-grammar';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
@@ -7,7 +6,7 @@ import {SourceFileGraph, SourceFileInfo} from './source-file-graph';
 
 
 // TODO: doc...
-export function createSourceFileGraph(compilerOptions: CompilerOptions): SourceFileGraph {
+export function createSourceFileGraph(options: {main: string}): SourceFileGraph {
     let sourceFiles = new Map<AbsPath, SourceFileInfo>();
 
     function getSourceFile(absPath: AbsPath) {
@@ -19,7 +18,7 @@ export function createSourceFileGraph(compilerOptions: CompilerOptions): SourceF
         return sourceFile;
     }
 
-    let mainPath = resolveModuleSpecifier(compilerOptions.main);
+    let mainPath = resolveModuleSpecifier(options.main);
     let unprocessedPaths = [mainPath];
     let processedPaths = new Set<AbsPath>();
     while (unprocessedPaths.length > 0) {

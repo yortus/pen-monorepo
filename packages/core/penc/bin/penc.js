@@ -5,28 +5,23 @@
 // chmod +x penc-cli.js # Make the file executable
 
 
+const program = require('commander');
 const path = require('path');
+const {version} = require('../package.json');
 
 
-// TODO: temp example...
-const program = require('commander'); // (normal include)
-
+// Declare the command line syntax.
 program
-    .option('-o, --out-file <path>', 'output file path')
-    .parse(process.argv);
+    .version(version, '-v, --version', 'print penc version')
+    .arguments('<path>')
+    .option('-o, --out-file <path>', 'specify the output path');
 
-if (program.args.length !== 1) {
-    console.error('main path required');
-    process.exit(1);
-}
+// Parse/validate the command line arguments.
+program.parse(process.argv);
+if (program.args.length !== 1) program.help();
 
-const main = program.args[0];
-const outFile = program.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
-if (main === outFile) {
-    console.error('output would overwrite input');
-    process.exit(1);
-}
-
-
+// Invoke the pen compiler with the given arguments.
 const {compile} = require('..');
+const main = program.args[0];
+const outFile = program.outFile;
 compile({main, outFile});

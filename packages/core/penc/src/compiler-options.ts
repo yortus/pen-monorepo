@@ -7,5 +7,6 @@ export interface CompilerOptions {
     // -required-
     // Path where the output file will be generated. If the file already exists, it will be overwritten.
     // If relative, will be resolved against the CWD.
-    outFile: string;
+    // If omitted, will be same as main path but with extension changed to '.js'
+    outFile?: string;
 }
