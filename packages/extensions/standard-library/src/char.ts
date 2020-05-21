@@ -10,6 +10,7 @@ function char(options: StaticOptions): PenVal {
             let max = expr.bindings?.max?.constant?.value as string | undefined ?? '\uFFFF';
             assert(typeof min === 'string' && min.length === 1);
             assert(typeof max === 'string' && max.length === 1);
+            let checkRange = min !== '\u0000' || max !== '\uFFFF';
 
             if (options.in === 'nil') {
                 const out = options.out === 'nil' ? undefined : min;
@@ -21,7 +22,7 @@ function char(options: StaticOptions): PenVal {
                     if (checkInType && typeof IN !== 'string') return false;
                     if (IP < 0 || IP >= (IN as string).length) return false;
                     let c = (IN as string).charAt(IP);
-                    if (c < min || c > max) return false;
+                    if (checkRange && (c < min || c > max)) return false;
                     IP += 1;
                     OUT = options.out === 'nil' ? undefined : c;
                     return true;

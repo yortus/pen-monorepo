@@ -416,6 +416,7 @@ const 𝔼8 = (() => {
                 let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
+                let checkRange = min !== '\u0000' || max !== '\uFFFF';
                 if (options.in === 'nil') {
                     const out = options.out === 'nil' ? undefined : min;
                     return { rule: function CHA() { return OUT = out, true; } };
@@ -427,7 +428,7 @@ const 𝔼8 = (() => {
                         if (IP < 0 || IP >= IN.length)
                             return false;
                         let c = IN.charAt(IP);
-                        if (c < min || c > max)
+                        if (checkRange && (c < min || c > max))
                             return false;
                         IP += 1;
                         OUT = options.out === 'nil' ? undefined : c;
