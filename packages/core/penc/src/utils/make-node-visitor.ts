@@ -30,7 +30,6 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'Binding': return rec(n.pattern), rec(n.value), undefined;
             case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
-            case 'CharacterExpression': return;
             case 'ExtensionFile': return;
             case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;

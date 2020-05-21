@@ -1,16 +1,3 @@
-Char improvements:
-    [ ] new `char` declaration in standard library
-    [ ] `char` is a lambda/rule combo, like `i32`
-    [ ] the rule form is equivalent to `anyChar` (ie character range from `0x000000-0x10ffff`)
-    [ ] the lambda form is equivalent to `character` in penrt, takes `min` and `max` parameters
-    [ ] `min` and `max` params default to `0x000000` and `0x10ffff` respectively
-    [ ] remove `character` from penrt and `anyChar` from experimental
-    [ ] remove special `a-z` charrange syntax from pen's grammar
-    [ ] remove `CharacterExpression` ast node and all handlers for it
-    [ ] treat `-` normally in strings etc in pen's grammar
-    [ ] update test suite pen grammars accordingly
-
-
 Optimisations to investigate:
     * initially focus on sequence, string, and character constructs
     * initial aim: performance parity with pegjs
@@ -21,6 +8,18 @@ Optimisations to investigate:
         [ ] Q: how to account for 6x modes (txt->ast, nil->txt, etc)? A: directly emit the specialised code
 
 
+Char improvements:
+    [x] new `char` declaration in standard library
+    [x] `char` is a lambda/rule combo, like `i32`
+    [x] the rule form is equivalent to `anyChar` (ie character range from `0x0000-0xFFFF`)
+    [x] the lambda form is equivalent to `character` in penrt, takes `min` and `max` parameters
+    [x] `min` and `max` params default to `\u0000` and `\uFFFF` respectively
+    [x] remove `character` from penrt and `anyChar` from experimental
+    [x] remove special `a-z` `CharacterExpression` syntax from pen's grammar
+    [x] remove `CharacterExpression` ast node and all handlers for it
+    [x] treat `-` normally in strings etc in pen's grammar
+    [x] update test suite pen grammars accordingly
+        
 
 New TODOs May 2020:
     [x] add a timed test for unparse so perf improvements can be roughly measured
@@ -54,6 +53,7 @@ New TODOs May 2020:
         [x] stringLiteral
         [x] TODO: list others...
 
+
 TODO 2020:
     [x] unparse --> print
     [x] `float64` --> `f64`
@@ -70,6 +70,7 @@ TODO 2020:
         [x] parse
         [ ] unparse
     [ ] unicode surrogate pairs - how to parse/unparse them? Harder than just plain charCode <-> char
+    [ ] provide full and consistent support everywhere in penc for all unicode chars 0-0x10FFFF (not just BMP)
     [ ] compile-time constants
         [x] basic working support
         [ ] doc current partial support:

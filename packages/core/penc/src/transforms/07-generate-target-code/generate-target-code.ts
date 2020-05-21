@@ -208,17 +208,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`booleanLiteral({in: IN, out: OUT, value: ${expr.value}})`);
             return;
 
-        case 'CharacterExpression': {
-            let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
-            emit.text('character({').indent();
-            emit.down(1).text(`in: ${m.replace(/_/g, 'IN')},`);
-            emit.down(1).text(`out: ${m.replace(/_/g, 'OUT')},`);
-            emit.down(1).text(`min: ${JSON.stringify(expr.minValue)},`);
-            emit.down(1).text(`max: ${JSON.stringify(expr.maxValue)},`);
-            emit.dedent().down(1).text('})');
-            return;
-        }
-
         case 'FieldExpression':
             emit.text('field({').indent();
             emit.down(1).text('in: IN,').down(1).text('out: OUT,');

@@ -28,7 +28,6 @@ export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BindingLookupExpression<M>
     | BooleanLiteralExpression<M>
-    | CharacterExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
@@ -136,16 +135,6 @@ export interface BindingLookupExpression<M extends Metadata = {}> {
 export interface BooleanLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'BooleanLiteralExpression';
     readonly value: boolean;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface CharacterExpression<M extends Metadata = {}> {
-    readonly kind: 'CharacterExpression';
-    readonly minValue: string;
-    readonly maxValue: string;
-    readonly concrete: boolean;
-    readonly abstract: boolean;
     readonly meta: M[this['kind']];
 }
 

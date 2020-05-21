@@ -68,7 +68,6 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         ListExpression              [a, b, c]   [a]   []
         NullLiteralExpression       null
         BooleanLiteralExpression    false   true
-        CharacterExpression         "a-z"   '0-9'   `A-F`
         StringLiteralExpression     "foo"   'a string!'   `a`
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression            import './foo'   import 'somelib'
@@ -110,7 +109,6 @@ PrimaryExpression
     / ImportExpression
     / NullLiteralExpression
     / BooleanLiteralExpression
-    / CharacterExpression
     / StringLiteralExpression
     / NumericLiteralExpression
     / ReferenceExpression
@@ -190,24 +188,14 @@ BooleanLiteralExpression
     = TRUE   { return {kind: 'BooleanLiteralExpression', value: true}; }
     / FALSE   { return {kind: 'BooleanLiteralExpression', value: false}; }
 
-CharacterExpression
-    = "'"   !['-]   minValue:CHARACTER   "-"   !['-]   maxValue:CHARACTER   "'"
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: true}; }
-
-    / '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: false}; }
-
-    / "`"   ![`-]   minValue:CHARACTER   "-"   ![`-]   maxValue:CHARACTER   "`"
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
-
 StringLiteralExpression
-    = !CharacterExpression   "'"   chars:(!"'"   CHARACTER)*   "'"
+    = "'"   chars:(!"'"   CHARACTER)*   "'"
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
-    / !CharacterExpression   '"'   chars:(!'"'   CHARACTER)*   '"'
+    / '"'   chars:(!'"'   CHARACTER)*   '"'
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
-    / !CharacterExpression   "`"   chars:(!"`"   CHARACTER)*   "`"
+    / "`"   chars:(!"`"   CHARACTER)*   "`"
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
 NumericLiteralExpression
@@ -251,7 +239,6 @@ ExponentPart
 // ====================   Literal characters and escape sequences   ====================
 CHARACTER
     = ![\x00-\x1F]   !"\\"   .   { return text(); }
-    / "\\-"   { return '-'; }
     / "\\"   c:[bfnrtv0'"\\]   { return eval(`"${text()}"`); }
     / "\\x"   d:(HEX_DIGIT   HEX_DIGIT)   { return eval(`"\\u00${d.join('')}"`); }
     / "\\u"   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   { return eval(`"${text()}"`); }

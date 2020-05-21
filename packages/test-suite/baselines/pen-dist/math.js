@@ -398,10 +398,49 @@ function zeroOrOne(options) {
 const 𝔼5 = (() => {
     "use strict";
     /* @pen exports = {
+        char,
         f64,
         i32,
         memoise,
     } */
+    // TODO: doc... has both 'txt' and 'ast' representation
+    // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
+    function char(options) {
+        const checkInType = options.in !== 'txt';
+        let result = {
+            lambda(expr) {
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
+                let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
+                assert(typeof min === 'string' && min.length === 1);
+                assert(typeof max === 'string' && max.length === 1);
+                if (options.in === 'nil') {
+                    const out = options.out === 'nil' ? undefined : min;
+                    return { rule: function CHA() { return OUT = out, true; } };
+                }
+                return {
+                    rule: function CHA() {
+                        if (checkInType && typeof IN !== 'string')
+                            return false;
+                        if (IP < 0 || IP >= IN.length)
+                            return false;
+                        let c = IN.charAt(IP);
+                        if (c < min || c > max)
+                            return false;
+                        IP += 1;
+                        OUT = options.out === 'nil' ? undefined : c;
+                        return true;
+                    },
+                };
+            },
+        };
+        // TODO: temp testing...
+        result.rule = result.lambda({ bindings: {
+                min: { constant: { value: '\u0000' } },
+                max: { constant: { value: '\uFFFF' } },
+            } }).rule;
+        return result;
+    }
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
         if (options.in === 'nil') {
@@ -726,6 +765,7 @@ const 𝔼5 = (() => {
     }
 
     return {
+        char,
         f64,
         i32,
         memoise,
@@ -772,6 +812,7 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊5 = {
         bindings: {
+            char: {},
             f64: {},
             i32: {},
             memoise: {},
@@ -792,6 +833,11 @@ function createProgram({in: IN, out: OUT}) {
     𝕊4.bindings.signed.constant = {value: false};
 
     // -------------------- std.pen.js --------------------
+
+    Object.assign(
+        𝕊5.bindings.char,
+        𝔼5.char({in: IN, out: OUT}),
+    );
 
     Object.assign(
         𝕊5.bindings.f64,

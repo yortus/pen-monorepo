@@ -1,4 +1,3 @@
 /* @pen exports = {
-    anyChar,
     unicode
 } */

@@ -18,7 +18,6 @@ export function resolveConstantValues(program: Program<Metadata>) {
         },
         // BindingLookupExpression: return rec(n.module), undefined;
         BooleanLiteralExpression: expr => ({value: expr.value}),
-        // CharacterExpression: return;
         // FieldExpression: return rec(n.name), rec(n.value), undefined;
         // ImportExpression: return;
         // //////////////////////////// LambdaExpression: TODO: ...

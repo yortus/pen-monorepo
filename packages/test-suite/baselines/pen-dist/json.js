@@ -395,13 +395,52 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const 𝔼3 = (() => {
+const 𝔼4 = (() => {
     "use strict";
     /* @pen exports = {
+        char,
         f64,
         i32,
         memoise,
     } */
+    // TODO: doc... has both 'txt' and 'ast' representation
+    // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
+    function char(options) {
+        const checkInType = options.in !== 'txt';
+        let result = {
+            lambda(expr) {
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
+                let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
+                assert(typeof min === 'string' && min.length === 1);
+                assert(typeof max === 'string' && max.length === 1);
+                if (options.in === 'nil') {
+                    const out = options.out === 'nil' ? undefined : min;
+                    return { rule: function CHA() { return OUT = out, true; } };
+                }
+                return {
+                    rule: function CHA() {
+                        if (checkInType && typeof IN !== 'string')
+                            return false;
+                        if (IP < 0 || IP >= IN.length)
+                            return false;
+                        let c = IN.charAt(IP);
+                        if (c < min || c > max)
+                            return false;
+                        IP += 1;
+                        OUT = options.out === 'nil' ? undefined : c;
+                        return true;
+                    },
+                };
+            },
+        };
+        // TODO: temp testing...
+        result.rule = result.lambda({ bindings: {
+                min: { constant: { value: '\u0000' } },
+                max: { constant: { value: '\uFFFF' } },
+            } }).rule;
+        return result;
+    }
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
         if (options.in === 'nil') {
@@ -726,37 +765,17 @@ const 𝔼3 = (() => {
     }
 
     return {
+        char,
         f64,
         i32,
         memoise,
     };
 })();
-const 𝔼4 = (() => {
+const 𝔼5 = (() => {
     "use strict";
     /* @pen exports = {
-        anyChar,
         unicode
     } */
-    // TODO: doc... has both 'txt' and 'ast' representation
-    function anyChar(options) {
-        const checkInType = options.in !== 'txt';
-        if (options.in === 'nil') {
-            const out = options.out === 'nil' ? undefined : '?';
-            return { rule: function ANY() { return OUT = out, true; } };
-        }
-        return {
-            rule: function ANY() {
-                if (checkInType && typeof IN !== 'string')
-                    return false;
-                if (IP < 0 || IP >= IN.length)
-                    return false;
-                let c = IN.charAt(IP);
-                IP += 1;
-                OUT = options.out === 'nil' ? undefined : c;
-                return true;
-            },
-        };
-    }
     function unicode(options) {
         return {
             lambda(expr) {
@@ -813,7 +832,6 @@ const 𝔼4 = (() => {
     }
 
     return {
-        anyChar,
         unicode,
     };
 })();
@@ -822,8 +840,8 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊1 = {
         bindings: {
+            char: {},
             f64: {},
-            anyChar: {},
             unicode: {},
             start: {},
             Value: {},
@@ -850,66 +868,75 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊2 = {
         bindings: {
+            min: {},
+            max: {},
+        },
+    };
+
+    const 𝕊3 = {
+        bindings: {
             base: {},
             minDigits: {},
             maxDigits: {},
         },
     };
 
-    const 𝕊3 = {
+    const 𝕊4 = {
         bindings: {
+            char: {},
             f64: {},
             i32: {},
             memoise: {},
         },
     };
 
-    const 𝕊4 = {
+    const 𝕊5 = {
         bindings: {
-            anyChar: {},
             unicode: {},
         },
     };
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.f64 = 𝕊3.bindings.f64;
-    𝕊1.bindings.anyChar = 𝕊4.bindings.anyChar;
-    𝕊1.bindings.unicode = 𝕊4.bindings.unicode;
+    𝕊1.bindings.char = 𝕊4.bindings.char;
+    𝕊1.bindings.f64 = 𝕊4.bindings.f64;
+    𝕊1.bindings.unicode = 𝕊5.bindings.unicode;
     𝕊1.bindings.Number = 𝕊1.bindings.f64;
 
     // -------------------- Compile-time constants --------------------
     𝕊1.bindings.DOUBLE_QUOTE.constant = {value: "\""};
-    𝕊2.bindings.base.constant = {value: 16};
-    𝕊2.bindings.minDigits.constant = {value: 4};
-    𝕊2.bindings.maxDigits.constant = {value: 4};
+    𝕊2.bindings.min.constant = {value: "\u0000"};
+    𝕊2.bindings.max.constant = {value: "\u001f"};
+    𝕊3.bindings.base.constant = {value: 16};
+    𝕊3.bindings.minDigits.constant = {value: 4};
+    𝕊3.bindings.maxDigits.constant = {value: 4};
 
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊3.bindings.f64,
-        𝔼3.f64({in: IN, out: OUT}),
+        𝕊4.bindings.char,
+        𝔼4.char({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊3.bindings.i32,
-        𝔼3.i32({in: IN, out: OUT}),
+        𝕊4.bindings.f64,
+        𝔼4.f64({in: IN, out: OUT}),
     );
 
     Object.assign(
-        𝕊3.bindings.memoise,
-        𝔼3.memoise({in: IN, out: OUT}),
+        𝕊4.bindings.i32,
+        𝔼4.i32({in: IN, out: OUT}),
+    );
+
+    Object.assign(
+        𝕊4.bindings.memoise,
+        𝔼4.memoise({in: IN, out: OUT}),
     );
 
     // -------------------- experiments.pen.js --------------------
 
     Object.assign(
-        𝕊4.bindings.anyChar,
-        𝔼4.anyChar({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊4.bindings.unicode,
-        𝔼4.unicode({in: IN, out: OUT}),
+        𝕊5.bindings.unicode,
+        𝔼5.unicode({in: IN, out: OUT}),
     );
 
     // -------------------- json.pen --------------------
@@ -1134,12 +1161,7 @@ function createProgram({in: IN, out: OUT}) {
                         not({
                             in: IN,
                             out: OUT,
-                            expression: character({
-                                in: IN,
-                                out: OUT,
-                                min: "\u0000",
-                                max: "\u001f",
-                            }),
+                            expression: (𝕊1.bindings.char).lambda(𝕊2),
                         }),
                         not({
                             in: IN,
@@ -1159,7 +1181,7 @@ function createProgram({in: IN, out: OUT}) {
                                 value: "\\",
                             }),
                         }),
-                        𝕊1.bindings.anyChar,
+                        𝕊1.bindings.char,
                     ],
                 }),
                 sequence({
@@ -1299,7 +1321,7 @@ function createProgram({in: IN, out: OUT}) {
                             out: OUT !== "txt" ? "nil" : OUT,
                             value: "\\u",
                         }),
-                        (𝕊1.bindings.unicode).lambda(𝕊2),
+                        (𝕊1.bindings.unicode).lambda(𝕊3),
                     ],
                 }),
             ],
@@ -1452,17 +1474,35 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊2.bindings.base,
+        𝕊2.bindings.min,
+        stringLiteral({
+            in: IN,
+            out: OUT,
+            value: "\u0000",
+        })
+    );
+
+    Object.assign(
+        𝕊2.bindings.max,
+        stringLiteral({
+            in: IN,
+            out: OUT,
+            value: "\u001f",
+        })
+    );
+
+    Object.assign(
+        𝕊3.bindings.base,
         numericLiteral({in: IN, out: OUT, value: 16})
     );
 
     Object.assign(
-        𝕊2.bindings.minDigits,
+        𝕊3.bindings.minDigits,
         numericLiteral({in: IN, out: OUT, value: 4})
     );
 
     Object.assign(
-        𝕊2.bindings.maxDigits,
+        𝕊3.bindings.maxDigits,
         numericLiteral({in: IN, out: OUT, value: 4})
     );
 
