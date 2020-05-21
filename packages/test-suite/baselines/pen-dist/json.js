@@ -405,6 +405,8 @@ const 𝔼4 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
+    // TODO: optimise 'any char' case better
+    // TODO: optimise all cases better
     function char(options) {
         const checkInType = options.in !== 'txt';
         let result = {
@@ -868,16 +870,16 @@ function createProgram({in: IN, out: OUT}) {
 
     const 𝕊2 = {
         bindings: {
-            min: {},
-            max: {},
+            base: {},
+            minDigits: {},
+            maxDigits: {},
         },
     };
 
     const 𝕊3 = {
         bindings: {
-            base: {},
-            minDigits: {},
-            maxDigits: {},
+            min: {},
+            max: {},
         },
     };
 
@@ -904,11 +906,11 @@ function createProgram({in: IN, out: OUT}) {
 
     // -------------------- Compile-time constants --------------------
     𝕊1.bindings.DOUBLE_QUOTE.constant = {value: "\""};
-    𝕊2.bindings.min.constant = {value: "\u0000"};
-    𝕊2.bindings.max.constant = {value: "\u001f"};
-    𝕊3.bindings.base.constant = {value: 16};
-    𝕊3.bindings.minDigits.constant = {value: 4};
-    𝕊3.bindings.maxDigits.constant = {value: 4};
+    𝕊2.bindings.base.constant = {value: 16};
+    𝕊2.bindings.minDigits.constant = {value: 4};
+    𝕊2.bindings.maxDigits.constant = {value: 4};
+    𝕊3.bindings.min.constant = {value: "\u0000"};
+    𝕊3.bindings.max.constant = {value: "\u001f"};
 
     // -------------------- std.pen.js --------------------
 
@@ -1158,11 +1160,163 @@ function createProgram({in: IN, out: OUT}) {
                     in: IN,
                     out: OUT,
                     expressions: [
-                        not({
+                        stringLiteral({
                             in: IN,
                             out: OUT,
-                            expression: (𝕊1.bindings.char).lambda(𝕊2),
+                            value: "\\",
                         }),
+                        selection({
+                            in: IN,
+                            out: OUT,
+                            expressions: [
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "\"",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\"",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "\\",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\\",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "/",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "/",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "b",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\b",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "f",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\f",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "n",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\n",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "r",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\r",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "t",
+                                        }),
+                                        stringLiteral({
+                                            in: IN !== "ast" ? "nil" : IN,
+                                            out: OUT !== "ast" ? "nil" : OUT,
+                                            value: "\t",
+                                        }),
+                                    ],
+                                }),
+                                sequence({
+                                    in: IN,
+                                    out: OUT,
+                                    expressions: [
+                                        stringLiteral({
+                                            in: IN !== "txt" ? "nil" : IN,
+                                            out: OUT !== "txt" ? "nil" : OUT,
+                                            value: "u",
+                                        }),
+                                        (𝕊1.bindings.unicode).lambda(𝕊2),
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                sequence({
+                    in: IN,
+                    out: OUT,
+                    expressions: [
                         not({
                             in: IN,
                             out: OUT,
@@ -1175,153 +1329,9 @@ function createProgram({in: IN, out: OUT}) {
                         not({
                             in: IN,
                             out: OUT,
-                            expression: stringLiteral({
-                                in: IN,
-                                out: OUT,
-                                value: "\\",
-                            }),
+                            expression: (𝕊1.bindings.char).lambda(𝕊3),
                         }),
                         𝕊1.bindings.char,
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\\"",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\"",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\\\",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\\",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\/",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "/",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\b",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\b",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\f",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\f",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\n",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\n",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\r",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\r",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\t",
-                        }),
-                        stringLiteral({
-                            in: IN !== "ast" ? "nil" : IN,
-                            out: OUT !== "ast" ? "nil" : OUT,
-                            value: "\t",
-                        }),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "\\u",
-                        }),
-                        (𝕊1.bindings.unicode).lambda(𝕊3),
                     ],
                 }),
             ],
@@ -1474,7 +1484,22 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊2.bindings.min,
+        𝕊2.bindings.base,
+        numericLiteral({in: IN, out: OUT, value: 16})
+    );
+
+    Object.assign(
+        𝕊2.bindings.minDigits,
+        numericLiteral({in: IN, out: OUT, value: 4})
+    );
+
+    Object.assign(
+        𝕊2.bindings.maxDigits,
+        numericLiteral({in: IN, out: OUT, value: 4})
+    );
+
+    Object.assign(
+        𝕊3.bindings.min,
         stringLiteral({
             in: IN,
             out: OUT,
@@ -1483,27 +1508,12 @@ function createProgram({in: IN, out: OUT}) {
     );
 
     Object.assign(
-        𝕊2.bindings.max,
+        𝕊3.bindings.max,
         stringLiteral({
             in: IN,
             out: OUT,
             value: "\u001f",
         })
-    );
-
-    Object.assign(
-        𝕊3.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 16})
-    );
-
-    Object.assign(
-        𝕊3.bindings.minDigits,
-        numericLiteral({in: IN, out: OUT, value: 4})
-    );
-
-    Object.assign(
-        𝕊3.bindings.maxDigits,
-        numericLiteral({in: IN, out: OUT, value: 4})
     );
 
     return 𝕊1.bindings.start;

@@ -405,6 +405,8 @@ const 𝔼5 = (() => {
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
     // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
+    // TODO: optimise 'any char' case better
+    // TODO: optimise all cases better
     function char(options) {
         const checkInType = options.in !== 'txt';
         let result = {
