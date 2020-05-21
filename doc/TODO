@@ -1,3 +1,16 @@
+Char improvements:
+    [ ] new `char` declaration in standard library
+    [ ] `char` is a lambda/rule combo, like `i32`
+    [ ] the rule form is equivalent to `anyChar` (ie character range from `0x000000-0x10ffff`)
+    [ ] the lambda form is equivalent to `character` in penrt, takes `min` and `max` parameters
+    [ ] `min` and `max` params default to `0x000000` and `0x10ffff` respectively
+    [ ] remove `character` from penrt and `anyChar` from experimental
+    [ ] remove special `a-z` charrange syntax from pen's grammar
+    [ ] remove `CharacterExpression` ast node and all handlers for it
+    [ ] treat `-` normally in strings etc in pen's grammar
+    [ ] update test suite pen grammars accordingly
+
+
 Optimisations to investigate:
     * initially focus on sequence, string, and character constructs
     * initial aim: performance parity with pegjs
