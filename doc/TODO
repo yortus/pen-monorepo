@@ -4,24 +4,27 @@ Optimisations to investigate:
     [ ] sequence: emit sequence code directly; don't use the penrt sequence() function
         [ ] *not* type-directed, so still need dynamic concat - may be string, object, array, undefined, or error
     [ ] string: ???
-    [ ] character: emit character code directly; don't use the penrt character() function
+    [ ] char: emit code directly; don't use the penrt char() lambda/rule
+        * NB: the change to `char` in `std` has made bench run 5-10% slower for penc
+        [ ] Q: how to special-case char when its in 'std'? use eval in `char.ts`?
         [ ] Q: how to account for 6x modes (txt->ast, nil->txt, etc)? A: directly emit the specialised code
 
 
-Char improvements:
-    [x] new `char` declaration in standard library
-    [x] `char` is a lambda/rule combo, like `i32`
-    [x] the rule form is equivalent to `anyChar` (ie character range from `0x0000-0xFFFF`)
-    [x] the lambda form is equivalent to `character` in penrt, takes `min` and `max` parameters
-    [x] `min` and `max` params default to `\u0000` and `\uFFFF` respectively
-    [x] remove `character` from penrt and `anyChar` from experimental
-    [x] remove special `a-z` `CharacterExpression` syntax from pen's grammar
-    [x] remove `CharacterExpression` ast node and all handlers for it
-    [x] treat `-` normally in strings etc in pen's grammar
-    [x] update test suite pen grammars accordingly
         
 
 New TODOs May 2020:
+    [ ] CLI: do the `chmod +x ...` thing in a *nix env and commit, so CLI will work in *nix envs
+    Char improvements:
+        [x] new `char` declaration in standard library
+        [x] `char` is a lambda/rule combo, like `i32`
+        [x] the rule form is equivalent to `anyChar` (ie character range from `0x0000-0xFFFF`)
+        [x] the lambda form is equivalent to `character` in penrt, takes `min` and `max` parameters
+        [x] `min` and `max` params default to `\u0000` and `\uFFFF` respectively
+        [x] remove `character` from penrt and `anyChar` from experimental
+        [x] remove special `a-z` `CharacterExpression` syntax from pen's grammar
+        [x] remove `CharacterExpression` ast node and all handlers for it
+        [x] treat `-` normally in strings etc in pen's grammar
+        [x] update test suite pen grammars accordingly
     [x] add a timed test for unparse so perf improvements can be roughly measured
     [x] parse/unparse -> rule
     [x] top-level exports = `parse` and `print`
