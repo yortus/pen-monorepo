@@ -1,6 +1,11 @@
 Optimisations to investigate:
     * initially focus on sequence, string, and character constructs
     * initial aim: performance parity with pegjs
+    [ ] reduce indirection in emitted code, ie replace `x.rule()` with `x_rule()` where possible
+        [ ] hypothesis: indirection has a big perf cost. Q: how to test this? A: manually modify `json.js` and see
+        [ ] need to do dependency analysis to get dep graph - and it is allowed to have cycles
+        [ ] will need thunks for cyclic deps - but try to choose an emit order that minimises thunks
+    [ ] consider changing extension interface to return source code rather than objects/functions
     [ ] sequence: emit sequence code directly; don't use the penrt sequence() function
         [ ] *not* type-directed, so still need dynamic concat - may be string, object, array, undefined, or error
     [ ] string: ???
