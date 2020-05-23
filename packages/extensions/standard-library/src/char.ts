@@ -3,7 +3,7 @@
 // TODO: optimise 'any char' case better
 // TODO: optimise all cases better
 function char(options: StaticOptions): PenVal {
-    const checkInType = options.in !== 'txt';
+    const checkInType = options.inForm !== 'txt';
     let result: PenVal = {
         lambda(expr) {
             let min = expr.bindings?.min?.constant?.value as string | undefined ?? '\u0000';
@@ -12,8 +12,8 @@ function char(options: StaticOptions): PenVal {
             assert(typeof max === 'string' && max.length === 1);
             let checkRange = min !== '\u0000' || max !== '\uFFFF';
 
-            if (options.in === 'nil') {
-                const out = options.out === 'nil' ? undefined : min;
+            if (options.inForm === 'nil') {
+                const out = options.outForm === 'nil' ? undefined : min;
                 return {rule: function CHA() { return OUT = out, true; }};
             }
 
@@ -24,7 +24,7 @@ function char(options: StaticOptions): PenVal {
                     let c = (IN as string).charAt(IP);
                     if (checkRange && (c < min || c > max)) return false;
                     IP += 1;
-                    OUT = options.out === 'nil' ? undefined : c;
+                    OUT = options.outForm === 'nil' ? undefined : c;
                     return true;
                 },
             };

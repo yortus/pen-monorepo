@@ -1,6 +1,6 @@
 function createMainExports(createProgram: (options: StaticOptions) => PenVal) {
-    const parse = createProgram({in: 'txt', out: 'ast'}).rule!;
-    const print = createProgram({in: 'ast', out: 'txt'}).rule!;
+    const parse = createProgram({inForm: 'txt', outForm: 'ast'}).rule!;
+    const print = createProgram({inForm: 'ast', outForm: 'txt'}).rule!;
     return {
         // TODO: dedupe the two fns below? Only the error strings differ.
         // TODO: add more exports - check, generate, etc.

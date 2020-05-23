@@ -2,7 +2,7 @@
 function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
     const {name, value} = options;
 
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function FLD() {
                 let stateₒ = getState();
@@ -22,7 +22,7 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
         };
     }
 
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function FLD() {
                 if (!isPlainObject(IN)) return false;
@@ -73,5 +73,5 @@ function field(options: StaticOptions & {name: PenVal, value: PenVal}): PenVal {
         };
     }
 
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

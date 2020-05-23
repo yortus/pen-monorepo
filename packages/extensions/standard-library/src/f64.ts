@@ -1,11 +1,11 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function f64(options: StaticOptions): PenVal {
-    if (options.in === 'nil') {
-        const out = options.out === 'nil' ? undefined : 0;
+    if (options.inForm === 'nil') {
+        const out = options.outForm === 'nil' ? undefined : 0;
         return {rule: function F64() { return OUT = out, true; }};
     }
 
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function F64() {
                 if (typeof IN !== 'string') return false;
@@ -75,13 +75,13 @@ function f64(options: StaticOptions): PenVal {
                 if (!Number.isFinite(num)) return setState(stateₒ), false;
 
                 // Success
-                OUT = options.out === 'nil' ? undefined : num;
+                OUT = options.outForm === 'nil' ? undefined : num;
                 return true;
             },
         };
     }
 
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function F64() {
                 // Ensure N is a number.
@@ -89,14 +89,14 @@ function f64(options: StaticOptions): PenVal {
 
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                OUT = options.out === 'nil' ? undefined : String(IN);
+                OUT = options.outForm === 'nil' ? undefined : String(IN);
                 IP = 1;
                 return true;
             },
         };
     }
 
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 
 

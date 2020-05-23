@@ -2,10 +2,10 @@
 function stringLiteral(options: StaticOptions & {value: string}): PenVal {
     const {value} = options;
     const length = value.length;
-    const out = options.out === 'nil' ? undefined : value;
-    const checkInType = options.in !== 'txt';
+    const out = options.outForm === 'nil' ? undefined : value;
+    const checkInType = options.inForm !== 'txt';
 
-    if (options.in === 'nil') {
+    if (options.inForm === 'nil') {
         return {rule: function STR() { return OUT = out, true; }};
     }
 

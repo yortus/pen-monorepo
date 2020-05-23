@@ -1,8 +1,8 @@
 // TODO: ...
 type StaticForm = (options: StaticOptions) => PenVal;
 interface StaticOptions {
-    in: 'txt' | 'ast' | 'nil';
-    out: 'txt' | 'ast' | 'nil';
+    inForm: 'txt' | 'ast' | 'nil';
+    outForm: 'txt' | 'ast' | 'nil';
 }
 
 

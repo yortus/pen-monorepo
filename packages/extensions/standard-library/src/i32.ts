@@ -10,12 +10,12 @@ function i32(options: StaticOptions): PenVal {
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
 
-            if (options.in === 'nil') {
-                const out = options.out === 'nil' ? undefined : 0;
+            if (options.inForm === 'nil') {
+                const out = options.outForm === 'nil' ? undefined : 0;
                 return {rule: function I32() { return OUT = out, true; }};
             }
 
-            if (options.in === 'txt' || options.out === 'ast') {
+            if (options.inForm === 'txt' || options.outForm === 'ast') {
                 return {
                     rule: function I32() {
                         if (typeof IN !== 'string') return false;
@@ -60,13 +60,13 @@ function i32(options: StaticOptions): PenVal {
                         if (isNegative) num = -num;
 
                         // Success
-                        OUT = options.out === 'nil' ? undefined : num;
+                        OUT = options.outForm === 'nil' ? undefined : num;
                         return true;
                     },
                 };
             }
 
-            if (options.in === 'ast' || options.out === 'txt') {
+            if (options.inForm === 'ast' || options.outForm === 'txt') {
                 return {
                     rule() {
                         if (typeof IN !== 'number' || IP !== 0) return false;
@@ -95,14 +95,14 @@ function i32(options: StaticOptions): PenVal {
                         // Compute the final string.
                         if (isNegative) digits.push(0x2d); // char code for '-'
                         // TODO: is String.fromCharCode(...) performant?
-                        OUT = options.out === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                        OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
                         IP = 1;
                         return true;
                     },
                 };
             }
 
-            throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         },
     };
 

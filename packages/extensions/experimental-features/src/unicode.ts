@@ -12,7 +12,7 @@ function unicode(options: StaticOptions): PenVal {
             let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
             let regex = RegExp(pattern, 'i');
 
-            if (options.in === 'txt' || options.out === 'ast') {
+            if (options.inForm === 'txt' || options.outForm === 'ast') {
                 return {
                     rule: function UNI() {
                         if (typeof IN !== 'string') return false;
@@ -40,7 +40,7 @@ function unicode(options: StaticOptions): PenVal {
                 };
             }
 
-            if (options.in === 'ast' || options.out === 'txt') {
+            if (options.inForm === 'ast' || options.outForm === 'txt') {
                 return {
                     rule: function UNI() {
                         // TODO: implement
@@ -49,7 +49,7 @@ function unicode(options: StaticOptions): PenVal {
                 };
             }
 
-            throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         },
     };
 }

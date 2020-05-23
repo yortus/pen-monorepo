@@ -2,7 +2,7 @@
 function record(options: StaticOptions & {fields: Array<{name: string, value: PenVal}>}): PenVal {
     const {fields} = options;
 
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function RCD() {
                 let stateₒ = getState();
@@ -19,7 +19,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
         };
     }
 
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function RCD() {
                 if (!isPlainObject(IN)) return false;
@@ -63,5 +63,5 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Pe
         };
     }
 
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

@@ -3,7 +3,7 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
     const {elements} = options;
     const elementsLength = elements.length;
 
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function LST() {
                 let stateₒ = getState();
@@ -19,7 +19,7 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
         };
     }
 
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function LST() {
                 if (!Array.isArray(IN)) return false;
@@ -42,5 +42,5 @@ function list(options: StaticOptions & {elements: PenVal[]}): PenVal {
         };
     }
 
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

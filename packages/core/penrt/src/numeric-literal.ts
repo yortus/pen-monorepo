@@ -2,9 +2,9 @@
 // TODO: support 'txt' representation too?
 function numericLiteral(options: StaticOptions & {value: number}): PenVal {
     const {value} = options;
-    const out = options.out === 'ast' ? value : undefined;
+    const out = options.outForm === 'ast' ? value : undefined;
 
-    if (options.in !== 'ast') {
+    if (options.inForm !== 'ast') {
         return {rule: function NUM() { return OUT = out, true; }};
     }
 

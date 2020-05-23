@@ -2,8 +2,8 @@
 "use strict";
 function booleanLiteral(options) {
     const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? value : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function BOO() { return OUT = out, true; } };
     }
     return {
@@ -16,31 +16,9 @@ function booleanLiteral(options) {
         },
     };
 }
-function character(options) {
-    const { min, max } = options;
-    const checkInType = options.in !== 'txt';
-    if (options.in === 'nil') {
-        const out = options.out === 'nil' ? undefined : min;
-        return { rule: function CHA() { return OUT = out, true; } };
-    }
-    return {
-        rule: function CHA() {
-            if (checkInType && typeof IN !== 'string')
-                return false;
-            if (IP < 0 || IP >= IN.length)
-                return false;
-            let c = IN.charAt(IP);
-            if (c < min || c > max)
-                return false;
-            IP += 1;
-            OUT = options.out === 'nil' ? undefined : c;
-            return true;
-        },
-    };
-}
 function createMainExports(createProgram) {
-    const parse = createProgram({ in: 'txt', out: 'ast' }).rule;
-    const print = createProgram({ in: 'ast', out: 'txt' }).rule;
+    const parse = createProgram({ inForm: 'txt', outForm: 'ast' }).rule;
+    const print = createProgram({ inForm: 'ast', outForm: 'txt' }).rule;
     return {
         parse: (text) => {
             setState({ IN: text, IP: 0 });
@@ -66,7 +44,7 @@ function createMainExports(createProgram) {
 }
 function field(options) {
     const { name, value } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function FLD() {
                 let stateₒ = getState();
@@ -84,7 +62,7 @@ function field(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function FLD() {
                 if (!isPlainObject(IN))
@@ -123,12 +101,12 @@ function field(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function list(options) {
     const { elements } = options;
     const elementsLength = elements.length;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function LST() {
                 let stateₒ = getState();
@@ -144,7 +122,7 @@ function list(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function LST() {
                 if (!Array.isArray(IN))
@@ -169,7 +147,7 @@ function list(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function not(options) {
     const { expression } = options;
@@ -184,8 +162,8 @@ function not(options) {
     };
 }
 function nullLiteral(options) {
-    const out = options.out === 'ast' ? null : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? null : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function NUL() { return OUT = out, true; } };
     }
     return {
@@ -200,8 +178,8 @@ function nullLiteral(options) {
 }
 function numericLiteral(options) {
     const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? value : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function NUM() { return OUT = out, true; } };
     }
     return {
@@ -216,7 +194,7 @@ function numericLiteral(options) {
 }
 function record(options) {
     const { fields } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function RCD() {
                 let stateₒ = getState();
@@ -233,7 +211,7 @@ function record(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function RCD() {
                 if (!isPlainObject(IN))
@@ -267,7 +245,7 @@ function record(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function selection(options) {
     const { expressions } = options;
@@ -302,9 +280,9 @@ function sequence(options) {
 function stringLiteral(options) {
     const { value } = options;
     const length = value.length;
-    const out = options.out === 'nil' ? undefined : value;
-    const checkInType = options.in !== 'txt';
-    if (options.in === 'nil') {
+    const out = options.outForm === 'nil' ? undefined : value;
+    const checkInType = options.inForm !== 'txt';
+    if (options.inForm === 'nil') {
         return { rule: function STR() { return OUT = out, true; } };
     }
     return {
@@ -396,7 +374,7 @@ function zeroOrOne(options) {
 
 // -------------------- Extensions --------------------
 
-function createProgram({in: IN, out: OUT}) {
+function createProgram({inForm, outForm}) {
 
     const 𝕊1 = {
         bindings: {
@@ -492,8 +470,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.b,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "b2",
         })
     );
@@ -501,8 +479,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.baz,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "baz",
         })
     );
@@ -510,8 +488,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.modExprMem,
         selection({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             expressions: [
                 𝕊1.bindings.expr.bindings.foo,
                 𝕊3.bindings.mem,
@@ -528,8 +506,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊2.bindings.foo,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "foo",
         })
     );
@@ -537,8 +515,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊2.bindings.bar,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "bar",
         })
     );
@@ -546,8 +524,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊3.bindings.mem,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "member",
         })
     );
@@ -575,8 +553,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊7.bindings.c1,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "c1",
         })
     );
@@ -584,8 +562,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊7.bindings.c2,
         stringLiteral({
-            in: IN,
-            out: OUT,
+            inForm: inForm,
+            outForm: outForm,
             value: "c2",
         })
     );

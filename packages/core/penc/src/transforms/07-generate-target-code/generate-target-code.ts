@@ -36,7 +36,7 @@ function emitProgram(program: Program) {
     emitExtensions(emit, program);
 
     // TODO: emit prolog for `createProgram` function
-    emit.down(2).text('function createProgram({in: IN, out: OUT}) {').indent();
+    emit.down(2).text('function createProgram({inForm, outForm}) {').indent();
 
     // Emit declarations for all symbols before any are defined.
     emitSymbolDeclarations(emit, program.meta.rootScope);
@@ -162,7 +162,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             for (let name of ef.exportedNames) {
                 emit.down(2).text(`Object.assign(`).indent();
                 emit.down(1).text(`𝕊${ef.meta.scope.id}.bindings.${name},`).down(1);
-                emit.text(`𝔼${ef.meta.scope.id}.${name}({in: IN, out: OUT}),`);
+                emit.text(`𝔼${ef.meta.scope.id}.${name}({inForm, outForm}),`);
                 emit.dedent().down(1).text(`);`);
             }
         },
@@ -205,12 +205,12 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BooleanLiteralExpression':
-            emit.text(`booleanLiteral({in: IN, out: OUT, value: ${expr.value}})`);
+            emit.text(`booleanLiteral({inForm, outForm, value: ${expr.value}})`);
             return;
 
         case 'FieldExpression':
             emit.text('field({').indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('name: ');
             emitExpression(emit, expr.name, symbolTable);
             emit.text(',').down(1).text('value: ');
@@ -227,7 +227,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ListExpression':
             emit.text('list({').indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('elements: [');
             if (expr.elements.length > 0) {
                 emit.indent();
@@ -247,7 +247,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'NotExpression':
             emit.text(`not({`).indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('expression: ');
             emitExpression(emit, expr.expression, symbolTable);
             emit.text(',');
@@ -255,11 +255,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'NullLiteralExpression':
-            emit.text(`nullLiteral({in: IN, out: OUT})`);
+            emit.text(`nullLiteral({inForm, outForm})`);
             return;
 
         case 'NumericLiteralExpression':
-            emit.text(`numericLiteral({in: IN, out: OUT, value: ${expr.value}})`);
+            emit.text(`numericLiteral({inForm, outForm, value: ${expr.value}})`);
             return;
 
         case 'ParenthesisedExpression':
@@ -269,7 +269,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'QuantifiedExpression':
             emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('expression: ');
             emitExpression(emit, expr.expression, symbolTable);
             emit.text(',');
@@ -278,7 +278,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'RecordExpression':
             emit.text('record({').indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
                 emit.indent();
@@ -301,7 +301,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'SelectionExpression':
             emit.text('selection({').indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('expressions: [').indent();
             for (let arg of expr.expressions) {
                 emit.down(1);
@@ -313,7 +313,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'SequenceExpression':
             emit.text('sequence({').indent();
-            emit.down(1).text('in: IN,').down(1).text('out: OUT,');
+            emit.down(1).text('inForm,').down(1).text('outForm,');
             emit.down(1).text('expressions: [').indent();
             for (let arg of expr.expressions) {
                 emit.down(1);
@@ -326,8 +326,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'StringLiteralExpression': {
             let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
             emit.text('stringLiteral({').indent();
-            emit.down(1).text(`in: ${m.replace(/_/g, 'IN')},`);
-            emit.down(1).text(`out: ${m.replace(/_/g, 'OUT')},`);
+            emit.down(1).text(`inForm: ${m.replace(/_/g, 'inForm')},`);
+            emit.down(1).text(`outForm: ${m.replace(/_/g, 'outForm')},`);
             emit.down(1).text(`value: ${JSON.stringify(expr.value)},`);
             emit.dedent().down(1).text('})');
             return;

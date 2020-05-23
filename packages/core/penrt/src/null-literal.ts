@@ -1,8 +1,8 @@
 // TODO: doc... has only 'ast' representation
 function nullLiteral(options: StaticOptions): PenVal {
-    const out = options.out === 'ast' ? null : undefined;
+    const out = options.outForm === 'ast' ? null : undefined;
 
-    if (options.in !== 'ast') {
+    if (options.inForm !== 'ast') {
         return {rule: function NUL() { return OUT = out, true; }};
     }
 

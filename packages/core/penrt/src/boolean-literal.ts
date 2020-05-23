@@ -1,9 +1,9 @@
 // TODO: doc... has only 'ast' representation
 function booleanLiteral(options: StaticOptions & {value: boolean}): PenVal {
     const {value} = options;
-    const out = options.out === 'ast' ? value : undefined;
+    const out = options.outForm === 'ast' ? value : undefined;
 
-    if (options.in !== 'ast') {
+    if (options.inForm !== 'ast') {
         return {rule: function BOO() { return OUT = out, true; }};
     }
 

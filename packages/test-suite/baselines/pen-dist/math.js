@@ -2,8 +2,8 @@
 "use strict";
 function booleanLiteral(options) {
     const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? value : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function BOO() { return OUT = out, true; } };
     }
     return {
@@ -16,31 +16,9 @@ function booleanLiteral(options) {
         },
     };
 }
-function character(options) {
-    const { min, max } = options;
-    const checkInType = options.in !== 'txt';
-    if (options.in === 'nil') {
-        const out = options.out === 'nil' ? undefined : min;
-        return { rule: function CHA() { return OUT = out, true; } };
-    }
-    return {
-        rule: function CHA() {
-            if (checkInType && typeof IN !== 'string')
-                return false;
-            if (IP < 0 || IP >= IN.length)
-                return false;
-            let c = IN.charAt(IP);
-            if (c < min || c > max)
-                return false;
-            IP += 1;
-            OUT = options.out === 'nil' ? undefined : c;
-            return true;
-        },
-    };
-}
 function createMainExports(createProgram) {
-    const parse = createProgram({ in: 'txt', out: 'ast' }).rule;
-    const print = createProgram({ in: 'ast', out: 'txt' }).rule;
+    const parse = createProgram({ inForm: 'txt', outForm: 'ast' }).rule;
+    const print = createProgram({ inForm: 'ast', outForm: 'txt' }).rule;
     return {
         parse: (text) => {
             setState({ IN: text, IP: 0 });
@@ -66,7 +44,7 @@ function createMainExports(createProgram) {
 }
 function field(options) {
     const { name, value } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function FLD() {
                 let stateₒ = getState();
@@ -84,7 +62,7 @@ function field(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function FLD() {
                 if (!isPlainObject(IN))
@@ -123,12 +101,12 @@ function field(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function list(options) {
     const { elements } = options;
     const elementsLength = elements.length;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function LST() {
                 let stateₒ = getState();
@@ -144,7 +122,7 @@ function list(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function LST() {
                 if (!Array.isArray(IN))
@@ -169,7 +147,7 @@ function list(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function not(options) {
     const { expression } = options;
@@ -184,8 +162,8 @@ function not(options) {
     };
 }
 function nullLiteral(options) {
-    const out = options.out === 'ast' ? null : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? null : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function NUL() { return OUT = out, true; } };
     }
     return {
@@ -200,8 +178,8 @@ function nullLiteral(options) {
 }
 function numericLiteral(options) {
     const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
+    const out = options.outForm === 'ast' ? value : undefined;
+    if (options.inForm !== 'ast') {
         return { rule: function NUM() { return OUT = out, true; } };
     }
     return {
@@ -216,7 +194,7 @@ function numericLiteral(options) {
 }
 function record(options) {
     const { fields } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
+    if (options.inForm === 'txt' || options.outForm === 'ast') {
         return {
             rule: function RCD() {
                 let stateₒ = getState();
@@ -233,7 +211,7 @@ function record(options) {
             },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
+    if (options.inForm === 'ast' || options.outForm === 'txt') {
         return {
             rule: function RCD() {
                 if (!isPlainObject(IN))
@@ -267,7 +245,7 @@ function record(options) {
             },
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function selection(options) {
     const { expressions } = options;
@@ -302,9 +280,9 @@ function sequence(options) {
 function stringLiteral(options) {
     const { value } = options;
     const length = value.length;
-    const out = options.out === 'nil' ? undefined : value;
-    const checkInType = options.in !== 'txt';
-    if (options.in === 'nil') {
+    const out = options.outForm === 'nil' ? undefined : value;
+    const checkInType = options.inForm !== 'txt';
+    if (options.inForm === 'nil') {
         return { rule: function STR() { return OUT = out, true; } };
     }
     return {
@@ -408,7 +386,7 @@ const 𝔼5 = (() => {
     // TODO: optimise 'any char' case better
     // TODO: optimise all cases better
     function char(options) {
-        const checkInType = options.in !== 'txt';
+        const checkInType = options.inForm !== 'txt';
         let result = {
             lambda(expr) {
                 var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -417,8 +395,8 @@ const 𝔼5 = (() => {
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
                 let checkRange = min !== '\u0000' || max !== '\uFFFF';
-                if (options.in === 'nil') {
-                    const out = options.out === 'nil' ? undefined : min;
+                if (options.inForm === 'nil') {
+                    const out = options.outForm === 'nil' ? undefined : min;
                     return { rule: function CHA() { return OUT = out, true; } };
                 }
                 return {
@@ -431,7 +409,7 @@ const 𝔼5 = (() => {
                         if (checkRange && (c < min || c > max))
                             return false;
                         IP += 1;
-                        OUT = options.out === 'nil' ? undefined : c;
+                        OUT = options.outForm === 'nil' ? undefined : c;
                         return true;
                     },
                 };
@@ -446,11 +424,11 @@ const 𝔼5 = (() => {
     }
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
-        if (options.in === 'nil') {
-            const out = options.out === 'nil' ? undefined : 0;
+        if (options.inForm === 'nil') {
+            const out = options.outForm === 'nil' ? undefined : 0;
             return { rule: function F64() { return OUT = out, true; } };
         }
-        if (options.in === 'txt' || options.out === 'ast') {
+        if (options.inForm === 'txt' || options.outForm === 'ast') {
             return {
                 rule: function F64() {
                     if (typeof IN !== 'string')
@@ -517,12 +495,12 @@ const 𝔼5 = (() => {
                     if (!Number.isFinite(num))
                         return setState(stateₒ), false;
                     // Success
-                    OUT = options.out === 'nil' ? undefined : num;
+                    OUT = options.outForm === 'nil' ? undefined : num;
                     return true;
                 },
             };
         }
-        if (options.in === 'ast' || options.out === 'txt') {
+        if (options.inForm === 'ast' || options.outForm === 'txt') {
             return {
                 rule: function F64() {
                     // Ensure N is a number.
@@ -530,13 +508,13 @@ const 𝔼5 = (() => {
                         return false;
                     // Delegate unparsing to the JS runtime.
                     // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = options.out === 'nil' ? undefined : String(IN);
+                    OUT = options.outForm === 'nil' ? undefined : String(IN);
                     IP = 1;
                     return true;
                 },
             };
         }
-        throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+        throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
     }
     // These constants are used by the f64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
@@ -556,11 +534,11 @@ const 𝔼5 = (() => {
                 let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
-                if (options.in === 'nil') {
-                    const out = options.out === 'nil' ? undefined : 0;
+                if (options.inForm === 'nil') {
+                    const out = options.outForm === 'nil' ? undefined : 0;
                     return { rule: function I32() { return OUT = out, true; } };
                 }
-                if (options.in === 'txt' || options.out === 'ast') {
+                if (options.inForm === 'txt' || options.outForm === 'ast') {
                     return {
                         rule: function I32() {
                             if (typeof IN !== 'string')
@@ -602,12 +580,12 @@ const 𝔼5 = (() => {
                             if (isNegative)
                                 num = -num;
                             // Success
-                            OUT = options.out === 'nil' ? undefined : num;
+                            OUT = options.outForm === 'nil' ? undefined : num;
                             return true;
                         },
                     };
                 }
-                if (options.in === 'ast' || options.out === 'txt') {
+                if (options.inForm === 'ast' || options.outForm === 'txt') {
                     return {
                         rule() {
                             if (typeof IN !== 'number' || IP !== 0)
@@ -638,13 +616,13 @@ const 𝔼5 = (() => {
                             if (isNegative)
                                 digits.push(0x2d); // char code for '-'
                             // TODO: is String.fromCharCode(...) performant?
-                            OUT = options.out === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                            OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
                             IP = 1;
                             return true;
                         },
                     };
                 }
-                throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
+                throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
             },
         };
         // TODO: temp testing...
@@ -775,7 +753,7 @@ const 𝔼5 = (() => {
     };
 })();
 
-function createProgram({in: IN, out: OUT}) {
+function createProgram({inForm, outForm}) {
 
     const 𝕊1 = {
         bindings: {
@@ -839,22 +817,22 @@ function createProgram({in: IN, out: OUT}) {
 
     Object.assign(
         𝕊5.bindings.char,
-        𝔼5.char({in: IN, out: OUT}),
+        𝔼5.char({inForm, outForm}),
     );
 
     Object.assign(
         𝕊5.bindings.f64,
-        𝔼5.f64({in: IN, out: OUT}),
+        𝔼5.f64({inForm, outForm}),
     );
 
     Object.assign(
         𝕊5.bindings.i32,
-        𝔼5.i32({in: IN, out: OUT}),
+        𝔼5.i32({inForm, outForm}),
     );
 
     Object.assign(
         𝕊5.bindings.memoise,
-        𝔼5.memoise({in: IN, out: OUT}),
+        𝔼5.memoise({inForm, outForm}),
     );
 
     // -------------------- math.pen --------------------
@@ -862,8 +840,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.expr,
         (𝕊1.bindings.memoise).lambda(selection({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             expressions: [
                 𝕊1.bindings.add,
                 𝕊1.bindings.sub,
@@ -875,14 +853,14 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.add,
         record({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             fields: [
                 {
                     name: 'type',
                     value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "add",
                     }),
                 },
@@ -893,12 +871,12 @@ function createProgram({in: IN, out: OUT}) {
                 {
                     name: 'rhs',
                     value: sequence({
-                        in: IN,
-                        out: OUT,
+                        inForm,
+                        outForm,
                         expressions: [
                             stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
+                                inForm: inForm !== "txt" ? "nil" : inForm,
+                                outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "+",
                             }),
                             𝕊1.bindings.term,
@@ -912,14 +890,14 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.sub,
         record({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             fields: [
                 {
                     name: 'type',
                     value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "sub",
                     }),
                 },
@@ -930,12 +908,12 @@ function createProgram({in: IN, out: OUT}) {
                 {
                     name: 'rhs',
                     value: sequence({
-                        in: IN,
-                        out: OUT,
+                        inForm,
+                        outForm,
                         expressions: [
                             stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
+                                inForm: inForm !== "txt" ? "nil" : inForm,
+                                outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "-",
                             }),
                             𝕊1.bindings.term,
@@ -949,8 +927,8 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.term,
         (𝕊1.bindings.memoise).lambda(selection({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             expressions: [
                 𝕊1.bindings.mul,
                 𝕊1.bindings.div,
@@ -962,26 +940,26 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.mul,
         sequence({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             expressions: [
                 field({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "type",
                     }),
                     value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "mul",
                     }),
                 }),
                 record({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     fields: [
                         {
                             name: 'lhs',
@@ -990,20 +968,20 @@ function createProgram({in: IN, out: OUT}) {
                     ],
                 }),
                 field({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "rhs",
                     }),
                     value: sequence({
-                        in: IN,
-                        out: OUT,
+                        inForm,
+                        outForm,
                         expressions: [
                             stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
+                                inForm: inForm !== "txt" ? "nil" : inForm,
+                                outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "*",
                             }),
                             𝕊1.bindings.factor,
@@ -1017,14 +995,14 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.div,
         record({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             fields: [
                 {
                     name: 'type',
                     value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
+                        inForm: inForm !== "ast" ? "nil" : inForm,
+                        outForm: outForm !== "ast" ? "nil" : outForm,
                         value: "div",
                     }),
                 },
@@ -1035,12 +1013,12 @@ function createProgram({in: IN, out: OUT}) {
                 {
                     name: 'rhs',
                     value: sequence({
-                        in: IN,
-                        out: OUT,
+                        inForm,
+                        outForm,
                         expressions: [
                             stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
+                                inForm: inForm !== "txt" ? "nil" : inForm,
+                                outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "/",
                             }),
                             𝕊1.bindings.factor,
@@ -1054,28 +1032,28 @@ function createProgram({in: IN, out: OUT}) {
     Object.assign(
         𝕊1.bindings.factor,
         selection({
-            in: IN,
-            out: OUT,
+            inForm,
+            outForm,
             expressions: [
                 sequence({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     expressions: [
                         not({
-                            in: IN,
-                            out: OUT,
+                            inForm,
+                            outForm,
                             expression: stringLiteral({
-                                in: IN,
-                                out: OUT,
+                                inForm: inForm,
+                                outForm: outForm,
                                 value: "0x",
                             }),
                         }),
                         not({
-                            in: IN,
-                            out: OUT,
+                            inForm,
+                            outForm,
                             expression: stringLiteral({
-                                in: IN,
-                                out: OUT,
+                                inForm: inForm,
+                                outForm: outForm,
                                 value: "0b",
                             }),
                         }),
@@ -1083,54 +1061,54 @@ function createProgram({in: IN, out: OUT}) {
                     ],
                 }),
                 sequence({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     expressions: [
                         stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
+                            inForm: inForm !== "txt" ? "nil" : inForm,
+                            outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0x",
                         }),
                         (𝕊1.bindings.i32).lambda(𝕊2),
                     ],
                 }),
                 sequence({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     expressions: [
                         stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
+                            inForm: inForm !== "txt" ? "nil" : inForm,
+                            outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0b",
                         }),
                         (𝕊1.bindings.i32).lambda(𝕊3),
                     ],
                 }),
                 sequence({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     expressions: [
                         stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
+                            inForm: inForm !== "txt" ? "nil" : inForm,
+                            outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "i",
                         }),
                         (𝕊1.bindings.i32).lambda(𝕊4),
                     ],
                 }),
                 sequence({
-                    in: IN,
-                    out: OUT,
+                    inForm,
+                    outForm,
                     expressions: [
                         stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
+                            inForm: inForm !== "txt" ? "nil" : inForm,
+                            outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "(",
                         }),
                         𝕊1.bindings.expr,
                         stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
+                            inForm: inForm !== "txt" ? "nil" : inForm,
+                            outForm: outForm !== "txt" ? "nil" : outForm,
                             value: ")",
                         }),
                     ],
@@ -1141,27 +1119,27 @@ function createProgram({in: IN, out: OUT}) {
 
     Object.assign(
         𝕊2.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 16})
+        numericLiteral({inForm, outForm, value: 16})
     );
 
     Object.assign(
         𝕊2.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
+        booleanLiteral({inForm, outForm, value: false})
     );
 
     Object.assign(
         𝕊3.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 2})
+        numericLiteral({inForm, outForm, value: 2})
     );
 
     Object.assign(
         𝕊3.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
+        booleanLiteral({inForm, outForm, value: false})
     );
 
     Object.assign(
         𝕊4.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
+        booleanLiteral({inForm, outForm, value: false})
     );
 
     return 𝕊1.bindings.start;
