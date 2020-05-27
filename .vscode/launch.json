@@ -15,6 +15,24 @@
             ]
         },
         {
+            "name": "Build json.pen",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/packages/test-suite/scripts/build-json-pen.ts",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register",
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/packages/test-suite/tsconfig.json"
+            },
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**",
+                //"**/node_modules/**"
+            ]
+        },
+        {
             "name": "Run Test Suite",
             "type": "node",
             "request": "launch",
