@@ -68,12 +68,14 @@ function emitExtensions(emit: Emitter, program: Program) {
     visitNode(program, _ => ({
         ExtensionFile: ext => {
             if (ext.meta.scope.kind !== 'extension') return;
-            emit.down(1).text(`const ext_${ext.meta.scope.scopeSymbol.name} = (() => {`).indent();
+            emit.down(1).text(`const create${ext.meta.scope.scopeSymbol.name} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-            emit.down(2).text(`return {`).indent();
-            ext.exportedNames.forEach(name => emit.down(1).text(`${name},`));
-            emit.dedent().down(1).text('};');
+            emit.down(2).text(`return (staticOptions) => ({`).indent();
+            emit.down(1).text(`bindings: {`).indent();
+            ext.exportedNames.forEach(name => emit.down(1).text(`${name}: ${name}(staticOptions),`));
+            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('});');
             emit.dedent().down(1).text('})();');
         },
     }));
@@ -86,6 +88,13 @@ function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
     function visitScope(scope: Scope) {
         // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
         if (scope.parent) { // TODO: skip the root scope for now... revise?
+
+            // TODO: temp testing...
+            if (scope.kind === 'extension') {
+                emit.down(2).text(`const ${scope.scopeSymbol.name} = create${scope.scopeSymbol.name}({inForm, outForm});`);
+                return;
+            }
+
             emit.down(2).text(`const ${scope.scopeSymbol.name} = {`).indent();
             emit.down(1).text(`bindings: {`).indent();
             for (let symbol of scope.symbols.values()) {
@@ -155,17 +164,18 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
     // TODO: this masks a def-ordering problem that will re-appear when lambda defns are implemented. Fix it properly...
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    visitNode(program, _ => ({
-        ExtensionFile: ef => {
-            emit.down(2).text(`// -------------------- ${path.basename(ef.path)} --------------------`);
-            for (let name of ef.exportedNames) {
-                emit.down(2).text(`Object.assign(`).indent();
-                emit.down(1).text(`${ef.meta.scope.scopeSymbol.name}.bindings.${name},`).down(1);
-                emit.text(`ext_${ef.meta.scope.scopeSymbol.name}.${name}({inForm, outForm}),`);
-                emit.dedent().down(1).text(`);`);
-            }
-        },
-    }));
+    // TODO: was... remove...
+    // visitNode(program, _ => ({
+    //     ExtensionFile: ef => {
+    //         emit.down(2).text(`// -------------------- ${path.basename(ef.path)} --------------------`);
+    //         for (let name of ef.exportedNames) {
+    //             emit.down(2).text(`Object.assign(`).indent();
+    //             emit.down(1).text(`${ef.meta.scope.scopeSymbol.name}.bindings.${name},`).down(1);
+    //             emit.text(`ext_${ef.meta.scope.scopeSymbol.name}.${name}({inForm, outForm}),`);
+    //             emit.dedent().down(1).text(`);`);
+    //         }
+    //     },
+    // }));
     visitNode(program, rec => ({
         PenSourceFile: sf => {
             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);

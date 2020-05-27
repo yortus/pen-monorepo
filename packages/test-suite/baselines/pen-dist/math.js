@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const ext_𝔼5 = (() => {
+const create𝔼5 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -733,12 +733,14 @@ const ext_𝔼5 = (() => {
         };
     }
 
-    return {
-        char,
-        f64,
-        i32,
-        memoise,
-    };
+    return (staticOptions) => ({
+        bindings: {
+            char: char(staticOptions),
+            f64: f64(staticOptions),
+            i32: i32(staticOptions),
+            memoise: memoise(staticOptions),
+        }
+    });
 })();
 
 function createProgram({inForm, outForm}) {
@@ -782,14 +784,7 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝔼5 = {
-        bindings: {
-            char: {},
-            f64: {},
-            i32: {},
-            memoise: {},
-        },
-    };
+    const 𝔼5 = create𝔼5({inForm, outForm});
 
     // -------------------- Aliases --------------------
     𝕊1.bindings.memoise = 𝔼5.bindings.memoise;
@@ -803,28 +798,6 @@ function createProgram({inForm, outForm}) {
     𝕊3.bindings.base.constant = {value: 2};
     𝕊3.bindings.signed.constant = {value: false};
     𝕊4.bindings.signed.constant = {value: false};
-
-    // -------------------- std.pen.js --------------------
-
-    Object.assign(
-        𝔼5.bindings.char,
-        ext_𝔼5.char({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼5.bindings.f64,
-        ext_𝔼5.f64({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼5.bindings.i32,
-        ext_𝔼5.i32({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼5.bindings.memoise,
-        ext_𝔼5.memoise({inForm, outForm}),
-    );
 
     // -------------------- math.pen --------------------
 

@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const ext_𝔼4 = (() => {
+const create𝔼4 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -733,14 +733,16 @@ const ext_𝔼4 = (() => {
         };
     }
 
-    return {
-        char,
-        f64,
-        i32,
-        memoise,
-    };
+    return (staticOptions) => ({
+        bindings: {
+            char: char(staticOptions),
+            f64: f64(staticOptions),
+            i32: i32(staticOptions),
+            memoise: memoise(staticOptions),
+        }
+    });
 })();
-const ext_𝔼5 = (() => {
+const create𝔼5 = (() => {
     "use strict";
     /* @pen exports = {
         unicode
@@ -800,9 +802,11 @@ const ext_𝔼5 = (() => {
         };
     }
 
-    return {
-        unicode,
-    };
+    return (staticOptions) => ({
+        bindings: {
+            unicode: unicode(staticOptions),
+        }
+    });
 })();
 
 function createProgram({inForm, outForm}) {
@@ -852,20 +856,9 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝔼4 = {
-        bindings: {
-            char: {},
-            f64: {},
-            i32: {},
-            memoise: {},
-        },
-    };
+    const 𝔼4 = create𝔼4({inForm, outForm});
 
-    const 𝔼5 = {
-        bindings: {
-            unicode: {},
-        },
-    };
+    const 𝔼5 = create𝔼5({inForm, outForm});
 
     // -------------------- Aliases --------------------
     𝕊1.bindings.char = 𝔼4.bindings.char;
@@ -880,35 +873,6 @@ function createProgram({inForm, outForm}) {
     𝕊3.bindings.base.constant = {value: 16};
     𝕊3.bindings.minDigits.constant = {value: 4};
     𝕊3.bindings.maxDigits.constant = {value: 4};
-
-    // -------------------- std.pen.js --------------------
-
-    Object.assign(
-        𝔼4.bindings.char,
-        ext_𝔼4.char({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼4.bindings.f64,
-        ext_𝔼4.f64({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼4.bindings.i32,
-        ext_𝔼4.i32({inForm, outForm}),
-    );
-
-    Object.assign(
-        𝔼4.bindings.memoise,
-        ext_𝔼4.memoise({inForm, outForm}),
-    );
-
-    // -------------------- experiments.pen.js --------------------
-
-    Object.assign(
-        𝔼5.bindings.unicode,
-        ext_𝔼5.unicode({inForm, outForm}),
-    );
 
     // -------------------- json-recursive.pen --------------------
 
