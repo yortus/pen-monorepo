@@ -3,7 +3,7 @@
 
 // TODO: doc... has both 'txt' and 'ast' representation
 function i32(options: StaticOptions): PenVal {
-    let result: PenVal = {
+    return {
         lambda(expr) {
             let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
             let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
@@ -105,14 +105,6 @@ function i32(options: StaticOptions): PenVal {
             throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         },
     };
-
-    // TODO: temp testing...
-    result.rule = result.lambda!({bindings: {
-        base: {constant: {value: 10}},
-        unsigned: {constant: {value: false}},
-    }} as unknown as PenVal).rule;
-
-    return result;
 }
 
 

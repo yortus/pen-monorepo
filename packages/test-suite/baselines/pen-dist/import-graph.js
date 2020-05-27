@@ -387,7 +387,7 @@ const 𝔼8 = (() => {
     // TODO: optimise all cases better
     function char(options) {
         const checkInType = options.inForm !== 'txt';
-        let result = {
+        return {
             lambda(expr) {
                 var _a, _b, _c, _d, _e, _f, _g, _h;
                 let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
@@ -415,12 +415,6 @@ const 𝔼8 = (() => {
                 };
             },
         };
-        // TODO: temp testing...
-        result.rule = result.lambda({ bindings: {
-                min: { constant: { value: '\u0000' } },
-                max: { constant: { value: '\uFFFF' } },
-            } }).rule;
-        return result;
     }
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
@@ -527,7 +521,7 @@ const 𝔼8 = (() => {
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32(options) {
-        let result = {
+        return {
             lambda(expr) {
                 var _a, _b, _c, _d, _e, _f, _g, _h;
                 let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
@@ -625,12 +619,6 @@ const 𝔼8 = (() => {
                 throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
             },
         };
-        // TODO: temp testing...
-        result.rule = result.lambda({ bindings: {
-                base: { constant: { value: 10 } },
-                unsigned: { constant: { value: false } },
-            } }).rule;
-        return result;
     }
     // TODO: doc...
     // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE

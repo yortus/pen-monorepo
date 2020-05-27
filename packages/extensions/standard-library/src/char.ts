@@ -4,7 +4,7 @@
 // TODO: optimise all cases better
 function char(options: StaticOptions): PenVal {
     const checkInType = options.inForm !== 'txt';
-    let result: PenVal = {
+    return {
         lambda(expr) {
             let min = expr.bindings?.min?.constant?.value as string | undefined ?? '\u0000';
             let max = expr.bindings?.max?.constant?.value as string | undefined ?? '\uFFFF';
@@ -30,12 +30,4 @@ function char(options: StaticOptions): PenVal {
             };
         },
     };
-
-    // TODO: temp testing...
-    result.rule = result.lambda!({bindings: {
-        min: {constant: {value: '\u0000'}},
-        max: {constant: {value: '\uFFFF'}},
-    }} as unknown as PenVal).rule;
-
-    return result;
 }
