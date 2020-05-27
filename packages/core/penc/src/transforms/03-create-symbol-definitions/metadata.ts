@@ -1,5 +1,4 @@
-import {Scope} from '../../scope';
-import {SymbolTable} from '../../symbol-table';
+import {Scope, SymbolTable} from '../../symbol-table';
 
 
 export interface Metadata {

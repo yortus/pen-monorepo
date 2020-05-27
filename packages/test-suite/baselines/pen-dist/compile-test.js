@@ -380,6 +380,7 @@ function createProgram({inForm, outForm}) {
         bindings: {
             start: {},
             expr: {},
+            𝕊2: {},
             foo1: {},
             bar: {},
             quux: {},
@@ -387,10 +388,14 @@ function createProgram({inForm, outForm}) {
             b: {},
             baz: {},
             modExprMem: {},
+            𝕊3: {},
             recA: {},
+            𝕊4: {},
             recB: {},
+            𝕊5: {},
             refC: {},
             defC: {},
+            𝕊6: {},
         },
     };
 
@@ -423,6 +428,7 @@ function createProgram({inForm, outForm}) {
     const 𝕊6 = {
         bindings: {
             c: {},
+            𝕊7: {},
             ref5: {},
             ref6: {},
         },

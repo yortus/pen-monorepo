@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const 𝔼8 = (() => {
+const ext_𝔼8 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -751,10 +751,14 @@ function createProgram({inForm, outForm}) {
             char: {},
             start: {},
             digit: {},
+            𝕊2: {},
             alpha: {},
+            𝕊3: {},
+            𝕊4: {},
             result: {},
             myList: {},
             rec: {},
+            𝕊5: {},
             r2: {},
             r2d: {},
         },
@@ -798,7 +802,7 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝕊8 = {
+    const 𝔼8 = {
         bindings: {
             char: {},
             f64: {},
@@ -820,6 +824,7 @@ function createProgram({inForm, outForm}) {
     const 𝕊11 = {
         bindings: {
             util: {},
+            𝕊12: {},
         },
     };
 
@@ -846,7 +851,7 @@ function createProgram({inForm, outForm}) {
     𝕊1.bindings.foo = 𝕊6.bindings.f;
     𝕊1.bindings.bar = 𝕊6.bindings.b;
     𝕊1.bindings.baz = 𝕊6.bindings.baz;
-    𝕊1.bindings.char = 𝕊8.bindings.char;
+    𝕊1.bindings.char = 𝔼8.bindings.char;
     𝕊1.bindings.start = 𝕊1.bindings.result;
     𝕊1.bindings.rec = 𝕊5;
     𝕊1.bindings.r2 = 𝕊1.bindings.rec;
@@ -869,23 +874,23 @@ function createProgram({inForm, outForm}) {
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊8.bindings.char,
-        𝔼8.char({inForm, outForm}),
+        𝔼8.bindings.char,
+        ext_𝔼8.char({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊8.bindings.f64,
-        𝔼8.f64({inForm, outForm}),
+        𝔼8.bindings.f64,
+        ext_𝔼8.f64({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊8.bindings.i32,
-        𝔼8.i32({inForm, outForm}),
+        𝔼8.bindings.i32,
+        ext_𝔼8.i32({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊8.bindings.memoise,
-        𝔼8.memoise({inForm, outForm}),
+        𝔼8.bindings.memoise,
+        ext_𝔼8.memoise({inForm, outForm}),
     );
 
     // -------------------- index.pen --------------------

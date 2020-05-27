@@ -1,4 +1,4 @@
-import {Scope} from '../../scope';
+import {Scope} from '../../symbol-table';
 import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
 
 

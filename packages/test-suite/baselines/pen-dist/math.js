@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const 𝔼5 = (() => {
+const ext_𝔼5 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -756,6 +756,9 @@ function createProgram({inForm, outForm}) {
             mul: {},
             div: {},
             factor: {},
+            𝕊2: {},
+            𝕊3: {},
+            𝕊4: {},
         },
     };
 
@@ -779,7 +782,7 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝕊5 = {
+    const 𝔼5 = {
         bindings: {
             char: {},
             f64: {},
@@ -789,9 +792,9 @@ function createProgram({inForm, outForm}) {
     };
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.memoise = 𝕊5.bindings.memoise;
-    𝕊1.bindings.f64 = 𝕊5.bindings.f64;
-    𝕊1.bindings.i32 = 𝕊5.bindings.i32;
+    𝕊1.bindings.memoise = 𝔼5.bindings.memoise;
+    𝕊1.bindings.f64 = 𝔼5.bindings.f64;
+    𝕊1.bindings.i32 = 𝔼5.bindings.i32;
     𝕊1.bindings.start = 𝕊1.bindings.expr;
 
     // -------------------- Compile-time constants --------------------
@@ -804,23 +807,23 @@ function createProgram({inForm, outForm}) {
     // -------------------- std.pen.js --------------------
 
     Object.assign(
-        𝕊5.bindings.char,
-        𝔼5.char({inForm, outForm}),
+        𝔼5.bindings.char,
+        ext_𝔼5.char({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊5.bindings.f64,
-        𝔼5.f64({inForm, outForm}),
+        𝔼5.bindings.f64,
+        ext_𝔼5.f64({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊5.bindings.i32,
-        𝔼5.i32({inForm, outForm}),
+        𝔼5.bindings.i32,
+        ext_𝔼5.i32({inForm, outForm}),
     );
 
     Object.assign(
-        𝕊5.bindings.memoise,
-        𝔼5.memoise({inForm, outForm}),
+        𝔼5.bindings.memoise,
+        ext_𝔼5.memoise({inForm, outForm}),
     );
 
     // -------------------- math.pen --------------------
