@@ -62,7 +62,7 @@ function emitExtensions(emit: Emitter, program: Program) {
     emit.down(2).text(`// -------------------- Extensions --------------------`);
     visitNode(program, _ => ({
         ExtensionFile: ext => {
-            if (ext.meta.scope.kind !== 'extension') return;
+            if (ext.meta.scope.kind !== 'Extension') return;
             emit.down(1).text(`const create${ext.meta.scope.scopeSymbol.sourceName} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
@@ -83,7 +83,7 @@ function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
         if (!scope.parent) continue; // TODO: skip the root scope for now... revise?
 
         // TODO: temp testing...
-        if (scope.kind === 'extension') {
+        if (scope.kind === 'Extension') {
             emit.down(2).text(`const ${scope.scopeSymbol.sourceName} = create${scope.scopeSymbol.sourceName}({inForm, outForm});`);
             continue;
         }

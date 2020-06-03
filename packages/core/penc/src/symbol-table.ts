@@ -30,7 +30,7 @@ import {assert} from './utils';
 
 export interface Symbol {
     id: string;
-    kind: 'binding';
+    kind: 'Binding';
     scope: Scope;
     sourceName: string;
     constant?: {value: unknown};
@@ -39,7 +39,7 @@ export interface Symbol {
 
 export interface Scope {
     id: number;
-    kind: 'root' | 'module' | 'extension';
+    kind: 'Root' | 'Module' | 'Extension';
     scopeSymbol: Symbol; // TODO: doc... symbol for this scope, will be in parent scope
     parent?: Scope;
     sourceNames: Map<string, Symbol>; // maps source name to symbol info
@@ -49,10 +49,10 @@ export interface Scope {
 export class SymbolTable {
 
     constructor() {
-        let rootScope: Scope = {id: 0, kind: 'root', scopeSymbol: undefined!, sourceNames: new Map()};
+        let rootScope: Scope = {kind: 'Root', id: 0, scopeSymbol: undefined!, sourceNames: new Map()};
         this.rootScope = rootScope;
         this.scopes = [rootScope];
-        this.symbols = new Map();
+        this.allSymbolsById = new Map();
     }
 
     getRootScope() {
@@ -64,13 +64,13 @@ export class SymbolTable {
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
-    createChildScope(parent: Scope, kind: 'module' | 'extension'): Scope & {parent: Scope} {
+    createChildScope(parent: Scope, kind: 'Module' | 'Extension'): Scope & {parent: Scope} {
         let id = ++this.counter;
 
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
-        let sourceName = `${kind === 'module' ? '𝕊' : '𝔼'}${id}`; // TODO: fix this... it's not a name in the source
+        let sourceName = `${kind === 'Module' ? '𝕊' : '𝔼'}${id}`; // TODO: fix this... it's not a name in the source
         let scopeSymbol = this.create(sourceName, parent);
-        let childScope = {id, kind, scopeSymbol, parent, children: [], sourceNames: new Map()};
+        let childScope = {kind, id, scopeSymbol, parent, children: [], sourceNames: new Map()};
         this.scopes.push(childScope);
         return childScope;
     }
@@ -78,10 +78,10 @@ export class SymbolTable {
     create(sourceName: string, scope: Scope): Symbol {
         // ensure not already defined in this scope
         if (scope.sourceNames.has(sourceName)) throw new Error(`Symbol '${sourceName}' is already defined.`);
-        let id = `symbolId${this.symbols.size}`; // TODO: temp... fix this...
-        let symbol: Symbol = {id, kind: 'binding', sourceName, scope};
+        let id = `symbolId${this.allSymbolsById.size}`; // TODO: temp... fix this...
+        let symbol: Symbol = {kind: 'Binding', id, sourceName, scope};
         scope.sourceNames.set(sourceName, symbol);
-        this.symbols.set(id, symbol);
+        this.allSymbolsById.set(id, symbol);
         return symbol;
     }
 
@@ -92,7 +92,7 @@ export class SymbolTable {
     }
 
     lookupById(id: string): Symbol {
-        let result = this.symbols.get(id);
+        let result = this.allSymbolsById.get(id);
         assert(result);
         return result;
     }
@@ -101,7 +101,7 @@ export class SymbolTable {
 
     private scopes: Scope[];
 
-    private symbols: Map<string, Symbol>;
+    private allSymbolsById: Map<string, Symbol>;
 
     private counter = 0;
 }
