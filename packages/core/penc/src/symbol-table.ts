@@ -30,8 +30,8 @@ import {assert} from './utils';
 
 export interface Symbol {
     id: string;
-    name: string;
     scope: Scope;
+    nameInSource: string;
     constant?: {value: unknown};
 }
 
@@ -67,27 +67,27 @@ export class SymbolTable {
         let id = ++this.counter;
 
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
-        let name = `${kind === 'module' ? '𝕊' : '𝔼'}${id}`;
-        let scopeSymbol = this.create(name, parent);
+        let nameInSource = `${kind === 'module' ? '𝕊' : '𝔼'}${id}`; // TODO: fix this... it's not a name in the source
+        let scopeSymbol = this.create(nameInSource, parent);
         let childScope = {id, kind, scopeSymbol, parent, children: [], symbols: new Map()};
         this.scopes.push(childScope);
         return childScope;
     }
 
-    create(name: string, scope: Scope): Symbol {
+    create(nameInSource: string, scope: Scope): Symbol {
         // ensure not already defined in this scope
-        if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
+        if (scope.symbols.has(nameInSource)) throw new Error(`Symbol '${nameInSource}' is already defined.`);
         let id = `symbolId${this.symbols.size}`; // TODO: temp... fix this...
-        let symbol: Symbol = {id, name, scope};
-        scope.symbols.set(name, symbol);
+        let symbol: Symbol = {id, nameInSource, scope};
+        scope.symbols.set(nameInSource, symbol);
         this.symbols.set(id, symbol);
         return symbol;
     }
 
-    lookupByName(name: string, scope: Scope): Symbol {
-        if (scope.symbols.has(name)) return scope.symbols.get(name)!;
-        if (scope.parent) return this.lookupByName(name, scope.parent);
-        throw new Error(`Symbol '${name}' is not defined.`);
+    lookupBySourceName(nameInSource: string, scope: Scope): Symbol {
+        if (scope.symbols.has(nameInSource)) return scope.symbols.get(nameInSource)!;
+        if (scope.parent) return this.lookupBySourceName(nameInSource, scope.parent);
+        throw new Error(`Symbol '${nameInSource}' is not defined.`);
     }
 
     lookupById(id: string): Symbol {

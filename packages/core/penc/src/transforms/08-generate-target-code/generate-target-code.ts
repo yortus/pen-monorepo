@@ -45,7 +45,7 @@ function emitProgram(program: Program) {
 
     // TODO: emit epilog for `create` function
     let start = program.meta.symbolTable.lookupById(program.meta.startSymbolId);
-    emit.down(2).text(`return ${start.scope.scopeSymbol.name}.bindings.${start.name};`);
+    emit.down(2).text(`return ${start.scope.scopeSymbol.nameInSource}.bindings.${start.nameInSource};`);
     emit.dedent().down(1).text('}');
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
@@ -63,7 +63,7 @@ function emitExtensions(emit: Emitter, program: Program) {
     visitNode(program, _ => ({
         ExtensionFile: ext => {
             if (ext.meta.scope.kind !== 'extension') return;
-            emit.down(1).text(`const create${ext.meta.scope.scopeSymbol.name} = (() => {`).indent();
+            emit.down(1).text(`const create${ext.meta.scope.scopeSymbol.nameInSource} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
             emit.down(2).text(`return (staticOptions) => ({`).indent();
@@ -84,14 +84,14 @@ function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
 
         // TODO: temp testing...
         if (scope.kind === 'extension') {
-            emit.down(2).text(`const ${scope.scopeSymbol.name} = create${scope.scopeSymbol.name}({inForm, outForm});`);
+            emit.down(2).text(`const ${scope.scopeSymbol.nameInSource} = create${scope.scopeSymbol.nameInSource}({inForm, outForm});`);
             continue;
         }
 
-        emit.down(2).text(`const ${scope.scopeSymbol.name} = {`).indent();
+        emit.down(2).text(`const ${scope.scopeSymbol.nameInSource} = {`).indent();
         emit.down(1).text(`bindings: {`).indent();
         for (let symbol of scope.symbols.values()) {
-            emit.down(1).text(`${symbol.name}: {},`);
+            emit.down(1).text(`${symbol.nameInSource}: {},`);
         }
         emit.dedent().down(1).text(`},`);
         emit.dedent().down(1).text(`};`);
@@ -110,14 +110,14 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                     // Each ModulePatternName *must* be an alias to a name in the rhs module
                     for (let {name, alias, meta: {symbolId}} of pattern.names) {
                         let {scope} = symbolTable.lookupById(symbolId);
-                        emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${alias || name} = `);
+                        emit.down(1).text(`${scope.scopeSymbol.nameInSource}.bindings.${alias || name} = `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
                         emit.text(`.bindings.${name};`);
                     }
                 }
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
-                    let {name, scope} = symbolTable.lookupById(pattern.meta.symbolId);
-                    emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name} = `);
+                    let {nameInSource, scope} = symbolTable.lookupById(pattern.meta.symbolId);
+                    emit.down(1).text(`${scope.scopeSymbol.nameInSource}.bindings.${nameInSource} = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(';');
                 }
@@ -136,9 +136,9 @@ function emitConstants(emit: Emitter, program: Program) {
         Module: module => {
             for (let {pattern} of module.bindings) {
                 if (pattern.kind === 'VariablePattern') {
-                    let {scope, name, constant} = symbolTable.lookupById(pattern.meta.symbolId);
+                    let {scope, nameInSource, constant} = symbolTable.lookupById(pattern.meta.symbolId);
                     if (!constant) continue;
-                    emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name}.constant = {value: `);
+                    emit.down(1).text(`${scope.scopeSymbol.nameInSource}.bindings.${nameInSource}.constant = {value: `);
                     emitConstant(emit, constant.value);
                     emit.text('};');
 
@@ -176,9 +176,9 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
             for (let {pattern, value} of module.bindings) {
                 if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
-                    let {name, scope} = symbolTable.lookupById(pattern.meta.symbolId);
+                    let {nameInSource, scope} = symbolTable.lookupById(pattern.meta.symbolId);
                     emit.down(2).text(`Object.assign(`).indent();
-                    emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name},`).down(1);
+                    emit.down(1).text(`${scope.scopeSymbol.nameInSource}.bindings.${nameInSource},`).down(1);
                     emitExpression(emit, value, symbolTable);
                     emit.dedent().down(1).text(`);`);
                 }
@@ -219,7 +219,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ImportExpression':
-            emit.text(expr.meta.scope.scopeSymbol.name);
+            emit.text(expr.meta.scope.scopeSymbol.nameInSource);
             return;
 
         // case 'LambdaExpression':
@@ -242,7 +242,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ModuleExpression':
-            emit.text(expr.module.meta.scope.scopeSymbol.name);
+            emit.text(expr.module.meta.scope.scopeSymbol.nameInSource);
             return;
 
         case 'NotExpression':
@@ -296,7 +296,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ReferenceExpression':
             let ref = symbolTable.lookupById(expr.meta.symbolId);
-            emit.text(`${ref.scope.scopeSymbol.name}.bindings.${ref.name}`);
+            emit.text(`${ref.scope.scopeSymbol.nameInSource}.bindings.${ref.nameInSource}`);
             return;
 
         case 'SelectionExpression':
