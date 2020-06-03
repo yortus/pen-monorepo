@@ -8,6 +8,6 @@ export type Metadata = OldMetadata & {
     };
 
     ReferenceExpression: {
-        readonly symbolId: number;
+        readonly symbolId: string;
     };
 };

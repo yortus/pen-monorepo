@@ -1,3 +1,6 @@
+import {assert} from './utils';
+
+
 // TODO: temp testing...
 // export type Symbol2 = Root | Module | Extension | Binding;
 // export type Scope2 = Root | Module | Extension;
@@ -26,7 +29,7 @@
 
 
 export interface Symbol {
-    id: number;
+    id: string;
     name: string;
     scope: Scope;
     constant?: {value: unknown};
@@ -48,7 +51,7 @@ export class SymbolTable {
         let rootScope: Scope = {id: 0, kind: 'root', scopeSymbol: undefined!, symbols: new Map()};
         this.rootScope = rootScope;
         this.scopes = [rootScope];
-        this.symbols = [];
+        this.symbols = new Map();
     }
 
     getRootScope() {
@@ -74,10 +77,10 @@ export class SymbolTable {
     create(name: string, scope: Scope): Symbol {
         // ensure not already defined in this scope
         if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
-        let id = this.symbols.length;
+        let id = `symbolId${this.symbols.size}`; // TODO: temp... fix this...
         let symbol: Symbol = {id, name, scope};
         scope.symbols.set(name, symbol);
-        this.symbols.push(symbol);
+        this.symbols.set(id, symbol);
         return symbol;
     }
 
@@ -87,15 +90,17 @@ export class SymbolTable {
         throw new Error(`Symbol '${name}' is not defined.`);
     }
 
-    lookupById(id: number): Symbol {
-        return this.symbols[id];
+    lookupById(id: string): Symbol {
+        let result = this.symbols.get(id);
+        assert(result);
+        return result;
     }
 
     private rootScope: Scope;
 
     private scopes: Scope[];
 
-    private symbols: Symbol[];
+    private symbols: Map<string, Symbol>;
 
     private counter = 0;
 }

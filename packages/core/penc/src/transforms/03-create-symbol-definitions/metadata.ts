@@ -4,7 +4,7 @@ import {Scope, SymbolTable} from '../../symbol-table';
 export interface Metadata {
     Program: {
         readonly symbolTable: SymbolTable;
-        readonly startSymbolId: number;
+        readonly startSymbolId: string;
     };
 
     Module: {
@@ -16,10 +16,10 @@ export interface Metadata {
     };
 
     VariablePattern: {
-        readonly symbolId: number;
+        readonly symbolId: string;
     };
 
     ModulePatternName: {
-        readonly symbolId: number;
+        readonly symbolId: string;
     };
 }

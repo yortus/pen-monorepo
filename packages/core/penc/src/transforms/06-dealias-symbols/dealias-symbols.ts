@@ -51,8 +51,8 @@ export function dealiasSymbols(program: Program<Metadata>) {
 
 
 // TODO: doc...
-function collectAliases(program: Program<Metadata>): Map<number, number> {
-    let aliases = new Map<number, number>(); // maps from symbolId -> symbolId
+function collectAliases(program: Program<Metadata>): Map<string, string> {
+    let aliases = new Map<string, string>(); // maps from symbolId -> symbolId
     let visitNode = makeNodeVisitor<Node<Metadata>>();
     visitNode(program, rec => ({
         Module: module => {
@@ -60,7 +60,7 @@ function collectAliases(program: Program<Metadata>): Map<number, number> {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // Each ModulePatternName *must* be an alias to a name in the rhs module
                     for (let {meta: {symbolId: fromSymbolId}} of pattern.names) {
-                        let toSymbolId: number;
+                        let toSymbolId: string;
                         if (value.kind === 'ImportExpression') {
                             toSymbolId = value.meta.scope.scopeSymbol.id;
                         }
@@ -80,7 +80,7 @@ function collectAliases(program: Program<Metadata>): Map<number, number> {
                 }
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
                     let fromSymbolId = pattern.meta.symbolId;
-                    let toSymbolId: number;
+                    let toSymbolId: string;
                     if (value.kind === 'ImportExpression') {
                         toSymbolId = value.meta.scope.scopeSymbol.id;
                     }
