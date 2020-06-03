@@ -389,16 +389,9 @@ const create𝔼4 = (() => {
         const checkInType = options.inForm !== 'txt';
         return {
             lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g;
-                // TODO: temp hack to unmangle binding names... fix this
-                let bindings = Object.keys((_a = expr.bindings) !== null && _a !== void 0 ? _a : {}).reduce((obj, key) => {
-                    var _a;
-                    let name = key.slice(key.indexOf('_') + 1);
-                    obj[name] = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a[key];
-                    return obj;
-                }, {});
-                let min = (_d = (_c = (_b = bindings.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
-                let max = (_g = (_f = (_e = bindings.max) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value) !== null && _g !== void 0 ? _g : '\uFFFF';
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
+                let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
                 let checkRange = min !== '\u0000' || max !== '\uFFFF';
@@ -530,16 +523,9 @@ const create𝔼4 = (() => {
     function i32(options) {
         return {
             lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g;
-                // TODO: temp hack to unmangle binding names... fix this
-                let bindings = Object.keys((_a = expr.bindings) !== null && _a !== void 0 ? _a : {}).reduce((obj, key) => {
-                    var _a;
-                    let name = key.slice(key.indexOf('_') + 1);
-                    obj[name] = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a[key];
-                    return obj;
-                }, {});
-                let base = (_d = (_c = (_b = bindings.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
-                let signed = (_g = (_f = (_e = bindings.signed) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value) !== null && _g !== void 0 ? _g : true;
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
+                let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 if (options.inForm === 'nil') {
@@ -749,10 +735,10 @@ const create𝔼4 = (() => {
 
     return (staticOptions) => ({
         bindings: {
-            𝔼4_char: char(staticOptions),
-            𝔼4_f64: f64(staticOptions),
-            𝔼4_i32: i32(staticOptions),
-            𝔼4_memoise: memoise(staticOptions),
+            char: char(staticOptions),
+            f64: f64(staticOptions),
+            i32: i32(staticOptions),
+            memoise: memoise(staticOptions),
         }
     });
 })();
@@ -764,17 +750,10 @@ const create𝔼5 = (() => {
     function unicode(options) {
         return {
             lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g;
-                // TODO: temp hack to unmangle binding names... fix this
-                let bindings = Object.keys((_a = expr.bindings) !== null && _a !== void 0 ? _a : {}).reduce((obj, key) => {
-                    var _a;
-                    let name = key.slice(key.indexOf('_') + 1);
-                    obj[name] = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a[key];
-                    return obj;
-                }, {});
-                let base = (_c = (_b = bindings.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value;
-                let minDigits = (_e = (_d = bindings.minDigits) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value;
-                let maxDigits = (_g = (_f = bindings.maxDigits) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value;
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+                let base = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value;
+                let minDigits = (_f = (_e = (_d = expr.bindings) === null || _d === void 0 ? void 0 : _d.minDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+                let maxDigits = (_j = (_h = (_g = expr.bindings) === null || _g === void 0 ? void 0 : _g.maxDigits) === null || _h === void 0 ? void 0 : _h.constant) === null || _j === void 0 ? void 0 : _j.value;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
                 assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
@@ -825,7 +804,7 @@ const create𝔼5 = (() => {
 
     return (staticOptions) => ({
         bindings: {
-            𝔼5_unicode: unicode(staticOptions),
+            unicode: unicode(staticOptions),
         }
     });
 })();
@@ -834,44 +813,44 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊1 = {
         bindings: {
-            𝕊1_char: {},
-            𝕊1_f64: {},
-            𝕊1_unicode: {},
-            𝕊1_start: {},
-            𝕊1_Value: {},
-            𝕊1_False: {},
-            𝕊1_Null: {},
-            𝕊1_True: {},
-            𝕊1_Object: {},
-            𝕊1_Property: {},
-            𝕊1_Array: {},
-            𝕊1_Element: {},
-            𝕊1_Number: {},
-            𝕊1_String: {},
-            𝕊1_CHAR: {},
-            𝕊1_LBRACE: {},
-            𝕊1_RBRACE: {},
-            𝕊1_LBRACKET: {},
-            𝕊1_RBRACKET: {},
-            𝕊1_COLON: {},
-            𝕊1_COMMA: {},
-            𝕊1_DOUBLE_QUOTE: {},
-            𝕊1_WS: {},
+            char: {},
+            f64: {},
+            unicode: {},
+            start: {},
+            Value: {},
+            False: {},
+            Null: {},
+            True: {},
+            Object: {},
+            Property: {},
+            Array: {},
+            Element: {},
+            Number: {},
+            String: {},
+            CHAR: {},
+            LBRACE: {},
+            RBRACE: {},
+            LBRACKET: {},
+            RBRACKET: {},
+            COLON: {},
+            COMMA: {},
+            DOUBLE_QUOTE: {},
+            WS: {},
         },
     };
 
     const 𝕊2 = {
         bindings: {
-            𝕊2_min: {},
-            𝕊2_max: {},
+            min: {},
+            max: {},
         },
     };
 
     const 𝕊3 = {
         bindings: {
-            𝕊3_base: {},
-            𝕊3_minDigits: {},
-            𝕊3_maxDigits: {},
+            base: {},
+            minDigits: {},
+            maxDigits: {},
         },
     };
 
@@ -880,53 +859,53 @@ function createProgram({inForm, outForm}) {
     const 𝔼5 = create𝔼5({inForm, outForm});
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.𝕊1_char = 𝔼4.bindings.𝔼4_char;
-    𝕊1.bindings.𝕊1_f64 = 𝔼4.bindings.𝔼4_f64;
-    𝕊1.bindings.𝕊1_unicode = 𝔼5.bindings.𝔼5_unicode;
-    𝕊1.bindings.𝕊1_Number = 𝕊1.bindings.𝕊1_f64;
+    𝕊1.bindings.char = 𝔼4.bindings.char;
+    𝕊1.bindings.f64 = 𝔼4.bindings.f64;
+    𝕊1.bindings.unicode = 𝔼5.bindings.unicode;
+    𝕊1.bindings.Number = 𝕊1.bindings.f64;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1.bindings.𝕊1_DOUBLE_QUOTE.constant = {value: "\""};
-    𝕊2.bindings.𝕊2_min.constant = {value: " "};
-    𝕊2.bindings.𝕊2_max.constant = {value: "￿"};
-    𝕊3.bindings.𝕊3_base.constant = {value: 16};
-    𝕊3.bindings.𝕊3_minDigits.constant = {value: 4};
-    𝕊3.bindings.𝕊3_maxDigits.constant = {value: 4};
+    𝕊1.bindings.DOUBLE_QUOTE.constant = {value: "\""};
+    𝕊2.bindings.min.constant = {value: " "};
+    𝕊2.bindings.max.constant = {value: "￿"};
+    𝕊3.bindings.base.constant = {value: 16};
+    𝕊3.bindings.minDigits.constant = {value: 4};
+    𝕊3.bindings.maxDigits.constant = {value: 4};
 
     // -------------------- json.pen --------------------
 
     Object.assign(
-        𝕊1.bindings.𝕊1_start,
+        𝕊1.bindings.start,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
-                𝕊1.bindings.𝕊1_Value,
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
+                𝕊1.bindings.Value,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Value,
+        𝕊1.bindings.Value,
         selection({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_False,
-                𝕊1.bindings.𝕊1_Null,
-                𝕊1.bindings.𝕊1_True,
-                𝕊1.bindings.𝕊1_Object,
-                𝕊1.bindings.𝕊1_Array,
-                𝕊1.bindings.𝕊1_Number,
-                𝕊1.bindings.𝕊1_String,
+                𝕊1.bindings.False,
+                𝕊1.bindings.Null,
+                𝕊1.bindings.True,
+                𝕊1.bindings.Object,
+                𝕊1.bindings.Array,
+                𝕊1.bindings.Number,
+                𝕊1.bindings.String,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_False,
+        𝕊1.bindings.False,
         sequence({
             inForm,
             outForm,
@@ -942,7 +921,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Null,
+        𝕊1.bindings.Null,
         sequence({
             inForm,
             outForm,
@@ -958,7 +937,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_True,
+        𝕊1.bindings.True,
         sequence({
             inForm,
             outForm,
@@ -974,12 +953,12 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Object,
+        𝕊1.bindings.Object,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_LBRACE,
+                𝕊1.bindings.LBRACE,
                 selection({
                     inForm,
                     outForm,
@@ -988,7 +967,7 @@ function createProgram({inForm, outForm}) {
                             inForm,
                             outForm,
                             expressions: [
-                                𝕊1.bindings.𝕊1_Property,
+                                𝕊1.bindings.Property,
                                 zeroOrMore({
                                     inForm,
                                     outForm,
@@ -996,8 +975,8 @@ function createProgram({inForm, outForm}) {
                                         inForm,
                                         outForm,
                                         expressions: [
-                                            𝕊1.bindings.𝕊1_COMMA,
-                                            𝕊1.bindings.𝕊1_Property,
+                                            𝕊1.bindings.COMMA,
+                                            𝕊1.bindings.Property,
                                         ],
                                     }),
                                 }),
@@ -1010,35 +989,35 @@ function createProgram({inForm, outForm}) {
                         }),
                     ],
                 }),
-                𝕊1.bindings.𝕊1_RBRACE,
+                𝕊1.bindings.RBRACE,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Property,
+        𝕊1.bindings.Property,
         field({
             inForm,
             outForm,
-            name: 𝕊1.bindings.𝕊1_String,
+            name: 𝕊1.bindings.String,
             value: sequence({
                 inForm,
                 outForm,
                 expressions: [
-                    𝕊1.bindings.𝕊1_COLON,
-                    𝕊1.bindings.𝕊1_Value,
+                    𝕊1.bindings.COLON,
+                    𝕊1.bindings.Value,
                 ],
             }),
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Array,
+        𝕊1.bindings.Array,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_LBRACKET,
+                𝕊1.bindings.LBRACKET,
                 selection({
                     inForm,
                     outForm,
@@ -1047,7 +1026,7 @@ function createProgram({inForm, outForm}) {
                             inForm,
                             outForm,
                             expressions: [
-                                𝕊1.bindings.𝕊1_Element,
+                                𝕊1.bindings.Element,
                                 zeroOrMore({
                                     inForm,
                                     outForm,
@@ -1055,8 +1034,8 @@ function createProgram({inForm, outForm}) {
                                         inForm,
                                         outForm,
                                         expressions: [
-                                            𝕊1.bindings.𝕊1_COMMA,
-                                            𝕊1.bindings.𝕊1_Element,
+                                            𝕊1.bindings.COMMA,
+                                            𝕊1.bindings.Element,
                                         ],
                                     }),
                                 }),
@@ -1069,41 +1048,41 @@ function createProgram({inForm, outForm}) {
                         }),
                     ],
                 }),
-                𝕊1.bindings.𝕊1_RBRACKET,
+                𝕊1.bindings.RBRACKET,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_Element,
+        𝕊1.bindings.Element,
         list({
             inForm,
             outForm,
             elements: [
-                𝕊1.bindings.𝕊1_Value,
+                𝕊1.bindings.Value,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_String,
+        𝕊1.bindings.String,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_DOUBLE_QUOTE,
+                𝕊1.bindings.DOUBLE_QUOTE,
                 zeroOrMore({
                     inForm,
                     outForm,
-                    expression: 𝕊1.bindings.𝕊1_CHAR,
+                    expression: 𝕊1.bindings.CHAR,
                 }),
-                𝕊1.bindings.𝕊1_DOUBLE_QUOTE,
+                𝕊1.bindings.DOUBLE_QUOTE,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_CHAR,
+        𝕊1.bindings.CHAR,
         selection({
             inForm,
             outForm,
@@ -1130,7 +1109,7 @@ function createProgram({inForm, outForm}) {
                                 value: "\"",
                             }),
                         }),
-                        (𝕊1.bindings.𝕊1_char).lambda(𝕊2),
+                        (𝕊1.bindings.char).lambda(𝕊2),
                     ],
                 }),
                 sequence({
@@ -1270,7 +1249,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "\\u",
                         }),
-                        (𝕊1.bindings.𝕊1_unicode).lambda(𝕊3),
+                        (𝕊1.bindings.unicode).lambda(𝕊3),
                     ],
                 }),
             ],
@@ -1278,109 +1257,109 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_LBRACE,
+        𝕊1.bindings.LBRACE,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: "{",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_RBRACE,
+        𝕊1.bindings.RBRACE,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: "}",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_LBRACKET,
+        𝕊1.bindings.LBRACKET,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: "[",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_RBRACKET,
+        𝕊1.bindings.RBRACKET,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: "]",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_COLON,
+        𝕊1.bindings.COLON,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: ":",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_COMMA,
+        𝕊1.bindings.COMMA,
         sequence({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
                 stringLiteral({
                     inForm: inForm !== "txt" ? "nil" : inForm,
                     outForm: outForm !== "txt" ? "nil" : outForm,
                     value: ",",
                 }),
-                𝕊1.bindings.𝕊1_WS,
+                𝕊1.bindings.WS,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_DOUBLE_QUOTE,
+        𝕊1.bindings.DOUBLE_QUOTE,
         stringLiteral({
             inForm: inForm !== "txt" ? "nil" : inForm,
             outForm: outForm !== "txt" ? "nil" : outForm,
@@ -1389,7 +1368,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_WS,
+        𝕊1.bindings.WS,
         zeroOrMore({
             inForm,
             outForm,
@@ -1423,7 +1402,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊2.bindings.𝕊2_min,
+        𝕊2.bindings.min,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -1432,7 +1411,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊2.bindings.𝕊2_max,
+        𝕊2.bindings.max,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -1441,21 +1420,21 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊3.bindings.𝕊3_base,
+        𝕊3.bindings.base,
         numericLiteral({inForm, outForm, value: 16})
     );
 
     Object.assign(
-        𝕊3.bindings.𝕊3_minDigits,
+        𝕊3.bindings.minDigits,
         numericLiteral({inForm, outForm, value: 4})
     );
 
     Object.assign(
-        𝕊3.bindings.𝕊3_maxDigits,
+        𝕊3.bindings.maxDigits,
         numericLiteral({inForm, outForm, value: 4})
     );
 
-    return 𝕊1.bindings.𝕊1_start;
+    return 𝕊1.bindings.start;
 }
 
 // -------------------- Main exports --------------------

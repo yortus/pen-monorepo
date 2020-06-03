@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {SymbolTable} from '../../symbol-table';
+import {Scope, SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {Metadata} from './metadata';
 
@@ -7,7 +7,7 @@ import {Metadata} from './metadata';
 // TODO: doc...
 export function createSymbolDefinitions(program: Program) {
     const symbolTable = new SymbolTable();
-    let currentScope = symbolTable.getRootScope();
+    let currentScope: Scope | undefined;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 
@@ -24,7 +24,7 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a scope to each Module node.
         Module: mod => {
-            let scope = currentScope = symbolTable.createChildScope(currentScope, 'Module');
+            let scope = currentScope = symbolTable.createChildScope('Module', currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = scope.scope;
             return modᐟ;
@@ -32,7 +32,7 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
         ExtensionFile: ext => {
-            let scope = currentScope = symbolTable.createChildScope(currentScope, 'Extension');
+            let scope = currentScope = symbolTable.createChildScope('Extension', currentScope);
             ext.exportedNames.forEach(name => symbolTable.create(name, scope));
             let extᐟ = {...ext, meta: {scope}};
             currentScope = scope.scope;
@@ -41,11 +41,13 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
+            assert(currentScope);
             let symbol = symbolTable.create(pat.name, currentScope);
             let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
             return patternᐟ;
         },
         ModulePatternName: name => {
+            assert(currentScope);
             let symbol = symbolTable.create(name.alias || name.name, currentScope);
             let nameᐟ = {...name, meta: {symbolId: symbol.id}};
             return nameᐟ;

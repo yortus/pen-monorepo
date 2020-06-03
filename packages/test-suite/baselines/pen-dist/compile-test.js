@@ -378,91 +378,91 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊1 = {
         bindings: {
-            𝕊1_start: {},
-            𝕊1_expr: {},
-            𝕊1_a: {},
-            𝕊1_b: {},
-            𝕊1_baz: {},
-            𝕊1_modExprMem: {},
-            𝕊1_recA: {},
-            𝕊1_recB: {},
-            𝕊1_refC: {},
-            𝕊1_defC: {},
+            start: {},
+            expr: {},
+            a: {},
+            b: {},
+            baz: {},
+            modExprMem: {},
+            recA: {},
+            recB: {},
+            refC: {},
+            defC: {},
         },
     };
 
     const 𝕊2 = {
         bindings: {
-            𝕊2_foo: {},
-            𝕊2_bar: {},
-            𝕊2_a: {},
+            foo: {},
+            bar: {},
+            a: {},
         },
     };
 
     const 𝕊3 = {
         bindings: {
-            𝕊3_mem: {},
+            mem: {},
         },
     };
 
     const 𝕊4 = {
         bindings: {
-            𝕊4_a: {},
+            a: {},
         },
     };
 
     const 𝕊5 = {
         bindings: {
-            𝕊5_b: {},
+            b: {},
         },
     };
 
     const 𝕊6 = {
         bindings: {
-            𝕊6_c: {},
-            𝕊6_ref5: {},
-            𝕊6_ref6: {},
+            c: {},
+            ref5: {},
+            ref6: {},
         },
     };
 
     const 𝕊7 = {
         bindings: {
-            𝕊7_c1: {},
-            𝕊7_c2: {},
-            𝕊7_ref1: {},
-            𝕊7_ref2: {},
-            𝕊7_ref3: {},
+            c1: {},
+            c2: {},
+            ref1: {},
+            ref2: {},
+            ref3: {},
         },
     };
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.𝕊1_expr = 𝕊2;
-    𝕊1.bindings.𝕊1_a = 𝕊1.bindings.𝕊1_b;
-    𝕊1.bindings.𝕊1_recA = 𝕊4;
-    𝕊1.bindings.𝕊1_recB = 𝕊5;
-    𝕊1.bindings.𝕊1_defC = 𝕊6;
-    𝕊2.bindings.𝕊2_a = 𝕊1.bindings.𝕊1_b;
-    𝕊6.bindings.𝕊6_c = 𝕊7;
-    𝕊7.bindings.𝕊7_ref1 = 𝕊7.bindings.𝕊7_c1;
+    𝕊1.bindings.expr = 𝕊2;
+    𝕊1.bindings.a = 𝕊1.bindings.b;
+    𝕊1.bindings.recA = 𝕊4;
+    𝕊1.bindings.recB = 𝕊5;
+    𝕊1.bindings.defC = 𝕊6;
+    𝕊2.bindings.a = 𝕊1.bindings.b;
+    𝕊6.bindings.c = 𝕊7;
+    𝕊7.bindings.ref1 = 𝕊7.bindings.c1;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1.bindings.𝕊1_b.constant = {value: "b2"};
-    𝕊1.bindings.𝕊1_baz.constant = {value: "baz"};
-    𝕊2.bindings.𝕊2_foo.constant = {value: "foo"};
-    𝕊2.bindings.𝕊2_bar.constant = {value: "bar"};
-    𝕊3.bindings.𝕊3_mem.constant = {value: "member"};
-    𝕊7.bindings.𝕊7_c1.constant = {value: "c1"};
-    𝕊7.bindings.𝕊7_c2.constant = {value: "c2"};
+    𝕊1.bindings.b.constant = {value: "b2"};
+    𝕊1.bindings.baz.constant = {value: "baz"};
+    𝕊2.bindings.foo.constant = {value: "foo"};
+    𝕊2.bindings.bar.constant = {value: "bar"};
+    𝕊3.bindings.mem.constant = {value: "member"};
+    𝕊7.bindings.c1.constant = {value: "c1"};
+    𝕊7.bindings.c2.constant = {value: "c2"};
 
     // -------------------- compile-test.pen --------------------
 
     Object.assign(
-        𝕊1.bindings.𝕊1_start,
-        𝕊1.bindings.𝕊1_expr.bindings.foo
+        𝕊1.bindings.start,
+        𝕊1.bindings.expr.bindings.foo
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_b,
+        𝕊1.bindings.b,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -471,7 +471,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_baz,
+        𝕊1.bindings.baz,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -480,25 +480,25 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_modExprMem,
+        𝕊1.bindings.modExprMem,
         selection({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.𝕊1_expr.bindings.foo,
+                𝕊1.bindings.expr.bindings.foo,
                 𝕊3.bindings.mem,
-                𝕊1.bindings.𝕊1_baz,
+                𝕊1.bindings.baz,
             ],
         })
     );
 
     Object.assign(
-        𝕊1.bindings.𝕊1_refC,
-        𝕊1.bindings.𝕊1_defC.bindings.c.bindings.c1
+        𝕊1.bindings.refC,
+        𝕊1.bindings.defC.bindings.c.bindings.c1
     );
 
     Object.assign(
-        𝕊2.bindings.𝕊2_foo,
+        𝕊2.bindings.foo,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -507,7 +507,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊2.bindings.𝕊2_bar,
+        𝕊2.bindings.bar,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -516,7 +516,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊3.bindings.𝕊3_mem,
+        𝕊3.bindings.mem,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -525,27 +525,27 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊4.bindings.𝕊4_a,
-        𝕊1.bindings.𝕊1_recB.bindings.b
+        𝕊4.bindings.a,
+        𝕊1.bindings.recB.bindings.b
     );
 
     Object.assign(
-        𝕊5.bindings.𝕊5_b,
-        𝕊1.bindings.𝕊1_recA.bindings.a
+        𝕊5.bindings.b,
+        𝕊1.bindings.recA.bindings.a
     );
 
     Object.assign(
-        𝕊6.bindings.𝕊6_ref5,
-        𝕊6.bindings.𝕊6_c.bindings.c1
+        𝕊6.bindings.ref5,
+        𝕊6.bindings.c.bindings.c1
     );
 
     Object.assign(
-        𝕊6.bindings.𝕊6_ref6,
-        𝕊1.bindings.𝕊1_defC.bindings.c.bindings.c1
+        𝕊6.bindings.ref6,
+        𝕊1.bindings.defC.bindings.c.bindings.c1
     );
 
     Object.assign(
-        𝕊7.bindings.𝕊7_c1,
+        𝕊7.bindings.c1,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -554,7 +554,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊7.bindings.𝕊7_c2,
+        𝕊7.bindings.c2,
         stringLiteral({
             inForm: inForm,
             outForm: outForm,
@@ -563,16 +563,16 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊7.bindings.𝕊7_ref2,
-        𝕊6.bindings.𝕊6_c.bindings.c1
+        𝕊7.bindings.ref2,
+        𝕊6.bindings.c.bindings.c1
     );
 
     Object.assign(
-        𝕊7.bindings.𝕊7_ref3,
-        𝕊1.bindings.𝕊1_defC.bindings.c.bindings.c1
+        𝕊7.bindings.ref3,
+        𝕊1.bindings.defC.bindings.c.bindings.c1
     );
 
-    return 𝕊1.bindings.𝕊1_start;
+    return 𝕊1.bindings.start;
 }
 
 // -------------------- Main exports --------------------

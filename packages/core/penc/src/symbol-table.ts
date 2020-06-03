@@ -5,22 +5,22 @@ import {assert} from './utils';
 export type Symbol = Root | Module | Extension | Binding;
 export type Scope = Root | Module | Extension;
 export interface Root {
-    kind: 'Root';
+    kind: 'Root'; // TODO: CAN WE REMOVE THIS KIND?                                     <================
     id: string;
     scope?: undefined;
-    sourceNames: Map<string, Symbol>; // maps source name to symbol info
+    sourceNames: Map<string, Binding>; // maps source name to symbol info
 }
 export interface Module {
     kind: 'Module';
     id: string;
     scope: Scope;
-    sourceNames: Map<string, Symbol>; // maps source name to symbol info
+    sourceNames: Map<string, Binding>; // maps source name to symbol info
 }
 export interface Extension {
-    kind: 'Extension';
+    kind: 'Extension'; // TODO: CAN WE REMOVE THIS KIND?                                <================
     id: string;
     scope: Scope;
-    sourceNames: Map<string, Symbol>; // maps source name to symbol info
+    sourceNames: Map<string, Binding>; // maps source name to symbol info
 }
 export interface Binding {
     kind: 'Binding';
@@ -48,10 +48,10 @@ export class SymbolTable {
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
-    createChildScope(parent: Scope, kind: 'Module' | 'Extension'): Module | Extension {
+    createChildScope(kind: 'Module' | 'Extension', parent?: Scope): Module | Extension {
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
         let id = `${kind === 'Module' ? '𝕊' : '𝔼'}${++this.counter}`; // TODO: fix this... it's not a name in the src
-        let symbol: Module | Extension = {kind, id, scope: parent, sourceNames: new Map()};
+        let symbol: Module | Extension = {kind, id, scope: parent ?? this.getRootScope(), sourceNames: new Map()};
         this.allSymbolsById.set(id, symbol);
         return symbol;
     }

@@ -5,17 +5,8 @@
 function i32(options: StaticOptions): PenVal {
     return {
         lambda(expr) {
-            // TODO: temp hack to unmangle binding names... fix this
-            let bindings = Object.keys(expr.bindings ?? {}).reduce(
-                (obj: any, key: string) => {
-                    let name = key.slice(key.indexOf('_') + 1);
-                    obj[name] = expr.bindings?.[key];
-                    return obj;
-                },
-                {} as any
-            );
-            let base = bindings.base?.constant?.value as number | undefined ?? 10;
-            let signed = bindings.signed?.constant?.value as boolean | undefined ?? true;
+            let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
+            let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
 

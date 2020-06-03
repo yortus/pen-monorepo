@@ -6,17 +6,8 @@ function char(options: StaticOptions): PenVal {
     const checkInType = options.inForm !== 'txt';
     return {
         lambda(expr) {
-            // TODO: temp hack to unmangle binding names... fix this
-            let bindings = Object.keys(expr.bindings ?? {}).reduce(
-                (obj: any, key: string) => {
-                    let name = key.slice(key.indexOf('_') + 1);
-                    obj[name] = expr.bindings?.[key];
-                    return obj;
-                },
-                {} as any
-            );
-            let min = bindings.min?.constant?.value as string | undefined ?? '\u0000';
-            let max = bindings.max?.constant?.value as string | undefined ?? '\uFFFF';
+            let min = expr.bindings?.min?.constant?.value as string | undefined ?? '\u0000';
+            let max = expr.bindings?.max?.constant?.value as string | undefined ?? '\uFFFF';
             assert(typeof min === 'string' && min.length === 1);
             assert(typeof max === 'string' && max.length === 1);
             let checkRange = min !== '\u0000' || max !== '\uFFFF';

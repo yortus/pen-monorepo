@@ -46,7 +46,7 @@ function emitProgram(program: Program) {
     // TODO: emit epilog for `create` function
     let start = program.meta.symbolTable.lookupById(program.meta.startSymbolId);
     assert(start.kind === 'Binding');
-    emit.down(2).text(`return ${start.scope.id}.bindings.${start.id};`);
+    emit.down(2).text(`return ${start.scope.id}.bindings.${start.sourceName};`);
     emit.dedent().down(1).text('}');
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
@@ -63,16 +63,13 @@ function emitExtensions(emit: Emitter, program: Program) {
     emit.down(2).text(`// -------------------- Extensions --------------------`);
     visitNode(program, _ => ({
         ExtensionFile: ext => {
-            if (ext.meta.scope.kind !== 'Extension') return;
+            assert(ext.meta.scope.kind === 'Extension');
             emit.down(1).text(`const create${ext.meta.scope.id} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
             emit.down(2).text(`return (staticOptions) => ({`).indent();
             emit.down(1).text(`bindings: {`).indent();
-            ext.exportedNames.forEach(name => {
-                let symbol = program.meta.symbolTable.lookupBySourceName(name, ext.meta.scope);
-                emit.down(1).text(`${symbol.id}: ${name}(staticOptions),`);
-            });
+            ext.exportedNames.forEach(name => emit.down(1).text(`${name}: ${name}(staticOptions),`));
             emit.dedent().down(1).text('}');
             emit.dedent().down(1).text('});');
             emit.dedent().down(1).text('})();');
@@ -86,7 +83,7 @@ function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
         // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
         if (!scope.scope) continue; // TODO: skip the root scope for now... revise?
 
-        // TODO: temp testing...
+        // TODO: temp testing... unify with 'Module'
         if (scope.kind === 'Extension') {
             emit.down(2).text(`const ${scope.id} = create${scope.id}({inForm, outForm});`);
             continue;
@@ -94,8 +91,8 @@ function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
 
         emit.down(2).text(`const ${scope.id} = {`).indent();
         emit.down(1).text(`bindings: {`).indent();
-        for (let symbol of scope.sourceNames.values()) {
-            emit.down(1).text(`${symbol.id}: {},`);
+        for (let sourceName of scope.sourceNames.keys()) {
+            emit.down(1).text(`${sourceName}: {},`);
         }
         emit.dedent().down(1).text(`},`);
         emit.dedent().down(1).text(`};`);
@@ -115,7 +112,7 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                     for (let {name, meta: {symbolId}} of pattern.names) {
                         let symbol = symbolTable.lookupById(symbolId);
                         assert(symbol.kind === 'Binding');
-                        emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id} = `);
+                        emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName} = `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
                         emit.text(`.bindings.${name};`); // TODO: still needs fixing...
                     }
@@ -123,7 +120,7 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
                     let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                     assert(symbol.kind === 'Binding');
-                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id} = `);
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName} = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(';');
                 }
@@ -145,7 +142,7 @@ function emitConstants(emit: Emitter, program: Program) {
                     let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                     assert(symbol.kind === 'Binding');
                     if (!symbol.constant) continue;
-                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id}.constant = {value: `);
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName}.constant = {value: `);
                     emitConstant(emit, symbol.constant.value);
                     emit.text('};');
 
@@ -186,7 +183,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                     assert(symbol.kind === 'Binding');
                     emit.down(2).text(`Object.assign(`).indent();
-                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id},`).down(1);
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName},`).down(1);
                     emitExpression(emit, value, symbolTable);
                     emit.dedent().down(1).text(`);`);
                 }
@@ -305,7 +302,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'ReferenceExpression':
             let ref = symbolTable.lookupById(expr.meta.symbolId);
             assert(ref.kind === 'Binding');
-            emit.text(`${ref.scope.id}.bindings.${ref.id}`);
+            emit.text(`${ref.scope.id}.bindings.${ref.sourceName}`);
             return;
 
         case 'SelectionExpression':
