@@ -1,6 +1,33 @@
 import {assert} from './utils';
 
 
+// TODO: temp testing...
+// export type Symbol2 = Root | Module | Extension | Binding;
+// export type Scope2 = Root | Module | Extension;
+// export interface Root {
+//     kind: 'Root';
+//     id: string;
+// }
+// export interface Module {
+//     kind: 'Module';
+//     id: string;
+//     scope: Scope;
+// }
+// export interface Extension {
+//     kind: 'Extension';
+//     id: string;
+//     scope: Scope;
+// }
+// export interface Binding {
+//     kind: 'Binding';
+//     id: string;
+//     scope: Scope;
+//     nameInSource: string;
+//     constant?: {value: unknown};
+// }
+
+
+
 export interface Symbol {
     id: number;
     name: string;
