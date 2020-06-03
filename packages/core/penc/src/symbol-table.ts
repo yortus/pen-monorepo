@@ -30,6 +30,7 @@ import {assert} from './utils';
 
 export interface Symbol {
     id: string;
+    kind: 'binding';
     scope: Scope;
     nameInSource: string;
     constant?: {value: unknown};
@@ -78,7 +79,7 @@ export class SymbolTable {
         // ensure not already defined in this scope
         if (scope.symbols.has(nameInSource)) throw new Error(`Symbol '${nameInSource}' is already defined.`);
         let id = `symbolId${this.symbols.size}`; // TODO: temp... fix this...
-        let symbol: Symbol = {id, nameInSource, scope};
+        let symbol: Symbol = {id, kind: 'binding', nameInSource, scope};
         scope.symbols.set(nameInSource, symbol);
         this.symbols.set(id, symbol);
         return symbol;
