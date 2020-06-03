@@ -28,7 +28,7 @@ export class SymbolTable {
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
-    createChildScope(parent?: Module): Module {
+    createScope(parent?: Module): Module {
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
         let id = `𝕊${this.parentScopes.size}`;
         let scopeSymbol: Module = {kind: 'Module', id, sourceNames: new Map()};
@@ -37,7 +37,7 @@ export class SymbolTable {
         return scopeSymbol;
     }
 
-    create(sourceName: string, scope: Module): Symbol {
+    createBinding(sourceName: string, scope: Module): Symbol {
         // ensure not already defined in this scope
         if (scope.sourceNames.has(sourceName)) throw new Error(`Symbol '${sourceName}' is already defined.`);
         let id = `${scope.id}_${sourceName}`; // TODO: temp... fix this...
@@ -47,14 +47,14 @@ export class SymbolTable {
         return symbol;
     }
 
-    lookupBySourceName(sourceName: string, scope: Module): Symbol {
+    lookupBinding(sourceName: string, scope: Module): Binding {
         if (scope.sourceNames.has(sourceName)) return scope.sourceNames.get(sourceName)!;
         let parentScope = this.parentScopes.get(scope)!;
-        if (parentScope !== 'none') return this.lookupBySourceName(sourceName, parentScope);
+        if (parentScope !== 'none') return this.lookupBinding(sourceName, parentScope);
         throw new Error(`Symbol '${sourceName}' is not defined.`);
     }
 
-    lookupById(id: string): Symbol {
+    lookupSymbol(id: string): Symbol {
         let result = this.allSymbolsById.get(id);
         assert(result);
         return result;

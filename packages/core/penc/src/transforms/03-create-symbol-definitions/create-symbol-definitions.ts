@@ -25,7 +25,7 @@ export function createSymbolDefinitions(program: Program) {
         // Attach a scope to each Module node.
         Module: mod => {
             let outerScope = currentScope;
-            let scope = currentScope = symbolTable.createChildScope(currentScope);
+            let scope = currentScope = symbolTable.createScope(currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = outerScope;
             return modᐟ;
@@ -34,8 +34,8 @@ export function createSymbolDefinitions(program: Program) {
         // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
         ExtensionFile: ext => {
             let outerScope = currentScope;
-            let scope = currentScope = symbolTable.createChildScope(currentScope);
-            ext.exportedNames.forEach(name => symbolTable.create(name, scope));
+            let scope = currentScope = symbolTable.createScope(currentScope);
+            ext.exportedNames.forEach(name => symbolTable.createBinding(name, scope));
             let extᐟ = {...ext, meta: {scope}};
             currentScope = outerScope;
             return extᐟ;
@@ -44,13 +44,13 @@ export function createSymbolDefinitions(program: Program) {
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
             assert(currentScope);
-            let symbol = symbolTable.create(pat.name, currentScope);
+            let symbol = symbolTable.createBinding(pat.name, currentScope);
             let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
             return patternᐟ;
         },
         ModulePatternName: name => {
             assert(currentScope);
-            let symbol = symbolTable.create(name.alias || name.name, currentScope);
+            let symbol = symbolTable.createBinding(name.alias || name.name, currentScope);
             let nameᐟ = {...name, meta: {symbolId: symbol.id}};
             return nameᐟ;
         },

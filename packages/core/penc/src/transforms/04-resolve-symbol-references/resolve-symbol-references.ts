@@ -32,7 +32,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
         // Resolve symbol references.
         ReferenceExpression: ref => {
             assert(currentScope);
-            let symbol = symbolTable.lookupBySourceName(ref.name, currentScope);
+            let symbol = symbolTable.lookupBinding(ref.name, currentScope);
             let refᐟ = {...ref, meta: {symbolId: symbol.id}};
             return refᐟ;
         },
