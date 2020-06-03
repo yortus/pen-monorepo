@@ -44,7 +44,7 @@ function emitProgram(program: Program) {
     emitSymbolDefinitions(emit, program);
 
     // TODO: emit epilog for `create` function
-    let start = program.meta.symbolTable.lookup(program.meta.startSymbolId);
+    let start = program.meta.symbolTable.lookupById(program.meta.startSymbolId);
     emit.down(2).text(`return ${start.scope.scopeSymbol.name}.bindings.${start.name};`);
     emit.dedent().down(1).text('}');
 
@@ -109,14 +109,14 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // Each ModulePatternName *must* be an alias to a name in the rhs module
                     for (let {name, alias, meta: {symbolId}} of pattern.names) {
-                        let {scope} = symbolTable.lookup(symbolId);
+                        let {scope} = symbolTable.lookupById(symbolId);
                         emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${alias || name} = `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
                         emit.text(`.bindings.${name};`);
                     }
                 }
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
-                    let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
+                    let {name, scope} = symbolTable.lookupById(pattern.meta.symbolId);
                     emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name} = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(';');
@@ -136,7 +136,7 @@ function emitConstants(emit: Emitter, program: Program) {
         Module: module => {
             for (let {pattern} of module.bindings) {
                 if (pattern.kind === 'VariablePattern') {
-                    let {scope, name, constant} = symbolTable.lookup(pattern.meta.symbolId);
+                    let {scope, name, constant} = symbolTable.lookupById(pattern.meta.symbolId);
                     if (!constant) continue;
                     emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name}.constant = {value: `);
                     emitConstant(emit, constant.value);
@@ -176,7 +176,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
             for (let {pattern, value} of module.bindings) {
                 if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
-                    let {name, scope} = symbolTable.lookup(pattern.meta.symbolId);
+                    let {name, scope} = symbolTable.lookupById(pattern.meta.symbolId);
                     emit.down(2).text(`Object.assign(`).indent();
                     emit.down(1).text(`${scope.scopeSymbol.name}.bindings.${name},`).down(1);
                     emitExpression(emit, value, symbolTable);
@@ -295,7 +295,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ReferenceExpression':
-            let ref = symbolTable.lookup(expr.meta.symbolId);
+            let ref = symbolTable.lookupById(expr.meta.symbolId);
             emit.text(`${ref.scope.scopeSymbol.name}.bindings.${ref.name}`);
             return;
 

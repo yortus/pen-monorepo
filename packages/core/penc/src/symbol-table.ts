@@ -1,6 +1,3 @@
-import {assert} from './utils';
-
-
 // TODO: temp testing...
 // export type Symbol2 = Root | Module | Extension | Binding;
 // export type Scope2 = Root | Module | Extension;
@@ -84,14 +81,14 @@ export class SymbolTable {
         return symbol;
     }
 
-    lookup(id: number): Symbol;
-    lookup(name: string, scope: Scope): Symbol;
-    lookup(idOrName: number | string, scope?: Scope): Symbol {
-        if (typeof idOrName === 'number') return this.symbols[idOrName];
-        assert(scope !== undefined);
-        if (scope.symbols.has(idOrName)) return scope.symbols.get(idOrName)!;
-        if (scope.parent) return this.lookup(idOrName, scope.parent);
-        throw new Error(`Symbol '${idOrName}' is not defined.`);
+    lookupByName(name: string, scope: Scope): Symbol {
+        if (scope.symbols.has(name)) return scope.symbols.get(name)!;
+        if (scope.parent) return this.lookupByName(name, scope.parent);
+        throw new Error(`Symbol '${name}' is not defined.`);
+    }
+
+    lookupById(id: number): Symbol {
+        return this.symbols[id];
     }
 
     private rootScope: Scope;

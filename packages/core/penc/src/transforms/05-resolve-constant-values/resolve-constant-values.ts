@@ -12,7 +12,7 @@ export function resolveConstantValues(program: Program<Metadata>) {
         Binding: ({pattern, value}) => {
             // TODO: temp testing...
             if (pattern.kind === 'VariablePattern') {
-                let symbol = symbolTable.lookup(pattern.meta.symbolId);
+                let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                 symbol.constant = rec(value) || undefined;
             }
         },
