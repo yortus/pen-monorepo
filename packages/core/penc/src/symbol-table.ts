@@ -14,15 +14,25 @@ export interface Scope {
     kind: 'root' | 'module' | 'extension';
     scopeSymbol: Symbol; // TODO: doc... symbol for this scope, will be in parent scope
     parent?: Scope;
-    children: Scope[];
     symbols: Map<string, Symbol>; // maps source name to symbol info
 }
 
 
 export class SymbolTable {
 
+    constructor() {
+        let rootScope: Scope = {id: 0, kind: 'root', scopeSymbol: undefined!, symbols: new Map()};
+        this.rootScope = rootScope;
+        this.scopes = [rootScope];
+        this.symbols = [];
+    }
+
     getRootScope() {
         return this.rootScope;
+    }
+
+    getAllScopes() {
+        return this.scopes;
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
@@ -33,7 +43,7 @@ export class SymbolTable {
         let name = `${kind === 'module' ? '𝕊' : '𝔼'}${id}`;
         let scopeSymbol = this.create(name, parent);
         let childScope = {id, kind, scopeSymbol, parent, children: [], symbols: new Map()};
-        parent.children.push(childScope);
+        this.scopes.push(childScope);
         return childScope;
     }
 
@@ -57,15 +67,11 @@ export class SymbolTable {
         throw new Error(`Symbol '${idOrName}' is not defined.`);
     }
 
-    private rootScope: Scope = {
-        id: 0,
-        kind: 'root',
-        scopeSymbol: undefined!,
-        children: [],
-        symbols: new Map(),
-    };
+    private rootScope: Scope;
 
-    private symbols: Symbol[] = [];
+    private scopes: Scope[];
+
+    private symbols: Symbol[];
 
     private counter = 0;
 }

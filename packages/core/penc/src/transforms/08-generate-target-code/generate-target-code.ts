@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as AstNodes from '../../ast-nodes';
-import {Scope, SymbolTable} from '../../symbol-table';
+import {SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
 import {Metadata} from '../07-check-semantics';
 import {Emitter, makeEmitter} from './emitter';
@@ -78,27 +78,23 @@ function emitExtensions(emit: Emitter, program: Program) {
 
 
 function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
-    visitScope(symbolTable.getRootScope());
-
-    function visitScope(scope: Scope) {
+    for (let scope of symbolTable.getAllScopes()) {
         // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
-        if (scope.parent) { // TODO: skip the root scope for now... revise?
+        if (!scope.parent) continue; // TODO: skip the root scope for now... revise?
 
-            // TODO: temp testing...
-            if (scope.kind === 'extension') {
-                emit.down(2).text(`const ${scope.scopeSymbol.name} = create${scope.scopeSymbol.name}({inForm, outForm});`);
-                return;
-            }
-
-            emit.down(2).text(`const ${scope.scopeSymbol.name} = {`).indent();
-            emit.down(1).text(`bindings: {`).indent();
-            for (let symbol of scope.symbols.values()) {
-                emit.down(1).text(`${symbol.name}: {},`);
-            }
-            emit.dedent().down(1).text(`},`);
-            emit.dedent().down(1).text(`};`);
+        // TODO: temp testing...
+        if (scope.kind === 'extension') {
+            emit.down(2).text(`const ${scope.scopeSymbol.name} = create${scope.scopeSymbol.name}({inForm, outForm});`);
+            continue;
         }
-        scope.children.forEach(visitScope);
+
+        emit.down(2).text(`const ${scope.scopeSymbol.name} = {`).indent();
+        emit.down(1).text(`bindings: {`).indent();
+        for (let symbol of scope.symbols.values()) {
+            emit.down(1).text(`${symbol.name}: {},`);
+        }
+        emit.dedent().down(1).text(`},`);
+        emit.dedent().down(1).text(`};`);
     }
 }
 
