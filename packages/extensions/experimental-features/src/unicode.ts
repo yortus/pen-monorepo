@@ -1,9 +1,18 @@
 function unicode(options: StaticOptions): PenVal {
     return {
         lambda(expr) {
-            let base = expr.bindings?.base?.constant?.value as number;
-            let minDigits = expr.bindings?.minDigits?.constant?.value as number;
-            let maxDigits = expr.bindings?.maxDigits?.constant?.value as number;
+            // TODO: temp hack to unmangle binding names... fix this
+            let bindings = Object.keys(expr.bindings ?? {}).reduce(
+                (obj: any, key: string) => {
+                    let name = key.slice(key.indexOf('_') + 1);
+                    obj[name] = expr.bindings?.[key];
+                    return obj;
+                },
+                {} as any
+            );
+            let base = bindings.base?.constant?.value as number;
+            let minDigits = bindings.minDigits?.constant?.value as number;
+            let maxDigits = bindings.maxDigits?.constant?.value as number;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
             assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);

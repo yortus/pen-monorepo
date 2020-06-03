@@ -1,5 +1,5 @@
 import {Expression, Node, Program} from '../../ast-nodes';
-import {makeNodeMapper, makeNodeVisitor} from '../../utils';
+import {assert, makeNodeMapper, makeNodeVisitor} from '../../utils';
 import {Metadata} from '../05-resolve-constant-values';
 
 
@@ -14,8 +14,9 @@ export function dealiasSymbols(program: Program<Metadata>) {
         let modified = false;
         for (let [fromSymbolId, toSymbolId] of aliases.entries()) {
             if (fromSymbolId === toSymbolId) {
-                let {sourceName} = program.meta.symbolTable.lookupById(fromSymbolId);
-                throw new Error(`Symbol '${sourceName}' is defined as itself.`);
+                let symbol = program.meta.symbolTable.lookupById(fromSymbolId);
+                assert(symbol.kind === 'Binding');
+                throw new Error(`Symbol '${symbol.sourceName}' is defined as itself.`);
             }
             if (aliases.has(toSymbolId)) {
                 aliases.set(fromSymbolId, aliases.get(toSymbolId)!);
@@ -62,10 +63,10 @@ function collectAliases(program: Program<Metadata>): Map<string, string> {
                     for (let {meta: {symbolId: fromSymbolId}} of pattern.names) {
                         let toSymbolId: string;
                         if (value.kind === 'ImportExpression') {
-                            toSymbolId = value.meta.scope.scopeSymbol.id;
+                            toSymbolId = value.meta.scope.id;
                         }
                         else if (value.kind === 'ModuleExpression') {
-                            toSymbolId = value.module.meta.scope.scopeSymbol.id;
+                            toSymbolId = value.module.meta.scope.id;
                         }
                         else if (value.kind === 'ReferenceExpression') {
                             toSymbolId = value.meta.symbolId;
@@ -82,10 +83,10 @@ function collectAliases(program: Program<Metadata>): Map<string, string> {
                     let fromSymbolId = pattern.meta.symbolId;
                     let toSymbolId: string;
                     if (value.kind === 'ImportExpression') {
-                        toSymbolId = value.meta.scope.scopeSymbol.id;
+                        toSymbolId = value.meta.scope.id;
                     }
                     else if (value.kind === 'ModuleExpression') {
-                        toSymbolId = value.module.meta.scope.scopeSymbol.id;
+                        toSymbolId = value.module.meta.scope.id;
                     }
                     else if (value.kind === 'ReferenceExpression') {
                         toSymbolId = value.meta.symbolId;

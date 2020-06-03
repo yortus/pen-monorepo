@@ -26,7 +26,7 @@ export function createSymbolDefinitions(program: Program) {
         Module: mod => {
             let scope = currentScope = symbolTable.createChildScope(currentScope, 'Module');
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
-            currentScope = scope.parent;
+            currentScope = scope.scope;
             return modᐟ;
         },
 
@@ -35,7 +35,7 @@ export function createSymbolDefinitions(program: Program) {
             let scope = currentScope = symbolTable.createChildScope(currentScope, 'Extension');
             ext.exportedNames.forEach(name => symbolTable.create(name, scope));
             let extᐟ = {...ext, meta: {scope}};
-            currentScope = scope.parent;
+            currentScope = scope.scope;
             return extᐟ;
         },
 

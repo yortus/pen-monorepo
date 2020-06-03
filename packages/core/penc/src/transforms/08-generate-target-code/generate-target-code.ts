@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as AstNodes from '../../ast-nodes';
 import {SymbolTable} from '../../symbol-table';
-import {makeNodeVisitor} from '../../utils';
+import {assert, makeNodeVisitor} from '../../utils';
 import {Metadata} from '../07-check-semantics';
 import {Emitter, makeEmitter} from './emitter';
 
@@ -45,7 +45,8 @@ function emitProgram(program: Program) {
 
     // TODO: emit epilog for `create` function
     let start = program.meta.symbolTable.lookupById(program.meta.startSymbolId);
-    emit.down(2).text(`return ${start.scope.scopeSymbol.sourceName}.bindings.${start.sourceName};`);
+    assert(start.kind === 'Binding');
+    emit.down(2).text(`return ${start.scope.id}.bindings.${start.id};`);
     emit.dedent().down(1).text('}');
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
@@ -63,12 +64,15 @@ function emitExtensions(emit: Emitter, program: Program) {
     visitNode(program, _ => ({
         ExtensionFile: ext => {
             if (ext.meta.scope.kind !== 'Extension') return;
-            emit.down(1).text(`const create${ext.meta.scope.scopeSymbol.sourceName} = (() => {`).indent();
+            emit.down(1).text(`const create${ext.meta.scope.id} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
             emit.down(2).text(`return (staticOptions) => ({`).indent();
             emit.down(1).text(`bindings: {`).indent();
-            ext.exportedNames.forEach(name => emit.down(1).text(`${name}: ${name}(staticOptions),`));
+            ext.exportedNames.forEach(name => {
+                let symbol = program.meta.symbolTable.lookupBySourceName(name, ext.meta.scope);
+                emit.down(1).text(`${symbol.id}: ${name}(staticOptions),`);
+            });
             emit.dedent().down(1).text('}');
             emit.dedent().down(1).text('});');
             emit.dedent().down(1).text('})();');
@@ -80,18 +84,18 @@ function emitExtensions(emit: Emitter, program: Program) {
 function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
     for (let scope of symbolTable.getAllScopes()) {
         // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
-        if (!scope.parent) continue; // TODO: skip the root scope for now... revise?
+        if (!scope.scope) continue; // TODO: skip the root scope for now... revise?
 
         // TODO: temp testing...
         if (scope.kind === 'Extension') {
-            emit.down(2).text(`const ${scope.scopeSymbol.sourceName} = create${scope.scopeSymbol.sourceName}({inForm, outForm});`);
+            emit.down(2).text(`const ${scope.id} = create${scope.id}({inForm, outForm});`);
             continue;
         }
 
-        emit.down(2).text(`const ${scope.scopeSymbol.sourceName} = {`).indent();
+        emit.down(2).text(`const ${scope.id} = {`).indent();
         emit.down(1).text(`bindings: {`).indent();
         for (let symbol of scope.sourceNames.values()) {
-            emit.down(1).text(`${symbol.sourceName}: {},`);
+            emit.down(1).text(`${symbol.id}: {},`);
         }
         emit.dedent().down(1).text(`},`);
         emit.dedent().down(1).text(`};`);
@@ -108,16 +112,18 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
             for (let {pattern, value} of module.bindings) {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // Each ModulePatternName *must* be an alias to a name in the rhs module
-                    for (let {name, alias, meta: {symbolId}} of pattern.names) {
-                        let {scope} = symbolTable.lookupById(symbolId);
-                        emit.down(1).text(`${scope.scopeSymbol.sourceName}.bindings.${alias || name} = `);
+                    for (let {name, meta: {symbolId}} of pattern.names) {
+                        let symbol = symbolTable.lookupById(symbolId);
+                        assert(symbol.kind === 'Binding');
+                        emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id} = `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
-                        emit.text(`.bindings.${name};`);
+                        emit.text(`.bindings.${name};`); // TODO: still needs fixing...
                     }
                 }
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
-                    let {sourceName, scope} = symbolTable.lookupById(pattern.meta.symbolId);
-                    emit.down(1).text(`${scope.scopeSymbol.sourceName}.bindings.${sourceName} = `);
+                    let symbol = symbolTable.lookupById(pattern.meta.symbolId);
+                    assert(symbol.kind === 'Binding');
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id} = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(';');
                 }
@@ -136,10 +142,11 @@ function emitConstants(emit: Emitter, program: Program) {
         Module: module => {
             for (let {pattern} of module.bindings) {
                 if (pattern.kind === 'VariablePattern') {
-                    let {scope, sourceName, constant} = symbolTable.lookupById(pattern.meta.symbolId);
-                    if (!constant) continue;
-                    emit.down(1).text(`${scope.scopeSymbol.sourceName}.bindings.${sourceName}.constant = {value: `);
-                    emitConstant(emit, constant.value);
+                    let symbol = symbolTable.lookupById(pattern.meta.symbolId);
+                    assert(symbol.kind === 'Binding');
+                    if (!symbol.constant) continue;
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id}.constant = {value: `);
+                    emitConstant(emit, symbol.constant.value);
                     emit.text('};');
 
                 }
@@ -176,9 +183,10 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
             // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
             for (let {pattern, value} of module.bindings) {
                 if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
-                    let {sourceName, scope} = symbolTable.lookupById(pattern.meta.symbolId);
+                    let symbol = symbolTable.lookupById(pattern.meta.symbolId);
+                    assert(symbol.kind === 'Binding');
                     emit.down(2).text(`Object.assign(`).indent();
-                    emit.down(1).text(`${scope.scopeSymbol.sourceName}.bindings.${sourceName},`).down(1);
+                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.id},`).down(1);
                     emitExpression(emit, value, symbolTable);
                     emit.dedent().down(1).text(`);`);
                 }
@@ -219,7 +227,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ImportExpression':
-            emit.text(expr.meta.scope.scopeSymbol.sourceName);
+            emit.text(expr.meta.scope.id);
             return;
 
         // case 'LambdaExpression':
@@ -242,7 +250,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'ModuleExpression':
-            emit.text(expr.module.meta.scope.scopeSymbol.sourceName);
+            emit.text(expr.module.meta.scope.id);
             return;
 
         case 'NotExpression':
@@ -296,7 +304,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ReferenceExpression':
             let ref = symbolTable.lookupById(expr.meta.symbolId);
-            emit.text(`${ref.scope.scopeSymbol.sourceName}.bindings.${ref.sourceName}`);
+            assert(ref.kind === 'Binding');
+            emit.text(`${ref.scope.id}.bindings.${ref.id}`);
             return;
 
         case 'SelectionExpression':

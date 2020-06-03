@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {makeNodeVisitor} from '../../utils';
+import {assert, makeNodeVisitor} from '../../utils';
 import {Metadata} from '../04-resolve-symbol-references';
 
 
@@ -13,6 +13,7 @@ export function resolveConstantValues(program: Program<Metadata>) {
             // TODO: temp testing...
             if (pattern.kind === 'VariablePattern') {
                 let symbol = symbolTable.lookupById(pattern.meta.symbolId);
+                assert(symbol.kind === 'Binding');
                 symbol.constant = rec(value) || undefined;
             }
         },

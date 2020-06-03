@@ -15,8 +15,8 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
         Module: mod => {
             currentScope = mod.meta.scope;
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
-            assert(currentScope.parent);
-            currentScope = currentScope.parent;
+            assert(currentScope.scope);
+            currentScope = currentScope.scope;
             return modᐟ;
         },
 
