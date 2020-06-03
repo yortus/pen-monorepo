@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const createExtension𝕊5 = (() => {
+const createExtension𝕊4 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -745,7 +745,7 @@ const createExtension𝕊5 = (() => {
 
 function createProgram({inForm, outForm}) {
 
-    const 𝕊1 = {
+    const 𝕊0 = {
         bindings: {
             memoise: {},
             f64: {},
@@ -761,6 +761,13 @@ function createProgram({inForm, outForm}) {
         },
     };
 
+    const 𝕊1 = {
+        bindings: {
+            base: {},
+            signed: {},
+        },
+    };
+
     const 𝕊2 = {
         bindings: {
             base: {},
@@ -770,49 +777,42 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊3 = {
         bindings: {
-            base: {},
             signed: {},
         },
     };
 
-    const 𝕊4 = {
-        bindings: {
-            signed: {},
-        },
-    };
-
-    const 𝕊5 = createExtension𝕊5({inForm, outForm});
+    const 𝕊4 = createExtension𝕊4({inForm, outForm});
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.memoise = 𝕊5.bindings.memoise;
-    𝕊1.bindings.f64 = 𝕊5.bindings.f64;
-    𝕊1.bindings.i32 = 𝕊5.bindings.i32;
-    𝕊1.bindings.start = 𝕊1.bindings.expr;
+    𝕊0.bindings.memoise = 𝕊4.bindings.memoise;
+    𝕊0.bindings.f64 = 𝕊4.bindings.f64;
+    𝕊0.bindings.i32 = 𝕊4.bindings.i32;
+    𝕊0.bindings.start = 𝕊0.bindings.expr;
 
     // -------------------- Compile-time constants --------------------
-    𝕊2.bindings.base.constant = {value: 16};
+    𝕊1.bindings.base.constant = {value: 16};
+    𝕊1.bindings.signed.constant = {value: false};
+    𝕊2.bindings.base.constant = {value: 2};
     𝕊2.bindings.signed.constant = {value: false};
-    𝕊3.bindings.base.constant = {value: 2};
     𝕊3.bindings.signed.constant = {value: false};
-    𝕊4.bindings.signed.constant = {value: false};
 
     // -------------------- math.pen --------------------
 
     Object.assign(
-        𝕊1.bindings.expr,
-        (𝕊1.bindings.memoise).lambda(selection({
+        𝕊0.bindings.expr,
+        (𝕊0.bindings.memoise).lambda(selection({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.add,
-                𝕊1.bindings.sub,
-                𝕊1.bindings.term,
+                𝕊0.bindings.add,
+                𝕊0.bindings.sub,
+                𝕊0.bindings.term,
             ],
         }))
     );
 
     Object.assign(
-        𝕊1.bindings.add,
+        𝕊0.bindings.add,
         record({
             inForm,
             outForm,
@@ -827,7 +827,7 @@ function createProgram({inForm, outForm}) {
                 },
                 {
                     name: 'lhs',
-                    value: 𝕊1.bindings.expr,
+                    value: 𝕊0.bindings.expr,
                 },
                 {
                     name: 'rhs',
@@ -840,7 +840,7 @@ function createProgram({inForm, outForm}) {
                                 outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "+",
                             }),
-                            𝕊1.bindings.term,
+                            𝕊0.bindings.term,
                         ],
                     }),
                 },
@@ -849,7 +849,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.sub,
+        𝕊0.bindings.sub,
         record({
             inForm,
             outForm,
@@ -864,7 +864,7 @@ function createProgram({inForm, outForm}) {
                 },
                 {
                     name: 'lhs',
-                    value: 𝕊1.bindings.expr,
+                    value: 𝕊0.bindings.expr,
                 },
                 {
                     name: 'rhs',
@@ -877,7 +877,7 @@ function createProgram({inForm, outForm}) {
                                 outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "-",
                             }),
-                            𝕊1.bindings.term,
+                            𝕊0.bindings.term,
                         ],
                     }),
                 },
@@ -886,20 +886,20 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.term,
-        (𝕊1.bindings.memoise).lambda(selection({
+        𝕊0.bindings.term,
+        (𝕊0.bindings.memoise).lambda(selection({
             inForm,
             outForm,
             expressions: [
-                𝕊1.bindings.mul,
-                𝕊1.bindings.div,
-                𝕊1.bindings.factor,
+                𝕊0.bindings.mul,
+                𝕊0.bindings.div,
+                𝕊0.bindings.factor,
             ],
         }))
     );
 
     Object.assign(
-        𝕊1.bindings.mul,
+        𝕊0.bindings.mul,
         sequence({
             inForm,
             outForm,
@@ -924,7 +924,7 @@ function createProgram({inForm, outForm}) {
                     fields: [
                         {
                             name: 'lhs',
-                            value: 𝕊1.bindings.term,
+                            value: 𝕊0.bindings.term,
                         },
                     ],
                 }),
@@ -945,7 +945,7 @@ function createProgram({inForm, outForm}) {
                                 outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "*",
                             }),
-                            𝕊1.bindings.factor,
+                            𝕊0.bindings.factor,
                         ],
                     }),
                 }),
@@ -954,7 +954,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.div,
+        𝕊0.bindings.div,
         record({
             inForm,
             outForm,
@@ -969,7 +969,7 @@ function createProgram({inForm, outForm}) {
                 },
                 {
                     name: 'lhs',
-                    value: 𝕊1.bindings.term,
+                    value: 𝕊0.bindings.term,
                 },
                 {
                     name: 'rhs',
@@ -982,7 +982,7 @@ function createProgram({inForm, outForm}) {
                                 outForm: outForm !== "txt" ? "nil" : outForm,
                                 value: "/",
                             }),
-                            𝕊1.bindings.factor,
+                            𝕊0.bindings.factor,
                         ],
                     }),
                 },
@@ -991,7 +991,7 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊1.bindings.factor,
+        𝕊0.bindings.factor,
         selection({
             inForm,
             outForm,
@@ -1018,7 +1018,7 @@ function createProgram({inForm, outForm}) {
                                 value: "0b",
                             }),
                         }),
-                        𝕊1.bindings.f64,
+                        𝕊0.bindings.f64,
                     ],
                 }),
                 sequence({
@@ -1030,7 +1030,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0x",
                         }),
-                        (𝕊1.bindings.i32).lambda(𝕊2),
+                        (𝕊0.bindings.i32).lambda(𝕊1),
                     ],
                 }),
                 sequence({
@@ -1042,7 +1042,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0b",
                         }),
-                        (𝕊1.bindings.i32).lambda(𝕊3),
+                        (𝕊0.bindings.i32).lambda(𝕊2),
                     ],
                 }),
                 sequence({
@@ -1054,7 +1054,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "i",
                         }),
-                        (𝕊1.bindings.i32).lambda(𝕊4),
+                        (𝕊0.bindings.i32).lambda(𝕊3),
                     ],
                 }),
                 sequence({
@@ -1066,7 +1066,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "(",
                         }),
-                        𝕊1.bindings.expr,
+                        𝕊0.bindings.expr,
                         stringLiteral({
                             inForm: inForm !== "txt" ? "nil" : inForm,
                             outForm: outForm !== "txt" ? "nil" : outForm,
@@ -1079,8 +1079,18 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊2.bindings.base,
+        𝕊1.bindings.base,
         numericLiteral({inForm, outForm, value: 16})
+    );
+
+    Object.assign(
+        𝕊1.bindings.signed,
+        booleanLiteral({inForm, outForm, value: false})
+    );
+
+    Object.assign(
+        𝕊2.bindings.base,
+        numericLiteral({inForm, outForm, value: 2})
     );
 
     Object.assign(
@@ -1089,21 +1099,11 @@ function createProgram({inForm, outForm}) {
     );
 
     Object.assign(
-        𝕊3.bindings.base,
-        numericLiteral({inForm, outForm, value: 2})
-    );
-
-    Object.assign(
         𝕊3.bindings.signed,
         booleanLiteral({inForm, outForm, value: false})
     );
 
-    Object.assign(
-        𝕊4.bindings.signed,
-        booleanLiteral({inForm, outForm, value: false})
-    );
-
-    return 𝕊1.bindings.start;
+    return 𝕊0.bindings.start;
 }
 
 // -------------------- Main exports --------------------

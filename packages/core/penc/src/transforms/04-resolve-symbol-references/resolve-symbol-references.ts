@@ -1,4 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
+import {Scope} from '../../symbol-table';
 import {assert, makeNodeMapper} from '../../utils';
 import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
 import {Metadata as NewMetadata} from './metadata';
@@ -7,16 +8,16 @@ import {Metadata as NewMetadata} from './metadata';
 // TODO: doc...
 export function resolveSymbolReferences(program: Program<OldMetadata>) {
     const {symbolTable} = program.meta;
-    let currentScope = symbolTable.getRootScope();
+    let currentScope: Scope | undefined;
     let mapNode = makeNodeMapper<Node<OldMetadata>, Node<NewMetadata>>();
     let result = mapNode(program, rec => ({
 
         // Keep track of the current scope.
         Module: mod => {
+            let outerScope = currentScope;
             currentScope = mod.meta.scope;
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
-            assert(currentScope.scope);
-            currentScope = currentScope.scope;
+            currentScope = outerScope;
             return modᐟ;
         },
 
@@ -30,6 +31,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
 
         // Resolve symbol references.
         ReferenceExpression: ref => {
+            assert(currentScope);
             let symbol = symbolTable.lookupBySourceName(ref.name, currentScope);
             let refᐟ = {...ref, meta: {symbolId: symbol.id}};
             return refᐟ;
@@ -37,7 +39,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === symbolTable.getRootScope());
+    assert(currentScope === undefined);
 
     // All done.
     return result;
