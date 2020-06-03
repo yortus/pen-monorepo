@@ -6,8 +6,8 @@ import {Metadata as NewMetadata} from './metadata';
 
 // TODO: doc...
 export function resolveSymbolReferences(program: Program<OldMetadata>) {
-    const {rootScope, symbolTable} = program.meta;
-    let currentScope = rootScope;
+    const {symbolTable} = program.meta;
+    let currentScope = symbolTable.getRootScope();
     let mapNode = makeNodeMapper<Node<OldMetadata>, Node<NewMetadata>>();
     let result = mapNode(program, rec => ({
 
@@ -37,7 +37,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === rootScope);
+    assert(currentScope === symbolTable.getRootScope());
 
     // All done.
     return result;

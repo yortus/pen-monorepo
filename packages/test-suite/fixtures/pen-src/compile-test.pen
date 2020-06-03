@@ -11,7 +11,7 @@ expr = {
 }
 
 // Aliases
-{foo as foo1, bar, quux} = expr // NB: quux is an error
+//{foo as foo1, bar, quux} = expr // NB: quux is an error
 
 a = b
 

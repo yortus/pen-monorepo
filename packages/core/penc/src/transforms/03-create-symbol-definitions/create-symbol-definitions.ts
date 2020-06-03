@@ -7,18 +7,22 @@ import {Metadata} from './metadata';
 // TODO: doc...
 export function createSymbolDefinitions(program: Program) {
     const symbolTable = new SymbolTable();
-    const rootScope = symbolTable.getRootScope();
-    let currentScope = rootScope;
+    let currentScope = symbolTable.getRootScope();
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 
         // Attach the symbol table to the Program node.
         Program: prg => {
-            let prgᐟ = {...prg, sourceFiles: mapMap(prg.sourceFiles, rec), meta: {rootScope, symbolTable}};
+            let sourceFiles = mapMap(prg.sourceFiles, rec);
+            let main = sourceFiles.get(program.mainPath)!;
+            if (main.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
+            let startSymbolId = main.module.meta.scope.symbols.get('start')?.id;
+            if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
+            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable, startSymbolId}};
             return prgᐟ;
         },
 
-        // Attach a scope to each Module node. Also generate a symbol for the module itself.
+        // Attach a scope to each Module node.
         Module: mod => {
             let scope = currentScope = symbolTable.createChildScope(currentScope, 'module');
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
@@ -26,7 +30,7 @@ export function createSymbolDefinitions(program: Program) {
             return modᐟ;
         },
 
-        // Attach a scope to each ExtensionFile node, and define a symbol for the file and for each of its exports.
+        // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
         ExtensionFile: ext => {
             let scope = currentScope = symbolTable.createChildScope(currentScope, 'extension');
             ext.exportedNames.forEach(name => symbolTable.create(name, scope));
@@ -49,7 +53,7 @@ export function createSymbolDefinitions(program: Program) {
     }));
 
     // sanity check - we should be back to the scope we started with here.
-    assert(currentScope === rootScope);
+    assert(currentScope === symbolTable.getRootScope());
 
     // All done.
     return result;

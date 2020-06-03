@@ -796,6 +796,9 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊6 = {
         bindings: {
+            f: {},
+            b: {},
+            baz: {},
         },
     };
 
@@ -863,6 +866,9 @@ function createProgram({inForm, outForm}) {
     𝕊4.bindings.max.constant = {value: "Z"};
     𝕊5.bindings.b.constant = {value: "b thing"};
     𝕊5.bindings.d.constant = {value: "d thing"};
+    𝕊6.bindings.f.constant = {value: "foo"};
+    𝕊6.bindings.b.constant = {value: "bar"};
+    𝕊6.bindings.baz.constant = {value: "baz"};
     𝕊13.bindings.util1.constant = {value: "util1"};
     𝕊14.bindings.util2.constant = {value: "util2"};
 
@@ -1003,6 +1009,33 @@ function createProgram({inForm, outForm}) {
     );
 
     // -------------------- a.pen --------------------
+
+    Object.assign(
+        𝕊6.bindings.f,
+        stringLiteral({
+            inForm: inForm,
+            outForm: outForm,
+            value: "foo",
+        })
+    );
+
+    Object.assign(
+        𝕊6.bindings.b,
+        stringLiteral({
+            inForm: inForm,
+            outForm: outForm,
+            value: "bar",
+        })
+    );
+
+    Object.assign(
+        𝕊6.bindings.baz,
+        stringLiteral({
+            inForm: inForm,
+            outForm: outForm,
+            value: "baz",
+        })
+    );
 
     // -------------------- b.pen --------------------
 

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as AstNodes from '../../ast-nodes';
 import {Scope, SymbolTable} from '../../symbol-table';
 import {makeNodeVisitor} from '../../utils';
-import {Metadata} from '../05-resolve-constant-values';
+import {Metadata} from '../07-check-semantics';
 import {Emitter, makeEmitter} from './emitter';
 
 
@@ -20,12 +20,6 @@ export function generateTargetCode(program: Program) {
 function emitProgram(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: top-level validation. Move these checks to an earlier transform step...
-    let sourceFile = program.sourceFiles.get(program.mainPath)!;
-    if (sourceFile.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
-    let mainModule = sourceFile.module;
-    if (!mainModule.meta.scope.symbols.has('start')) throw new Error(`Main module must define a 'start' rule.`);
-
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
     const RUNTIME_PATH = require.resolve('../../deps/penrt');
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
@@ -38,7 +32,7 @@ function emitProgram(program: Program) {
     emit.down(2).text('function createProgram({inForm, outForm}) {').indent();
 
     // Emit declarations for all symbols before any are defined.
-    emitSymbolDeclarations(emit, program.meta.rootScope);
+    emitSymbolDeclarations(emit, program.meta.symbolTable);
 
     // TODO: Emit aliases...
     emitSymbolAliases(emit, program);
@@ -50,7 +44,8 @@ function emitProgram(program: Program) {
     emitSymbolDefinitions(emit, program);
 
     // TODO: emit epilog for `create` function
-    emit.down(2).text(`return ${mainModule.meta.scope.scopeSymbol.name}.bindings.start;`);
+    let start = program.meta.symbolTable.lookup(program.meta.startSymbolId);
+    emit.down(2).text(`return ${start.scope.scopeSymbol.name}.bindings.${start.name};`);
     emit.dedent().down(1).text('}');
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
@@ -82,8 +77,8 @@ function emitExtensions(emit: Emitter, program: Program) {
 }
 
 
-function emitSymbolDeclarations(emit: Emitter, rootScope: Scope) {
-    visitScope(rootScope);
+function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
+    visitScope(symbolTable.getRootScope());
 
     function visitScope(scope: Scope) {
         // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
@@ -350,6 +345,8 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
 // TODO: helper function
 function isLValue(e: Expression) {
+    // BUG: BindingLookupExpression belongs here too...
+    // TODO: ^^^
     return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 }
 

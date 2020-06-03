@@ -381,9 +381,6 @@ function createProgram({inForm, outForm}) {
             start: {},
             expr: {},
             𝕊2: {},
-            foo1: {},
-            bar: {},
-            quux: {},
             a: {},
             b: {},
             baz: {},
@@ -446,9 +443,6 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- Aliases --------------------
     𝕊1.bindings.expr = 𝕊2;
-    𝕊1.bindings.foo1 = 𝕊1.bindings.expr.bindings.foo;
-    𝕊1.bindings.bar = 𝕊1.bindings.expr.bindings.bar;
-    𝕊1.bindings.quux = 𝕊1.bindings.expr.bindings.quux;
     𝕊1.bindings.a = 𝕊1.bindings.b;
     𝕊1.bindings.recA = 𝕊4;
     𝕊1.bindings.recB = 𝕊5;

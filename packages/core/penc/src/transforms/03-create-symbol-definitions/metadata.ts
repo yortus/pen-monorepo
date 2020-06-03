@@ -3,8 +3,8 @@ import {Scope, SymbolTable} from '../../symbol-table';
 
 export interface Metadata {
     Program: {
-        readonly rootScope: Scope;
         readonly symbolTable: SymbolTable;
+        readonly startSymbolId: number;
     };
 
     Module: {
