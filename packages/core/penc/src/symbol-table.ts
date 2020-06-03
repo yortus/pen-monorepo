@@ -2,9 +2,11 @@ import {assert} from './utils';
 
 
 // TODO: temp testing...
-export type Symbol = Module | Binding;
-export type Scope = Module;
-export interface Module {
+export type Symbol = Module | Binding; // TODO: keep this union? best name?
+
+export type Scope = Module; // TODO: remove - just use one name, but which?
+
+export interface Module { // TODO: rename? Scope?
     kind: 'Module';
     id: string;
     sourceNames: Map<string, Binding>; // maps source name to symbol info
@@ -12,7 +14,7 @@ export interface Module {
 export interface Binding {
     kind: 'Binding';
     id: string;
-    scope: Module;
+    scope: Module; // TODO: rename this prop?
     sourceName: string;
     constant?: {value: unknown};
 }
