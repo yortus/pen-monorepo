@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const create𝔼5 = (() => {
+const createExtension𝕊5 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -781,12 +781,12 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝔼5 = create𝔼5({inForm, outForm});
+    const 𝕊5 = createExtension𝕊5({inForm, outForm});
 
     // -------------------- Aliases --------------------
-    𝕊1.bindings.memoise = 𝔼5.bindings.memoise;
-    𝕊1.bindings.f64 = 𝔼5.bindings.f64;
-    𝕊1.bindings.i32 = 𝔼5.bindings.i32;
+    𝕊1.bindings.memoise = 𝕊5.bindings.memoise;
+    𝕊1.bindings.f64 = 𝕊5.bindings.f64;
+    𝕊1.bindings.i32 = 𝕊5.bindings.i32;
     𝕊1.bindings.start = 𝕊1.bindings.expr;
 
     // -------------------- Compile-time constants --------------------

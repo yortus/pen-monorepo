@@ -373,7 +373,7 @@ function zeroOrOne(options) {
 }
 
 // -------------------- Extensions --------------------
-const create𝔼8 = (() => {
+const createExtension𝕊8 = (() => {
     "use strict";
     /* @pen exports = {
         char,
@@ -803,7 +803,7 @@ function createProgram({inForm, outForm}) {
         },
     };
 
-    const 𝔼8 = create𝔼8({inForm, outForm});
+    const 𝕊8 = createExtension𝕊8({inForm, outForm});
 
     const 𝕊9 = {
         bindings: {
@@ -844,7 +844,7 @@ function createProgram({inForm, outForm}) {
     𝕊1.bindings.foo = 𝕊6.bindings.f;
     𝕊1.bindings.bar = 𝕊6.bindings.b;
     𝕊1.bindings.baz = 𝕊6.bindings.baz;
-    𝕊1.bindings.char = 𝔼8.bindings.char;
+    𝕊1.bindings.char = 𝕊8.bindings.char;
     𝕊1.bindings.start = 𝕊1.bindings.result;
     𝕊1.bindings.rec = 𝕊5;
     𝕊1.bindings.r2 = 𝕊1.bindings.rec;

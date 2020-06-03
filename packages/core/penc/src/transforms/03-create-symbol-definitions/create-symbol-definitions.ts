@@ -24,7 +24,7 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a scope to each Module node.
         Module: mod => {
-            let scope = currentScope = symbolTable.createChildScope('Module', currentScope);
+            let scope = currentScope = symbolTable.createChildScope(currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = scope.scope;
             return modᐟ;
@@ -32,7 +32,7 @@ export function createSymbolDefinitions(program: Program) {
 
         // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
         ExtensionFile: ext => {
-            let scope = currentScope = symbolTable.createChildScope('Extension', currentScope);
+            let scope = currentScope = symbolTable.createChildScope(currentScope);
             ext.exportedNames.forEach(name => symbolTable.create(name, scope));
             let extᐟ = {...ext, meta: {scope}};
             currentScope = scope.scope;

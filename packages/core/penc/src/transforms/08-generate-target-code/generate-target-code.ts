@@ -32,7 +32,7 @@ function emitProgram(program: Program) {
     emit.down(2).text('function createProgram({inForm, outForm}) {').indent();
 
     // Emit declarations for all symbols before any are defined.
-    emitSymbolDeclarations(emit, program.meta.symbolTable);
+    emitSymbolDeclarations(emit, program);
 
     // TODO: Emit aliases...
     emitSymbolAliases(emit, program);
@@ -63,8 +63,7 @@ function emitExtensions(emit: Emitter, program: Program) {
     emit.down(2).text(`// -------------------- Extensions --------------------`);
     visitNode(program, _ => ({
         ExtensionFile: ext => {
-            assert(ext.meta.scope.kind === 'Extension');
-            emit.down(1).text(`const create${ext.meta.scope.id} = (() => {`).indent();
+            emit.down(1).text(`const createExtension${ext.meta.scope.id} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
             emit.down(2).text(`return (staticOptions) => ({`).indent();
@@ -78,25 +77,25 @@ function emitExtensions(emit: Emitter, program: Program) {
 }
 
 
-function emitSymbolDeclarations(emit: Emitter, symbolTable: SymbolTable) {
-    for (let scope of symbolTable.getAllScopes()) {
-        // TODO: doc... basically allocates vars for every module in the program (modules/scopes are mapped 1:1)
-        if (!scope.scope) continue; // TODO: skip the root scope for now... revise?
-
-        // TODO: temp testing... unify with 'Module'
-        if (scope.kind === 'Extension') {
-            emit.down(2).text(`const ${scope.id} = create${scope.id}({inForm, outForm});`);
-            continue;
-        }
-
-        emit.down(2).text(`const ${scope.id} = {`).indent();
-        emit.down(1).text(`bindings: {`).indent();
-        for (let sourceName of scope.sourceNames.keys()) {
-            emit.down(1).text(`${sourceName}: {},`);
-        }
-        emit.dedent().down(1).text(`},`);
-        emit.dedent().down(1).text(`};`);
-    }
+function emitSymbolDeclarations(emit: Emitter, program: Program) {
+    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
+    visitNode(program, rec => ({
+        ExtensionFile: ext => {
+            let scope = ext.meta.scope;
+            emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({inForm, outForm});`);
+        },
+        Module: mod => {
+            let scope = mod.meta.scope;
+            emit.down(2).text(`const ${scope.id} = {`).indent();
+            emit.down(1).text(`bindings: {`).indent();
+            for (let sourceName of scope.sourceNames.keys()) {
+                emit.down(1).text(`${sourceName}: {},`);
+            }
+            emit.dedent().down(1).text(`},`);
+            emit.dedent().down(1).text(`};`);
+            mod.bindings.forEach(rec);
+        },
+    }));
 }
 
 
@@ -136,8 +135,8 @@ function emitConstants(emit: Emitter, program: Program) {
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     emit.down(2).text(`// -------------------- Compile-time constants --------------------`);
     visitNode(program, rec => ({
-        Module: module => {
-            for (let {pattern} of module.bindings) {
+        Module: mod => {
+            for (let {pattern} of mod.bindings) {
                 if (pattern.kind === 'VariablePattern') {
                     let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                     assert(symbol.kind === 'Binding');
@@ -145,40 +144,25 @@ function emitConstants(emit: Emitter, program: Program) {
                     emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName}.constant = {value: `);
                     emitConstant(emit, symbol.constant.value);
                     emit.text('};');
-
                 }
             }
-            module.bindings.forEach(rec);
+            mod.bindings.forEach(rec);
         },
     }));
 }
 
 
 function emitSymbolDefinitions(emit: Emitter, program: Program) {
-    // Emit extension definitions *before* definitions from pen modules
-    // TODO: this masks a def-ordering problem that will re-appear when lambda defns are implemented. Fix it properly...
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    // TODO: was... remove...
-    // visitNode(program, _ => ({
-    //     ExtensionFile: ef => {
-    //         emit.down(2).text(`// -------------------- ${path.basename(ef.path)} --------------------`);
-    //         for (let name of ef.exportedNames) {
-    //             emit.down(2).text(`Object.assign(`).indent();
-    //             emit.down(1).text(`${ef.meta.scope.scopeSymbol.name}.bindings.${name},`).down(1);
-    //             emit.text(`ext_${ef.meta.scope.scopeSymbol.name}.${name}({inForm, outForm}),`);
-    //             emit.dedent().down(1).text(`);`);
-    //         }
-    //     },
-    // }));
     visitNode(program, rec => ({
         PenSourceFile: sf => {
             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
             rec(sf.module);
         },
-        Module: module => {
+        Module: mod => {
             // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
-            for (let {pattern, value} of module.bindings) {
+            for (let {pattern, value} of mod.bindings) {
                 if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
                     let symbol = symbolTable.lookupById(pattern.meta.symbolId);
                     assert(symbol.kind === 'Binding');
@@ -188,7 +172,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     emit.dedent().down(1).text(`);`);
                 }
             }
-            module.bindings.forEach(rec);
+            mod.bindings.forEach(rec);
         },
     }));
 }

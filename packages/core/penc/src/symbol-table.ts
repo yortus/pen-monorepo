@@ -2,8 +2,8 @@ import {assert} from './utils';
 
 
 // TODO: temp testing...
-export type Symbol = Root | Module | Extension | Binding;
-export type Scope = Root | Module | Extension;
+export type Symbol = Root | Module | Binding;
+export type Scope = Root | Module;
 export interface Root {
     kind: 'Root'; // TODO: CAN WE REMOVE THIS KIND?                                     <================
     id: string;
@@ -12,12 +12,6 @@ export interface Root {
 }
 export interface Module {
     kind: 'Module';
-    id: string;
-    scope: Scope;
-    sourceNames: Map<string, Binding>; // maps source name to symbol info
-}
-export interface Extension {
-    kind: 'Extension'; // TODO: CAN WE REMOVE THIS KIND?                                <================
     id: string;
     scope: Scope;
     sourceNames: Map<string, Binding>; // maps source name to symbol info
@@ -48,10 +42,10 @@ export class SymbolTable {
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
-    createChildScope(kind: 'Module' | 'Extension', parent?: Scope): Module | Extension {
+    createChildScope(parent?: Scope): Module {
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
-        let id = `${kind === 'Module' ? '𝕊' : '𝔼'}${++this.counter}`; // TODO: fix this... it's not a name in the src
-        let symbol: Module | Extension = {kind, id, scope: parent ?? this.getRootScope(), sourceNames: new Map()};
+        let id = `𝕊${++this.counter}`; // TODO: fix this... it's not a name in the src
+        let symbol: Module = {kind: 'Module', id, scope: parent ?? this.getRootScope(), sourceNames: new Map()};
         this.allSymbolsById.set(id, symbol);
         return symbol;
     }
