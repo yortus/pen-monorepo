@@ -14,8 +14,8 @@ export function dealiasSymbols(program: Program<Metadata>) {
         let modified = false;
         for (let [fromSymbolId, toSymbolId] of aliases.entries()) {
             if (fromSymbolId === toSymbolId) {
-                let {nameInSource} = program.meta.symbolTable.lookupById(fromSymbolId);
-                throw new Error(`Symbol '${nameInSource}' is defined as itself.`);
+                let {sourceName} = program.meta.symbolTable.lookupById(fromSymbolId);
+                throw new Error(`Symbol '${sourceName}' is defined as itself.`);
             }
             if (aliases.has(toSymbolId)) {
                 aliases.set(fromSymbolId, aliases.get(toSymbolId)!);
