@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {Scope} from '../../symbol-table';
+import {ScopeSymbol} from '../../symbol-table';
 import {assert, makeNodeMapper} from '../../utils';
 import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
 import {Metadata as NewMetadata} from './metadata';
@@ -8,7 +8,7 @@ import {Metadata as NewMetadata} from './metadata';
 // TODO: doc...
 export function resolveSymbolReferences(program: Program<OldMetadata>) {
     const {symbolTable} = program.meta;
-    let currentScope: Scope | undefined;
+    let currentScope: ScopeSymbol | undefined;
     let mapNode = makeNodeMapper<Node<OldMetadata>, Node<NewMetadata>>();
     let result = mapNode(program, rec => ({
 
@@ -32,7 +32,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
         // Resolve symbol references.
         ReferenceExpression: ref => {
             assert(currentScope);
-            let symbol = symbolTable.lookupBinding(ref.name, currentScope);
+            let symbol = symbolTable.lookupName(ref.name, currentScope);
             let refᐟ = {...ref, meta: {symbolId: symbol.id}};
             return refᐟ;
         },

@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {Scope, SymbolTable} from '../../symbol-table';
+import {ScopeSymbol, SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {Metadata} from './metadata';
 
@@ -7,7 +7,7 @@ import {Metadata} from './metadata';
 // TODO: doc...
 export function createSymbolDefinitions(program: Program) {
     const symbolTable = new SymbolTable();
-    let currentScope: Scope | undefined;
+    let currentScope: ScopeSymbol | undefined;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 
@@ -35,7 +35,7 @@ export function createSymbolDefinitions(program: Program) {
         ExtensionFile: ext => {
             let outerScope = currentScope;
             let scope = currentScope = symbolTable.createScope(currentScope);
-            ext.exportedNames.forEach(name => symbolTable.createBinding(name, scope));
+            ext.exportedNames.forEach(name => symbolTable.createName(name, scope));
             let extᐟ = {...ext, meta: {scope}};
             currentScope = outerScope;
             return extᐟ;
@@ -44,13 +44,13 @@ export function createSymbolDefinitions(program: Program) {
         // Attach a symbol to each VariablePattern and ModulePatternName node.
         VariablePattern: pat => {
             assert(currentScope);
-            let symbol = symbolTable.createBinding(pat.name, currentScope);
+            let symbol = symbolTable.createName(pat.name, currentScope);
             let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
             return patternᐟ;
         },
         ModulePatternName: name => {
             assert(currentScope);
-            let symbol = symbolTable.createBinding(name.alias || name.name, currentScope);
+            let symbol = symbolTable.createName(name.alias || name.name, currentScope);
             let nameᐟ = {...name, meta: {symbolId: symbol.id}};
             return nameᐟ;
         },

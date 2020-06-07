@@ -1,4 +1,4 @@
-import {Scope, SymbolTable} from '../../symbol-table';
+import {ScopeSymbol, SymbolTable} from '../../symbol-table';
 
 
 export interface Metadata {
@@ -8,11 +8,11 @@ export interface Metadata {
     };
 
     Module: {
-        readonly scope: Scope;
+        readonly scope: ScopeSymbol;
     };
 
     ExtensionFile: {
-        readonly scope: Scope;
+        readonly scope: ScopeSymbol;
     };
 
     VariablePattern: {
