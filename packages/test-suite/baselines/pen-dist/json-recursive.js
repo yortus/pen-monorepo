@@ -227,32 +227,6 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function selection(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEL() {
-        for (let i = 0; i < arity; ++i) {
-            if (expressions[i]())
-                return true;
-        }
-        return false;
-    };
-}
-function sequence(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEQ() {
-        let stateₒ = getState();
-        let out;
-        for (let i = 0; i < arity; ++i) {
-            if (!expressions[i]())
-                return setState(stateₒ), false;
-            out = concat(out, OUT);
-        }
-        OUT = out;
-        return true;
-    };
-}
 function stringLiteral(options) {
     const { value } = options;
     const length = value.length;
@@ -813,502 +787,642 @@ function createProgram({inForm, outForm}) {
     // -------------------- json-recursive.pen --------------------
 
     function 𝕊0_start() {
-        if (!𝕊0_start_memo) 𝕊0_start_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                𝕊0.bindings.Value,
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = 𝕊0.bindings.Value;
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_start_memo();
     }
     let 𝕊0_start_memo;
 
     function 𝕊0_Value() {
-        if (!𝕊0_Value_memo) 𝕊0_Value_memo = selection({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.False,
-                𝕊0.bindings.Null,
-                𝕊0.bindings.True,
-                𝕊0.bindings.Object,
-                𝕊0.bindings.Array,
-                𝕊0.bindings.Number,
-                𝕊0.bindings.String,
-            ],
-        });
+        if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
+            let expr0 = 𝕊0.bindings.False;
+            let expr1 = 𝕊0.bindings.Null;
+            let expr2 = 𝕊0.bindings.True;
+            let expr3 = 𝕊0.bindings.Object;
+            let expr4 = 𝕊0.bindings.Array;
+            let expr5 = 𝕊0.bindings.Number;
+            let expr6 = 𝕊0.bindings.String;
+            return function SEL() {
+                if (expr0()) return true;
+                if (expr1()) return true;
+                if (expr2()) return true;
+                if (expr3()) return true;
+                if (expr4()) return true;
+                if (expr5()) return true;
+                if (expr6()) return true;
+                return false;
+            }
+        })();
         return 𝕊0_Value_memo();
     }
     let 𝕊0_Value_memo;
 
     function 𝕊0_False() {
-        if (!𝕊0_False_memo) 𝕊0_False_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "false",
-                }),
-                booleanLiteral({inForm, outForm, value: false}),
-            ],
-        });
+        if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
+            let expr0 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "false",
+            });
+            let expr1 = booleanLiteral({inForm, outForm, value: false});
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_False_memo();
     }
     let 𝕊0_False_memo;
 
     function 𝕊0_Null() {
-        if (!𝕊0_Null_memo) 𝕊0_Null_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "null",
-                }),
-                nullLiteral({inForm, outForm}),
-            ],
-        });
+        if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
+            let expr0 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "null",
+            });
+            let expr1 = nullLiteral({inForm, outForm});
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_Null_memo();
     }
     let 𝕊0_Null_memo;
 
     function 𝕊0_True() {
-        if (!𝕊0_True_memo) 𝕊0_True_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "true",
-                }),
-                booleanLiteral({inForm, outForm, value: true}),
-            ],
-        });
+        if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
+            let expr0 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "true",
+            });
+            let expr1 = booleanLiteral({inForm, outForm, value: true});
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_True_memo();
     }
     let 𝕊0_True_memo;
 
     function 𝕊0_Object() {
-        if (!𝕊0_Object_memo) 𝕊0_Object_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.LBRACE,
-                selection({
+        if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
+            let expr0 = 𝕊0.bindings.LBRACE;
+            let expr1 = (() => {
+                let expr0 = 𝕊0.bindings.Properties;
+                let expr1 = record({
                     inForm,
                     outForm,
-                    expressions: [
-                        𝕊0.bindings.Properties,
-                        record({
-                            inForm,
-                            outForm,
-                            fields: [],
-                        }),
-                    ],
-                }),
-                𝕊0.bindings.RBRACE,
-            ],
-        });
+                    fields: [],
+                });
+                return function SEL() {
+                    if (expr0()) return true;
+                    if (expr1()) return true;
+                    return false;
+                }
+            })();
+            let expr2 = 𝕊0.bindings.RBRACE;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_Object_memo();
     }
     let 𝕊0_Object_memo;
 
     function 𝕊0_Properties() {
-        if (!𝕊0_Properties_memo) 𝕊0_Properties_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                field({
-                    inForm,
-                    outForm,
-                    name: 𝕊0.bindings.String,
-                    value: sequence({
-                        inForm,
-                        outForm,
-                        expressions: [
-                            𝕊0.bindings.COLON,
-                            𝕊0.bindings.Value,
-                        ],
-                    }),
-                }),
-                zeroOrOne({
-                    inForm,
-                    outForm,
-                    expression: sequence({
-                        inForm,
-                        outForm,
-                        expressions: [
-                            𝕊0.bindings.COMMA,
-                            𝕊0.bindings.Properties,
-                        ],
-                    }),
-                }),
-            ],
-        });
+        if (!𝕊0_Properties_memo) 𝕊0_Properties_memo = (() => {
+            let expr0 = field({
+                inForm,
+                outForm,
+                name: 𝕊0.bindings.String,
+                value: (() => {
+                    let expr0 = 𝕊0.bindings.COLON;
+                    let expr1 = 𝕊0.bindings.Value;
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    }
+                })(),
+            });
+            let expr1 = zeroOrOne({
+                inForm,
+                outForm,
+                expression: (() => {
+                    let expr0 = 𝕊0.bindings.COMMA;
+                    let expr1 = 𝕊0.bindings.Properties;
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    }
+                })(),
+            });
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_Properties_memo();
     }
     let 𝕊0_Properties_memo;
 
     function 𝕊0_Array() {
-        if (!𝕊0_Array_memo) 𝕊0_Array_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.LBRACKET,
-                selection({
+        if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
+            let expr0 = 𝕊0.bindings.LBRACKET;
+            let expr1 = (() => {
+                let expr0 = 𝕊0.bindings.Elements;
+                let expr1 = list({
                     inForm,
                     outForm,
-                    expressions: [
-                        𝕊0.bindings.Elements,
-                        list({
-                            inForm,
-                            outForm,
-                            elements: [],
-                        }),
-                    ],
-                }),
-                𝕊0.bindings.RBRACKET,
-            ],
-        });
+                    elements: [],
+                });
+                return function SEL() {
+                    if (expr0()) return true;
+                    if (expr1()) return true;
+                    return false;
+                }
+            })();
+            let expr2 = 𝕊0.bindings.RBRACKET;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_Array_memo();
     }
     let 𝕊0_Array_memo;
 
     function 𝕊0_Elements() {
-        if (!𝕊0_Elements_memo) 𝕊0_Elements_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                list({
-                    inForm,
-                    outForm,
-                    elements: [
-                        𝕊0.bindings.Value,
-                    ],
-                }),
-                zeroOrOne({
-                    inForm,
-                    outForm,
-                    expression: sequence({
-                        inForm,
-                        outForm,
-                        expressions: [
-                            𝕊0.bindings.COMMA,
-                            𝕊0.bindings.Elements,
-                        ],
-                    }),
-                }),
-            ],
-        });
+        if (!𝕊0_Elements_memo) 𝕊0_Elements_memo = (() => {
+            let expr0 = list({
+                inForm,
+                outForm,
+                elements: [
+                    𝕊0.bindings.Value,
+                ],
+            });
+            let expr1 = zeroOrOne({
+                inForm,
+                outForm,
+                expression: (() => {
+                    let expr0 = 𝕊0.bindings.COMMA;
+                    let expr1 = 𝕊0.bindings.Elements;
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    }
+                })(),
+            });
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_Elements_memo();
     }
     let 𝕊0_Elements_memo;
 
     function 𝕊0_String() {
-        if (!𝕊0_String_memo) 𝕊0_String_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.DOUBLE_QUOTE,
-                zeroOrMore({
-                    inForm,
-                    outForm,
-                    expression: 𝕊0.bindings.CHAR,
-                }),
-                𝕊0.bindings.DOUBLE_QUOTE,
-            ],
-        });
+        if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
+            let expr0 = 𝕊0.bindings.DOUBLE_QUOTE;
+            let expr1 = zeroOrMore({
+                inForm,
+                outForm,
+                expression: 𝕊0.bindings.CHAR,
+            });
+            let expr2 = 𝕊0.bindings.DOUBLE_QUOTE;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_String_memo();
     }
     let 𝕊0_String_memo;
 
     function 𝕊0_CHAR() {
-        if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = selection({
-            inForm,
-            outForm,
-            expressions: [
-                sequence({
+        if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
+            let expr0 = (() => {
+                let expr0 = not({
                     inForm,
                     outForm,
-                    expressions: [
-                        not({
-                            inForm,
-                            outForm,
-                            expression: stringLiteral({
-                                inForm: inForm,
-                                outForm: outForm,
-                                value: "\\",
-                            }),
-                        }),
-                        not({
-                            inForm,
-                            outForm,
-                            expression: stringLiteral({
-                                inForm: inForm,
-                                outForm: outForm,
-                                value: "\"",
-                            }),
-                        }),
-                        (𝕊0.bindings.char)(𝕊1),
-                    ],
-                }),
-                sequence({
+                    expression: stringLiteral({
+                        inForm: inForm,
+                        outForm: outForm,
+                        value: "\\",
+                    }),
+                });
+                let expr1 = not({
                     inForm,
                     outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\\"",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\"",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\\\",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\\",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\/",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "/",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\b",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\b",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\f",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\f",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\n",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\n",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\r",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\r",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\t",
-                        }),
-                        stringLiteral({
-                            inForm: inForm !== "ast" ? "nil" : inForm,
-                            outForm: outForm !== "ast" ? "nil" : outForm,
-                            value: "\t",
-                        }),
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        stringLiteral({
-                            inForm: inForm !== "txt" ? "nil" : inForm,
-                            outForm: outForm !== "txt" ? "nil" : outForm,
-                            value: "\\u",
-                        }),
-                        (𝕊0.bindings.unicode)(𝕊2),
-                    ],
-                }),
-            ],
-        });
+                    expression: stringLiteral({
+                        inForm: inForm,
+                        outForm: outForm,
+                        value: "\"",
+                    }),
+                });
+                let expr2 = (𝕊0.bindings.char)(𝕊1);
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr1 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\\"",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\"",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr2 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\\\",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\\",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr3 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\/",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "/",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr4 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\b",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\b",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr5 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\f",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\f",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr6 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\n",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\n",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr7 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\r",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\r",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr8 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\t",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "ast" ? "nil" : inForm,
+                    outForm: outForm !== "ast" ? "nil" : outForm,
+                    value: "\t",
+                });
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            let expr9 = (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\\u",
+                });
+                let expr1 = (𝕊0.bindings.unicode)(𝕊2);
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                }
+            })();
+            return function SEL() {
+                if (expr0()) return true;
+                if (expr1()) return true;
+                if (expr2()) return true;
+                if (expr3()) return true;
+                if (expr4()) return true;
+                if (expr5()) return true;
+                if (expr6()) return true;
+                if (expr7()) return true;
+                if (expr8()) return true;
+                if (expr9()) return true;
+                return false;
+            }
+        })();
         return 𝕊0_CHAR_memo();
     }
     let 𝕊0_CHAR_memo;
 
     function 𝕊0_LBRACE() {
-        if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "{",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "{",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_LBRACE_memo();
     }
     let 𝕊0_LBRACE_memo;
 
     function 𝕊0_RBRACE() {
-        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "}",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "}",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_RBRACE_memo();
     }
     let 𝕊0_RBRACE_memo;
 
     function 𝕊0_LBRACKET() {
-        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "[",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "[",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_LBRACKET_memo();
     }
     let 𝕊0_LBRACKET_memo;
 
     function 𝕊0_RBRACKET() {
-        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: "]",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: "]",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_RBRACKET_memo();
     }
     let 𝕊0_RBRACKET_memo;
 
     function 𝕊0_COLON() {
-        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: ":",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: ":",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_COLON_memo();
     }
     let 𝕊0_COLON_memo;
 
     function 𝕊0_COMMA() {
-        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.WS,
-                stringLiteral({
-                    inForm: inForm !== "txt" ? "nil" : inForm,
-                    outForm: outForm !== "txt" ? "nil" : outForm,
-                    value: ",",
-                }),
-                𝕊0.bindings.WS,
-            ],
-        });
+        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
+            let expr0 = 𝕊0.bindings.WS;
+            let expr1 = stringLiteral({
+                inForm: inForm !== "txt" ? "nil" : inForm,
+                outForm: outForm !== "txt" ? "nil" : outForm,
+                value: ",",
+            });
+            let expr2 = 𝕊0.bindings.WS;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_COMMA_memo();
     }
     let 𝕊0_COMMA_memo;
@@ -1327,32 +1441,35 @@ function createProgram({inForm, outForm}) {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
             inForm,
             outForm,
-            expression: selection({
-                inForm,
-                outForm,
-                expressions: [
-                    stringLiteral({
-                        inForm: inForm !== "txt" ? "nil" : inForm,
-                        outForm: outForm !== "txt" ? "nil" : outForm,
-                        value: " ",
-                    }),
-                    stringLiteral({
-                        inForm: inForm !== "txt" ? "nil" : inForm,
-                        outForm: outForm !== "txt" ? "nil" : outForm,
-                        value: "\t",
-                    }),
-                    stringLiteral({
-                        inForm: inForm !== "txt" ? "nil" : inForm,
-                        outForm: outForm !== "txt" ? "nil" : outForm,
-                        value: "\n",
-                    }),
-                    stringLiteral({
-                        inForm: inForm !== "txt" ? "nil" : inForm,
-                        outForm: outForm !== "txt" ? "nil" : outForm,
-                        value: "\r",
-                    }),
-                ],
-            }),
+            expression: (() => {
+                let expr0 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: " ",
+                });
+                let expr1 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\t",
+                });
+                let expr2 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\n",
+                });
+                let expr3 = stringLiteral({
+                    inForm: inForm !== "txt" ? "nil" : inForm,
+                    outForm: outForm !== "txt" ? "nil" : outForm,
+                    value: "\r",
+                });
+                return function SEL() {
+                    if (expr0()) return true;
+                    if (expr1()) return true;
+                    if (expr2()) return true;
+                    if (expr3()) return true;
+                    return false;
+                }
+            })(),
         });
         return 𝕊0_WS_memo();
     }

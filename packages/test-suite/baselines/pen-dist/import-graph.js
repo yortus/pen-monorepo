@@ -227,32 +227,6 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function selection(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEL() {
-        for (let i = 0; i < arity; ++i) {
-            if (expressions[i]())
-                return true;
-        }
-        return false;
-    };
-}
-function sequence(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEQ() {
-        let stateₒ = getState();
-        let out;
-        for (let i = 0; i < arity; ++i) {
-            if (!expressions[i]())
-                return setState(stateₒ), false;
-            out = concat(out, OUT);
-        }
-        OUT = out;
-        return true;
-    };
-}
 function stringLiteral(options) {
     const { value } = options;
     const length = value.length;
@@ -813,27 +787,32 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_digit_memo;
 
     function 𝕊0_alpha() {
-        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = selection({
-            inForm,
-            outForm,
-            expressions: [
-                (𝕊0.bindings.char)(𝕊2),
-                (𝕊0.bindings.char)(𝕊3),
-            ],
-        });
+        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
+            let expr0 = (𝕊0.bindings.char)(𝕊2);
+            let expr1 = (𝕊0.bindings.char)(𝕊3);
+            return function SEL() {
+                if (expr0()) return true;
+                if (expr1()) return true;
+                return false;
+            }
+        })();
         return 𝕊0_alpha_memo();
     }
     let 𝕊0_alpha_memo;
 
     function 𝕊0_result() {
-        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0.bindings.foo)(sequence({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.bar,
-                𝕊0.bindings.baz,
-            ],
-        }));
+        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0.bindings.foo)((() => {
+            let expr0 = 𝕊0.bindings.bar;
+            let expr1 = 𝕊0.bindings.baz;
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            }
+        })());
         return 𝕊0_result_memo();
     }
     let 𝕊0_result_memo;
@@ -844,23 +823,32 @@ function createProgram({inForm, outForm}) {
             outForm,
             elements: [
                 𝕊0.bindings.digit,
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        𝕊0.bindings.digit,
-                        𝕊0.bindings.digit,
-                    ],
-                }),
-                sequence({
-                    inForm,
-                    outForm,
-                    expressions: [
-                        𝕊0.bindings.digit,
-                        𝕊0.bindings.digit,
-                        𝕊0.bindings.digit,
-                    ],
-                }),
+                (() => {
+                    let expr0 = 𝕊0.bindings.digit;
+                    let expr1 = 𝕊0.bindings.digit;
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    }
+                })(),
+                (() => {
+                    let expr0 = 𝕊0.bindings.digit;
+                    let expr1 = 𝕊0.bindings.digit;
+                    let expr2 = 𝕊0.bindings.digit;
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    }
+                })(),
             ],
         });
         return 𝕊0_myList_memo();

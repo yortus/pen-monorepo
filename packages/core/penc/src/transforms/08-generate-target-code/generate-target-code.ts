@@ -9,6 +9,8 @@ import {Emitter, makeEmitter} from './emitter';
 
 type Program = AstNodes.Program<Metadata>;
 type Expression = AstNodes.Expression<Metadata>;
+type SelectionExpression = AstNodes.SelectionExpression<Metadata>;
+type SequenceExpression = AstNodes.SequenceExpression<Metadata>;
 
 
 // TODO: doc...
@@ -19,7 +21,6 @@ export function generateTargetCode(program: Program) {
 
 function emitProgram(program: Program) {
     const emit = makeEmitter();
-    //nextId = 0;
 
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
     const RUNTIME_PATH = require.resolve('../../deps/penrt');
@@ -301,27 +302,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'SelectionExpression':
-            emit.text('selection({').indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
-            emit.down(1).text('expressions: [').indent();
-            for (let arg of expr.expressions) {
-                emit.down(1);
-                emitExpression(emit, arg, symbolTable);
-                emit.text(',');
-            }
-            emit.dedent().down(1).text('],').dedent().down(1).text(`})`);
+            emitSelectionExpression(emit, expr, symbolTable);
             return;
 
         case 'SequenceExpression':
-            emit.text('sequence({').indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
-            emit.down(1).text('expressions: [').indent();
-            for (let arg of expr.expressions) {
-                emit.down(1);
-                emitExpression(emit, arg, symbolTable);
-                emit.text(',');
-            }
-            emit.dedent().down(1).text('],').dedent().down(1).text(`})`);
+            emitSequenceExpression(emit, expr, symbolTable);
             return;
 
         case 'StringLiteralExpression': {
@@ -337,6 +322,47 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         default:
             throw new Error('Internal Error'); // TODO...
     }
+}
+
+
+function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable) {
+    const arity = expr.expressions.length;
+    emit.text('(() => {').indent();
+    // ...
+    for (let i = 0; i < arity; ++i) {
+        emit.down(1).text(`let expr${i} = `);
+        emitExpression(emit, expr.expressions[i], symbolTable);
+        emit.text(';');
+    }
+    emit.down(1).text('return function SEL() {').indent();
+    for (let i = 0; i < arity; ++i) {
+        emit.down(1).text(`if (expr${i}()) return true;`);
+    }
+    emit.down(1).text('return false;');
+    emit.dedent().down(1).text('}');
+    emit.dedent().down(1).text('})()');
+}
+
+
+function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolTable: SymbolTable) {
+    const arity = expr.expressions.length;
+    emit.text('(() => {').indent();
+    // ...
+    for (let i = 0; i < arity; ++i) {
+        emit.down(1).text(`let expr${i} = `);
+        emitExpression(emit, expr.expressions[i], symbolTable);
+        emit.text(';');
+    }
+    emit.down(1).text('return function SEQ() {').indent();
+    emit.down(1).text('let stateₒ = getState();');
+    emit.down(1).text('let out;');
+    for (let i = 0; i < arity; ++i) {
+        emit.down(1).text(`if (expr${i}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
+    }
+    emit.down(1).text('OUT = out;');
+    emit.down(1).text('return true;');
+    emit.dedent().down(1).text('}');
+    emit.dedent().down(1).text('})()');
 }
 
 
@@ -360,7 +386,3 @@ function emitConstant(emit: Emitter, value: unknown) {
         throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
     }
 }
-
-
-// TODO: temp testing...
-//let nextId = 0;

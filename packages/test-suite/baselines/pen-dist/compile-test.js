@@ -227,32 +227,6 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function selection(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEL() {
-        for (let i = 0; i < arity; ++i) {
-            if (expressions[i]())
-                return true;
-        }
-        return false;
-    };
-}
-function sequence(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return function SEQ() {
-        let stateₒ = getState();
-        let out;
-        for (let i = 0; i < arity; ++i) {
-            if (!expressions[i]())
-                return setState(stateₒ), false;
-            out = concat(out, OUT);
-        }
-        OUT = out;
-        return true;
-    };
-}
 function stringLiteral(options) {
     const { value } = options;
     const length = value.length;
@@ -444,15 +418,17 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_baz_memo;
 
     function 𝕊0_modExprMem() {
-        if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = selection({
-            inForm,
-            outForm,
-            expressions: [
-                𝕊0.bindings.expr.bindings.foo,
-                𝕊2.bindings.mem,
-                𝕊0.bindings.baz,
-            ],
-        });
+        if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
+            let expr0 = 𝕊0.bindings.expr.bindings.foo;
+            let expr1 = 𝕊2.bindings.mem;
+            let expr2 = 𝕊0.bindings.baz;
+            return function SEL() {
+                if (expr0()) return true;
+                if (expr1()) return true;
+                if (expr2()) return true;
+                return false;
+            }
+        })();
         return 𝕊0_modExprMem_memo();
     }
     let 𝕊0_modExprMem_memo;
