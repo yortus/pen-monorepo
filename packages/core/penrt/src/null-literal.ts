@@ -1,17 +1,15 @@
 // TODO: doc... has only 'ast' representation
-function nullLiteral(options: StaticOptions): PenVal {
+function nullLiteral(options: StaticOptions): Rule {
     const out = options.outForm === 'ast' ? null : undefined;
 
     if (options.inForm !== 'ast') {
-        return {rule: function NUL() { return OUT = out, true; }};
+        return function NUL() { return OUT = out, true; };
     }
 
-    return {
-        rule: function NUL() {
-            if (IN !== null || IP !== 0) return false;
-            IP = 1;
-            OUT = out;
-            return true;
-        },
+    return function NUL() {
+        if (IN !== null || IP !== 0) return false;
+        IP = 1;
+        OUT = out;
+        return true;
     };
 }

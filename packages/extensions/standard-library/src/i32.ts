@@ -3,107 +3,101 @@
 
 // TODO: doc... has both 'txt' and 'ast' representation
 function i32(options: StaticOptions): PenVal {
-    return {
-        lambda(expr) {
-            let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
-            let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
-            assert(typeof base === 'number' && base >= 2 && base <= 36);
-            assert(typeof signed === 'boolean');
+    return function I32_lambda(expr) {
+        let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
+        let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
+        assert(typeof base === 'number' && base >= 2 && base <= 36);
+        assert(typeof signed === 'boolean');
 
-            if (options.inForm === 'nil') {
-                const out = options.outForm === 'nil' ? undefined : 0;
-                return {rule: function I32() { return OUT = out, true; }};
-            }
+        if (options.inForm === 'nil') {
+            const out = options.outForm === 'nil' ? undefined : 0;
+            return function I32() { return OUT = out, true; };
+        }
 
-            if (options.inForm === 'txt' || options.outForm === 'ast') {
-                return {
-                    rule: function I32() {
-                        if (typeof IN !== 'string') return false;
-                        let stateₒ = getState();
+        if (options.inForm === 'txt' || options.outForm === 'ast') {
+            return function I32() {
+                if (typeof IN !== 'string') return false;
+                let stateₒ = getState();
 
-                        // Parse optional leading '-' sign (if signed)...
-                        let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                        let isNegative = false;
-                        if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                            isNegative = true;
-                            MAX_NUM = 0x80000000;
-                            IP += 1;
-                        }
+                // Parse optional leading '-' sign (if signed)...
+                let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                let isNegative = false;
+                if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                    isNegative = true;
+                    MAX_NUM = 0x80000000;
+                    IP += 1;
+                }
 
-                        // ...followed by one or more decimal digits. (NB: no exponents).
-                        let num = 0;
-                        let digits = 0;
-                        while (IP < IN.length) {
+                // ...followed by one or more decimal digits. (NB: no exponents).
+                let num = 0;
+                let digits = 0;
+                while (IP < IN.length) {
 
-                            // Read a digit.
-                            let c = IN.charCodeAt(IP);
-                            if (c >= 256) break;
-                            let digitValue = DIGIT_VALUES[c];
-                            if (digitValue >= base) break;
+                    // Read a digit.
+                    let c = IN.charCodeAt(IP);
+                    if (c >= 256) break;
+                    let digitValue = DIGIT_VALUES[c];
+                    if (digitValue >= base) break;
 
-                            // Update parsed number.
-                            num *= base;
-                            num += digitValue;
+                    // Update parsed number.
+                    num *= base;
+                    num += digitValue;
 
-                            // Check for overflow.
-                            if (num > MAX_NUM) return setState(stateₒ), false;
+                    // Check for overflow.
+                    if (num > MAX_NUM) return setState(stateₒ), false;
 
-                            // Loop again.
-                            IP += 1;
-                            digits += 1;
-                        }
+                    // Loop again.
+                    IP += 1;
+                    digits += 1;
+                }
 
-                        // Check that we parsed at least one digit.
-                        if (digits === 0) return setState(stateₒ), false;
+                // Check that we parsed at least one digit.
+                if (digits === 0) return setState(stateₒ), false;
 
-                        // Apply the sign.
-                        if (isNegative) num = -num;
+                // Apply the sign.
+                if (isNegative) num = -num;
 
-                        // Success
-                        OUT = options.outForm === 'nil' ? undefined : num;
-                        return true;
-                    },
-                };
-            }
+                // Success
+                OUT = options.outForm === 'nil' ? undefined : num;
+                return true;
+            };
+        }
 
-            if (options.inForm === 'ast' || options.outForm === 'txt') {
-                return {
-                    rule() {
-                        if (typeof IN !== 'number' || IP !== 0) return false;
-                        let num = IN;
+        if (options.inForm === 'ast' || options.outForm === 'txt') {
+            return function I32() {
+                if (typeof IN !== 'number' || IP !== 0) return false;
+                let num = IN;
 
-                        // Determine the number's sign and ensure it is in range.
-                        let isNegative = false;
-                        let MAX_NUM = 0x7FFFFFFF;
-                        if (num < 0) {
-                            if (!signed) return false;
-                            isNegative = true;
-                            num = -num;
-                            MAX_NUM = 0x80000000;
-                        }
-                        if (num > MAX_NUM) return false;
+                // Determine the number's sign and ensure it is in range.
+                let isNegative = false;
+                let MAX_NUM = 0x7FFFFFFF;
+                if (num < 0) {
+                    if (!signed) return false;
+                    isNegative = true;
+                    num = -num;
+                    MAX_NUM = 0x80000000;
+                }
+                if (num > MAX_NUM) return false;
 
-                        // Extract the digits.
-                        let digits = [] as number[];
-                        while (true) {
-                            let d = num % base;
-                            num = (num / base) | 0;
-                            digits.push(CHAR_CODES[d]);
-                            if (num === 0) break;
-                        }
+                // Extract the digits.
+                let digits = [] as number[];
+                while (true) {
+                    let d = num % base;
+                    num = (num / base) | 0;
+                    digits.push(CHAR_CODES[d]);
+                    if (num === 0) break;
+                }
 
-                        // Compute the final string.
-                        if (isNegative) digits.push(0x2d); // char code for '-'
-                        // TODO: is String.fromCharCode(...) performant?
-                        OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
-                        IP = 1;
-                        return true;
-                    },
-                };
-            }
+                // Compute the final string.
+                if (isNegative) digits.push(0x2d); // char code for '-'
+                // TODO: is String.fromCharCode(...) performant?
+                OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                IP = 1;
+                return true;
+            };
+        }
 
-            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
-        },
+        throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
     };
 }
 

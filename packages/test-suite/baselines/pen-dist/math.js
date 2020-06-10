@@ -4,21 +4,19 @@ function booleanLiteral(options) {
     const { value } = options;
     const out = options.outForm === 'ast' ? value : undefined;
     if (options.inForm !== 'ast') {
-        return { rule: function BOO() { return OUT = out, true; } };
+        return function BOO() { return OUT = out, true; };
     }
-    return {
-        rule: function BOO() {
-            if (IN !== value || IP !== 0)
-                return false;
-            IP += 1;
-            OUT = out;
-            return true;
-        },
+    return function BOO() {
+        if (IN !== value || IP !== 0)
+            return false;
+        IP += 1;
+        OUT = out;
+        return true;
     };
 }
 function createMainExports(createProgram) {
-    const parse = createProgram({ inForm: 'txt', outForm: 'ast' }).rule;
-    const print = createProgram({ inForm: 'ast', outForm: 'txt' }).rule;
+    const parse = createProgram({ inForm: 'txt', outForm: 'ast' });
+    const print = createProgram({ inForm: 'ast', outForm: 'txt' });
     return {
         parse: (text) => {
             setState({ IN: text, IP: 0 });
@@ -45,60 +43,56 @@ function createMainExports(createProgram) {
 function field(options) {
     const { name, value } = options;
     if (options.inForm === 'txt' || options.outForm === 'ast') {
-        return {
-            rule: function FLD() {
-                let stateₒ = getState();
-                let obj = {};
-                if (!name.rule())
-                    return false;
-                assert(typeof OUT === 'string');
-                let propName = OUT;
-                if (!value.rule())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                OUT = obj;
-                return true;
-            },
+        return function FLD() {
+            let stateₒ = getState();
+            let obj = {};
+            if (!name())
+                return false;
+            assert(typeof OUT === 'string');
+            let propName = OUT;
+            if (!value())
+                return setState(stateₒ), false;
+            assert(OUT !== undefined);
+            obj[propName] = OUT;
+            OUT = obj;
+            return true;
         };
     }
     if (options.inForm === 'ast' || options.outForm === 'txt') {
-        return {
-            rule: function FLD() {
-                if (!isPlainObject(IN))
-                    return false;
-                let stateₒ = getState();
-                let text;
-                let propNames = Object.keys(IN);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                const obj = IN;
-                let bitmask = IP;
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
-                    const propBit = 1 << i;
-                    if ((bitmask & propBit) !== 0)
-                        continue;
-                    setState({ IN: propName, IP: 0 });
-                    if (!name.rule())
-                        continue;
-                    if (IP !== propName.length)
-                        continue;
-                    text = concat(text, OUT);
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!value.rule())
-                        continue;
-                    if (!isInputFullyConsumed())
-                        continue;
-                    text = concat(text, OUT);
-                    bitmask += propBit;
-                    setState({ IN: obj, IP: bitmask });
-                    OUT = text;
-                    return true;
-                }
-                setState(stateₒ);
+        return function FLD() {
+            if (!isPlainObject(IN))
                 return false;
-            },
+            let stateₒ = getState();
+            let text;
+            let propNames = Object.keys(IN);
+            let propCount = propNames.length;
+            assert(propCount <= 32);
+            const obj = IN;
+            let bitmask = IP;
+            for (let i = 0; i < propCount; ++i) {
+                let propName = propNames[i];
+                const propBit = 1 << i;
+                if ((bitmask & propBit) !== 0)
+                    continue;
+                setState({ IN: propName, IP: 0 });
+                if (!name())
+                    continue;
+                if (IP !== propName.length)
+                    continue;
+                text = concat(text, OUT);
+                setState({ IN: obj[propName], IP: 0 });
+                if (!value())
+                    continue;
+                if (!isInputFullyConsumed())
+                    continue;
+                text = concat(text, OUT);
+                bitmask += propBit;
+                setState({ IN: obj, IP: bitmask });
+                OUT = text;
+                return true;
+            }
+            setState(stateₒ);
+            return false;
         };
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
@@ -107,142 +101,128 @@ function list(options) {
     const { elements } = options;
     const elementsLength = elements.length;
     if (options.inForm === 'txt' || options.outForm === 'ast') {
-        return {
-            rule: function LST() {
-                let stateₒ = getState();
-                let arr = [];
-                for (let i = 0; i < elementsLength; ++i) {
-                    if (!elements[i].rule())
-                        return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    arr.push(OUT);
-                }
-                OUT = arr;
-                return true;
-            },
+        return function LST() {
+            let stateₒ = getState();
+            let arr = [];
+            for (let i = 0; i < elementsLength; ++i) {
+                if (!elements[i]())
+                    return setState(stateₒ), false;
+                assert(OUT !== undefined);
+                arr.push(OUT);
+            }
+            OUT = arr;
+            return true;
         };
     }
     if (options.inForm === 'ast' || options.outForm === 'txt') {
-        return {
-            rule: function LST() {
-                if (!Array.isArray(IN))
-                    return false;
-                if (IP < 0 || IP + elementsLength > IN.length)
-                    return false;
-                let stateₒ = getState();
-                let text;
-                const arr = IN;
-                const off = IP;
-                for (let i = 0; i < elementsLength; ++i) {
-                    setState({ IN: arr[off + i], IP: 0 });
-                    if (!elements[i].rule())
-                        return setState(stateₒ), false;
-                    if (!isInputFullyConsumed())
-                        return setState(stateₒ), false;
-                    text = concat(text, OUT);
-                }
-                setState({ IN: arr, IP: off + elementsLength });
-                OUT = text;
-                return true;
-            },
+        return function LST() {
+            if (!Array.isArray(IN))
+                return false;
+            if (IP < 0 || IP + elementsLength > IN.length)
+                return false;
+            let stateₒ = getState();
+            let text;
+            const arr = IN;
+            const off = IP;
+            for (let i = 0; i < elementsLength; ++i) {
+                setState({ IN: arr[off + i], IP: 0 });
+                if (!elements[i]())
+                    return setState(stateₒ), false;
+                if (!isInputFullyConsumed())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+            }
+            setState({ IN: arr, IP: off + elementsLength });
+            OUT = text;
+            return true;
         };
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 function not(options) {
     const { expression } = options;
-    return {
-        rule: function NOT() {
-            let stateₒ = getState();
-            let result = !expression.rule();
-            setState(stateₒ);
-            OUT = undefined;
-            return result;
-        },
+    return function NOT() {
+        let stateₒ = getState();
+        let result = !expression();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
     };
 }
 function nullLiteral(options) {
     const out = options.outForm === 'ast' ? null : undefined;
     if (options.inForm !== 'ast') {
-        return { rule: function NUL() { return OUT = out, true; } };
+        return function NUL() { return OUT = out, true; };
     }
-    return {
-        rule: function NUL() {
-            if (IN !== null || IP !== 0)
-                return false;
-            IP = 1;
-            OUT = out;
-            return true;
-        },
+    return function NUL() {
+        if (IN !== null || IP !== 0)
+            return false;
+        IP = 1;
+        OUT = out;
+        return true;
     };
 }
 function numericLiteral(options) {
     const { value } = options;
     const out = options.outForm === 'ast' ? value : undefined;
     if (options.inForm !== 'ast') {
-        return { rule: function NUM() { return OUT = out, true; } };
+        return function NUM() { return OUT = out, true; };
     }
-    return {
-        rule: function NUM() {
-            if (IN !== value || IP !== 0)
-                return false;
-            IP = 1;
-            OUT = out;
-            return true;
-        },
+    return function NUM() {
+        if (IN !== value || IP !== 0)
+            return false;
+        IP = 1;
+        OUT = out;
+        return true;
     };
 }
 function record(options) {
     const { fields } = options;
     if (options.inForm === 'txt' || options.outForm === 'ast') {
-        return {
-            rule: function RCD() {
-                let stateₒ = getState();
-                let obj = {};
-                for (let field of fields) {
-                    let propName = field.name;
-                    if (!field.value.rule())
-                        return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    obj[propName] = OUT;
-                }
-                OUT = obj;
-                return true;
-            },
+        return function RCD() {
+            let stateₒ = getState();
+            let obj = {};
+            for (let field of fields) {
+                let propName = field.name;
+                if (!field.value())
+                    return setState(stateₒ), false;
+                assert(OUT !== undefined);
+                obj[propName] = OUT;
+            }
+            OUT = obj;
+            return true;
         };
     }
     if (options.inForm === 'ast' || options.outForm === 'txt') {
-        return {
-            rule: function RCD() {
-                if (!isPlainObject(IN))
-                    return false;
-                let stateₒ = getState();
-                let text;
-                let propNames = Object.keys(IN);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                const obj = IN;
-                let bitmask = IP;
-                for (let field of fields) {
-                    let i = propNames.indexOf(field.name);
-                    if (i < 0)
-                        return setState(stateₒ), false;
-                    let propName = propNames[i];
-                    const propBit = 1 << i;
-                    if ((bitmask & propBit) !== 0)
-                        return setState(stateₒ), false;
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!field.value.rule())
-                        return setState(stateₒ), false;
-                    if (!isInputFullyConsumed())
-                        return setState(stateₒ), false;
-                    text = concat(text, OUT);
-                    bitmask += propBit;
-                }
-                setState({ IN: obj, IP: bitmask });
-                OUT = text;
-                return true;
-            },
+        return function RCD() {
+            if (!isPlainObject(IN))
+                return false;
+            let stateₒ = getState();
+            let text;
+            let propNames = Object.keys(IN);
+            let propCount = propNames.length;
+            assert(propCount <= 32);
+            const obj = IN;
+            let bitmask = IP;
+            for (let field of fields) {
+                let i = propNames.indexOf(field.name);
+                if (i < 0)
+                    return setState(stateₒ), false;
+                let propName = propNames[i];
+                const propBit = 1 << i;
+                if ((bitmask & propBit) !== 0)
+                    return setState(stateₒ), false;
+                setState({ IN: obj[propName], IP: 0 });
+                if (!field.value())
+                    return setState(stateₒ), false;
+                if (!isInputFullyConsumed())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+                bitmask += propBit;
+            }
+            setState({ IN: obj, IP: bitmask });
+            OUT = text;
+            return true;
         };
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
@@ -250,31 +230,27 @@ function record(options) {
 function selection(options) {
     const { expressions } = options;
     const arity = expressions.length;
-    return {
-        rule: function SEL() {
-            for (let i = 0; i < arity; ++i) {
-                if (expressions[i].rule())
-                    return true;
-            }
-            return false;
-        },
+    return function SEL() {
+        for (let i = 0; i < arity; ++i) {
+            if (expressions[i]())
+                return true;
+        }
+        return false;
     };
 }
 function sequence(options) {
     const { expressions } = options;
     const arity = expressions.length;
-    return {
-        rule: function SEQ() {
-            let stateₒ = getState();
-            let out;
-            for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].rule())
-                    return setState(stateₒ), false;
-                out = concat(out, OUT);
-            }
-            OUT = out;
-            return true;
-        },
+    return function SEQ() {
+        let stateₒ = getState();
+        let out;
+        for (let i = 0; i < arity; ++i) {
+            if (!expressions[i]())
+                return setState(stateₒ), false;
+            out = concat(out, OUT);
+        }
+        OUT = out;
+        return true;
     };
 }
 function stringLiteral(options) {
@@ -283,22 +259,20 @@ function stringLiteral(options) {
     const out = options.outForm === 'nil' ? undefined : value;
     const checkInType = options.inForm !== 'txt';
     if (options.inForm === 'nil') {
-        return { rule: function STR() { return OUT = out, true; } };
+        return function STR() { return OUT = out, true; };
     }
-    return {
-        rule: function STR() {
-            if (checkInType && typeof IN !== 'string')
+    return function STR() {
+        if (checkInType && typeof IN !== 'string')
+            return false;
+        if (IP + length > IN.length)
+            return false;
+        for (let i = 0; i < length; ++i) {
+            if (IN.charAt(IP + i) !== value.charAt(i))
                 return false;
-            if (IP + length > IN.length)
-                return false;
-            for (let i = 0; i < length; ++i) {
-                if (IN.charAt(IP + i) !== value.charAt(i))
-                    return false;
-            }
-            IP += length;
-            OUT = out;
-            return true;
-        },
+        }
+        IP += length;
+        OUT = out;
+        return true;
     };
 }
 let IN;
@@ -345,30 +319,26 @@ function isPlainObject(value) {
 }
 function zeroOrMore(options) {
     const { expression } = options;
-    return {
-        rule: function O_M() {
-            let stateₒ = getState();
-            let out;
-            while (true) {
-                if (!expression.rule())
-                    break;
-                if (IP === stateₒ.IP)
-                    break;
-                out = concat(out, OUT);
-            }
-            OUT = out;
-            return true;
-        },
+    return function O_M() {
+        let stateₒ = getState();
+        let out;
+        while (true) {
+            if (!expression())
+                break;
+            if (IP === stateₒ.IP)
+                break;
+            out = concat(out, OUT);
+        }
+        OUT = out;
+        return true;
     };
 }
 function zeroOrOne(options) {
     const { expression } = options;
-    return {
-        rule: function O_1() {
-            if (!expression.rule())
-                OUT = undefined;
-            return true;
-        },
+    return function O_1() {
+        if (!expression())
+            OUT = undefined;
+        return true;
     };
 }
 
@@ -387,57 +357,86 @@ const createExtension𝕊4 = (() => {
     // TODO: optimise all cases better
     function char(options) {
         const checkInType = options.inForm !== 'txt';
-        return {
-            lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g, _h;
-                let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
-                let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
-                assert(typeof min === 'string' && min.length === 1);
-                assert(typeof max === 'string' && max.length === 1);
-                let checkRange = min !== '\u0000' || max !== '\uFFFF';
-                if (options.inForm === 'nil') {
-                    const out = options.outForm === 'nil' ? undefined : min;
-                    return { rule: function CHA() { return OUT = out, true; } };
-                }
-                return {
-                    rule: function CHA() {
-                        if (checkInType && typeof IN !== 'string')
-                            return false;
-                        if (IP < 0 || IP >= IN.length)
-                            return false;
-                        let c = IN.charAt(IP);
-                        if (checkRange && (c < min || c > max))
-                            return false;
-                        IP += 1;
-                        OUT = options.outForm === 'nil' ? undefined : c;
-                        return true;
-                    },
-                };
-            },
+        return function CHA_lambda(expr) {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
+            let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
+            assert(typeof min === 'string' && min.length === 1);
+            assert(typeof max === 'string' && max.length === 1);
+            let checkRange = min !== '\u0000' || max !== '\uFFFF';
+            if (options.inForm === 'nil') {
+                const out = options.outForm === 'nil' ? undefined : min;
+                return function CHA() { return OUT = out, true; };
+            }
+            return function CHA() {
+                if (checkInType && typeof IN !== 'string')
+                    return false;
+                if (IP < 0 || IP >= IN.length)
+                    return false;
+                let c = IN.charAt(IP);
+                if (checkRange && (c < min || c > max))
+                    return false;
+                IP += 1;
+                OUT = options.outForm === 'nil' ? undefined : c;
+                return true;
+            };
         };
     }
     // TODO: doc... has both 'txt' and 'ast' representation
     function f64(options) {
         if (options.inForm === 'nil') {
             const out = options.outForm === 'nil' ? undefined : 0;
-            return { rule: function F64() { return OUT = out, true; } };
+            return function F64() { return OUT = out, true; };
         }
         if (options.inForm === 'txt' || options.outForm === 'ast') {
-            return {
-                rule: function F64() {
-                    if (typeof IN !== 'string')
-                        return false;
-                    let stateₒ = getState();
-                    const LEN = IN.length;
-                    const EOS = 0;
-                    let digitCount = 0;
+            return function F64() {
+                if (typeof IN !== 'string')
+                    return false;
+                let stateₒ = getState();
+                const LEN = IN.length;
+                const EOS = 0;
+                let digitCount = 0;
+                // Parse optional '+' or '-' sign
+                let c = IN.charCodeAt(IP);
+                if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse 0..M digits
+                while (true) {
+                    if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                        break;
+                    digitCount += 1;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse optional '.'
+                if (c === DECIMAL_POINT) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse 0..M digits
+                while (true) {
+                    if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                        break;
+                    digitCount += 1;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Ensure we have parsed at least one significant digit
+                if (digitCount === 0)
+                    return setState(stateₒ), false;
+                // Parse optional exponent
+                if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     // Parse optional '+' or '-' sign
-                    let c = IN.charCodeAt(IP);
                     if (c === PLUS_SIGN || c === MINUS_SIGN) {
                         IP += 1;
                         c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
-                    // Parse 0..M digits
+                    // Parse 1..M digits
+                    digitCount = 0;
                     while (true) {
                         if (c < ZERO_DIGIT || c > NINE_DIGIT)
                             break;
@@ -445,67 +444,30 @@ const createExtension𝕊4 = (() => {
                         IP += 1;
                         c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
-                    // Parse optional '.'
-                    if (c === DECIMAL_POINT) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Ensure we have parsed at least one significant digit
                     if (digitCount === 0)
                         return setState(stateₒ), false;
-                    // Parse optional exponent
-                    if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        // Parse optional '+' or '-' sign
-                        if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        }
-                        // Parse 1..M digits
-                        digitCount = 0;
-                        while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                                break;
-                            digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        }
-                        if (digitCount === 0)
-                            return setState(stateₒ), false;
-                    }
-                    // There is a syntactically valid float. Delegate parsing to the JS runtime.
-                    // Reject the number if it parses to Infinity or Nan.
-                    // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
-                    if (!Number.isFinite(num))
-                        return setState(stateₒ), false;
-                    // Success
-                    OUT = options.outForm === 'nil' ? undefined : num;
-                    return true;
-                },
+                }
+                // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                // Reject the number if it parses to Infinity or Nan.
+                // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                if (!Number.isFinite(num))
+                    return setState(stateₒ), false;
+                // Success
+                OUT = options.outForm === 'nil' ? undefined : num;
+                return true;
             };
         }
         if (options.inForm === 'ast' || options.outForm === 'txt') {
-            return {
-                rule: function F64() {
-                    // Ensure N is a number.
-                    if (typeof IN !== 'number' || IP !== 0)
-                        return false;
-                    // Delegate unparsing to the JS runtime.
-                    // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = options.outForm === 'nil' ? undefined : String(IN);
-                    IP = 1;
-                    return true;
-                },
+            return function F64() {
+                // Ensure N is a number.
+                if (typeof IN !== 'number' || IP !== 0)
+                    return false;
+                // Delegate unparsing to the JS runtime.
+                // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                OUT = options.outForm === 'nil' ? undefined : String(IN);
+                IP = 1;
+                return true;
             };
         }
         throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
@@ -521,103 +483,97 @@ const createExtension𝕊4 = (() => {
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32(options) {
-        return {
-            lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g, _h;
-                let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
-                let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
-                assert(typeof base === 'number' && base >= 2 && base <= 36);
-                assert(typeof signed === 'boolean');
-                if (options.inForm === 'nil') {
-                    const out = options.outForm === 'nil' ? undefined : 0;
-                    return { rule: function I32() { return OUT = out, true; } };
-                }
-                if (options.inForm === 'txt' || options.outForm === 'ast') {
-                    return {
-                        rule: function I32() {
-                            if (typeof IN !== 'string')
-                                return false;
-                            let stateₒ = getState();
-                            // Parse optional leading '-' sign (if signed)...
-                            let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                            let isNegative = false;
-                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                                isNegative = true;
-                                MAX_NUM = 0x80000000;
-                                IP += 1;
-                            }
-                            // ...followed by one or more decimal digits. (NB: no exponents).
-                            let num = 0;
-                            let digits = 0;
-                            while (IP < IN.length) {
-                                // Read a digit.
-                                let c = IN.charCodeAt(IP);
-                                if (c >= 256)
-                                    break;
-                                let digitValue = DIGIT_VALUES[c];
-                                if (digitValue >= base)
-                                    break;
-                                // Update parsed number.
-                                num *= base;
-                                num += digitValue;
-                                // Check for overflow.
-                                if (num > MAX_NUM)
-                                    return setState(stateₒ), false;
-                                // Loop again.
-                                IP += 1;
-                                digits += 1;
-                            }
-                            // Check that we parsed at least one digit.
-                            if (digits === 0)
-                                return setState(stateₒ), false;
-                            // Apply the sign.
-                            if (isNegative)
-                                num = -num;
-                            // Success
-                            OUT = options.outForm === 'nil' ? undefined : num;
-                            return true;
-                        },
-                    };
-                }
-                if (options.inForm === 'ast' || options.outForm === 'txt') {
-                    return {
-                        rule() {
-                            if (typeof IN !== 'number' || IP !== 0)
-                                return false;
-                            let num = IN;
-                            // Determine the number's sign and ensure it is in range.
-                            let isNegative = false;
-                            let MAX_NUM = 0x7FFFFFFF;
-                            if (num < 0) {
-                                if (!signed)
-                                    return false;
-                                isNegative = true;
-                                num = -num;
-                                MAX_NUM = 0x80000000;
-                            }
-                            if (num > MAX_NUM)
-                                return false;
-                            // Extract the digits.
-                            let digits = [];
-                            while (true) {
-                                let d = num % base;
-                                num = (num / base) | 0;
-                                digits.push(CHAR_CODES[d]);
-                                if (num === 0)
-                                    break;
-                            }
-                            // Compute the final string.
-                            if (isNegative)
-                                digits.push(0x2d); // char code for '-'
-                            // TODO: is String.fromCharCode(...) performant?
-                            OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
-                            IP = 1;
-                            return true;
-                        },
-                    };
-                }
-                throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
-            },
+        return function I32_lambda(expr) {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
+            let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
+            assert(typeof base === 'number' && base >= 2 && base <= 36);
+            assert(typeof signed === 'boolean');
+            if (options.inForm === 'nil') {
+                const out = options.outForm === 'nil' ? undefined : 0;
+                return function I32() { return OUT = out, true; };
+            }
+            if (options.inForm === 'txt' || options.outForm === 'ast') {
+                return function I32() {
+                    if (typeof IN !== 'string')
+                        return false;
+                    let stateₒ = getState();
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        IP += 1;
+                    }
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let num = 0;
+                    let digits = 0;
+                    while (IP < IN.length) {
+                        // Read a digit.
+                        let c = IN.charCodeAt(IP);
+                        if (c >= 256)
+                            break;
+                        let digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base)
+                            break;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
+                        // Check for overflow.
+                        if (num > MAX_NUM)
+                            return setState(stateₒ), false;
+                        // Loop again.
+                        IP += 1;
+                        digits += 1;
+                    }
+                    // Check that we parsed at least one digit.
+                    if (digits === 0)
+                        return setState(stateₒ), false;
+                    // Apply the sign.
+                    if (isNegative)
+                        num = -num;
+                    // Success
+                    OUT = options.outForm === 'nil' ? undefined : num;
+                    return true;
+                };
+            }
+            if (options.inForm === 'ast' || options.outForm === 'txt') {
+                return function I32() {
+                    if (typeof IN !== 'number' || IP !== 0)
+                        return false;
+                    let num = IN;
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed)
+                            return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM)
+                        return false;
+                    // Extract the digits.
+                    let digits = [];
+                    while (true) {
+                        let d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0)
+                            break;
+                    }
+                    // Compute the final string.
+                    if (isNegative)
+                        digits.push(0x2d); // char code for '-'
+                    // TODO: is String.fromCharCode(...) performant?
+                    OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                    IP = 1;
+                    return true;
+                };
+            }
+            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         };
     }
     // TODO: doc...
@@ -650,86 +606,82 @@ const createExtension𝕊4 = (() => {
         0x57, 0x58, 0x59, 0x5a,
     ];
     function memoise(_options) {
-        return {
-            lambda(expr) {
-                // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
-                const memos = new Map();
-                return {
-                    rule: function MEM() {
-                        // Check whether the memo table already has an entry for the given initial state.
-                        let stateₒ = getState();
-                        let memos2 = memos.get(IN);
-                        if (memos2 === undefined) {
-                            memos2 = new Map();
-                            memos.set(IN, memos2);
-                        }
-                        let memo = memos2.get(IP);
-                        if (!memo) {
-                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                            // this initial state. The first thing we do is create a memo table entry, which is marked as
-                            // *unresolved*. All future applications of this rule with the same initial state will find this
-                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                            // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
-                            memos2.set(IP, memo);
-                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                            // At this point, any left-recursive paths encountered during application are guaranteed to have
-                            // been noted and aborted (see below).
-                            if (expr.rule()) {
-                                memo.result = true;
-                                memo.stateᐟ = getState();
-                                memo.OUT = OUT;
-                            }
-                            memo.resolved = true;
-                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                            // final.
-                            if (!memo.isLeftRecursive) {
-                                setState(memo.stateᐟ);
-                                OUT = memo.OUT;
-                                return memo.result;
-                            }
-                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                            // the same rule with the same initial state. We continue to iterate as long as the application
-                            // succeeds and consumes more input than the previous iteration did, in which case we update the
-                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                            // does not consume more input, at which point we take the result of the previous iteration as
-                            // final.
-                            while (memo.result === true) {
-                                setState(stateₒ);
-                                // TODO: break cases for UNPARSING:
-                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                                // some node --> some different non-empty node (assert: should never happen!)
-                                if (!expr.rule())
-                                    break;
-                                let state = getState();
-                                if (state.IP <= memo.stateᐟ.IP)
-                                    break;
-                                // TODO: was for unparse... comment above says should never happen...
-                                // if (!isInputFullyConsumed()) break;
-                                memo.stateᐟ = state;
-                                memo.OUT = OUT;
-                            }
-                        }
-                        else if (!memo.resolved) {
-                            // If we get here, then we have already applied the rule with this initial state, but not yet
-                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                            // note that the rule application encountered left-recursion, and return with failure. This means
-                            // that the initial application of the rule for this initial state can only possibly succeed along a
-                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                            // left-recursive rules.
-                            memo.isLeftRecursive = true;
-                            return false;
-                        }
-                        // We have a resolved memo, so the result of the rule application for the given initial state has
-                        // already been computed. Return it from the memo.
+        return function MEM_lambda(expr) {
+            // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
+            const memos = new Map();
+            return function MEM() {
+                // Check whether the memo table already has an entry for the given initial state.
+                let stateₒ = getState();
+                let memos2 = memos.get(IN);
+                if (memos2 === undefined) {
+                    memos2 = new Map();
+                    memos.set(IN, memos2);
+                }
+                let memo = memos2.get(IP);
+                if (!memo) {
+                    // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                    // this initial state. The first thing we do is create a memo table entry, which is marked as
+                    // *unresolved*. All future applications of this rule with the same initial state will find this
+                    // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                    // left-recursion.
+                    memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
+                    memos2.set(IP, memo);
+                    // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                    // At this point, any left-recursive paths encountered during application are guaranteed to have
+                    // been noted and aborted (see below).
+                    if (expr()) { // TODO: fix cast
+                        memo.result = true;
+                        memo.stateᐟ = getState();
+                        memo.OUT = OUT;
+                    }
+                    memo.resolved = true;
+                    // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                    // final.
+                    if (!memo.isLeftRecursive) {
                         setState(memo.stateᐟ);
                         OUT = memo.OUT;
                         return memo.result;
-                    },
-                };
-            },
+                    }
+                    // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                    // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                    // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                    // the same rule with the same initial state. We continue to iterate as long as the application
+                    // succeeds and consumes more input than the previous iteration did, in which case we update the
+                    // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                    // does not consume more input, at which point we take the result of the previous iteration as
+                    // final.
+                    while (memo.result === true) {
+                        setState(stateₒ);
+                        // TODO: break cases for UNPARSING:
+                        // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                        // some node --> some different non-empty node (assert: should never happen!)
+                        if (!expr())
+                            break; // TODO: fix cast
+                        let state = getState();
+                        if (state.IP <= memo.stateᐟ.IP)
+                            break;
+                        // TODO: was for unparse... comment above says should never happen...
+                        // if (!isInputFullyConsumed()) break;
+                        memo.stateᐟ = state;
+                        memo.OUT = OUT;
+                    }
+                }
+                else if (!memo.resolved) {
+                    // If we get here, then we have already applied the rule with this initial state, but not yet
+                    // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                    // note that the rule application encountered left-recursion, and return with failure. This means
+                    // that the initial application of the rule for this initial state can only possibly succeed along a
+                    // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                    // left-recursive rules.
+                    memo.isLeftRecursive = true;
+                    return false;
+                }
+                // We have a resolved memo, so the result of the rule application for the given initial state has
+                // already been computed. Return it from the memo.
+                setState(memo.stateᐟ);
+                OUT = memo.OUT;
+                return memo.result;
+            };
         };
     }
 
@@ -747,60 +699,52 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0 = {
         bindings: {
-            memoise: {},
-            f64: {},
-            i32: {},
-            start: {},
-            expr: {},
-            add: {},
-            sub: {},
-            term: {},
-            mul: {},
-            div: {},
-            factor: {},
+            memoise: 𝕊0_memoise,
+            f64: 𝕊0_f64,
+            i32: 𝕊0_i32,
+            start: 𝕊0_start,
+            expr: 𝕊0_expr,
+            add: 𝕊0_add,
+            sub: 𝕊0_sub,
+            term: 𝕊0_term,
+            mul: 𝕊0_mul,
+            div: 𝕊0_div,
+            factor: 𝕊0_factor,
         },
     };
 
     const 𝕊1 = {
         bindings: {
-            base: {},
-            signed: {},
+            base: 𝕊1_base,
+            signed: 𝕊1_signed,
         },
     };
 
     const 𝕊2 = {
         bindings: {
-            base: {},
-            signed: {},
+            base: 𝕊2_base,
+            signed: 𝕊2_signed,
         },
     };
 
     const 𝕊3 = {
         bindings: {
-            signed: {},
+            signed: 𝕊3_signed,
         },
     };
 
     const 𝕊4 = createExtension𝕊4({inForm, outForm});
 
     // -------------------- Aliases --------------------
-    𝕊0.bindings.memoise = 𝕊4.bindings.memoise;
-    𝕊0.bindings.f64 = 𝕊4.bindings.f64;
-    𝕊0.bindings.i32 = 𝕊4.bindings.i32;
-    𝕊0.bindings.start = 𝕊0.bindings.expr;
-
-    // -------------------- Compile-time constants --------------------
-    𝕊1.bindings.base.constant = {value: 16};
-    𝕊1.bindings.signed.constant = {value: false};
-    𝕊2.bindings.base.constant = {value: 2};
-    𝕊2.bindings.signed.constant = {value: false};
-    𝕊3.bindings.signed.constant = {value: false};
+    function 𝕊0_memoise(arg) { return 𝕊4.bindings.memoise(arg); }
+    function 𝕊0_f64(arg) { return 𝕊4.bindings.f64(arg); }
+    function 𝕊0_i32(arg) { return 𝕊4.bindings.i32(arg); }
+    function 𝕊0_start(arg) { return 𝕊0.bindings.expr(arg); }
 
     // -------------------- math.pen --------------------
 
     function 𝕊0_expr() {
-        if (𝕊0_expr.memo) return 𝕊0_expr.memo;
-        return 𝕊0_expr.memo = (𝕊0.bindings.memoise).lambda(selection({
+        if (!𝕊0_expr_memo) 𝕊0_expr_memo = (𝕊0.bindings.memoise)(selection({
             inForm,
             outForm,
             expressions: [
@@ -809,12 +753,12 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.term,
             ],
         }));
+        return 𝕊0_expr_memo();
     }
-    Object.assign(𝕊0.bindings.expr, 𝕊0_expr());
+    let 𝕊0_expr_memo;
 
     function 𝕊0_add() {
-        if (𝕊0_add.memo) return 𝕊0_add.memo;
-        return 𝕊0_add.memo = record({
+        if (!𝕊0_add_memo) 𝕊0_add_memo = record({
             inForm,
             outForm,
             fields: [
@@ -847,12 +791,12 @@ function createProgram({inForm, outForm}) {
                 },
             ],
         });
+        return 𝕊0_add_memo();
     }
-    Object.assign(𝕊0.bindings.add, 𝕊0_add());
+    let 𝕊0_add_memo;
 
     function 𝕊0_sub() {
-        if (𝕊0_sub.memo) return 𝕊0_sub.memo;
-        return 𝕊0_sub.memo = record({
+        if (!𝕊0_sub_memo) 𝕊0_sub_memo = record({
             inForm,
             outForm,
             fields: [
@@ -885,12 +829,12 @@ function createProgram({inForm, outForm}) {
                 },
             ],
         });
+        return 𝕊0_sub_memo();
     }
-    Object.assign(𝕊0.bindings.sub, 𝕊0_sub());
+    let 𝕊0_sub_memo;
 
     function 𝕊0_term() {
-        if (𝕊0_term.memo) return 𝕊0_term.memo;
-        return 𝕊0_term.memo = (𝕊0.bindings.memoise).lambda(selection({
+        if (!𝕊0_term_memo) 𝕊0_term_memo = (𝕊0.bindings.memoise)(selection({
             inForm,
             outForm,
             expressions: [
@@ -899,12 +843,12 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.factor,
             ],
         }));
+        return 𝕊0_term_memo();
     }
-    Object.assign(𝕊0.bindings.term, 𝕊0_term());
+    let 𝕊0_term_memo;
 
     function 𝕊0_mul() {
-        if (𝕊0_mul.memo) return 𝕊0_mul.memo;
-        return 𝕊0_mul.memo = sequence({
+        if (!𝕊0_mul_memo) 𝕊0_mul_memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -955,12 +899,12 @@ function createProgram({inForm, outForm}) {
                 }),
             ],
         });
+        return 𝕊0_mul_memo();
     }
-    Object.assign(𝕊0.bindings.mul, 𝕊0_mul());
+    let 𝕊0_mul_memo;
 
     function 𝕊0_div() {
-        if (𝕊0_div.memo) return 𝕊0_div.memo;
-        return 𝕊0_div.memo = record({
+        if (!𝕊0_div_memo) 𝕊0_div_memo = record({
             inForm,
             outForm,
             fields: [
@@ -993,12 +937,12 @@ function createProgram({inForm, outForm}) {
                 },
             ],
         });
+        return 𝕊0_div_memo();
     }
-    Object.assign(𝕊0.bindings.div, 𝕊0_div());
+    let 𝕊0_div_memo;
 
     function 𝕊0_factor() {
-        if (𝕊0_factor.memo) return 𝕊0_factor.memo;
-        return 𝕊0_factor.memo = selection({
+        if (!𝕊0_factor_memo) 𝕊0_factor_memo = selection({
             inForm,
             outForm,
             expressions: [
@@ -1036,7 +980,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0x",
                         }),
-                        (𝕊0.bindings.i32).lambda(𝕊1),
+                        (𝕊0.bindings.i32)(𝕊1),
                     ],
                 }),
                 sequence({
@@ -1048,7 +992,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "0b",
                         }),
-                        (𝕊0.bindings.i32).lambda(𝕊2),
+                        (𝕊0.bindings.i32)(𝕊2),
                     ],
                 }),
                 sequence({
@@ -1060,7 +1004,7 @@ function createProgram({inForm, outForm}) {
                             outForm: outForm !== "txt" ? "nil" : outForm,
                             value: "i",
                         }),
-                        (𝕊0.bindings.i32).lambda(𝕊3),
+                        (𝕊0.bindings.i32)(𝕊3),
                     ],
                 }),
                 sequence({
@@ -1082,38 +1026,46 @@ function createProgram({inForm, outForm}) {
                 }),
             ],
         });
+        return 𝕊0_factor_memo();
     }
-    Object.assign(𝕊0.bindings.factor, 𝕊0_factor());
+    let 𝕊0_factor_memo;
 
     function 𝕊1_base() {
-        if (𝕊1_base.memo) return 𝕊1_base.memo;
-        return 𝕊1_base.memo = numericLiteral({inForm, outForm, value: 16});
+        if (!𝕊1_base_memo) 𝕊1_base_memo = numericLiteral({inForm, outForm, value: 16});
+        return 𝕊1_base_memo();
     }
-    Object.assign(𝕊1.bindings.base, 𝕊1_base());
+    let 𝕊1_base_memo;
 
     function 𝕊1_signed() {
-        if (𝕊1_signed.memo) return 𝕊1_signed.memo;
-        return 𝕊1_signed.memo = booleanLiteral({inForm, outForm, value: false});
+        if (!𝕊1_signed_memo) 𝕊1_signed_memo = booleanLiteral({inForm, outForm, value: false});
+        return 𝕊1_signed_memo();
     }
-    Object.assign(𝕊1.bindings.signed, 𝕊1_signed());
+    let 𝕊1_signed_memo;
 
     function 𝕊2_base() {
-        if (𝕊2_base.memo) return 𝕊2_base.memo;
-        return 𝕊2_base.memo = numericLiteral({inForm, outForm, value: 2});
+        if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({inForm, outForm, value: 2});
+        return 𝕊2_base_memo();
     }
-    Object.assign(𝕊2.bindings.base, 𝕊2_base());
+    let 𝕊2_base_memo;
 
     function 𝕊2_signed() {
-        if (𝕊2_signed.memo) return 𝕊2_signed.memo;
-        return 𝕊2_signed.memo = booleanLiteral({inForm, outForm, value: false});
+        if (!𝕊2_signed_memo) 𝕊2_signed_memo = booleanLiteral({inForm, outForm, value: false});
+        return 𝕊2_signed_memo();
     }
-    Object.assign(𝕊2.bindings.signed, 𝕊2_signed());
+    let 𝕊2_signed_memo;
 
     function 𝕊3_signed() {
-        if (𝕊3_signed.memo) return 𝕊3_signed.memo;
-        return 𝕊3_signed.memo = booleanLiteral({inForm, outForm, value: false});
+        if (!𝕊3_signed_memo) 𝕊3_signed_memo = booleanLiteral({inForm, outForm, value: false});
+        return 𝕊3_signed_memo();
     }
-    Object.assign(𝕊3.bindings.signed, 𝕊3_signed());
+    let 𝕊3_signed_memo;
+
+    // -------------------- Compile-time constants --------------------
+    𝕊1.bindings.base.constant = {value: 16};
+    𝕊1.bindings.signed.constant = {value: false};
+    𝕊2.bindings.base.constant = {value: 2};
+    𝕊2.bindings.signed.constant = {value: false};
+    𝕊3.bindings.signed.constant = {value: false};
 
     return 𝕊0.bindings.start;
 }

@@ -1,10 +1,8 @@
 // TODO: doc... this rule is representation-agnostic
-function zeroOrOne(options: StaticOptions & {expression: PenVal}): PenVal {
+function zeroOrOne(options: StaticOptions & {expression: Rule}): Rule {
     const {expression} = options;
-    return {
-        rule: function O_1() {
-            if (!expression.rule!()) OUT = undefined;
-            return true;
-        },
+    return function O_1() {
+        if (!expression()) OUT = undefined;
+        return true;
     };
 }

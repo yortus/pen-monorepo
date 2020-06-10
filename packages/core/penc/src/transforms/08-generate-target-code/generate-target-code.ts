@@ -19,6 +19,7 @@ export function generateTargetCode(program: Program) {
 
 function emitProgram(program: Program) {
     const emit = makeEmitter();
+    //nextId = 0;
 
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
     const RUNTIME_PATH = require.resolve('../../deps/penrt');
@@ -37,11 +38,11 @@ function emitProgram(program: Program) {
     // TODO: Emit aliases...
     emitSymbolAliases(emit, program);
 
-    // TODO: Emit compile-time constants...
-    emitConstants(emit, program);
-
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
+
+    // TODO: Emit compile-time constants...
+    emitConstants(emit, program);
 
     // TODO: emit epilog for `create` function
     let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
@@ -89,7 +90,7 @@ function emitSymbolDeclarations(emit: Emitter, program: Program) {
             emit.down(2).text(`const ${scope.id} = {`).indent();
             emit.down(1).text(`bindings: {`).indent();
             for (let sourceName of scope.sourceNames.keys()) {
-                emit.down(1).text(`${sourceName}: {},`);
+                emit.down(1).text(`${sourceName}: ${scope.id}_${sourceName},`);
             }
             emit.dedent().down(1).text(`},`);
             emit.dedent().down(1).text(`};`);
@@ -111,17 +112,21 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                     for (let {name, meta: {symbolId}} of pattern.names) {
                         let symbol = symbolTable.getSymbolById(symbolId);
                         assert(symbol.kind === 'NameSymbol');
-                        emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName} = `);
+                        let {scope, sourceName} = symbol;
+                        let qualName = `${scope.id}_${sourceName}`;
+                        emit.down(1).text(`function ${qualName}(arg) { return `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
-                        emit.text(`.bindings.${name};`); // TODO: still needs fixing...
+                        emit.text(`.bindings.${name}(arg); }`); // TODO: still needs fixing...
                     }
                 }
                 else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
                     let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
                     assert(symbol.kind === 'NameSymbol');
-                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName} = `);
-                    emitExpression(emit, value, symbolTable);
-                    emit.text(';');
+                    let {scope, sourceName} = symbol;
+                    let qualName = `${scope.id}_${sourceName}`;
+                    emit.down(1).text(`function ${qualName}(arg) { return `); // TODO: probably wrong. Modules aren't functions (yet)
+                    emitExpression(emit, value, symbolTable); // rhs *must* be a module
+                    emit.text(`(arg); }`);
                 }
             }
             module.bindings.forEach(rec);
@@ -171,11 +176,11 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     // TODO: temp testing...
                     let qualName = `${scope.id}_${sourceName}`;
                     emit.down(2).text(`function ${qualName}() {`).indent();
-                    emit.down(1).text(`if (${qualName}.memo) return ${qualName}.memo;`);
-                    emit.down(1).text(`return ${qualName}.memo = `);
+                    emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
                     emitExpression(emit, value, symbolTable);
-                    emit.text(';').dedent().down(1).text('}');
-                    emit.down(1).text(`Object.assign(${scope.id}.bindings.${sourceName}, ${qualName}());`);
+                    emit.text(`;`).down(1).text(`return ${qualName}_memo();`);
+                    emit.dedent().down(1).text('}');
+                    emit.down(1).text(`let ${qualName}_memo;`);
                 }
             }
             mod.bindings.forEach(rec);
@@ -189,7 +194,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
         case 'ApplicationExpression':
             emit.text('(');
             emitExpression(emit, expr.lambda, symbolTable);
-            emit.text(').lambda(');
+            emit.text(')(');
             emitExpression(emit, expr.argument, symbolTable);
             emit.text(`)`);
             return;
@@ -355,3 +360,7 @@ function emitConstant(emit: Emitter, value: unknown) {
         throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
     }
 }
+
+
+// TODO: temp testing...
+//let nextId = 0;

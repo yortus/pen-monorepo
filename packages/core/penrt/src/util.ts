@@ -9,20 +9,18 @@ interface StaticOptions {
 
 
 
-
-interface PenVal {
+type PenVal = (Rule | Lambda) & {
     // module
     bindings?: Record<string, PenVal>;
 
-    // rule
-    rule?(): boolean;
-
-    // lambda
-    lambda?(arg: PenVal): PenVal;
-
     // compile-time constant
     constant?: {value: unknown};
-}
+};
+type Rule = () => boolean;
+type Lambda = (arg: PenVal) => PenVal;
+
+
+
 
 
 // TODO: new 'registers'... temp testing...
