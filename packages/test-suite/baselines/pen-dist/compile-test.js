@@ -227,28 +227,6 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function stringLiteral(options) {
-    const { value } = options;
-    const length = value.length;
-    const out = options.outForm === 'nil' ? undefined : value;
-    const checkInType = options.inForm !== 'txt';
-    if (options.inForm === 'nil') {
-        return function STR() { return OUT = out, true; };
-    }
-    return function STR() {
-        if (checkInType && typeof IN !== 'string')
-            return false;
-        if (IP + length > IN.length)
-            return false;
-        for (let i = 0; i < length; ++i) {
-            if (IN.charAt(IP + i) !== value.charAt(i))
-                return false;
-        }
-        IP += length;
-        OUT = out;
-        return true;
-    };
-}
 let IN;
 let IP;
 let OUT;
@@ -398,21 +376,44 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_start_memo;
 
     function 𝕊0_b() {
-        if (!𝕊0_b_memo) 𝕊0_b_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "b2",
-        });
+        if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "b2";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 50) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_b_memo();
     }
     let 𝕊0_b_memo;
 
     function 𝕊0_baz() {
-        if (!𝕊0_baz_memo) 𝕊0_baz_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "baz",
-        });
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "baz";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 122) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊0_baz_memo();
     }
     let 𝕊0_baz_memo;
@@ -440,31 +441,70 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_refC_memo;
 
     function 𝕊1_foo() {
-        if (!𝕊1_foo_memo) 𝕊1_foo_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "foo",
-        });
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "foo";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 102) return false;
+                if (IN.charCodeAt(IP + 1) !== 111) return false;
+                if (IN.charCodeAt(IP + 2) !== 111) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊1_foo_memo();
     }
     let 𝕊1_foo_memo;
 
     function 𝕊1_bar() {
-        if (!𝕊1_bar_memo) 𝕊1_bar_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "bar",
-        });
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "bar";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 114) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊1_bar_memo();
     }
     let 𝕊1_bar_memo;
 
     function 𝕊2_mem() {
-        if (!𝕊2_mem_memo) 𝕊2_mem_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "member",
-        });
+        if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "member";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 6 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 109) return false;
+                if (IN.charCodeAt(IP + 1) !== 101) return false;
+                if (IN.charCodeAt(IP + 2) !== 109) return false;
+                if (IN.charCodeAt(IP + 3) !== 98) return false;
+                if (IN.charCodeAt(IP + 4) !== 101) return false;
+                if (IN.charCodeAt(IP + 5) !== 114) return false;
+                IP += 6;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊2_mem_memo();
     }
     let 𝕊2_mem_memo;
@@ -494,21 +534,43 @@ function createProgram({inForm, outForm}) {
     let 𝕊5_ref6_memo;
 
     function 𝕊6_c1() {
-        if (!𝕊6_c1_memo) 𝕊6_c1_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "c1",
-        });
+        if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "c1";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 99) return false;
+                if (IN.charCodeAt(IP + 1) !== 49) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊6_c1_memo();
     }
     let 𝕊6_c1_memo;
 
     function 𝕊6_c2() {
-        if (!𝕊6_c2_memo) 𝕊6_c2_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "c2",
-        });
+        if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "c2";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 99) return false;
+                if (IN.charCodeAt(IP + 1) !== 50) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊6_c2_memo();
     }
     let 𝕊6_c2_memo;

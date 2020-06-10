@@ -11,6 +11,7 @@ type Program = AstNodes.Program<Metadata>;
 type Expression = AstNodes.Expression<Metadata>;
 type SelectionExpression = AstNodes.SelectionExpression<Metadata>;
 type SequenceExpression = AstNodes.SequenceExpression<Metadata>;
+type StringLiteralExpression = AstNodes.StringLiteralExpression<Metadata>;
 
 
 // TODO: doc...
@@ -310,12 +311,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'StringLiteralExpression': {
-            let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
-            emit.text('stringLiteral({').indent();
-            emit.down(1).text(`inForm: ${m.replace(/_/g, 'inForm')},`);
-            emit.down(1).text(`outForm: ${m.replace(/_/g, 'outForm')},`);
-            emit.down(1).text(`value: ${JSON.stringify(expr.value)},`);
-            emit.dedent().down(1).text('})');
+            emitStringLiteralExpression(emit, expr);
             return;
         }
 
@@ -361,6 +357,30 @@ function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolT
     }
     emit.down(1).text('OUT = out;');
     emit.down(1).text('return true;');
+    emit.dedent().down(1).text('}');
+    emit.dedent().down(1).text('})()');
+}
+
+
+function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpression) {
+
+    let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
+    const length = expr.value.length;
+    emit.text('(() => {').indent();
+    emit.down(1).text(`const inFormHere = ${m.replace(/_/g, 'inForm')}`);
+    emit.down(1).text(`const outFormHere = ${m.replace(/_/g, 'outForm')}`);
+    emit.down(1).text(`const checkInType = inFormHere !== 'txt';`);
+    emit.down(1).text(`const out = outFormHere === 'nil' ? undefined : ${JSON.stringify(expr.value)};`);
+    emit.down(1).text(`if (inFormHere === 'nil') return function STR() { OUT = out; return true; }`);
+    emit.down(1).text('return function STR() {').indent();
+    emit.down(1).text(`if (checkInType && typeof IN !== 'string') return false;`);
+    emit.down(1).text(`if (IP + ${length} > IN.length) return false;`);
+    for (let i = 0; i < length; ++i) {
+        emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+    }
+    emit.down(1).text(`IP += ${length};`);
+    emit.down(1).text(`OUT = out;`);
+    emit.down(1).text(`return true;`);
     emit.dedent().down(1).text('}');
     emit.dedent().down(1).text('})()');
 }

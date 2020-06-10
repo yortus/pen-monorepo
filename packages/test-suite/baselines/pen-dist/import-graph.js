@@ -227,28 +227,6 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function stringLiteral(options) {
-    const { value } = options;
-    const length = value.length;
-    const out = options.outForm === 'nil' ? undefined : value;
-    const checkInType = options.inForm !== 'txt';
-    if (options.inForm === 'nil') {
-        return function STR() { return OUT = out, true; };
-    }
-    return function STR() {
-        if (checkInType && typeof IN !== 'string')
-            return false;
-        if (IP + length > IN.length)
-            return false;
-        for (let i = 0; i < length; ++i) {
-            if (IN.charAt(IP + i) !== value.charAt(i))
-                return false;
-        }
-        IP += length;
-        OUT = out;
-        return true;
-    };
-}
 let IN;
 let IP;
 let OUT;
@@ -862,81 +840,173 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_r2d_memo;
 
     function 𝕊1_min() {
-        if (!𝕊1_min_memo) 𝕊1_min_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "0",
-        });
+        if (!𝕊1_min_memo) 𝕊1_min_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "0";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 48) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊1_min_memo();
     }
     let 𝕊1_min_memo;
 
     function 𝕊1_max() {
-        if (!𝕊1_max_memo) 𝕊1_max_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "9",
-        });
+        if (!𝕊1_max_memo) 𝕊1_max_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "9";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 57) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊1_max_memo();
     }
     let 𝕊1_max_memo;
 
     function 𝕊2_min() {
-        if (!𝕊2_min_memo) 𝕊2_min_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "a",
-        });
+        if (!𝕊2_min_memo) 𝕊2_min_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "a";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 97) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊2_min_memo();
     }
     let 𝕊2_min_memo;
 
     function 𝕊2_max() {
-        if (!𝕊2_max_memo) 𝕊2_max_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "z",
-        });
+        if (!𝕊2_max_memo) 𝕊2_max_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "z";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 122) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊2_max_memo();
     }
     let 𝕊2_max_memo;
 
     function 𝕊3_min() {
-        if (!𝕊3_min_memo) 𝕊3_min_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "A",
-        });
+        if (!𝕊3_min_memo) 𝕊3_min_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "A";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 65) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊3_min_memo();
     }
     let 𝕊3_min_memo;
 
     function 𝕊3_max() {
-        if (!𝕊3_max_memo) 𝕊3_max_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "Z",
-        });
+        if (!𝕊3_max_memo) 𝕊3_max_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "Z";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 90) return false;
+                IP += 1;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊3_max_memo();
     }
     let 𝕊3_max_memo;
 
     function 𝕊4_b() {
-        if (!𝕊4_b_memo) 𝕊4_b_memo = stringLiteral({
-            inForm: inForm !== "ast" ? "nil" : inForm,
-            outForm: outForm !== "ast" ? "nil" : outForm,
-            value: "b thing",
-        });
+        if (!𝕊4_b_memo) 𝕊4_b_memo = (() => {
+            const inFormHere = inForm !== "ast" ? "nil" : inForm
+            const outFormHere = outForm !== "ast" ? "nil" : outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "b thing";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 7 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 32) return false;
+                if (IN.charCodeAt(IP + 2) !== 116) return false;
+                if (IN.charCodeAt(IP + 3) !== 104) return false;
+                if (IN.charCodeAt(IP + 4) !== 105) return false;
+                if (IN.charCodeAt(IP + 5) !== 110) return false;
+                if (IN.charCodeAt(IP + 6) !== 103) return false;
+                IP += 7;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊4_b_memo();
     }
     let 𝕊4_b_memo;
 
     function 𝕊4_d() {
-        if (!𝕊4_d_memo) 𝕊4_d_memo = stringLiteral({
-            inForm: inForm !== "ast" ? "nil" : inForm,
-            outForm: outForm !== "ast" ? "nil" : outForm,
-            value: "d thing",
-        });
+        if (!𝕊4_d_memo) 𝕊4_d_memo = (() => {
+            const inFormHere = inForm !== "ast" ? "nil" : inForm
+            const outFormHere = outForm !== "ast" ? "nil" : outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "d thing";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 7 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 100) return false;
+                if (IN.charCodeAt(IP + 1) !== 32) return false;
+                if (IN.charCodeAt(IP + 2) !== 116) return false;
+                if (IN.charCodeAt(IP + 3) !== 104) return false;
+                if (IN.charCodeAt(IP + 4) !== 105) return false;
+                if (IN.charCodeAt(IP + 5) !== 110) return false;
+                if (IN.charCodeAt(IP + 6) !== 103) return false;
+                IP += 7;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊4_d_memo();
     }
     let 𝕊4_d_memo;
@@ -944,31 +1014,67 @@ function createProgram({inForm, outForm}) {
     // -------------------- a.pen --------------------
 
     function 𝕊5_f() {
-        if (!𝕊5_f_memo) 𝕊5_f_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "foo",
-        });
+        if (!𝕊5_f_memo) 𝕊5_f_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "foo";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 102) return false;
+                if (IN.charCodeAt(IP + 1) !== 111) return false;
+                if (IN.charCodeAt(IP + 2) !== 111) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊5_f_memo();
     }
     let 𝕊5_f_memo;
 
     function 𝕊5_b() {
-        if (!𝕊5_b_memo) 𝕊5_b_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "bar",
-        });
+        if (!𝕊5_b_memo) 𝕊5_b_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "bar";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 114) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊5_b_memo();
     }
     let 𝕊5_b_memo;
 
     function 𝕊5_baz() {
-        if (!𝕊5_baz_memo) 𝕊5_baz_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "baz",
-        });
+        if (!𝕊5_baz_memo) 𝕊5_baz_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "baz";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 122) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊5_baz_memo();
     }
     let 𝕊5_baz_memo;
@@ -984,11 +1090,25 @@ function createProgram({inForm, outForm}) {
     // -------------------- util1.pen --------------------
 
     function 𝕊12_util1() {
-        if (!𝕊12_util1_memo) 𝕊12_util1_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "util1",
-        });
+        if (!𝕊12_util1_memo) 𝕊12_util1_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "util1";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 5 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 117) return false;
+                if (IN.charCodeAt(IP + 1) !== 116) return false;
+                if (IN.charCodeAt(IP + 2) !== 105) return false;
+                if (IN.charCodeAt(IP + 3) !== 108) return false;
+                if (IN.charCodeAt(IP + 4) !== 49) return false;
+                IP += 5;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊12_util1_memo();
     }
     let 𝕊12_util1_memo;
@@ -996,11 +1116,25 @@ function createProgram({inForm, outForm}) {
     // -------------------- util2 --------------------
 
     function 𝕊13_util2() {
-        if (!𝕊13_util2_memo) 𝕊13_util2_memo = stringLiteral({
-            inForm: inForm,
-            outForm: outForm,
-            value: "util2",
-        });
+        if (!𝕊13_util2_memo) 𝕊13_util2_memo = (() => {
+            const inFormHere = inForm
+            const outFormHere = outForm
+            const checkInType = inFormHere !== 'txt';
+            const out = outFormHere === 'nil' ? undefined : "util2";
+            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (checkInType && typeof IN !== 'string') return false;
+                if (IP + 5 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 117) return false;
+                if (IN.charCodeAt(IP + 1) !== 116) return false;
+                if (IN.charCodeAt(IP + 2) !== 105) return false;
+                if (IN.charCodeAt(IP + 3) !== 108) return false;
+                if (IN.charCodeAt(IP + 4) !== 50) return false;
+                IP += 5;
+                OUT = out;
+                return true;
+            }
+        })();
         return 𝕊13_util2_memo();
     }
     let 𝕊13_util2_memo;
