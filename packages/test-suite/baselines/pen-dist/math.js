@@ -798,9 +798,9 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- math.pen --------------------
 
-    Object.assign(
-        𝕊0.bindings.expr,
-        (𝕊0.bindings.memoise).lambda(selection({
+    function 𝕊0_expr() {
+        if (𝕊0_expr.memo) return 𝕊0_expr.memo;
+        return 𝕊0_expr.memo = (𝕊0.bindings.memoise).lambda(selection({
             inForm,
             outForm,
             expressions: [
@@ -808,12 +808,13 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.sub,
                 𝕊0.bindings.term,
             ],
-        }))
-    );
+        }));
+    }
+    Object.assign(𝕊0.bindings.expr, 𝕊0_expr());
 
-    Object.assign(
-        𝕊0.bindings.add,
-        record({
+    function 𝕊0_add() {
+        if (𝕊0_add.memo) return 𝕊0_add.memo;
+        return 𝕊0_add.memo = record({
             inForm,
             outForm,
             fields: [
@@ -845,12 +846,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 },
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.add, 𝕊0_add());
 
-    Object.assign(
-        𝕊0.bindings.sub,
-        record({
+    function 𝕊0_sub() {
+        if (𝕊0_sub.memo) return 𝕊0_sub.memo;
+        return 𝕊0_sub.memo = record({
             inForm,
             outForm,
             fields: [
@@ -882,12 +884,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 },
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.sub, 𝕊0_sub());
 
-    Object.assign(
-        𝕊0.bindings.term,
-        (𝕊0.bindings.memoise).lambda(selection({
+    function 𝕊0_term() {
+        if (𝕊0_term.memo) return 𝕊0_term.memo;
+        return 𝕊0_term.memo = (𝕊0.bindings.memoise).lambda(selection({
             inForm,
             outForm,
             expressions: [
@@ -895,12 +898,13 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.div,
                 𝕊0.bindings.factor,
             ],
-        }))
-    );
+        }));
+    }
+    Object.assign(𝕊0.bindings.term, 𝕊0_term());
 
-    Object.assign(
-        𝕊0.bindings.mul,
-        sequence({
+    function 𝕊0_mul() {
+        if (𝕊0_mul.memo) return 𝕊0_mul.memo;
+        return 𝕊0_mul.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -950,12 +954,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.mul, 𝕊0_mul());
 
-    Object.assign(
-        𝕊0.bindings.div,
-        record({
+    function 𝕊0_div() {
+        if (𝕊0_div.memo) return 𝕊0_div.memo;
+        return 𝕊0_div.memo = record({
             inForm,
             outForm,
             fields: [
@@ -987,12 +992,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 },
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.div, 𝕊0_div());
 
-    Object.assign(
-        𝕊0.bindings.factor,
-        selection({
+    function 𝕊0_factor() {
+        if (𝕊0_factor.memo) return 𝕊0_factor.memo;
+        return 𝕊0_factor.memo = selection({
             inForm,
             outForm,
             expressions: [
@@ -1075,33 +1081,39 @@ function createProgram({inForm, outForm}) {
                     ],
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.factor, 𝕊0_factor());
 
-    Object.assign(
-        𝕊1.bindings.base,
-        numericLiteral({inForm, outForm, value: 16})
-    );
+    function 𝕊1_base() {
+        if (𝕊1_base.memo) return 𝕊1_base.memo;
+        return 𝕊1_base.memo = numericLiteral({inForm, outForm, value: 16});
+    }
+    Object.assign(𝕊1.bindings.base, 𝕊1_base());
 
-    Object.assign(
-        𝕊1.bindings.signed,
-        booleanLiteral({inForm, outForm, value: false})
-    );
+    function 𝕊1_signed() {
+        if (𝕊1_signed.memo) return 𝕊1_signed.memo;
+        return 𝕊1_signed.memo = booleanLiteral({inForm, outForm, value: false});
+    }
+    Object.assign(𝕊1.bindings.signed, 𝕊1_signed());
 
-    Object.assign(
-        𝕊2.bindings.base,
-        numericLiteral({inForm, outForm, value: 2})
-    );
+    function 𝕊2_base() {
+        if (𝕊2_base.memo) return 𝕊2_base.memo;
+        return 𝕊2_base.memo = numericLiteral({inForm, outForm, value: 2});
+    }
+    Object.assign(𝕊2.bindings.base, 𝕊2_base());
 
-    Object.assign(
-        𝕊2.bindings.signed,
-        booleanLiteral({inForm, outForm, value: false})
-    );
+    function 𝕊2_signed() {
+        if (𝕊2_signed.memo) return 𝕊2_signed.memo;
+        return 𝕊2_signed.memo = booleanLiteral({inForm, outForm, value: false});
+    }
+    Object.assign(𝕊2.bindings.signed, 𝕊2_signed());
 
-    Object.assign(
-        𝕊3.bindings.signed,
-        booleanLiteral({inForm, outForm, value: false})
-    );
+    function 𝕊3_signed() {
+        if (𝕊3_signed.memo) return 𝕊3_signed.memo;
+        return 𝕊3_signed.memo = booleanLiteral({inForm, outForm, value: false});
+    }
+    Object.assign(𝕊3.bindings.signed, 𝕊3_signed());
 
     return 𝕊0.bindings.start;
 }

@@ -869,38 +869,41 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- index.pen --------------------
 
-    Object.assign(
-        𝕊0.bindings.digit,
-        (𝕊0.bindings.char).lambda(𝕊1)
-    );
+    function 𝕊0_digit() {
+        if (𝕊0_digit.memo) return 𝕊0_digit.memo;
+        return 𝕊0_digit.memo = (𝕊0.bindings.char).lambda(𝕊1);
+    }
+    Object.assign(𝕊0.bindings.digit, 𝕊0_digit());
 
-    Object.assign(
-        𝕊0.bindings.alpha,
-        selection({
+    function 𝕊0_alpha() {
+        if (𝕊0_alpha.memo) return 𝕊0_alpha.memo;
+        return 𝕊0_alpha.memo = selection({
             inForm,
             outForm,
             expressions: [
                 (𝕊0.bindings.char).lambda(𝕊2),
                 (𝕊0.bindings.char).lambda(𝕊3),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.alpha, 𝕊0_alpha());
 
-    Object.assign(
-        𝕊0.bindings.result,
-        (𝕊0.bindings.foo).lambda(sequence({
+    function 𝕊0_result() {
+        if (𝕊0_result.memo) return 𝕊0_result.memo;
+        return 𝕊0_result.memo = (𝕊0.bindings.foo).lambda(sequence({
             inForm,
             outForm,
             expressions: [
                 𝕊0.bindings.bar,
                 𝕊0.bindings.baz,
             ],
-        }))
-    );
+        }));
+    }
+    Object.assign(𝕊0.bindings.result, 𝕊0_result());
 
-    Object.assign(
-        𝕊0.bindings.myList,
-        list({
+    function 𝕊0_myList() {
+        if (𝕊0_myList.memo) return 𝕊0_myList.memo;
+        return 𝕊0_myList.memo = list({
             inForm,
             outForm,
             elements: [
@@ -923,114 +926,127 @@ function createProgram({inForm, outForm}) {
                     ],
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.myList, 𝕊0_myList());
 
-    Object.assign(
-        𝕊0.bindings.r2d,
-        𝕊0.bindings.rec.bindings.d
-    );
+    function 𝕊0_r2d() {
+        if (𝕊0_r2d.memo) return 𝕊0_r2d.memo;
+        return 𝕊0_r2d.memo = 𝕊0.bindings.rec.bindings.d;
+    }
+    Object.assign(𝕊0.bindings.r2d, 𝕊0_r2d());
 
-    Object.assign(
-        𝕊1.bindings.min,
-        stringLiteral({
+    function 𝕊1_min() {
+        if (𝕊1_min.memo) return 𝕊1_min.memo;
+        return 𝕊1_min.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "0",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.min, 𝕊1_min());
 
-    Object.assign(
-        𝕊1.bindings.max,
-        stringLiteral({
+    function 𝕊1_max() {
+        if (𝕊1_max.memo) return 𝕊1_max.memo;
+        return 𝕊1_max.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "9",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.max, 𝕊1_max());
 
-    Object.assign(
-        𝕊2.bindings.min,
-        stringLiteral({
+    function 𝕊2_min() {
+        if (𝕊2_min.memo) return 𝕊2_min.memo;
+        return 𝕊2_min.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "a",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊2.bindings.min, 𝕊2_min());
 
-    Object.assign(
-        𝕊2.bindings.max,
-        stringLiteral({
+    function 𝕊2_max() {
+        if (𝕊2_max.memo) return 𝕊2_max.memo;
+        return 𝕊2_max.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "z",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊2.bindings.max, 𝕊2_max());
 
-    Object.assign(
-        𝕊3.bindings.min,
-        stringLiteral({
+    function 𝕊3_min() {
+        if (𝕊3_min.memo) return 𝕊3_min.memo;
+        return 𝕊3_min.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "A",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊3.bindings.min, 𝕊3_min());
 
-    Object.assign(
-        𝕊3.bindings.max,
-        stringLiteral({
+    function 𝕊3_max() {
+        if (𝕊3_max.memo) return 𝕊3_max.memo;
+        return 𝕊3_max.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "Z",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊3.bindings.max, 𝕊3_max());
 
-    Object.assign(
-        𝕊4.bindings.b,
-        stringLiteral({
+    function 𝕊4_b() {
+        if (𝕊4_b.memo) return 𝕊4_b.memo;
+        return 𝕊4_b.memo = stringLiteral({
             inForm: inForm !== "ast" ? "nil" : inForm,
             outForm: outForm !== "ast" ? "nil" : outForm,
             value: "b thing",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊4.bindings.b, 𝕊4_b());
 
-    Object.assign(
-        𝕊4.bindings.d,
-        stringLiteral({
+    function 𝕊4_d() {
+        if (𝕊4_d.memo) return 𝕊4_d.memo;
+        return 𝕊4_d.memo = stringLiteral({
             inForm: inForm !== "ast" ? "nil" : inForm,
             outForm: outForm !== "ast" ? "nil" : outForm,
             value: "d thing",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊4.bindings.d, 𝕊4_d());
 
     // -------------------- a.pen --------------------
 
-    Object.assign(
-        𝕊5.bindings.f,
-        stringLiteral({
+    function 𝕊5_f() {
+        if (𝕊5_f.memo) return 𝕊5_f.memo;
+        return 𝕊5_f.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "foo",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊5.bindings.f, 𝕊5_f());
 
-    Object.assign(
-        𝕊5.bindings.b,
-        stringLiteral({
+    function 𝕊5_b() {
+        if (𝕊5_b.memo) return 𝕊5_b.memo;
+        return 𝕊5_b.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "bar",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊5.bindings.b, 𝕊5_b());
 
-    Object.assign(
-        𝕊5.bindings.baz,
-        stringLiteral({
+    function 𝕊5_baz() {
+        if (𝕊5_baz.memo) return 𝕊5_baz.memo;
+        return 𝕊5_baz.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "baz",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊5.bindings.baz, 𝕊5_baz());
 
     // -------------------- b.pen --------------------
 
@@ -1042,25 +1058,27 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- util1.pen --------------------
 
-    Object.assign(
-        𝕊12.bindings.util1,
-        stringLiteral({
+    function 𝕊12_util1() {
+        if (𝕊12_util1.memo) return 𝕊12_util1.memo;
+        return 𝕊12_util1.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "util1",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊12.bindings.util1, 𝕊12_util1());
 
     // -------------------- util2 --------------------
 
-    Object.assign(
-        𝕊13.bindings.util2,
-        stringLiteral({
+    function 𝕊13_util2() {
+        if (𝕊13_util2.memo) return 𝕊13_util2.memo;
+        return 𝕊13_util2.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "util2",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊13.bindings.util2, 𝕊13_util2());
 
     return 𝕊0.bindings.start;
 }

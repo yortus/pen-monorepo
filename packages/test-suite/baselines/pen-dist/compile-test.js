@@ -456,32 +456,35 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- compile-test.pen --------------------
 
-    Object.assign(
-        𝕊0.bindings.start,
-        𝕊0.bindings.expr.bindings.foo
-    );
+    function 𝕊0_start() {
+        if (𝕊0_start.memo) return 𝕊0_start.memo;
+        return 𝕊0_start.memo = 𝕊0.bindings.expr.bindings.foo;
+    }
+    Object.assign(𝕊0.bindings.start, 𝕊0_start());
 
-    Object.assign(
-        𝕊0.bindings.b,
-        stringLiteral({
+    function 𝕊0_b() {
+        if (𝕊0_b.memo) return 𝕊0_b.memo;
+        return 𝕊0_b.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "b2",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.b, 𝕊0_b());
 
-    Object.assign(
-        𝕊0.bindings.baz,
-        stringLiteral({
+    function 𝕊0_baz() {
+        if (𝕊0_baz.memo) return 𝕊0_baz.memo;
+        return 𝕊0_baz.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "baz",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.baz, 𝕊0_baz());
 
-    Object.assign(
-        𝕊0.bindings.modExprMem,
-        selection({
+    function 𝕊0_modExprMem() {
+        if (𝕊0_modExprMem.memo) return 𝕊0_modExprMem.memo;
+        return 𝕊0_modExprMem.memo = selection({
             inForm,
             outForm,
             expressions: [
@@ -489,88 +492,101 @@ function createProgram({inForm, outForm}) {
                 𝕊2.bindings.mem,
                 𝕊0.bindings.baz,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.modExprMem, 𝕊0_modExprMem());
 
-    Object.assign(
-        𝕊0.bindings.refC,
-        𝕊0.bindings.defC.bindings.c.bindings.c1
-    );
+    function 𝕊0_refC() {
+        if (𝕊0_refC.memo) return 𝕊0_refC.memo;
+        return 𝕊0_refC.memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+    }
+    Object.assign(𝕊0.bindings.refC, 𝕊0_refC());
 
-    Object.assign(
-        𝕊1.bindings.foo,
-        stringLiteral({
+    function 𝕊1_foo() {
+        if (𝕊1_foo.memo) return 𝕊1_foo.memo;
+        return 𝕊1_foo.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "foo",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.foo, 𝕊1_foo());
 
-    Object.assign(
-        𝕊1.bindings.bar,
-        stringLiteral({
+    function 𝕊1_bar() {
+        if (𝕊1_bar.memo) return 𝕊1_bar.memo;
+        return 𝕊1_bar.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "bar",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.bar, 𝕊1_bar());
 
-    Object.assign(
-        𝕊2.bindings.mem,
-        stringLiteral({
+    function 𝕊2_mem() {
+        if (𝕊2_mem.memo) return 𝕊2_mem.memo;
+        return 𝕊2_mem.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "member",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊2.bindings.mem, 𝕊2_mem());
 
-    Object.assign(
-        𝕊3.bindings.a,
-        𝕊0.bindings.recB.bindings.b
-    );
+    function 𝕊3_a() {
+        if (𝕊3_a.memo) return 𝕊3_a.memo;
+        return 𝕊3_a.memo = 𝕊0.bindings.recB.bindings.b;
+    }
+    Object.assign(𝕊3.bindings.a, 𝕊3_a());
 
-    Object.assign(
-        𝕊4.bindings.b,
-        𝕊0.bindings.recA.bindings.a
-    );
+    function 𝕊4_b() {
+        if (𝕊4_b.memo) return 𝕊4_b.memo;
+        return 𝕊4_b.memo = 𝕊0.bindings.recA.bindings.a;
+    }
+    Object.assign(𝕊4.bindings.b, 𝕊4_b());
 
-    Object.assign(
-        𝕊5.bindings.ref5,
-        𝕊5.bindings.c.bindings.c1
-    );
+    function 𝕊5_ref5() {
+        if (𝕊5_ref5.memo) return 𝕊5_ref5.memo;
+        return 𝕊5_ref5.memo = 𝕊5.bindings.c.bindings.c1;
+    }
+    Object.assign(𝕊5.bindings.ref5, 𝕊5_ref5());
 
-    Object.assign(
-        𝕊5.bindings.ref6,
-        𝕊0.bindings.defC.bindings.c.bindings.c1
-    );
+    function 𝕊5_ref6() {
+        if (𝕊5_ref6.memo) return 𝕊5_ref6.memo;
+        return 𝕊5_ref6.memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+    }
+    Object.assign(𝕊5.bindings.ref6, 𝕊5_ref6());
 
-    Object.assign(
-        𝕊6.bindings.c1,
-        stringLiteral({
+    function 𝕊6_c1() {
+        if (𝕊6_c1.memo) return 𝕊6_c1.memo;
+        return 𝕊6_c1.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "c1",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊6.bindings.c1, 𝕊6_c1());
 
-    Object.assign(
-        𝕊6.bindings.c2,
-        stringLiteral({
+    function 𝕊6_c2() {
+        if (𝕊6_c2.memo) return 𝕊6_c2.memo;
+        return 𝕊6_c2.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "c2",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊6.bindings.c2, 𝕊6_c2());
 
-    Object.assign(
-        𝕊6.bindings.ref2,
-        𝕊5.bindings.c.bindings.c1
-    );
+    function 𝕊6_ref2() {
+        if (𝕊6_ref2.memo) return 𝕊6_ref2.memo;
+        return 𝕊6_ref2.memo = 𝕊5.bindings.c.bindings.c1;
+    }
+    Object.assign(𝕊6.bindings.ref2, 𝕊6_ref2());
 
-    Object.assign(
-        𝕊6.bindings.ref3,
-        𝕊0.bindings.defC.bindings.c.bindings.c1
-    );
+    function 𝕊6_ref3() {
+        if (𝕊6_ref3.memo) return 𝕊6_ref3.memo;
+        return 𝕊6_ref3.memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+    }
+    Object.assign(𝕊6.bindings.ref3, 𝕊6_ref3());
 
     return 𝕊0.bindings.start;
 }

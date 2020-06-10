@@ -874,9 +874,9 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- json-recursive.pen --------------------
 
-    Object.assign(
-        𝕊0.bindings.start,
-        sequence({
+    function 𝕊0_start() {
+        if (𝕊0_start.memo) return 𝕊0_start.memo;
+        return 𝕊0_start.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -884,12 +884,13 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.Value,
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.start, 𝕊0_start());
 
-    Object.assign(
-        𝕊0.bindings.Value,
-        selection({
+    function 𝕊0_Value() {
+        if (𝕊0_Value.memo) return 𝕊0_Value.memo;
+        return 𝕊0_Value.memo = selection({
             inForm,
             outForm,
             expressions: [
@@ -901,12 +902,13 @@ function createProgram({inForm, outForm}) {
                 𝕊0.bindings.Number,
                 𝕊0.bindings.String,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Value, 𝕊0_Value());
 
-    Object.assign(
-        𝕊0.bindings.False,
-        sequence({
+    function 𝕊0_False() {
+        if (𝕊0_False.memo) return 𝕊0_False.memo;
+        return 𝕊0_False.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -917,12 +919,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 booleanLiteral({inForm, outForm, value: false}),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.False, 𝕊0_False());
 
-    Object.assign(
-        𝕊0.bindings.Null,
-        sequence({
+    function 𝕊0_Null() {
+        if (𝕊0_Null.memo) return 𝕊0_Null.memo;
+        return 𝕊0_Null.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -933,12 +936,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 nullLiteral({inForm, outForm}),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Null, 𝕊0_Null());
 
-    Object.assign(
-        𝕊0.bindings.True,
-        sequence({
+    function 𝕊0_True() {
+        if (𝕊0_True.memo) return 𝕊0_True.memo;
+        return 𝕊0_True.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -949,12 +953,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 booleanLiteral({inForm, outForm, value: true}),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.True, 𝕊0_True());
 
-    Object.assign(
-        𝕊0.bindings.Object,
-        sequence({
+    function 𝕊0_Object() {
+        if (𝕊0_Object.memo) return 𝕊0_Object.memo;
+        return 𝕊0_Object.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -973,12 +978,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.RBRACE,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Object, 𝕊0_Object());
 
-    Object.assign(
-        𝕊0.bindings.Properties,
-        sequence({
+    function 𝕊0_Properties() {
+        if (𝕊0_Properties.memo) return 𝕊0_Properties.memo;
+        return 𝕊0_Properties.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1008,12 +1014,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Properties, 𝕊0_Properties());
 
-    Object.assign(
-        𝕊0.bindings.Array,
-        sequence({
+    function 𝕊0_Array() {
+        if (𝕊0_Array.memo) return 𝕊0_Array.memo;
+        return 𝕊0_Array.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1032,12 +1039,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.RBRACKET,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Array, 𝕊0_Array());
 
-    Object.assign(
-        𝕊0.bindings.Elements,
-        sequence({
+    function 𝕊0_Elements() {
+        if (𝕊0_Elements.memo) return 𝕊0_Elements.memo;
+        return 𝕊0_Elements.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1061,12 +1069,13 @@ function createProgram({inForm, outForm}) {
                     }),
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.Elements, 𝕊0_Elements());
 
-    Object.assign(
-        𝕊0.bindings.String,
-        sequence({
+    function 𝕊0_String() {
+        if (𝕊0_String.memo) return 𝕊0_String.memo;
+        return 𝕊0_String.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1078,12 +1087,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.DOUBLE_QUOTE,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.String, 𝕊0_String());
 
-    Object.assign(
-        𝕊0.bindings.CHAR,
-        selection({
+    function 𝕊0_CHAR() {
+        if (𝕊0_CHAR.memo) return 𝕊0_CHAR.memo;
+        return 𝕊0_CHAR.memo = selection({
             inForm,
             outForm,
             expressions: [
@@ -1253,12 +1263,13 @@ function createProgram({inForm, outForm}) {
                     ],
                 }),
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.CHAR, 𝕊0_CHAR());
 
-    Object.assign(
-        𝕊0.bindings.LBRACE,
-        sequence({
+    function 𝕊0_LBRACE() {
+        if (𝕊0_LBRACE.memo) return 𝕊0_LBRACE.memo;
+        return 𝕊0_LBRACE.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1270,12 +1281,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.LBRACE, 𝕊0_LBRACE());
 
-    Object.assign(
-        𝕊0.bindings.RBRACE,
-        sequence({
+    function 𝕊0_RBRACE() {
+        if (𝕊0_RBRACE.memo) return 𝕊0_RBRACE.memo;
+        return 𝕊0_RBRACE.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1287,12 +1299,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.RBRACE, 𝕊0_RBRACE());
 
-    Object.assign(
-        𝕊0.bindings.LBRACKET,
-        sequence({
+    function 𝕊0_LBRACKET() {
+        if (𝕊0_LBRACKET.memo) return 𝕊0_LBRACKET.memo;
+        return 𝕊0_LBRACKET.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1304,12 +1317,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.LBRACKET, 𝕊0_LBRACKET());
 
-    Object.assign(
-        𝕊0.bindings.RBRACKET,
-        sequence({
+    function 𝕊0_RBRACKET() {
+        if (𝕊0_RBRACKET.memo) return 𝕊0_RBRACKET.memo;
+        return 𝕊0_RBRACKET.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1321,12 +1335,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.RBRACKET, 𝕊0_RBRACKET());
 
-    Object.assign(
-        𝕊0.bindings.COLON,
-        sequence({
+    function 𝕊0_COLON() {
+        if (𝕊0_COLON.memo) return 𝕊0_COLON.memo;
+        return 𝕊0_COLON.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1338,12 +1353,13 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.COLON, 𝕊0_COLON());
 
-    Object.assign(
-        𝕊0.bindings.COMMA,
-        sequence({
+    function 𝕊0_COMMA() {
+        if (𝕊0_COMMA.memo) return 𝕊0_COMMA.memo;
+        return 𝕊0_COMMA.memo = sequence({
             inForm,
             outForm,
             expressions: [
@@ -1355,21 +1371,23 @@ function createProgram({inForm, outForm}) {
                 }),
                 𝕊0.bindings.WS,
             ],
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.COMMA, 𝕊0_COMMA());
 
-    Object.assign(
-        𝕊0.bindings.DOUBLE_QUOTE,
-        stringLiteral({
+    function 𝕊0_DOUBLE_QUOTE() {
+        if (𝕊0_DOUBLE_QUOTE.memo) return 𝕊0_DOUBLE_QUOTE.memo;
+        return 𝕊0_DOUBLE_QUOTE.memo = stringLiteral({
             inForm: inForm !== "txt" ? "nil" : inForm,
             outForm: outForm !== "txt" ? "nil" : outForm,
             value: "\"",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.DOUBLE_QUOTE, 𝕊0_DOUBLE_QUOTE());
 
-    Object.assign(
-        𝕊0.bindings.WS,
-        zeroOrMore({
+    function 𝕊0_WS() {
+        if (𝕊0_WS.memo) return 𝕊0_WS.memo;
+        return 𝕊0_WS.memo = zeroOrMore({
             inForm,
             outForm,
             expression: selection({
@@ -1398,41 +1416,47 @@ function createProgram({inForm, outForm}) {
                     }),
                 ],
             }),
-        })
-    );
+        });
+    }
+    Object.assign(𝕊0.bindings.WS, 𝕊0_WS());
 
-    Object.assign(
-        𝕊1.bindings.min,
-        stringLiteral({
+    function 𝕊1_min() {
+        if (𝕊1_min.memo) return 𝕊1_min.memo;
+        return 𝕊1_min.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: " ",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.min, 𝕊1_min());
 
-    Object.assign(
-        𝕊1.bindings.max,
-        stringLiteral({
+    function 𝕊1_max() {
+        if (𝕊1_max.memo) return 𝕊1_max.memo;
+        return 𝕊1_max.memo = stringLiteral({
             inForm: inForm,
             outForm: outForm,
             value: "￿",
-        })
-    );
+        });
+    }
+    Object.assign(𝕊1.bindings.max, 𝕊1_max());
 
-    Object.assign(
-        𝕊2.bindings.base,
-        numericLiteral({inForm, outForm, value: 16})
-    );
+    function 𝕊2_base() {
+        if (𝕊2_base.memo) return 𝕊2_base.memo;
+        return 𝕊2_base.memo = numericLiteral({inForm, outForm, value: 16});
+    }
+    Object.assign(𝕊2.bindings.base, 𝕊2_base());
 
-    Object.assign(
-        𝕊2.bindings.minDigits,
-        numericLiteral({inForm, outForm, value: 4})
-    );
+    function 𝕊2_minDigits() {
+        if (𝕊2_minDigits.memo) return 𝕊2_minDigits.memo;
+        return 𝕊2_minDigits.memo = numericLiteral({inForm, outForm, value: 4});
+    }
+    Object.assign(𝕊2.bindings.minDigits, 𝕊2_minDigits());
 
-    Object.assign(
-        𝕊2.bindings.maxDigits,
-        numericLiteral({inForm, outForm, value: 4})
-    );
+    function 𝕊2_maxDigits() {
+        if (𝕊2_maxDigits.memo) return 𝕊2_maxDigits.memo;
+        return 𝕊2_maxDigits.memo = numericLiteral({inForm, outForm, value: 4});
+    }
+    Object.assign(𝕊2.bindings.maxDigits, 𝕊2_maxDigits());
 
     return 𝕊0.bindings.start;
 }

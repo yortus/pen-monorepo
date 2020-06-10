@@ -166,10 +166,16 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                 if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
                     let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
                     assert(symbol.kind === 'NameSymbol');
-                    emit.down(2).text(`Object.assign(`).indent();
-                    emit.down(1).text(`${symbol.scope.id}.bindings.${symbol.sourceName},`).down(1);
+                    let {scope, sourceName} = symbol;
+
+                    // TODO: temp testing...
+                    let qualName = `${scope.id}_${sourceName}`;
+                    emit.down(2).text(`function ${qualName}() {`).indent();
+                    emit.down(1).text(`if (${qualName}.memo) return ${qualName}.memo;`);
+                    emit.down(1).text(`return ${qualName}.memo = `);
                     emitExpression(emit, value, symbolTable);
-                    emit.dedent().down(1).text(`);`);
+                    emit.text(';').dedent().down(1).text('}');
+                    emit.down(1).text(`Object.assign(${scope.id}.bindings.${sourceName}, ${qualName}());`);
                 }
             }
             mod.bindings.forEach(rec);
