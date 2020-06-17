@@ -732,6 +732,8 @@ const createExtension𝕊4 = (() => {
 
 function createProgram({inForm, outForm}) {
 
+    // -------------------- json.pen --------------------
+
     function 𝕊0(name) {
         switch (name) {
             case 'char': return 𝕊0_char;
@@ -760,37 +762,11 @@ function createProgram({inForm, outForm}) {
             default: return undefined;
         }
     }
-
-    function 𝕊1(name) {
-        switch (name) {
-            case 'min': return 𝕊1_min;
-            case 'max': return 𝕊1_max;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊2(name) {
-        switch (name) {
-            case 'base': return 𝕊2_base;
-            case 'minDigits': return 𝕊2_minDigits;
-            case 'maxDigits': return 𝕊2_maxDigits;
-            default: return undefined;
-        }
-    }
-
-    const 𝕊3 = createExtension𝕊3({inForm, outForm});
-
-    const 𝕊4 = createExtension𝕊4({inForm, outForm});
-
-    // -------------------- Aliases --------------------
     function 𝕊0_char(arg) { return 𝕊3('char')(arg); }
     function 𝕊0_f64(arg) { return 𝕊3('f64')(arg); }
     function 𝕊0_unicode(arg) { return 𝕊4('unicode')(arg); }
-    function 𝕊0_Number(arg) { return 𝕊0('f64')(arg); }
 
-    // -------------------- json.pen --------------------
-
-    function 𝕊0_start() {
+    function 𝕊0_start(arg) {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = 𝕊0('Value');
@@ -805,11 +781,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_start_memo();
+        return 𝕊0_start_memo(arg);
     }
     let 𝕊0_start_memo;
 
-    function 𝕊0_Value() {
+    function 𝕊0_Value(arg) {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
             let expr0 = 𝕊0('False');
             let expr1 = 𝕊0('Null');
@@ -829,11 +805,11 @@ function createProgram({inForm, outForm}) {
                 return false;
             }
         })();
-        return 𝕊0_Value_memo();
+        return 𝕊0_Value_memo(arg);
     }
     let 𝕊0_Value_memo;
 
-    function 𝕊0_False() {
+    function 𝕊0_False(arg) {
         if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
             let expr0 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
@@ -864,11 +840,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_False_memo();
+        return 𝕊0_False_memo(arg);
     }
     let 𝕊0_False_memo;
 
-    function 𝕊0_Null() {
+    function 𝕊0_Null(arg) {
         if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
             let expr0 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
@@ -898,11 +874,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_Null_memo();
+        return 𝕊0_Null_memo(arg);
     }
     let 𝕊0_Null_memo;
 
-    function 𝕊0_True() {
+    function 𝕊0_True(arg) {
         if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
             let expr0 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
@@ -932,11 +908,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_True_memo();
+        return 𝕊0_True_memo(arg);
     }
     let 𝕊0_True_memo;
 
-    function 𝕊0_Object() {
+    function 𝕊0_Object(arg) {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
             let expr0 = 𝕊0('LBRACE');
             let expr1 = (() => {
@@ -989,11 +965,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_Object_memo();
+        return 𝕊0_Object_memo(arg);
     }
     let 𝕊0_Object_memo;
 
-    function 𝕊0_Property() {
+    function 𝕊0_Property(arg) {
         if (!𝕊0_Property_memo) 𝕊0_Property_memo = field({
             inForm,
             outForm,
@@ -1011,11 +987,11 @@ function createProgram({inForm, outForm}) {
                 }
             })(),
         });
-        return 𝕊0_Property_memo();
+        return 𝕊0_Property_memo(arg);
     }
     let 𝕊0_Property_memo;
 
-    function 𝕊0_Array() {
+    function 𝕊0_Array(arg) {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
             let expr0 = 𝕊0('LBRACKET');
             let expr1 = (() => {
@@ -1068,11 +1044,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_Array_memo();
+        return 𝕊0_Array_memo(arg);
     }
     let 𝕊0_Array_memo;
 
-    function 𝕊0_Element() {
+    function 𝕊0_Element(arg) {
         if (!𝕊0_Element_memo) 𝕊0_Element_memo = list({
             inForm,
             outForm,
@@ -1080,11 +1056,17 @@ function createProgram({inForm, outForm}) {
                 𝕊0('Value'),
             ],
         });
-        return 𝕊0_Element_memo();
+        return 𝕊0_Element_memo(arg);
     }
     let 𝕊0_Element_memo;
 
-    function 𝕊0_String() {
+    function 𝕊0_Number(arg) {
+        if (!𝕊0_Number_memo) 𝕊0_Number_memo = 𝕊0('f64');
+        return 𝕊0_Number_memo(arg);
+    }
+    let 𝕊0_Number_memo;
+
+    function 𝕊0_String(arg) {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
             let expr0 = 𝕊0('DOUBLE_QUOTE');
             let expr1 = zeroOrMore({
@@ -1103,11 +1085,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_String_memo();
+        return 𝕊0_String_memo(arg);
     }
     let 𝕊0_String_memo;
 
-    function 𝕊0_CHAR() {
+    function 𝕊0_CHAR(arg) {
         if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
             let expr0 = (() => {
                 let expr0 = not({
@@ -1528,11 +1510,11 @@ function createProgram({inForm, outForm}) {
                 return false;
             }
         })();
-        return 𝕊0_CHAR_memo();
+        return 𝕊0_CHAR_memo(arg);
     }
     let 𝕊0_CHAR_memo;
 
-    function 𝕊0_LBRACE() {
+    function 𝕊0_LBRACE(arg) {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1561,11 +1543,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_LBRACE_memo();
+        return 𝕊0_LBRACE_memo(arg);
     }
     let 𝕊0_LBRACE_memo;
 
-    function 𝕊0_RBRACE() {
+    function 𝕊0_RBRACE(arg) {
         if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1594,11 +1576,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_RBRACE_memo();
+        return 𝕊0_RBRACE_memo(arg);
     }
     let 𝕊0_RBRACE_memo;
 
-    function 𝕊0_LBRACKET() {
+    function 𝕊0_LBRACKET(arg) {
         if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1627,11 +1609,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_LBRACKET_memo();
+        return 𝕊0_LBRACKET_memo(arg);
     }
     let 𝕊0_LBRACKET_memo;
 
-    function 𝕊0_RBRACKET() {
+    function 𝕊0_RBRACKET(arg) {
         if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1660,11 +1642,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_RBRACKET_memo();
+        return 𝕊0_RBRACKET_memo(arg);
     }
     let 𝕊0_RBRACKET_memo;
 
-    function 𝕊0_COLON() {
+    function 𝕊0_COLON(arg) {
         if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1693,11 +1675,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_COLON_memo();
+        return 𝕊0_COLON_memo(arg);
     }
     let 𝕊0_COLON_memo;
 
-    function 𝕊0_COMMA() {
+    function 𝕊0_COMMA(arg) {
         if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
             let expr0 = 𝕊0('WS');
             let expr1 = (() => {
@@ -1726,11 +1708,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_COMMA_memo();
+        return 𝕊0_COMMA_memo(arg);
     }
     let 𝕊0_COMMA_memo;
 
-    function 𝕊0_DOUBLE_QUOTE() {
+    function 𝕊0_DOUBLE_QUOTE(arg) {
         if (!𝕊0_DOUBLE_QUOTE_memo) 𝕊0_DOUBLE_QUOTE_memo = (() => {
             const inFormHere = inForm !== "txt" ? "nil" : inForm
             const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1746,11 +1728,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_DOUBLE_QUOTE_memo();
+        return 𝕊0_DOUBLE_QUOTE_memo(arg);
     }
     let 𝕊0_DOUBLE_QUOTE_memo;
 
-    function 𝕊0_WS() {
+    function 𝕊0_WS(arg) {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
             inForm,
             outForm,
@@ -1824,11 +1806,19 @@ function createProgram({inForm, outForm}) {
                 }
             })(),
         });
-        return 𝕊0_WS_memo();
+        return 𝕊0_WS_memo(arg);
     }
     let 𝕊0_WS_memo;
 
-    function 𝕊1_min() {
+    function 𝕊1(name) {
+        switch (name) {
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊1_min(arg) {
         if (!𝕊1_min_memo) 𝕊1_min_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1844,11 +1834,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊1_min_memo();
+        return 𝕊1_min_memo(arg);
     }
     let 𝕊1_min_memo;
 
-    function 𝕊1_max() {
+    function 𝕊1_max(arg) {
         if (!𝕊1_max_memo) 𝕊1_max_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1864,27 +1854,40 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊1_max_memo();
+        return 𝕊1_max_memo(arg);
     }
     let 𝕊1_max_memo;
 
-    function 𝕊2_base() {
+    function 𝕊2(name) {
+        switch (name) {
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_minDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊2_base(arg) {
         if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({inForm, outForm, value: 16});
-        return 𝕊2_base_memo();
+        return 𝕊2_base_memo(arg);
     }
     let 𝕊2_base_memo;
 
-    function 𝕊2_minDigits() {
+    function 𝕊2_minDigits(arg) {
         if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = numericLiteral({inForm, outForm, value: 4});
-        return 𝕊2_minDigits_memo();
+        return 𝕊2_minDigits_memo(arg);
     }
     let 𝕊2_minDigits_memo;
 
-    function 𝕊2_maxDigits() {
+    function 𝕊2_maxDigits(arg) {
         if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = numericLiteral({inForm, outForm, value: 4});
-        return 𝕊2_maxDigits_memo();
+        return 𝕊2_maxDigits_memo(arg);
     }
     let 𝕊2_maxDigits_memo;
+
+    const 𝕊3 = createExtension𝕊3({inForm, outForm});
+
+    const 𝕊4 = createExtension𝕊4({inForm, outForm});
 
     // -------------------- Compile-time constants --------------------
     𝕊0('DOUBLE_QUOTE').constant = {value: "\""};

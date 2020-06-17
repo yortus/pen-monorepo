@@ -307,6 +307,8 @@ function zeroOrOne(options) {
 
 function createProgram({inForm, outForm}) {
 
+    // -------------------- compile-test.pen --------------------
+
     function 𝕊0(name) {
         switch (name) {
             case 'start': return 𝕊0_start;
@@ -323,75 +325,25 @@ function createProgram({inForm, outForm}) {
         }
     }
 
-    function 𝕊1(name) {
-        switch (name) {
-            case 'foo': return 𝕊1_foo;
-            case 'bar': return 𝕊1_bar;
-            case 'a': return 𝕊1_a;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊2(name) {
-        switch (name) {
-            case 'mem': return 𝕊2_mem;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊3(name) {
-        switch (name) {
-            case 'a': return 𝕊3_a;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊4(name) {
-        switch (name) {
-            case 'b': return 𝕊4_b;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊5(name) {
-        switch (name) {
-            case 'c': return 𝕊5_c;
-            case 'ref5': return 𝕊5_ref5;
-            case 'ref6': return 𝕊5_ref6;
-            default: return undefined;
-        }
-    }
-
-    function 𝕊6(name) {
-        switch (name) {
-            case 'c1': return 𝕊6_c1;
-            case 'c2': return 𝕊6_c2;
-            case 'ref1': return 𝕊6_ref1;
-            case 'ref2': return 𝕊6_ref2;
-            case 'ref3': return 𝕊6_ref3;
-            default: return undefined;
-        }
-    }
-
-    // -------------------- Aliases --------------------
-    function 𝕊0_expr(arg) { return 𝕊1(arg); }
-    function 𝕊0_a(arg) { return 𝕊0('b')(arg); }
-    function 𝕊0_recA(arg) { return 𝕊3(arg); }
-    function 𝕊0_recB(arg) { return 𝕊4(arg); }
-    function 𝕊0_defC(arg) { return 𝕊5(arg); }
-    function 𝕊1_a(arg) { return 𝕊0('b')(arg); }
-    function 𝕊5_c(arg) { return 𝕊6(arg); }
-    function 𝕊6_ref1(arg) { return 𝕊6('c1')(arg); }
-
-    // -------------------- compile-test.pen --------------------
-
-    function 𝕊0_start() {
+    function 𝕊0_start(arg) {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr')('foo');
-        return 𝕊0_start_memo();
+        return 𝕊0_start_memo(arg);
     }
     let 𝕊0_start_memo;
 
-    function 𝕊0_b() {
+    function 𝕊0_expr(arg) {
+        if (!𝕊0_expr_memo) 𝕊0_expr_memo = 𝕊1;
+        return 𝕊0_expr_memo(arg);
+    }
+    let 𝕊0_expr_memo;
+
+    function 𝕊0_a(arg) {
+        if (!𝕊0_a_memo) 𝕊0_a_memo = 𝕊0('b');
+        return 𝕊0_a_memo(arg);
+    }
+    let 𝕊0_a_memo;
+
+    function 𝕊0_b(arg) {
         if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -408,11 +360,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_b_memo();
+        return 𝕊0_b_memo(arg);
     }
     let 𝕊0_b_memo;
 
-    function 𝕊0_baz() {
+    function 𝕊0_baz(arg) {
         if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -430,11 +382,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊0_baz_memo();
+        return 𝕊0_baz_memo(arg);
     }
     let 𝕊0_baz_memo;
 
-    function 𝕊0_modExprMem() {
+    function 𝕊0_modExprMem(arg) {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
             let expr0 = 𝕊0('expr')('foo');
             let expr1 = 𝕊2('mem');
@@ -446,17 +398,44 @@ function createProgram({inForm, outForm}) {
                 return false;
             }
         })();
-        return 𝕊0_modExprMem_memo();
+        return 𝕊0_modExprMem_memo(arg);
     }
     let 𝕊0_modExprMem_memo;
 
-    function 𝕊0_refC() {
+    function 𝕊0_recA(arg) {
+        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
+        return 𝕊0_recA_memo(arg);
+    }
+    let 𝕊0_recA_memo;
+
+    function 𝕊0_recB(arg) {
+        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
+        return 𝕊0_recB_memo(arg);
+    }
+    let 𝕊0_recB_memo;
+
+    function 𝕊0_refC(arg) {
         if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊0_refC_memo();
+        return 𝕊0_refC_memo(arg);
     }
     let 𝕊0_refC_memo;
 
-    function 𝕊1_foo() {
+    function 𝕊0_defC(arg) {
+        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
+        return 𝕊0_defC_memo(arg);
+    }
+    let 𝕊0_defC_memo;
+
+    function 𝕊1(name) {
+        switch (name) {
+            case 'foo': return 𝕊1_foo;
+            case 'bar': return 𝕊1_bar;
+            case 'a': return 𝕊1_a;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊1_foo(arg) {
         if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -474,11 +453,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊1_foo_memo();
+        return 𝕊1_foo_memo(arg);
     }
     let 𝕊1_foo_memo;
 
-    function 𝕊1_bar() {
+    function 𝕊1_bar(arg) {
         if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -496,11 +475,24 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊1_bar_memo();
+        return 𝕊1_bar_memo(arg);
     }
     let 𝕊1_bar_memo;
 
-    function 𝕊2_mem() {
+    function 𝕊1_a(arg) {
+        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
+        return 𝕊1_a_memo(arg);
+    }
+    let 𝕊1_a_memo;
+
+    function 𝕊2(name) {
+        switch (name) {
+            case 'mem': return 𝕊2_mem;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊2_mem(arg) {
         if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -521,35 +513,75 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊2_mem_memo();
+        return 𝕊2_mem_memo(arg);
     }
     let 𝕊2_mem_memo;
 
-    function 𝕊3_a() {
+    function 𝕊3(name) {
+        switch (name) {
+            case 'a': return 𝕊3_a;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊3_a(arg) {
         if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
-        return 𝕊3_a_memo();
+        return 𝕊3_a_memo(arg);
     }
     let 𝕊3_a_memo;
 
-    function 𝕊4_b() {
+    function 𝕊4(name) {
+        switch (name) {
+            case 'b': return 𝕊4_b;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊4_b(arg) {
         if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
-        return 𝕊4_b_memo();
+        return 𝕊4_b_memo(arg);
     }
     let 𝕊4_b_memo;
 
-    function 𝕊5_ref5() {
+    function 𝕊5(name) {
+        switch (name) {
+            case 'c': return 𝕊5_c;
+            case 'ref5': return 𝕊5_ref5;
+            case 'ref6': return 𝕊5_ref6;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊5_c(arg) {
+        if (!𝕊5_c_memo) 𝕊5_c_memo = 𝕊6;
+        return 𝕊5_c_memo(arg);
+    }
+    let 𝕊5_c_memo;
+
+    function 𝕊5_ref5(arg) {
         if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
-        return 𝕊5_ref5_memo();
+        return 𝕊5_ref5_memo(arg);
     }
     let 𝕊5_ref5_memo;
 
-    function 𝕊5_ref6() {
+    function 𝕊5_ref6(arg) {
         if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊5_ref6_memo();
+        return 𝕊5_ref6_memo(arg);
     }
     let 𝕊5_ref6_memo;
 
-    function 𝕊6_c1() {
+    function 𝕊6(name) {
+        switch (name) {
+            case 'c1': return 𝕊6_c1;
+            case 'c2': return 𝕊6_c2;
+            case 'ref1': return 𝕊6_ref1;
+            case 'ref2': return 𝕊6_ref2;
+            case 'ref3': return 𝕊6_ref3;
+            default: return undefined;
+        }
+    }
+
+    function 𝕊6_c1(arg) {
         if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -566,11 +598,11 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊6_c1_memo();
+        return 𝕊6_c1_memo(arg);
     }
     let 𝕊6_c1_memo;
 
-    function 𝕊6_c2() {
+    function 𝕊6_c2(arg) {
         if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -587,19 +619,25 @@ function createProgram({inForm, outForm}) {
                 return true;
             }
         })();
-        return 𝕊6_c2_memo();
+        return 𝕊6_c2_memo(arg);
     }
     let 𝕊6_c2_memo;
 
-    function 𝕊6_ref2() {
+    function 𝕊6_ref1(arg) {
+        if (!𝕊6_ref1_memo) 𝕊6_ref1_memo = 𝕊6('c1');
+        return 𝕊6_ref1_memo(arg);
+    }
+    let 𝕊6_ref1_memo;
+
+    function 𝕊6_ref2(arg) {
         if (!𝕊6_ref2_memo) 𝕊6_ref2_memo = 𝕊5('c')('c1');
-        return 𝕊6_ref2_memo();
+        return 𝕊6_ref2_memo(arg);
     }
     let 𝕊6_ref2_memo;
 
-    function 𝕊6_ref3() {
+    function 𝕊6_ref3(arg) {
         if (!𝕊6_ref3_memo) 𝕊6_ref3_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊6_ref3_memo();
+        return 𝕊6_ref3_memo(arg);
     }
     let 𝕊6_ref3_memo;
 

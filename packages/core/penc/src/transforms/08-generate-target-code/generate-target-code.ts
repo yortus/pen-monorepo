@@ -34,19 +34,13 @@ function emitProgram(program: Program) {
     // TODO: emit prolog for `createProgram` function
     emit.down(2).text('function createProgram({inForm, outForm}) {').indent();
 
-    // Emit declarations for all symbols before any are defined.
-    emitSymbolDeclarations(emit, program);
-
-    // TODO: Emit aliases...
-    emitSymbolAliases(emit, program);
-
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
 
     // TODO: Emit compile-time constants...
     emitConstants(emit, program);
 
-    // TODO: emit epilog for `create` function
+    // TODO: emit epilog for `createProgram` function
     let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
     assert(start.kind === 'NameSymbol');
     emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
@@ -84,36 +78,32 @@ function emitExtensions(emit: Emitter, program: Program) {
 }
 
 
-function emitSymbolDeclarations(emit: Emitter, program: Program) {
+function emitSymbolDefinitions(emit: Emitter, program: Program) {
+    const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     visitNode(program, rec => ({
         ExtensionFile: ext => {
             let scope = ext.meta.scope;
             emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({inForm, outForm});`);
         },
+        PenSourceFile: sf => {
+            emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
+            rec(sf.module);
+        },
         Module: mod => {
-            let scope = mod.meta.scope;
-            emit.down(2).text(`function ${scope.id}(name) {`).indent();
+            // Emit module definition
+            let moduleScope = mod.meta.scope;
+            emit.down(2).text(`function ${moduleScope.id}(name) {`).indent();
             emit.down(1).text(`switch (name) {`).indent();
-            for (let sourceName of scope.sourceNames.keys()) {
-                emit.down(1).text(`case '${sourceName}': return ${scope.id}_${sourceName};`);
+            for (let sourceName of moduleScope.sourceNames.keys()) {
+                emit.down(1).text(`case '${sourceName}': return ${moduleScope.id}_${sourceName};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
-            mod.bindings.forEach(rec);
-        },
-    }));
-}
 
-
-function emitSymbolAliases(emit: Emitter, program: Program) {
-    const {symbolTable} = program.meta;
-    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    emit.down(2).text(`// -------------------- Aliases --------------------`);
-    visitNode(program, rec => ({
-        Module: module => {
-            for (let {pattern, value} of module.bindings) {
+            // Emit definitions for each module binding
+            for (let {pattern, value} of mod.bindings) {
                 if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
                     // Each ModulePatternName *must* be an alias to a name in the rhs module
                     for (let {name, meta: {symbolId}} of pattern.names) {
@@ -126,17 +116,22 @@ function emitSymbolAliases(emit: Emitter, program: Program) {
                         emit.text(`('${name}')(arg); }`); // TODO: still needs fixing...
                     }
                 }
-                else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
+                else if (pattern.kind === 'VariablePattern') {
                     let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
                     assert(symbol.kind === 'NameSymbol');
                     let {scope, sourceName} = symbol;
                     let qualName = `${scope.id}_${sourceName}`;
-                    emit.down(1).text(`function ${qualName}(arg) { return `); // TODO: probably wrong. Modules aren't functions (yet)
-                    emitExpression(emit, value, symbolTable); // rhs *must* be a module
-                    emit.text(`(arg); }`);
+                    emit.down(2).text(`function ${qualName}(arg) {`).indent();
+                    emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
+                    emitExpression(emit, value, symbolTable);
+                    emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
+                    emit.dedent().down(1).text('}');
+                    emit.down(1).text(`let ${qualName}_memo;`);
                 }
             }
-            module.bindings.forEach(rec);
+
+            // Visit all child nodes recursively
+            mod.bindings.forEach(rec);
         },
     }));
 }
@@ -156,38 +151,6 @@ function emitConstants(emit: Emitter, program: Program) {
                     emit.down(1).text(`${symbol.scope.id}('${symbol.sourceName}').constant = {value: `);
                     emitConstant(emit, symbol.constant.value);
                     emit.text('};');
-                }
-            }
-            mod.bindings.forEach(rec);
-        },
-    }));
-}
-
-
-function emitSymbolDefinitions(emit: Emitter, program: Program) {
-    const {symbolTable} = program.meta;
-    let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    visitNode(program, rec => ({
-        PenSourceFile: sf => {
-            emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
-            rec(sf.module);
-        },
-        Module: mod => {
-            // Emit non-alias definitions - i.e. things not already emitted by emitSymbolAliases()
-            for (let {pattern, value} of mod.bindings) {
-                if (pattern.kind === 'VariablePattern' && !isLValue(value)) {
-                    let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
-                    assert(symbol.kind === 'NameSymbol');
-                    let {scope, sourceName} = symbol;
-
-                    // TODO: temp testing...
-                    let qualName = `${scope.id}_${sourceName}`;
-                    emit.down(2).text(`function ${qualName}() {`).indent();
-                    emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
-                    emitExpression(emit, value, symbolTable);
-                    emit.text(`;`).down(1).text(`return ${qualName}_memo();`);
-                    emit.dedent().down(1).text('}');
-                    emit.down(1).text(`let ${qualName}_memo;`);
                 }
             }
             mod.bindings.forEach(rec);
@@ -388,14 +351,6 @@ function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpressio
     emit.down(1).text(`return true;`);
     emit.dedent().down(1).text('}');
     emit.dedent().down(1).text('})()');
-}
-
-
-// TODO: helper function
-function isLValue(e: Expression) {
-    // BUG: BindingLookupExpression belongs here too...
-    // TODO: ^^^
-    return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 }
 
 
