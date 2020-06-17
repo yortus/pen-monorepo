@@ -227,6 +227,15 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
+function isRule(_x) {
+    return true;
+}
+function isLambda(_x) {
+    return true;
+}
+function isModule(_x) {
+    return true;
+}
 let IN;
 let IP;
 let OUT;
@@ -310,9 +319,10 @@ const createExtension𝕊3 = (() => {
     function char(options) {
         const checkInType = options.inForm !== 'txt';
         return function CHA_lambda(expr) {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
-            let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
+            let max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
             assert(typeof min === 'string' && min.length === 1);
             assert(typeof max === 'string' && max.length === 1);
             let checkRange = min !== '\u0000' || max !== '\uFFFF';
@@ -436,9 +446,10 @@ const createExtension𝕊3 = (() => {
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32(options) {
         return function I32_lambda(expr) {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
-            let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+            let signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
             if (options.inForm === 'nil') {
@@ -637,14 +648,21 @@ const createExtension𝕊3 = (() => {
         };
     }
 
-    return (staticOptions) => ({
-        bindings: {
-            char: char(staticOptions),
-            f64: f64(staticOptions),
-            i32: i32(staticOptions),
-            memoise: memoise(staticOptions),
-        }
-    });
+    return (staticOptions) => {
+        let _char = char(staticOptions);
+        let _f64 = f64(staticOptions);
+        let _i32 = i32(staticOptions);
+        let _memoise = memoise(staticOptions);
+        return (name) => {
+            switch(name) {
+                case 'char': return _char;
+                case 'f64': return _f64;
+                case 'i32': return _i32;
+                case 'memoise': return _memoise;
+                default: return undefined;
+            }
+        };
+    };
 })();
 const createExtension𝕊4 = (() => {
     "use strict";
@@ -653,10 +671,11 @@ const createExtension𝕊4 = (() => {
     } */
     function unicode(options) {
         return function UNI_lambda(expr) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-            let base = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value;
-            let minDigits = (_f = (_e = (_d = expr.bindings) === null || _d === void 0 ? void 0 : _d.minDigits) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
-            let maxDigits = (_j = (_h = (_g = expr.bindings) === null || _g === void 0 ? void 0 : _g.maxDigits) === null || _h === void 0 ? void 0 : _h.constant) === null || _j === void 0 ? void 0 : _j.value;
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
+            let minDigits = (_d = (_c = expr('minDigits')) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
+            let maxDigits = (_f = (_e = expr('maxDigits')) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
             assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
@@ -700,75 +719,82 @@ const createExtension𝕊4 = (() => {
         };
     }
 
-    return (staticOptions) => ({
-        bindings: {
-            unicode: unicode(staticOptions),
-        }
-    });
+    return (staticOptions) => {
+        let _unicode = unicode(staticOptions);
+        return (name) => {
+            switch(name) {
+                case 'unicode': return _unicode;
+                default: return undefined;
+            }
+        };
+    };
 })();
 
 function createProgram({inForm, outForm}) {
 
-    const 𝕊0 = {
-        bindings: {
-            char: 𝕊0_char,
-            f64: 𝕊0_f64,
-            unicode: 𝕊0_unicode,
-            start: 𝕊0_start,
-            Value: 𝕊0_Value,
-            False: 𝕊0_False,
-            Null: 𝕊0_Null,
-            True: 𝕊0_True,
-            Object: 𝕊0_Object,
-            Property: 𝕊0_Property,
-            Array: 𝕊0_Array,
-            Element: 𝕊0_Element,
-            Number: 𝕊0_Number,
-            String: 𝕊0_String,
-            CHAR: 𝕊0_CHAR,
-            LBRACE: 𝕊0_LBRACE,
-            RBRACE: 𝕊0_RBRACE,
-            LBRACKET: 𝕊0_LBRACKET,
-            RBRACKET: 𝕊0_RBRACKET,
-            COLON: 𝕊0_COLON,
-            COMMA: 𝕊0_COMMA,
-            DOUBLE_QUOTE: 𝕊0_DOUBLE_QUOTE,
-            WS: 𝕊0_WS,
-        },
-    };
+    function 𝕊0(name) {
+        switch (name) {
+            case 'char': return 𝕊0_char;
+            case 'f64': return 𝕊0_f64;
+            case 'unicode': return 𝕊0_unicode;
+            case 'start': return 𝕊0_start;
+            case 'Value': return 𝕊0_Value;
+            case 'False': return 𝕊0_False;
+            case 'Null': return 𝕊0_Null;
+            case 'True': return 𝕊0_True;
+            case 'Object': return 𝕊0_Object;
+            case 'Property': return 𝕊0_Property;
+            case 'Array': return 𝕊0_Array;
+            case 'Element': return 𝕊0_Element;
+            case 'Number': return 𝕊0_Number;
+            case 'String': return 𝕊0_String;
+            case 'CHAR': return 𝕊0_CHAR;
+            case 'LBRACE': return 𝕊0_LBRACE;
+            case 'RBRACE': return 𝕊0_RBRACE;
+            case 'LBRACKET': return 𝕊0_LBRACKET;
+            case 'RBRACKET': return 𝕊0_RBRACKET;
+            case 'COLON': return 𝕊0_COLON;
+            case 'COMMA': return 𝕊0_COMMA;
+            case 'DOUBLE_QUOTE': return 𝕊0_DOUBLE_QUOTE;
+            case 'WS': return 𝕊0_WS;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊1 = {
-        bindings: {
-            min: 𝕊1_min,
-            max: 𝕊1_max,
-        },
-    };
+    function 𝕊1(name) {
+        switch (name) {
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊2 = {
-        bindings: {
-            base: 𝕊2_base,
-            minDigits: 𝕊2_minDigits,
-            maxDigits: 𝕊2_maxDigits,
-        },
-    };
+    function 𝕊2(name) {
+        switch (name) {
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_minDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
+            default: return undefined;
+        }
+    }
 
     const 𝕊3 = createExtension𝕊3({inForm, outForm});
 
     const 𝕊4 = createExtension𝕊4({inForm, outForm});
 
     // -------------------- Aliases --------------------
-    function 𝕊0_char(arg) { return 𝕊3.bindings.char(arg); }
-    function 𝕊0_f64(arg) { return 𝕊3.bindings.f64(arg); }
-    function 𝕊0_unicode(arg) { return 𝕊4.bindings.unicode(arg); }
-    function 𝕊0_Number(arg) { return 𝕊0.bindings.f64(arg); }
+    function 𝕊0_char(arg) { return 𝕊3('char')(arg); }
+    function 𝕊0_f64(arg) { return 𝕊3('f64')(arg); }
+    function 𝕊0_unicode(arg) { return 𝕊4('unicode')(arg); }
+    function 𝕊0_Number(arg) { return 𝕊0('f64')(arg); }
 
     // -------------------- json.pen --------------------
 
     function 𝕊0_start() {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
-            let expr1 = 𝕊0.bindings.Value;
-            let expr2 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
+            let expr1 = 𝕊0('Value');
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -785,13 +811,13 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_Value() {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
-            let expr0 = 𝕊0.bindings.False;
-            let expr1 = 𝕊0.bindings.Null;
-            let expr2 = 𝕊0.bindings.True;
-            let expr3 = 𝕊0.bindings.Object;
-            let expr4 = 𝕊0.bindings.Array;
-            let expr5 = 𝕊0.bindings.Number;
-            let expr6 = 𝕊0.bindings.String;
+            let expr0 = 𝕊0('False');
+            let expr1 = 𝕊0('Null');
+            let expr2 = 𝕊0('True');
+            let expr3 = 𝕊0('Object');
+            let expr4 = 𝕊0('Array');
+            let expr5 = 𝕊0('Number');
+            let expr6 = 𝕊0('String');
             return function SEL() {
                 if (expr0()) return true;
                 if (expr1()) return true;
@@ -912,16 +938,16 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_Object() {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
-            let expr0 = 𝕊0.bindings.LBRACE;
+            let expr0 = 𝕊0('LBRACE');
             let expr1 = (() => {
                 let expr0 = (() => {
-                    let expr0 = 𝕊0.bindings.Property;
+                    let expr0 = 𝕊0('Property');
                     let expr1 = zeroOrMore({
                         inForm,
                         outForm,
                         expression: (() => {
-                            let expr0 = 𝕊0.bindings.COMMA;
-                            let expr1 = 𝕊0.bindings.Property;
+                            let expr0 = 𝕊0('COMMA');
+                            let expr1 = 𝕊0('Property');
                             return function SEQ() {
                                 let stateₒ = getState();
                                 let out;
@@ -952,7 +978,7 @@ function createProgram({inForm, outForm}) {
                     return false;
                 }
             })();
-            let expr2 = 𝕊0.bindings.RBRACE;
+            let expr2 = 𝕊0('RBRACE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -971,10 +997,10 @@ function createProgram({inForm, outForm}) {
         if (!𝕊0_Property_memo) 𝕊0_Property_memo = field({
             inForm,
             outForm,
-            name: 𝕊0.bindings.String,
+            name: 𝕊0('String'),
             value: (() => {
-                let expr0 = 𝕊0.bindings.COLON;
-                let expr1 = 𝕊0.bindings.Value;
+                let expr0 = 𝕊0('COLON');
+                let expr1 = 𝕊0('Value');
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
@@ -991,16 +1017,16 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_Array() {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
-            let expr0 = 𝕊0.bindings.LBRACKET;
+            let expr0 = 𝕊0('LBRACKET');
             let expr1 = (() => {
                 let expr0 = (() => {
-                    let expr0 = 𝕊0.bindings.Element;
+                    let expr0 = 𝕊0('Element');
                     let expr1 = zeroOrMore({
                         inForm,
                         outForm,
                         expression: (() => {
-                            let expr0 = 𝕊0.bindings.COMMA;
-                            let expr1 = 𝕊0.bindings.Element;
+                            let expr0 = 𝕊0('COMMA');
+                            let expr1 = 𝕊0('Element');
                             return function SEQ() {
                                 let stateₒ = getState();
                                 let out;
@@ -1031,7 +1057,7 @@ function createProgram({inForm, outForm}) {
                     return false;
                 }
             })();
-            let expr2 = 𝕊0.bindings.RBRACKET;
+            let expr2 = 𝕊0('RBRACKET');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1051,7 +1077,7 @@ function createProgram({inForm, outForm}) {
             inForm,
             outForm,
             elements: [
-                𝕊0.bindings.Value,
+                𝕊0('Value'),
             ],
         });
         return 𝕊0_Element_memo();
@@ -1060,13 +1086,13 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_String() {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
-            let expr0 = 𝕊0.bindings.DOUBLE_QUOTE;
+            let expr0 = 𝕊0('DOUBLE_QUOTE');
             let expr1 = zeroOrMore({
                 inForm,
                 outForm,
-                expression: 𝕊0.bindings.CHAR,
+                expression: 𝕊0('CHAR'),
             });
-            let expr2 = 𝕊0.bindings.DOUBLE_QUOTE;
+            let expr2 = 𝕊0('DOUBLE_QUOTE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1122,7 +1148,7 @@ function createProgram({inForm, outForm}) {
                         }
                     })(),
                 });
-                let expr2 = (𝕊0.bindings.char)(𝕊1);
+                let expr2 = (𝕊0('char'))(𝕊1);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
@@ -1478,7 +1504,7 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (𝕊0.bindings.unicode)(𝕊2);
+                let expr1 = (𝕊0('unicode'))(𝕊2);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
@@ -1508,7 +1534,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_LBRACE() {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1524,7 +1550,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1541,7 +1567,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_RBRACE() {
         if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1557,7 +1583,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1574,7 +1600,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_LBRACKET() {
         if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1590,7 +1616,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1607,7 +1633,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_RBRACKET() {
         if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1623,7 +1649,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1640,7 +1666,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_COLON() {
         if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1656,7 +1682,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1673,7 +1699,7 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_COMMA() {
         if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
-            let expr0 = 𝕊0.bindings.WS;
+            let expr0 = 𝕊0('WS');
             let expr1 = (() => {
                 const inFormHere = inForm !== "txt" ? "nil" : inForm
                 const outFormHere = outForm !== "txt" ? "nil" : outForm
@@ -1689,7 +1715,7 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0.bindings.WS;
+            let expr2 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -1861,14 +1887,14 @@ function createProgram({inForm, outForm}) {
     let 𝕊2_maxDigits_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊0.bindings.DOUBLE_QUOTE.constant = {value: "\""};
-    𝕊1.bindings.min.constant = {value: " "};
-    𝕊1.bindings.max.constant = {value: "￿"};
-    𝕊2.bindings.base.constant = {value: 16};
-    𝕊2.bindings.minDigits.constant = {value: 4};
-    𝕊2.bindings.maxDigits.constant = {value: 4};
+    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
+    𝕊1('min').constant = {value: " "};
+    𝕊1('max').constant = {value: "￿"};
+    𝕊2('base').constant = {value: 16};
+    𝕊2('minDigits').constant = {value: 4};
+    𝕊2('maxDigits').constant = {value: 4};
 
-    return 𝕊0.bindings.start;
+    return 𝕊0('start');
 }
 
 // -------------------- Main exports --------------------

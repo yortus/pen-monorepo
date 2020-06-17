@@ -2,11 +2,12 @@
 // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
 // TODO: optimise 'any char' case better
 // TODO: optimise all cases better
-function char(options: StaticOptions): PenVal {
+function char(options: StaticOptions): Lambda {
     const checkInType = options.inForm !== 'txt';
     return function CHA_lambda(expr) {
-        let min = expr.bindings?.min?.constant?.value as string | undefined ?? '\u0000';
-        let max = expr.bindings?.max?.constant?.value as string | undefined ?? '\uFFFF';
+        assert(isModule(expr));
+        let min = expr('min')?.constant?.value as string | undefined ?? '\u0000';
+        let max = expr('max')?.constant?.value as string | undefined ?? '\uFFFF';
         assert(typeof min === 'string' && min.length === 1);
         assert(typeof max === 'string' && max.length === 1);
         let checkRange = min !== '\u0000' || max !== '\uFFFF';

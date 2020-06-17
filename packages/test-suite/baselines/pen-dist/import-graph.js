@@ -227,6 +227,15 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
+function isRule(_x) {
+    return true;
+}
+function isLambda(_x) {
+    return true;
+}
+function isModule(_x) {
+    return true;
+}
 let IN;
 let IP;
 let OUT;
@@ -310,9 +319,10 @@ const createExtension𝕊7 = (() => {
     function char(options) {
         const checkInType = options.inForm !== 'txt';
         return function CHA_lambda(expr) {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            let min = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.min) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : '\u0000';
-            let max = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.max) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : '\uFFFF';
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
+            let max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
             assert(typeof min === 'string' && min.length === 1);
             assert(typeof max === 'string' && max.length === 1);
             let checkRange = min !== '\u0000' || max !== '\uFFFF';
@@ -436,9 +446,10 @@ const createExtension𝕊7 = (() => {
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32(options) {
         return function I32_lambda(expr) {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
-            let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
-            let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+            let signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
             if (options.inForm === 'nil') {
@@ -637,121 +648,141 @@ const createExtension𝕊7 = (() => {
         };
     }
 
-    return (staticOptions) => ({
-        bindings: {
-            char: char(staticOptions),
-            f64: f64(staticOptions),
-            i32: i32(staticOptions),
-            memoise: memoise(staticOptions),
-        }
-    });
+    return (staticOptions) => {
+        let _char = char(staticOptions);
+        let _f64 = f64(staticOptions);
+        let _i32 = i32(staticOptions);
+        let _memoise = memoise(staticOptions);
+        return (name) => {
+            switch(name) {
+                case 'char': return _char;
+                case 'f64': return _f64;
+                case 'i32': return _i32;
+                case 'memoise': return _memoise;
+                default: return undefined;
+            }
+        };
+    };
 })();
 
 function createProgram({inForm, outForm}) {
 
-    const 𝕊0 = {
-        bindings: {
-            foo: 𝕊0_foo,
-            bar: 𝕊0_bar,
-            baz: 𝕊0_baz,
-            char: 𝕊0_char,
-            start: 𝕊0_start,
-            digit: 𝕊0_digit,
-            alpha: 𝕊0_alpha,
-            result: 𝕊0_result,
-            myList: 𝕊0_myList,
-            rec: 𝕊0_rec,
-            r2: 𝕊0_r2,
-            r2d: 𝕊0_r2d,
-        },
-    };
+    function 𝕊0(name) {
+        switch (name) {
+            case 'foo': return 𝕊0_foo;
+            case 'bar': return 𝕊0_bar;
+            case 'baz': return 𝕊0_baz;
+            case 'char': return 𝕊0_char;
+            case 'start': return 𝕊0_start;
+            case 'digit': return 𝕊0_digit;
+            case 'alpha': return 𝕊0_alpha;
+            case 'result': return 𝕊0_result;
+            case 'myList': return 𝕊0_myList;
+            case 'rec': return 𝕊0_rec;
+            case 'r2': return 𝕊0_r2;
+            case 'r2d': return 𝕊0_r2d;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊1 = {
-        bindings: {
-            min: 𝕊1_min,
-            max: 𝕊1_max,
-        },
-    };
+    function 𝕊1(name) {
+        switch (name) {
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊2 = {
-        bindings: {
-            min: 𝕊2_min,
-            max: 𝕊2_max,
-        },
-    };
+    function 𝕊2(name) {
+        switch (name) {
+            case 'min': return 𝕊2_min;
+            case 'max': return 𝕊2_max;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊3 = {
-        bindings: {
-            min: 𝕊3_min,
-            max: 𝕊3_max,
-        },
-    };
+    function 𝕊3(name) {
+        switch (name) {
+            case 'min': return 𝕊3_min;
+            case 'max': return 𝕊3_max;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊4 = {
-        bindings: {
-            b: 𝕊4_b,
-            d: 𝕊4_d,
-        },
-    };
+    function 𝕊4(name) {
+        switch (name) {
+            case 'b': return 𝕊4_b;
+            case 'd': return 𝕊4_d;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊5 = {
-        bindings: {
-            f: 𝕊5_f,
-            b: 𝕊5_b,
-            baz: 𝕊5_baz,
-        },
-    };
+    function 𝕊5(name) {
+        switch (name) {
+            case 'f': return 𝕊5_f;
+            case 'b': return 𝕊5_b;
+            case 'baz': return 𝕊5_baz;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊6 = {
-        bindings: {
-        },
-    };
+    function 𝕊6(name) {
+        switch (name) {
+            default: return undefined;
+        }
+    }
 
     const 𝕊7 = createExtension𝕊7({inForm, outForm});
 
-    const 𝕊8 = {
-        bindings: {
-        },
-    };
+    function 𝕊8(name) {
+        switch (name) {
+            default: return undefined;
+        }
+    }
 
-    const 𝕊9 = {
-        bindings: {
-        },
-    };
+    function 𝕊9(name) {
+        switch (name) {
+            default: return undefined;
+        }
+    }
 
-    const 𝕊10 = {
-        bindings: {
-            util: 𝕊10_util,
-        },
-    };
+    function 𝕊10(name) {
+        switch (name) {
+            case 'util': return 𝕊10_util;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊11 = {
-        bindings: {
-            util1: 𝕊11_util1,
-            util2: 𝕊11_util2,
-        },
-    };
+    function 𝕊11(name) {
+        switch (name) {
+            case 'util1': return 𝕊11_util1;
+            case 'util2': return 𝕊11_util2;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊12 = {
-        bindings: {
-            util1: 𝕊12_util1,
-        },
-    };
+    function 𝕊12(name) {
+        switch (name) {
+            case 'util1': return 𝕊12_util1;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊13 = {
-        bindings: {
-            util2: 𝕊13_util2,
-        },
-    };
+    function 𝕊13(name) {
+        switch (name) {
+            case 'util2': return 𝕊13_util2;
+            default: return undefined;
+        }
+    }
 
     // -------------------- Aliases --------------------
-    function 𝕊0_foo(arg) { return 𝕊5.bindings.f(arg); }
-    function 𝕊0_bar(arg) { return 𝕊5.bindings.b(arg); }
-    function 𝕊0_baz(arg) { return 𝕊5.bindings.baz(arg); }
-    function 𝕊0_char(arg) { return 𝕊7.bindings.char(arg); }
-    function 𝕊0_start(arg) { return 𝕊0.bindings.result(arg); }
+    function 𝕊0_foo(arg) { return 𝕊5('f')(arg); }
+    function 𝕊0_bar(arg) { return 𝕊5('b')(arg); }
+    function 𝕊0_baz(arg) { return 𝕊5('baz')(arg); }
+    function 𝕊0_char(arg) { return 𝕊7('char')(arg); }
+    function 𝕊0_start(arg) { return 𝕊0('result')(arg); }
     function 𝕊0_rec(arg) { return 𝕊4(arg); }
-    function 𝕊0_r2(arg) { return 𝕊0.bindings.rec(arg); }
+    function 𝕊0_r2(arg) { return 𝕊0('rec')(arg); }
     function 𝕊10_util(arg) { return 𝕊11(arg); }
     function 𝕊11_util1(arg) { return 𝕊12(arg); }
     function 𝕊11_util2(arg) { return 𝕊13(arg); }
@@ -759,15 +790,15 @@ function createProgram({inForm, outForm}) {
     // -------------------- index.pen --------------------
 
     function 𝕊0_digit() {
-        if (!𝕊0_digit_memo) 𝕊0_digit_memo = (𝕊0.bindings.char)(𝕊1);
+        if (!𝕊0_digit_memo) 𝕊0_digit_memo = (𝕊0('char'))(𝕊1);
         return 𝕊0_digit_memo();
     }
     let 𝕊0_digit_memo;
 
     function 𝕊0_alpha() {
         if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
-            let expr0 = (𝕊0.bindings.char)(𝕊2);
-            let expr1 = (𝕊0.bindings.char)(𝕊3);
+            let expr0 = (𝕊0('char'))(𝕊2);
+            let expr1 = (𝕊0('char'))(𝕊3);
             return function SEL() {
                 if (expr0()) return true;
                 if (expr1()) return true;
@@ -779,9 +810,9 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_alpha_memo;
 
     function 𝕊0_result() {
-        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0.bindings.foo)((() => {
-            let expr0 = 𝕊0.bindings.bar;
-            let expr1 = 𝕊0.bindings.baz;
+        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
+            let expr0 = 𝕊0('bar');
+            let expr1 = 𝕊0('baz');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
@@ -800,10 +831,10 @@ function createProgram({inForm, outForm}) {
             inForm,
             outForm,
             elements: [
-                𝕊0.bindings.digit,
+                𝕊0('digit'),
                 (() => {
-                    let expr0 = 𝕊0.bindings.digit;
-                    let expr1 = 𝕊0.bindings.digit;
+                    let expr0 = 𝕊0('digit');
+                    let expr1 = 𝕊0('digit');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
@@ -814,9 +845,9 @@ function createProgram({inForm, outForm}) {
                     }
                 })(),
                 (() => {
-                    let expr0 = 𝕊0.bindings.digit;
-                    let expr1 = 𝕊0.bindings.digit;
-                    let expr2 = 𝕊0.bindings.digit;
+                    let expr0 = 𝕊0('digit');
+                    let expr1 = 𝕊0('digit');
+                    let expr2 = 𝕊0('digit');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
@@ -834,7 +865,7 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_myList_memo;
 
     function 𝕊0_r2d() {
-        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0.bindings.rec.bindings.d;
+        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
         return 𝕊0_r2d_memo();
     }
     let 𝕊0_r2d_memo;
@@ -1140,21 +1171,21 @@ function createProgram({inForm, outForm}) {
     let 𝕊13_util2_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1.bindings.min.constant = {value: "0"};
-    𝕊1.bindings.max.constant = {value: "9"};
-    𝕊2.bindings.min.constant = {value: "a"};
-    𝕊2.bindings.max.constant = {value: "z"};
-    𝕊3.bindings.min.constant = {value: "A"};
-    𝕊3.bindings.max.constant = {value: "Z"};
-    𝕊4.bindings.b.constant = {value: "b thing"};
-    𝕊4.bindings.d.constant = {value: "d thing"};
-    𝕊5.bindings.f.constant = {value: "foo"};
-    𝕊5.bindings.b.constant = {value: "bar"};
-    𝕊5.bindings.baz.constant = {value: "baz"};
-    𝕊12.bindings.util1.constant = {value: "util1"};
-    𝕊13.bindings.util2.constant = {value: "util2"};
+    𝕊1('min').constant = {value: "0"};
+    𝕊1('max').constant = {value: "9"};
+    𝕊2('min').constant = {value: "a"};
+    𝕊2('max').constant = {value: "z"};
+    𝕊3('min').constant = {value: "A"};
+    𝕊3('max').constant = {value: "Z"};
+    𝕊4('b').constant = {value: "b thing"};
+    𝕊4('d').constant = {value: "d thing"};
+    𝕊5('f').constant = {value: "foo"};
+    𝕊5('b').constant = {value: "bar"};
+    𝕊5('baz').constant = {value: "baz"};
+    𝕊12('util1').constant = {value: "util1"};
+    𝕊13('util2').constant = {value: "util2"};
 
-    return 𝕊0.bindings.start;
+    return 𝕊0('start');
 }
 
 // -------------------- Main exports --------------------

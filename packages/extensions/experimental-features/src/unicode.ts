@@ -1,8 +1,9 @@
-function unicode(options: StaticOptions): PenVal {
+function unicode(options: StaticOptions): Lambda {
     return function UNI_lambda(expr) {
-        let base = expr.bindings?.base?.constant?.value as number;
-        let minDigits = expr.bindings?.minDigits?.constant?.value as number;
-        let maxDigits = expr.bindings?.maxDigits?.constant?.value as number;
+        assert(isModule(expr));
+        let base = expr('base')?.constant?.value as number;
+        let minDigits = expr('minDigits')?.constant?.value as number;
+        let maxDigits = expr('maxDigits')?.constant?.value as number;
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
         assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);

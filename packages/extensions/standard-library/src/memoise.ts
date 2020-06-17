@@ -1,4 +1,4 @@
-function memoise(_options: StaticOptions): PenVal {
+function memoise(_options: StaticOptions): Lambda {
     return function MEM_lambda(expr) {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.

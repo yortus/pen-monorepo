@@ -227,6 +227,15 @@ function record(options) {
     }
     throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
+function isRule(_x) {
+    return true;
+}
+function isLambda(_x) {
+    return true;
+}
+function isModule(_x) {
+    return true;
+}
 let IN;
 let IP;
 let OUT;
@@ -298,79 +307,86 @@ function zeroOrOne(options) {
 
 function createProgram({inForm, outForm}) {
 
-    const 𝕊0 = {
-        bindings: {
-            start: 𝕊0_start,
-            expr: 𝕊0_expr,
-            a: 𝕊0_a,
-            b: 𝕊0_b,
-            baz: 𝕊0_baz,
-            modExprMem: 𝕊0_modExprMem,
-            recA: 𝕊0_recA,
-            recB: 𝕊0_recB,
-            refC: 𝕊0_refC,
-            defC: 𝕊0_defC,
-        },
-    };
+    function 𝕊0(name) {
+        switch (name) {
+            case 'start': return 𝕊0_start;
+            case 'expr': return 𝕊0_expr;
+            case 'a': return 𝕊0_a;
+            case 'b': return 𝕊0_b;
+            case 'baz': return 𝕊0_baz;
+            case 'modExprMem': return 𝕊0_modExprMem;
+            case 'recA': return 𝕊0_recA;
+            case 'recB': return 𝕊0_recB;
+            case 'refC': return 𝕊0_refC;
+            case 'defC': return 𝕊0_defC;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊1 = {
-        bindings: {
-            foo: 𝕊1_foo,
-            bar: 𝕊1_bar,
-            a: 𝕊1_a,
-        },
-    };
+    function 𝕊1(name) {
+        switch (name) {
+            case 'foo': return 𝕊1_foo;
+            case 'bar': return 𝕊1_bar;
+            case 'a': return 𝕊1_a;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊2 = {
-        bindings: {
-            mem: 𝕊2_mem,
-        },
-    };
+    function 𝕊2(name) {
+        switch (name) {
+            case 'mem': return 𝕊2_mem;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊3 = {
-        bindings: {
-            a: 𝕊3_a,
-        },
-    };
+    function 𝕊3(name) {
+        switch (name) {
+            case 'a': return 𝕊3_a;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊4 = {
-        bindings: {
-            b: 𝕊4_b,
-        },
-    };
+    function 𝕊4(name) {
+        switch (name) {
+            case 'b': return 𝕊4_b;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊5 = {
-        bindings: {
-            c: 𝕊5_c,
-            ref5: 𝕊5_ref5,
-            ref6: 𝕊5_ref6,
-        },
-    };
+    function 𝕊5(name) {
+        switch (name) {
+            case 'c': return 𝕊5_c;
+            case 'ref5': return 𝕊5_ref5;
+            case 'ref6': return 𝕊5_ref6;
+            default: return undefined;
+        }
+    }
 
-    const 𝕊6 = {
-        bindings: {
-            c1: 𝕊6_c1,
-            c2: 𝕊6_c2,
-            ref1: 𝕊6_ref1,
-            ref2: 𝕊6_ref2,
-            ref3: 𝕊6_ref3,
-        },
-    };
+    function 𝕊6(name) {
+        switch (name) {
+            case 'c1': return 𝕊6_c1;
+            case 'c2': return 𝕊6_c2;
+            case 'ref1': return 𝕊6_ref1;
+            case 'ref2': return 𝕊6_ref2;
+            case 'ref3': return 𝕊6_ref3;
+            default: return undefined;
+        }
+    }
 
     // -------------------- Aliases --------------------
     function 𝕊0_expr(arg) { return 𝕊1(arg); }
-    function 𝕊0_a(arg) { return 𝕊0.bindings.b(arg); }
+    function 𝕊0_a(arg) { return 𝕊0('b')(arg); }
     function 𝕊0_recA(arg) { return 𝕊3(arg); }
     function 𝕊0_recB(arg) { return 𝕊4(arg); }
     function 𝕊0_defC(arg) { return 𝕊5(arg); }
-    function 𝕊1_a(arg) { return 𝕊0.bindings.b(arg); }
+    function 𝕊1_a(arg) { return 𝕊0('b')(arg); }
     function 𝕊5_c(arg) { return 𝕊6(arg); }
-    function 𝕊6_ref1(arg) { return 𝕊6.bindings.c1(arg); }
+    function 𝕊6_ref1(arg) { return 𝕊6('c1')(arg); }
 
     // -------------------- compile-test.pen --------------------
 
     function 𝕊0_start() {
-        if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0.bindings.expr.bindings.foo;
+        if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr')('foo');
         return 𝕊0_start_memo();
     }
     let 𝕊0_start_memo;
@@ -420,9 +436,9 @@ function createProgram({inForm, outForm}) {
 
     function 𝕊0_modExprMem() {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
-            let expr0 = 𝕊0.bindings.expr.bindings.foo;
-            let expr1 = 𝕊2.bindings.mem;
-            let expr2 = 𝕊0.bindings.baz;
+            let expr0 = 𝕊0('expr')('foo');
+            let expr1 = 𝕊2('mem');
+            let expr2 = 𝕊0('baz');
             return function SEL() {
                 if (expr0()) return true;
                 if (expr1()) return true;
@@ -435,7 +451,7 @@ function createProgram({inForm, outForm}) {
     let 𝕊0_modExprMem_memo;
 
     function 𝕊0_refC() {
-        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
         return 𝕊0_refC_memo();
     }
     let 𝕊0_refC_memo;
@@ -510,25 +526,25 @@ function createProgram({inForm, outForm}) {
     let 𝕊2_mem_memo;
 
     function 𝕊3_a() {
-        if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0.bindings.recB.bindings.b;
+        if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
         return 𝕊3_a_memo();
     }
     let 𝕊3_a_memo;
 
     function 𝕊4_b() {
-        if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0.bindings.recA.bindings.a;
+        if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
         return 𝕊4_b_memo();
     }
     let 𝕊4_b_memo;
 
     function 𝕊5_ref5() {
-        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5.bindings.c.bindings.c1;
+        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
         return 𝕊5_ref5_memo();
     }
     let 𝕊5_ref5_memo;
 
     function 𝕊5_ref6() {
-        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
         return 𝕊5_ref6_memo();
     }
     let 𝕊5_ref6_memo;
@@ -576,27 +592,27 @@ function createProgram({inForm, outForm}) {
     let 𝕊6_c2_memo;
 
     function 𝕊6_ref2() {
-        if (!𝕊6_ref2_memo) 𝕊6_ref2_memo = 𝕊5.bindings.c.bindings.c1;
+        if (!𝕊6_ref2_memo) 𝕊6_ref2_memo = 𝕊5('c')('c1');
         return 𝕊6_ref2_memo();
     }
     let 𝕊6_ref2_memo;
 
     function 𝕊6_ref3() {
-        if (!𝕊6_ref3_memo) 𝕊6_ref3_memo = 𝕊0.bindings.defC.bindings.c.bindings.c1;
+        if (!𝕊6_ref3_memo) 𝕊6_ref3_memo = 𝕊0('defC')('c')('c1');
         return 𝕊6_ref3_memo();
     }
     let 𝕊6_ref3_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊0.bindings.b.constant = {value: "b2"};
-    𝕊0.bindings.baz.constant = {value: "baz"};
-    𝕊1.bindings.foo.constant = {value: "foo"};
-    𝕊1.bindings.bar.constant = {value: "bar"};
-    𝕊2.bindings.mem.constant = {value: "member"};
-    𝕊6.bindings.c1.constant = {value: "c1"};
-    𝕊6.bindings.c2.constant = {value: "c2"};
+    𝕊0('b').constant = {value: "b2"};
+    𝕊0('baz').constant = {value: "baz"};
+    𝕊1('foo').constant = {value: "foo"};
+    𝕊1('bar').constant = {value: "bar"};
+    𝕊2('mem').constant = {value: "member"};
+    𝕊6('c1').constant = {value: "c1"};
+    𝕊6('c2').constant = {value: "c2"};
 
-    return 𝕊0.bindings.start;
+    return 𝕊0('start');
 }
 
 // -------------------- Main exports --------------------

@@ -8,17 +8,28 @@ interface StaticOptions {
 
 
 
-
-type PenVal = (Rule | Lambda) & {
-    // module
-    bindings?: Record<string, PenVal>;
-
-    // compile-time constant
-    constant?: {value: unknown};
-};
-type Rule = () => boolean;
-type Lambda = (arg: PenVal) => PenVal;
-
+type PenVal = Rule | Lambda | Module;
+interface Rule {
+    (): boolean; // rule
+    constant?: {value: unknown}; // compile-time constant
+}
+interface Lambda {
+    (arg: PenVal): PenVal; // lambda
+    constant?: {value: unknown}; // compile-time constant
+}
+interface Module {
+    (name: string): PenVal | undefined; // module
+    constant?: {value: unknown}; // compile-time constant
+}
+function isRule(_x: PenVal): _x is Rule {
+    return true; // TODO: implement runtime check
+}
+function isLambda(_x: PenVal): _x is Lambda {
+    return true; // TODO: implement runtime check
+}
+function isModule(_x: PenVal): _x is Module {
+    return true; // TODO: implement runtime check
+}
 
 
 

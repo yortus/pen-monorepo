@@ -2,10 +2,11 @@
 
 
 // TODO: doc... has both 'txt' and 'ast' representation
-function i32(options: StaticOptions): PenVal {
+function i32(options: StaticOptions): Lambda {
     return function I32_lambda(expr) {
-        let base = expr.bindings?.base?.constant?.value as number | undefined ?? 10;
-        let signed = expr.bindings?.signed?.constant?.value as boolean | undefined ?? true;
+        assert(isModule(expr));
+        let base = expr('base')?.constant?.value as number | undefined ?? 10;
+        let signed = expr('signed')?.constant?.value as boolean | undefined ?? true;
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
