@@ -3,4 +3,9 @@ export function nextNodeId() {
 }
 
 
+export function resetNodeId() {
+    counter = -1;
+}
+
+
 let counter = -1;

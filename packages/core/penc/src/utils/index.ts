@@ -3,4 +3,4 @@ export {assert} from './assert';
 export {makeNodeMapper} from './make-node-mapper';
 export {makeNodeVisitor} from './make-node-visitor';
 export {mapMap} from './map-map';
-export {nextNodeId} from './next-node-id';
+export {nextNodeId, resetNodeId} from './next-node-id';

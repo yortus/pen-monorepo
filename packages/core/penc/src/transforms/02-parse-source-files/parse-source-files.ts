@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import {ExtensionFile, PenSourceFile, Program} from '../../ast-nodes';
-import {mapMap, nextNodeId} from '../../utils';
+import {mapMap, nextNodeId, resetNodeId} from '../../utils';
 import {SourceFileGraph} from '../01-create-source-file-graph';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
+    resetNodeId();
     let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): PenSourceFile | ExtensionFile => {
         let isExtension = sourceFile.path.toLowerCase().endsWith('.pen.js');
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
