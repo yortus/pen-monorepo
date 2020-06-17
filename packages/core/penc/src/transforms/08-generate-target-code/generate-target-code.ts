@@ -93,7 +93,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
         Module: mod => {
             // Emit module definition
             let moduleScope = mod.meta.scope;
-            emit.down(2).text(`let ${moduleScope.id} = (name) => {`).indent();
+            emit.down(2).text(`const ${moduleScope.id} = (name) => {`).indent();
             emit.down(1).text(`switch (name) {`).indent();
             for (let sourceName of moduleScope.sourceNames.keys()) {
                 emit.down(1).text(`case '${sourceName}': return ${moduleScope.id}_${sourceName};`);
@@ -111,7 +111,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                         assert(symbol.kind === 'NameSymbol');
                         let {scope, sourceName} = symbol;
                         let qualName = `${scope.id}_${sourceName}`;
-                        emit.down(2).text(`let ${qualName} = (arg) => `);
+                        emit.down(2).text(`const ${qualName} = (arg) => `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
                         emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
                     }
@@ -121,7 +121,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     assert(symbol.kind === 'NameSymbol');
                     let {scope, sourceName} = symbol;
                     let qualName = `${scope.id}_${sourceName}`;
-                    emit.down(2).text(`let ${qualName} = (arg) => {`).indent();
+                    emit.down(2).text(`const ${qualName} = (arg) => {`).indent();
                     emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
@@ -291,16 +291,16 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
 function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable) {
     const arity = expr.expressions.length;
+    const exprVars = expr.expressions.map(_ => newId());
     emit.text('(() => {').indent();
-    // ...
     for (let i = 0; i < arity; ++i) {
-        emit.down(1).text(`let expr${i} = `);
+        emit.down(1).text(`const ${exprVars[i]} = `);
         emitExpression(emit, expr.expressions[i], symbolTable);
         emit.text(';');
     }
     emit.down(1).text('return function SEL() {').indent();
     for (let i = 0; i < arity; ++i) {
-        emit.down(1).text(`if (expr${i}()) return true;`);
+        emit.down(1).text(`if (${exprVars[i]}()) return true;`);
     }
     emit.down(1).text('return false;');
     emit.dedent().down(1).text('}');
@@ -310,10 +310,10 @@ function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbo
 
 function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolTable: SymbolTable) {
     const arity = expr.expressions.length;
+    const exprVars = expr.expressions.map(_ => newId());
     emit.text('(() => {').indent();
-    // ...
     for (let i = 0; i < arity; ++i) {
-        emit.down(1).text(`let expr${i} = `);
+        emit.down(1).text(`const ${exprVars[i]} = `);
         emitExpression(emit, expr.expressions[i], symbolTable);
         emit.text(';');
     }
@@ -321,7 +321,7 @@ function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolT
     emit.down(1).text('let stateₒ = getState();');
     emit.down(1).text('let out;');
     for (let i = 0; i < arity; ++i) {
-        emit.down(1).text(`if (expr${i}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
+        emit.down(1).text(`if (${exprVars[i]}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
     }
     emit.down(1).text('OUT = out;');
     emit.down(1).text('return true;');
@@ -334,14 +334,17 @@ function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpressio
 
     let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
     const length = expr.value.length;
+    const inFormHereVar = newId('inFormHere');
+    const outFormHereVar = newId('outFormHere');
+    const checkInTypeVar = newId('checkInType');
     emit.text('(() => {').indent();
-    emit.down(1).text(`const inFormHere = ${m.replace(/_/g, 'inForm')}`);
-    emit.down(1).text(`const outFormHere = ${m.replace(/_/g, 'outForm')}`);
-    emit.down(1).text(`const checkInType = inFormHere !== 'txt';`);
-    emit.down(1).text(`const out = outFormHere === 'nil' ? undefined : ${JSON.stringify(expr.value)};`);
-    emit.down(1).text(`if (inFormHere === 'nil') return function STR() { OUT = out; return true; }`);
+    emit.down(1).text(`const ${inFormHereVar} = ${m.replace(/_/g, 'inForm')}`);
+    emit.down(1).text(`const ${outFormHereVar} = ${m.replace(/_/g, 'outForm')}`);
+    emit.down(1).text(`const ${checkInTypeVar} = ${inFormHereVar} !== 'txt';`);
+    emit.down(1).text(`const out = ${outFormHereVar} === 'nil' ? undefined : ${JSON.stringify(expr.value)};`);
+    emit.down(1).text(`if (${inFormHereVar} === 'nil') return function STR() { OUT = out; return true; }`);
     emit.down(1).text('return function STR() {').indent();
-    emit.down(1).text(`if (checkInType && typeof IN !== 'string') return false;`);
+    emit.down(1).text(`if (${checkInTypeVar} && typeof IN !== 'string') return false;`);
     emit.down(1).text(`if (IP + ${length} > IN.length) return false;`);
     for (let i = 0; i < length; ++i) {
         emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
@@ -366,3 +369,10 @@ function emitConstant(emit: Emitter, value: unknown) {
         throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
     }
 }
+
+
+// TODO: helper function
+function newId(prefix = 't') {
+    return `${prefix}${++counter}`;
+}
+let counter = -1;

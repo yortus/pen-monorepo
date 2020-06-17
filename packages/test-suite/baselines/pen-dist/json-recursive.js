@@ -734,7 +734,7 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- json-recursive.pen --------------------
 
-    let 𝕊0 = (name) => {
+    const 𝕊0 = (name) => {
         switch (name) {
             case 'char': return 𝕊0_char;
             case 'f64': return 𝕊0_f64;
@@ -763,23 +763,23 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊0_char = (arg) => 𝕊3('char')(arg);
+    const 𝕊0_char = (arg) => 𝕊3('char')(arg);
 
-    let 𝕊0_f64 = (arg) => 𝕊3('f64')(arg);
+    const 𝕊0_f64 = (arg) => 𝕊3('f64')(arg);
 
-    let 𝕊0_unicode = (arg) => 𝕊4('unicode')(arg);
+    const 𝕊0_unicode = (arg) => 𝕊4('unicode')(arg);
 
-    let 𝕊0_start = (arg) => {
+    const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = 𝕊0('Value');
-            let expr2 = 𝕊0('WS');
+            const t72 = 𝕊0('WS');
+            const t73 = 𝕊0('Value');
+            const t74 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t72()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t73()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t74()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -788,23 +788,23 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_start_memo;
 
-    let 𝕊0_Value = (arg) => {
+    const 𝕊0_Value = (arg) => {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
-            let expr0 = 𝕊0('False');
-            let expr1 = 𝕊0('Null');
-            let expr2 = 𝕊0('True');
-            let expr3 = 𝕊0('Object');
-            let expr4 = 𝕊0('Array');
-            let expr5 = 𝕊0('Number');
-            let expr6 = 𝕊0('String');
+            const t75 = 𝕊0('False');
+            const t76 = 𝕊0('Null');
+            const t77 = 𝕊0('True');
+            const t78 = 𝕊0('Object');
+            const t79 = 𝕊0('Array');
+            const t80 = 𝕊0('Number');
+            const t81 = 𝕊0('String');
             return function SEL() {
-                if (expr0()) return true;
-                if (expr1()) return true;
-                if (expr2()) return true;
-                if (expr3()) return true;
-                if (expr4()) return true;
-                if (expr5()) return true;
-                if (expr6()) return true;
+                if (t75()) return true;
+                if (t76()) return true;
+                if (t77()) return true;
+                if (t78()) return true;
+                if (t79()) return true;
+                if (t80()) return true;
+                if (t81()) return true;
                 return false;
             }
         })();
@@ -812,16 +812,16 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Value_memo;
 
-    let 𝕊0_False = (arg) => {
+    const 𝕊0_False = (arg) => {
         if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
-            let expr0 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "false";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t82 = (() => {
+                const inFormHere84 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere85 = outForm !== "txt" ? "nil" : outForm
+                const checkInType86 = inFormHere84 !== 'txt';
+                const out = outFormHere85 === 'nil' ? undefined : "false";
+                if (inFormHere84 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType86 && typeof IN !== 'string') return false;
                     if (IP + 5 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 102) return false;
                     if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -833,12 +833,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr1 = booleanLiteral({inForm, outForm, value: false});
+            const t83 = booleanLiteral({inForm, outForm, value: false});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t82()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t83()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -847,16 +847,16 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_False_memo;
 
-    let 𝕊0_Null = (arg) => {
+    const 𝕊0_Null = (arg) => {
         if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
-            let expr0 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "null";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t87 = (() => {
+                const inFormHere89 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere90 = outForm !== "txt" ? "nil" : outForm
+                const checkInType91 = inFormHere89 !== 'txt';
+                const out = outFormHere90 === 'nil' ? undefined : "null";
+                if (inFormHere89 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType91 && typeof IN !== 'string') return false;
                     if (IP + 4 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 110) return false;
                     if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -867,12 +867,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr1 = nullLiteral({inForm, outForm});
+            const t88 = nullLiteral({inForm, outForm});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t87()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t88()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -881,16 +881,16 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Null_memo;
 
-    let 𝕊0_True = (arg) => {
+    const 𝕊0_True = (arg) => {
         if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
-            let expr0 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "true";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t92 = (() => {
+                const inFormHere94 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere95 = outForm !== "txt" ? "nil" : outForm
+                const checkInType96 = inFormHere94 !== 'txt';
+                const out = outFormHere95 === 'nil' ? undefined : "true";
+                if (inFormHere94 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType96 && typeof IN !== 'string') return false;
                     if (IP + 4 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 116) return false;
                     if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -901,12 +901,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr1 = booleanLiteral({inForm, outForm, value: true});
+            const t93 = booleanLiteral({inForm, outForm, value: true});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t92()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t93()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -915,29 +915,29 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_True_memo;
 
-    let 𝕊0_Object = (arg) => {
+    const 𝕊0_Object = (arg) => {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
-            let expr0 = 𝕊0('LBRACE');
-            let expr1 = (() => {
-                let expr0 = 𝕊0('Properties');
-                let expr1 = record({
+            const t97 = 𝕊0('LBRACE');
+            const t98 = (() => {
+                const t100 = 𝕊0('Properties');
+                const t101 = record({
                     inForm,
                     outForm,
                     fields: [],
                 });
                 return function SEL() {
-                    if (expr0()) return true;
-                    if (expr1()) return true;
+                    if (t100()) return true;
+                    if (t101()) return true;
                     return false;
                 }
             })();
-            let expr2 = 𝕊0('RBRACE');
+            const t99 = 𝕊0('RBRACE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t97()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t98()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t99()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -946,36 +946,36 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Object_memo;
 
-    let 𝕊0_Properties = (arg) => {
+    const 𝕊0_Properties = (arg) => {
         if (!𝕊0_Properties_memo) 𝕊0_Properties_memo = (() => {
-            let expr0 = field({
+            const t102 = field({
                 inForm,
                 outForm,
                 name: 𝕊0('String'),
                 value: (() => {
-                    let expr0 = 𝕊0('COLON');
-                    let expr1 = 𝕊0('Value');
+                    const t104 = 𝕊0('COLON');
+                    const t105 = 𝕊0('Value');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t104()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t105()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     }
                 })(),
             });
-            let expr1 = zeroOrOne({
+            const t103 = zeroOrOne({
                 inForm,
                 outForm,
                 expression: (() => {
-                    let expr0 = 𝕊0('COMMA');
-                    let expr1 = 𝕊0('Properties');
+                    const t106 = 𝕊0('COMMA');
+                    const t107 = 𝕊0('Properties');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t106()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t107()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     }
@@ -984,8 +984,8 @@ function createProgram({inForm, outForm}) {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t102()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t103()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -994,29 +994,29 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Properties_memo;
 
-    let 𝕊0_Array = (arg) => {
+    const 𝕊0_Array = (arg) => {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
-            let expr0 = 𝕊0('LBRACKET');
-            let expr1 = (() => {
-                let expr0 = 𝕊0('Elements');
-                let expr1 = list({
+            const t108 = 𝕊0('LBRACKET');
+            const t109 = (() => {
+                const t111 = 𝕊0('Elements');
+                const t112 = list({
                     inForm,
                     outForm,
                     elements: [],
                 });
                 return function SEL() {
-                    if (expr0()) return true;
-                    if (expr1()) return true;
+                    if (t111()) return true;
+                    if (t112()) return true;
                     return false;
                 }
             })();
-            let expr2 = 𝕊0('RBRACKET');
+            const t110 = 𝕊0('RBRACKET');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t108()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t109()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t110()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1025,26 +1025,26 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Array_memo;
 
-    let 𝕊0_Elements = (arg) => {
+    const 𝕊0_Elements = (arg) => {
         if (!𝕊0_Elements_memo) 𝕊0_Elements_memo = (() => {
-            let expr0 = list({
+            const t113 = list({
                 inForm,
                 outForm,
                 elements: [
                     𝕊0('Value'),
                 ],
             });
-            let expr1 = zeroOrOne({
+            const t114 = zeroOrOne({
                 inForm,
                 outForm,
                 expression: (() => {
-                    let expr0 = 𝕊0('COMMA');
-                    let expr1 = 𝕊0('Elements');
+                    const t115 = 𝕊0('COMMA');
+                    const t116 = 𝕊0('Elements');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t115()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t116()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     }
@@ -1053,8 +1053,8 @@ function createProgram({inForm, outForm}) {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t113()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t114()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1063,27 +1063,27 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_Elements_memo;
 
-    let 𝕊0_Number = (arg) => {
+    const 𝕊0_Number = (arg) => {
         if (!𝕊0_Number_memo) 𝕊0_Number_memo = 𝕊0('f64');
         return 𝕊0_Number_memo(arg);
     };
     let 𝕊0_Number_memo;
 
-    let 𝕊0_String = (arg) => {
+    const 𝕊0_String = (arg) => {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
-            let expr0 = 𝕊0('DOUBLE_QUOTE');
-            let expr1 = zeroOrMore({
+            const t117 = 𝕊0('DOUBLE_QUOTE');
+            const t118 = zeroOrMore({
                 inForm,
                 outForm,
                 expression: 𝕊0('CHAR'),
             });
-            let expr2 = 𝕊0('DOUBLE_QUOTE');
+            const t119 = 𝕊0('DOUBLE_QUOTE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t117()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t118()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t119()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1092,20 +1092,20 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_String_memo;
 
-    let 𝕊0_CHAR = (arg) => {
+    const 𝕊0_CHAR = (arg) => {
         if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
-            let expr0 = (() => {
-                let expr0 = not({
+            const t120 = (() => {
+                const t130 = not({
                     inForm,
                     outForm,
                     expression: (() => {
-                        const inFormHere = inForm
-                        const outFormHere = outForm
-                        const checkInType = inFormHere !== 'txt';
-                        const out = outFormHere === 'nil' ? undefined : "\\";
-                        if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                        const inFormHere133 = inForm
+                        const outFormHere134 = outForm
+                        const checkInType135 = inFormHere133 !== 'txt';
+                        const out = outFormHere134 === 'nil' ? undefined : "\\";
+                        if (inFormHere133 === 'nil') return function STR() { OUT = out; return true; }
                         return function STR() {
-                            if (checkInType && typeof IN !== 'string') return false;
+                            if (checkInType135 && typeof IN !== 'string') return false;
                             if (IP + 1 > IN.length) return false;
                             if (IN.charCodeAt(IP + 0) !== 92) return false;
                             IP += 1;
@@ -1114,17 +1114,17 @@ function createProgram({inForm, outForm}) {
                         }
                     })(),
                 });
-                let expr1 = not({
+                const t131 = not({
                     inForm,
                     outForm,
                     expression: (() => {
-                        const inFormHere = inForm
-                        const outFormHere = outForm
-                        const checkInType = inFormHere !== 'txt';
-                        const out = outFormHere === 'nil' ? undefined : "\"";
-                        if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                        const inFormHere136 = inForm
+                        const outFormHere137 = outForm
+                        const checkInType138 = inFormHere136 !== 'txt';
+                        const out = outFormHere137 === 'nil' ? undefined : "\"";
+                        if (inFormHere136 === 'nil') return function STR() { OUT = out; return true; }
                         return function STR() {
-                            if (checkInType && typeof IN !== 'string') return false;
+                            if (checkInType138 && typeof IN !== 'string') return false;
                             if (IP + 1 > IN.length) return false;
                             if (IN.charCodeAt(IP + 0) !== 34) return false;
                             IP += 1;
@@ -1133,26 +1133,26 @@ function createProgram({inForm, outForm}) {
                         }
                     })(),
                 });
-                let expr2 = (𝕊0('char'))(𝕊1);
+                const t132 = (𝕊0('char'))(𝕊1);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t130()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t131()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t132()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr1 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\\"";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t121 = (() => {
+                const t139 = (() => {
+                    const inFormHere141 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere142 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType143 = inFormHere141 !== 'txt';
+                    const out = outFormHere142 === 'nil' ? undefined : "\\\"";
+                    if (inFormHere141 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType143 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -1161,14 +1161,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\"";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t140 = (() => {
+                    const inFormHere144 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere145 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType146 = inFormHere144 !== 'txt';
+                    const out = outFormHere145 === 'nil' ? undefined : "\"";
+                    if (inFormHere144 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType146 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 34) return false;
                         IP += 1;
@@ -1179,21 +1179,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t139()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t140()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr2 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\\\";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t122 = (() => {
+                const t147 = (() => {
+                    const inFormHere149 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere150 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType151 = inFormHere149 !== 'txt';
+                    const out = outFormHere150 === 'nil' ? undefined : "\\\\";
+                    if (inFormHere149 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType151 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 92) return false;
@@ -1202,14 +1202,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t148 = (() => {
+                    const inFormHere152 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere153 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType154 = inFormHere152 !== 'txt';
+                    const out = outFormHere153 === 'nil' ? undefined : "\\";
+                    if (inFormHere152 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType154 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         IP += 1;
@@ -1220,21 +1220,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t147()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t148()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr3 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\/";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t123 = (() => {
+                const t155 = (() => {
+                    const inFormHere157 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere158 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType159 = inFormHere157 !== 'txt';
+                    const out = outFormHere158 === 'nil' ? undefined : "\\/";
+                    if (inFormHere157 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType159 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 47) return false;
@@ -1243,14 +1243,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "/";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t156 = (() => {
+                    const inFormHere160 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere161 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType162 = inFormHere160 !== 'txt';
+                    const out = outFormHere161 === 'nil' ? undefined : "/";
+                    if (inFormHere160 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType162 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 47) return false;
                         IP += 1;
@@ -1261,21 +1261,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t155()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t156()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr4 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\b";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t124 = (() => {
+                const t163 = (() => {
+                    const inFormHere165 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere166 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType167 = inFormHere165 !== 'txt';
+                    const out = outFormHere166 === 'nil' ? undefined : "\\b";
+                    if (inFormHere165 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType167 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -1284,14 +1284,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\b";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t164 = (() => {
+                    const inFormHere168 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere169 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType170 = inFormHere168 !== 'txt';
+                    const out = outFormHere169 === 'nil' ? undefined : "\b";
+                    if (inFormHere168 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType170 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 8) return false;
                         IP += 1;
@@ -1302,21 +1302,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t163()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t164()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr5 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\f";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t125 = (() => {
+                const t171 = (() => {
+                    const inFormHere173 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere174 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType175 = inFormHere173 !== 'txt';
+                    const out = outFormHere174 === 'nil' ? undefined : "\\f";
+                    if (inFormHere173 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType175 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 102) return false;
@@ -1325,14 +1325,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\f";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t172 = (() => {
+                    const inFormHere176 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere177 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType178 = inFormHere176 !== 'txt';
+                    const out = outFormHere177 === 'nil' ? undefined : "\f";
+                    if (inFormHere176 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType178 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 12) return false;
                         IP += 1;
@@ -1343,21 +1343,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t171()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t172()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr6 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\n";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t126 = (() => {
+                const t179 = (() => {
+                    const inFormHere181 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere182 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType183 = inFormHere181 !== 'txt';
+                    const out = outFormHere182 === 'nil' ? undefined : "\\n";
+                    if (inFormHere181 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType183 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -1366,14 +1366,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\n";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t180 = (() => {
+                    const inFormHere184 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere185 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType186 = inFormHere184 !== 'txt';
+                    const out = outFormHere185 === 'nil' ? undefined : "\n";
+                    if (inFormHere184 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType186 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 10) return false;
                         IP += 1;
@@ -1384,21 +1384,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t179()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t180()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr7 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\r";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t127 = (() => {
+                const t187 = (() => {
+                    const inFormHere189 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere190 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType191 = inFormHere189 !== 'txt';
+                    const out = outFormHere190 === 'nil' ? undefined : "\\r";
+                    if (inFormHere189 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType191 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -1407,14 +1407,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\r";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t188 = (() => {
+                    const inFormHere192 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere193 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType194 = inFormHere192 !== 'txt';
+                    const out = outFormHere193 === 'nil' ? undefined : "\r";
+                    if (inFormHere192 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType194 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 13) return false;
                         IP += 1;
@@ -1425,21 +1425,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t187()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t188()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr8 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\t";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t128 = (() => {
+                const t195 = (() => {
+                    const inFormHere197 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere198 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType199 = inFormHere197 !== 'txt';
+                    const out = outFormHere198 === 'nil' ? undefined : "\\t";
+                    if (inFormHere197 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType199 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 116) return false;
@@ -1448,14 +1448,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere = outForm !== "ast" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\t";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t196 = (() => {
+                    const inFormHere200 = inForm !== "ast" ? "nil" : inForm
+                    const outFormHere201 = outForm !== "ast" ? "nil" : outForm
+                    const checkInType202 = inFormHere200 !== 'txt';
+                    const out = outFormHere201 === 'nil' ? undefined : "\t";
+                    if (inFormHere200 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType202 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 9) return false;
                         IP += 1;
@@ -1466,21 +1466,21 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t195()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t196()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            let expr9 = (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\\u";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t129 = (() => {
+                const t203 = (() => {
+                    const inFormHere205 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere206 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType207 = inFormHere205 !== 'txt';
+                    const out = outFormHere206 === 'nil' ? undefined : "\\u";
+                    if (inFormHere205 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType207 && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -1489,27 +1489,27 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (𝕊0('unicode'))(𝕊2);
+                const t204 = (𝕊0('unicode'))(𝕊2);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t203()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t204()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
             return function SEL() {
-                if (expr0()) return true;
-                if (expr1()) return true;
-                if (expr2()) return true;
-                if (expr3()) return true;
-                if (expr4()) return true;
-                if (expr5()) return true;
-                if (expr6()) return true;
-                if (expr7()) return true;
-                if (expr8()) return true;
-                if (expr9()) return true;
+                if (t120()) return true;
+                if (t121()) return true;
+                if (t122()) return true;
+                if (t123()) return true;
+                if (t124()) return true;
+                if (t125()) return true;
+                if (t126()) return true;
+                if (t127()) return true;
+                if (t128()) return true;
+                if (t129()) return true;
                 return false;
             }
         })();
@@ -1517,17 +1517,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_CHAR_memo;
 
-    let 𝕊0_LBRACE = (arg) => {
+    const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "{";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t208 = 𝕊0('WS');
+            const t209 = (() => {
+                const inFormHere211 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere212 = outForm !== "txt" ? "nil" : outForm
+                const checkInType213 = inFormHere211 !== 'txt';
+                const out = outFormHere212 === 'nil' ? undefined : "{";
+                if (inFormHere211 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType213 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 123) return false;
                     IP += 1;
@@ -1535,13 +1535,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t210 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t208()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t209()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t210()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1550,17 +1550,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_LBRACE_memo;
 
-    let 𝕊0_RBRACE = (arg) => {
+    const 𝕊0_RBRACE = (arg) => {
         if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "}";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t214 = 𝕊0('WS');
+            const t215 = (() => {
+                const inFormHere217 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere218 = outForm !== "txt" ? "nil" : outForm
+                const checkInType219 = inFormHere217 !== 'txt';
+                const out = outFormHere218 === 'nil' ? undefined : "}";
+                if (inFormHere217 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType219 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 125) return false;
                     IP += 1;
@@ -1568,13 +1568,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t216 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t214()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t215()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t216()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1583,17 +1583,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_RBRACE_memo;
 
-    let 𝕊0_LBRACKET = (arg) => {
+    const 𝕊0_LBRACKET = (arg) => {
         if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "[";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t220 = 𝕊0('WS');
+            const t221 = (() => {
+                const inFormHere223 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere224 = outForm !== "txt" ? "nil" : outForm
+                const checkInType225 = inFormHere223 !== 'txt';
+                const out = outFormHere224 === 'nil' ? undefined : "[";
+                if (inFormHere223 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType225 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 91) return false;
                     IP += 1;
@@ -1601,13 +1601,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t222 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t220()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t221()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t222()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1616,17 +1616,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_LBRACKET_memo;
 
-    let 𝕊0_RBRACKET = (arg) => {
+    const 𝕊0_RBRACKET = (arg) => {
         if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : "]";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t226 = 𝕊0('WS');
+            const t227 = (() => {
+                const inFormHere229 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere230 = outForm !== "txt" ? "nil" : outForm
+                const checkInType231 = inFormHere229 !== 'txt';
+                const out = outFormHere230 === 'nil' ? undefined : "]";
+                if (inFormHere229 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType231 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 93) return false;
                     IP += 1;
@@ -1634,13 +1634,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t228 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t226()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t227()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t228()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1649,17 +1649,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_RBRACKET_memo;
 
-    let 𝕊0_COLON = (arg) => {
+    const 𝕊0_COLON = (arg) => {
         if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : ":";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t232 = 𝕊0('WS');
+            const t233 = (() => {
+                const inFormHere235 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere236 = outForm !== "txt" ? "nil" : outForm
+                const checkInType237 = inFormHere235 !== 'txt';
+                const out = outFormHere236 === 'nil' ? undefined : ":";
+                if (inFormHere235 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType237 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 58) return false;
                     IP += 1;
@@ -1667,13 +1667,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t234 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t232()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t233()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t234()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1682,17 +1682,17 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_COLON_memo;
 
-    let 𝕊0_COMMA = (arg) => {
+    const 𝕊0_COMMA = (arg) => {
         if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
-            let expr0 = 𝕊0('WS');
-            let expr1 = (() => {
-                const inFormHere = inForm !== "txt" ? "nil" : inForm
-                const outFormHere = outForm !== "txt" ? "nil" : outForm
-                const checkInType = inFormHere !== 'txt';
-                const out = outFormHere === 'nil' ? undefined : ",";
-                if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const t238 = 𝕊0('WS');
+            const t239 = (() => {
+                const inFormHere241 = inForm !== "txt" ? "nil" : inForm
+                const outFormHere242 = outForm !== "txt" ? "nil" : outForm
+                const checkInType243 = inFormHere241 !== 'txt';
+                const out = outFormHere242 === 'nil' ? undefined : ",";
+                if (inFormHere241 === 'nil') return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType && typeof IN !== 'string') return false;
+                    if (checkInType243 && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 44) return false;
                     IP += 1;
@@ -1700,13 +1700,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            let expr2 = 𝕊0('WS');
+            const t240 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (expr0()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr1()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (expr2()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t238()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t239()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t240()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1715,15 +1715,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_COMMA_memo;
 
-    let 𝕊0_DOUBLE_QUOTE = (arg) => {
+    const 𝕊0_DOUBLE_QUOTE = (arg) => {
         if (!𝕊0_DOUBLE_QUOTE_memo) 𝕊0_DOUBLE_QUOTE_memo = (() => {
-            const inFormHere = inForm !== "txt" ? "nil" : inForm
-            const outFormHere = outForm !== "txt" ? "nil" : outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "\"";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere244 = inForm !== "txt" ? "nil" : inForm
+            const outFormHere245 = outForm !== "txt" ? "nil" : outForm
+            const checkInType246 = inFormHere244 !== 'txt';
+            const out = outFormHere245 === 'nil' ? undefined : "\"";
+            if (inFormHere244 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType246 && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 34) return false;
                 IP += 1;
@@ -1735,19 +1735,19 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_DOUBLE_QUOTE_memo;
 
-    let 𝕊0_WS = (arg) => {
+    const 𝕊0_WS = (arg) => {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
             inForm,
             outForm,
             expression: (() => {
-                let expr0 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : " ";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t247 = (() => {
+                    const inFormHere251 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere252 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType253 = inFormHere251 !== 'txt';
+                    const out = outFormHere252 === 'nil' ? undefined : " ";
+                    if (inFormHere251 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType253 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 32) return false;
                         IP += 1;
@@ -1755,14 +1755,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr1 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\t";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t248 = (() => {
+                    const inFormHere254 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere255 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType256 = inFormHere254 !== 'txt';
+                    const out = outFormHere255 === 'nil' ? undefined : "\t";
+                    if (inFormHere254 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType256 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 9) return false;
                         IP += 1;
@@ -1770,14 +1770,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr2 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\n";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t249 = (() => {
+                    const inFormHere257 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere258 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType259 = inFormHere257 !== 'txt';
+                    const out = outFormHere258 === 'nil' ? undefined : "\n";
+                    if (inFormHere257 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType259 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 10) return false;
                         IP += 1;
@@ -1785,14 +1785,14 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                let expr3 = (() => {
-                    const inFormHere = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere = outForm !== "txt" ? "nil" : outForm
-                    const checkInType = inFormHere !== 'txt';
-                    const out = outFormHere === 'nil' ? undefined : "\r";
-                    if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+                const t250 = (() => {
+                    const inFormHere260 = inForm !== "txt" ? "nil" : inForm
+                    const outFormHere261 = outForm !== "txt" ? "nil" : outForm
+                    const checkInType262 = inFormHere260 !== 'txt';
+                    const out = outFormHere261 === 'nil' ? undefined : "\r";
+                    if (inFormHere260 === 'nil') return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType && typeof IN !== 'string') return false;
+                        if (checkInType262 && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 13) return false;
                         IP += 1;
@@ -1801,10 +1801,10 @@ function createProgram({inForm, outForm}) {
                     }
                 })();
                 return function SEL() {
-                    if (expr0()) return true;
-                    if (expr1()) return true;
-                    if (expr2()) return true;
-                    if (expr3()) return true;
+                    if (t247()) return true;
+                    if (t248()) return true;
+                    if (t249()) return true;
+                    if (t250()) return true;
                     return false;
                 }
             })(),
@@ -1813,7 +1813,7 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_WS_memo;
 
-    let 𝕊1 = (name) => {
+    const 𝕊1 = (name) => {
         switch (name) {
             case 'min': return 𝕊1_min;
             case 'max': return 𝕊1_max;
@@ -1821,15 +1821,15 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊1_min = (arg) => {
+    const 𝕊1_min = (arg) => {
         if (!𝕊1_min_memo) 𝕊1_min_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : " ";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere263 = inForm
+            const outFormHere264 = outForm
+            const checkInType265 = inFormHere263 !== 'txt';
+            const out = outFormHere264 === 'nil' ? undefined : " ";
+            if (inFormHere263 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType265 && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 32) return false;
                 IP += 1;
@@ -1841,15 +1841,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊1_min_memo;
 
-    let 𝕊1_max = (arg) => {
+    const 𝕊1_max = (arg) => {
         if (!𝕊1_max_memo) 𝕊1_max_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "￿";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere266 = inForm
+            const outFormHere267 = outForm
+            const checkInType268 = inFormHere266 !== 'txt';
+            const out = outFormHere267 === 'nil' ? undefined : "￿";
+            if (inFormHere266 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType268 && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 65535) return false;
                 IP += 1;
@@ -1861,7 +1861,7 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊1_max_memo;
 
-    let 𝕊2 = (name) => {
+    const 𝕊2 = (name) => {
         switch (name) {
             case 'base': return 𝕊2_base;
             case 'minDigits': return 𝕊2_minDigits;
@@ -1870,19 +1870,19 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊2_base = (arg) => {
+    const 𝕊2_base = (arg) => {
         if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({inForm, outForm, value: 16});
         return 𝕊2_base_memo(arg);
     };
     let 𝕊2_base_memo;
 
-    let 𝕊2_minDigits = (arg) => {
+    const 𝕊2_minDigits = (arg) => {
         if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = numericLiteral({inForm, outForm, value: 4});
         return 𝕊2_minDigits_memo(arg);
     };
     let 𝕊2_minDigits_memo;
 
-    let 𝕊2_maxDigits = (arg) => {
+    const 𝕊2_maxDigits = (arg) => {
         if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = numericLiteral({inForm, outForm, value: 4});
         return 𝕊2_maxDigits_memo(arg);
     };

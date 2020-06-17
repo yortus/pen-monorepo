@@ -309,7 +309,7 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- compile-test.pen --------------------
 
-    let 𝕊0 = (name) => {
+    const 𝕊0 = (name) => {
         switch (name) {
             case 'start': return 𝕊0_start;
             case 'expr': return 𝕊0_expr;
@@ -325,33 +325,33 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊0_start = (arg) => {
+    const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr')('foo');
         return 𝕊0_start_memo(arg);
     };
     let 𝕊0_start_memo;
 
-    let 𝕊0_expr = (arg) => {
+    const 𝕊0_expr = (arg) => {
         if (!𝕊0_expr_memo) 𝕊0_expr_memo = 𝕊1;
         return 𝕊0_expr_memo(arg);
     };
     let 𝕊0_expr_memo;
 
-    let 𝕊0_a = (arg) => {
+    const 𝕊0_a = (arg) => {
         if (!𝕊0_a_memo) 𝕊0_a_memo = 𝕊0('b');
         return 𝕊0_a_memo(arg);
     };
     let 𝕊0_a_memo;
 
-    let 𝕊0_b = (arg) => {
+    const 𝕊0_b = (arg) => {
         if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "b2";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere0 = inForm
+            const outFormHere1 = outForm
+            const checkInType2 = inFormHere0 !== 'txt';
+            const out = outFormHere1 === 'nil' ? undefined : "b2";
+            if (inFormHere0 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType2 && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
@@ -364,15 +364,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_b_memo;
 
-    let 𝕊0_baz = (arg) => {
+    const 𝕊0_baz = (arg) => {
         if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "baz";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere3 = inForm
+            const outFormHere4 = outForm
+            const checkInType5 = inFormHere3 !== 'txt';
+            const out = outFormHere4 === 'nil' ? undefined : "baz";
+            if (inFormHere3 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType5 && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -386,15 +386,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_baz_memo;
 
-    let 𝕊0_modExprMem = (arg) => {
+    const 𝕊0_modExprMem = (arg) => {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
-            let expr0 = 𝕊0('expr')('foo');
-            let expr1 = 𝕊2('mem');
-            let expr2 = 𝕊0('baz');
+            const t6 = 𝕊0('expr')('foo');
+            const t7 = 𝕊2('mem');
+            const t8 = 𝕊0('baz');
             return function SEL() {
-                if (expr0()) return true;
-                if (expr1()) return true;
-                if (expr2()) return true;
+                if (t6()) return true;
+                if (t7()) return true;
+                if (t8()) return true;
                 return false;
             }
         })();
@@ -402,31 +402,31 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊0_modExprMem_memo;
 
-    let 𝕊0_recA = (arg) => {
+    const 𝕊0_recA = (arg) => {
         if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
         return 𝕊0_recA_memo(arg);
     };
     let 𝕊0_recA_memo;
 
-    let 𝕊0_recB = (arg) => {
+    const 𝕊0_recB = (arg) => {
         if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
         return 𝕊0_recB_memo(arg);
     };
     let 𝕊0_recB_memo;
 
-    let 𝕊0_refC = (arg) => {
+    const 𝕊0_refC = (arg) => {
         if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
         return 𝕊0_refC_memo(arg);
     };
     let 𝕊0_refC_memo;
 
-    let 𝕊0_defC = (arg) => {
+    const 𝕊0_defC = (arg) => {
         if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
         return 𝕊0_defC_memo(arg);
     };
     let 𝕊0_defC_memo;
 
-    let 𝕊1 = (name) => {
+    const 𝕊1 = (name) => {
         switch (name) {
             case 'foo': return 𝕊1_foo;
             case 'bar': return 𝕊1_bar;
@@ -435,15 +435,15 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊1_foo = (arg) => {
+    const 𝕊1_foo = (arg) => {
         if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "foo";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere9 = inForm
+            const outFormHere10 = outForm
+            const checkInType11 = inFormHere9 !== 'txt';
+            const out = outFormHere10 === 'nil' ? undefined : "foo";
+            if (inFormHere9 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType11 && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 102) return false;
                 if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -457,15 +457,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊1_foo_memo;
 
-    let 𝕊1_bar = (arg) => {
+    const 𝕊1_bar = (arg) => {
         if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "bar";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere12 = inForm
+            const outFormHere13 = outForm
+            const checkInType14 = inFormHere12 !== 'txt';
+            const out = outFormHere13 === 'nil' ? undefined : "bar";
+            if (inFormHere12 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType14 && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -479,28 +479,28 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊1_bar_memo;
 
-    let 𝕊1_a = (arg) => {
+    const 𝕊1_a = (arg) => {
         if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
         return 𝕊1_a_memo(arg);
     };
     let 𝕊1_a_memo;
 
-    let 𝕊2 = (name) => {
+    const 𝕊2 = (name) => {
         switch (name) {
             case 'mem': return 𝕊2_mem;
             default: return undefined;
         }
     };
 
-    let 𝕊2_mem = (arg) => {
+    const 𝕊2_mem = (arg) => {
         if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "member";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere15 = inForm
+            const outFormHere16 = outForm
+            const checkInType17 = inFormHere15 !== 'txt';
+            const out = outFormHere16 === 'nil' ? undefined : "member";
+            if (inFormHere15 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType17 && typeof IN !== 'string') return false;
                 if (IP + 6 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 109) return false;
                 if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -517,33 +517,33 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊2_mem_memo;
 
-    let 𝕊3 = (name) => {
+    const 𝕊3 = (name) => {
         switch (name) {
             case 'a': return 𝕊3_a;
             default: return undefined;
         }
     };
 
-    let 𝕊3_a = (arg) => {
+    const 𝕊3_a = (arg) => {
         if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
         return 𝕊3_a_memo(arg);
     };
     let 𝕊3_a_memo;
 
-    let 𝕊4 = (name) => {
+    const 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
             default: return undefined;
         }
     };
 
-    let 𝕊4_b = (arg) => {
+    const 𝕊4_b = (arg) => {
         if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
         return 𝕊4_b_memo(arg);
     };
     let 𝕊4_b_memo;
 
-    let 𝕊5 = (name) => {
+    const 𝕊5 = (name) => {
         switch (name) {
             case 'c': return 𝕊5_c;
             case 'ref5': return 𝕊5_ref5;
@@ -552,25 +552,25 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊5_c = (arg) => {
+    const 𝕊5_c = (arg) => {
         if (!𝕊5_c_memo) 𝕊5_c_memo = 𝕊6;
         return 𝕊5_c_memo(arg);
     };
     let 𝕊5_c_memo;
 
-    let 𝕊5_ref5 = (arg) => {
+    const 𝕊5_ref5 = (arg) => {
         if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
         return 𝕊5_ref5_memo(arg);
     };
     let 𝕊5_ref5_memo;
 
-    let 𝕊5_ref6 = (arg) => {
+    const 𝕊5_ref6 = (arg) => {
         if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
         return 𝕊5_ref6_memo(arg);
     };
     let 𝕊5_ref6_memo;
 
-    let 𝕊6 = (name) => {
+    const 𝕊6 = (name) => {
         switch (name) {
             case 'c1': return 𝕊6_c1;
             case 'c2': return 𝕊6_c2;
@@ -581,15 +581,15 @@ function createProgram({inForm, outForm}) {
         }
     };
 
-    let 𝕊6_c1 = (arg) => {
+    const 𝕊6_c1 = (arg) => {
         if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "c1";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere18 = inForm
+            const outFormHere19 = outForm
+            const checkInType20 = inFormHere18 !== 'txt';
+            const out = outFormHere19 === 'nil' ? undefined : "c1";
+            if (inFormHere18 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType20 && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 49) return false;
@@ -602,15 +602,15 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊6_c1_memo;
 
-    let 𝕊6_c2 = (arg) => {
+    const 𝕊6_c2 = (arg) => {
         if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
-            const inFormHere = inForm
-            const outFormHere = outForm
-            const checkInType = inFormHere !== 'txt';
-            const out = outFormHere === 'nil' ? undefined : "c2";
-            if (inFormHere === 'nil') return function STR() { OUT = out; return true; }
+            const inFormHere21 = inForm
+            const outFormHere22 = outForm
+            const checkInType23 = inFormHere21 !== 'txt';
+            const out = outFormHere22 === 'nil' ? undefined : "c2";
+            if (inFormHere21 === 'nil') return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType && typeof IN !== 'string') return false;
+                if (checkInType23 && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
@@ -623,19 +623,19 @@ function createProgram({inForm, outForm}) {
     };
     let 𝕊6_c2_memo;
 
-    let 𝕊6_ref1 = (arg) => {
+    const 𝕊6_ref1 = (arg) => {
         if (!𝕊6_ref1_memo) 𝕊6_ref1_memo = 𝕊6('c1');
         return 𝕊6_ref1_memo(arg);
     };
     let 𝕊6_ref1_memo;
 
-    let 𝕊6_ref2 = (arg) => {
+    const 𝕊6_ref2 = (arg) => {
         if (!𝕊6_ref2_memo) 𝕊6_ref2_memo = 𝕊5('c')('c1');
         return 𝕊6_ref2_memo(arg);
     };
     let 𝕊6_ref2_memo;
 
-    let 𝕊6_ref3 = (arg) => {
+    const 𝕊6_ref3 = (arg) => {
         if (!𝕊6_ref3_memo) 𝕊6_ref3_memo = 𝕊0('defC')('c')('c1');
         return 𝕊6_ref3_memo(arg);
     };
