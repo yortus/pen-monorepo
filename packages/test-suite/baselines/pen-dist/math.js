@@ -669,7 +669,7 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- math.pen --------------------
 
-    function 𝕊0(name) {
+    let 𝕊0 = (name) => {
         switch (name) {
             case 'memoise': return 𝕊0_memoise;
             case 'f64': return 𝕊0_f64;
@@ -684,18 +684,21 @@ function createProgram({inForm, outForm}) {
             case 'factor': return 𝕊0_factor;
             default: return undefined;
         }
-    }
-    function 𝕊0_memoise(arg) { return 𝕊4('memoise')(arg); }
-    function 𝕊0_f64(arg) { return 𝕊4('f64')(arg); }
-    function 𝕊0_i32(arg) { return 𝕊4('i32')(arg); }
+    };
 
-    function 𝕊0_start(arg) {
+    let 𝕊0_memoise = (arg) => 𝕊4('memoise')(arg);
+
+    let 𝕊0_f64 = (arg) => 𝕊4('f64')(arg);
+
+    let 𝕊0_i32 = (arg) => 𝕊4('i32')(arg);
+
+    let 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr');
         return 𝕊0_start_memo(arg);
-    }
+    };
     let 𝕊0_start_memo;
 
-    function 𝕊0_expr(arg) {
+    let 𝕊0_expr = (arg) => {
         if (!𝕊0_expr_memo) 𝕊0_expr_memo = (𝕊0('memoise'))((() => {
             let expr0 = 𝕊0('add');
             let expr1 = 𝕊0('sub');
@@ -708,10 +711,10 @@ function createProgram({inForm, outForm}) {
             }
         })());
         return 𝕊0_expr_memo(arg);
-    }
+    };
     let 𝕊0_expr_memo;
 
-    function 𝕊0_add(arg) {
+    let 𝕊0_add = (arg) => {
         if (!𝕊0_add_memo) 𝕊0_add_memo = record({
             inForm,
             outForm,
@@ -772,10 +775,10 @@ function createProgram({inForm, outForm}) {
             ],
         });
         return 𝕊0_add_memo(arg);
-    }
+    };
     let 𝕊0_add_memo;
 
-    function 𝕊0_sub(arg) {
+    let 𝕊0_sub = (arg) => {
         if (!𝕊0_sub_memo) 𝕊0_sub_memo = record({
             inForm,
             outForm,
@@ -836,10 +839,10 @@ function createProgram({inForm, outForm}) {
             ],
         });
         return 𝕊0_sub_memo(arg);
-    }
+    };
     let 𝕊0_sub_memo;
 
-    function 𝕊0_term(arg) {
+    let 𝕊0_term = (arg) => {
         if (!𝕊0_term_memo) 𝕊0_term_memo = (𝕊0('memoise'))((() => {
             let expr0 = 𝕊0('mul');
             let expr1 = 𝕊0('div');
@@ -852,10 +855,10 @@ function createProgram({inForm, outForm}) {
             }
         })());
         return 𝕊0_term_memo(arg);
-    }
+    };
     let 𝕊0_term_memo;
 
-    function 𝕊0_mul(arg) {
+    let 𝕊0_mul = (arg) => {
         if (!𝕊0_mul_memo) 𝕊0_mul_memo = (() => {
             let expr0 = field({
                 inForm,
@@ -964,10 +967,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊0_mul_memo(arg);
-    }
+    };
     let 𝕊0_mul_memo;
 
-    function 𝕊0_div(arg) {
+    let 𝕊0_div = (arg) => {
         if (!𝕊0_div_memo) 𝕊0_div_memo = record({
             inForm,
             outForm,
@@ -1028,10 +1031,10 @@ function createProgram({inForm, outForm}) {
             ],
         });
         return 𝕊0_div_memo(arg);
-    }
+    };
     let 𝕊0_div_memo;
 
-    function 𝕊0_factor(arg) {
+    let 𝕊0_factor = (arg) => {
         if (!𝕊0_factor_memo) 𝕊0_factor_memo = (() => {
             let expr0 = (() => {
                 let expr0 = not({
@@ -1217,60 +1220,60 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊0_factor_memo(arg);
-    }
+    };
     let 𝕊0_factor_memo;
 
-    function 𝕊1(name) {
+    let 𝕊1 = (name) => {
         switch (name) {
             case 'base': return 𝕊1_base;
             case 'signed': return 𝕊1_signed;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊1_base(arg) {
+    let 𝕊1_base = (arg) => {
         if (!𝕊1_base_memo) 𝕊1_base_memo = numericLiteral({inForm, outForm, value: 16});
         return 𝕊1_base_memo(arg);
-    }
+    };
     let 𝕊1_base_memo;
 
-    function 𝕊1_signed(arg) {
+    let 𝕊1_signed = (arg) => {
         if (!𝕊1_signed_memo) 𝕊1_signed_memo = booleanLiteral({inForm, outForm, value: false});
         return 𝕊1_signed_memo(arg);
-    }
+    };
     let 𝕊1_signed_memo;
 
-    function 𝕊2(name) {
+    let 𝕊2 = (name) => {
         switch (name) {
             case 'base': return 𝕊2_base;
             case 'signed': return 𝕊2_signed;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊2_base(arg) {
+    let 𝕊2_base = (arg) => {
         if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({inForm, outForm, value: 2});
         return 𝕊2_base_memo(arg);
-    }
+    };
     let 𝕊2_base_memo;
 
-    function 𝕊2_signed(arg) {
+    let 𝕊2_signed = (arg) => {
         if (!𝕊2_signed_memo) 𝕊2_signed_memo = booleanLiteral({inForm, outForm, value: false});
         return 𝕊2_signed_memo(arg);
-    }
+    };
     let 𝕊2_signed_memo;
 
-    function 𝕊3(name) {
+    let 𝕊3 = (name) => {
         switch (name) {
             case 'signed': return 𝕊3_signed;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊3_signed(arg) {
+    let 𝕊3_signed = (arg) => {
         if (!𝕊3_signed_memo) 𝕊3_signed_memo = booleanLiteral({inForm, outForm, value: false});
         return 𝕊3_signed_memo(arg);
-    }
+    };
     let 𝕊3_signed_memo;
 
     const 𝕊4 = createExtension𝕊4({inForm, outForm});

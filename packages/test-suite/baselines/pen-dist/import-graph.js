@@ -669,7 +669,7 @@ function createProgram({inForm, outForm}) {
 
     // -------------------- index.pen --------------------
 
-    function 𝕊0(name) {
+    let 𝕊0 = (name) => {
         switch (name) {
             case 'foo': return 𝕊0_foo;
             case 'bar': return 𝕊0_bar;
@@ -685,25 +685,29 @@ function createProgram({inForm, outForm}) {
             case 'r2d': return 𝕊0_r2d;
             default: return undefined;
         }
-    }
-    function 𝕊0_foo(arg) { return 𝕊5('f')(arg); }
-    function 𝕊0_bar(arg) { return 𝕊5('b')(arg); }
-    function 𝕊0_baz(arg) { return 𝕊5('baz')(arg); }
-    function 𝕊0_char(arg) { return 𝕊7('char')(arg); }
+    };
 
-    function 𝕊0_start(arg) {
+    let 𝕊0_foo = (arg) => 𝕊5('f')(arg);
+
+    let 𝕊0_bar = (arg) => 𝕊5('b')(arg);
+
+    let 𝕊0_baz = (arg) => 𝕊5('baz')(arg);
+
+    let 𝕊0_char = (arg) => 𝕊7('char')(arg);
+
+    let 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('result');
         return 𝕊0_start_memo(arg);
-    }
+    };
     let 𝕊0_start_memo;
 
-    function 𝕊0_digit(arg) {
+    let 𝕊0_digit = (arg) => {
         if (!𝕊0_digit_memo) 𝕊0_digit_memo = (𝕊0('char'))(𝕊1);
         return 𝕊0_digit_memo(arg);
-    }
+    };
     let 𝕊0_digit_memo;
 
-    function 𝕊0_alpha(arg) {
+    let 𝕊0_alpha = (arg) => {
         if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
             let expr0 = (𝕊0('char'))(𝕊2);
             let expr1 = (𝕊0('char'))(𝕊3);
@@ -714,10 +718,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊0_alpha_memo(arg);
-    }
+    };
     let 𝕊0_alpha_memo;
 
-    function 𝕊0_result(arg) {
+    let 𝕊0_result = (arg) => {
         if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
             let expr0 = 𝕊0('bar');
             let expr1 = 𝕊0('baz');
@@ -731,10 +735,10 @@ function createProgram({inForm, outForm}) {
             }
         })());
         return 𝕊0_result_memo(arg);
-    }
+    };
     let 𝕊0_result_memo;
 
-    function 𝕊0_myList(arg) {
+    let 𝕊0_myList = (arg) => {
         if (!𝕊0_myList_memo) 𝕊0_myList_memo = list({
             inForm,
             outForm,
@@ -769,36 +773,36 @@ function createProgram({inForm, outForm}) {
             ],
         });
         return 𝕊0_myList_memo(arg);
-    }
+    };
     let 𝕊0_myList_memo;
 
-    function 𝕊0_rec(arg) {
+    let 𝕊0_rec = (arg) => {
         if (!𝕊0_rec_memo) 𝕊0_rec_memo = 𝕊4;
         return 𝕊0_rec_memo(arg);
-    }
+    };
     let 𝕊0_rec_memo;
 
-    function 𝕊0_r2(arg) {
+    let 𝕊0_r2 = (arg) => {
         if (!𝕊0_r2_memo) 𝕊0_r2_memo = 𝕊0('rec');
         return 𝕊0_r2_memo(arg);
-    }
+    };
     let 𝕊0_r2_memo;
 
-    function 𝕊0_r2d(arg) {
+    let 𝕊0_r2d = (arg) => {
         if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
         return 𝕊0_r2d_memo(arg);
-    }
+    };
     let 𝕊0_r2d_memo;
 
-    function 𝕊1(name) {
+    let 𝕊1 = (name) => {
         switch (name) {
             case 'min': return 𝕊1_min;
             case 'max': return 𝕊1_max;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊1_min(arg) {
+    let 𝕊1_min = (arg) => {
         if (!𝕊1_min_memo) 𝕊1_min_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -815,10 +819,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊1_min_memo(arg);
-    }
+    };
     let 𝕊1_min_memo;
 
-    function 𝕊1_max(arg) {
+    let 𝕊1_max = (arg) => {
         if (!𝕊1_max_memo) 𝕊1_max_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -835,18 +839,18 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊1_max_memo(arg);
-    }
+    };
     let 𝕊1_max_memo;
 
-    function 𝕊2(name) {
+    let 𝕊2 = (name) => {
         switch (name) {
             case 'min': return 𝕊2_min;
             case 'max': return 𝕊2_max;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊2_min(arg) {
+    let 𝕊2_min = (arg) => {
         if (!𝕊2_min_memo) 𝕊2_min_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -863,10 +867,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊2_min_memo(arg);
-    }
+    };
     let 𝕊2_min_memo;
 
-    function 𝕊2_max(arg) {
+    let 𝕊2_max = (arg) => {
         if (!𝕊2_max_memo) 𝕊2_max_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -883,18 +887,18 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊2_max_memo(arg);
-    }
+    };
     let 𝕊2_max_memo;
 
-    function 𝕊3(name) {
+    let 𝕊3 = (name) => {
         switch (name) {
             case 'min': return 𝕊3_min;
             case 'max': return 𝕊3_max;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊3_min(arg) {
+    let 𝕊3_min = (arg) => {
         if (!𝕊3_min_memo) 𝕊3_min_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -911,10 +915,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊3_min_memo(arg);
-    }
+    };
     let 𝕊3_min_memo;
 
-    function 𝕊3_max(arg) {
+    let 𝕊3_max = (arg) => {
         if (!𝕊3_max_memo) 𝕊3_max_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -931,18 +935,18 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊3_max_memo(arg);
-    }
+    };
     let 𝕊3_max_memo;
 
-    function 𝕊4(name) {
+    let 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
             case 'd': return 𝕊4_d;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊4_b(arg) {
+    let 𝕊4_b = (arg) => {
         if (!𝕊4_b_memo) 𝕊4_b_memo = (() => {
             const inFormHere = inForm !== "ast" ? "nil" : inForm
             const outFormHere = outForm !== "ast" ? "nil" : outForm
@@ -965,10 +969,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊4_b_memo(arg);
-    }
+    };
     let 𝕊4_b_memo;
 
-    function 𝕊4_d(arg) {
+    let 𝕊4_d = (arg) => {
         if (!𝕊4_d_memo) 𝕊4_d_memo = (() => {
             const inFormHere = inForm !== "ast" ? "nil" : inForm
             const outFormHere = outForm !== "ast" ? "nil" : outForm
@@ -991,21 +995,21 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊4_d_memo(arg);
-    }
+    };
     let 𝕊4_d_memo;
 
     // -------------------- a.pen --------------------
 
-    function 𝕊5(name) {
+    let 𝕊5 = (name) => {
         switch (name) {
             case 'f': return 𝕊5_f;
             case 'b': return 𝕊5_b;
             case 'baz': return 𝕊5_baz;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊5_f(arg) {
+    let 𝕊5_f = (arg) => {
         if (!𝕊5_f_memo) 𝕊5_f_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1024,10 +1028,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊5_f_memo(arg);
-    }
+    };
     let 𝕊5_f_memo;
 
-    function 𝕊5_b(arg) {
+    let 𝕊5_b = (arg) => {
         if (!𝕊5_b_memo) 𝕊5_b_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1046,10 +1050,10 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊5_b_memo(arg);
-    }
+    };
     let 𝕊5_b_memo;
 
-    function 𝕊5_baz(arg) {
+    let 𝕊5_baz = (arg) => {
         if (!𝕊5_baz_memo) 𝕊5_baz_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1068,80 +1072,80 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊5_baz_memo(arg);
-    }
+    };
     let 𝕊5_baz_memo;
 
     // -------------------- b.pen --------------------
 
-    function 𝕊6(name) {
+    let 𝕊6 = (name) => {
         switch (name) {
             default: return undefined;
         }
-    }
+    };
 
     const 𝕊7 = createExtension𝕊7({inForm, outForm});
 
     // -------------------- c.pen --------------------
 
-    function 𝕊8(name) {
+    let 𝕊8 = (name) => {
         switch (name) {
             default: return undefined;
         }
-    }
+    };
 
     // -------------------- d.pen --------------------
 
-    function 𝕊9(name) {
+    let 𝕊9 = (name) => {
         switch (name) {
             default: return undefined;
         }
-    }
+    };
 
     // -------------------- index.pen --------------------
 
-    function 𝕊10(name) {
+    let 𝕊10 = (name) => {
         switch (name) {
             case 'util': return 𝕊10_util;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊10_util(arg) {
+    let 𝕊10_util = (arg) => {
         if (!𝕊10_util_memo) 𝕊10_util_memo = 𝕊11;
         return 𝕊10_util_memo(arg);
-    }
+    };
     let 𝕊10_util_memo;
 
-    function 𝕊11(name) {
+    let 𝕊11 = (name) => {
         switch (name) {
             case 'util1': return 𝕊11_util1;
             case 'util2': return 𝕊11_util2;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊11_util1(arg) {
+    let 𝕊11_util1 = (arg) => {
         if (!𝕊11_util1_memo) 𝕊11_util1_memo = 𝕊12;
         return 𝕊11_util1_memo(arg);
-    }
+    };
     let 𝕊11_util1_memo;
 
-    function 𝕊11_util2(arg) {
+    let 𝕊11_util2 = (arg) => {
         if (!𝕊11_util2_memo) 𝕊11_util2_memo = 𝕊13;
         return 𝕊11_util2_memo(arg);
-    }
+    };
     let 𝕊11_util2_memo;
 
     // -------------------- util1.pen --------------------
 
-    function 𝕊12(name) {
+    let 𝕊12 = (name) => {
         switch (name) {
             case 'util1': return 𝕊12_util1;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊12_util1(arg) {
+    let 𝕊12_util1 = (arg) => {
         if (!𝕊12_util1_memo) 𝕊12_util1_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1162,19 +1166,19 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊12_util1_memo(arg);
-    }
+    };
     let 𝕊12_util1_memo;
 
     // -------------------- util2 --------------------
 
-    function 𝕊13(name) {
+    let 𝕊13 = (name) => {
         switch (name) {
             case 'util2': return 𝕊13_util2;
             default: return undefined;
         }
-    }
+    };
 
-    function 𝕊13_util2(arg) {
+    let 𝕊13_util2 = (arg) => {
         if (!𝕊13_util2_memo) 𝕊13_util2_memo = (() => {
             const inFormHere = inForm
             const outFormHere = outForm
@@ -1195,7 +1199,7 @@ function createProgram({inForm, outForm}) {
             }
         })();
         return 𝕊13_util2_memo(arg);
-    }
+    };
     let 𝕊13_util2_memo;
 
     // -------------------- Compile-time constants --------------------

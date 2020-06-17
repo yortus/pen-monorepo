@@ -93,14 +93,14 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
         Module: mod => {
             // Emit module definition
             let moduleScope = mod.meta.scope;
-            emit.down(2).text(`function ${moduleScope.id}(name) {`).indent();
+            emit.down(2).text(`let ${moduleScope.id} = (name) => {`).indent();
             emit.down(1).text(`switch (name) {`).indent();
             for (let sourceName of moduleScope.sourceNames.keys()) {
                 emit.down(1).text(`case '${sourceName}': return ${moduleScope.id}_${sourceName};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
 
             // Emit definitions for each module binding
             for (let {pattern, value} of mod.bindings) {
@@ -111,9 +111,9 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                         assert(symbol.kind === 'NameSymbol');
                         let {scope, sourceName} = symbol;
                         let qualName = `${scope.id}_${sourceName}`;
-                        emit.down(1).text(`function ${qualName}(arg) { return `);
+                        emit.down(2).text(`let ${qualName} = (arg) => `);
                         emitExpression(emit, value, symbolTable); // rhs *must* be a module
-                        emit.text(`('${name}')(arg); }`); // TODO: still needs fixing...
+                        emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
                     }
                 }
                 else if (pattern.kind === 'VariablePattern') {
@@ -121,11 +121,11 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     assert(symbol.kind === 'NameSymbol');
                     let {scope, sourceName} = symbol;
                     let qualName = `${scope.id}_${sourceName}`;
-                    emit.down(2).text(`function ${qualName}(arg) {`).indent();
+                    emit.down(2).text(`let ${qualName} = (arg) => {`).indent();
                     emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
                     emitExpression(emit, value, symbolTable);
                     emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
-                    emit.dedent().down(1).text('}');
+                    emit.dedent().down(1).text('};');
                     emit.down(1).text(`let ${qualName}_memo;`);
                 }
             }
