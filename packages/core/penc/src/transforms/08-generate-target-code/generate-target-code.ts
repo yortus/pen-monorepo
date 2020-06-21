@@ -16,11 +16,6 @@ type StringLiteralExpression = AstNodes.StringLiteralExpression<Metadata>;
 
 // TODO: doc...
 export function generateTargetCode(program: Program) {
-    return emitProgram(program);
-}
-
-
-function emitProgram(program: Program) {
     const emit = makeEmitter();
 
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
@@ -28,11 +23,29 @@ function emitProgram(program: Program) {
     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
-    // TODO: emit extensions
+    // TODO: emit extensions...
     emitExtensions(emit, program);
 
-    // TODO: emit prolog for `createProgram` function
-    emit.down(2).text('function createProgram({mode}) {').indent();
+    // TODO: temp testing... emit parse() fn and print() fn
+    emitProgram(emit, program, 'parse'); // TODO: remove magic nums
+    emitProgram(emit, program, 'print');
+
+    // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
+    emit.down(2).text(`// -------------------- Main exports --------------------`);
+    emit.down(1).text(`module.exports = {parse, print};`);
+
+    // All done.
+    return emit.down(1).toString();
+}
+
+
+function emitProgram(emit: Emitter, program: Program, mode: 'parse' | 'print') {
+
+    // TODO: emit prolog...
+    const argVar = mode === 'parse' ? 'text' : 'node';
+    emit.down(5).text(`// --------------------------------------------------------------------------------`);
+    emit.down(1).text(`function ${mode}(${argVar}) {`).indent();
+    emit.down(1).text(`const mode = ${mode === 'parse' ? 6 : 7};`); // TODO: remove magic nums
 
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
@@ -40,18 +53,15 @@ function emitProgram(program: Program) {
     // TODO: Emit compile-time constants...
     emitConstants(emit, program);
 
-    // TODO: emit epilog for `createProgram` function
+    // TODO: emit epilog...
     let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
     assert(start.kind === 'NameSymbol');
-    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
+    emit.down(2).text(`setState({ IN: ${argVar}, IP: 0 });`);
+    emit.down(1).text(`if (!${start.scope.id}('${start.sourceName}')()) throw new Error('${mode} failed');`);
+    emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
+    emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
+    emit.down(1).text(`return OUT;`);
     emit.dedent().down(1).text('}');
-
-    // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
-    emit.down(2).text(`// -------------------- Main exports --------------------`);
-    emit.down(1).text(`module.exports = createMainExports(createProgram);`);
-
-    // All done.
-    return emit.down(1).toString();
 }
 
 

@@ -306,7 +306,12 @@ function zeroOrOne({ expression }) {
 
 // -------------------- Extensions --------------------
 
-function createProgram({mode}) {
+
+
+
+// --------------------------------------------------------------------------------
+function parse(text) {
+    const mode = 6;
 
     // -------------------- compile-test.pen --------------------
 
@@ -637,8 +642,355 @@ function createProgram({mode}) {
     𝕊6('c1').constant = {value: "c1"};
     𝕊6('c2').constant = {value: "c2"};
 
-    return 𝕊0('start');
+    setState({ IN: text, IP: 0 });
+    if (!𝕊0('start')()) throw new Error('parse failed');
+    if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+    if (OUT === undefined) throw new Error('parse didn\'t return a value');
+    return OUT;
+}
+
+
+
+
+// --------------------------------------------------------------------------------
+function print(node) {
+    const mode = 7;
+
+    // -------------------- compile-test.pen --------------------
+
+    const 𝕊0 = (name) => {
+        switch (name) {
+            case 'start': return 𝕊0_start;
+            case 'expr': return 𝕊0_expr;
+            case 'a': return 𝕊0_a;
+            case 'b': return 𝕊0_b;
+            case 'baz': return 𝕊0_baz;
+            case 'modExprMem': return 𝕊0_modExprMem;
+            case 'recA': return 𝕊0_recA;
+            case 'recB': return 𝕊0_recB;
+            case 'refC': return 𝕊0_refC;
+            case 'defC': return 𝕊0_defC;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊0_start = (arg) => {
+        if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr')('foo');
+        return 𝕊0_start_memo(arg);
+    };
+    let 𝕊0_start_memo;
+
+    const 𝕊0_expr = (arg) => {
+        if (!𝕊0_expr_memo) 𝕊0_expr_memo = 𝕊1;
+        return 𝕊0_expr_memo(arg);
+    };
+    let 𝕊0_expr_memo;
+
+    const 𝕊0_a = (arg) => {
+        if (!𝕊0_a_memo) 𝕊0_a_memo = 𝕊0('b');
+        return 𝕊0_a_memo(arg);
+    };
+    let 𝕊0_a_memo;
+
+    const 𝕊0_b = (arg) => {
+        if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
+            const mode10 = mode & ~0;
+            const out = hasOutput(mode10) ? "b2" : undefined;
+            if (!hasInput(mode10)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode10) && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 50) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊0_b_memo(arg);
+    };
+    let 𝕊0_b_memo;
+
+    const 𝕊0_baz = (arg) => {
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
+            const mode11 = mode & ~0;
+            const out = hasOutput(mode11) ? "baz" : undefined;
+            if (!hasInput(mode11)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode11) && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 122) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊0_baz_memo(arg);
+    };
+    let 𝕊0_baz_memo;
+
+    const 𝕊0_modExprMem = (arg) => {
+        if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
+            const t12 = 𝕊0('expr')('foo');
+            const t13 = 𝕊2('mem');
+            const t14 = 𝕊0('baz');
+            return function SEL() {
+                if (t12()) return true;
+                if (t13()) return true;
+                if (t14()) return true;
+                return false;
+            }
+        })();
+        return 𝕊0_modExprMem_memo(arg);
+    };
+    let 𝕊0_modExprMem_memo;
+
+    const 𝕊0_recA = (arg) => {
+        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
+        return 𝕊0_recA_memo(arg);
+    };
+    let 𝕊0_recA_memo;
+
+    const 𝕊0_recB = (arg) => {
+        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
+        return 𝕊0_recB_memo(arg);
+    };
+    let 𝕊0_recB_memo;
+
+    const 𝕊0_refC = (arg) => {
+        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊0_refC_memo(arg);
+    };
+    let 𝕊0_refC_memo;
+
+    const 𝕊0_defC = (arg) => {
+        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
+        return 𝕊0_defC_memo(arg);
+    };
+    let 𝕊0_defC_memo;
+
+    const 𝕊1 = (name) => {
+        switch (name) {
+            case 'foo': return 𝕊1_foo;
+            case 'bar': return 𝕊1_bar;
+            case 'a': return 𝕊1_a;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊1_foo = (arg) => {
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
+            const mode15 = mode & ~0;
+            const out = hasOutput(mode15) ? "foo" : undefined;
+            if (!hasInput(mode15)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode15) && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 102) return false;
+                if (IN.charCodeAt(IP + 1) !== 111) return false;
+                if (IN.charCodeAt(IP + 2) !== 111) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊1_foo_memo(arg);
+    };
+    let 𝕊1_foo_memo;
+
+    const 𝕊1_bar = (arg) => {
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
+            const mode16 = mode & ~0;
+            const out = hasOutput(mode16) ? "bar" : undefined;
+            if (!hasInput(mode16)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode16) && typeof IN !== 'string') return false;
+                if (IP + 3 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                if (IN.charCodeAt(IP + 1) !== 97) return false;
+                if (IN.charCodeAt(IP + 2) !== 114) return false;
+                IP += 3;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊1_bar_memo(arg);
+    };
+    let 𝕊1_bar_memo;
+
+    const 𝕊1_a = (arg) => {
+        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
+        return 𝕊1_a_memo(arg);
+    };
+    let 𝕊1_a_memo;
+
+    const 𝕊2 = (name) => {
+        switch (name) {
+            case 'mem': return 𝕊2_mem;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊2_mem = (arg) => {
+        if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
+            const mode17 = mode & ~0;
+            const out = hasOutput(mode17) ? "member" : undefined;
+            if (!hasInput(mode17)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode17) && typeof IN !== 'string') return false;
+                if (IP + 6 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 109) return false;
+                if (IN.charCodeAt(IP + 1) !== 101) return false;
+                if (IN.charCodeAt(IP + 2) !== 109) return false;
+                if (IN.charCodeAt(IP + 3) !== 98) return false;
+                if (IN.charCodeAt(IP + 4) !== 101) return false;
+                if (IN.charCodeAt(IP + 5) !== 114) return false;
+                IP += 6;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊2_mem_memo(arg);
+    };
+    let 𝕊2_mem_memo;
+
+    const 𝕊3 = (name) => {
+        switch (name) {
+            case 'a': return 𝕊3_a;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊3_a = (arg) => {
+        if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
+        return 𝕊3_a_memo(arg);
+    };
+    let 𝕊3_a_memo;
+
+    const 𝕊4 = (name) => {
+        switch (name) {
+            case 'b': return 𝕊4_b;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊4_b = (arg) => {
+        if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
+        return 𝕊4_b_memo(arg);
+    };
+    let 𝕊4_b_memo;
+
+    const 𝕊5 = (name) => {
+        switch (name) {
+            case 'c': return 𝕊5_c;
+            case 'ref5': return 𝕊5_ref5;
+            case 'ref6': return 𝕊5_ref6;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊5_c = (arg) => {
+        if (!𝕊5_c_memo) 𝕊5_c_memo = 𝕊6;
+        return 𝕊5_c_memo(arg);
+    };
+    let 𝕊5_c_memo;
+
+    const 𝕊5_ref5 = (arg) => {
+        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
+        return 𝕊5_ref5_memo(arg);
+    };
+    let 𝕊5_ref5_memo;
+
+    const 𝕊5_ref6 = (arg) => {
+        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊5_ref6_memo(arg);
+    };
+    let 𝕊5_ref6_memo;
+
+    const 𝕊6 = (name) => {
+        switch (name) {
+            case 'c1': return 𝕊6_c1;
+            case 'c2': return 𝕊6_c2;
+            case 'ref1': return 𝕊6_ref1;
+            case 'ref2': return 𝕊6_ref2;
+            case 'ref3': return 𝕊6_ref3;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊6_c1 = (arg) => {
+        if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
+            const mode18 = mode & ~0;
+            const out = hasOutput(mode18) ? "c1" : undefined;
+            if (!hasInput(mode18)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode18) && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 99) return false;
+                if (IN.charCodeAt(IP + 1) !== 49) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊6_c1_memo(arg);
+    };
+    let 𝕊6_c1_memo;
+
+    const 𝕊6_c2 = (arg) => {
+        if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
+            const mode19 = mode & ~0;
+            const out = hasOutput(mode19) ? "c2" : undefined;
+            if (!hasInput(mode19)) return function STR() { OUT = out; return true; }
+            return function STR() {
+                if (isPrint(mode19) && typeof IN !== 'string') return false;
+                if (IP + 2 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 99) return false;
+                if (IN.charCodeAt(IP + 1) !== 50) return false;
+                IP += 2;
+                OUT = out;
+                return true;
+            }
+        })();
+        return 𝕊6_c2_memo(arg);
+    };
+    let 𝕊6_c2_memo;
+
+    const 𝕊6_ref1 = (arg) => {
+        if (!𝕊6_ref1_memo) 𝕊6_ref1_memo = 𝕊6('c1');
+        return 𝕊6_ref1_memo(arg);
+    };
+    let 𝕊6_ref1_memo;
+
+    const 𝕊6_ref2 = (arg) => {
+        if (!𝕊6_ref2_memo) 𝕊6_ref2_memo = 𝕊5('c')('c1');
+        return 𝕊6_ref2_memo(arg);
+    };
+    let 𝕊6_ref2_memo;
+
+    const 𝕊6_ref3 = (arg) => {
+        if (!𝕊6_ref3_memo) 𝕊6_ref3_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊6_ref3_memo(arg);
+    };
+    let 𝕊6_ref3_memo;
+
+    // -------------------- Compile-time constants --------------------
+    𝕊0('b').constant = {value: "b2"};
+    𝕊0('baz').constant = {value: "baz"};
+    𝕊1('foo').constant = {value: "foo"};
+    𝕊1('bar').constant = {value: "bar"};
+    𝕊2('mem').constant = {value: "member"};
+    𝕊6('c1').constant = {value: "c1"};
+    𝕊6('c2').constant = {value: "c2"};
+
+    setState({ IN: node, IP: 0 });
+    if (!𝕊0('start')()) throw new Error('print failed');
+    if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+    if (OUT === undefined) throw new Error('print didn\'t return a value');
+    return OUT;
 }
 
 // -------------------- Main exports --------------------
-module.exports = createMainExports(createProgram);
+module.exports = {parse, print};
