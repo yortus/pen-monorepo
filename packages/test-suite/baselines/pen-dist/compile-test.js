@@ -310,7 +310,7 @@ function zeroOrOne({ expression }) {
 
 
 // --------------------------------------------------------------------------------
-function parse(text) {
+const parse = (() => {
     const mode = 6;
 
     // -------------------- compile-test.pen --------------------
@@ -642,18 +642,14 @@ function parse(text) {
     𝕊6('c1').constant = {value: "c1"};
     𝕊6('c2').constant = {value: "c2"};
 
-    setState({ IN: text, IP: 0 });
-    if (!𝕊0('start')()) throw new Error('parse failed');
-    if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-    if (OUT === undefined) throw new Error('parse didn\'t return a value');
-    return OUT;
-}
+    return 𝕊0('start');
+})();
 
 
 
 
 // --------------------------------------------------------------------------------
-function print(node) {
+const print = (() => {
     const mode = 7;
 
     // -------------------- compile-test.pen --------------------
@@ -985,12 +981,23 @@ function print(node) {
     𝕊6('c1').constant = {value: "c1"};
     𝕊6('c2').constant = {value: "c2"};
 
-    setState({ IN: node, IP: 0 });
-    if (!𝕊0('start')()) throw new Error('print failed');
-    if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-    if (OUT === undefined) throw new Error('print didn\'t return a value');
-    return OUT;
-}
+    return 𝕊0('start');
+})();
 
 // -------------------- Main exports --------------------
-module.exports = {parse, print};
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};

@@ -32,7 +32,18 @@ export function generateTargetCode(program: Program) {
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
     emit.down(2).text(`// -------------------- Main exports --------------------`);
-    emit.down(1).text(`module.exports = {parse, print};`);
+    emit.down(1).text(`module.exports = {`).indent();
+    for (let mode of ['parse', 'print'] as const) {
+        const argVar = mode === 'parse' ? 'text' : 'node';
+        emit.down(1).text(`${mode}(${argVar}) {`).indent();
+        emit.down(1).text(`setState({ IN: ${argVar}, IP: 0 });`);
+        emit.down(1).text(`if (!${mode}()) throw new Error('${mode} failed');`);
+        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
+        emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
+        emit.down(1).text(`return OUT;`);
+        emit.dedent().down(1).text(`},`);
+    }
+    emit.dedent().down(1).text(`};`);
 
     // All done.
     return emit.down(1).toString();
@@ -42,9 +53,8 @@ export function generateTargetCode(program: Program) {
 function emitProgram(emit: Emitter, program: Program, mode: 'parse' | 'print') {
 
     // TODO: emit prolog...
-    const argVar = mode === 'parse' ? 'text' : 'node';
     emit.down(5).text(`// --------------------------------------------------------------------------------`);
-    emit.down(1).text(`function ${mode}(${argVar}) {`).indent();
+    emit.down(1).text(`const ${mode} = (() => {`).indent();
     emit.down(1).text(`const mode = ${mode === 'parse' ? 6 : 7};`); // TODO: remove magic nums
 
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
@@ -56,12 +66,8 @@ function emitProgram(emit: Emitter, program: Program, mode: 'parse' | 'print') {
     // TODO: emit epilog...
     let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
     assert(start.kind === 'NameSymbol');
-    emit.down(2).text(`setState({ IN: ${argVar}, IP: 0 });`);
-    emit.down(1).text(`if (!${start.scope.id}('${start.sourceName}')()) throw new Error('${mode} failed');`);
-    emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
-    emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
-    emit.down(1).text(`return OUT;`);
-    emit.dedent().down(1).text('}');
+    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
+    emit.dedent().down(1).text('})();');
 }
 
 
