@@ -1,8 +1,7 @@
 // TODO: doc... has only 'ast' representation
-function record(options: StaticOptions & {fields: Array<{name: string, value: Rule}>}): Rule {
-    const {fields} = options;
+function record({mode, fields}: StaticOptions & {fields: Array<{name: string, value: Rule}>}): Rule {
 
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+    if (isParse(mode)) {
         return function RCD() {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
@@ -17,7 +16,7 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Ru
         };
     }
 
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else /* isPrint */ {
         return function RCD() {
             if (!isPlainObject(IN)) return false;
             let stateₒ = getState();
@@ -58,6 +57,4 @@ function record(options: StaticOptions & {fields: Array<{name: string, value: Ru
             return true;
         };
     }
-
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

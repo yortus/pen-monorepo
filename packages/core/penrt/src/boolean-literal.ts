@@ -1,9 +1,8 @@
 // TODO: doc... has only 'ast' representation
-function booleanLiteral(options: StaticOptions & {value: boolean}): Rule {
-    const {value} = options;
-    const out = options.outForm === 'ast' ? value : undefined;
+function booleanLiteral({mode, value}: StaticOptions & {value: boolean}): Rule {
+    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
 
-    if (options.inForm !== 'ast') {
+    if (isParse(mode)) {
         return function BOO() { return OUT = out, true; };
     }
 

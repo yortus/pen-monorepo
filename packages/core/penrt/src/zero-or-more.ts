@@ -1,6 +1,5 @@
 // TODO: doc... this rule is representation-agnostic
-function zeroOrMore(options: StaticOptions & {expression: Rule}): Rule {
-    const {expression} = options;
+function zeroOrMore({expression}: StaticOptions & {expression: Rule}): Rule {
     return function O_M() {
         let stateₒ = getState();
         let out: unknown;

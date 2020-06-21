@@ -1,8 +1,8 @@
 // TODO: doc... has only 'ast' representation
-function nullLiteral(options: StaticOptions): Rule {
-    const out = options.outForm === 'ast' ? null : undefined;
+function nullLiteral({mode}: StaticOptions): Rule {
+    const out = isParse(mode) && hasAbstractForm(mode) ? null : undefined;
 
-    if (options.inForm !== 'ast') {
+    if (isParse(mode)) {
         return function NUL() { return OUT = out, true; };
     }
 

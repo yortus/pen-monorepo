@@ -1,9 +1,8 @@
 
 "use strict";
-function booleanLiteral(options) {
-    const { value } = options;
-    const out = options.outForm === 'ast' ? value : undefined;
-    if (options.inForm !== 'ast') {
+function booleanLiteral({ mode, value }) {
+    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
+    if (isParse(mode)) {
         return function BOO() { return OUT = out, true; };
     }
     return function BOO() {
@@ -15,8 +14,8 @@ function booleanLiteral(options) {
     };
 }
 function createMainExports(createProgram) {
-    const parse = createProgram({ inForm: 'txt', outForm: 'ast' });
-    const print = createProgram({ inForm: 'ast', outForm: 'txt' });
+    const parse = createProgram({ mode: PARSE });
+    const print = createProgram({ mode: PRINT });
     return {
         parse: (text) => {
             setState({ IN: text, IP: 0 });
@@ -40,9 +39,8 @@ function createMainExports(createProgram) {
         },
     };
 }
-function field(options) {
-    const { name, value } = options;
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+function field({ mode, name, value }) {
+    if (isParse(mode)) {
         return function FLD() {
             let stateₒ = getState();
             let obj = {};
@@ -58,7 +56,7 @@ function field(options) {
             return true;
         };
     }
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else {
         return function FLD() {
             if (!isPlainObject(IN))
                 return false;
@@ -95,12 +93,10 @@ function field(options) {
             return false;
         };
     }
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function list(options) {
-    const { elements } = options;
+function list({ mode, elements }) {
     const elementsLength = elements.length;
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+    if (isParse(mode)) {
         return function LST() {
             let stateₒ = getState();
             let arr = [];
@@ -114,7 +110,7 @@ function list(options) {
             return true;
         };
     }
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else {
         return function LST() {
             if (!Array.isArray(IN))
                 return false;
@@ -137,10 +133,8 @@ function list(options) {
             return true;
         };
     }
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
-function not(options) {
-    const { expression } = options;
+function not({ expression }) {
     return function NOT() {
         let stateₒ = getState();
         let result = !expression();
@@ -149,9 +143,9 @@ function not(options) {
         return result;
     };
 }
-function nullLiteral(options) {
-    const out = options.outForm === 'ast' ? null : undefined;
-    if (options.inForm !== 'ast') {
+function nullLiteral({ mode }) {
+    const out = isParse(mode) && hasAbstractForm(mode) ? null : undefined;
+    if (isParse(mode)) {
         return function NUL() { return OUT = out, true; };
     }
     return function NUL() {
@@ -162,10 +156,9 @@ function nullLiteral(options) {
         return true;
     };
 }
-function numericLiteral(options) {
-    const { value } = options;
-    const out = options.outForm === 'ast' ? value : undefined;
-    if (options.inForm !== 'ast') {
+function numericLiteral({ mode, value }) {
+    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
+    if (isParse(mode)) {
         return function NUM() { return OUT = out, true; };
     }
     return function NUM() {
@@ -176,9 +169,8 @@ function numericLiteral(options) {
         return true;
     };
 }
-function record(options) {
-    const { fields } = options;
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+function record({ mode, fields }) {
+    if (isParse(mode)) {
         return function RCD() {
             let stateₒ = getState();
             let obj = {};
@@ -193,7 +185,7 @@ function record(options) {
             return true;
         };
     }
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else {
         return function RCD() {
             if (!isPlainObject(IN))
                 return false;
@@ -225,8 +217,19 @@ function record(options) {
             return true;
         };
     }
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
+const PARSE = 6;
+const PRINT = 7;
+const COVAL = 4;
+const COGEN = 5;
+const ABGEN = 2;
+const ABVAL = 3;
+const isParse = (mode) => (mode & 1) === 0;
+const isPrint = (mode) => (mode & 1) !== 0;
+const hasConcreteForm = (mode) => (mode & 4) !== 0;
+const hasAbstractForm = (mode) => (mode & 2) !== 0;
+const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
+const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
 function isRule(_x) {
     return true;
 }
@@ -278,8 +281,7 @@ function isInputFullyConsumed() {
 function isPlainObject(value) {
     return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
 }
-function zeroOrMore(options) {
-    const { expression } = options;
+function zeroOrMore({ expression }) {
     return function O_M() {
         let stateₒ = getState();
         let out;
@@ -294,8 +296,7 @@ function zeroOrMore(options) {
         return true;
     };
 }
-function zeroOrOne(options) {
-    const { expression } = options;
+function zeroOrOne({ expression }) {
     return function O_1() {
         if (!expression())
             OUT = undefined;
@@ -316,8 +317,7 @@ const createExtension𝕊3 = (() => {
     // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
     // TODO: optimise 'any char' case better
     // TODO: optimise all cases better
-    function char(options) {
-        const checkInType = options.inForm !== 'txt';
+    function char({ mode }) {
         return function CHA_lambda(expr) {
             var _a, _b, _c, _d, _e, _f;
             assert(isModule(expr));
@@ -326,12 +326,12 @@ const createExtension𝕊3 = (() => {
             assert(typeof min === 'string' && min.length === 1);
             assert(typeof max === 'string' && max.length === 1);
             let checkRange = min !== '\u0000' || max !== '\uFFFF';
-            if (options.inForm === 'nil') {
-                const out = options.outForm === 'nil' ? undefined : min;
-                return function CHA() { return OUT = out, true; };
+            if (!hasInput(mode)) {
+                assert(hasOutput(mode));
+                return function CHA() { return OUT = min, true; };
             }
             return function CHA() {
-                if (checkInType && typeof IN !== 'string')
+                if (isPrint(mode) && typeof IN !== 'string')
                     return false;
                 if (IP < 0 || IP >= IN.length)
                     return false;
@@ -339,18 +339,19 @@ const createExtension𝕊3 = (() => {
                 if (checkRange && (c < min || c > max))
                     return false;
                 IP += 1;
-                OUT = options.outForm === 'nil' ? undefined : c;
+                OUT = hasOutput(mode) ? c : undefined;
                 return true;
             };
         };
     }
     // TODO: doc... has both 'txt' and 'ast' representation
-    function f64(options) {
-        if (options.inForm === 'nil') {
-            const out = options.outForm === 'nil' ? undefined : 0;
+    function f64({ mode }) {
+        if (!hasInput(mode)) {
+            assert(hasOutput(mode));
+            const out = isParse(mode) ? 0 : '0';
             return function F64() { return OUT = out, true; };
         }
-        if (options.inForm === 'txt' || options.outForm === 'ast') {
+        if (isParse(mode)) {
             return function F64() {
                 if (typeof IN !== 'string')
                     return false;
@@ -416,23 +417,22 @@ const createExtension𝕊3 = (() => {
                 if (!Number.isFinite(num))
                     return setState(stateₒ), false;
                 // Success
-                OUT = options.outForm === 'nil' ? undefined : num;
+                OUT = hasOutput(mode) ? num : undefined;
                 return true;
             };
         }
-        if (options.inForm === 'ast' || options.outForm === 'txt') {
+        else /* isPrint */ {
             return function F64() {
                 // Ensure N is a number.
                 if (typeof IN !== 'number' || IP !== 0)
                     return false;
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                OUT = options.outForm === 'nil' ? undefined : String(IN);
+                OUT = hasOutput(mode) ? String(IN) : undefined;
                 IP = 1;
                 return true;
             };
         }
-        throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
     }
     // These constants are used by the f64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
@@ -444,7 +444,7 @@ const createExtension𝕊3 = (() => {
     const UPPERCASE_E = 'E'.charCodeAt(0);
     // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
-    function i32(options) {
+    function i32({ mode }) {
         return function I32_lambda(expr) {
             var _a, _b, _c, _d, _e, _f;
             assert(isModule(expr));
@@ -452,11 +452,12 @@ const createExtension𝕊3 = (() => {
             let signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
             assert(typeof base === 'number' && base >= 2 && base <= 36);
             assert(typeof signed === 'boolean');
-            if (options.inForm === 'nil') {
-                const out = options.outForm === 'nil' ? undefined : 0;
+            if (!hasInput(mode)) {
+                assert(hasOutput(mode));
+                const out = isParse(mode) ? 0 : '0';
                 return function I32() { return OUT = out, true; };
             }
-            if (options.inForm === 'txt' || options.outForm === 'ast') {
+            if (isParse(mode)) {
                 return function I32() {
                     if (typeof IN !== 'string')
                         return false;
@@ -497,11 +498,11 @@ const createExtension𝕊3 = (() => {
                     if (isNegative)
                         num = -num;
                     // Success
-                    OUT = options.outForm === 'nil' ? undefined : num;
+                    OUT = hasOutput(mode) ? num : undefined;
                     return true;
                 };
             }
-            if (options.inForm === 'ast' || options.outForm === 'txt') {
+            else /* isPrint */ {
                 return function I32() {
                     if (typeof IN !== 'number' || IP !== 0)
                         return false;
@@ -531,12 +532,11 @@ const createExtension𝕊3 = (() => {
                     if (isNegative)
                         digits.push(0x2d); // char code for '-'
                     // TODO: is String.fromCharCode(...) performant?
-                    OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                    OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
                     IP = 1;
                     return true;
                 };
             }
-            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         };
     }
     // TODO: doc...
@@ -568,7 +568,7 @@ const createExtension𝕊3 = (() => {
         0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
         0x57, 0x58, 0x59, 0x5a,
     ];
-    function memoise(_options) {
+    function memoise({}) {
         return function MEM_lambda(expr) {
             // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
             const memos = new Map();
@@ -648,11 +648,11 @@ const createExtension𝕊3 = (() => {
         };
     }
 
-    return (staticOptions) => {
-        let _char = char(staticOptions);
-        let _f64 = f64(staticOptions);
-        let _i32 = i32(staticOptions);
-        let _memoise = memoise(staticOptions);
+    return ({mode}) => {
+        let _char = char({mode});
+        let _f64 = f64({mode});
+        let _i32 = i32({mode});
+        let _memoise = memoise({mode});
         return (name) => {
             switch(name) {
                 case 'char': return _char;
@@ -669,7 +669,7 @@ const createExtension𝕊4 = (() => {
     /* @pen exports = {
         unicode
     } */
-    function unicode(options) {
+    function unicode({ mode }) {
         return function UNI_lambda(expr) {
             var _a, _b, _c, _d, _e, _f;
             assert(isModule(expr));
@@ -682,7 +682,7 @@ const createExtension𝕊4 = (() => {
             // Construct a regex to match the digits
             let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
             let regex = RegExp(pattern, 'i');
-            if (options.inForm === 'txt' || options.outForm === 'ast') {
+            if (isParse(mode)) {
                 return function UNI() {
                     if (typeof IN !== 'string')
                         return false;
@@ -709,18 +709,17 @@ const createExtension𝕊4 = (() => {
                     return true;
                 };
             }
-            if (options.inForm === 'ast' || options.outForm === 'txt') {
+            else /* isPrint */ {
                 return function UNI() {
                     // TODO: implement
                     return false;
                 };
             }
-            throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
         };
     }
 
-    return (staticOptions) => {
-        let _unicode = unicode(staticOptions);
+    return ({mode}) => {
+        let _unicode = unicode({mode});
         return (name) => {
             switch(name) {
                 case 'unicode': return _unicode;
@@ -730,7 +729,7 @@ const createExtension𝕊4 = (() => {
     };
 })();
 
-function createProgram({inForm, outForm}) {
+function createProgram({mode}) {
 
     // -------------------- json.pen --------------------
 
@@ -771,15 +770,15 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
-            const t269 = 𝕊0('WS');
-            const t270 = 𝕊0('Value');
-            const t271 = 𝕊0('WS');
+            const t159 = 𝕊0('WS');
+            const t160 = 𝕊0('Value');
+            const t161 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t269()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t270()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t271()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t159()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t160()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t161()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -790,21 +789,21 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Value = (arg) => {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
-            const t272 = 𝕊0('False');
-            const t273 = 𝕊0('Null');
-            const t274 = 𝕊0('True');
-            const t275 = 𝕊0('Object');
-            const t276 = 𝕊0('Array');
-            const t277 = 𝕊0('Number');
-            const t278 = 𝕊0('String');
+            const t162 = 𝕊0('False');
+            const t163 = 𝕊0('Null');
+            const t164 = 𝕊0('True');
+            const t165 = 𝕊0('Object');
+            const t166 = 𝕊0('Array');
+            const t167 = 𝕊0('Number');
+            const t168 = 𝕊0('String');
             return function SEL() {
-                if (t272()) return true;
-                if (t273()) return true;
-                if (t274()) return true;
-                if (t275()) return true;
-                if (t276()) return true;
-                if (t277()) return true;
-                if (t278()) return true;
+                if (t162()) return true;
+                if (t163()) return true;
+                if (t164()) return true;
+                if (t165()) return true;
+                if (t166()) return true;
+                if (t167()) return true;
+                if (t168()) return true;
                 return false;
             }
         })();
@@ -814,14 +813,12 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_False = (arg) => {
         if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
-            const t279 = (() => {
-                const inFormHere281 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere282 = outForm !== "txt" ? "nil" : outForm
-                const checkInType283 = inFormHere281 !== 'txt';
-                const out = outFormHere282 === 'nil' ? undefined : "false";
-                if (inFormHere281 === 'nil') return function STR() { OUT = out; return true; }
+            const t169 = (() => {
+                const mode171 = mode & ~2;
+                const out = hasOutput(mode171) ? "false" : undefined;
+                if (!hasInput(mode171)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType283 && typeof IN !== 'string') return false;
+                    if (isPrint(mode171) && typeof IN !== 'string') return false;
                     if (IP + 5 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 102) return false;
                     if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -833,12 +830,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t280 = booleanLiteral({inForm, outForm, value: false});
+            const t170 = booleanLiteral({mode, value: false});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t279()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t280()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t169()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t170()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -849,14 +846,12 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Null = (arg) => {
         if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
-            const t284 = (() => {
-                const inFormHere286 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere287 = outForm !== "txt" ? "nil" : outForm
-                const checkInType288 = inFormHere286 !== 'txt';
-                const out = outFormHere287 === 'nil' ? undefined : "null";
-                if (inFormHere286 === 'nil') return function STR() { OUT = out; return true; }
+            const t172 = (() => {
+                const mode174 = mode & ~2;
+                const out = hasOutput(mode174) ? "null" : undefined;
+                if (!hasInput(mode174)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType288 && typeof IN !== 'string') return false;
+                    if (isPrint(mode174) && typeof IN !== 'string') return false;
                     if (IP + 4 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 110) return false;
                     if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -867,12 +862,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t285 = nullLiteral({inForm, outForm});
+            const t173 = nullLiteral({mode});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t284()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t285()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t172()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t173()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -883,14 +878,12 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_True = (arg) => {
         if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
-            const t289 = (() => {
-                const inFormHere291 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere292 = outForm !== "txt" ? "nil" : outForm
-                const checkInType293 = inFormHere291 !== 'txt';
-                const out = outFormHere292 === 'nil' ? undefined : "true";
-                if (inFormHere291 === 'nil') return function STR() { OUT = out; return true; }
+            const t175 = (() => {
+                const mode177 = mode & ~2;
+                const out = hasOutput(mode177) ? "true" : undefined;
+                if (!hasInput(mode177)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType293 && typeof IN !== 'string') return false;
+                    if (isPrint(mode177) && typeof IN !== 'string') return false;
                     if (IP + 4 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 116) return false;
                     if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -901,12 +894,12 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t290 = booleanLiteral({inForm, outForm, value: true});
+            const t176 = booleanLiteral({mode, value: true});
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t289()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t290()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t175()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t176()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -917,21 +910,20 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Object = (arg) => {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
-            const t294 = 𝕊0('LBRACE');
-            const t295 = (() => {
-                const t297 = (() => {
-                    const t299 = 𝕊0('Property');
-                    const t300 = zeroOrMore({
-                        inForm,
-                        outForm,
+            const t178 = 𝕊0('LBRACE');
+            const t179 = (() => {
+                const t181 = (() => {
+                    const t183 = 𝕊0('Property');
+                    const t184 = zeroOrMore({
+                        mode,
                         expression: (() => {
-                            const t301 = 𝕊0('COMMA');
-                            const t302 = 𝕊0('Property');
+                            const t185 = 𝕊0('COMMA');
+                            const t186 = 𝕊0('Property');
                             return function SEQ() {
                                 let stateₒ = getState();
                                 let out;
-                                if (t301()) out = concat(out, OUT); else return setState(stateₒ), false;
-                                if (t302()) out = concat(out, OUT); else return setState(stateₒ), false;
+                                if (t185()) out = concat(out, OUT); else return setState(stateₒ), false;
+                                if (t186()) out = concat(out, OUT); else return setState(stateₒ), false;
                                 OUT = out;
                                 return true;
                             }
@@ -940,30 +932,29 @@ function createProgram({inForm, outForm}) {
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t299()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t300()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t183()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t184()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     }
                 })();
-                const t298 = record({
-                    inForm,
-                    outForm,
+                const t182 = record({
+                    mode,
                     fields: [],
                 });
                 return function SEL() {
-                    if (t297()) return true;
-                    if (t298()) return true;
+                    if (t181()) return true;
+                    if (t182()) return true;
                     return false;
                 }
             })();
-            const t296 = 𝕊0('RBRACE');
+            const t180 = 𝕊0('RBRACE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t294()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t295()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t296()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t178()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t179()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t180()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -974,17 +965,16 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Property = (arg) => {
         if (!𝕊0_Property_memo) 𝕊0_Property_memo = field({
-            inForm,
-            outForm,
+            mode,
             name: 𝕊0('String'),
             value: (() => {
-                const t303 = 𝕊0('COLON');
-                const t304 = 𝕊0('Value');
+                const t187 = 𝕊0('COLON');
+                const t188 = 𝕊0('Value');
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t303()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t304()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t187()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t188()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
@@ -996,21 +986,20 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Array = (arg) => {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
-            const t305 = 𝕊0('LBRACKET');
-            const t306 = (() => {
-                const t308 = (() => {
-                    const t310 = 𝕊0('Element');
-                    const t311 = zeroOrMore({
-                        inForm,
-                        outForm,
+            const t189 = 𝕊0('LBRACKET');
+            const t190 = (() => {
+                const t192 = (() => {
+                    const t194 = 𝕊0('Element');
+                    const t195 = zeroOrMore({
+                        mode,
                         expression: (() => {
-                            const t312 = 𝕊0('COMMA');
-                            const t313 = 𝕊0('Element');
+                            const t196 = 𝕊0('COMMA');
+                            const t197 = 𝕊0('Element');
                             return function SEQ() {
                                 let stateₒ = getState();
                                 let out;
-                                if (t312()) out = concat(out, OUT); else return setState(stateₒ), false;
-                                if (t313()) out = concat(out, OUT); else return setState(stateₒ), false;
+                                if (t196()) out = concat(out, OUT); else return setState(stateₒ), false;
+                                if (t197()) out = concat(out, OUT); else return setState(stateₒ), false;
                                 OUT = out;
                                 return true;
                             }
@@ -1019,30 +1008,29 @@ function createProgram({inForm, outForm}) {
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t310()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t311()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t194()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t195()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     }
                 })();
-                const t309 = list({
-                    inForm,
-                    outForm,
+                const t193 = list({
+                    mode,
                     elements: [],
                 });
                 return function SEL() {
-                    if (t308()) return true;
-                    if (t309()) return true;
+                    if (t192()) return true;
+                    if (t193()) return true;
                     return false;
                 }
             })();
-            const t307 = 𝕊0('RBRACKET');
+            const t191 = 𝕊0('RBRACKET');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t305()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t306()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t307()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t189()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t190()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t191()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1053,8 +1041,7 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_Element = (arg) => {
         if (!𝕊0_Element_memo) 𝕊0_Element_memo = list({
-            inForm,
-            outForm,
+            mode,
             elements: [
                 𝕊0('Value'),
             ],
@@ -1071,19 +1058,18 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_String = (arg) => {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
-            const t314 = 𝕊0('DOUBLE_QUOTE');
-            const t315 = zeroOrMore({
-                inForm,
-                outForm,
+            const t198 = 𝕊0('DOUBLE_QUOTE');
+            const t199 = zeroOrMore({
+                mode,
                 expression: 𝕊0('CHAR'),
             });
-            const t316 = 𝕊0('DOUBLE_QUOTE');
+            const t200 = 𝕊0('DOUBLE_QUOTE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t314()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t315()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t316()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t198()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t199()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t200()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1094,18 +1080,15 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_CHAR = (arg) => {
         if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
-            const t317 = (() => {
-                const t327 = not({
-                    inForm,
-                    outForm,
+            const t201 = (() => {
+                const t211 = not({
+                    mode,
                     expression: (() => {
-                        const inFormHere330 = inForm
-                        const outFormHere331 = outForm
-                        const checkInType332 = inFormHere330 !== 'txt';
-                        const out = outFormHere331 === 'nil' ? undefined : "\\";
-                        if (inFormHere330 === 'nil') return function STR() { OUT = out; return true; }
+                        const mode214 = mode & ~0;
+                        const out = hasOutput(mode214) ? "\\" : undefined;
+                        if (!hasInput(mode214)) return function STR() { OUT = out; return true; }
                         return function STR() {
-                            if (checkInType332 && typeof IN !== 'string') return false;
+                            if (isPrint(mode214) && typeof IN !== 'string') return false;
                             if (IP + 1 > IN.length) return false;
                             if (IN.charCodeAt(IP + 0) !== 92) return false;
                             IP += 1;
@@ -1114,17 +1097,14 @@ function createProgram({inForm, outForm}) {
                         }
                     })(),
                 });
-                const t328 = not({
-                    inForm,
-                    outForm,
+                const t212 = not({
+                    mode,
                     expression: (() => {
-                        const inFormHere333 = inForm
-                        const outFormHere334 = outForm
-                        const checkInType335 = inFormHere333 !== 'txt';
-                        const out = outFormHere334 === 'nil' ? undefined : "\"";
-                        if (inFormHere333 === 'nil') return function STR() { OUT = out; return true; }
+                        const mode215 = mode & ~0;
+                        const out = hasOutput(mode215) ? "\"" : undefined;
+                        if (!hasInput(mode215)) return function STR() { OUT = out; return true; }
                         return function STR() {
-                            if (checkInType335 && typeof IN !== 'string') return false;
+                            if (isPrint(mode215) && typeof IN !== 'string') return false;
                             if (IP + 1 > IN.length) return false;
                             if (IN.charCodeAt(IP + 0) !== 34) return false;
                             IP += 1;
@@ -1133,26 +1113,24 @@ function createProgram({inForm, outForm}) {
                         }
                     })(),
                 });
-                const t329 = (𝕊0('char'))(𝕊1);
+                const t213 = (𝕊0('char'))(𝕊1);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t327()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t328()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t329()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t211()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t212()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t213()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t318 = (() => {
-                const t336 = (() => {
-                    const inFormHere338 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere339 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType340 = inFormHere338 !== 'txt';
-                    const out = outFormHere339 === 'nil' ? undefined : "\\\"";
-                    if (inFormHere338 === 'nil') return function STR() { OUT = out; return true; }
+            const t202 = (() => {
+                const t216 = (() => {
+                    const mode218 = mode & ~2;
+                    const out = hasOutput(mode218) ? "\\\"" : undefined;
+                    if (!hasInput(mode218)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType340 && typeof IN !== 'string') return false;
+                        if (isPrint(mode218) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -1161,14 +1139,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t337 = (() => {
-                    const inFormHere341 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere342 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType343 = inFormHere341 !== 'txt';
-                    const out = outFormHere342 === 'nil' ? undefined : "\"";
-                    if (inFormHere341 === 'nil') return function STR() { OUT = out; return true; }
+                const t217 = (() => {
+                    const mode219 = mode & ~4;
+                    const out = hasOutput(mode219) ? "\"" : undefined;
+                    if (!hasInput(mode219)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType343 && typeof IN !== 'string') return false;
+                        if (isPrint(mode219) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 34) return false;
                         IP += 1;
@@ -1179,21 +1155,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t336()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t337()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t216()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t217()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t319 = (() => {
-                const t344 = (() => {
-                    const inFormHere346 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere347 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType348 = inFormHere346 !== 'txt';
-                    const out = outFormHere347 === 'nil' ? undefined : "\\\\";
-                    if (inFormHere346 === 'nil') return function STR() { OUT = out; return true; }
+            const t203 = (() => {
+                const t220 = (() => {
+                    const mode222 = mode & ~2;
+                    const out = hasOutput(mode222) ? "\\\\" : undefined;
+                    if (!hasInput(mode222)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType348 && typeof IN !== 'string') return false;
+                        if (isPrint(mode222) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 92) return false;
@@ -1202,14 +1176,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t345 = (() => {
-                    const inFormHere349 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere350 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType351 = inFormHere349 !== 'txt';
-                    const out = outFormHere350 === 'nil' ? undefined : "\\";
-                    if (inFormHere349 === 'nil') return function STR() { OUT = out; return true; }
+                const t221 = (() => {
+                    const mode223 = mode & ~4;
+                    const out = hasOutput(mode223) ? "\\" : undefined;
+                    if (!hasInput(mode223)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType351 && typeof IN !== 'string') return false;
+                        if (isPrint(mode223) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         IP += 1;
@@ -1220,21 +1192,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t344()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t345()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t220()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t221()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t320 = (() => {
-                const t352 = (() => {
-                    const inFormHere354 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere355 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType356 = inFormHere354 !== 'txt';
-                    const out = outFormHere355 === 'nil' ? undefined : "\\/";
-                    if (inFormHere354 === 'nil') return function STR() { OUT = out; return true; }
+            const t204 = (() => {
+                const t224 = (() => {
+                    const mode226 = mode & ~2;
+                    const out = hasOutput(mode226) ? "\\/" : undefined;
+                    if (!hasInput(mode226)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType356 && typeof IN !== 'string') return false;
+                        if (isPrint(mode226) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 47) return false;
@@ -1243,14 +1213,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t353 = (() => {
-                    const inFormHere357 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere358 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType359 = inFormHere357 !== 'txt';
-                    const out = outFormHere358 === 'nil' ? undefined : "/";
-                    if (inFormHere357 === 'nil') return function STR() { OUT = out; return true; }
+                const t225 = (() => {
+                    const mode227 = mode & ~4;
+                    const out = hasOutput(mode227) ? "/" : undefined;
+                    if (!hasInput(mode227)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType359 && typeof IN !== 'string') return false;
+                        if (isPrint(mode227) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 47) return false;
                         IP += 1;
@@ -1261,21 +1229,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t352()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t353()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t224()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t225()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t321 = (() => {
-                const t360 = (() => {
-                    const inFormHere362 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere363 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType364 = inFormHere362 !== 'txt';
-                    const out = outFormHere363 === 'nil' ? undefined : "\\b";
-                    if (inFormHere362 === 'nil') return function STR() { OUT = out; return true; }
+            const t205 = (() => {
+                const t228 = (() => {
+                    const mode230 = mode & ~2;
+                    const out = hasOutput(mode230) ? "\\b" : undefined;
+                    if (!hasInput(mode230)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType364 && typeof IN !== 'string') return false;
+                        if (isPrint(mode230) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -1284,14 +1250,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t361 = (() => {
-                    const inFormHere365 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere366 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType367 = inFormHere365 !== 'txt';
-                    const out = outFormHere366 === 'nil' ? undefined : "\b";
-                    if (inFormHere365 === 'nil') return function STR() { OUT = out; return true; }
+                const t229 = (() => {
+                    const mode231 = mode & ~4;
+                    const out = hasOutput(mode231) ? "\b" : undefined;
+                    if (!hasInput(mode231)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType367 && typeof IN !== 'string') return false;
+                        if (isPrint(mode231) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 8) return false;
                         IP += 1;
@@ -1302,21 +1266,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t360()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t361()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t228()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t229()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t322 = (() => {
-                const t368 = (() => {
-                    const inFormHere370 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere371 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType372 = inFormHere370 !== 'txt';
-                    const out = outFormHere371 === 'nil' ? undefined : "\\f";
-                    if (inFormHere370 === 'nil') return function STR() { OUT = out; return true; }
+            const t206 = (() => {
+                const t232 = (() => {
+                    const mode234 = mode & ~2;
+                    const out = hasOutput(mode234) ? "\\f" : undefined;
+                    if (!hasInput(mode234)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType372 && typeof IN !== 'string') return false;
+                        if (isPrint(mode234) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 102) return false;
@@ -1325,14 +1287,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t369 = (() => {
-                    const inFormHere373 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere374 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType375 = inFormHere373 !== 'txt';
-                    const out = outFormHere374 === 'nil' ? undefined : "\f";
-                    if (inFormHere373 === 'nil') return function STR() { OUT = out; return true; }
+                const t233 = (() => {
+                    const mode235 = mode & ~4;
+                    const out = hasOutput(mode235) ? "\f" : undefined;
+                    if (!hasInput(mode235)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType375 && typeof IN !== 'string') return false;
+                        if (isPrint(mode235) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 12) return false;
                         IP += 1;
@@ -1343,21 +1303,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t368()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t369()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t232()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t233()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t323 = (() => {
-                const t376 = (() => {
-                    const inFormHere378 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere379 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType380 = inFormHere378 !== 'txt';
-                    const out = outFormHere379 === 'nil' ? undefined : "\\n";
-                    if (inFormHere378 === 'nil') return function STR() { OUT = out; return true; }
+            const t207 = (() => {
+                const t236 = (() => {
+                    const mode238 = mode & ~2;
+                    const out = hasOutput(mode238) ? "\\n" : undefined;
+                    if (!hasInput(mode238)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType380 && typeof IN !== 'string') return false;
+                        if (isPrint(mode238) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -1366,14 +1324,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t377 = (() => {
-                    const inFormHere381 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere382 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType383 = inFormHere381 !== 'txt';
-                    const out = outFormHere382 === 'nil' ? undefined : "\n";
-                    if (inFormHere381 === 'nil') return function STR() { OUT = out; return true; }
+                const t237 = (() => {
+                    const mode239 = mode & ~4;
+                    const out = hasOutput(mode239) ? "\n" : undefined;
+                    if (!hasInput(mode239)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType383 && typeof IN !== 'string') return false;
+                        if (isPrint(mode239) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 10) return false;
                         IP += 1;
@@ -1384,21 +1340,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t376()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t377()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t236()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t237()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t324 = (() => {
-                const t384 = (() => {
-                    const inFormHere386 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere387 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType388 = inFormHere386 !== 'txt';
-                    const out = outFormHere387 === 'nil' ? undefined : "\\r";
-                    if (inFormHere386 === 'nil') return function STR() { OUT = out; return true; }
+            const t208 = (() => {
+                const t240 = (() => {
+                    const mode242 = mode & ~2;
+                    const out = hasOutput(mode242) ? "\\r" : undefined;
+                    if (!hasInput(mode242)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType388 && typeof IN !== 'string') return false;
+                        if (isPrint(mode242) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -1407,14 +1361,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t385 = (() => {
-                    const inFormHere389 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere390 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType391 = inFormHere389 !== 'txt';
-                    const out = outFormHere390 === 'nil' ? undefined : "\r";
-                    if (inFormHere389 === 'nil') return function STR() { OUT = out; return true; }
+                const t241 = (() => {
+                    const mode243 = mode & ~4;
+                    const out = hasOutput(mode243) ? "\r" : undefined;
+                    if (!hasInput(mode243)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType391 && typeof IN !== 'string') return false;
+                        if (isPrint(mode243) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 13) return false;
                         IP += 1;
@@ -1425,21 +1377,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t384()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t385()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t240()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t241()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t325 = (() => {
-                const t392 = (() => {
-                    const inFormHere394 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere395 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType396 = inFormHere394 !== 'txt';
-                    const out = outFormHere395 === 'nil' ? undefined : "\\t";
-                    if (inFormHere394 === 'nil') return function STR() { OUT = out; return true; }
+            const t209 = (() => {
+                const t244 = (() => {
+                    const mode246 = mode & ~2;
+                    const out = hasOutput(mode246) ? "\\t" : undefined;
+                    if (!hasInput(mode246)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType396 && typeof IN !== 'string') return false;
+                        if (isPrint(mode246) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 116) return false;
@@ -1448,14 +1398,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t393 = (() => {
-                    const inFormHere397 = inForm !== "ast" ? "nil" : inForm
-                    const outFormHere398 = outForm !== "ast" ? "nil" : outForm
-                    const checkInType399 = inFormHere397 !== 'txt';
-                    const out = outFormHere398 === 'nil' ? undefined : "\t";
-                    if (inFormHere397 === 'nil') return function STR() { OUT = out; return true; }
+                const t245 = (() => {
+                    const mode247 = mode & ~4;
+                    const out = hasOutput(mode247) ? "\t" : undefined;
+                    if (!hasInput(mode247)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType399 && typeof IN !== 'string') return false;
+                        if (isPrint(mode247) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 9) return false;
                         IP += 1;
@@ -1466,21 +1414,19 @@ function createProgram({inForm, outForm}) {
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t392()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t393()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t244()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t245()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
-            const t326 = (() => {
-                const t400 = (() => {
-                    const inFormHere402 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere403 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType404 = inFormHere402 !== 'txt';
-                    const out = outFormHere403 === 'nil' ? undefined : "\\u";
-                    if (inFormHere402 === 'nil') return function STR() { OUT = out; return true; }
+            const t210 = (() => {
+                const t248 = (() => {
+                    const mode250 = mode & ~2;
+                    const out = hasOutput(mode250) ? "\\u" : undefined;
+                    if (!hasInput(mode250)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType404 && typeof IN !== 'string') return false;
+                        if (isPrint(mode250) && typeof IN !== 'string') return false;
                         if (IP + 2 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -1489,27 +1435,27 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t401 = (𝕊0('unicode'))(𝕊2);
+                const t249 = (𝕊0('unicode'))(𝕊2);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t400()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t401()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t248()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t249()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 }
             })();
             return function SEL() {
-                if (t317()) return true;
-                if (t318()) return true;
-                if (t319()) return true;
-                if (t320()) return true;
-                if (t321()) return true;
-                if (t322()) return true;
-                if (t323()) return true;
-                if (t324()) return true;
-                if (t325()) return true;
-                if (t326()) return true;
+                if (t201()) return true;
+                if (t202()) return true;
+                if (t203()) return true;
+                if (t204()) return true;
+                if (t205()) return true;
+                if (t206()) return true;
+                if (t207()) return true;
+                if (t208()) return true;
+                if (t209()) return true;
+                if (t210()) return true;
                 return false;
             }
         })();
@@ -1519,15 +1465,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
-            const t405 = 𝕊0('WS');
-            const t406 = (() => {
-                const inFormHere408 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere409 = outForm !== "txt" ? "nil" : outForm
-                const checkInType410 = inFormHere408 !== 'txt';
-                const out = outFormHere409 === 'nil' ? undefined : "{";
-                if (inFormHere408 === 'nil') return function STR() { OUT = out; return true; }
+            const t251 = 𝕊0('WS');
+            const t252 = (() => {
+                const mode254 = mode & ~2;
+                const out = hasOutput(mode254) ? "{" : undefined;
+                if (!hasInput(mode254)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType410 && typeof IN !== 'string') return false;
+                    if (isPrint(mode254) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 123) return false;
                     IP += 1;
@@ -1535,13 +1479,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t407 = 𝕊0('WS');
+            const t253 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t405()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t406()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t407()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t251()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t252()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t253()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1552,15 +1496,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_RBRACE = (arg) => {
         if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
-            const t411 = 𝕊0('WS');
-            const t412 = (() => {
-                const inFormHere414 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere415 = outForm !== "txt" ? "nil" : outForm
-                const checkInType416 = inFormHere414 !== 'txt';
-                const out = outFormHere415 === 'nil' ? undefined : "}";
-                if (inFormHere414 === 'nil') return function STR() { OUT = out; return true; }
+            const t255 = 𝕊0('WS');
+            const t256 = (() => {
+                const mode258 = mode & ~2;
+                const out = hasOutput(mode258) ? "}" : undefined;
+                if (!hasInput(mode258)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType416 && typeof IN !== 'string') return false;
+                    if (isPrint(mode258) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 125) return false;
                     IP += 1;
@@ -1568,13 +1510,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t413 = 𝕊0('WS');
+            const t257 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t411()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t412()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t413()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t255()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t256()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t257()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1585,15 +1527,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_LBRACKET = (arg) => {
         if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
-            const t417 = 𝕊0('WS');
-            const t418 = (() => {
-                const inFormHere420 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere421 = outForm !== "txt" ? "nil" : outForm
-                const checkInType422 = inFormHere420 !== 'txt';
-                const out = outFormHere421 === 'nil' ? undefined : "[";
-                if (inFormHere420 === 'nil') return function STR() { OUT = out; return true; }
+            const t259 = 𝕊0('WS');
+            const t260 = (() => {
+                const mode262 = mode & ~2;
+                const out = hasOutput(mode262) ? "[" : undefined;
+                if (!hasInput(mode262)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType422 && typeof IN !== 'string') return false;
+                    if (isPrint(mode262) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 91) return false;
                     IP += 1;
@@ -1601,13 +1541,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t419 = 𝕊0('WS');
+            const t261 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t417()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t418()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t419()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t259()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t260()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t261()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1618,15 +1558,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_RBRACKET = (arg) => {
         if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
-            const t423 = 𝕊0('WS');
-            const t424 = (() => {
-                const inFormHere426 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere427 = outForm !== "txt" ? "nil" : outForm
-                const checkInType428 = inFormHere426 !== 'txt';
-                const out = outFormHere427 === 'nil' ? undefined : "]";
-                if (inFormHere426 === 'nil') return function STR() { OUT = out; return true; }
+            const t263 = 𝕊0('WS');
+            const t264 = (() => {
+                const mode266 = mode & ~2;
+                const out = hasOutput(mode266) ? "]" : undefined;
+                if (!hasInput(mode266)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType428 && typeof IN !== 'string') return false;
+                    if (isPrint(mode266) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 93) return false;
                     IP += 1;
@@ -1634,13 +1572,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t425 = 𝕊0('WS');
+            const t265 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t423()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t424()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t425()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t263()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t264()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t265()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1651,15 +1589,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_COLON = (arg) => {
         if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
-            const t429 = 𝕊0('WS');
-            const t430 = (() => {
-                const inFormHere432 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere433 = outForm !== "txt" ? "nil" : outForm
-                const checkInType434 = inFormHere432 !== 'txt';
-                const out = outFormHere433 === 'nil' ? undefined : ":";
-                if (inFormHere432 === 'nil') return function STR() { OUT = out; return true; }
+            const t267 = 𝕊0('WS');
+            const t268 = (() => {
+                const mode270 = mode & ~2;
+                const out = hasOutput(mode270) ? ":" : undefined;
+                if (!hasInput(mode270)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType434 && typeof IN !== 'string') return false;
+                    if (isPrint(mode270) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 58) return false;
                     IP += 1;
@@ -1667,13 +1603,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t431 = 𝕊0('WS');
+            const t269 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t429()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t430()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t431()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t267()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t268()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t269()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1684,15 +1620,13 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_COMMA = (arg) => {
         if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
-            const t435 = 𝕊0('WS');
-            const t436 = (() => {
-                const inFormHere438 = inForm !== "txt" ? "nil" : inForm
-                const outFormHere439 = outForm !== "txt" ? "nil" : outForm
-                const checkInType440 = inFormHere438 !== 'txt';
-                const out = outFormHere439 === 'nil' ? undefined : ",";
-                if (inFormHere438 === 'nil') return function STR() { OUT = out; return true; }
+            const t271 = 𝕊0('WS');
+            const t272 = (() => {
+                const mode274 = mode & ~2;
+                const out = hasOutput(mode274) ? "," : undefined;
+                if (!hasInput(mode274)) return function STR() { OUT = out; return true; }
                 return function STR() {
-                    if (checkInType440 && typeof IN !== 'string') return false;
+                    if (isPrint(mode274) && typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 44) return false;
                     IP += 1;
@@ -1700,13 +1634,13 @@ function createProgram({inForm, outForm}) {
                     return true;
                 }
             })();
-            const t437 = 𝕊0('WS');
+            const t273 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t435()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t436()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t437()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t271()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t272()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t273()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             }
@@ -1717,13 +1651,11 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_DOUBLE_QUOTE = (arg) => {
         if (!𝕊0_DOUBLE_QUOTE_memo) 𝕊0_DOUBLE_QUOTE_memo = (() => {
-            const inFormHere441 = inForm !== "txt" ? "nil" : inForm
-            const outFormHere442 = outForm !== "txt" ? "nil" : outForm
-            const checkInType443 = inFormHere441 !== 'txt';
-            const out = outFormHere442 === 'nil' ? undefined : "\"";
-            if (inFormHere441 === 'nil') return function STR() { OUT = out; return true; }
+            const mode275 = mode & ~2;
+            const out = hasOutput(mode275) ? "\"" : undefined;
+            if (!hasInput(mode275)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType443 && typeof IN !== 'string') return false;
+                if (isPrint(mode275) && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 34) return false;
                 IP += 1;
@@ -1737,17 +1669,14 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊0_WS = (arg) => {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
-            inForm,
-            outForm,
+            mode,
             expression: (() => {
-                const t444 = (() => {
-                    const inFormHere448 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere449 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType450 = inFormHere448 !== 'txt';
-                    const out = outFormHere449 === 'nil' ? undefined : " ";
-                    if (inFormHere448 === 'nil') return function STR() { OUT = out; return true; }
+                const t276 = (() => {
+                    const mode280 = mode & ~2;
+                    const out = hasOutput(mode280) ? " " : undefined;
+                    if (!hasInput(mode280)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType450 && typeof IN !== 'string') return false;
+                        if (isPrint(mode280) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 32) return false;
                         IP += 1;
@@ -1755,14 +1684,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t445 = (() => {
-                    const inFormHere451 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere452 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType453 = inFormHere451 !== 'txt';
-                    const out = outFormHere452 === 'nil' ? undefined : "\t";
-                    if (inFormHere451 === 'nil') return function STR() { OUT = out; return true; }
+                const t277 = (() => {
+                    const mode281 = mode & ~2;
+                    const out = hasOutput(mode281) ? "\t" : undefined;
+                    if (!hasInput(mode281)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType453 && typeof IN !== 'string') return false;
+                        if (isPrint(mode281) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 9) return false;
                         IP += 1;
@@ -1770,14 +1697,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t446 = (() => {
-                    const inFormHere454 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere455 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType456 = inFormHere454 !== 'txt';
-                    const out = outFormHere455 === 'nil' ? undefined : "\n";
-                    if (inFormHere454 === 'nil') return function STR() { OUT = out; return true; }
+                const t278 = (() => {
+                    const mode282 = mode & ~2;
+                    const out = hasOutput(mode282) ? "\n" : undefined;
+                    if (!hasInput(mode282)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType456 && typeof IN !== 'string') return false;
+                        if (isPrint(mode282) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 10) return false;
                         IP += 1;
@@ -1785,14 +1710,12 @@ function createProgram({inForm, outForm}) {
                         return true;
                     }
                 })();
-                const t447 = (() => {
-                    const inFormHere457 = inForm !== "txt" ? "nil" : inForm
-                    const outFormHere458 = outForm !== "txt" ? "nil" : outForm
-                    const checkInType459 = inFormHere457 !== 'txt';
-                    const out = outFormHere458 === 'nil' ? undefined : "\r";
-                    if (inFormHere457 === 'nil') return function STR() { OUT = out; return true; }
+                const t279 = (() => {
+                    const mode283 = mode & ~2;
+                    const out = hasOutput(mode283) ? "\r" : undefined;
+                    if (!hasInput(mode283)) return function STR() { OUT = out; return true; }
                     return function STR() {
-                        if (checkInType459 && typeof IN !== 'string') return false;
+                        if (isPrint(mode283) && typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 13) return false;
                         IP += 1;
@@ -1801,10 +1724,10 @@ function createProgram({inForm, outForm}) {
                     }
                 })();
                 return function SEL() {
-                    if (t444()) return true;
-                    if (t445()) return true;
-                    if (t446()) return true;
-                    if (t447()) return true;
+                    if (t276()) return true;
+                    if (t277()) return true;
+                    if (t278()) return true;
+                    if (t279()) return true;
                     return false;
                 }
             })(),
@@ -1823,13 +1746,11 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊1_min = (arg) => {
         if (!𝕊1_min_memo) 𝕊1_min_memo = (() => {
-            const inFormHere460 = inForm
-            const outFormHere461 = outForm
-            const checkInType462 = inFormHere460 !== 'txt';
-            const out = outFormHere461 === 'nil' ? undefined : " ";
-            if (inFormHere460 === 'nil') return function STR() { OUT = out; return true; }
+            const mode284 = mode & ~0;
+            const out = hasOutput(mode284) ? " " : undefined;
+            if (!hasInput(mode284)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType462 && typeof IN !== 'string') return false;
+                if (isPrint(mode284) && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 32) return false;
                 IP += 1;
@@ -1843,13 +1764,11 @@ function createProgram({inForm, outForm}) {
 
     const 𝕊1_max = (arg) => {
         if (!𝕊1_max_memo) 𝕊1_max_memo = (() => {
-            const inFormHere463 = inForm
-            const outFormHere464 = outForm
-            const checkInType465 = inFormHere463 !== 'txt';
-            const out = outFormHere464 === 'nil' ? undefined : "￿";
-            if (inFormHere463 === 'nil') return function STR() { OUT = out; return true; }
+            const mode285 = mode & ~0;
+            const out = hasOutput(mode285) ? "￿" : undefined;
+            if (!hasInput(mode285)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (checkInType465 && typeof IN !== 'string') return false;
+                if (isPrint(mode285) && typeof IN !== 'string') return false;
                 if (IP + 1 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 65535) return false;
                 IP += 1;
@@ -1871,26 +1790,26 @@ function createProgram({inForm, outForm}) {
     };
 
     const 𝕊2_base = (arg) => {
-        if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({inForm, outForm, value: 16});
+        if (!𝕊2_base_memo) 𝕊2_base_memo = numericLiteral({mode, value: 16});
         return 𝕊2_base_memo(arg);
     };
     let 𝕊2_base_memo;
 
     const 𝕊2_minDigits = (arg) => {
-        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = numericLiteral({inForm, outForm, value: 4});
+        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = numericLiteral({mode, value: 4});
         return 𝕊2_minDigits_memo(arg);
     };
     let 𝕊2_minDigits_memo;
 
     const 𝕊2_maxDigits = (arg) => {
-        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = numericLiteral({inForm, outForm, value: 4});
+        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = numericLiteral({mode, value: 4});
         return 𝕊2_maxDigits_memo(arg);
     };
     let 𝕊2_maxDigits_memo;
 
-    const 𝕊3 = createExtension𝕊3({inForm, outForm});
+    const 𝕊3 = createExtension𝕊3({mode});
 
-    const 𝕊4 = createExtension𝕊4({inForm, outForm});
+    const 𝕊4 = createExtension𝕊4({mode});
 
     // -------------------- Compile-time constants --------------------
     𝕊0('DOUBLE_QUOTE').constant = {value: "\""};

@@ -1,11 +1,12 @@
 // TODO: doc... has both 'txt' and 'ast' representation
-function f64(options: StaticOptions): Rule {
-    if (options.inForm === 'nil') {
-        const out = options.outForm === 'nil' ? undefined : 0;
+function f64({mode}: StaticOptions): Rule {
+    if (!hasInput(mode)) {
+        assert(hasOutput(mode));
+        const out = isParse(mode) ? 0 : '0';
         return function F64() { return OUT = out, true; };
     }
 
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+    if (isParse(mode)) {
         return function F64() {
             if (typeof IN !== 'string') return false;
             let stateₒ = getState();
@@ -74,25 +75,23 @@ function f64(options: StaticOptions): Rule {
             if (!Number.isFinite(num)) return setState(stateₒ), false;
 
             // Success
-            OUT = options.outForm === 'nil' ? undefined : num;
+            OUT = hasOutput(mode) ? num : undefined;
             return true;
         };
     }
 
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else /* isPrint */ {
         return function F64() {
             // Ensure N is a number.
             if (typeof IN !== 'number' || IP !== 0) return false;
 
             // Delegate unparsing to the JS runtime.
             // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-            OUT = options.outForm === 'nil' ? undefined : String(IN);
+            OUT = hasOutput(mode) ? String(IN) : undefined;
             IP = 1;
             return true;
         };
     }
-
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }
 
 

@@ -1,8 +1,6 @@
 // TODO: doc... has only 'ast' representation
-function field(options: StaticOptions & {name: Rule, value: Rule}): Rule {
-    const {name, value} = options;
-
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+function field({mode, name, value}: StaticOptions & {name: Rule, value: Rule}): Rule {
+    if (isParse(mode)) {
         return function FLD() {
             let stateₒ = getState();
             let obj = {} as Record<string, unknown>;
@@ -20,7 +18,7 @@ function field(options: StaticOptions & {name: Rule, value: Rule}): Rule {
         };
     }
 
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else /* isPrint */ {
         return function FLD() {
             if (!isPlainObject(IN)) return false;
             let stateₒ = getState();
@@ -68,6 +66,4 @@ function field(options: StaticOptions & {name: Rule, value: Rule}): Rule {
             return false;
         };
     }
-
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

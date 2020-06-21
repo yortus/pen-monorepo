@@ -1,6 +1,6 @@
 function createMainExports(createProgram: (options: StaticOptions) => Rule) {
-    const parse = createProgram({inForm: 'txt', outForm: 'ast'});
-    const print = createProgram({inForm: 'ast', outForm: 'txt'});
+    const parse = createProgram({mode: PARSE});
+    const print = createProgram({mode: PRINT});
     return {
         // TODO: dedupe the two fns below? Only the error strings differ.
         // TODO: add more exports - check, generate, etc.

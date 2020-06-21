@@ -32,7 +32,7 @@ function emitProgram(program: Program) {
     emitExtensions(emit, program);
 
     // TODO: emit prolog for `createProgram` function
-    emit.down(2).text('function createProgram({inForm, outForm}) {').indent();
+    emit.down(2).text('function createProgram({mode}) {').indent();
 
     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
     emitSymbolDefinitions(emit, program);
@@ -63,8 +63,8 @@ function emitExtensions(emit: Emitter, program: Program) {
             emit.down(1).text(`const createExtension${ext.meta.scope.id} = (() => {`).indent();
             let content = fs.readFileSync(ext.path, 'utf8') + '\n';
             content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-            emit.down(2).text(`return (staticOptions) => {`).indent();
-            ext.exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}(staticOptions);`));
+            emit.down(2).text(`return ({mode}) => {`).indent();
+            ext.exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}({mode});`));
             emit.down(1).text(`return (name) => {`).indent();
             emit.down(1).text(`switch(name) {`).indent();
             ext.exportedNames.forEach(name => emit.down(1).text(`case '${name}': return _${name};`));
@@ -84,7 +84,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
     visitNode(program, rec => ({
         ExtensionFile: ext => {
             let scope = ext.meta.scope;
-            emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({inForm, outForm});`);
+            emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({mode});`);
         },
         PenSourceFile: sf => {
             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
@@ -175,12 +175,12 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'BooleanLiteralExpression':
-            emit.text(`booleanLiteral({inForm, outForm, value: ${expr.value}})`);
+            emit.text(`booleanLiteral({mode, value: ${expr.value}})`);
             return;
 
         case 'FieldExpression':
             emit.text('field({').indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
+            emit.down(1).text('mode,');
             emit.down(1).text('name: ');
             emitExpression(emit, expr.name, symbolTable);
             emit.text(',').down(1).text('value: ');
@@ -197,7 +197,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ListExpression':
             emit.text('list({').indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
+            emit.down(1).text('mode,');
             emit.down(1).text('elements: [');
             if (expr.elements.length > 0) {
                 emit.indent();
@@ -217,7 +217,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'NotExpression':
             emit.text(`not({`).indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
+            emit.down(1).text('mode,');
             emit.down(1).text('expression: ');
             emitExpression(emit, expr.expression, symbolTable);
             emit.text(',');
@@ -225,11 +225,11 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'NullLiteralExpression':
-            emit.text(`nullLiteral({inForm, outForm})`);
+            emit.text(`nullLiteral({mode})`);
             return;
 
         case 'NumericLiteralExpression':
-            emit.text(`numericLiteral({inForm, outForm, value: ${expr.value}})`);
+            emit.text(`numericLiteral({mode, value: ${expr.value}})`);
             return;
 
         case 'ParenthesisedExpression':
@@ -239,7 +239,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'QuantifiedExpression':
             emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
+            emit.down(1).text('mode,');
             emit.down(1).text('expression: ');
             emitExpression(emit, expr.expression, symbolTable);
             emit.text(',');
@@ -248,7 +248,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'RecordExpression':
             emit.text('record({').indent();
-            emit.down(1).text('inForm,').down(1).text('outForm,');
+            emit.down(1).text('mode,');
             emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
                 emit.indent();
@@ -331,20 +331,14 @@ function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolT
 
 
 function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpression) {
-
-    let m = `${expr.abstract ? `_ !== "ast" ? "nil" : ` : ''}_${expr.concrete ? ` !== "txt" ? "nil" : _` : ''}`;
     const length = expr.value.length;
-    const inFormHereVar = newId('inFormHere');
-    const outFormHereVar = newId('outFormHere');
-    const checkInTypeVar = newId('checkInType');
+    const modeVar = newId('mode');
     emit.text('(() => {').indent();
-    emit.down(1).text(`const ${inFormHereVar} = ${m.replace(/_/g, 'inForm')}`);
-    emit.down(1).text(`const ${outFormHereVar} = ${m.replace(/_/g, 'outForm')}`);
-    emit.down(1).text(`const ${checkInTypeVar} = ${inFormHereVar} !== 'txt';`);
-    emit.down(1).text(`const out = ${outFormHereVar} === 'nil' ? undefined : ${JSON.stringify(expr.value)};`);
-    emit.down(1).text(`if (${inFormHereVar} === 'nil') return function STR() { OUT = out; return true; }`);
+    emit.down(1).text(`const ${modeVar} = mode & ~${expr.abstract ? 4 : expr.concrete ? 2 : 0};`);
+    emit.down(1).text(`const out = hasOutput(${modeVar}) ? ${JSON.stringify(expr.value)} : undefined;`);
+    emit.down(1).text(`if (!hasInput(${modeVar})) return function STR() { OUT = out; return true; }`);
     emit.down(1).text('return function STR() {').indent();
-    emit.down(1).text(`if (${checkInTypeVar} && typeof IN !== 'string') return false;`);
+    emit.down(1).text(`if (isPrint(${modeVar}) && typeof IN !== 'string') return false;`);
     emit.down(1).text(`if (IP + ${length} > IN.length) return false;`);
     for (let i = 0; i < length; ++i) {
         emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);

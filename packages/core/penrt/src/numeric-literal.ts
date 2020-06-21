@@ -1,10 +1,9 @@
 // TODO: doc... has only 'ast' representation
 // TODO: support 'txt' representation too?
-function numericLiteral(options: StaticOptions & {value: number}): Rule {
-    const {value} = options;
-    const out = options.outForm === 'ast' ? value : undefined;
+function numericLiteral({mode, value}: StaticOptions & {value: number}): Rule {
+    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
 
-    if (options.inForm !== 'ast') {
+    if (isParse(mode)) {
         return function NUM() { return OUT = out, true; };
     }
 

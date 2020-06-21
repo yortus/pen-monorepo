@@ -1,9 +1,8 @@
 // TODO: doc... has only 'ast' representation
-function list(options: StaticOptions & {elements: Rule[]}): Rule {
-    const {elements} = options;
+function list({mode, elements}: StaticOptions & {elements: Rule[]}): Rule {
     const elementsLength = elements.length;
 
-    if (options.inForm === 'txt' || options.outForm === 'ast') {
+    if (isParse(mode)) {
         return function LST() {
             let stateₒ = getState();
             let arr = [] as unknown[];
@@ -17,7 +16,7 @@ function list(options: StaticOptions & {elements: Rule[]}): Rule {
         };
     }
 
-    if (options.inForm === 'ast' || options.outForm === 'txt') {
+    else /* isPrint */ {
         return function LST() {
             if (!Array.isArray(IN)) return false;
             if (IP < 0 || IP + elementsLength > IN.length) return false;
@@ -37,6 +36,4 @@ function list(options: StaticOptions & {elements: Rule[]}): Rule {
             return true;
         };
     }
-
-    throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
 }

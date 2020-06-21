@@ -1,4 +1,4 @@
-function unicode(options: StaticOptions): Lambda {
+function unicode({mode}: StaticOptions): Lambda {
     return function UNI_lambda(expr) {
         assert(isModule(expr));
         let base = expr('base')?.constant?.value as number;
@@ -12,7 +12,7 @@ function unicode(options: StaticOptions): Lambda {
         let pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
         let regex = RegExp(pattern, 'i');
 
-        if (options.inForm === 'txt' || options.outForm === 'ast') {
+        if (isParse(mode)) {
             return function UNI() {
                 if (typeof IN !== 'string') return false;
                 let stateₒ = getState();
@@ -38,13 +38,11 @@ function unicode(options: StaticOptions): Lambda {
             };
         }
 
-        if (options.inForm === 'ast' || options.outForm === 'txt') {
+        else /* isPrint */ {
             return function UNI() {
                 // TODO: implement
                 return false;
             };
         }
-
-        throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
     };
 }

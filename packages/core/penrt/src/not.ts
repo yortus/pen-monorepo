@@ -1,6 +1,5 @@
 // TODO: doc... this rule is representation-agnostic
-function not(options: StaticOptions & {expression: Rule}): Rule {
-    const {expression} = options;
+function not({expression}: StaticOptions & {expression: Rule}): Rule {
     return function NOT() {
         let stateₒ = getState();
         let result = !expression();

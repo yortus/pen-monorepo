@@ -2,7 +2,7 @@
 
 
 // TODO: doc... has both 'txt' and 'ast' representation
-function i32(options: StaticOptions): Lambda {
+function i32({mode}: StaticOptions): Lambda {
     return function I32_lambda(expr) {
         assert(isModule(expr));
         let base = expr('base')?.constant?.value as number | undefined ?? 10;
@@ -10,12 +10,13 @@ function i32(options: StaticOptions): Lambda {
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
-        if (options.inForm === 'nil') {
-            const out = options.outForm === 'nil' ? undefined : 0;
+        if (!hasInput(mode)) {
+            assert(hasOutput(mode));
+            const out = isParse(mode) ? 0 : '0';
             return function I32() { return OUT = out, true; };
         }
 
-        if (options.inForm === 'txt' || options.outForm === 'ast') {
+        if (isParse(mode)) {
             return function I32() {
                 if (typeof IN !== 'string') return false;
                 let stateₒ = getState();
@@ -59,12 +60,12 @@ function i32(options: StaticOptions): Lambda {
                 if (isNegative) num = -num;
 
                 // Success
-                OUT = options.outForm === 'nil' ? undefined : num;
+                OUT = hasOutput(mode) ? num : undefined;
                 return true;
             };
         }
 
-        if (options.inForm === 'ast' || options.outForm === 'txt') {
+        else /* isPrint */ {
             return function I32() {
                 if (typeof IN !== 'number' || IP !== 0) return false;
                 let num = IN;
@@ -92,13 +93,11 @@ function i32(options: StaticOptions): Lambda {
                 // Compute the final string.
                 if (isNegative) digits.push(0x2d); // char code for '-'
                 // TODO: is String.fromCharCode(...) performant?
-                OUT = options.outForm === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
+                OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
                 IP = 1;
                 return true;
             };
         }
-
-        throw new Error(`Unsupported operation '${options.inForm}'->'${options.outForm}'`);
     };
 }
 
