@@ -184,7 +184,7 @@ ImportExpression
     }
 
 NullLiteralExpression
-    = NULL   { return {kind: 'NullLiteralExpression', id: nextId()}; }
+    = NULL   { return {kind: 'NullLiteralExpression', id: nextId(), value: null}; }
 
 BooleanLiteralExpression
     = TRUE   { return {kind: 'BooleanLiteralExpression', id: nextId(), value: true}; }

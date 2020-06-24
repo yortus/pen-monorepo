@@ -203,6 +203,7 @@ export interface NotExpression<M extends Metadata = {}> {
 export interface NullLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'NullLiteralExpression';
     readonly id: number;
+    readonly value: null;
     readonly meta: M[this['kind']];
 }
 

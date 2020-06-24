@@ -1,18 +1,5 @@
 
 "use strict";
-function booleanLiteral({ mode, value }) {
-    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
-    if (isParse(mode)) {
-        return function BOO() { return OUT = out, true; };
-    }
-    return function BOO() {
-        if (IN !== value || IP !== 0)
-            return false;
-        IP += 1;
-        OUT = out;
-        return true;
-    };
-}
 function field({ mode, name, value }) {
     if (isParse(mode)) {
         return function FLD() {
@@ -115,32 +102,6 @@ function not({ expression }) {
         setState(stateₒ);
         OUT = undefined;
         return result;
-    };
-}
-function nullLiteral({ mode }) {
-    const out = isParse(mode) && hasAbstractForm(mode) ? null : undefined;
-    if (isParse(mode)) {
-        return function NUL() { return OUT = out, true; };
-    }
-    return function NUL() {
-        if (IN !== null || IP !== 0)
-            return false;
-        IP = 1;
-        OUT = out;
-        return true;
-    };
-}
-function numericLiteral({ mode, value }) {
-    const out = isParse(mode) && hasAbstractForm(mode) ? value : undefined;
-    if (isParse(mode)) {
-        return function NUM() { return OUT = out, true; };
-    }
-    return function NUM() {
-        if (IN !== value || IP !== 0)
-            return false;
-        IP = 1;
-        OUT = out;
-        return true;
     };
 }
 function record({ mode, fields }) {
@@ -323,32 +284,28 @@ const parse = (() => {
     let 𝕊0_a_memo;
 
     const 𝕊0_b = (arg) => {
-        if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
-            return function STR() {
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 50) return false;
-                IP += 2;
-                OUT = "b2";
-                return true;
-            }
-        })();
+        if (!𝕊0_b_memo) 𝕊0_b_memo = function STR() {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+            OUT = "b2";
+            return true;
+        };
         return 𝕊0_b_memo(arg);
     };
     let 𝕊0_b_memo;
 
     const 𝕊0_baz = (arg) => {
-        if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
-            return function STR() {
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 97) return false;
-                if (IN.charCodeAt(IP + 2) !== 122) return false;
-                IP += 3;
-                OUT = "baz";
-                return true;
-            }
-        })();
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = function STR() {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+            OUT = "baz";
+            return true;
+        };
         return 𝕊0_baz_memo(arg);
     };
     let 𝕊0_baz_memo;
@@ -403,33 +360,29 @@ const parse = (() => {
     };
 
     const 𝕊1_foo = (arg) => {
-        if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
-            return function STR() {
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 102) return false;
-                if (IN.charCodeAt(IP + 1) !== 111) return false;
-                if (IN.charCodeAt(IP + 2) !== 111) return false;
-                IP += 3;
-                OUT = "foo";
-                return true;
-            }
-        })();
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+            OUT = "foo";
+            return true;
+        };
         return 𝕊1_foo_memo(arg);
     };
     let 𝕊1_foo_memo;
 
     const 𝕊1_bar = (arg) => {
-        if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
-            return function STR() {
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 97) return false;
-                if (IN.charCodeAt(IP + 2) !== 114) return false;
-                IP += 3;
-                OUT = "bar";
-                return true;
-            }
-        })();
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+            OUT = "bar";
+            return true;
+        };
         return 𝕊1_bar_memo(arg);
     };
     let 𝕊1_bar_memo;
@@ -448,20 +401,18 @@ const parse = (() => {
     };
 
     const 𝕊2_mem = (arg) => {
-        if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
-            return function STR() {
-                if (IP + 6 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 109) return false;
-                if (IN.charCodeAt(IP + 1) !== 101) return false;
-                if (IN.charCodeAt(IP + 2) !== 109) return false;
-                if (IN.charCodeAt(IP + 3) !== 98) return false;
-                if (IN.charCodeAt(IP + 4) !== 101) return false;
-                if (IN.charCodeAt(IP + 5) !== 114) return false;
-                IP += 6;
-                OUT = "member";
-                return true;
-            }
-        })();
+        if (!𝕊2_mem_memo) 𝕊2_mem_memo = function STR() {
+            if (IP + 6 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 109) return false;
+            if (IN.charCodeAt(IP + 1) !== 101) return false;
+            if (IN.charCodeAt(IP + 2) !== 109) return false;
+            if (IN.charCodeAt(IP + 3) !== 98) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            if (IN.charCodeAt(IP + 5) !== 114) return false;
+            IP += 6;
+            OUT = "member";
+            return true;
+        };
         return 𝕊2_mem_memo(arg);
     };
     let 𝕊2_mem_memo;
@@ -531,31 +482,27 @@ const parse = (() => {
     };
 
     const 𝕊6_c1 = (arg) => {
-        if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
-            return function STR() {
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 99) return false;
-                if (IN.charCodeAt(IP + 1) !== 49) return false;
-                IP += 2;
-                OUT = "c1";
-                return true;
-            }
-        })();
+        if (!𝕊6_c1_memo) 𝕊6_c1_memo = function STR() {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 49) return false;
+            IP += 2;
+            OUT = "c1";
+            return true;
+        };
         return 𝕊6_c1_memo(arg);
     };
     let 𝕊6_c1_memo;
 
     const 𝕊6_c2 = (arg) => {
-        if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
-            return function STR() {
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 99) return false;
-                if (IN.charCodeAt(IP + 1) !== 50) return false;
-                IP += 2;
-                OUT = "c2";
-                return true;
-            }
-        })();
+        if (!𝕊6_c2_memo) 𝕊6_c2_memo = function STR() {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+            OUT = "c2";
+            return true;
+        };
         return 𝕊6_c2_memo(arg);
     };
     let 𝕊6_c2_memo;
@@ -633,34 +580,30 @@ const print = (() => {
     let 𝕊0_a_memo;
 
     const 𝕊0_b = (arg) => {
-        if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 50) return false;
-                IP += 2;
-                OUT = "b2";
-                return true;
-            }
-        })();
+        if (!𝕊0_b_memo) 𝕊0_b_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+            OUT = "b2";
+            return true;
+        };
         return 𝕊0_b_memo(arg);
     };
     let 𝕊0_b_memo;
 
     const 𝕊0_baz = (arg) => {
-        if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 97) return false;
-                if (IN.charCodeAt(IP + 2) !== 122) return false;
-                IP += 3;
-                OUT = "baz";
-                return true;
-            }
-        })();
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+            OUT = "baz";
+            return true;
+        };
         return 𝕊0_baz_memo(arg);
     };
     let 𝕊0_baz_memo;
@@ -715,35 +658,31 @@ const print = (() => {
     };
 
     const 𝕊1_foo = (arg) => {
-        if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 102) return false;
-                if (IN.charCodeAt(IP + 1) !== 111) return false;
-                if (IN.charCodeAt(IP + 2) !== 111) return false;
-                IP += 3;
-                OUT = "foo";
-                return true;
-            }
-        })();
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+            OUT = "foo";
+            return true;
+        };
         return 𝕊1_foo_memo(arg);
     };
     let 𝕊1_foo_memo;
 
     const 𝕊1_bar = (arg) => {
-        if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 3 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 98) return false;
-                if (IN.charCodeAt(IP + 1) !== 97) return false;
-                if (IN.charCodeAt(IP + 2) !== 114) return false;
-                IP += 3;
-                OUT = "bar";
-                return true;
-            }
-        })();
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+            OUT = "bar";
+            return true;
+        };
         return 𝕊1_bar_memo(arg);
     };
     let 𝕊1_bar_memo;
@@ -762,21 +701,19 @@ const print = (() => {
     };
 
     const 𝕊2_mem = (arg) => {
-        if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 6 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 109) return false;
-                if (IN.charCodeAt(IP + 1) !== 101) return false;
-                if (IN.charCodeAt(IP + 2) !== 109) return false;
-                if (IN.charCodeAt(IP + 3) !== 98) return false;
-                if (IN.charCodeAt(IP + 4) !== 101) return false;
-                if (IN.charCodeAt(IP + 5) !== 114) return false;
-                IP += 6;
-                OUT = "member";
-                return true;
-            }
-        })();
+        if (!𝕊2_mem_memo) 𝕊2_mem_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 6 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 109) return false;
+            if (IN.charCodeAt(IP + 1) !== 101) return false;
+            if (IN.charCodeAt(IP + 2) !== 109) return false;
+            if (IN.charCodeAt(IP + 3) !== 98) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            if (IN.charCodeAt(IP + 5) !== 114) return false;
+            IP += 6;
+            OUT = "member";
+            return true;
+        };
         return 𝕊2_mem_memo(arg);
     };
     let 𝕊2_mem_memo;
@@ -846,33 +783,29 @@ const print = (() => {
     };
 
     const 𝕊6_c1 = (arg) => {
-        if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 99) return false;
-                if (IN.charCodeAt(IP + 1) !== 49) return false;
-                IP += 2;
-                OUT = "c1";
-                return true;
-            }
-        })();
+        if (!𝕊6_c1_memo) 𝕊6_c1_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 49) return false;
+            IP += 2;
+            OUT = "c1";
+            return true;
+        };
         return 𝕊6_c1_memo(arg);
     };
     let 𝕊6_c1_memo;
 
     const 𝕊6_c2 = (arg) => {
-        if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
-            return function STR() {
-                if (typeof IN !== 'string') return false;
-                if (IP + 2 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 99) return false;
-                if (IN.charCodeAt(IP + 1) !== 50) return false;
-                IP += 2;
-                OUT = "c2";
-                return true;
-            }
-        })();
+        if (!𝕊6_c2_memo) 𝕊6_c2_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+            OUT = "c2";
+            return true;
+        };
         return 𝕊6_c2_memo(arg);
     };
     let 𝕊6_c2_memo;
