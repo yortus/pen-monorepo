@@ -285,7 +285,6 @@ function zeroOrOne({ expression }) {
 
 // --------------------------------------------------------------------------------
 const parse = (() => {
-    const mode = 6;
 
     // -------------------- compile-test.pen --------------------
 
@@ -325,16 +324,12 @@ const parse = (() => {
 
     const 𝕊0_b = (arg) => {
         if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
-            const mode0 = mode & ~0;
-            const out = hasOutput(mode0) ? "b2" : undefined;
-            if (!hasInput(mode0)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode0) && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "b2";
                 return true;
             }
         })();
@@ -344,17 +339,13 @@ const parse = (() => {
 
     const 𝕊0_baz = (arg) => {
         if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
-            const mode1 = mode & ~0;
-            const out = hasOutput(mode1) ? "baz" : undefined;
-            if (!hasInput(mode1)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode1) && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
                 if (IN.charCodeAt(IP + 2) !== 122) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "baz";
                 return true;
             }
         })();
@@ -364,13 +355,13 @@ const parse = (() => {
 
     const 𝕊0_modExprMem = (arg) => {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
-            const t2 = 𝕊0('expr')('foo');
-            const t3 = 𝕊2('mem');
-            const t4 = 𝕊0('baz');
+            const t0 = 𝕊0('expr')('foo');
+            const t1 = 𝕊2('mem');
+            const t2 = 𝕊0('baz');
             return function SEL() {
+                if (t0()) return true;
+                if (t1()) return true;
                 if (t2()) return true;
-                if (t3()) return true;
-                if (t4()) return true;
                 return false;
             }
         })();
@@ -413,17 +404,13 @@ const parse = (() => {
 
     const 𝕊1_foo = (arg) => {
         if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
-            const mode5 = mode & ~0;
-            const out = hasOutput(mode5) ? "foo" : undefined;
-            if (!hasInput(mode5)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode5) && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 102) return false;
                 if (IN.charCodeAt(IP + 1) !== 111) return false;
                 if (IN.charCodeAt(IP + 2) !== 111) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "foo";
                 return true;
             }
         })();
@@ -433,17 +420,13 @@ const parse = (() => {
 
     const 𝕊1_bar = (arg) => {
         if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
-            const mode6 = mode & ~0;
-            const out = hasOutput(mode6) ? "bar" : undefined;
-            if (!hasInput(mode6)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode6) && typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
                 if (IN.charCodeAt(IP + 2) !== 114) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "bar";
                 return true;
             }
         })();
@@ -466,11 +449,7 @@ const parse = (() => {
 
     const 𝕊2_mem = (arg) => {
         if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
-            const mode7 = mode & ~0;
-            const out = hasOutput(mode7) ? "member" : undefined;
-            if (!hasInput(mode7)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode7) && typeof IN !== 'string') return false;
                 if (IP + 6 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 109) return false;
                 if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -479,7 +458,7 @@ const parse = (() => {
                 if (IN.charCodeAt(IP + 4) !== 101) return false;
                 if (IN.charCodeAt(IP + 5) !== 114) return false;
                 IP += 6;
-                OUT = out;
+                OUT = "member";
                 return true;
             }
         })();
@@ -553,16 +532,12 @@ const parse = (() => {
 
     const 𝕊6_c1 = (arg) => {
         if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
-            const mode8 = mode & ~0;
-            const out = hasOutput(mode8) ? "c1" : undefined;
-            if (!hasInput(mode8)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode8) && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 49) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "c1";
                 return true;
             }
         })();
@@ -572,16 +547,12 @@ const parse = (() => {
 
     const 𝕊6_c2 = (arg) => {
         if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
-            const mode9 = mode & ~0;
-            const out = hasOutput(mode9) ? "c2" : undefined;
-            if (!hasInput(mode9)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode9) && typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "c2";
                 return true;
             }
         })();
@@ -624,7 +595,6 @@ const parse = (() => {
 
 // --------------------------------------------------------------------------------
 const print = (() => {
-    const mode = 7;
 
     // -------------------- compile-test.pen --------------------
 
@@ -664,16 +634,13 @@ const print = (() => {
 
     const 𝕊0_b = (arg) => {
         if (!𝕊0_b_memo) 𝕊0_b_memo = (() => {
-            const mode10 = mode & ~0;
-            const out = hasOutput(mode10) ? "b2" : undefined;
-            if (!hasInput(mode10)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode10) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "b2";
                 return true;
             }
         })();
@@ -683,17 +650,14 @@ const print = (() => {
 
     const 𝕊0_baz = (arg) => {
         if (!𝕊0_baz_memo) 𝕊0_baz_memo = (() => {
-            const mode11 = mode & ~0;
-            const out = hasOutput(mode11) ? "baz" : undefined;
-            if (!hasInput(mode11)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode11) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
                 if (IN.charCodeAt(IP + 2) !== 122) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "baz";
                 return true;
             }
         })();
@@ -703,13 +667,13 @@ const print = (() => {
 
     const 𝕊0_modExprMem = (arg) => {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
-            const t12 = 𝕊0('expr')('foo');
-            const t13 = 𝕊2('mem');
-            const t14 = 𝕊0('baz');
+            const t3 = 𝕊0('expr')('foo');
+            const t4 = 𝕊2('mem');
+            const t5 = 𝕊0('baz');
             return function SEL() {
-                if (t12()) return true;
-                if (t13()) return true;
-                if (t14()) return true;
+                if (t3()) return true;
+                if (t4()) return true;
+                if (t5()) return true;
                 return false;
             }
         })();
@@ -752,17 +716,14 @@ const print = (() => {
 
     const 𝕊1_foo = (arg) => {
         if (!𝕊1_foo_memo) 𝕊1_foo_memo = (() => {
-            const mode15 = mode & ~0;
-            const out = hasOutput(mode15) ? "foo" : undefined;
-            if (!hasInput(mode15)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode15) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 102) return false;
                 if (IN.charCodeAt(IP + 1) !== 111) return false;
                 if (IN.charCodeAt(IP + 2) !== 111) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "foo";
                 return true;
             }
         })();
@@ -772,17 +733,14 @@ const print = (() => {
 
     const 𝕊1_bar = (arg) => {
         if (!𝕊1_bar_memo) 𝕊1_bar_memo = (() => {
-            const mode16 = mode & ~0;
-            const out = hasOutput(mode16) ? "bar" : undefined;
-            if (!hasInput(mode16)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode16) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 3 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 98) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
                 if (IN.charCodeAt(IP + 2) !== 114) return false;
                 IP += 3;
-                OUT = out;
+                OUT = "bar";
                 return true;
             }
         })();
@@ -805,11 +763,8 @@ const print = (() => {
 
     const 𝕊2_mem = (arg) => {
         if (!𝕊2_mem_memo) 𝕊2_mem_memo = (() => {
-            const mode17 = mode & ~0;
-            const out = hasOutput(mode17) ? "member" : undefined;
-            if (!hasInput(mode17)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode17) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 6 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 109) return false;
                 if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -818,7 +773,7 @@ const print = (() => {
                 if (IN.charCodeAt(IP + 4) !== 101) return false;
                 if (IN.charCodeAt(IP + 5) !== 114) return false;
                 IP += 6;
-                OUT = out;
+                OUT = "member";
                 return true;
             }
         })();
@@ -892,16 +847,13 @@ const print = (() => {
 
     const 𝕊6_c1 = (arg) => {
         if (!𝕊6_c1_memo) 𝕊6_c1_memo = (() => {
-            const mode18 = mode & ~0;
-            const out = hasOutput(mode18) ? "c1" : undefined;
-            if (!hasInput(mode18)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode18) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 49) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "c1";
                 return true;
             }
         })();
@@ -911,16 +863,13 @@ const print = (() => {
 
     const 𝕊6_c2 = (arg) => {
         if (!𝕊6_c2_memo) 𝕊6_c2_memo = (() => {
-            const mode19 = mode & ~0;
-            const out = hasOutput(mode19) ? "c2" : undefined;
-            if (!hasInput(mode19)) return function STR() { OUT = out; return true; }
             return function STR() {
-                if (isPrint(mode19) && typeof IN !== 'string') return false;
+                if (typeof IN !== 'string') return false;
                 if (IP + 2 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 99) return false;
                 if (IN.charCodeAt(IP + 1) !== 50) return false;
                 IP += 2;
-                OUT = out;
+                OUT = "c2";
                 return true;
             }
         })();

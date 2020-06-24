@@ -5,6 +5,8 @@ import {SymbolTable} from '../../symbol-table';
 import {assert, makeNodeVisitor} from '../../utils';
 import {Metadata} from '../07-check-semantics';
 import {Emitter, makeEmitter} from './emitter';
+import {Mode, PARSE, PRINT} from './modes';
+import * as modes from './modes';
 
 
 type Program = AstNodes.Program<Metadata>;
@@ -27,19 +29,20 @@ export function generateTargetCode(program: Program) {
     emitExtensions(emit, program);
 
     // TODO: temp testing... emit parse() fn and print() fn
-    emitProgram(emit, program, 'parse'); // TODO: remove magic nums
-    emitProgram(emit, program, 'print');
+    emitProgram(emit, program, PARSE);
+    emitProgram(emit, program, PRINT);
 
     // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
     emit.down(2).text(`// -------------------- Main exports --------------------`);
     emit.down(1).text(`module.exports = {`).indent();
-    for (let mode of ['parse', 'print'] as const) {
-        const argVar = mode === 'parse' ? 'text' : 'node';
-        emit.down(1).text(`${mode}(${argVar}) {`).indent();
-        emit.down(1).text(`setState({ IN: ${argVar}, IP: 0 });`);
-        emit.down(1).text(`if (!${mode}()) throw new Error('${mode} failed');`);
-        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
-        emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
+    for (let mode of [PARSE, PRINT] as const) {
+        const fname = mode === PARSE ? 'parse' : 'print';
+        const paramName = mode === PARSE ? 'text' : 'node';
+        emit.down(1).text(`${fname}(${paramName}) {`).indent();
+        emit.down(1).text(`setState({ IN: ${paramName}, IP: 0 });`);
+        emit.down(1).text(`if (!${fname}()) throw new Error('${fname} failed');`);
+        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${fname} didn\\\'t consume entire input');`);
+        emit.down(1).text(`if (OUT === undefined) throw new Error('${fname} didn\\\'t return a value');`);
         emit.down(1).text(`return OUT;`);
         emit.dedent().down(1).text(`},`);
     }
@@ -47,27 +50,6 @@ export function generateTargetCode(program: Program) {
 
     // All done.
     return emit.down(1).toString();
-}
-
-
-function emitProgram(emit: Emitter, program: Program, mode: 'parse' | 'print') {
-
-    // TODO: emit prolog...
-    emit.down(5).text(`// --------------------------------------------------------------------------------`);
-    emit.down(1).text(`const ${mode} = (() => {`).indent();
-    emit.down(1).text(`const mode = ${mode === 'parse' ? 6 : 7};`); // TODO: remove magic nums
-
-    // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
-    emitSymbolDefinitions(emit, program);
-
-    // TODO: Emit compile-time constants...
-    emitConstants(emit, program);
-
-    // TODO: emit epilog...
-    let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
-    assert(start.kind === 'NameSymbol');
-    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
-    emit.dedent().down(1).text('})();');
 }
 
 
@@ -94,13 +76,33 @@ function emitExtensions(emit: Emitter, program: Program) {
 }
 
 
-function emitSymbolDefinitions(emit: Emitter, program: Program) {
+function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
+
+    // TODO: emit prolog...
+    emit.down(5).text(`// --------------------------------------------------------------------------------`);
+    emit.down(1).text(`const ${mode === PARSE ? 'parse' : 'print'} = (() => {`).indent();
+
+    // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
+    emitSymbolDefinitions(emit, program, mode);
+
+    // TODO: Emit compile-time constants...
+    emitConstants(emit, program);
+
+    // TODO: emit epilog...
+    let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
+    assert(start.kind === 'NameSymbol');
+    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
+    emit.dedent().down(1).text('})();');
+}
+
+
+function emitSymbolDefinitions(emit: Emitter, program: Program, mode: Mode) {
     const {symbolTable} = program.meta;
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     visitNode(program, rec => ({
         ExtensionFile: ext => {
             let scope = ext.meta.scope;
-            emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({mode});`);
+            emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({mode: ${mode}});`);
         },
         PenSourceFile: sf => {
             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
@@ -128,7 +130,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                         let {scope, sourceName} = symbol;
                         let qualName = `${scope.id}_${sourceName}`;
                         emit.down(2).text(`const ${qualName} = (arg) => `);
-                        emitExpression(emit, value, symbolTable); // rhs *must* be a module
+                        emitExpression(emit, value, symbolTable, mode); // rhs *must* be a module
                         emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
                     }
                 }
@@ -139,7 +141,7 @@ function emitSymbolDefinitions(emit: Emitter, program: Program) {
                     let qualName = `${scope.id}_${sourceName}`;
                     emit.down(2).text(`const ${qualName} = (arg) => {`).indent();
                     emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
-                    emitExpression(emit, value, symbolTable);
+                    emitExpression(emit, value, symbolTable, mode);
                     emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
                     emit.dedent().down(1).text('};');
                     emit.down(1).text(`let ${qualName}_memo;`);
@@ -175,32 +177,32 @@ function emitConstants(emit: Emitter, program: Program) {
 }
 
 
-function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable) {
+function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable, mode: Mode) {
     switch (expr.kind) {
         case 'ApplicationExpression':
             emit.text('(');
-            emitExpression(emit, expr.lambda, symbolTable);
+            emitExpression(emit, expr.lambda, symbolTable, mode);
             emit.text(')(');
-            emitExpression(emit, expr.argument, symbolTable);
+            emitExpression(emit, expr.argument, symbolTable, mode);
             emit.text(`)`);
             return;
 
         case 'BindingLookupExpression':
-            emitExpression(emit, expr.module, symbolTable);
+            emitExpression(emit, expr.module, symbolTable, mode);
             emit.text(`('${expr.bindingName}')`);
             return;
 
         case 'BooleanLiteralExpression':
-            emit.text(`booleanLiteral({mode, value: ${expr.value}})`);
+            emit.text(`booleanLiteral({mode: ${mode}, value: ${expr.value}})`);                                         // <====== TODO: inline emit
             return;
 
         case 'FieldExpression':
             emit.text('field({').indent();
-            emit.down(1).text('mode,');
+            emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('name: ');
-            emitExpression(emit, expr.name, symbolTable);
+            emitExpression(emit, expr.name, symbolTable, mode);
             emit.text(',').down(1).text('value: ');
-            emitExpression(emit, expr.value, symbolTable);
+            emitExpression(emit, expr.value, symbolTable, mode);
             emit.text(',').dedent().down(1).text('})');
             return;
 
@@ -213,13 +215,13 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 
         case 'ListExpression':
             emit.text('list({').indent();
-            emit.down(1).text('mode,');
+            emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('elements: [');
             if (expr.elements.length > 0) {
                 emit.indent();
                 for (let element of expr.elements) {
                     emit.down(1);
-                    emitExpression(emit, element, symbolTable);
+                    emitExpression(emit, element, symbolTable, mode);
                     emit.text(',');
                 }
                 emit.dedent().down(1);
@@ -231,40 +233,40 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(expr.module.meta.scope.id);
             return;
 
-        case 'NotExpression':
+        case 'NotExpression':                                                                                           // <====== TODO: inline emit
             emit.text(`not({`).indent();
-            emit.down(1).text('mode,');
+            emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('expression: ');
-            emitExpression(emit, expr.expression, symbolTable);
+            emitExpression(emit, expr.expression, symbolTable, mode);
             emit.text(',');
             emit.dedent().down(1).text('})');
             return;
 
-        case 'NullLiteralExpression':
-            emit.text(`nullLiteral({mode})`);
+        case 'NullLiteralExpression':                                                                                   // <====== TODO: inline emit
+            emit.text(`nullLiteral({mode: ${mode}})`);
             return;
 
-        case 'NumericLiteralExpression':
-            emit.text(`numericLiteral({mode, value: ${expr.value}})`);
+        case 'NumericLiteralExpression':                                                                                // <====== TODO: inline emit
+            emit.text(`numericLiteral({mode: ${mode}, value: ${expr.value}})`);
             return;
 
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
-            emitExpression(emit, expr.expression, symbolTable);
+            emitExpression(emit, expr.expression, symbolTable, mode);
             return;
 
         case 'QuantifiedExpression':
             emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-            emit.down(1).text('mode,');
+            emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('expression: ');
-            emitExpression(emit, expr.expression, symbolTable);
+            emitExpression(emit, expr.expression, symbolTable, mode);
             emit.text(',');
             emit.dedent().down(1).text('})');
             return;
 
         case 'RecordExpression':
             emit.text('record({').indent();
-            emit.down(1).text('mode,');
+            emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
                 emit.indent();
@@ -272,7 +274,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
                     emit.down(1).text('{').indent();
                     emit.down(1).text(`name: '${field.name}',`);
                     emit.down(1).text(`value: `);
-                    emitExpression(emit, field.value, symbolTable);
+                    emitExpression(emit, field.value, symbolTable, mode);
                     emit.text(',').dedent().down(1).text('},');
                 }
                 emit.dedent().down(1);
@@ -287,15 +289,15 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             return;
 
         case 'SelectionExpression':
-            emitSelectionExpression(emit, expr, symbolTable);
+            emitSelectionExpression(emit, expr, symbolTable, mode);
             return;
 
         case 'SequenceExpression':
-            emitSequenceExpression(emit, expr, symbolTable);
+            emitSequenceExpression(emit, expr, symbolTable, mode);
             return;
 
         case 'StringLiteralExpression': {
-            emitStringLiteralExpression(emit, expr);
+            emitStringLiteralExpression(emit, expr, mode);
             return;
         }
 
@@ -305,13 +307,13 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
 }
 
 
-function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable) {
+function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable, mode: Mode) {
     const arity = expr.expressions.length;
     const exprVars = expr.expressions.map(_ => newId());
     emit.text('(() => {').indent();
     for (let i = 0; i < arity; ++i) {
         emit.down(1).text(`const ${exprVars[i]} = `);
-        emitExpression(emit, expr.expressions[i], symbolTable);
+        emitExpression(emit, expr.expressions[i], symbolTable, mode);
         emit.text(';');
     }
     emit.down(1).text('return function SEL() {').indent();
@@ -324,13 +326,13 @@ function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbo
 }
 
 
-function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolTable: SymbolTable) {
+function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolTable: SymbolTable, mode: Mode) {
     const arity = expr.expressions.length;
     const exprVars = expr.expressions.map(_ => newId());
     emit.text('(() => {').indent();
     for (let i = 0; i < arity; ++i) {
         emit.down(1).text(`const ${exprVars[i]} = `);
-        emitExpression(emit, expr.expressions[i], symbolTable);
+        emitExpression(emit, expr.expressions[i], symbolTable, mode);
         emit.text(';');
     }
     emit.down(1).text('return function SEQ() {').indent();
@@ -346,23 +348,27 @@ function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolT
 }
 
 
-function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpression) {
+function emitStringLiteralExpression(emit: Emitter, expr: StringLiteralExpression, mode: Mode) {
     const length = expr.value.length;
-    const modeVar = newId('mode');
+    const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
+    const outText = modes.hasOutput(localMode) ? JSON.stringify(expr.value) : 'undefined';
+
     emit.text('(() => {').indent();
-    emit.down(1).text(`const ${modeVar} = mode & ~${expr.abstract ? 4 : expr.concrete ? 2 : 0};`);
-    emit.down(1).text(`const out = hasOutput(${modeVar}) ? ${JSON.stringify(expr.value)} : undefined;`);
-    emit.down(1).text(`if (!hasInput(${modeVar})) return function STR() { OUT = out; return true; }`);
-    emit.down(1).text('return function STR() {').indent();
-    emit.down(1).text(`if (isPrint(${modeVar}) && typeof IN !== 'string') return false;`);
-    emit.down(1).text(`if (IP + ${length} > IN.length) return false;`);
-    for (let i = 0; i < length; ++i) {
-        emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+    if (!modes.hasInput(localMode)) {
+        emit.down(1).text(`return function STR() { OUT = ${outText}; return true; };`);
     }
-    emit.down(1).text(`IP += ${length};`);
-    emit.down(1).text(`OUT = out;`);
-    emit.down(1).text(`return true;`);
-    emit.dedent().down(1).text('}');
+    else {
+        emit.down(1).text('return function STR() {').indent();
+        if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
+        emit.down(1).text(`if (IP + ${length} > IN.length) return false;`);
+        for (let i = 0; i < length; ++i) {
+            emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+        }
+        emit.down(1).text(`IP += ${length};`);
+        emit.down(1).text(`OUT = ${outText};`);
+        emit.down(1).text(`return true;`);
+        emit.dedent().down(1).text('}');
+    }
     emit.dedent().down(1).text('})()');
 }
 
