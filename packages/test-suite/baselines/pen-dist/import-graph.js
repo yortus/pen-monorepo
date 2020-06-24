@@ -95,15 +95,6 @@ function list({ mode, elements }) {
         };
     }
 }
-function not({ expression }) {
-    return function NOT() {
-        let stateₒ = getState();
-        let result = !expression();
-        setState(stateₒ);
-        OUT = undefined;
-        return result;
-    };
-}
 function record({ mode, fields }) {
     if (isParse(mode)) {
         return function RCD() {
@@ -218,15 +209,15 @@ function isPlainObject(value) {
 }
 function zeroOrMore({ expression }) {
     return function O_M() {
-        let stateₒ = getState();
+        let IPₒ = IP;
         let out;
-        while (true) {
+        do {
             if (!expression())
                 break;
-            if (IP === stateₒ.IP)
+            if (IP === IPₒ)
                 break;
             out = concat(out, OUT);
-        }
+        } while (true);
         OUT = out;
         return true;
     };
@@ -653,7 +644,7 @@ const parse = (() => {
                 if (t6()) return true;
                 if (t7()) return true;
                 return false;
-            }
+            };
         })();
         return 𝕊0_alpha_memo(arg);
     };
@@ -670,7 +661,7 @@ const parse = (() => {
                 if (t9()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
-            }
+            };
         })());
         return 𝕊0_result_memo(arg);
     };
@@ -691,7 +682,7 @@ const parse = (() => {
                         if (t11()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
-                    }
+                    };
                 })(),
                 (() => {
                     const t12 = 𝕊0('digit');
@@ -705,7 +696,7 @@ const parse = (() => {
                         if (t14()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
-                    }
+                    };
                 })(),
             ],
         });
@@ -1089,7 +1080,7 @@ const print = (() => {
                 if (t15()) return true;
                 if (t16()) return true;
                 return false;
-            }
+            };
         })();
         return 𝕊0_alpha_memo(arg);
     };
@@ -1106,7 +1097,7 @@ const print = (() => {
                 if (t18()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
-            }
+            };
         })());
         return 𝕊0_result_memo(arg);
     };
@@ -1127,7 +1118,7 @@ const print = (() => {
                         if (t20()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
-                    }
+                    };
                 })(),
                 (() => {
                     const t21 = 𝕊0('digit');
@@ -1141,7 +1132,7 @@ const print = (() => {
                         if (t23()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
-                    }
+                    };
                 })(),
             ],
         });

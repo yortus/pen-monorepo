@@ -95,15 +95,6 @@ function list({ mode, elements }) {
         };
     }
 }
-function not({ expression }) {
-    return function NOT() {
-        let stateₒ = getState();
-        let result = !expression();
-        setState(stateₒ);
-        OUT = undefined;
-        return result;
-    };
-}
 function record({ mode, fields }) {
     if (isParse(mode)) {
         return function RCD() {
@@ -218,15 +209,15 @@ function isPlainObject(value) {
 }
 function zeroOrMore({ expression }) {
     return function O_M() {
-        let stateₒ = getState();
+        let IPₒ = IP;
         let out;
-        while (true) {
+        do {
             if (!expression())
                 break;
-            if (IP === stateₒ.IP)
+            if (IP === IPₒ)
                 break;
             out = concat(out, OUT);
-        }
+        } while (true);
         OUT = out;
         return true;
     };
@@ -320,7 +311,7 @@ const parse = (() => {
                 if (t1()) return true;
                 if (t2()) return true;
                 return false;
-            }
+            };
         })();
         return 𝕊0_modExprMem_memo(arg);
     };
@@ -618,7 +609,7 @@ const print = (() => {
                 if (t4()) return true;
                 if (t5()) return true;
                 return false;
-            }
+            };
         })();
         return 𝕊0_modExprMem_memo(arg);
     };

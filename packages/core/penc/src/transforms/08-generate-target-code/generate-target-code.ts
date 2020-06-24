@@ -244,14 +244,22 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(expr.module.meta.scope.id);
             break;
 
-        case 'NotExpression':                                                                                           // <====== TODO: inline emit
-            emit.text(`not({`).indent();
-            emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text('expression: ');
+        case 'NotExpression': {
+            const exprVar = newId();
+            emit.text('(() => {').indent();
+            emit.down(1).text(`const ${exprVar} = `);
             emitExpression(emit, expr.expression, symbolTable, mode);
-            emit.text(',');
-            emit.dedent().down(1).text('})');
+            emit.text(';');
+            emit.down(1).text(`return function NOT() {`).indent();
+            emit.down(1).text(`let stateₒ = getState();`);
+            emit.down(1).text(`let result = !${exprVar}();`);
+            emit.down(1).text(`setState(stateₒ);`);
+            emit.down(1).text(`OUT = undefined;`);
+            emit.down(1).text(`return result;`);
+            emit.dedent().down(1).text(`};`);
+            emit.dedent().down(1).text('})()');
             break;
+        }
 
         case 'ParenthesisedExpression':
             // TODO: emit extra parens?
@@ -336,7 +344,7 @@ function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbo
         emit.down(1).text(`if (${exprVars[i]}()) return true;`);
     }
     emit.down(1).text('return false;');
-    emit.dedent().down(1).text('}');
+    emit.dedent().down(1).text('};');
     emit.dedent().down(1).text('})()');
 }
 
@@ -358,7 +366,7 @@ function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolT
     }
     emit.down(1).text('OUT = out;');
     emit.down(1).text('return true;');
-    emit.dedent().down(1).text('}');
+    emit.dedent().down(1).text('};');
     emit.dedent().down(1).text('})()');
 }
 
