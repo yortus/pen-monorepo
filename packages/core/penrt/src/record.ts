@@ -18,16 +18,16 @@ function record({mode, fields}: StaticOptions & {fields: Array<{name: string, va
 
     else /* isPrint */ {
         return function RCD() {
-            if (!isPlainObject(IN)) return false;
+            if (objectToString.call(IN) !== '[object Object]') return false;
             let stateₒ = getState();
             let text: unknown;
 
-            let propNames = Object.keys(IN); // TODO: doc reliance on prop order and what this means
+            let propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
             let propCount = propNames.length;
             assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
             // TODO: temp testing...
-            const obj = IN;
+            const obj = IN as Record<string, unknown>;
             let bitmask = IP;
 
             for (let field of fields) {

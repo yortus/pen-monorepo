@@ -72,20 +72,24 @@ function assert(value: unknown): asserts value {
 function concat(a: any, b: any): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
-    if (typeof a === 'string' && typeof b === 'string') return a + b;
-    // TODO: if program is statically proven valid, the following check isn't necessary
-    // if (typeof a !== 'object' || typeof b !== 'object') throw new Error(`Internal error: invalid sequence`);
-    if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
-    return {...a, ...b};
+    let type = objectToString.call(a);
+    // TODO: if program is statically proven valid, the following guard isn't necessary
+    if (type !== objectToString.call(b)) throw new Error(`Internal error: invalid sequence`);
+    if (type === '[object String]') return a + b;
+    if (type === '[object Array]') return [...a, ...b];
+    if (type === '[object Object]') return {...a, ...b};
+    // TODO: if program is statically proven valid, the following guard isn't necessary
+    throw new Error(`Internal error: invalid sequence`);
 }
 
 
 // TODO: doc... helper...
 function isInputFullyConsumed(): boolean {
-    if (typeof IN === 'string') return IP === IN.length;
-    if (Array.isArray(IN)) return IP === IN.length;
-    if (typeof IN === 'object' && IN !== null) {
-        let keyCount = Object.keys(IN).length;
+    let type = objectToString.call(IN);
+    if (type === '[object String]') return IP === (IN as any).length;
+    if (type === '[object Array]') return IP === (IN as any).length;
+    if (type === '[object Object]') {
+        let keyCount = Object.keys(IN as any).length;
         assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
         if (keyCount === 0) return true;
         return IP === -1 >>> (32 - keyCount);
@@ -93,8 +97,4 @@ function isInputFullyConsumed(): boolean {
     return IP === 1; // TODO: doc which case(s) this covers. Better to just return false?
 }
 
-
-// TODO: doc... helper...
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-    return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-}
+const objectToString = Object.prototype.toString;
