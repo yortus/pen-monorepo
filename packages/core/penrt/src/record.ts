@@ -38,9 +38,7 @@ function record({mode, fields}: StaticOptions & {fields: Array<{name: string, va
                 let propName = propNames[i];
 
                 // TODO: skip already-consumed key/value pairs
-                // tslint:disable-next-line: no-bitwise
                 const propBit = 1 << i;
-                // tslint:disable-next-line: no-bitwise
                 if ((bitmask & propBit) !== 0) return setState(stateₒ), false;
 
                 // TODO: match field value

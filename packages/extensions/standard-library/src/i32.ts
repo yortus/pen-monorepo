@@ -1,6 +1,3 @@
-// tslint:disable: no-bitwise
-
-
 // TODO: doc... has both 'txt' and 'ast' representation
 function i32({mode}: StaticOptions): Lambda {
     return function I32_lambda(expr) {

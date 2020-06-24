@@ -416,7 +416,6 @@ const createExtension𝕊7 = (() => {
     const NINE_DIGIT = '9'.charCodeAt(0);
     const LOWERCASE_E = 'e'.charCodeAt(0);
     const UPPERCASE_E = 'E'.charCodeAt(0);
-    // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
     function i32({ mode }) {
         return function I32_lambda(expr) {

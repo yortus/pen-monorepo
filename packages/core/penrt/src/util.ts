@@ -1,4 +1,3 @@
-// tslint:disable: no-bitwise
 // TODO: modes...
 type Mode = 2 | 3 | 4 | 5 | 6 | 7;
 const PARSE = 6;
@@ -89,7 +88,6 @@ function isInputFullyConsumed(): boolean {
         let keyCount = Object.keys(IN).length;
         assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
         if (keyCount === 0) return true;
-        // tslint:disable-next-line: no-bitwise
         return IP === -1 >>> (32 - keyCount);
     }
     return IP === 1; // TODO: doc which case(s) this covers. Better to just return false?

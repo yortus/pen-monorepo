@@ -37,9 +37,7 @@ function field({mode, name, value}: StaticOptions & {name: Rule, value: Rule}): 
                 let propName = propNames[i];
 
                 // TODO: skip already-consumed key/value pairs
-                // tslint:disable-next-line: no-bitwise
                 const propBit = 1 << i;
-                // tslint:disable-next-line: no-bitwise
                 if ((bitmask & propBit) !== 0) continue;
 
                 // TODO: match field name
