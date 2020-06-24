@@ -1,2 +1,2 @@
-export {Metadata} from '../05-resolve-constant-values';
+export {Metadata} from './metadata';
 export {dealiasSymbols} from './dealias-symbols';

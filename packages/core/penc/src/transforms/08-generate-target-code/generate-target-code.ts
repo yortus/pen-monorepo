@@ -3,8 +3,8 @@ import * as path from 'path';
 import * as AstNodes from '../../ast-nodes';
 import {SymbolTable} from '../../symbol-table';
 import {assert, makeNodeVisitor} from '../../utils';
-import {Metadata} from '../07-check-semantics';
 import {Emitter, makeEmitter} from './emitter';
+import {Metadata} from './metadata';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
@@ -187,6 +187,7 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             break;
 
         case 'BindingLookupExpression':
+            // TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
             emitExpression(emit, expr.module, symbolTable, mode);
             emit.text(`('${expr.bindingName}')`);
             break;

@@ -1,2 +1,2 @@
-export {Metadata} from '../06-dealias-symbols';
+export {Metadata} from './metadata';
 export {checkSemantics} from './check-semantics';

@@ -19,7 +19,7 @@ function field({ mode, name, value }) {
     }
     else {
         return function FLD() {
-            if (!isPlainObject(IN))
+            if (objectToString.call(IN) !== '[object Object]')
                 return false;
             let stateₒ = getState();
             let text;
@@ -113,7 +113,7 @@ function record({ mode, fields }) {
     }
     else {
         return function RCD() {
-            if (!isPlainObject(IN))
+            if (objectToString.call(IN) !== '[object Object]')
                 return false;
             let stateₒ = getState();
             let text;
@@ -184,18 +184,24 @@ function concat(a, b) {
         return b;
     if (b === undefined)
         return a;
-    if (typeof a === 'string' && typeof b === 'string')
+    let type = objectToString.call(a);
+    if (type !== objectToString.call(b))
+        throw new Error(`Internal error: invalid sequence`);
+    if (type === '[object String]')
         return a + b;
-    if (Array.isArray(a) && Array.isArray(b))
+    if (type === '[object Array]')
         return [...a, ...b];
-    return Object.assign(Object.assign({}, a), b);
+    if (type === '[object Object]')
+        return Object.assign(Object.assign({}, a), b);
+    throw new Error(`Internal error: invalid sequence`);
 }
 function isInputFullyConsumed() {
-    if (typeof IN === 'string')
+    let type = objectToString.call(IN);
+    if (type === '[object String]')
         return IP === IN.length;
-    if (Array.isArray(IN))
+    if (type === '[object Array]')
         return IP === IN.length;
-    if (typeof IN === 'object' && IN !== null) {
+    if (type === '[object Object]') {
         let keyCount = Object.keys(IN).length;
         assert(keyCount <= 32);
         if (keyCount === 0)
@@ -204,9 +210,7 @@ function isInputFullyConsumed() {
     }
     return IP === 1;
 }
-function isPlainObject(value) {
-    return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-}
+const objectToString = Object.prototype.toString;
 function zeroOrMore({ expression }) {
     return function O_M() {
         let IPₒ = IP;

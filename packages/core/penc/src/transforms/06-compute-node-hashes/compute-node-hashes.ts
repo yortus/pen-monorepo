@@ -4,7 +4,7 @@ import {Metadata} from './metadata';
 
 
 // TODO: doc...
-export function dealiasSymbols(program: Program<Metadata>) {
+export function computeNodeHashes(program: Program<Metadata>) {
     let aliases = collectAliases(program);
 
     // TODO: doc... process aliases:

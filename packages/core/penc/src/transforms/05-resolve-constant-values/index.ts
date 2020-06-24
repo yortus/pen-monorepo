@@ -1,2 +1,2 @@
-export {Metadata} from '../04-resolve-symbol-references';
+export {Metadata} from './metadata';
 export {resolveConstantValues} from './resolve-constant-values';

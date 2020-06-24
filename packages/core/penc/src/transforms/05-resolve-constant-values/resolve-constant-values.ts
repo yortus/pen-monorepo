@@ -1,6 +1,6 @@
 import {Node, Program} from '../../ast-nodes';
 import {assert, makeNodeVisitor} from '../../utils';
-import {Metadata} from '../04-resolve-symbol-references';
+import {Metadata} from './metadata';
 
 
 // TODO: doc...

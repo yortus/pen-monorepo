@@ -1,6 +1,6 @@
 import {Node, Program} from '../../ast-nodes';
 import {makeNodeVisitor} from '../../utils';
-import {Metadata} from '../06-dealias-symbols';
+import {Metadata} from './metadata';
 
 
 // TODO: doc...
