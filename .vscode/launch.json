@@ -18,7 +18,9 @@
             "name": "Build json.pen",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/packages/test-suite/scripts/build-json-pen.ts",
+            "args": [
+                "${workspaceFolder}/packages/test-suite/scripts/build-json-pen.ts"
+            ],
             "runtimeArgs": [
                 "-r",
                 "ts-node/register",
@@ -29,7 +31,7 @@
             "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
                 "<node_internals>/**",
-                //"**/node_modules/**"
+                "**/node_modules/**"
             ]
         },
         {
@@ -60,7 +62,9 @@
             "name": "Run Benchmarks",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/packages/test-suite/bench/large-json.bench.ts",
+            "args": [
+                "${workspaceFolder}/packages/test-suite/bench/large-json.bench.ts"
+            ],
             "runtimeArgs": [
                 "-r",
                 "ts-node/register",

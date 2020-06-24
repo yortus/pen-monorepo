@@ -1,117 +1,94 @@
-import {Expression, Node, Program} from '../../ast-nodes';
-import {assert, makeNodeMapper, makeNodeVisitor} from '../../utils';
+import {Node, Program} from '../../ast-nodes';
+import {mapMap} from '../../utils';
 import {Metadata} from './metadata';
 
 
 // TODO: doc...
 export function computeNodeHashes(program: Program<Metadata>) {
-    let aliases = collectAliases(program);
 
-    // TODO: doc... process aliases:
-    // - self-aliases (throw an error)
-    // - transitive aliases (eg 13-->2, 2-->33 in json.pen)
-    while (true) {
-        let modified = false;
-        for (let [fromSymbolId, toSymbolId] of aliases.entries()) {
-            if (fromSymbolId === toSymbolId) {
-                let symbol = program.meta.symbolTable.getSymbolById(fromSymbolId);
-                assert(symbol.kind === 'NameSymbol');
-                throw new Error(`Symbol '${symbol.sourceName}' is defined as itself.`);
-            }
-            if (aliases.has(toSymbolId)) {
-                aliases.set(fromSymbolId, aliases.get(toSymbolId)!);
-                modified = true;
-            }
+    let hashableValues = new Map<Node<Metadata>, Record<string, unknown>>();
+    traverseAstDepthFirst(program, n => hashableValues.set(n, {}));
+
+    // TODO: next steps:
+    // 2. Object.assign props into the hashableValue of every node (another traversal, just for side-effects, ie visit)
+    // 3. mapMap from hashableValues to hashes using object-hash
+    // 4. add the map of node hashes to program.meta.nodeHashes (new meta prop)
+
+    return program;
+}
+
+
+// // TODO: doc...
+// function getHashableValue(n: Node<Metadata>): void {
+//     const rec = getHashableValue;
+//     switch (n.kind) {
+//         // case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
+//         // case 'Binding': return rec(n.pattern), rec(n.value), undefined;
+//         // case 'BindingLookupExpression': return rec(n.module), undefined;
+//         // case 'BooleanLiteralExpression': return;
+//         // case 'ExtensionFile': return;
+//         // case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
+//         // case 'ImportExpression': return;
+//         // // case 'LambdaExpression': TODO: ...
+//         // case 'ListExpression': return n.elements.forEach(rec), undefined;
+//         // case 'Module': return n.bindings.forEach(rec), undefined;
+//         // case 'ModuleExpression': return rec(n.module), undefined;
+//         // case 'ModulePattern': return n.names.forEach(rec), undefined;
+//         // case 'ModulePatternName': return;
+//         // case 'NotExpression': return rec(n.expression), undefined;
+//         case 'NullLiteralExpression': return null;
+//         // case 'NumericLiteralExpression': return;
+//         // case 'ParenthesisedExpression': return rec(n.expression), undefined;
+//         // case 'PenSourceFile': return rec(n.module), undefined;
+//         // case 'Program': return mapMap(n.sourceFiles, rec), undefined;
+//         // case 'QuantifiedExpression': return rec(n.expression), undefined;
+//         // case 'RecordExpression': return n.fields.forEach(rec), undefined;
+//         // case 'ReferenceExpression': return;
+//         // case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
+//         // case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
+//         // case 'StaticField': return rec(n.value), undefined;
+//         // case 'StringLiteralExpression': return;
+//         // case 'VariablePattern': return;
+//         // default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
+//     }
+
+//     // TODO: ...
+// }
+
+
+// TODO: doc...
+function traverseAstDepthFirst(program: Program<Metadata>, cb: (n: Node<Metadata>) => void): void {
+    rec(program);
+    function rec(n: Node<Metadata>): void {
+        switch (n.kind) {
+            case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
+            case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
+            case 'BindingLookupExpression': return rec(n.module), cb(n);
+            case 'BooleanLiteralExpression': return cb(n);
+            case 'ExtensionFile': return cb(n);
+            case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
+            case 'ImportExpression': return cb(n);
+            // case 'LambdaExpression': TODO: ...
+            case 'ListExpression': return n.elements.forEach(rec), cb(n);
+            case 'Module': return n.bindings.forEach(rec), cb(n);
+            case 'ModuleExpression': return rec(n.module), cb(n);
+            case 'ModulePattern': return n.names.forEach(rec), cb(n);
+            case 'ModulePatternName': return cb(n);
+            case 'NotExpression': return rec(n.expression), cb(n);
+            case 'NullLiteralExpression': return cb(n);
+            case 'NumericLiteralExpression': return cb(n);
+            case 'ParenthesisedExpression': return rec(n.expression), cb(n);
+            case 'PenSourceFile': return rec(n.module), cb(n);
+            case 'Program': return mapMap(n.sourceFiles, rec), cb(n);
+            case 'QuantifiedExpression': return rec(n.expression), cb(n);
+            case 'RecordExpression': return n.fields.forEach(rec), cb(n);
+            case 'ReferenceExpression': return cb(n);
+            case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
+            case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
+            case 'StaticField': return rec(n.value), cb(n);
+            case 'StringLiteralExpression': return cb(n);
+            case 'VariablePattern': return cb(n);
+            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
-        if (!modified) break;
     }
-
-    // TODO: doc... forall nodes with symbolId, replace meta.symbolId with alias target (if any)
-    let mapNode = makeNodeMapper<Node<Metadata>, Node<Metadata>>();
-    let result = mapNode(program, _rec => ({
-        VariablePattern: pat => {
-            let symbolId = aliases.get(pat.meta.symbolId) ?? pat.meta.symbolId;
-            let patᐟ = {...pat, meta: {symbolId}};
-            return patᐟ;
-        },
-        ModulePatternName: pat => {
-            let symbolId = aliases.get(pat.meta.symbolId) ?? pat.meta.symbolId;
-            let patᐟ = {...pat, meta: {symbolId}};
-            return patᐟ;
-        },
-        ReferenceExpression: ref => {
-            let symbolId = aliases.get(ref.meta.symbolId) ?? ref.meta.symbolId;
-            let refᐟ = {...ref, meta: {symbolId}};
-            return refᐟ;
-        },
-    }));
-
-    // All done.
-    return result;
-}
-
-
-// TODO: doc...
-function collectAliases(program: Program<Metadata>): Map<string, string> {
-    let aliases = new Map<string, string>(); // maps from symbolId -> symbolId
-    let visitNode = makeNodeVisitor<Node<Metadata>>();
-    visitNode(program, rec => ({
-        Module: module => {
-            for (let {pattern, value} of module.bindings) {
-                if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
-                    // Each ModulePatternName *must* be an alias to a name in the rhs module
-                    for (let {meta: {symbolId: fromSymbolId}} of pattern.names) {
-                        let toSymbolId: string;
-                        if (value.kind === 'ImportExpression') {
-                            toSymbolId = value.meta.scope.id;
-                        }
-                        else if (value.kind === 'ModuleExpression') {
-                            toSymbolId = value.module.meta.scope.id;
-                        }
-                        else if (value.kind === 'ReferenceExpression') {
-                            toSymbolId = value.meta.symbolId;
-                        }
-                        // BUG: BindingLookupExpression belongs here too... or does it??
-                        else {
-                            // TODO: tidy up / check logic...
-                            throw new Error(`Internal error: should never get here`);
-                        }
-                        aliases.set(fromSymbolId, toSymbolId);
-                    }
-                }
-                else if (pattern.kind === 'VariablePattern' && isLValue(value)) {
-                    let fromSymbolId = pattern.meta.symbolId;
-                    let toSymbolId: string;
-                    if (value.kind === 'ImportExpression') {
-                        toSymbolId = value.meta.scope.id;
-                    }
-                    else if (value.kind === 'ModuleExpression') {
-                        toSymbolId = value.module.meta.scope.id;
-                    }
-                    else if (value.kind === 'ReferenceExpression') {
-                        toSymbolId = value.meta.symbolId;
-                    }
-                    // BUG: BindingLookupExpression belongs here too... or does it??
-                    else {
-                        // TODO: tidy up / check logic...
-                        throw new Error(`Internal error: should never get here`);
-                    }
-                    aliases.set(fromSymbolId, toSymbolId);
-                }
-            }
-            module.bindings.forEach(rec);
-        },
-    }));
-    return aliases;
-}
-
-
-// TODO: doc...
-
-
-// TODO: helper function
-function isLValue(e: Expression): e is Expression & {kind: 'ImportExpression' | 'ModuleExpression' | 'ReferenceExpression'} {
-    // BUG: BindingLookupExpression belongs here too...
-    // TODO: ^^^
-    return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 }
