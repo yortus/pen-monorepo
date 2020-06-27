@@ -1,94 +1,67 @@
 import {Node, Program} from '../../ast-nodes';
-import {mapMap} from '../../utils';
+import {traverseDepthFirst} from '../../utils';
 import {Metadata} from './metadata';
 
 
 // TODO: doc...
 export function computeNodeHashes(program: Program<Metadata>) {
 
-    let hashableValues = new Map<Node<Metadata>, Record<string, unknown>>();
-    traverseAstDepthFirst(program, n => hashableValues.set(n, {}));
+    let sigs = new Map<Node<Metadata>, Record<string, unknown>>();
+    traverseDepthFirst(program, n => sigs.set(n, {}));
 
     // TODO: next steps:
-    // 2. Object.assign props into the hashableValue of every node (another traversal, just for side-effects, ie visit)
-    // 3. mapMap from hashableValues to hashes using object-hash
+    // 2. Object.assign props into the signature obj of every node (another traversal, just for side-effects, ie visit)
+    for (let [node, sig] of sigs.entries()) {
+        Object.assign(sig, getSignatureFor(node));
+    }
+
+    // TODO:
+    // 3. mapMap from sigs to hashes using object-hash
     // 4. add the map of node hashes to program.meta.nodeHashes (new meta prop)
 
     return program;
-}
 
 
-// // TODO: doc...
-// function getHashableValue(n: Node<Metadata>): void {
-//     const rec = getHashableValue;
-//     switch (n.kind) {
-//         // case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
-//         // case 'Binding': return rec(n.pattern), rec(n.value), undefined;
-//         // case 'BindingLookupExpression': return rec(n.module), undefined;
-//         // case 'BooleanLiteralExpression': return;
-//         // case 'ExtensionFile': return;
-//         // case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
-//         // case 'ImportExpression': return;
-//         // // case 'LambdaExpression': TODO: ...
-//         // case 'ListExpression': return n.elements.forEach(rec), undefined;
-//         // case 'Module': return n.bindings.forEach(rec), undefined;
-//         // case 'ModuleExpression': return rec(n.module), undefined;
-//         // case 'ModulePattern': return n.names.forEach(rec), undefined;
-//         // case 'ModulePatternName': return;
-//         // case 'NotExpression': return rec(n.expression), undefined;
-//         case 'NullLiteralExpression': return null;
-//         // case 'NumericLiteralExpression': return;
-//         // case 'ParenthesisedExpression': return rec(n.expression), undefined;
-//         // case 'PenSourceFile': return rec(n.module), undefined;
-//         // case 'Program': return mapMap(n.sourceFiles, rec), undefined;
-//         // case 'QuantifiedExpression': return rec(n.expression), undefined;
-//         // case 'RecordExpression': return n.fields.forEach(rec), undefined;
-//         // case 'ReferenceExpression': return;
-//         // case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
-//         // case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
-//         // case 'StaticField': return rec(n.value), undefined;
-//         // case 'StringLiteralExpression': return;
-//         // case 'VariablePattern': return;
-//         // default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
-//     }
-
-//     // TODO: ...
-// }
-
-
-// TODO: doc...
-function traverseAstDepthFirst(program: Program<Metadata>, cb: (n: Node<Metadata>) => void): void {
-    rec(program);
-    function rec(n: Node<Metadata>): void {
+    // TODO: doc...
+    function getSignatureFor(n: Node<Metadata>): unknown {
         switch (n.kind) {
-            case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
-            case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
-            case 'BindingLookupExpression': return rec(n.module), cb(n);
-            case 'BooleanLiteralExpression': return cb(n);
-            case 'ExtensionFile': return cb(n);
-            case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
-            case 'ImportExpression': return cb(n);
-            // case 'LambdaExpression': TODO: ...
-            case 'ListExpression': return n.elements.forEach(rec), cb(n);
-            case 'Module': return n.bindings.forEach(rec), cb(n);
-            case 'ModuleExpression': return rec(n.module), cb(n);
-            case 'ModulePattern': return n.names.forEach(rec), cb(n);
-            case 'ModulePatternName': return cb(n);
-            case 'NotExpression': return rec(n.expression), cb(n);
-            case 'NullLiteralExpression': return cb(n);
-            case 'NumericLiteralExpression': return cb(n);
-            case 'ParenthesisedExpression': return rec(n.expression), cb(n);
-            case 'PenSourceFile': return rec(n.module), cb(n);
-            case 'Program': return mapMap(n.sourceFiles, rec), cb(n);
-            case 'QuantifiedExpression': return rec(n.expression), cb(n);
-            case 'RecordExpression': return n.fields.forEach(rec), cb(n);
-            case 'ReferenceExpression': return cb(n);
-            case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
-            case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
-            case 'StaticField': return rec(n.value), cb(n);
-            case 'StringLiteralExpression': return cb(n);
-            case 'VariablePattern': return cb(n);
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
+            case 'ApplicationExpression': return {kind: 'APP', l: sigs.get(n.lambda), a: sigs.get(n.argument)};
+            // case 'Binding': return;
+            case 'BindingLookupExpression': return {kind: 'BLE', m: sigs.get(n.module), n: n.bindingName};
+            case 'BooleanLiteralExpression':
+            case 'NullLiteralExpression':
+            case 'NumericLiteralExpression': return {kind: 'LIT', value: n.value};
+            // case 'ExtensionFile': return;
+            // case 'FieldExpression': return;
+            // case 'ImportExpression': return;
+            // // case 'LambdaExpression': TODO: ...
+            case 'ListExpression': return {kind: 'LST', e: n.elements.map(e => sigs.get(e))};
+            case 'Module':
+                // return {kind: 'MDL', b: n.bindings};
+                // TODO!!!
+                // - binding order not important
+                // - need to 'normalise' - ie:
+                //   a) get a flat list of binding names from either VariablePattern or ModulePatternName nodes
+                //   b) link each binding name to appropriate rhs signature - either direct, or equiv of BLE
+                return;
+            // case 'ModuleExpression': return;
+            // case 'ModulePattern': return;
+            // case 'ModulePatternName': return;
+            case 'NotExpression': return {kind: 'NOT', e: sigs.get(n.expression)};
+            case 'ParenthesisedExpression': return sigs.get(n);
+            // case 'PenSourceFile': return;
+            // case 'Program': return;
+            case 'QuantifiedExpression': return {kind: 'QUA', e: sigs.get(n.expression), q: n.quantifier};
+            case 'RecordExpression': return {kind: 'REC', f: n.fields.map(f => sigs.get(f))};
+            // case 'ReferenceExpression': return;
+            case 'SelectionExpression': return {kind: 'SEL', e: n.expressions.map(e => sigs.get(e))};
+            case 'SequenceExpression': return {kind: 'SEQ', e: n.expressions.map(e => sigs.get(e))};
+            case 'StaticField': return {kind: 'FLD', n: n.name, v: sigs.get(n.value)};
+            case 'StringLiteralExpression': return {kind: 'STR', value: n.value, a: n.abstract, c: n.concrete};
+            // case 'VariablePattern': return;
+            // default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
+
+        // TODO: ...
     }
 }
