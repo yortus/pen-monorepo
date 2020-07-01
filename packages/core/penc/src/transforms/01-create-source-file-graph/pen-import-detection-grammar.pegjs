@@ -21,6 +21,9 @@ StringLiteral
     / "'"   (!"'"   CHARACTER)*   "'"
     { return undefined; }
 
+    / "`"   (!"`"   CHARACTER)*   "`"
+    { return undefined; }
+
 AnyChar
     = .
     { return undefined; }

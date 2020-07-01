@@ -31,7 +31,7 @@ export function generateTargetCode(program: Program) {
     emitProgram(emit, program, PARSE);
     emitProgram(emit, program, PRINT);
 
-    // TODO: Emit main exports... must come after symbol decls, since it refs the start rule
+    // TODO: Emit main exports...
     emit.down(2).text(`// -------------------- Main exports --------------------`);
     emit.down(1).text(`module.exports = {`).indent();
     for (let mode of [PARSE, PRINT] as const) {
@@ -119,36 +119,36 @@ function emitSymbolDefinitions(emit: Emitter, program: Program, mode: Mode) {
             emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`};`);
 
-            // Emit definitions for each module binding
-            for (let {pattern, value} of mod.bindings) {
-                if (pattern.kind === 'ModulePattern' && pattern.names.length > 0) {
-                    // Each ModulePatternName *must* be an alias to a name in the rhs module
-                    for (let {name, meta: {symbolId}} of pattern.names) {
-                        let symbol = symbolTable.getSymbolById(symbolId);
-                        assert(symbol.kind === 'NameSymbol');
-                        let {scope, sourceName} = symbol;
-                        let qualName = `${scope.id}_${sourceName}`;
-                        emit.down(2).text(`const ${qualName} = (arg) => `);
-                        emitExpression(emit, value, symbolTable, mode); // rhs *must* be a module
-                        emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
-                    }
-                }
-                else if (pattern.kind === 'VariablePattern') {
-                    let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
-                    assert(symbol.kind === 'NameSymbol');
-                    let {scope, sourceName} = symbol;
-                    let qualName = `${scope.id}_${sourceName}`;
-                    emit.down(2).text(`const ${qualName} = (arg) => {`).indent();
-                    emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
-                    emitExpression(emit, value, symbolTable, mode);
-                    emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
-                    emit.dedent().down(1).text('};');
-                    emit.down(1).text(`let ${qualName}_memo;`);
-                }
-            }
-
             // Visit all child nodes recursively
             mod.bindings.forEach(rec);
+        },
+        SimpleBinding: bnd => {
+            let symbol = symbolTable.getSymbolById(bnd.meta.symbolId);
+            assert(symbol.kind === 'NameSymbol');
+            let {scope, sourceName} = symbol;
+            let qualName = `${scope.id}_${sourceName}`;
+            emit.down(2).text(`const ${qualName} = (arg) => {`).indent();
+            emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
+            emitExpression(emit, bnd.value, symbolTable, mode);
+            emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
+            emit.dedent().down(1).text('};');
+            emit.down(1).text(`let ${qualName}_memo;`);
+            rec(bnd.value); // recurse
+        },
+        DestructuredBinding: bnd => {
+            // TODO: ... only emit `value` once for all names, not once per name as is currently done below
+            // Each ModulePatternName *must* be an alias to a name in the rhs module
+            for (let i = 0; i < bnd.names.length; ++i) {
+                let {name} = bnd.names[i];
+                let symbol = symbolTable.getSymbolById(bnd.meta.symbolIds[i]);
+                assert(symbol.kind === 'NameSymbol');
+                let {scope, sourceName} = symbol;
+                let qualName = `${scope.id}_${sourceName}`;
+                emit.down(2).text(`const ${qualName} = (arg) => `);
+                emitExpression(emit, bnd.value, symbolTable, mode); // rhs *must* be a module
+                emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
+            }
+            rec(bnd.value); // recurse
         },
     }));
 }
@@ -159,18 +159,14 @@ function emitConstants(emit: Emitter, program: Program) {
     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
     emit.down(2).text(`// -------------------- Compile-time constants --------------------`);
     visitNode(program, rec => ({
-        Module: mod => {
-            for (let {pattern} of mod.bindings) {
-                if (pattern.kind === 'VariablePattern') {
-                    let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
-                    assert(symbol.kind === 'NameSymbol');
-                    if (!symbol.constant) continue;
-                    emit.down(1).text(`${symbol.scope.id}('${symbol.sourceName}').constant = {value: `);
-                    emitConstant(emit, symbol.constant.value);
-                    emit.text('};');
-                }
-            }
-            mod.bindings.forEach(rec);
+        SimpleBinding: bnd => {
+            rec(bnd.value); // recurse
+            let symbol = symbolTable.getSymbolById(bnd.meta.symbolId);
+            assert(symbol.kind === 'NameSymbol');
+            if (!symbol.constant) return;
+            emit.down(1).text(`${symbol.scope.id}('${symbol.sourceName}').constant = {value: `);
+            emitConstant(emit, symbol.constant.value);
+            emit.text('};');
         },
     }));
 }

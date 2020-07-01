@@ -9,19 +9,17 @@ export type Node<M extends Metadata = {}> =
     | PenSourceFile<M>
     | ExtensionFile<M>
 
-    // Bindings, Patterns, and Expressions
+    // Bindings and Expressions
     | Binding<M>
-    | Pattern<M>
     | Expression<M>
 
     // Other nodes
-    | ModulePatternName<M>
     | StaticField<M>;
 
 
-export type Pattern<M extends Metadata = {}> =
-    | ModulePattern<M>
-    | VariablePattern<M>;
+export type Binding<M extends Metadata = {}> =
+    | SimpleBinding<M>
+    | DestructuredBinding<M>;
 
 
 export type Expression<M extends Metadata = {}> =
@@ -95,29 +93,25 @@ export interface Module<M extends Metadata = {}> {
 
 
 // ====================   Binding nodes   ====================
-export interface Binding<M extends Metadata = {}> {
-    readonly kind: 'Binding';
+export interface SimpleBinding<M extends Metadata = {}> {
+    readonly kind: 'SimpleBinding';
     readonly id: number;
-    readonly pattern: Pattern<M>;
+    readonly name: string;
     readonly value: Expression<M>;
     readonly exported: boolean;
     readonly meta: M[this['kind']];
 }
 
 
-// ====================   Pattern nodes   ====================
-export interface ModulePattern<M extends Metadata = {}> {
-    readonly kind: 'ModulePattern';
+export interface DestructuredBinding<M extends Metadata = {}> {
+    readonly kind: 'DestructuredBinding';
     readonly id: number;
-    readonly names: ReadonlyArray<ModulePatternName<M>>;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface VariablePattern<M extends Metadata = {}> {
-    readonly kind: 'VariablePattern';
-    readonly id: number;
-    readonly name: string;
+    readonly names: ReadonlyArray<{
+        readonly name: string;
+        readonly alias?: string;
+    }>;
+    readonly value: Expression<M>;
+    readonly exported: boolean;
     readonly meta: M[this['kind']];
 }
 
@@ -276,15 +270,6 @@ export interface StringLiteralExpression<M extends Metadata = {}> {
 
 
 // // ====================   Other nodes   ====================
-export interface ModulePatternName<M extends Metadata = {}> {
-    readonly kind: 'ModulePatternName';
-    readonly id: number;
-    readonly name: string;
-    readonly alias?: string;
-    readonly meta: M[this['kind']];
-}
-
-
 export interface StaticField<M extends Metadata = {}> {
     readonly kind: 'StaticField';
     readonly id: number;

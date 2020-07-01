@@ -8,9 +8,9 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
     function rec(n: Node<M>): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
-            case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
             case 'BindingLookupExpression': return rec(n.module), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
+            case 'DestructuredBinding': return rec(n.value), cb(n);
             case 'ExtensionFile': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'ImportExpression': return cb(n);
@@ -18,8 +18,6 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
-            case 'ModulePattern': return n.names.forEach(rec), cb(n);
-            case 'ModulePatternName': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteralExpression': return cb(n);
             case 'NumericLiteralExpression': return cb(n);
@@ -31,9 +29,9 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
+            case 'SimpleBinding': return rec(n.value), cb(n);
             case 'StaticField': return rec(n.value), cb(n);
             case 'StringLiteralExpression': return cb(n);
-            case 'VariablePattern': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

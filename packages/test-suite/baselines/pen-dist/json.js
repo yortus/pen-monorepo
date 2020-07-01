@@ -1261,6 +1261,74 @@ const parse = (() => {
     };
     let 𝕊0_CHAR_memo;
 
+    const 𝕊1 = (name) => {
+        switch (name) {
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊1_min = (arg) => {
+        if (!𝕊1_min_memo) 𝕊1_min_memo = function STR() {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+            OUT = " ";
+            return true;
+        };
+        return 𝕊1_min_memo(arg);
+    };
+    let 𝕊1_min_memo;
+
+    const 𝕊1_max = (arg) => {
+        if (!𝕊1_max_memo) 𝕊1_max_memo = function STR() {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65535) return false;
+            IP += 1;
+            OUT = "￿";
+            return true;
+        };
+        return 𝕊1_max_memo(arg);
+    };
+    let 𝕊1_max_memo;
+
+    const 𝕊2 = (name) => {
+        switch (name) {
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_minDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊2_base = (arg) => {
+        if (!𝕊2_base_memo) 𝕊2_base_memo = function NUM() {
+            OUT = 16;
+            return true;
+        };
+        return 𝕊2_base_memo(arg);
+    };
+    let 𝕊2_base_memo;
+
+    const 𝕊2_minDigits = (arg) => {
+        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = function NUM() {
+            OUT = 4;
+            return true;
+        };
+        return 𝕊2_minDigits_memo(arg);
+    };
+    let 𝕊2_minDigits_memo;
+
+    const 𝕊2_maxDigits = (arg) => {
+        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = function NUM() {
+            OUT = 4;
+            return true;
+        };
+        return 𝕊2_maxDigits_memo(arg);
+    };
+    let 𝕊2_maxDigits_memo;
+
     const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
             const t284 = 𝕊0('WS');
@@ -1468,85 +1536,17 @@ const parse = (() => {
     };
     let 𝕊0_WS_memo;
 
-    const 𝕊1 = (name) => {
-        switch (name) {
-            case 'min': return 𝕊1_min;
-            case 'max': return 𝕊1_max;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊1_min = (arg) => {
-        if (!𝕊1_min_memo) 𝕊1_min_memo = function STR() {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 32) return false;
-            IP += 1;
-            OUT = " ";
-            return true;
-        };
-        return 𝕊1_min_memo(arg);
-    };
-    let 𝕊1_min_memo;
-
-    const 𝕊1_max = (arg) => {
-        if (!𝕊1_max_memo) 𝕊1_max_memo = function STR() {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 65535) return false;
-            IP += 1;
-            OUT = "￿";
-            return true;
-        };
-        return 𝕊1_max_memo(arg);
-    };
-    let 𝕊1_max_memo;
-
-    const 𝕊2 = (name) => {
-        switch (name) {
-            case 'base': return 𝕊2_base;
-            case 'minDigits': return 𝕊2_minDigits;
-            case 'maxDigits': return 𝕊2_maxDigits;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊2_base = (arg) => {
-        if (!𝕊2_base_memo) 𝕊2_base_memo = function NUM() {
-            OUT = 16;
-            return true;
-        };
-        return 𝕊2_base_memo(arg);
-    };
-    let 𝕊2_base_memo;
-
-    const 𝕊2_minDigits = (arg) => {
-        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = function NUM() {
-            OUT = 4;
-            return true;
-        };
-        return 𝕊2_minDigits_memo(arg);
-    };
-    let 𝕊2_minDigits_memo;
-
-    const 𝕊2_maxDigits = (arg) => {
-        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = function NUM() {
-            OUT = 4;
-            return true;
-        };
-        return 𝕊2_maxDigits_memo(arg);
-    };
-    let 𝕊2_maxDigits_memo;
-
     const 𝕊3 = createExtension𝕊3({mode: 6});
 
     const 𝕊4 = createExtension𝕊4({mode: 6});
 
     // -------------------- Compile-time constants --------------------
-    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
     𝕊1('min').constant = {value: " "};
     𝕊1('max').constant = {value: "￿"};
     𝕊2('base').constant = {value: 16};
     𝕊2('minDigits').constant = {value: 4};
     𝕊2('maxDigits').constant = {value: 4};
+    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
 
     return 𝕊0('start');
 })();
@@ -2139,6 +2139,82 @@ const print = (() => {
     };
     let 𝕊0_CHAR_memo;
 
+    const 𝕊1 = (name) => {
+        switch (name) {
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊1_min = (arg) => {
+        if (!𝕊1_min_memo) 𝕊1_min_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+            OUT = " ";
+            return true;
+        };
+        return 𝕊1_min_memo(arg);
+    };
+    let 𝕊1_min_memo;
+
+    const 𝕊1_max = (arg) => {
+        if (!𝕊1_max_memo) 𝕊1_max_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65535) return false;
+            IP += 1;
+            OUT = "￿";
+            return true;
+        };
+        return 𝕊1_max_memo(arg);
+    };
+    let 𝕊1_max_memo;
+
+    const 𝕊2 = (name) => {
+        switch (name) {
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_minDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊2_base = (arg) => {
+        if (!𝕊2_base_memo) 𝕊2_base_memo = function NUM() {
+            if (IN !== 16 || IP !== 0) return false;
+            IP += 1;
+            OUT = undefined;
+            return true;
+        };
+        return 𝕊2_base_memo(arg);
+    };
+    let 𝕊2_base_memo;
+
+    const 𝕊2_minDigits = (arg) => {
+        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = function NUM() {
+            if (IN !== 4 || IP !== 0) return false;
+            IP += 1;
+            OUT = undefined;
+            return true;
+        };
+        return 𝕊2_minDigits_memo(arg);
+    };
+    let 𝕊2_minDigits_memo;
+
+    const 𝕊2_maxDigits = (arg) => {
+        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = function NUM() {
+            if (IN !== 4 || IP !== 0) return false;
+            IP += 1;
+            OUT = undefined;
+            return true;
+        };
+        return 𝕊2_maxDigits_memo(arg);
+    };
+    let 𝕊2_maxDigits_memo;
+
     const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
             const t378 = 𝕊0('WS');
@@ -2313,93 +2389,17 @@ const print = (() => {
     };
     let 𝕊0_WS_memo;
 
-    const 𝕊1 = (name) => {
-        switch (name) {
-            case 'min': return 𝕊1_min;
-            case 'max': return 𝕊1_max;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊1_min = (arg) => {
-        if (!𝕊1_min_memo) 𝕊1_min_memo = function STR() {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 32) return false;
-            IP += 1;
-            OUT = " ";
-            return true;
-        };
-        return 𝕊1_min_memo(arg);
-    };
-    let 𝕊1_min_memo;
-
-    const 𝕊1_max = (arg) => {
-        if (!𝕊1_max_memo) 𝕊1_max_memo = function STR() {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 65535) return false;
-            IP += 1;
-            OUT = "￿";
-            return true;
-        };
-        return 𝕊1_max_memo(arg);
-    };
-    let 𝕊1_max_memo;
-
-    const 𝕊2 = (name) => {
-        switch (name) {
-            case 'base': return 𝕊2_base;
-            case 'minDigits': return 𝕊2_minDigits;
-            case 'maxDigits': return 𝕊2_maxDigits;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊2_base = (arg) => {
-        if (!𝕊2_base_memo) 𝕊2_base_memo = function NUM() {
-            if (IN !== 16 || IP !== 0) return false;
-            IP += 1;
-            OUT = undefined;
-            return true;
-        };
-        return 𝕊2_base_memo(arg);
-    };
-    let 𝕊2_base_memo;
-
-    const 𝕊2_minDigits = (arg) => {
-        if (!𝕊2_minDigits_memo) 𝕊2_minDigits_memo = function NUM() {
-            if (IN !== 4 || IP !== 0) return false;
-            IP += 1;
-            OUT = undefined;
-            return true;
-        };
-        return 𝕊2_minDigits_memo(arg);
-    };
-    let 𝕊2_minDigits_memo;
-
-    const 𝕊2_maxDigits = (arg) => {
-        if (!𝕊2_maxDigits_memo) 𝕊2_maxDigits_memo = function NUM() {
-            if (IN !== 4 || IP !== 0) return false;
-            IP += 1;
-            OUT = undefined;
-            return true;
-        };
-        return 𝕊2_maxDigits_memo(arg);
-    };
-    let 𝕊2_maxDigits_memo;
-
     const 𝕊3 = createExtension𝕊3({mode: 7});
 
     const 𝕊4 = createExtension𝕊4({mode: 7});
 
     // -------------------- Compile-time constants --------------------
-    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
     𝕊1('min').constant = {value: " "};
     𝕊1('max').constant = {value: "￿"};
     𝕊2('base').constant = {value: 16};
     𝕊2('minDigits').constant = {value: 4};
     𝕊2('maxDigits').constant = {value: 4};
+    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
 
     return 𝕊0('start');
 })();

@@ -272,6 +272,49 @@ const parse = (() => {
     };
     let 𝕊0_expr_memo;
 
+    const 𝕊1 = (name) => {
+        switch (name) {
+            case 'foo': return 𝕊1_foo;
+            case 'bar': return 𝕊1_bar;
+            case 'a': return 𝕊1_a;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊1_foo = (arg) => {
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+            OUT = "foo";
+            return true;
+        };
+        return 𝕊1_foo_memo(arg);
+    };
+    let 𝕊1_foo_memo;
+
+    const 𝕊1_bar = (arg) => {
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+            OUT = "bar";
+            return true;
+        };
+        return 𝕊1_bar_memo(arg);
+    };
+    let 𝕊1_bar_memo;
+
+    const 𝕊1_a = (arg) => {
+        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
+        return 𝕊1_a_memo(arg);
+    };
+    let 𝕊1_a_memo;
+
     const 𝕊0_a = (arg) => {
         if (!𝕊0_a_memo) 𝕊0_a_memo = 𝕊0('b');
         return 𝕊0_a_memo(arg);
@@ -321,73 +364,6 @@ const parse = (() => {
     };
     let 𝕊0_modExprMem_memo;
 
-    const 𝕊0_recA = (arg) => {
-        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
-        return 𝕊0_recA_memo(arg);
-    };
-    let 𝕊0_recA_memo;
-
-    const 𝕊0_recB = (arg) => {
-        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
-        return 𝕊0_recB_memo(arg);
-    };
-    let 𝕊0_recB_memo;
-
-    const 𝕊0_refC = (arg) => {
-        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊0_refC_memo(arg);
-    };
-    let 𝕊0_refC_memo;
-
-    const 𝕊0_defC = (arg) => {
-        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
-        return 𝕊0_defC_memo(arg);
-    };
-    let 𝕊0_defC_memo;
-
-    const 𝕊1 = (name) => {
-        switch (name) {
-            case 'foo': return 𝕊1_foo;
-            case 'bar': return 𝕊1_bar;
-            case 'a': return 𝕊1_a;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊1_foo = (arg) => {
-        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 111) return false;
-            if (IN.charCodeAt(IP + 2) !== 111) return false;
-            IP += 3;
-            OUT = "foo";
-            return true;
-        };
-        return 𝕊1_foo_memo(arg);
-    };
-    let 𝕊1_foo_memo;
-
-    const 𝕊1_bar = (arg) => {
-        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 114) return false;
-            IP += 3;
-            OUT = "bar";
-            return true;
-        };
-        return 𝕊1_bar_memo(arg);
-    };
-    let 𝕊1_bar_memo;
-
-    const 𝕊1_a = (arg) => {
-        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
-        return 𝕊1_a_memo(arg);
-    };
-    let 𝕊1_a_memo;
-
     const 𝕊2 = (name) => {
         switch (name) {
             case 'mem': return 𝕊2_mem;
@@ -412,6 +388,12 @@ const parse = (() => {
     };
     let 𝕊2_mem_memo;
 
+    const 𝕊0_recA = (arg) => {
+        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
+        return 𝕊0_recA_memo(arg);
+    };
+    let 𝕊0_recA_memo;
+
     const 𝕊3 = (name) => {
         switch (name) {
             case 'a': return 𝕊3_a;
@@ -425,6 +407,12 @@ const parse = (() => {
     };
     let 𝕊3_a_memo;
 
+    const 𝕊0_recB = (arg) => {
+        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
+        return 𝕊0_recB_memo(arg);
+    };
+    let 𝕊0_recB_memo;
+
     const 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
@@ -437,6 +425,18 @@ const parse = (() => {
         return 𝕊4_b_memo(arg);
     };
     let 𝕊4_b_memo;
+
+    const 𝕊0_refC = (arg) => {
+        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊0_refC_memo(arg);
+    };
+    let 𝕊0_refC_memo;
+
+    const 𝕊0_defC = (arg) => {
+        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
+        return 𝕊0_defC_memo(arg);
+    };
+    let 𝕊0_defC_memo;
 
     const 𝕊5 = (name) => {
         switch (name) {
@@ -452,18 +452,6 @@ const parse = (() => {
         return 𝕊5_c_memo(arg);
     };
     let 𝕊5_c_memo;
-
-    const 𝕊5_ref5 = (arg) => {
-        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
-        return 𝕊5_ref5_memo(arg);
-    };
-    let 𝕊5_ref5_memo;
-
-    const 𝕊5_ref6 = (arg) => {
-        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊5_ref6_memo(arg);
-    };
-    let 𝕊5_ref6_memo;
 
     const 𝕊6 = (name) => {
         switch (name) {
@@ -520,11 +508,23 @@ const parse = (() => {
     };
     let 𝕊6_ref3_memo;
 
+    const 𝕊5_ref5 = (arg) => {
+        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
+        return 𝕊5_ref5_memo(arg);
+    };
+    let 𝕊5_ref5_memo;
+
+    const 𝕊5_ref6 = (arg) => {
+        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊5_ref6_memo(arg);
+    };
+    let 𝕊5_ref6_memo;
+
     // -------------------- Compile-time constants --------------------
-    𝕊0('b').constant = {value: "b2"};
-    𝕊0('baz').constant = {value: "baz"};
     𝕊1('foo').constant = {value: "foo"};
     𝕊1('bar').constant = {value: "bar"};
+    𝕊0('b').constant = {value: "b2"};
+    𝕊0('baz').constant = {value: "baz"};
     𝕊2('mem').constant = {value: "member"};
     𝕊6('c1').constant = {value: "c1"};
     𝕊6('c2').constant = {value: "c2"};
@@ -567,6 +567,51 @@ const print = (() => {
         return 𝕊0_expr_memo(arg);
     };
     let 𝕊0_expr_memo;
+
+    const 𝕊1 = (name) => {
+        switch (name) {
+            case 'foo': return 𝕊1_foo;
+            case 'bar': return 𝕊1_bar;
+            case 'a': return 𝕊1_a;
+            default: return undefined;
+        }
+    };
+
+    const 𝕊1_foo = (arg) => {
+        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+            OUT = "foo";
+            return true;
+        };
+        return 𝕊1_foo_memo(arg);
+    };
+    let 𝕊1_foo_memo;
+
+    const 𝕊1_bar = (arg) => {
+        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+            OUT = "bar";
+            return true;
+        };
+        return 𝕊1_bar_memo(arg);
+    };
+    let 𝕊1_bar_memo;
+
+    const 𝕊1_a = (arg) => {
+        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
+        return 𝕊1_a_memo(arg);
+    };
+    let 𝕊1_a_memo;
 
     const 𝕊0_a = (arg) => {
         if (!𝕊0_a_memo) 𝕊0_a_memo = 𝕊0('b');
@@ -619,75 +664,6 @@ const print = (() => {
     };
     let 𝕊0_modExprMem_memo;
 
-    const 𝕊0_recA = (arg) => {
-        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
-        return 𝕊0_recA_memo(arg);
-    };
-    let 𝕊0_recA_memo;
-
-    const 𝕊0_recB = (arg) => {
-        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
-        return 𝕊0_recB_memo(arg);
-    };
-    let 𝕊0_recB_memo;
-
-    const 𝕊0_refC = (arg) => {
-        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊0_refC_memo(arg);
-    };
-    let 𝕊0_refC_memo;
-
-    const 𝕊0_defC = (arg) => {
-        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
-        return 𝕊0_defC_memo(arg);
-    };
-    let 𝕊0_defC_memo;
-
-    const 𝕊1 = (name) => {
-        switch (name) {
-            case 'foo': return 𝕊1_foo;
-            case 'bar': return 𝕊1_bar;
-            case 'a': return 𝕊1_a;
-            default: return undefined;
-        }
-    };
-
-    const 𝕊1_foo = (arg) => {
-        if (!𝕊1_foo_memo) 𝕊1_foo_memo = function STR() {
-            if (typeof IN !== 'string') return false;
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 111) return false;
-            if (IN.charCodeAt(IP + 2) !== 111) return false;
-            IP += 3;
-            OUT = "foo";
-            return true;
-        };
-        return 𝕊1_foo_memo(arg);
-    };
-    let 𝕊1_foo_memo;
-
-    const 𝕊1_bar = (arg) => {
-        if (!𝕊1_bar_memo) 𝕊1_bar_memo = function STR() {
-            if (typeof IN !== 'string') return false;
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 114) return false;
-            IP += 3;
-            OUT = "bar";
-            return true;
-        };
-        return 𝕊1_bar_memo(arg);
-    };
-    let 𝕊1_bar_memo;
-
-    const 𝕊1_a = (arg) => {
-        if (!𝕊1_a_memo) 𝕊1_a_memo = 𝕊0('b');
-        return 𝕊1_a_memo(arg);
-    };
-    let 𝕊1_a_memo;
-
     const 𝕊2 = (name) => {
         switch (name) {
             case 'mem': return 𝕊2_mem;
@@ -713,6 +689,12 @@ const print = (() => {
     };
     let 𝕊2_mem_memo;
 
+    const 𝕊0_recA = (arg) => {
+        if (!𝕊0_recA_memo) 𝕊0_recA_memo = 𝕊3;
+        return 𝕊0_recA_memo(arg);
+    };
+    let 𝕊0_recA_memo;
+
     const 𝕊3 = (name) => {
         switch (name) {
             case 'a': return 𝕊3_a;
@@ -726,6 +708,12 @@ const print = (() => {
     };
     let 𝕊3_a_memo;
 
+    const 𝕊0_recB = (arg) => {
+        if (!𝕊0_recB_memo) 𝕊0_recB_memo = 𝕊4;
+        return 𝕊0_recB_memo(arg);
+    };
+    let 𝕊0_recB_memo;
+
     const 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
@@ -738,6 +726,18 @@ const print = (() => {
         return 𝕊4_b_memo(arg);
     };
     let 𝕊4_b_memo;
+
+    const 𝕊0_refC = (arg) => {
+        if (!𝕊0_refC_memo) 𝕊0_refC_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊0_refC_memo(arg);
+    };
+    let 𝕊0_refC_memo;
+
+    const 𝕊0_defC = (arg) => {
+        if (!𝕊0_defC_memo) 𝕊0_defC_memo = 𝕊5;
+        return 𝕊0_defC_memo(arg);
+    };
+    let 𝕊0_defC_memo;
 
     const 𝕊5 = (name) => {
         switch (name) {
@@ -753,18 +753,6 @@ const print = (() => {
         return 𝕊5_c_memo(arg);
     };
     let 𝕊5_c_memo;
-
-    const 𝕊5_ref5 = (arg) => {
-        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
-        return 𝕊5_ref5_memo(arg);
-    };
-    let 𝕊5_ref5_memo;
-
-    const 𝕊5_ref6 = (arg) => {
-        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
-        return 𝕊5_ref6_memo(arg);
-    };
-    let 𝕊5_ref6_memo;
 
     const 𝕊6 = (name) => {
         switch (name) {
@@ -823,11 +811,23 @@ const print = (() => {
     };
     let 𝕊6_ref3_memo;
 
+    const 𝕊5_ref5 = (arg) => {
+        if (!𝕊5_ref5_memo) 𝕊5_ref5_memo = 𝕊5('c')('c1');
+        return 𝕊5_ref5_memo(arg);
+    };
+    let 𝕊5_ref5_memo;
+
+    const 𝕊5_ref6 = (arg) => {
+        if (!𝕊5_ref6_memo) 𝕊5_ref6_memo = 𝕊0('defC')('c')('c1');
+        return 𝕊5_ref6_memo(arg);
+    };
+    let 𝕊5_ref6_memo;
+
     // -------------------- Compile-time constants --------------------
-    𝕊0('b').constant = {value: "b2"};
-    𝕊0('baz').constant = {value: "baz"};
     𝕊1('foo').constant = {value: "foo"};
     𝕊1('bar').constant = {value: "bar"};
+    𝕊0('b').constant = {value: "b2"};
+    𝕊0('baz').constant = {value: "baz"};
     𝕊2('mem').constant = {value: "member"};
     𝕊6('c1').constant = {value: "c1"};
     𝕊6('c2').constant = {value: "c2"};

@@ -27,9 +27,9 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
     return (n: Node): void => {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
-            case 'Binding': return rec(n.pattern), rec(n.value), undefined;
             case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
+            case 'DestructuredBinding': return rec(n.value), undefined;
             case 'ExtensionFile': return;
             case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;
@@ -37,8 +37,6 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ListExpression': return n.elements.forEach(rec), undefined;
             case 'Module': return n.bindings.forEach(rec), undefined;
             case 'ModuleExpression': return rec(n.module), undefined;
-            case 'ModulePattern': return n.names.forEach(rec), undefined;
-            case 'ModulePatternName': return;
             case 'NotExpression': return rec(n.expression), undefined;
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
@@ -50,9 +48,11 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
             case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
+            case 'SimpleBinding': {
+                return rec(n.value), undefined;
+            }
             case 'StaticField': return rec(n.value), undefined;
             case 'StringLiteralExpression': return;
-            case 'VariablePattern': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };

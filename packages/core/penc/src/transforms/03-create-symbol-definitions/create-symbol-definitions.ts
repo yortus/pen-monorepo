@@ -41,18 +41,18 @@ export function createSymbolDefinitions(program: Program) {
             return extᐟ;
         },
 
-        // Attach a symbol to each VariablePattern and ModulePatternName node.
-        VariablePattern: pat => {
+        // Attach symbols to each SimpleBinding and DestructuredBinding node.
+        SimpleBinding: bnd => {
             assert(currentScope);
-            let symbol = symbolTable.createName(pat.name, currentScope);
-            let patternᐟ = {...pat, meta: {symbolId: symbol.id}};
-            return patternᐟ;
+            let symbol = symbolTable.createName(bnd.name, currentScope);
+            let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolId: symbol.id}};
+            return bndᐟ;
         },
-        ModulePatternName: name => {
+        DestructuredBinding: bnd => {
             assert(currentScope);
-            let symbol = symbolTable.createName(name.alias || name.name, currentScope);
-            let nameᐟ = {...name, meta: {symbolId: symbol.id}};
-            return nameᐟ;
+            let symbolIds = bnd.names.map(n => symbolTable.createName(n.alias || n.name, currentScope!).id);
+            let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolIds}};
+            return bndᐟ;
         },
     }));
 

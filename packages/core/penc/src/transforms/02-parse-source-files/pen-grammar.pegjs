@@ -22,26 +22,24 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = ex:(EXPORT   __)?   pattern:Pattern   __   "="   __   value:Expression
-    { return Object.assign({kind: 'Binding', id: nextId(), pattern, value}, ex ? {exported: true} : {}); }
+    = SimpleBinding
+    / DestructuredBinding
 
+SimpleBinding
+    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
+    { return Object.assign({kind: 'SimpleBinding', id: nextId(), name, value}, ex ? {exported: true} : {}); }
 
-// ====================   Patterns   ====================
-Pattern
-    = VariablePattern
-    / ModulePattern
+DestructuredBinding
+    = ex:(EXPORT   __)?   names:DestructuredBindingNameList   __   "="   __   value:Expression
+    { return Object.assign({kind: 'DestructuredBinding', id: nextId(), names, value}, ex ? {exported: true} : {}); }
 
-VariablePattern
-    = name:IDENTIFIER
-    { return {kind: 'VariablePattern', id: nextId(), name}; }
+DestructuredBindingNameList
+    = "{"   __   !","   head:DestructuredBindingName?   tail:((__   ",")?   __   DestructuredBindingName)*   (__   ",")?   __   "}"
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-ModulePattern
-    = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
-    { return {kind: 'ModulePattern', id: nextId(), names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
-
-ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePattern
+DestructuredBindingName
     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
-    { return Object.assign({kind: 'ModulePatternName', id: nextId(), name}, alias ? {alias: alias[3]} : {}); }
+    { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
 
 
 // ====================   Expressions   ====================

@@ -9,13 +9,11 @@ export function resolveConstantValues(program: Program<Metadata>) {
     let visitNode = makeNodeVisitor<Node<Metadata>, {value: unknown} | void>();
     visitNode(program, rec => ({
         // ApplicationExpression: return rec(n.lambda), rec(n.argument), undefined;
-        Binding: ({pattern, value}) => {
+        SimpleBinding: ({value, meta}) => {
             // TODO: temp testing...
-            if (pattern.kind === 'VariablePattern') {
-                let symbol = symbolTable.getSymbolById(pattern.meta.symbolId);
-                assert(symbol.kind === 'NameSymbol');
-                symbol.constant = rec(value) || undefined;
-            }
+            let symbol = symbolTable.getSymbolById(meta.symbolId);
+            assert(symbol.kind === 'NameSymbol');
+            symbol.constant = rec(value) || undefined;
         },
         // BindingLookupExpression: return rec(n.module), undefined;
         BooleanLiteralExpression: expr => ({value: expr.value}),

@@ -15,11 +15,11 @@ export interface Metadata {
         readonly scope: ScopeSymbol;
     };
 
-    VariablePattern: {
+    SimpleBinding: {
         readonly symbolId: string;
     };
 
-    ModulePatternName: {
-        readonly symbolId: string;
+    DestructuredBinding: {
+        readonly symbolIds: string[];
     };
 }

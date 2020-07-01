@@ -640,92 +640,6 @@ const parse = (() => {
     };
     let 𝕊0_digit_memo;
 
-    const 𝕊0_alpha = (arg) => {
-        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
-            const t6 = (𝕊0('char'))(𝕊2);
-            const t7 = (𝕊0('char'))(𝕊3);
-            return function SEL() {
-                if (t6()) return true;
-                if (t7()) return true;
-                return false;
-            };
-        })();
-        return 𝕊0_alpha_memo(arg);
-    };
-    let 𝕊0_alpha_memo;
-
-    const 𝕊0_result = (arg) => {
-        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
-            const t8 = 𝕊0('bar');
-            const t9 = 𝕊0('baz');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t8()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t9()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })());
-        return 𝕊0_result_memo(arg);
-    };
-    let 𝕊0_result_memo;
-
-    const 𝕊0_myList = (arg) => {
-        if (!𝕊0_myList_memo) 𝕊0_myList_memo = list({
-            mode: 6,
-            elements: [
-                𝕊0('digit'),
-                (() => {
-                    const t10 = 𝕊0('digit');
-                    const t11 = 𝕊0('digit');
-                    return function SEQ() {
-                        let stateₒ = getState();
-                        let out;
-                        if (t10()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t11()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        OUT = out;
-                        return true;
-                    };
-                })(),
-                (() => {
-                    const t12 = 𝕊0('digit');
-                    const t13 = 𝕊0('digit');
-                    const t14 = 𝕊0('digit');
-                    return function SEQ() {
-                        let stateₒ = getState();
-                        let out;
-                        if (t12()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t13()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t14()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        OUT = out;
-                        return true;
-                    };
-                })(),
-            ],
-        });
-        return 𝕊0_myList_memo(arg);
-    };
-    let 𝕊0_myList_memo;
-
-    const 𝕊0_rec = (arg) => {
-        if (!𝕊0_rec_memo) 𝕊0_rec_memo = 𝕊4;
-        return 𝕊0_rec_memo(arg);
-    };
-    let 𝕊0_rec_memo;
-
-    const 𝕊0_r2 = (arg) => {
-        if (!𝕊0_r2_memo) 𝕊0_r2_memo = 𝕊0('rec');
-        return 𝕊0_r2_memo(arg);
-    };
-    let 𝕊0_r2_memo;
-
-    const 𝕊0_r2d = (arg) => {
-        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
-        return 𝕊0_r2d_memo(arg);
-    };
-    let 𝕊0_r2d_memo;
-
     const 𝕊1 = (name) => {
         switch (name) {
             case 'min': return 𝕊1_min;
@@ -757,6 +671,20 @@ const parse = (() => {
         return 𝕊1_max_memo(arg);
     };
     let 𝕊1_max_memo;
+
+    const 𝕊0_alpha = (arg) => {
+        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
+            const t6 = (𝕊0('char'))(𝕊2);
+            const t7 = (𝕊0('char'))(𝕊3);
+            return function SEL() {
+                if (t6()) return true;
+                if (t7()) return true;
+                return false;
+            };
+        })();
+        return 𝕊0_alpha_memo(arg);
+    };
+    let 𝕊0_alpha_memo;
 
     const 𝕊2 = (name) => {
         switch (name) {
@@ -822,6 +750,66 @@ const parse = (() => {
     };
     let 𝕊3_max_memo;
 
+    const 𝕊0_result = (arg) => {
+        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
+            const t8 = 𝕊0('bar');
+            const t9 = 𝕊0('baz');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t8()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t9()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })());
+        return 𝕊0_result_memo(arg);
+    };
+    let 𝕊0_result_memo;
+
+    const 𝕊0_myList = (arg) => {
+        if (!𝕊0_myList_memo) 𝕊0_myList_memo = list({
+            mode: 6,
+            elements: [
+                𝕊0('digit'),
+                (() => {
+                    const t10 = 𝕊0('digit');
+                    const t11 = 𝕊0('digit');
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (t10()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t11()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    };
+                })(),
+                (() => {
+                    const t12 = 𝕊0('digit');
+                    const t13 = 𝕊0('digit');
+                    const t14 = 𝕊0('digit');
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (t12()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t13()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t14()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    };
+                })(),
+            ],
+        });
+        return 𝕊0_myList_memo(arg);
+    };
+    let 𝕊0_myList_memo;
+
+    const 𝕊0_rec = (arg) => {
+        if (!𝕊0_rec_memo) 𝕊0_rec_memo = 𝕊4;
+        return 𝕊0_rec_memo(arg);
+    };
+    let 𝕊0_rec_memo;
+
     const 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
@@ -847,6 +835,18 @@ const parse = (() => {
         return 𝕊4_d_memo(arg);
     };
     let 𝕊4_d_memo;
+
+    const 𝕊0_r2 = (arg) => {
+        if (!𝕊0_r2_memo) 𝕊0_r2_memo = 𝕊0('rec');
+        return 𝕊0_r2_memo(arg);
+    };
+    let 𝕊0_r2_memo;
+
+    const 𝕊0_r2d = (arg) => {
+        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
+        return 𝕊0_r2d_memo(arg);
+    };
+    let 𝕊0_r2d_memo;
 
     // -------------------- a.pen --------------------
 
@@ -1076,92 +1076,6 @@ const print = (() => {
     };
     let 𝕊0_digit_memo;
 
-    const 𝕊0_alpha = (arg) => {
-        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
-            const t15 = (𝕊0('char'))(𝕊2);
-            const t16 = (𝕊0('char'))(𝕊3);
-            return function SEL() {
-                if (t15()) return true;
-                if (t16()) return true;
-                return false;
-            };
-        })();
-        return 𝕊0_alpha_memo(arg);
-    };
-    let 𝕊0_alpha_memo;
-
-    const 𝕊0_result = (arg) => {
-        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
-            const t17 = 𝕊0('bar');
-            const t18 = 𝕊0('baz');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t17()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t18()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })());
-        return 𝕊0_result_memo(arg);
-    };
-    let 𝕊0_result_memo;
-
-    const 𝕊0_myList = (arg) => {
-        if (!𝕊0_myList_memo) 𝕊0_myList_memo = list({
-            mode: 7,
-            elements: [
-                𝕊0('digit'),
-                (() => {
-                    const t19 = 𝕊0('digit');
-                    const t20 = 𝕊0('digit');
-                    return function SEQ() {
-                        let stateₒ = getState();
-                        let out;
-                        if (t19()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t20()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        OUT = out;
-                        return true;
-                    };
-                })(),
-                (() => {
-                    const t21 = 𝕊0('digit');
-                    const t22 = 𝕊0('digit');
-                    const t23 = 𝕊0('digit');
-                    return function SEQ() {
-                        let stateₒ = getState();
-                        let out;
-                        if (t21()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t22()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t23()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        OUT = out;
-                        return true;
-                    };
-                })(),
-            ],
-        });
-        return 𝕊0_myList_memo(arg);
-    };
-    let 𝕊0_myList_memo;
-
-    const 𝕊0_rec = (arg) => {
-        if (!𝕊0_rec_memo) 𝕊0_rec_memo = 𝕊4;
-        return 𝕊0_rec_memo(arg);
-    };
-    let 𝕊0_rec_memo;
-
-    const 𝕊0_r2 = (arg) => {
-        if (!𝕊0_r2_memo) 𝕊0_r2_memo = 𝕊0('rec');
-        return 𝕊0_r2_memo(arg);
-    };
-    let 𝕊0_r2_memo;
-
-    const 𝕊0_r2d = (arg) => {
-        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
-        return 𝕊0_r2d_memo(arg);
-    };
-    let 𝕊0_r2d_memo;
-
     const 𝕊1 = (name) => {
         switch (name) {
             case 'min': return 𝕊1_min;
@@ -1195,6 +1109,20 @@ const print = (() => {
         return 𝕊1_max_memo(arg);
     };
     let 𝕊1_max_memo;
+
+    const 𝕊0_alpha = (arg) => {
+        if (!𝕊0_alpha_memo) 𝕊0_alpha_memo = (() => {
+            const t15 = (𝕊0('char'))(𝕊2);
+            const t16 = (𝕊0('char'))(𝕊3);
+            return function SEL() {
+                if (t15()) return true;
+                if (t16()) return true;
+                return false;
+            };
+        })();
+        return 𝕊0_alpha_memo(arg);
+    };
+    let 𝕊0_alpha_memo;
 
     const 𝕊2 = (name) => {
         switch (name) {
@@ -1264,6 +1192,66 @@ const print = (() => {
     };
     let 𝕊3_max_memo;
 
+    const 𝕊0_result = (arg) => {
+        if (!𝕊0_result_memo) 𝕊0_result_memo = (𝕊0('foo'))((() => {
+            const t17 = 𝕊0('bar');
+            const t18 = 𝕊0('baz');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t17()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t18()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })());
+        return 𝕊0_result_memo(arg);
+    };
+    let 𝕊0_result_memo;
+
+    const 𝕊0_myList = (arg) => {
+        if (!𝕊0_myList_memo) 𝕊0_myList_memo = list({
+            mode: 7,
+            elements: [
+                𝕊0('digit'),
+                (() => {
+                    const t19 = 𝕊0('digit');
+                    const t20 = 𝕊0('digit');
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (t19()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t20()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    };
+                })(),
+                (() => {
+                    const t21 = 𝕊0('digit');
+                    const t22 = 𝕊0('digit');
+                    const t23 = 𝕊0('digit');
+                    return function SEQ() {
+                        let stateₒ = getState();
+                        let out;
+                        if (t21()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t22()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t23()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        OUT = out;
+                        return true;
+                    };
+                })(),
+            ],
+        });
+        return 𝕊0_myList_memo(arg);
+    };
+    let 𝕊0_myList_memo;
+
+    const 𝕊0_rec = (arg) => {
+        if (!𝕊0_rec_memo) 𝕊0_rec_memo = 𝕊4;
+        return 𝕊0_rec_memo(arg);
+    };
+    let 𝕊0_rec_memo;
+
     const 𝕊4 = (name) => {
         switch (name) {
             case 'b': return 𝕊4_b;
@@ -1309,6 +1297,18 @@ const print = (() => {
         return 𝕊4_d_memo(arg);
     };
     let 𝕊4_d_memo;
+
+    const 𝕊0_r2 = (arg) => {
+        if (!𝕊0_r2_memo) 𝕊0_r2_memo = 𝕊0('rec');
+        return 𝕊0_r2_memo(arg);
+    };
+    let 𝕊0_r2_memo;
+
+    const 𝕊0_r2d = (arg) => {
+        if (!𝕊0_r2d_memo) 𝕊0_r2d_memo = 𝕊0('rec')('d');
+        return 𝕊0_r2d_memo(arg);
+    };
+    let 𝕊0_r2d_memo;
 
     // -------------------- a.pen --------------------
 
