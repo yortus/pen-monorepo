@@ -11,10 +11,7 @@ export type Node<M extends Metadata = {}> =
 
     // Bindings and Expressions
     | Binding<M>
-    | Expression<M>
-
-    // Other nodes
-    | StaticField<M>;
+    | Expression<M>;
 
 
 export type Binding<M extends Metadata = {}> =
@@ -230,7 +227,10 @@ export interface QuantifiedExpression<M extends Metadata = {}> {
 export interface RecordExpression<M extends Metadata = {}> {
     readonly kind: 'RecordExpression';
     readonly id: number;
-    readonly fields: ReadonlyArray<StaticField<M>>;
+    readonly fields: ReadonlyArray<{
+        readonly name: string;
+        readonly value: Expression<M>;
+    }>;
     readonly meta: M[this['kind']];
 }
 
@@ -265,16 +265,6 @@ export interface StringLiteralExpression<M extends Metadata = {}> {
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;
-    readonly meta: M[this['kind']];
-}
-
-
-// // ====================   Other nodes   ====================
-export interface StaticField<M extends Metadata = {}> {
-    readonly kind: 'StaticField';
-    readonly id: number;
-    readonly name: string;
-    readonly value: Expression<M>;
     readonly meta: M[this['kind']];
 }
 

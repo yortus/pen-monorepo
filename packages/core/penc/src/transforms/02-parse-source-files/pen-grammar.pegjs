@@ -154,7 +154,7 @@ ApplicationArgument
 //     { return {kind: 'LambdaExpression', pattern, body}; }
 
 RecordExpression
-    = "{"   __   fields:StaticFieldList   __   "}"
+    = "{"   __   fields:RecordFieldList   __   "}"
     { return {kind: 'RecordExpression', id: nextId(), fields}; }
 
 FieldExpression
@@ -214,13 +214,13 @@ ReferenceExpression
 
 
 // ====================   Record/List Parts   ====================
-StaticFieldList
-    = !","   head:StaticField?   tail:((__   ",")?   __   StaticField)*   (__   ",")?
+RecordFieldList
+    = !","   head:RecordField?   tail:((__   ",")?   __   RecordField)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-StaticField
+RecordField
     = name:IDENTIFIER   __   ":"   __   value:Expression
-    { return {kind: 'StaticField', id: nextId(), name, value}; }
+    { return {name, value}; }
 
 ElementList
     = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?

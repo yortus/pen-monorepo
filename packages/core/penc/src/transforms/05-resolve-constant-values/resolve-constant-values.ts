@@ -34,7 +34,6 @@ export function resolveConstantValues(program: Program<Metadata>) {
         // ReferenceExpression: return;
         // SelectionExpression: return n.expressions.forEach(rec), undefined;
         // SequenceExpression: return n.expressions.forEach(rec), undefined;
-        // StaticField: return rec(n.value), undefined;
         StringLiteralExpression: expr => ({value: expr.value}),
         // VariablePattern: return;
     }));

@@ -52,14 +52,14 @@ export function computeNodeHashes(program: Program<Metadata>) {
             case 'PenSourceFile': return sigs.get(n.module);
             case 'Program': return {kind: 'PRG'}; // only one of these
             case 'QuantifiedExpression': return {kind: 'QUA', e: sigs.get(n.expression), q: n.quantifier};
-            case 'RecordExpression': return {kind: 'REC', f: n.fields.map(f => sigs.get(f))};
+            //case 'RecordExpression': return {kind: 'REC', f: n.fields.map(f => sigs.get(f))};
             case 'ReferenceExpression':
                 // TODO: must be same hash value as its referent - how to look it up?
                 program.meta.symbolTable.getSymbolById(n.meta.symbolId);
                 return;
             case 'SelectionExpression': return {kind: 'SEL', e: n.expressions.map(e => sigs.get(e))};
             case 'SequenceExpression': return {kind: 'SEQ', e: n.expressions.map(e => sigs.get(e))};
-            case 'StaticField': return {kind: 'STF', n: n.name, v: sigs.get(n.value)};
+            //case 'StaticField': return {kind: 'STF', n: n.name, v: sigs.get(n.value)};
             case 'StringLiteralExpression': return {kind: 'STR', value: n.value, a: n.abstract, c: n.concrete};
             // case 'VariablePattern': return;
             // default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);

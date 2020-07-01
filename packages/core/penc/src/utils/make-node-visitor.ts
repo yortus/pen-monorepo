@@ -44,14 +44,13 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'PenSourceFile': return rec(n.module), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
             case 'QuantifiedExpression': return rec(n.expression), undefined;
-            case 'RecordExpression': return n.fields.forEach(rec), undefined;
+            case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), undefined;
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
             case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
             case 'SimpleBinding': {
                 return rec(n.value), undefined;
             }
-            case 'StaticField': return rec(n.value), undefined;
             case 'StringLiteralExpression': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

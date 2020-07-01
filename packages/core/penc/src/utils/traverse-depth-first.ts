@@ -25,12 +25,11 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'PenSourceFile': return rec(n.module), cb(n);
             case 'Program': return mapMap(n.sourceFiles, rec), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
-            case 'RecordExpression': return n.fields.forEach(rec), cb(n);
+            case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
             case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'SimpleBinding': return rec(n.value), cb(n);
-            case 'StaticField': return rec(n.value), cb(n);
             case 'StringLiteralExpression': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

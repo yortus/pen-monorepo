@@ -44,12 +44,11 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'PenSourceFile': return {...n, module: rec(n.module)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
-            case 'RecordExpression': return {...n, fields: n.fields.map(rec)};
+            case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
             case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SimpleBinding': return {...n, value: rec(n.value)};
-            case 'StaticField': return {...n, value: rec(n.value)};
             case 'StringLiteralExpression': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
