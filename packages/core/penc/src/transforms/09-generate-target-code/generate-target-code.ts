@@ -243,11 +243,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             break;
         }
 
-        case 'ParenthesisedExpression':
-            // TODO: emit extra parens?
-            emitExpression(emit, expr.expression, symbolTable, mode);
-            break;
-
         case 'QuantifiedExpression':
             emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
             emit.down(1).text(`mode: ${mode},`);

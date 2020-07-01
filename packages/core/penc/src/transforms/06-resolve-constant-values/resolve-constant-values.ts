@@ -23,11 +23,8 @@ export function resolveConstantValues(program: Program<Metadata>) {
         // ListExpression: return n.elements.forEach(rec), undefined;
         // Module: return n.bindings.forEach(rec), undefined;
         // ModuleExpression: return rec(n.module), undefined;
-        // ModulePattern: return n.names.forEach(rec), undefined;
-        // ModulePatternName: return;
         NullLiteralExpression: () => ({value: null}),
         NumericLiteralExpression: expr => ({value: expr.value}),
-        // ParenthesisedExpression: return rec(n.expression), undefined;
         // PenSourceFile: return rec(n.module), undefined;
         // Program: return mapMap(n.sourceFiles, rec), undefined;
         // RecordExpression: return n.fields.forEach(rec), undefined;
@@ -35,7 +32,6 @@ export function resolveConstantValues(program: Program<Metadata>) {
         // SelectionExpression: return n.expressions.forEach(rec), undefined;
         // SequenceExpression: return n.expressions.forEach(rec), undefined;
         StringLiteralExpression: expr => ({value: expr.value}),
-        // VariablePattern: return;
     }));
 
     // TODO: temp testing...

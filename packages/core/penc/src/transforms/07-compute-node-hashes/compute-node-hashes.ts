@@ -65,7 +65,6 @@ export function computeNodeHashes(program: Program<Metadata>) {
 
             // Aliasing nodes (ie nodes that *directly* create graph cycles)
             case 'ModuleExpression': return {ref: n.module};
-            case 'ParenthesisedExpression': return {ref: n.expression};
             case 'PenSourceFile': return {ref: n.module};
             case 'SimpleBinding': return {ref: n.value};
 
@@ -74,7 +73,6 @@ export function computeNodeHashes(program: Program<Metadata>) {
 
             // TODO: Nodes that reference other nodes (ie creating graph cycles)
             // case 'BindingLookupExpression':
-            // case 'DestructuredBinding':
             // case 'ImportExpression':
             ///////// // case 'LambdaExpression': TODO: ...
 
