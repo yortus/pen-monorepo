@@ -3,7 +3,9 @@ import {makeNodeMapper} from '../../utils';
 import {Metadata} from './metadata';
 
 
-// TODO: doc... after this transform, all bindings in the AST will be simple bindings (no more DestructuredBindings)
+// TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
+// - DestructuredBinding
+// - ParenthesisedExpression
 export function desugarSyntax(program: Program) {
     let counter = 0;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
@@ -35,6 +37,14 @@ export function desugarSyntax(program: Program) {
 
             let modᐟ = {...mod, bindings};
             return modᐟ;
+        },
+
+        // TODO: temp testing...
+        ParenthesisedExpression: par => {
+            // TODO: make a new util to replace ast nodes? `makeNodeMapper` doesn't typecheck when replacing a node
+            // with a different kind node like done below, however it works fine at runtime. It's safe here since any
+            // place a ParenthesisedExpression may appear, any other Expression kind may appear. But the cast is ugly.
+            return rec(par.expression) as any;
         },
     }));
 

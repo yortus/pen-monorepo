@@ -26,7 +26,9 @@ export function computeNodeHashes(program: Program<Metadata>) {
     const bnds = [] as number[];
     const sigsEntries = [...signatures.entries()];
     for (let i = 0; i < signatures.size; ++i) {
-        if (sigsEntries[i][0].kind === 'SimpleBinding' || sigsEntries[i][0].kind === 'DestructuredBinding') {
+        if (sigsEntries[i][0].kind === 'SimpleBinding'
+            //|| sigsEntries[i][0].kind === 'DestructuredBinding'
+        ) {
             bnds.push(i);
         }
     }
