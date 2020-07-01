@@ -41,17 +41,11 @@ export function createSymbolDefinitions(program: Program) {
             return extᐟ;
         },
 
-        // Attach symbols to each SimpleBinding and DestructuredBinding node.
+        // Attach a symbol to each SimpleBinding node. NB: There are no DestructuredBinding nodes after desugaring.
         SimpleBinding: bnd => {
             assert(currentScope);
             let symbol = symbolTable.createName(bnd.name, currentScope);
             let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolId: symbol.id}};
-            return bndᐟ;
-        },
-        DestructuredBinding: bnd => {
-            assert(currentScope);
-            let symbolIds = bnd.names.map(n => symbolTable.createName(n.alias || n.name, currentScope!).id);
-            let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolIds}};
             return bndᐟ;
         },
     }));

@@ -1,7 +1,7 @@
 import {Node, Program} from '../../ast-nodes';
 import {ScopeSymbol} from '../../symbol-table';
 import {assert, makeNodeMapper} from '../../utils';
-import {Metadata as OldMetadata} from '../03-create-symbol-definitions';
+import {Metadata as OldMetadata} from '../04-create-symbol-definitions';
 import {Metadata as NewMetadata} from './metadata';
 
 

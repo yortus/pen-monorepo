@@ -1,7 +1,8 @@
 import {ScopeSymbol, SymbolTable} from '../../symbol-table';
+import {Metadata as OldMetadata} from '../03-desugar-syntax';
 
 
-export interface Metadata {
+export type Metadata = OldMetadata & {
     Program: {
         readonly symbolTable: SymbolTable;
         readonly startSymbolId: string;
@@ -17,9 +18,5 @@ export interface Metadata {
 
     SimpleBinding: {
         readonly symbolId: string;
-    };
-
-    DestructuredBinding: {
-        readonly symbolIds: string[];
     };
 }

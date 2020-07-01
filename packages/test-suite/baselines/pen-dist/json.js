@@ -668,8 +668,10 @@ const parse = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'char': return 𝕊0_char;
             case 'f64': return 𝕊0_f64;
+            case '$2': return 𝕊0_$2;
             case 'unicode': return 𝕊0_unicode;
             case 'start': return 𝕊0_start;
             case 'Value': return 𝕊0_Value;
@@ -695,11 +697,35 @@ const parse = (() => {
         }
     };
 
-    const 𝕊0_char = (arg) => 𝕊3('char')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊3;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_f64 = (arg) => 𝕊3('f64')(arg);
+    const 𝕊0_char = (arg) => {
+        if (!𝕊0_char_memo) 𝕊0_char_memo = 𝕊0('$1')('char');
+        return 𝕊0_char_memo(arg);
+    };
+    let 𝕊0_char_memo;
 
-    const 𝕊0_unicode = (arg) => 𝕊4('unicode')(arg);
+    const 𝕊0_f64 = (arg) => {
+        if (!𝕊0_f64_memo) 𝕊0_f64_memo = 𝕊0('$1')('f64');
+        return 𝕊0_f64_memo(arg);
+    };
+    let 𝕊0_f64_memo;
+
+    const 𝕊0_$2 = (arg) => {
+        if (!𝕊0_$2_memo) 𝕊0_$2_memo = 𝕊4;
+        return 𝕊0_$2_memo(arg);
+    };
+    let 𝕊0_$2_memo;
+
+    const 𝕊0_unicode = (arg) => {
+        if (!𝕊0_unicode_memo) 𝕊0_unicode_memo = 𝕊0('$2')('unicode');
+        return 𝕊0_unicode_memo(arg);
+    };
+    let 𝕊0_unicode_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
@@ -1561,8 +1587,10 @@ const print = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'char': return 𝕊0_char;
             case 'f64': return 𝕊0_f64;
+            case '$2': return 𝕊0_$2;
             case 'unicode': return 𝕊0_unicode;
             case 'start': return 𝕊0_start;
             case 'Value': return 𝕊0_Value;
@@ -1588,11 +1616,35 @@ const print = (() => {
         }
     };
 
-    const 𝕊0_char = (arg) => 𝕊3('char')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊3;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_f64 = (arg) => 𝕊3('f64')(arg);
+    const 𝕊0_char = (arg) => {
+        if (!𝕊0_char_memo) 𝕊0_char_memo = 𝕊0('$1')('char');
+        return 𝕊0_char_memo(arg);
+    };
+    let 𝕊0_char_memo;
 
-    const 𝕊0_unicode = (arg) => 𝕊4('unicode')(arg);
+    const 𝕊0_f64 = (arg) => {
+        if (!𝕊0_f64_memo) 𝕊0_f64_memo = 𝕊0('$1')('f64');
+        return 𝕊0_f64_memo(arg);
+    };
+    let 𝕊0_f64_memo;
+
+    const 𝕊0_$2 = (arg) => {
+        if (!𝕊0_$2_memo) 𝕊0_$2_memo = 𝕊4;
+        return 𝕊0_$2_memo(arg);
+    };
+    let 𝕊0_$2_memo;
+
+    const 𝕊0_unicode = (arg) => {
+        if (!𝕊0_unicode_memo) 𝕊0_unicode_memo = 𝕊0('$2')('unicode');
+        return 𝕊0_unicode_memo(arg);
+    };
+    let 𝕊0_unicode_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {

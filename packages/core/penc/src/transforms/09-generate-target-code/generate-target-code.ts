@@ -135,21 +135,6 @@ function emitSymbolDefinitions(emit: Emitter, program: Program, mode: Mode) {
             emit.down(1).text(`let ${qualName}_memo;`);
             rec(bnd.value); // recurse
         },
-        DestructuredBinding: bnd => {
-            // TODO: ... only emit `value` once for all names, not once per name as is currently done below
-            // Each ModulePatternName *must* be an alias to a name in the rhs module
-            for (let i = 0; i < bnd.names.length; ++i) {
-                let {name} = bnd.names[i];
-                let symbol = symbolTable.getSymbolById(bnd.meta.symbolIds[i]);
-                assert(symbol.kind === 'NameSymbol');
-                let {scope, sourceName} = symbol;
-                let qualName = `${scope.id}_${sourceName}`;
-                emit.down(2).text(`const ${qualName} = (arg) => `);
-                emitExpression(emit, bnd.value, symbolTable, mode); // rhs *must* be a module
-                emit.text(`('${name}')(arg);`); // TODO: still needs fixing...
-            }
-            rec(bnd.value); // recurse
-        },
     }));
 }
 

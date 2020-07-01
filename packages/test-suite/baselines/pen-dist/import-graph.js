@@ -604,9 +604,12 @@ const parse = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'foo': return 𝕊0_foo;
             case 'bar': return 𝕊0_bar;
             case 'baz': return 𝕊0_baz;
+            case '$2': return 𝕊0_$2;
+            case '$3': return 𝕊0_$3;
             case 'char': return 𝕊0_char;
             case 'start': return 𝕊0_start;
             case 'digit': return 𝕊0_digit;
@@ -620,13 +623,47 @@ const parse = (() => {
         }
     };
 
-    const 𝕊0_foo = (arg) => 𝕊5('f')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊5;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_bar = (arg) => 𝕊5('b')(arg);
+    const 𝕊0_foo = (arg) => {
+        if (!𝕊0_foo_memo) 𝕊0_foo_memo = 𝕊0('$1')('f');
+        return 𝕊0_foo_memo(arg);
+    };
+    let 𝕊0_foo_memo;
 
-    const 𝕊0_baz = (arg) => 𝕊5('baz')(arg);
+    const 𝕊0_bar = (arg) => {
+        if (!𝕊0_bar_memo) 𝕊0_bar_memo = 𝕊0('$1')('b');
+        return 𝕊0_bar_memo(arg);
+    };
+    let 𝕊0_bar_memo;
 
-    const 𝕊0_char = (arg) => 𝕊7('char')(arg);
+    const 𝕊0_baz = (arg) => {
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = 𝕊0('$1')('baz');
+        return 𝕊0_baz_memo(arg);
+    };
+    let 𝕊0_baz_memo;
+
+    const 𝕊0_$2 = (arg) => {
+        if (!𝕊0_$2_memo) 𝕊0_$2_memo = 𝕊6;
+        return 𝕊0_$2_memo(arg);
+    };
+    let 𝕊0_$2_memo;
+
+    const 𝕊0_$3 = (arg) => {
+        if (!𝕊0_$3_memo) 𝕊0_$3_memo = 𝕊7;
+        return 𝕊0_$3_memo(arg);
+    };
+    let 𝕊0_$3_memo;
+
+    const 𝕊0_char = (arg) => {
+        if (!𝕊0_char_memo) 𝕊0_char_memo = 𝕊0('$3')('char');
+        return 𝕊0_char_memo(arg);
+    };
+    let 𝕊0_char_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('result');
@@ -852,12 +889,26 @@ const parse = (() => {
 
     const 𝕊5 = (name) => {
         switch (name) {
+            case '$4': return 𝕊5_$4;
+            case '$5': return 𝕊5_$5;
             case 'f': return 𝕊5_f;
             case 'b': return 𝕊5_b;
             case 'baz': return 𝕊5_baz;
             default: return undefined;
         }
     };
+
+    const 𝕊5_$4 = (arg) => {
+        if (!𝕊5_$4_memo) 𝕊5_$4_memo = 𝕊8;
+        return 𝕊5_$4_memo(arg);
+    };
+    let 𝕊5_$4_memo;
+
+    const 𝕊5_$5 = (arg) => {
+        if (!𝕊5_$5_memo) 𝕊5_$5_memo = 𝕊6;
+        return 𝕊5_$5_memo(arg);
+    };
+    let 𝕊5_$5_memo;
 
     const 𝕊5_f = (arg) => {
         if (!𝕊5_f_memo) 𝕊5_f_memo = function STR() {
@@ -905,9 +956,23 @@ const parse = (() => {
 
     const 𝕊6 = (name) => {
         switch (name) {
+            case '$6': return 𝕊6_$6;
+            case '$7': return 𝕊6_$7;
             default: return undefined;
         }
     };
+
+    const 𝕊6_$6 = (arg) => {
+        if (!𝕊6_$6_memo) 𝕊6_$6_memo = 𝕊8;
+        return 𝕊6_$6_memo(arg);
+    };
+    let 𝕊6_$6_memo;
+
+    const 𝕊6_$7 = (arg) => {
+        if (!𝕊6_$7_memo) 𝕊6_$7_memo = 𝕊6;
+        return 𝕊6_$7_memo(arg);
+    };
+    let 𝕊6_$7_memo;
 
     const 𝕊7 = createExtension𝕊7({mode: 6});
 
@@ -915,17 +980,45 @@ const parse = (() => {
 
     const 𝕊8 = (name) => {
         switch (name) {
+            case '$8': return 𝕊8_$8;
+            case '$9': return 𝕊8_$9;
+            case '$10': return 𝕊8_$10;
             default: return undefined;
         }
     };
+
+    const 𝕊8_$8 = (arg) => {
+        if (!𝕊8_$8_memo) 𝕊8_$8_memo = 𝕊5;
+        return 𝕊8_$8_memo(arg);
+    };
+    let 𝕊8_$8_memo;
+
+    const 𝕊8_$9 = (arg) => {
+        if (!𝕊8_$9_memo) 𝕊8_$9_memo = 𝕊8;
+        return 𝕊8_$9_memo(arg);
+    };
+    let 𝕊8_$9_memo;
+
+    const 𝕊8_$10 = (arg) => {
+        if (!𝕊8_$10_memo) 𝕊8_$10_memo = 𝕊9;
+        return 𝕊8_$10_memo(arg);
+    };
+    let 𝕊8_$10_memo;
 
     // -------------------- d.pen --------------------
 
     const 𝕊9 = (name) => {
         switch (name) {
+            case '$11': return 𝕊9_$11;
             default: return undefined;
         }
     };
+
+    const 𝕊9_$11 = (arg) => {
+        if (!𝕊9_$11_memo) 𝕊9_$11_memo = 𝕊10;
+        return 𝕊9_$11_memo(arg);
+    };
+    let 𝕊9_$11_memo;
 
     // -------------------- index.pen --------------------
 
@@ -1040,9 +1133,12 @@ const print = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'foo': return 𝕊0_foo;
             case 'bar': return 𝕊0_bar;
             case 'baz': return 𝕊0_baz;
+            case '$2': return 𝕊0_$2;
+            case '$3': return 𝕊0_$3;
             case 'char': return 𝕊0_char;
             case 'start': return 𝕊0_start;
             case 'digit': return 𝕊0_digit;
@@ -1056,13 +1152,47 @@ const print = (() => {
         }
     };
 
-    const 𝕊0_foo = (arg) => 𝕊5('f')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊5;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_bar = (arg) => 𝕊5('b')(arg);
+    const 𝕊0_foo = (arg) => {
+        if (!𝕊0_foo_memo) 𝕊0_foo_memo = 𝕊0('$1')('f');
+        return 𝕊0_foo_memo(arg);
+    };
+    let 𝕊0_foo_memo;
 
-    const 𝕊0_baz = (arg) => 𝕊5('baz')(arg);
+    const 𝕊0_bar = (arg) => {
+        if (!𝕊0_bar_memo) 𝕊0_bar_memo = 𝕊0('$1')('b');
+        return 𝕊0_bar_memo(arg);
+    };
+    let 𝕊0_bar_memo;
 
-    const 𝕊0_char = (arg) => 𝕊7('char')(arg);
+    const 𝕊0_baz = (arg) => {
+        if (!𝕊0_baz_memo) 𝕊0_baz_memo = 𝕊0('$1')('baz');
+        return 𝕊0_baz_memo(arg);
+    };
+    let 𝕊0_baz_memo;
+
+    const 𝕊0_$2 = (arg) => {
+        if (!𝕊0_$2_memo) 𝕊0_$2_memo = 𝕊6;
+        return 𝕊0_$2_memo(arg);
+    };
+    let 𝕊0_$2_memo;
+
+    const 𝕊0_$3 = (arg) => {
+        if (!𝕊0_$3_memo) 𝕊0_$3_memo = 𝕊7;
+        return 𝕊0_$3_memo(arg);
+    };
+    let 𝕊0_$3_memo;
+
+    const 𝕊0_char = (arg) => {
+        if (!𝕊0_char_memo) 𝕊0_char_memo = 𝕊0('$3')('char');
+        return 𝕊0_char_memo(arg);
+    };
+    let 𝕊0_char_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('result');
@@ -1314,12 +1444,26 @@ const print = (() => {
 
     const 𝕊5 = (name) => {
         switch (name) {
+            case '$4': return 𝕊5_$4;
+            case '$5': return 𝕊5_$5;
             case 'f': return 𝕊5_f;
             case 'b': return 𝕊5_b;
             case 'baz': return 𝕊5_baz;
             default: return undefined;
         }
     };
+
+    const 𝕊5_$4 = (arg) => {
+        if (!𝕊5_$4_memo) 𝕊5_$4_memo = 𝕊8;
+        return 𝕊5_$4_memo(arg);
+    };
+    let 𝕊5_$4_memo;
+
+    const 𝕊5_$5 = (arg) => {
+        if (!𝕊5_$5_memo) 𝕊5_$5_memo = 𝕊6;
+        return 𝕊5_$5_memo(arg);
+    };
+    let 𝕊5_$5_memo;
 
     const 𝕊5_f = (arg) => {
         if (!𝕊5_f_memo) 𝕊5_f_memo = function STR() {
@@ -1370,9 +1514,23 @@ const print = (() => {
 
     const 𝕊6 = (name) => {
         switch (name) {
+            case '$6': return 𝕊6_$6;
+            case '$7': return 𝕊6_$7;
             default: return undefined;
         }
     };
+
+    const 𝕊6_$6 = (arg) => {
+        if (!𝕊6_$6_memo) 𝕊6_$6_memo = 𝕊8;
+        return 𝕊6_$6_memo(arg);
+    };
+    let 𝕊6_$6_memo;
+
+    const 𝕊6_$7 = (arg) => {
+        if (!𝕊6_$7_memo) 𝕊6_$7_memo = 𝕊6;
+        return 𝕊6_$7_memo(arg);
+    };
+    let 𝕊6_$7_memo;
 
     const 𝕊7 = createExtension𝕊7({mode: 7});
 
@@ -1380,17 +1538,45 @@ const print = (() => {
 
     const 𝕊8 = (name) => {
         switch (name) {
+            case '$8': return 𝕊8_$8;
+            case '$9': return 𝕊8_$9;
+            case '$10': return 𝕊8_$10;
             default: return undefined;
         }
     };
+
+    const 𝕊8_$8 = (arg) => {
+        if (!𝕊8_$8_memo) 𝕊8_$8_memo = 𝕊5;
+        return 𝕊8_$8_memo(arg);
+    };
+    let 𝕊8_$8_memo;
+
+    const 𝕊8_$9 = (arg) => {
+        if (!𝕊8_$9_memo) 𝕊8_$9_memo = 𝕊8;
+        return 𝕊8_$9_memo(arg);
+    };
+    let 𝕊8_$9_memo;
+
+    const 𝕊8_$10 = (arg) => {
+        if (!𝕊8_$10_memo) 𝕊8_$10_memo = 𝕊9;
+        return 𝕊8_$10_memo(arg);
+    };
+    let 𝕊8_$10_memo;
 
     // -------------------- d.pen --------------------
 
     const 𝕊9 = (name) => {
         switch (name) {
+            case '$11': return 𝕊9_$11;
             default: return undefined;
         }
     };
+
+    const 𝕊9_$11 = (arg) => {
+        if (!𝕊9_$11_memo) 𝕊9_$11_memo = 𝕊10;
+        return 𝕊9_$11_memo(arg);
+    };
+    let 𝕊9_$11_memo;
 
     // -------------------- index.pen --------------------
 

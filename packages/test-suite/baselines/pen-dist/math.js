@@ -604,6 +604,7 @@ const parse = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'memoise': return 𝕊0_memoise;
             case 'f64': return 𝕊0_f64;
             case 'i32': return 𝕊0_i32;
@@ -619,11 +620,29 @@ const parse = (() => {
         }
     };
 
-    const 𝕊0_memoise = (arg) => 𝕊4('memoise')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊4;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_f64 = (arg) => 𝕊4('f64')(arg);
+    const 𝕊0_memoise = (arg) => {
+        if (!𝕊0_memoise_memo) 𝕊0_memoise_memo = 𝕊0('$1')('memoise');
+        return 𝕊0_memoise_memo(arg);
+    };
+    let 𝕊0_memoise_memo;
 
-    const 𝕊0_i32 = (arg) => 𝕊4('i32')(arg);
+    const 𝕊0_f64 = (arg) => {
+        if (!𝕊0_f64_memo) 𝕊0_f64_memo = 𝕊0('$1')('f64');
+        return 𝕊0_f64_memo(arg);
+    };
+    let 𝕊0_f64_memo;
+
+    const 𝕊0_i32 = (arg) => {
+        if (!𝕊0_i32_memo) 𝕊0_i32_memo = 𝕊0('$1')('i32');
+        return 𝕊0_i32_memo(arg);
+    };
+    let 𝕊0_i32_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr');
@@ -1083,6 +1102,7 @@ const print = (() => {
 
     const 𝕊0 = (name) => {
         switch (name) {
+            case '$1': return 𝕊0_$1;
             case 'memoise': return 𝕊0_memoise;
             case 'f64': return 𝕊0_f64;
             case 'i32': return 𝕊0_i32;
@@ -1098,11 +1118,29 @@ const print = (() => {
         }
     };
 
-    const 𝕊0_memoise = (arg) => 𝕊4('memoise')(arg);
+    const 𝕊0_$1 = (arg) => {
+        if (!𝕊0_$1_memo) 𝕊0_$1_memo = 𝕊4;
+        return 𝕊0_$1_memo(arg);
+    };
+    let 𝕊0_$1_memo;
 
-    const 𝕊0_f64 = (arg) => 𝕊4('f64')(arg);
+    const 𝕊0_memoise = (arg) => {
+        if (!𝕊0_memoise_memo) 𝕊0_memoise_memo = 𝕊0('$1')('memoise');
+        return 𝕊0_memoise_memo(arg);
+    };
+    let 𝕊0_memoise_memo;
 
-    const 𝕊0_i32 = (arg) => 𝕊4('i32')(arg);
+    const 𝕊0_f64 = (arg) => {
+        if (!𝕊0_f64_memo) 𝕊0_f64_memo = 𝕊0('$1')('f64');
+        return 𝕊0_f64_memo(arg);
+    };
+    let 𝕊0_f64_memo;
+
+    const 𝕊0_i32 = (arg) => {
+        if (!𝕊0_i32_memo) 𝕊0_i32_memo = 𝕊0('$1')('i32');
+        return 𝕊0_i32_memo(arg);
+    };
+    let 𝕊0_i32_memo;
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = 𝕊0('expr');
