@@ -1,8 +1,6 @@
 {
     let sourceFile = options.sourceFile || {};
     sourceFile.imports = sourceFile.imports || {};
-    let nextId = options.nextId || (() => ++counter);
-    let counter = -1;
 }
 
 
@@ -13,7 +11,7 @@ File
 
 Module
     = bindings:BindingList
-    { return {kind: 'Module', id: nextId(), bindings}; }
+    { return {kind: 'Module', bindings}; }
 
 
 // ====================   Bindings   ====================
@@ -27,11 +25,11 @@ Binding
 
 SimpleBinding
     = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return Object.assign({kind: 'SimpleBinding', id: nextId(), name, value}, ex ? {exported: true} : {}); }
+    { return Object.assign({kind: 'SimpleBinding', name, value}, ex ? {exported: true} : {}); }
 
 DestructuredBinding
     = ex:(EXPORT   __)?   names:DestructuredBindingNameList   __   "="   __   value:Expression
-    { return Object.assign({kind: 'DestructuredBinding', id: nextId(), names, value}, ex ? {exported: true} : {}); }
+    { return Object.assign({kind: 'DestructuredBinding', names, value}, ex ? {exported: true} : {}); }
 
 DestructuredBindingNameList
     = "{"   __   !","   head:DestructuredBindingName?   tail:((__   ",")?   __   DestructuredBindingName)*   (__   ",")?   __   "}"
@@ -115,27 +113,27 @@ PrimaryExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
-    { return {kind: 'SelectionExpression', id: nextId(), expressions: [head].concat(tail.map(el => el[3]))}; }
+    { return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))}; }
 
 SequenceExpression
     = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))+
-    { return {kind: 'SequenceExpression', id: nextId(), expressions: [head].concat(tail.map(el => el[1]))}; }
+    { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
 
 NotExpression
     = "!"   __   expression:Precedence4OrHigher
-    { return {kind: 'NotExpression', id: nextId(), expression}; }
+    { return {kind: 'NotExpression', expression}; }
 
 QuantifiedExpression
     = expression:Precedence5OrHigher   __   quantifier:("?" / "*")
-    { return {kind: 'QuantifiedExpression', id: nextId(), expression, quantifier}; }
+    { return {kind: 'QuantifiedExpression', expression, quantifier}; }
 
 ApplicationOrBindingLookupExpression
     = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
-                ? {kind: 'BindingLookupExpression', id: nextId(), module: lhs, bindingName: rhs.name}
-                : {kind: 'ApplicationExpression', id: nextId(), lambda: lhs, argument: rhs.arg}
+                ? {kind: 'BindingLookupExpression', module: lhs, bindingName: rhs.name}
+                : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
             ),
             head
         );
@@ -155,62 +153,62 @@ ApplicationArgument
 
 RecordExpression
     = "{"   __   fields:RecordFieldList   __   "}"
-    { return {kind: 'RecordExpression', id: nextId(), fields}; }
+    { return {kind: 'RecordExpression', fields}; }
 
 FieldExpression
     = "{"   __   "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression   __   "}"
-    { return {kind: 'FieldExpression', id: nextId(), name, value}; }
+    { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
     = "{"   __   module:Module   __   "}"
-    { return {kind: 'ModuleExpression', id: nextId(), module}; }
+    { return {kind: 'ModuleExpression', module}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"
-    { return {kind: 'ListExpression', id: nextId(), elements}; }
+    { return {kind: 'ListExpression', elements}; }
 
 ParenthesisedExpression
     = "("   __   expression:Expression   __   ")"
-    { return {kind: 'ParenthesisedExpression', id: nextId(), expression}; }
+    { return {kind: 'ParenthesisedExpression', expression}; }
 
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let modspec = specifierChars.map(el => el[1]).join('');
         let sourceFilePath = sourceFile.imports[modspec];
-        return {kind: 'ImportExpression', id: nextId(), moduleSpecifier: modspec, sourceFilePath};
+        return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 
 NullLiteralExpression
-    = NULL   { return {kind: 'NullLiteralExpression', id: nextId(), value: null}; }
+    = NULL   { return {kind: 'NullLiteralExpression', value: null}; }
 
 BooleanLiteralExpression
-    = TRUE   { return {kind: 'BooleanLiteralExpression', id: nextId(), value: true}; }
-    / FALSE   { return {kind: 'BooleanLiteralExpression', id: nextId(), value: false}; }
+    = TRUE   { return {kind: 'BooleanLiteralExpression', value: true}; }
+    / FALSE   { return {kind: 'BooleanLiteralExpression', value: false}; }
 
 StringLiteralExpression
     = "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringLiteralExpression', id: nextId(), value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
     / '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringLiteralExpression', id: nextId(), value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
     / "`"   chars:(!"`"   CHARACTER)*   "`"
-    { return {kind: 'StringLiteralExpression', id: nextId(), value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
+    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
 NumericLiteralExpression
     = DecimalLiteral
     {
         let n = parseFloat(text());
         if (!Number.isFinite(n)) error('cannot represent numeric literal'); // TODO: also ensure exact representation, aka safenum?
-        return {kind: 'NumericLiteralExpression', id: nextId(), value: n}
+        return {kind: 'NumericLiteralExpression', value: n}
     }
 
     // TODO: HexIntegerLiteral
 
 ReferenceExpression
     = name:IDENTIFIER
-    { return {kind: 'ReferenceExpression', id: nextId(), name}; }
+    { return {kind: 'ReferenceExpression', name}; }
 
 
 // ====================   Record/List Parts   ====================
