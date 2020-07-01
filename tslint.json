@@ -34,7 +34,7 @@
         "import-spacing": true,
         "indent":  {"options": ["spaces"]},
         "interface-name": {"options": ["never-prefix"]},                            // <===== changed from recommended
-        "interface-over-type-literal": true,
+        "interface-over-type-literal": false,                                       // <===== changed from recommended
         "jsdoc-format": true,
         "label-position": true,
         "max-classes-per-file": {
