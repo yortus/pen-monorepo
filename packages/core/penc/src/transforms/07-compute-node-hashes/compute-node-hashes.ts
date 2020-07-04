@@ -1,14 +1,15 @@
-import {Node, Program} from '../../ast-nodes';
-import {traverseDepthFirst} from '../../utils';
+import {Expression, Node, Program, ReferenceExpression} from '../../ast-nodes';
+import {assert, traverseDepthFirst} from '../../utils';
 import {Metadata} from './metadata';
 
 
 // TODO: doc...
 export function computeNodeHashes(program: Program<Metadata>) {
-    type Signature = {val: unknown} | {ref: Node<Metadata>};
+    type Signature = {$: unknown[] | {ref: Node<Metadata>, bindingName?: string}};
     let signatures = new Map<Node<Metadata>, Signature>();
-    traverseDepthFirst(program, n => signatures.set(n, {} as Signature));
+    traverseDepthFirst(program, n => signatures.set(n, {$: []}));
     const sigFor = (node: Node<Metadata>) => signatures.get(node)!;
+    const allNodes = [...signatures.keys()];
 
     // TODO: next steps:
     // 2. Object.assign props into the signature obj of every node (another traversal, just for side-effects, ie visit)
@@ -16,18 +17,61 @@ export function computeNodeHashes(program: Program<Metadata>) {
         Object.assign(sig, computeSignatureFor(node));
     }
 
+
+    // Replace {ref: ...} values in the signatures map, until the map stabilises
+    let isStable = false;
+    while (!isStable) {
+        isStable = true;
+        for (let [_, sig] of signatures) {
+            if (Array.isArray(sig.$) || sig.$.bindingName) continue; // only handle direct refs in this loop
+            Object.assign(sig, sigFor(sig.$.ref));
+            isStable = false;
+        }
+    }
+
+    // Replace {ref: ..., bindingName: ...} values in the signatures map, until the map stabilises
+    isStable = false;
+    while (!isStable) {
+        isStable = true;
+        for (let [_, sig] of signatures) {
+            if (Array.isArray(sig.$)) continue; // only handle direct refs in this loop
+
+            // TODO: ... a bit like findReferencedNode
+            // - can 'see through' some node kinds (eg Module), but not others (eg ApplicationExpression)
+            // switch (ref.kind) {
+            //     case ''
+            // }
+            switch (sig.$.ref.kind) {
+                case 'ReferenceExpression':
+                    let refdExpr = findReferencedExpression(sig.$.ref);
+                    console.log(`=====>   REF1: ${refdExpr.kind}.${sig.$.bindingName}`);
+                    break;
+                default:
+                    console.log(`=====>   REF2: ${sig.$.ref.kind}.${sig.$.bindingName}`);
+                }
+        }
+    }
+
+
+
+
     // TODO:
     // 3. mapMap from sigs to hashes using object-hash
     // 4. add the map of node hashes to program.meta.nodeHashes (new meta prop)
 
 
 
+
+
+
+
+
+
     // TODO: temp testing... remove...
     const bnds = [] as number[];
-    const sigsEntries = [...signatures.entries()];
-    for (let i = 0; i < signatures.size; ++i) {
-        if (sigsEntries[i][0].kind === 'SimpleBinding'
-            //|| sigsEntries[i][0].kind === 'DestructuredBinding'
+    for (let i = 0; i < allNodes.length; ++i) {
+        if (allNodes[i].kind === 'SimpleBinding'
+            //|| allNodes[i].kind === 'DestructuredBinding'
         ) {
             bnds.push(i);
         }
@@ -44,59 +88,52 @@ export function computeNodeHashes(program: Program<Metadata>) {
         switch (n.kind) {
 
             // Simple nodes
-            case 'BooleanLiteralExpression': return {val: {$: 'LIT', v: n.value}};
-            case 'ExtensionFile': return {val: {$: 'EXF', p: n.path}};
-            case 'NullLiteralExpression': return {val: {$: 'LIT', v: n.value}};
-            case 'NumericLiteralExpression': return {val: {$: 'LIT', v: n.value}};
-            case 'StringLiteralExpression': return {val: {$: 'STR', v: n.value, a: n.abstract, c: n.concrete}};
-            case 'Program': return {val: {$: 'PRG'}}; // special case - only one of these
+            case 'BooleanLiteralExpression': return {$: ['LIT', n.value]};
+            case 'ExtensionFile': return {$: ['EXF', n.path]};
+            case 'NullLiteralExpression': return {$: ['LIT', n.value]};
+            case 'NumericLiteralExpression': return {$: ['LIT', n.value]};
+            case 'StringLiteralExpression': return {$: ['STR', n.value, n.abstract, n.concrete]};
+            case 'Program': return {$: ['PRG']}; // special case - only one of these
 
             // Compound nodes
-            case 'ApplicationExpression': return {val: {$: 'APP', l: sigFor(n.lambda), a: sigFor(n.argument)}};
-            case 'FieldExpression': return {val: {$: 'FLD', n: sigFor(n.name), v: sigFor(n.value)}};
-            case 'ListExpression': return {val: {$: 'LST', e: n.elements.map(e => sigFor(e))}};
-            case 'NotExpression': return {val: {$: 'NOT', e: sigFor(n.expression)}};
-            case 'QuantifiedExpression': return {val: {$: 'QUA', e: sigFor(n.expression), q: n.quantifier}};
-            case 'RecordExpression': return {val: {$: 'REC', f: n.fields.map(f => ({n: f.name, v: sigFor(f.value)}))}};
-            case 'SelectionExpression': return {val: {$: 'SEL', e: n.expressions.map(e => sigFor(e))}};
-            case 'SequenceExpression': return {val: {$: 'SEQ', e: n.expressions.map(e => sigFor(e))}};
-
-
+            case 'ApplicationExpression': return {$: ['APP', sigFor(n.lambda), sigFor(n.argument)]};
+            case 'FieldExpression': return {$: ['FLD', sigFor(n.name), sigFor(n.value)]};
+            // case 'LambdaExpression': TODO: ...
+            case 'ListExpression': return {$: ['LST', n.elements.map(e => sigFor(e))]};
+            case 'Module': {
+                // Ensure binding order doesn't affect hash value
+                let obj = {} as Record<string, unknown>;
+                for (let binding of n.bindings) {
+                    assert(binding.kind === 'SimpleBinding');
+                    obj[binding.name] = sigFor(binding.value);
+                }
+                return {$: ['MOD', obj]};
+            }
+            case 'NotExpression': return {$: ['NOT', sigFor(n.expression)]};
+            case 'QuantifiedExpression': return {$: ['QUA', sigFor(n.expression), n.quantifier]};
+            case 'RecordExpression': return {$: ['REC', n.fields.map(f => ({n: f.name, v: sigFor(f.value)}))]};
+            case 'SelectionExpression': return {$: ['SEL', n.expressions.map(e => sigFor(e))]};
+            case 'SequenceExpression': return {$: ['SEQ', n.expressions.map(e => sigFor(e))]};
 
             // Aliasing nodes (ie nodes that *directly* create graph cycles)
-            case 'ModuleExpression': return {ref: n.module};
-            case 'PenSourceFile': return {ref: n.module};
-            case 'SimpleBinding': return {ref: n.value};
+            case 'BindingLookupExpression': return {$: {ref: n.module, bindingName: n.bindingName}};
+            case 'ImportExpression': return {$: {ref: program.sourceFiles.get(n.sourceFilePath)!}};
+            case 'ModuleExpression': return {$: {ref: n.module}};
+            case 'PenSourceFile': return {$: {ref: n.module}};
+            case 'ReferenceExpression': return {$: {ref: findReferencedExpression(n)}};
+            case 'SimpleBinding': return {$: {ref: n.value}};
 
-
-
-
-            // TODO: Nodes that reference other nodes (ie creating graph cycles)
-            // case 'BindingLookupExpression':
-            // case 'ImportExpression':
-            ///////// // case 'LambdaExpression': TODO: ...
-
-
-            case 'Module':
-                // return {kind: 'MOD', b: n.bindings};
-                // TODO!!!
-                // - binding order not important
-                // - need to 'normalise' - ie:
-                //   a) get a flat list of binding names from either VariablePattern or ModulePatternName nodes
-                //   b) link each binding name to appropriate rhs signature - either direct, or equiv of BLE
-
-
-            // case 'ReferenceExpression':
-
-
-
-
-
-            // TODO: was... restore...
-            // default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
+            // All kinds handled. Should never reach here.
+            case 'DestructuredBinding': throw 0;
+            case 'ParenthesisedExpression': throw 0;
+            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
+    }
 
-        // TODO: ...
-        return {} as any;
+    function findReferencedExpression(ref: ReferenceExpression<Metadata>): Expression<Metadata> {
+        let symbolId = ref.meta.symbolId;
+        let result = allNodes.find(n => n.kind === 'SimpleBinding' && n.meta.symbolId === symbolId);
+        assert(result && result.kind === 'SimpleBinding');
+        return result.value;
     }
 }
