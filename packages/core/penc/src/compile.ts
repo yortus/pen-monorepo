@@ -11,7 +11,7 @@ import {createSymbolDefinitions} from './transforms';
 import {resolveSymbolReferences} from './transforms';
 import {resolveConstantValues} from './transforms';
 // import {dealiasSymbols} from './transforms';
-import {computeNodeHashes} from './transforms';
+import {createFlatExpressionList} from './transforms';
 import {checkSemantics} from './transforms';
 import {generateTargetCode} from './transforms';
 
@@ -32,7 +32,7 @@ export function compile(options: CompilerOptions) {
     let ast03 = createSymbolDefinitions(ast02);
     let ast04 = resolveSymbolReferences(ast03);
     let ast05 = resolveConstantValues(ast04);
-    let ast06 = computeNodeHashes(ast05);
+    let ast06 = createFlatExpressionList(ast05);
 
     checkSemantics(ast06);
 

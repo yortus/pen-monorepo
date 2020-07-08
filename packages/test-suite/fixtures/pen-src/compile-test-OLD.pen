@@ -1,0 +1,45 @@
+
+
+
+start = expr.foo
+
+expr = {
+    foo = "foo"
+    bar = "bar"
+    a = b
+    //b = "b1"
+}
+
+// Aliases
+//{foo as foo1, bar, quux} = expr // NB: quux is an error
+
+a = b
+
+b = "b2"
+
+baz = "baz"
+
+modExprMem = expr.foo | ({mem = "member"}).mem | baz
+
+// mutually recursive module expressions
+recA = { a = "a" recB.b }
+recB = { b = "b" recA.a }
+
+// lambda expressions, disabled for now
+// fn1 = a => a a
+// fn2 = {x, y} => x y
+
+// deeper references
+refC = defC.c.c1
+defC = {
+    c = {
+        c1 = "c1"
+        c2 = "c2"
+
+        ref1 = c1
+        ref2 = c.c1
+        ref3 = defC.c.c1
+    }
+    ref5 = c.c1
+    ref6 = defC.c.c1
+}

@@ -729,15 +729,15 @@ const parse = (() => {
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
-            const t32 = 𝕊0('WS');
-            const t33 = 𝕊0('Value');
-            const t34 = 𝕊0('WS');
+            const t38 = 𝕊0('WS');
+            const t39 = 𝕊0('Value');
+            const t40 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t32()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t33()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t34()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t38()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t39()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t40()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -748,21 +748,21 @@ const parse = (() => {
 
     const 𝕊0_Value = (arg) => {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
-            const t35 = 𝕊0('False');
-            const t36 = 𝕊0('Null');
-            const t37 = 𝕊0('True');
-            const t38 = 𝕊0('Object');
-            const t39 = 𝕊0('Array');
-            const t40 = 𝕊0('Number');
-            const t41 = 𝕊0('String');
+            const t41 = 𝕊0('False');
+            const t42 = 𝕊0('Null');
+            const t43 = 𝕊0('True');
+            const t44 = 𝕊0('Object');
+            const t45 = 𝕊0('Array');
+            const t46 = 𝕊0('Number');
+            const t47 = 𝕊0('String');
             return function SEL() {
-                if (t35()) return true;
-                if (t36()) return true;
-                if (t37()) return true;
-                if (t38()) return true;
-                if (t39()) return true;
-                if (t40()) return true;
                 if (t41()) return true;
+                if (t42()) return true;
+                if (t43()) return true;
+                if (t44()) return true;
+                if (t45()) return true;
+                if (t46()) return true;
+                if (t47()) return true;
                 return false;
             };
         })();
@@ -772,7 +772,7 @@ const parse = (() => {
 
     const 𝕊0_False = (arg) => {
         if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
-            const t42 = function STR() {
+            const t48 = function STR() {
                 if (IP + 5 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 102) return false;
                 if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -783,15 +783,15 @@ const parse = (() => {
                 OUT = undefined;
                 return true;
             };
-            const t43 = function BOO() {
+            const t49 = function BOO() {
                 OUT = false;
                 return true;
             };
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t42()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t43()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t48()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t49()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -802,7 +802,7 @@ const parse = (() => {
 
     const 𝕊0_Null = (arg) => {
         if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
-            const t44 = function STR() {
+            const t50 = function STR() {
                 if (IP + 4 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 110) return false;
                 if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -812,15 +812,15 @@ const parse = (() => {
                 OUT = undefined;
                 return true;
             };
-            const t45 = function NUL() {
+            const t51 = function NUL() {
                 OUT = null;
                 return true;
             };
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t44()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t45()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t50()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t51()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -831,7 +831,7 @@ const parse = (() => {
 
     const 𝕊0_True = (arg) => {
         if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
-            const t46 = function STR() {
+            const t52 = function STR() {
                 if (IP + 4 > IN.length) return false;
                 if (IN.charCodeAt(IP + 0) !== 116) return false;
                 if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -841,15 +841,15 @@ const parse = (() => {
                 OUT = undefined;
                 return true;
             };
-            const t47 = function BOO() {
+            const t53 = function BOO() {
                 OUT = true;
                 return true;
             };
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t46()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t47()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t52()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t53()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -860,26 +860,26 @@ const parse = (() => {
 
     const 𝕊0_Object = (arg) => {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
-            const t48 = 𝕊0('LBRACE');
-            const t49 = (() => {
-                const t51 = 𝕊0('Properties');
-                const t52 = record({
+            const t54 = 𝕊0('LBRACE');
+            const t55 = (() => {
+                const t57 = 𝕊0('Properties');
+                const t58 = record({
                     mode: 6,
                     fields: [],
                 });
                 return function SEL() {
-                    if (t51()) return true;
-                    if (t52()) return true;
+                    if (t57()) return true;
+                    if (t58()) return true;
                     return false;
                 };
             })();
-            const t50 = 𝕊0('RBRACE');
+            const t56 = 𝕊0('RBRACE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t48()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t49()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t50()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t54()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t55()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t56()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -890,32 +890,32 @@ const parse = (() => {
 
     const 𝕊0_Properties = (arg) => {
         if (!𝕊0_Properties_memo) 𝕊0_Properties_memo = (() => {
-            const t53 = field({
+            const t59 = field({
                 mode: 6,
                 name: 𝕊0('String'),
                 value: (() => {
-                    const t55 = 𝕊0('COLON');
-                    const t56 = 𝕊0('Value');
+                    const t61 = 𝕊0('COLON');
+                    const t62 = 𝕊0('Value');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t55()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t56()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t61()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t62()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
                 })(),
             });
-            const t54 = zeroOrOne({
+            const t60 = zeroOrOne({
                 mode: 6,
                 expression: (() => {
-                    const t57 = 𝕊0('COMMA');
-                    const t58 = 𝕊0('Properties');
+                    const t63 = 𝕊0('COMMA');
+                    const t64 = 𝕊0('Properties');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t57()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t58()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t63()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t64()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
@@ -924,8 +924,8 @@ const parse = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t53()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t54()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t59()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t60()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -936,26 +936,26 @@ const parse = (() => {
 
     const 𝕊0_Array = (arg) => {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
-            const t59 = 𝕊0('LBRACKET');
-            const t60 = (() => {
-                const t62 = 𝕊0('Elements');
-                const t63 = list({
+            const t65 = 𝕊0('LBRACKET');
+            const t66 = (() => {
+                const t68 = 𝕊0('Elements');
+                const t69 = list({
                     mode: 6,
                     elements: [],
                 });
                 return function SEL() {
-                    if (t62()) return true;
-                    if (t63()) return true;
+                    if (t68()) return true;
+                    if (t69()) return true;
                     return false;
                 };
             })();
-            const t61 = 𝕊0('RBRACKET');
+            const t67 = 𝕊0('RBRACKET');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t59()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t60()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t61()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t65()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t66()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t67()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -966,22 +966,22 @@ const parse = (() => {
 
     const 𝕊0_Elements = (arg) => {
         if (!𝕊0_Elements_memo) 𝕊0_Elements_memo = (() => {
-            const t64 = list({
+            const t70 = list({
                 mode: 6,
                 elements: [
                     𝕊0('Value'),
                 ],
             });
-            const t65 = zeroOrOne({
+            const t71 = zeroOrOne({
                 mode: 6,
                 expression: (() => {
-                    const t66 = 𝕊0('COMMA');
-                    const t67 = 𝕊0('Elements');
+                    const t72 = 𝕊0('COMMA');
+                    const t73 = 𝕊0('Elements');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t66()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t67()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t72()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t73()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
@@ -990,8 +990,8 @@ const parse = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t64()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t65()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t70()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t71()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1008,18 +1008,18 @@ const parse = (() => {
 
     const 𝕊0_String = (arg) => {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
-            const t68 = 𝕊0('DOUBLE_QUOTE');
-            const t69 = zeroOrMore({
+            const t74 = 𝕊0('DOUBLE_QUOTE');
+            const t75 = zeroOrMore({
                 mode: 6,
                 expression: 𝕊0('CHAR'),
             });
-            const t70 = 𝕊0('DOUBLE_QUOTE');
+            const t76 = 𝕊0('DOUBLE_QUOTE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t68()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t69()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t70()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t74()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t75()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t76()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1030,9 +1030,9 @@ const parse = (() => {
 
     const 𝕊0_CHAR = (arg) => {
         if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
-            const t71 = (() => {
-                const t81 = (() => {
-                    const t84 = function STR() {
+            const t77 = (() => {
+                const t87 = (() => {
+                    const t90 = function STR() {
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
                         IP += 1;
@@ -1041,14 +1041,14 @@ const parse = (() => {
                     };
                     return function NOT() {
                         let stateₒ = getState();
-                        let result = !t84();
+                        let result = !t90();
                         setState(stateₒ);
                         OUT = undefined;
                         return result;
                     };
                 })();
-                const t82 = (() => {
-                    const t85 = function STR() {
+                const t88 = (() => {
+                    const t91 = function STR() {
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 34) return false;
                         IP += 1;
@@ -1057,25 +1057,25 @@ const parse = (() => {
                     };
                     return function NOT() {
                         let stateₒ = getState();
-                        let result = !t85();
+                        let result = !t91();
                         setState(stateₒ);
                         OUT = undefined;
                         return result;
                     };
                 })();
-                const t83 = (𝕊0('char'))(𝕊1);
+                const t89 = (𝕊0('char'))(𝕊1);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t81()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t82()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t83()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t87()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t88()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t89()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 };
             })();
-            const t72 = (() => {
-                const t86 = function STR() {
+            const t78 = (() => {
+                const t92 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
                     if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -1083,74 +1083,8 @@ const parse = (() => {
                     OUT = undefined;
                     return true;
                 };
-                const t87 = function STR() {
-                    OUT = "\"";
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
-                    if (t86()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t87()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t73 = (() => {
-                const t88 = function STR() {
-                    if (IP + 2 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 92) return false;
-                    IP += 2;
-                    OUT = undefined;
-                    return true;
-                };
-                const t89 = function STR() {
-                    OUT = "\\";
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
-                    if (t88()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t89()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t74 = (() => {
-                const t90 = function STR() {
-                    if (IP + 2 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 47) return false;
-                    IP += 2;
-                    OUT = undefined;
-                    return true;
-                };
-                const t91 = function STR() {
-                    OUT = "/";
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
-                    if (t90()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t91()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t75 = (() => {
-                const t92 = function STR() {
-                    if (IP + 2 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 98) return false;
-                    IP += 2;
-                    OUT = undefined;
-                    return true;
-                };
                 const t93 = function STR() {
-                    OUT = "\b";
+                    OUT = "\"";
                     return true;
                 };
                 return function SEQ() {
@@ -1162,17 +1096,17 @@ const parse = (() => {
                     return true;
                 };
             })();
-            const t76 = (() => {
+            const t79 = (() => {
                 const t94 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 102) return false;
+                    if (IN.charCodeAt(IP + 1) !== 92) return false;
                     IP += 2;
                     OUT = undefined;
                     return true;
                 };
                 const t95 = function STR() {
-                    OUT = "\f";
+                    OUT = "\\";
                     return true;
                 };
                 return function SEQ() {
@@ -1184,17 +1118,17 @@ const parse = (() => {
                     return true;
                 };
             })();
-            const t77 = (() => {
+            const t80 = (() => {
                 const t96 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 110) return false;
+                    if (IN.charCodeAt(IP + 1) !== 47) return false;
                     IP += 2;
                     OUT = undefined;
                     return true;
                 };
                 const t97 = function STR() {
-                    OUT = "\n";
+                    OUT = "/";
                     return true;
                 };
                 return function SEQ() {
@@ -1206,17 +1140,17 @@ const parse = (() => {
                     return true;
                 };
             })();
-            const t78 = (() => {
+            const t81 = (() => {
                 const t98 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 114) return false;
+                    if (IN.charCodeAt(IP + 1) !== 98) return false;
                     IP += 2;
                     OUT = undefined;
                     return true;
                 };
                 const t99 = function STR() {
-                    OUT = "\r";
+                    OUT = "\b";
                     return true;
                 };
                 return function SEQ() {
@@ -1228,17 +1162,17 @@ const parse = (() => {
                     return true;
                 };
             })();
-            const t79 = (() => {
+            const t82 = (() => {
                 const t100 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 116) return false;
+                    if (IN.charCodeAt(IP + 1) !== 102) return false;
                     IP += 2;
                     OUT = undefined;
                     return true;
                 };
                 const t101 = function STR() {
-                    OUT = "\t";
+                    OUT = "\f";
                     return true;
                 };
                 return function SEQ() {
@@ -1250,16 +1184,19 @@ const parse = (() => {
                     return true;
                 };
             })();
-            const t80 = (() => {
+            const t83 = (() => {
                 const t102 = function STR() {
                     if (IP + 2 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    if (IN.charCodeAt(IP + 1) !== 117) return false;
+                    if (IN.charCodeAt(IP + 1) !== 110) return false;
                     IP += 2;
                     OUT = undefined;
                     return true;
                 };
-                const t103 = (𝕊0('unicode'))(𝕊2);
+                const t103 = function STR() {
+                    OUT = "\n";
+                    return true;
+                };
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
@@ -1269,17 +1206,80 @@ const parse = (() => {
                     return true;
                 };
             })();
+            const t84 = (() => {
+                const t104 = function STR() {
+                    if (IP + 2 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 92) return false;
+                    if (IN.charCodeAt(IP + 1) !== 114) return false;
+                    IP += 2;
+                    OUT = undefined;
+                    return true;
+                };
+                const t105 = function STR() {
+                    OUT = "\r";
+                    return true;
+                };
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t104()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t105()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
+            const t85 = (() => {
+                const t106 = function STR() {
+                    if (IP + 2 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 92) return false;
+                    if (IN.charCodeAt(IP + 1) !== 116) return false;
+                    IP += 2;
+                    OUT = undefined;
+                    return true;
+                };
+                const t107 = function STR() {
+                    OUT = "\t";
+                    return true;
+                };
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t106()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t107()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
+            const t86 = (() => {
+                const t108 = function STR() {
+                    if (IP + 2 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 92) return false;
+                    if (IN.charCodeAt(IP + 1) !== 117) return false;
+                    IP += 2;
+                    OUT = undefined;
+                    return true;
+                };
+                const t109 = (𝕊0('unicode'))(𝕊2);
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t108()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t109()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
             return function SEL() {
-                if (t71()) return true;
-                if (t72()) return true;
-                if (t73()) return true;
-                if (t74()) return true;
-                if (t75()) return true;
-                if (t76()) return true;
                 if (t77()) return true;
                 if (t78()) return true;
                 if (t79()) return true;
                 if (t80()) return true;
+                if (t81()) return true;
+                if (t82()) return true;
+                if (t83()) return true;
+                if (t84()) return true;
+                if (t85()) return true;
+                if (t86()) return true;
                 return false;
             };
         })();
@@ -1357,60 +1357,10 @@ const parse = (() => {
 
     const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
-            const t104 = 𝕊0('WS');
-            const t105 = function STR() {
-                if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 123) return false;
-                IP += 1;
-                OUT = undefined;
-                return true;
-            };
-            const t106 = 𝕊0('WS');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t104()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t105()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t106()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })();
-        return 𝕊0_LBRACE_memo(arg);
-    };
-    let 𝕊0_LBRACE_memo;
-
-    const 𝕊0_RBRACE = (arg) => {
-        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
-            const t107 = 𝕊0('WS');
-            const t108 = function STR() {
-                if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 125) return false;
-                IP += 1;
-                OUT = undefined;
-                return true;
-            };
-            const t109 = 𝕊0('WS');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t107()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t108()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t109()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })();
-        return 𝕊0_RBRACE_memo(arg);
-    };
-    let 𝕊0_RBRACE_memo;
-
-    const 𝕊0_LBRACKET = (arg) => {
-        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
             const t110 = 𝕊0('WS');
             const t111 = function STR() {
                 if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 91) return false;
+                if (IN.charCodeAt(IP + 0) !== 123) return false;
                 IP += 1;
                 OUT = undefined;
                 return true;
@@ -1426,16 +1376,16 @@ const parse = (() => {
                 return true;
             };
         })();
-        return 𝕊0_LBRACKET_memo(arg);
+        return 𝕊0_LBRACE_memo(arg);
     };
-    let 𝕊0_LBRACKET_memo;
+    let 𝕊0_LBRACE_memo;
 
-    const 𝕊0_RBRACKET = (arg) => {
-        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
+    const 𝕊0_RBRACE = (arg) => {
+        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
             const t113 = 𝕊0('WS');
             const t114 = function STR() {
                 if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 93) return false;
+                if (IN.charCodeAt(IP + 0) !== 125) return false;
                 IP += 1;
                 OUT = undefined;
                 return true;
@@ -1451,16 +1401,16 @@ const parse = (() => {
                 return true;
             };
         })();
-        return 𝕊0_RBRACKET_memo(arg);
+        return 𝕊0_RBRACE_memo(arg);
     };
-    let 𝕊0_RBRACKET_memo;
+    let 𝕊0_RBRACE_memo;
 
-    const 𝕊0_COLON = (arg) => {
-        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
+    const 𝕊0_LBRACKET = (arg) => {
+        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
             const t116 = 𝕊0('WS');
             const t117 = function STR() {
                 if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 58) return false;
+                if (IN.charCodeAt(IP + 0) !== 91) return false;
                 IP += 1;
                 OUT = undefined;
                 return true;
@@ -1476,16 +1426,16 @@ const parse = (() => {
                 return true;
             };
         })();
-        return 𝕊0_COLON_memo(arg);
+        return 𝕊0_LBRACKET_memo(arg);
     };
-    let 𝕊0_COLON_memo;
+    let 𝕊0_LBRACKET_memo;
 
-    const 𝕊0_COMMA = (arg) => {
-        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
+    const 𝕊0_RBRACKET = (arg) => {
+        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
             const t119 = 𝕊0('WS');
             const t120 = function STR() {
                 if (IP + 1 > IN.length) return false;
-                if (IN.charCodeAt(IP + 0) !== 44) return false;
+                if (IN.charCodeAt(IP + 0) !== 93) return false;
                 IP += 1;
                 OUT = undefined;
                 return true;
@@ -1497,6 +1447,56 @@ const parse = (() => {
                 if (t119()) out = concat(out, OUT); else return setState(stateₒ), false;
                 if (t120()) out = concat(out, OUT); else return setState(stateₒ), false;
                 if (t121()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
+        return 𝕊0_RBRACKET_memo(arg);
+    };
+    let 𝕊0_RBRACKET_memo;
+
+    const 𝕊0_COLON = (arg) => {
+        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
+            const t122 = 𝕊0('WS');
+            const t123 = function STR() {
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 58) return false;
+                IP += 1;
+                OUT = undefined;
+                return true;
+            };
+            const t124 = 𝕊0('WS');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t122()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t123()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t124()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
+        return 𝕊0_COLON_memo(arg);
+    };
+    let 𝕊0_COLON_memo;
+
+    const 𝕊0_COMMA = (arg) => {
+        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
+            const t125 = 𝕊0('WS');
+            const t126 = function STR() {
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 44) return false;
+                IP += 1;
+                OUT = undefined;
+                return true;
+            };
+            const t127 = 𝕊0('WS');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t125()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t126()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t127()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1521,28 +1521,28 @@ const parse = (() => {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
             mode: 6,
             expression: (() => {
-                const t122 = function STR() {
+                const t128 = function STR() {
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 32) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
                 };
-                const t123 = function STR() {
+                const t129 = function STR() {
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 9) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
                 };
-                const t124 = function STR() {
+                const t130 = function STR() {
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 10) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
                 };
-                const t125 = function STR() {
+                const t131 = function STR() {
                     if (IP + 1 > IN.length) return false;
                     if (IN.charCodeAt(IP + 0) !== 13) return false;
                     IP += 1;
@@ -1550,10 +1550,10 @@ const parse = (() => {
                     return true;
                 };
                 return function SEL() {
-                    if (t122()) return true;
-                    if (t123()) return true;
-                    if (t124()) return true;
-                    if (t125()) return true;
+                    if (t128()) return true;
+                    if (t129()) return true;
+                    if (t130()) return true;
+                    if (t131()) return true;
                     return false;
                 };
             })(),
@@ -1648,15 +1648,15 @@ const print = (() => {
 
     const 𝕊0_start = (arg) => {
         if (!𝕊0_start_memo) 𝕊0_start_memo = (() => {
-            const t126 = 𝕊0('WS');
-            const t127 = 𝕊0('Value');
-            const t128 = 𝕊0('WS');
+            const t132 = 𝕊0('WS');
+            const t133 = 𝕊0('Value');
+            const t134 = 𝕊0('WS');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t126()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t127()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t128()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t132()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t133()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t134()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1667,21 +1667,21 @@ const print = (() => {
 
     const 𝕊0_Value = (arg) => {
         if (!𝕊0_Value_memo) 𝕊0_Value_memo = (() => {
-            const t129 = 𝕊0('False');
-            const t130 = 𝕊0('Null');
-            const t131 = 𝕊0('True');
-            const t132 = 𝕊0('Object');
-            const t133 = 𝕊0('Array');
-            const t134 = 𝕊0('Number');
-            const t135 = 𝕊0('String');
+            const t135 = 𝕊0('False');
+            const t136 = 𝕊0('Null');
+            const t137 = 𝕊0('True');
+            const t138 = 𝕊0('Object');
+            const t139 = 𝕊0('Array');
+            const t140 = 𝕊0('Number');
+            const t141 = 𝕊0('String');
             return function SEL() {
-                if (t129()) return true;
-                if (t130()) return true;
-                if (t131()) return true;
-                if (t132()) return true;
-                if (t133()) return true;
-                if (t134()) return true;
                 if (t135()) return true;
+                if (t136()) return true;
+                if (t137()) return true;
+                if (t138()) return true;
+                if (t139()) return true;
+                if (t140()) return true;
+                if (t141()) return true;
                 return false;
             };
         })();
@@ -1691,11 +1691,11 @@ const print = (() => {
 
     const 𝕊0_False = (arg) => {
         if (!𝕊0_False_memo) 𝕊0_False_memo = (() => {
-            const t136 = function STR() {
+            const t142 = function STR() {
                 OUT = "false";
                 return true;
             };
-            const t137 = function BOO() {
+            const t143 = function BOO() {
                 if (IN !== false || IP !== 0) return false;
                 IP += 1;
                 OUT = undefined;
@@ -1704,8 +1704,8 @@ const print = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t136()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t137()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t142()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t143()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1716,11 +1716,11 @@ const print = (() => {
 
     const 𝕊0_Null = (arg) => {
         if (!𝕊0_Null_memo) 𝕊0_Null_memo = (() => {
-            const t138 = function STR() {
+            const t144 = function STR() {
                 OUT = "null";
                 return true;
             };
-            const t139 = function NUL() {
+            const t145 = function NUL() {
                 if (IN !== null || IP !== 0) return false;
                 IP += 1;
                 OUT = undefined;
@@ -1729,8 +1729,8 @@ const print = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t138()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t139()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t144()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t145()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1741,11 +1741,11 @@ const print = (() => {
 
     const 𝕊0_True = (arg) => {
         if (!𝕊0_True_memo) 𝕊0_True_memo = (() => {
-            const t140 = function STR() {
+            const t146 = function STR() {
                 OUT = "true";
                 return true;
             };
-            const t141 = function BOO() {
+            const t147 = function BOO() {
                 if (IN !== true || IP !== 0) return false;
                 IP += 1;
                 OUT = undefined;
@@ -1754,8 +1754,8 @@ const print = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t140()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t141()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t146()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t147()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1766,26 +1766,26 @@ const print = (() => {
 
     const 𝕊0_Object = (arg) => {
         if (!𝕊0_Object_memo) 𝕊0_Object_memo = (() => {
-            const t142 = 𝕊0('LBRACE');
-            const t143 = (() => {
-                const t145 = 𝕊0('Properties');
-                const t146 = record({
+            const t148 = 𝕊0('LBRACE');
+            const t149 = (() => {
+                const t151 = 𝕊0('Properties');
+                const t152 = record({
                     mode: 7,
                     fields: [],
                 });
                 return function SEL() {
-                    if (t145()) return true;
-                    if (t146()) return true;
+                    if (t151()) return true;
+                    if (t152()) return true;
                     return false;
                 };
             })();
-            const t144 = 𝕊0('RBRACE');
+            const t150 = 𝕊0('RBRACE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t142()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t143()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t144()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t148()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t149()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t150()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1796,32 +1796,32 @@ const print = (() => {
 
     const 𝕊0_Properties = (arg) => {
         if (!𝕊0_Properties_memo) 𝕊0_Properties_memo = (() => {
-            const t147 = field({
+            const t153 = field({
                 mode: 7,
                 name: 𝕊0('String'),
                 value: (() => {
-                    const t149 = 𝕊0('COLON');
-                    const t150 = 𝕊0('Value');
+                    const t155 = 𝕊0('COLON');
+                    const t156 = 𝕊0('Value');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t149()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t150()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t155()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t156()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
                 })(),
             });
-            const t148 = zeroOrOne({
+            const t154 = zeroOrOne({
                 mode: 7,
                 expression: (() => {
-                    const t151 = 𝕊0('COMMA');
-                    const t152 = 𝕊0('Properties');
+                    const t157 = 𝕊0('COMMA');
+                    const t158 = 𝕊0('Properties');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t151()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t152()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t157()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t158()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
@@ -1830,8 +1830,8 @@ const print = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t147()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t148()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t153()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t154()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1842,26 +1842,26 @@ const print = (() => {
 
     const 𝕊0_Array = (arg) => {
         if (!𝕊0_Array_memo) 𝕊0_Array_memo = (() => {
-            const t153 = 𝕊0('LBRACKET');
-            const t154 = (() => {
-                const t156 = 𝕊0('Elements');
-                const t157 = list({
+            const t159 = 𝕊0('LBRACKET');
+            const t160 = (() => {
+                const t162 = 𝕊0('Elements');
+                const t163 = list({
                     mode: 7,
                     elements: [],
                 });
                 return function SEL() {
-                    if (t156()) return true;
-                    if (t157()) return true;
+                    if (t162()) return true;
+                    if (t163()) return true;
                     return false;
                 };
             })();
-            const t155 = 𝕊0('RBRACKET');
+            const t161 = 𝕊0('RBRACKET');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t153()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t154()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t155()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t159()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t160()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t161()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1872,22 +1872,22 @@ const print = (() => {
 
     const 𝕊0_Elements = (arg) => {
         if (!𝕊0_Elements_memo) 𝕊0_Elements_memo = (() => {
-            const t158 = list({
+            const t164 = list({
                 mode: 7,
                 elements: [
                     𝕊0('Value'),
                 ],
             });
-            const t159 = zeroOrOne({
+            const t165 = zeroOrOne({
                 mode: 7,
                 expression: (() => {
-                    const t160 = 𝕊0('COMMA');
-                    const t161 = 𝕊0('Elements');
+                    const t166 = 𝕊0('COMMA');
+                    const t167 = 𝕊0('Elements');
                     return function SEQ() {
                         let stateₒ = getState();
                         let out;
-                        if (t160()) out = concat(out, OUT); else return setState(stateₒ), false;
-                        if (t161()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t166()) out = concat(out, OUT); else return setState(stateₒ), false;
+                        if (t167()) out = concat(out, OUT); else return setState(stateₒ), false;
                         OUT = out;
                         return true;
                     };
@@ -1896,8 +1896,8 @@ const print = (() => {
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t158()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t159()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t164()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t165()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1914,18 +1914,18 @@ const print = (() => {
 
     const 𝕊0_String = (arg) => {
         if (!𝕊0_String_memo) 𝕊0_String_memo = (() => {
-            const t162 = 𝕊0('DOUBLE_QUOTE');
-            const t163 = zeroOrMore({
+            const t168 = 𝕊0('DOUBLE_QUOTE');
+            const t169 = zeroOrMore({
                 mode: 7,
                 expression: 𝕊0('CHAR'),
             });
-            const t164 = 𝕊0('DOUBLE_QUOTE');
+            const t170 = 𝕊0('DOUBLE_QUOTE');
             return function SEQ() {
                 let stateₒ = getState();
                 let out;
-                if (t162()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t163()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t164()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t168()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t169()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t170()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -1936,9 +1936,9 @@ const print = (() => {
 
     const 𝕊0_CHAR = (arg) => {
         if (!𝕊0_CHAR_memo) 𝕊0_CHAR_memo = (() => {
-            const t165 = (() => {
-                const t175 = (() => {
-                    const t178 = function STR() {
+            const t171 = (() => {
+                const t181 = (() => {
+                    const t184 = function STR() {
                         if (typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1948,14 +1948,14 @@ const print = (() => {
                     };
                     return function NOT() {
                         let stateₒ = getState();
-                        let result = !t178();
+                        let result = !t184();
                         setState(stateₒ);
                         OUT = undefined;
                         return result;
                     };
                 })();
-                const t176 = (() => {
-                    const t179 = function STR() {
+                const t182 = (() => {
+                    const t185 = function STR() {
                         if (typeof IN !== 'string') return false;
                         if (IP + 1 > IN.length) return false;
                         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1965,98 +1965,32 @@ const print = (() => {
                     };
                     return function NOT() {
                         let stateₒ = getState();
-                        let result = !t179();
+                        let result = !t185();
                         setState(stateₒ);
                         OUT = undefined;
                         return result;
                     };
                 })();
-                const t177 = (𝕊0('char'))(𝕊1);
+                const t183 = (𝕊0('char'))(𝕊1);
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
-                    if (t175()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t176()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t177()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t166 = (() => {
-                const t180 = function STR() {
-                    OUT = "\\\"";
-                    return true;
-                };
-                const t181 = function STR() {
-                    if (typeof IN !== 'string') return false;
-                    if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 34) return false;
-                    IP += 1;
-                    OUT = undefined;
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
-                    if (t180()) out = concat(out, OUT); else return setState(stateₒ), false;
                     if (t181()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t167 = (() => {
-                const t182 = function STR() {
-                    OUT = "\\\\";
-                    return true;
-                };
-                const t183 = function STR() {
-                    if (typeof IN !== 'string') return false;
-                    if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 92) return false;
-                    IP += 1;
-                    OUT = undefined;
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
                     if (t182()) out = concat(out, OUT); else return setState(stateₒ), false;
                     if (t183()) out = concat(out, OUT); else return setState(stateₒ), false;
                     OUT = out;
                     return true;
                 };
             })();
-            const t168 = (() => {
-                const t184 = function STR() {
-                    OUT = "\\/";
-                    return true;
-                };
-                const t185 = function STR() {
-                    if (typeof IN !== 'string') return false;
-                    if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 47) return false;
-                    IP += 1;
-                    OUT = undefined;
-                    return true;
-                };
-                return function SEQ() {
-                    let stateₒ = getState();
-                    let out;
-                    if (t184()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    if (t185()) out = concat(out, OUT); else return setState(stateₒ), false;
-                    OUT = out;
-                    return true;
-                };
-            })();
-            const t169 = (() => {
+            const t172 = (() => {
                 const t186 = function STR() {
-                    OUT = "\\b";
+                    OUT = "\\\"";
                     return true;
                 };
                 const t187 = function STR() {
                     if (typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 8) return false;
+                    if (IN.charCodeAt(IP + 0) !== 34) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
@@ -2070,15 +2004,15 @@ const print = (() => {
                     return true;
                 };
             })();
-            const t170 = (() => {
+            const t173 = (() => {
                 const t188 = function STR() {
-                    OUT = "\\f";
+                    OUT = "\\\\";
                     return true;
                 };
                 const t189 = function STR() {
                     if (typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 12) return false;
+                    if (IN.charCodeAt(IP + 0) !== 92) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
@@ -2092,15 +2026,15 @@ const print = (() => {
                     return true;
                 };
             })();
-            const t171 = (() => {
+            const t174 = (() => {
                 const t190 = function STR() {
-                    OUT = "\\n";
+                    OUT = "\\/";
                     return true;
                 };
                 const t191 = function STR() {
                     if (typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 10) return false;
+                    if (IN.charCodeAt(IP + 0) !== 47) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
@@ -2114,15 +2048,15 @@ const print = (() => {
                     return true;
                 };
             })();
-            const t172 = (() => {
+            const t175 = (() => {
                 const t192 = function STR() {
-                    OUT = "\\r";
+                    OUT = "\\b";
                     return true;
                 };
                 const t193 = function STR() {
                     if (typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 13) return false;
+                    if (IN.charCodeAt(IP + 0) !== 8) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
@@ -2136,15 +2070,15 @@ const print = (() => {
                     return true;
                 };
             })();
-            const t173 = (() => {
+            const t176 = (() => {
                 const t194 = function STR() {
-                    OUT = "\\t";
+                    OUT = "\\f";
                     return true;
                 };
                 const t195 = function STR() {
                     if (typeof IN !== 'string') return false;
                     if (IP + 1 > IN.length) return false;
-                    if (IN.charCodeAt(IP + 0) !== 9) return false;
+                    if (IN.charCodeAt(IP + 0) !== 12) return false;
                     IP += 1;
                     OUT = undefined;
                     return true;
@@ -2158,12 +2092,19 @@ const print = (() => {
                     return true;
                 };
             })();
-            const t174 = (() => {
+            const t177 = (() => {
                 const t196 = function STR() {
-                    OUT = "\\u";
+                    OUT = "\\n";
                     return true;
                 };
-                const t197 = (𝕊0('unicode'))(𝕊2);
+                const t197 = function STR() {
+                    if (typeof IN !== 'string') return false;
+                    if (IP + 1 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 10) return false;
+                    IP += 1;
+                    OUT = undefined;
+                    return true;
+                };
                 return function SEQ() {
                     let stateₒ = getState();
                     let out;
@@ -2173,17 +2114,76 @@ const print = (() => {
                     return true;
                 };
             })();
+            const t178 = (() => {
+                const t198 = function STR() {
+                    OUT = "\\r";
+                    return true;
+                };
+                const t199 = function STR() {
+                    if (typeof IN !== 'string') return false;
+                    if (IP + 1 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 13) return false;
+                    IP += 1;
+                    OUT = undefined;
+                    return true;
+                };
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t198()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t199()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
+            const t179 = (() => {
+                const t200 = function STR() {
+                    OUT = "\\t";
+                    return true;
+                };
+                const t201 = function STR() {
+                    if (typeof IN !== 'string') return false;
+                    if (IP + 1 > IN.length) return false;
+                    if (IN.charCodeAt(IP + 0) !== 9) return false;
+                    IP += 1;
+                    OUT = undefined;
+                    return true;
+                };
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t200()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t201()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
+            const t180 = (() => {
+                const t202 = function STR() {
+                    OUT = "\\u";
+                    return true;
+                };
+                const t203 = (𝕊0('unicode'))(𝕊2);
+                return function SEQ() {
+                    let stateₒ = getState();
+                    let out;
+                    if (t202()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    if (t203()) out = concat(out, OUT); else return setState(stateₒ), false;
+                    OUT = out;
+                    return true;
+                };
+            })();
             return function SEL() {
-                if (t165()) return true;
-                if (t166()) return true;
-                if (t167()) return true;
-                if (t168()) return true;
-                if (t169()) return true;
-                if (t170()) return true;
                 if (t171()) return true;
                 if (t172()) return true;
                 if (t173()) return true;
                 if (t174()) return true;
+                if (t175()) return true;
+                if (t176()) return true;
+                if (t177()) return true;
+                if (t178()) return true;
+                if (t179()) return true;
+                if (t180()) return true;
                 return false;
             };
         })();
@@ -2269,53 +2269,9 @@ const print = (() => {
 
     const 𝕊0_LBRACE = (arg) => {
         if (!𝕊0_LBRACE_memo) 𝕊0_LBRACE_memo = (() => {
-            const t198 = 𝕊0('WS');
-            const t199 = function STR() {
-                OUT = "{";
-                return true;
-            };
-            const t200 = 𝕊0('WS');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t198()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t199()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t200()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })();
-        return 𝕊0_LBRACE_memo(arg);
-    };
-    let 𝕊0_LBRACE_memo;
-
-    const 𝕊0_RBRACE = (arg) => {
-        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
-            const t201 = 𝕊0('WS');
-            const t202 = function STR() {
-                OUT = "}";
-                return true;
-            };
-            const t203 = 𝕊0('WS');
-            return function SEQ() {
-                let stateₒ = getState();
-                let out;
-                if (t201()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t202()) out = concat(out, OUT); else return setState(stateₒ), false;
-                if (t203()) out = concat(out, OUT); else return setState(stateₒ), false;
-                OUT = out;
-                return true;
-            };
-        })();
-        return 𝕊0_RBRACE_memo(arg);
-    };
-    let 𝕊0_RBRACE_memo;
-
-    const 𝕊0_LBRACKET = (arg) => {
-        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
             const t204 = 𝕊0('WS');
             const t205 = function STR() {
-                OUT = "[";
+                OUT = "{";
                 return true;
             };
             const t206 = 𝕊0('WS');
@@ -2329,15 +2285,15 @@ const print = (() => {
                 return true;
             };
         })();
-        return 𝕊0_LBRACKET_memo(arg);
+        return 𝕊0_LBRACE_memo(arg);
     };
-    let 𝕊0_LBRACKET_memo;
+    let 𝕊0_LBRACE_memo;
 
-    const 𝕊0_RBRACKET = (arg) => {
-        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
+    const 𝕊0_RBRACE = (arg) => {
+        if (!𝕊0_RBRACE_memo) 𝕊0_RBRACE_memo = (() => {
             const t207 = 𝕊0('WS');
             const t208 = function STR() {
-                OUT = "]";
+                OUT = "}";
                 return true;
             };
             const t209 = 𝕊0('WS');
@@ -2351,15 +2307,15 @@ const print = (() => {
                 return true;
             };
         })();
-        return 𝕊0_RBRACKET_memo(arg);
+        return 𝕊0_RBRACE_memo(arg);
     };
-    let 𝕊0_RBRACKET_memo;
+    let 𝕊0_RBRACE_memo;
 
-    const 𝕊0_COLON = (arg) => {
-        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
+    const 𝕊0_LBRACKET = (arg) => {
+        if (!𝕊0_LBRACKET_memo) 𝕊0_LBRACKET_memo = (() => {
             const t210 = 𝕊0('WS');
             const t211 = function STR() {
-                OUT = ":";
+                OUT = "[";
                 return true;
             };
             const t212 = 𝕊0('WS');
@@ -2373,15 +2329,15 @@ const print = (() => {
                 return true;
             };
         })();
-        return 𝕊0_COLON_memo(arg);
+        return 𝕊0_LBRACKET_memo(arg);
     };
-    let 𝕊0_COLON_memo;
+    let 𝕊0_LBRACKET_memo;
 
-    const 𝕊0_COMMA = (arg) => {
-        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
+    const 𝕊0_RBRACKET = (arg) => {
+        if (!𝕊0_RBRACKET_memo) 𝕊0_RBRACKET_memo = (() => {
             const t213 = 𝕊0('WS');
             const t214 = function STR() {
-                OUT = ",";
+                OUT = "]";
                 return true;
             };
             const t215 = 𝕊0('WS');
@@ -2391,6 +2347,50 @@ const print = (() => {
                 if (t213()) out = concat(out, OUT); else return setState(stateₒ), false;
                 if (t214()) out = concat(out, OUT); else return setState(stateₒ), false;
                 if (t215()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
+        return 𝕊0_RBRACKET_memo(arg);
+    };
+    let 𝕊0_RBRACKET_memo;
+
+    const 𝕊0_COLON = (arg) => {
+        if (!𝕊0_COLON_memo) 𝕊0_COLON_memo = (() => {
+            const t216 = 𝕊0('WS');
+            const t217 = function STR() {
+                OUT = ":";
+                return true;
+            };
+            const t218 = 𝕊0('WS');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t216()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t217()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t218()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
+        return 𝕊0_COLON_memo(arg);
+    };
+    let 𝕊0_COLON_memo;
+
+    const 𝕊0_COMMA = (arg) => {
+        if (!𝕊0_COMMA_memo) 𝕊0_COMMA_memo = (() => {
+            const t219 = 𝕊0('WS');
+            const t220 = function STR() {
+                OUT = ",";
+                return true;
+            };
+            const t221 = 𝕊0('WS');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t219()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t220()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t221()) out = concat(out, OUT); else return setState(stateₒ), false;
                 OUT = out;
                 return true;
             };
@@ -2412,27 +2412,27 @@ const print = (() => {
         if (!𝕊0_WS_memo) 𝕊0_WS_memo = zeroOrMore({
             mode: 7,
             expression: (() => {
-                const t216 = function STR() {
+                const t222 = function STR() {
                     OUT = " ";
                     return true;
                 };
-                const t217 = function STR() {
+                const t223 = function STR() {
                     OUT = "\t";
                     return true;
                 };
-                const t218 = function STR() {
+                const t224 = function STR() {
                     OUT = "\n";
                     return true;
                 };
-                const t219 = function STR() {
+                const t225 = function STR() {
                     OUT = "\r";
                     return true;
                 };
                 return function SEL() {
-                    if (t216()) return true;
-                    if (t217()) return true;
-                    if (t218()) return true;
-                    if (t219()) return true;
+                    if (t222()) return true;
+                    if (t223()) return true;
+                    if (t224()) return true;
+                    if (t225()) return true;
                     return false;
                 };
             })(),

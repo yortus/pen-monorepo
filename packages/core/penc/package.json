@@ -25,12 +25,14 @@
         "@ext/experimental-features": "*",
         "@ext/standard-library": "*",
         "@types/fs-extra": "^8.1.0",
+        "@types/object-hash": "^1.3.3",
         "fast-glob": "^3.2.2",
         "pegjs": "^0.10.0",
         "penrt": "*"
     },
     "dependencies": {
         "commander": "^5.1.0",
-        "fs-extra": "^8.1.0"
+        "fs-extra": "^8.1.0",
+        "object-hash": "^2.0.3"
     }
 }
