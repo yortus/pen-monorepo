@@ -402,7 +402,24 @@ const parse = (() => {
     };
 
     const 𝕊3_a = (arg) => {
-        if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
+        if (!𝕊3_a_memo) 𝕊3_a_memo = (() => {
+            const t3 = function STR() {
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 97) return false;
+                IP += 1;
+                OUT = "a";
+                return true;
+            };
+            const t4 = 𝕊0('recB')('b');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t3()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t4()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
         return 𝕊3_a_memo(arg);
     };
     let 𝕊3_a_memo;
@@ -421,7 +438,24 @@ const parse = (() => {
     };
 
     const 𝕊4_b = (arg) => {
-        if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
+        if (!𝕊4_b_memo) 𝕊4_b_memo = (() => {
+            const t5 = function STR() {
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                IP += 1;
+                OUT = "b";
+                return true;
+            };
+            const t6 = 𝕊0('recA')('a');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t5()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t6()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
         return 𝕊4_b_memo(arg);
     };
     let 𝕊4_b_memo;
@@ -650,13 +684,13 @@ const print = (() => {
 
     const 𝕊0_modExprMem = (arg) => {
         if (!𝕊0_modExprMem_memo) 𝕊0_modExprMem_memo = (() => {
-            const t3 = 𝕊0('expr')('foo');
-            const t4 = 𝕊2('mem');
-            const t5 = 𝕊0('baz');
+            const t7 = 𝕊0('expr')('foo');
+            const t8 = 𝕊2('mem');
+            const t9 = 𝕊0('baz');
             return function SEL() {
-                if (t3()) return true;
-                if (t4()) return true;
-                if (t5()) return true;
+                if (t7()) return true;
+                if (t8()) return true;
+                if (t9()) return true;
                 return false;
             };
         })();
@@ -703,7 +737,25 @@ const print = (() => {
     };
 
     const 𝕊3_a = (arg) => {
-        if (!𝕊3_a_memo) 𝕊3_a_memo = 𝕊0('recB')('b');
+        if (!𝕊3_a_memo) 𝕊3_a_memo = (() => {
+            const t10 = function STR() {
+                if (typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 97) return false;
+                IP += 1;
+                OUT = "a";
+                return true;
+            };
+            const t11 = 𝕊0('recB')('b');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t10()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t11()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
         return 𝕊3_a_memo(arg);
     };
     let 𝕊3_a_memo;
@@ -722,7 +774,25 @@ const print = (() => {
     };
 
     const 𝕊4_b = (arg) => {
-        if (!𝕊4_b_memo) 𝕊4_b_memo = 𝕊0('recA')('a');
+        if (!𝕊4_b_memo) 𝕊4_b_memo = (() => {
+            const t12 = function STR() {
+                if (typeof IN !== 'string') return false;
+                if (IP + 1 > IN.length) return false;
+                if (IN.charCodeAt(IP + 0) !== 98) return false;
+                IP += 1;
+                OUT = "b";
+                return true;
+            };
+            const t13 = 𝕊0('recA')('a');
+            return function SEQ() {
+                let stateₒ = getState();
+                let out;
+                if (t12()) out = concat(out, OUT); else return setState(stateₒ), false;
+                if (t13()) out = concat(out, OUT); else return setState(stateₒ), false;
+                OUT = out;
+                return true;
+            };
+        })();
         return 𝕊4_b_memo(arg);
     };
     let 𝕊4_b_memo;

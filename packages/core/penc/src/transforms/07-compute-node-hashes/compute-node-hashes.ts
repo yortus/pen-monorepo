@@ -29,29 +29,89 @@ export function computeNodeHashes(program: Program<Metadata>) {
         }
     }
 
-    // Replace {ref: ..., bindingName: ...} values in the signatures map, until the map stabilises
+    // Replace {ref: RefExpr, bindingName: ...} values in the signatures map, until the map stabilises
     isStable = false;
     while (!isStable) {
         isStable = true;
         for (let [_, sig] of signatures) {
-            if (Array.isArray(sig.$)) continue; // only handle direct refs in this loop
+            if (Array.isArray(sig.$)) continue; // only handle refs in this loop
+            let {ref, bindingName} = sig.$;
+            assert(bindingName); // sanity check: any remaining refs must be binding lookups by now
 
             // TODO: ... a bit like findReferencedNode
             // - can 'see through' some node kinds (eg Module), but not others (eg ApplicationExpression)
-            // switch (ref.kind) {
-            //     case ''
-            // }
-            switch (sig.$.ref.kind) {
-                case 'ReferenceExpression':
-                    let refdExpr = findReferencedExpression(sig.$.ref);
-                    console.log(`=====>   REF1: ${refdExpr.kind}.${sig.$.bindingName}`);
+            switch (ref.kind) {
+                case 'ImportExpression': {
+                    let mod = program.sourceFiles.get(ref.sourceFilePath)!;
+                    if (mod.kind === 'PenSourceFile') {
+                        let bnd = mod.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === bindingName);
+                        assert(bnd && bnd.kind === 'SimpleBinding'); // sanity check
+
+                        // TODO: this can cause an infinite loop here, if the code contains a circular definition. That
+                        // should be detected and flagged as an error, rather that sending the compiler into a loop.
+                        Object.assign(sig, sigFor(bnd.value));
+                        isStable = false;
+                    }
+                    else {
+                        // TODO: ...
+                    }
                     break;
-                default:
-                    console.log(`=====>   REF2: ${sig.$.ref.kind}.${sig.$.bindingName}`);
                 }
+                case 'ModuleExpression': {
+                    let bnd = ref.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === bindingName);
+                    assert(bnd && bnd.kind === 'SimpleBinding'); // sanity check
+
+                    // TODO: this can cause an infinite loop here, if the code contains a circular definition. That
+                    // should be detected and flagged as an error, rather that sending the compiler into a loop.
+                    Object.assign(sig, sigFor(bnd.value));
+                    isStable = false;
+                    break;
+                }
+                case 'ReferenceExpression': {
+                    let refdExpr = findReferencedExpression(ref);
+                    // TODO: should be more like: Object.assign(sig, sigFor(bnd.value));?
+                    sig.$.ref = refdExpr;
+                    isStable = false;
+                    break;
+                }
+            }
         }
     }
 
+    // TOO: temp testing... see what refs are still left
+    for (let [node, sig] of signatures) {
+        if (Array.isArray(sig.$)) continue; // only handle refs in this loop
+        let {ref, bindingName} = sig.$;
+        assert(bindingName); // sanity check: any remaining refs must be binding lookups by now
+
+        let x: string;
+        switch (ref.kind) {
+            case 'BindingLookupExpression': {
+                x = 'BLE';
+                break;
+            }
+            case 'ImportExpression': {
+                let mod = program.sourceFiles.get(ref.sourceFilePath)!;
+                if (mod.kind === 'PenSourceFile') {
+                    // TODO: ...
+                    x = 'PSF';
+                }
+                else {
+                    // TODO: ...
+                    x = 'EXF';
+                }
+                break;
+            }
+            case 'ModuleExpression': {
+                x = 'MOD';
+                break;
+            }
+            default:
+                x = '???';
+        }
+        console.log(`${node.kind.toUpperCase().padEnd(24)}=====>   (${x}) REF: ${ref.kind}.${bindingName}`);
+
+    }
 
 
 

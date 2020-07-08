@@ -22,8 +22,8 @@ baz = "baz"
 modExprMem = expr.foo | ({mem = "member"}).mem | baz
 
 // mutually recursive module expressions
-recA = { a = recB.b }
-recB = { b = recA.a }
+recA = { a = "a" recB.b }
+recB = { b = "b" recA.a }
 
 // lambda expressions, disabled for now
 // fn1 = a => a a
