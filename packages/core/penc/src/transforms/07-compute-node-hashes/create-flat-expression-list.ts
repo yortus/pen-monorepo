@@ -7,38 +7,29 @@ import {assert, traverseDepthFirst} from '../../utils';
 import {Metadata} from './metadata';
 
 
-// TODO: move below exports...
-type Expression = AstNodes.Expression<Metadata>;
-type Module = AstNodes.Module<Metadata>;
-type PenSourceFile = AstNodes.PenSourceFile<Metadata>;
-type Program = AstNodes.Program<Metadata>;
-type ReferenceExpression = AstNodes.ReferenceExpression<Metadata>;
-type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
-
-
 // TODO: doc...
 export function createFlatExpressionList(program: Program) {
+
+    // Create helper functions for this program.
+    let getHashFor = createExpressionHasher(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
     let startExpr = main.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
     assert(startExpr);
 
-    // TODO: temp testing...
-    let {getHashFor, getSignatureFor} = createProgramHelpers(program);
 
     let entry = getEntryFor(startExpr);
     [] = [entry];
 
-    let sig = getSignatureFor(startExpr);
-    let hash = getHashFor(startExpr);
-    [] = [sig, hash];
 
 
     return program;
 
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
+        let hash = getHashFor(expr);
+        [] = [hash];
 
         // Steps:
         // 1. If an equivelent entry already exists, do nothing else and return the existing entry
@@ -71,66 +62,45 @@ export function createFlatExpressionList(program: Program) {
         // TODO: ...
         return null!;
     }
-
-
-
-
-
-
-
-
 }
 
 
-function createProgramHelpers(program: Program) {
+export interface Entry {
+    name: string;
+    expr: AstNodes.Expression;
+}
+
+
+type Expression = AstNodes.Expression<Metadata>;
+type Module = AstNodes.Module<Metadata>;
+type PenSourceFile = AstNodes.PenSourceFile<Metadata>;
+type Program = AstNodes.Program<Metadata>;
+type ReferenceExpression = AstNodes.ReferenceExpression<Metadata>;
+type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
+
+
+function createExpressionHasher(program: Program) {
     type Signature = [string, ...unknown[]];
     const allBindings = [] as SimpleBinding[];
     const signaturesByNode = new Map<Expression, Signature>();
-
+    const hashesByNode = new Map<Expression, string>();
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
 
-
-    for (let bnd of allBindings) {
-        console.log(`${bnd.name}: ${getHashFor(bnd.value)}`);
-    }
-
-
-    return {findReferencedExpression, getHashFor, getSignatureFor};
-
-
-    function getHashFor(n: Expression) {
-        let sig = getSignatureFor(n);
-        return objectHash(sig);
-    }
+    return function getHashFor(expr: Expression) {
+        if (hashesByNode.has(expr)) return hashesByNode.get(expr)!;
+        let sig = getSignatureFor(expr);
+        let hash = objectHash(sig);
+        hashesByNode.set(expr, hash);
+        return hash;
+    };
 
     function getSignatureFor(n: Expression): Signature {
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
         let sig = [] as unknown as Signature;
         signaturesByNode.set(n, sig);
-
-        function getSig(n: Expression, allowCircularity = true) {
-            let result = getSignatureFor(n);
-            if (result === sig && !allowCircularity) {
-                // TODO: room for improvement with this error message, and how it is constructed
-                let name
-                    = n.kind === 'ReferenceExpression' ? n.name
-                    : n.kind === 'BindingLookupExpression' ? n.bindingName
-                    : '';
-                assert(name);
-                throw new Error(`'${name}' is circularly defined`);
-            }
-            return result;
-        }
-
-        function setSig(...els: Signature) {
-            sig.push(...els);
-            return sig;
-        }
-
         switch (n.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
             case 'BindingLookupExpression': {
-                // TODO: BUG HERE - x.x1 sig is [] after, should be ???
                 let expr = tryStaticBindingLookup(n.module, n.bindingName);
                 return expr ? getSig(expr, false) : setSig('BLE', getSig(n.module), n.bindingName);
             }
@@ -155,6 +125,25 @@ function createProgramHelpers(program: Program) {
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
 
+        function getSig(expr: Expression, allowCircularity = true) {
+            let result = getSignatureFor(expr);
+            if (result === sig && !allowCircularity) {
+                // TODO: room for improvement with this error message, and how it is constructed
+                let name
+                    = expr.kind === 'ReferenceExpression' ? expr.name
+                    : expr.kind === 'BindingLookupExpression' ? expr.bindingName
+                    : '';
+                assert(name);
+                throw new Error(`'${name}' is circularly defined`);
+            }
+            return result;
+        }
+
+        function setSig(...els: Signature) {
+            sig.push(...els);
+            return sig;
+        }
+
         function setModuleSig(module: Module): Signature {
             // Make an object keyed by binding name, to ensure binding order doesn't affect signature.
             let obj = {} as Record<string, unknown>;
@@ -166,7 +155,6 @@ function createProgramHelpers(program: Program) {
             return sig;
         }
     }
-
 
     function findReferencedExpression(ref: ReferenceExpression): Expression {
         let symbolId = ref.meta.symbolId;
@@ -215,10 +203,4 @@ function createProgramHelpers(program: Program) {
             return binding.value;
         }
     }
-}
-
-
-interface Entry {
-    name: string;
-    // TODO: ...
 }
