@@ -8,7 +8,7 @@ import {Metadata} from './metadata';
 
 
 // TODO: doc...
-export function createFlatExpressionList(program: Program) {
+export function createFlatExpressionList(program: Program): Entry[] {
 
     // Create helper functions for this program.
     let getHashFor = createExpressionHasher(program);
@@ -18,55 +18,57 @@ export function createFlatExpressionList(program: Program) {
     let startExpr = main.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
     assert(startExpr);
 
+    // TODO: temp testing...
+    let entriesByHash = new Map<string, Entry>();
+    getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
+    return [...entriesByHash.values()];
 
-    let entry = getEntryFor(startExpr);
-    [] = [entry];
-
-
-
-    return program;
 
     // TODO: recursive...
-    function getEntryFor(expr: Expression): Entry {
-        let hash = getHashFor(expr);
-        [] = [hash];
+    function getEntryFor(n: Expression): Entry {
+        let hash = getHashFor(n);
+        let entry = entriesByHash.get(hash)!;
+        if (entry) return entry;
+        entry = {uniqueName: '???', expr: undefined!};
 
-        // Steps:
-        // 1. If an equivelent entry already exists, do nothing else and return the existing entry
-        //    1a. compute the hash code for `expr`.
-        //    1b. search for an existing entry with the same hash code. If found, regard it as an equivelent entry.
-        // 2. 
+        // TODO: set entry.expr to a new shallow expr
+        switch (n.kind) {
+            case 'ApplicationExpression': return set(n, {/*TODO*/});
+            case 'BindingLookupExpression': return set(n, {/*TODO*/});
+            case 'BooleanLiteralExpression': return set(n, n);
+            case 'FieldExpression': return set(n, {name: ref(n.name), value: ref(n.value)});
+            case 'ImportExpression': return set(n, {/*TODO*/});
+            case 'ListExpression': return set(n, {elements: n.elements.map(ref)});
+            case 'ModuleExpression': return set(n, {/*TODO*/});
+            case 'NotExpression': return set(n, {expression: ref(n.expression)});
+            case 'NullLiteralExpression': return set(n, n);
+            case 'NumericLiteralExpression': return set(n, n);
+            case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
+            case 'QuantifiedExpression': return set(n, {expression: ref(n.expression), quantifier: n.quantifier});
+            case 'RecordExpression': return set(n, {/*TODO*/});
+            case 'ReferenceExpression': return set(n, {/*TODO*/});
+            case 'SelectionExpression': return set(n, {expressions: n.expressions.map(ref)});
+            case 'SequenceExpression': return set(n, {expressions: n.expressions.map(ref)});
+            case 'StringLiteralExpression': return set(n, n);
 
-        switch (expr.kind) {
-            case 'BindingLookupExpression':
-            case 'BooleanLiteralExpression':
-            case 'FieldExpression':
-            case 'ImportExpression':
-            case 'ListExpression':
-            case 'ModuleExpression':
-            case 'NotExpression':
-            case 'NullLiteralExpression':
-            case 'NumericLiteralExpression':
-            case 'ParenthesisedExpression': // will never happen
-            case 'QuantifiedExpression':
-            case 'RecordExpression':
-            case 'ReferenceExpression':
-            case 'SelectionExpression':
-            case 'SequenceExpression':
-            case 'StringLiteralExpression':
-                break;
-            default:
-                // TODO: exhaustiveness check
+            // TODO: exhaustiveness check
+            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
 
-        // TODO: ...
-        return null!;
+        function ref(expr: Expression): AstNodes.ReferenceExpression<any> {
+            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
+        }
+
+        function set<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
+            entry.expr = {kind: expr.kind, ...vals, meta: {}} as any;
+            return entry;
+        }
     }
 }
 
 
 export interface Entry {
-    name: string;
+    uniqueName: string;
     expr: AstNodes.Expression;
 }
 
