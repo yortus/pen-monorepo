@@ -11,7 +11,7 @@ import {Metadata} from './metadata';
 export function createFlatExpressionList(program: Program): Entry[] {
 
     // Create helper functions for this program.
-    let {getHashFor/*, findReferencedExpression, tryStaticBindingLookup*/} = createProgramHelpers(program);
+    let {getHashFor, findReferencedExpression, tryStaticBindingLookup} = createProgramHelpers(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
@@ -30,66 +30,46 @@ export function createFlatExpressionList(program: Program): Entry[] {
         let entry = entriesByHash.get(hash)!;
         if (entry) return entry;
         entry = {uniqueName: '???', expr: undefined!};
-        const refs = (exprs: readonly Expression[], allowCircular = true) => exprs.map(e => ref(e, allowCircular));
+        entriesByHash.set(hash, entry);
 
         // TODO: set entry.expr to a new shallow expr
         switch (n.kind) {
             case 'ApplicationExpression': return setX(n, {lambda: ref(n.lambda), argument: ref(n.argument)});
             case 'BindingLookupExpression': {
-                // TODO: wha? how?
-                // let ex = tryStaticBindingLookup(n.module, n.bindingName); // use this?
-                // return setX(n, {/*TODO*/});
-
-                // let expr = tryStaticBindingLookup(n.module, n.bindingName);
-                // return expr
-                //     ? ref(expr, false)
-                //     : setSig('BLE', getSig(n.module), n.bindingName);
-                throw new Error('Not implemented');
-
-
-
-
+                let expr = tryStaticBindingLookup(n.module, n.bindingName);
+                return expr ? getEnt(expr, false) : setX(n, {module: ref(n.module), bindingName: n.bindingName});
             }
             case 'BooleanLiteralExpression': return setX(n, n);
             case 'FieldExpression': return setX(n, {name: ref(n.name), value: ref(n.value)});
             case 'ImportExpression': {
                 let sf = program.sourceFiles.get(n.sourceFilePath)!;
                 if (sf.kind === 'PenSourceFile') {
-                    return setModuleX(sf.module);
+                    entry.expr = {kind: 'ModuleExpression', module: getModule(sf.module), meta: {}};
+                    return entry;
                 }
                 else {
                     // TODO: expr is a ref to extension file - how??
-                    //sf.path;
-                    //return null!;
-                    throw new Error('Not implemented');
+                    throw new Error('getEntryFor(ExtensionFile): Not implemented');
                 }
             }
-            case 'ListExpression': return setX(n, {elements: refs(n.elements)});
-            case 'ModuleExpression': return setModuleX(n.module);
+            case 'ListExpression': return setX(n, {elements: n.elements.map(ref)});
+            case 'ModuleExpression': return setX(n, {module: getModule(n.module)});
             case 'NotExpression': return setX(n, {expression: ref(n.expression)});
             case 'NullLiteralExpression': return setX(n, n);
             case 'NumericLiteralExpression': return setX(n, n);
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setX(n, {expression: ref(n.expression), quantifier: n.quantifier});
             case 'RecordExpression': return setX(n, {fields: n.fields.map(f => ({name: f.name, value: ref(f.value)}))});
-            case 'ReferenceExpression': {
-
-                // TODO: wha? how?
-                //findReferencedExpression(n); // use this?
-                //return setX(n, {/*TODO*/});
-                throw new Error('Not implemented');
-            }
-            case 'SelectionExpression': return setX(n, {expressions: refs(n.expressions)});
-            case 'SequenceExpression': return setX(n, {expressions: refs(n.expressions)});
+            case 'ReferenceExpression': return getEnt(findReferencedExpression(n));
+            case 'SelectionExpression': return setX(n, {expressions: n.expressions.map(ref)});
+            case 'SequenceExpression': return setX(n, {expressions: n.expressions.map(ref)});
             case 'StringLiteralExpression': return setX(n, n);
-
-            // TODO: exhaustiveness check
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
 
-        function ref(expr: Expression, allowCircularity = true): AstNodes.ReferenceExpression<any> {
-            let refdEntry = getEntryFor(expr);
-            if (refdEntry === entry && !allowCircularity) {
+        function getEnt(expr: Expression, allowCircularity = true) {
+            let result = getEntryFor(expr);
+            if (result === entry && !allowCircularity) {
                 // TODO: room for improvement with this error message, and how it is constructed
                 let name
                     = expr.kind === 'ReferenceExpression' ? expr.name
@@ -98,7 +78,11 @@ export function createFlatExpressionList(program: Program): Entry[] {
                 assert(name);
                 throw new Error(`'${name}' is circularly defined`);
             }
-            return {kind: 'ReferenceExpression', name: refdEntry.uniqueName, meta: {}};
+            return result;
+        }
+
+        function ref(expr: Expression): AstNodes.ReferenceExpression<any> {
+            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
         }
 
         function setX<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
@@ -106,11 +90,12 @@ export function createFlatExpressionList(program: Program): Entry[] {
             return entry;
         }
 
-        function setModuleX(_mod: Module): Entry {
-            // TODO: ...
-            // entry.expr = ...;
-            // return entry;
-            throw new Error('Not implemented');
+        function getModule(module: Module): Module {
+            let bindings = module.bindings.map(binding => {
+                assert(binding.kind === 'SimpleBinding');
+                return {...binding, value: ref(binding.value)} as SimpleBinding;
+            });
+            return {...module, bindings};
         }
     }
 }
@@ -144,7 +129,7 @@ function createProgramHelpers(program: Program) {
         let hash = objectHash(sig);
         hashesByNode.set(expr, hash);
         return hash;
-    };
+    }
 
     function getSignatureFor(n: Expression): Signature {
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
