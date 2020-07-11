@@ -32,11 +32,12 @@ export function compile(options: CompilerOptions) {
     let ast03 = createSymbolDefinitions(ast02);
     let ast04 = resolveSymbolReferences(ast03);
     let ast05 = resolveConstantValues(ast04);
-    let ast06 = createFlatExpressionList(ast05);
+    let ast06Entries = createFlatExpressionList(ast05);
+    [] = ast06Entries;
 
-    checkSemantics(ast06);
+    checkSemantics(ast05);
 
-    let targetCode = generateTargetCode(ast06);
+    let targetCode = generateTargetCode(ast05);
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     let outFilePath = path.resolve(outFile);

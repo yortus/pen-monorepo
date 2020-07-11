@@ -11,7 +11,7 @@ import {Metadata} from './metadata';
 export function createFlatExpressionList(program: Program): Entry[] {
 
     // Create helper functions for this program.
-    let {getHashFor, findReferencedExpression} = createProgramHelpers(program);
+    let {getHashFor/*, findReferencedExpression, tryStaticBindingLookup*/} = createProgramHelpers(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
@@ -30,12 +30,25 @@ export function createFlatExpressionList(program: Program): Entry[] {
         let entry = entriesByHash.get(hash)!;
         if (entry) return entry;
         entry = {uniqueName: '???', expr: undefined!};
+        const refs = (exprs: readonly Expression[], allowCircular = true) => exprs.map(e => ref(e, allowCircular));
 
         // TODO: set entry.expr to a new shallow expr
         switch (n.kind) {
             case 'ApplicationExpression': return setX(n, {lambda: ref(n.lambda), argument: ref(n.argument)});
             case 'BindingLookupExpression': {
-                return setX(n, {/*TODO*/});
+                // TODO: wha? how?
+                // let ex = tryStaticBindingLookup(n.module, n.bindingName); // use this?
+                // return setX(n, {/*TODO*/});
+
+                // let expr = tryStaticBindingLookup(n.module, n.bindingName);
+                // return expr
+                //     ? ref(expr, false)
+                //     : setSig('BLE', getSig(n.module), n.bindingName);
+                throw new Error('Not implemented');
+
+
+
+
             }
             case 'BooleanLiteralExpression': return setX(n, n);
             case 'FieldExpression': return setX(n, {name: ref(n.name), value: ref(n.value)});
@@ -46,11 +59,12 @@ export function createFlatExpressionList(program: Program): Entry[] {
                 }
                 else {
                     // TODO: expr is a ref to extension file - how??
-                    sf.path;
-                    return null!;
+                    //sf.path;
+                    //return null!;
+                    throw new Error('Not implemented');
                 }
             }
-            case 'ListExpression': return setX(n, {elements: n.elements.map(ref)});
+            case 'ListExpression': return setX(n, {elements: refs(n.elements)});
             case 'ModuleExpression': return setModuleX(n.module);
             case 'NotExpression': return setX(n, {expression: ref(n.expression)});
             case 'NullLiteralExpression': return setX(n, n);
@@ -59,20 +73,32 @@ export function createFlatExpressionList(program: Program): Entry[] {
             case 'QuantifiedExpression': return setX(n, {expression: ref(n.expression), quantifier: n.quantifier});
             case 'RecordExpression': return setX(n, {fields: n.fields.map(f => ({name: f.name, value: ref(f.value)}))});
             case 'ReferenceExpression': {
+
                 // TODO: wha? how?
-                findReferencedExpression(n); // use this?
-                return setX(n, {/*TODO*/});
+                //findReferencedExpression(n); // use this?
+                //return setX(n, {/*TODO*/});
+                throw new Error('Not implemented');
             }
-            case 'SelectionExpression': return setX(n, {expressions: n.expressions.map(ref)});
-            case 'SequenceExpression': return setX(n, {expressions: n.expressions.map(ref)});
+            case 'SelectionExpression': return setX(n, {expressions: refs(n.expressions)});
+            case 'SequenceExpression': return setX(n, {expressions: refs(n.expressions)});
             case 'StringLiteralExpression': return setX(n, n);
 
             // TODO: exhaustiveness check
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
 
-        function ref(expr: Expression): AstNodes.ReferenceExpression<any> {
-            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
+        function ref(expr: Expression, allowCircularity = true): AstNodes.ReferenceExpression<any> {
+            let refdEntry = getEntryFor(expr);
+            if (refdEntry === entry && !allowCircularity) {
+                // TODO: room for improvement with this error message, and how it is constructed
+                let name
+                    = expr.kind === 'ReferenceExpression' ? expr.name
+                    : expr.kind === 'BindingLookupExpression' ? expr.bindingName
+                    : '';
+                assert(name);
+                throw new Error(`'${name}' is circularly defined`);
+            }
+            return {kind: 'ReferenceExpression', name: refdEntry.uniqueName, meta: {}};
         }
 
         function setX<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
@@ -80,10 +106,11 @@ export function createFlatExpressionList(program: Program): Entry[] {
             return entry;
         }
 
-        function setModuleX(mod: Module) {
+        function setModuleX(_mod: Module): Entry {
             // TODO: ...
-            entry.expr = ...;
-            return entry;
+            // entry.expr = ...;
+            // return entry;
+            throw new Error('Not implemented');
         }
     }
 }
@@ -109,7 +136,7 @@ function createProgramHelpers(program: Program) {
     const signaturesByNode = new Map<Expression, Signature>();
     const hashesByNode = new Map<Expression, string>();
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
-    return {getHashFor, findReferencedExpression};
+    return {getHashFor, findReferencedExpression, tryStaticBindingLookup};
 
     function getHashFor(expr: Expression) {
         if (hashesByNode.has(expr)) return hashesByNode.get(expr)!;
