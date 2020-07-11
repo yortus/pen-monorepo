@@ -11,7 +11,7 @@ import {Metadata} from './metadata';
 export function createFlatExpressionList(program: Program): Entry[] {
 
     // Create helper functions for this program.
-    let getHashFor = createExpressionHasher(program);
+    let {getHashFor, findReferencedExpression} = createProgramHelpers(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
@@ -33,23 +33,39 @@ export function createFlatExpressionList(program: Program): Entry[] {
 
         // TODO: set entry.expr to a new shallow expr
         switch (n.kind) {
-            case 'ApplicationExpression': return set(n, {/*TODO*/});
-            case 'BindingLookupExpression': return set(n, {/*TODO*/});
-            case 'BooleanLiteralExpression': return set(n, n);
-            case 'FieldExpression': return set(n, {name: ref(n.name), value: ref(n.value)});
-            case 'ImportExpression': return set(n, {/*TODO*/});
-            case 'ListExpression': return set(n, {elements: n.elements.map(ref)});
-            case 'ModuleExpression': return set(n, {/*TODO*/});
-            case 'NotExpression': return set(n, {expression: ref(n.expression)});
-            case 'NullLiteralExpression': return set(n, n);
-            case 'NumericLiteralExpression': return set(n, n);
+            case 'ApplicationExpression': return setX(n, {lambda: ref(n.lambda), argument: ref(n.argument)});
+            case 'BindingLookupExpression': {
+                return setX(n, {/*TODO*/});
+            }
+            case 'BooleanLiteralExpression': return setX(n, n);
+            case 'FieldExpression': return setX(n, {name: ref(n.name), value: ref(n.value)});
+            case 'ImportExpression': {
+                let sf = program.sourceFiles.get(n.sourceFilePath)!;
+                if (sf.kind === 'PenSourceFile') {
+                    return setModuleX(sf.module);
+                }
+                else {
+                    // TODO: expr is a ref to extension file - how??
+                    sf.path;
+                    return null!;
+                }
+            }
+            case 'ListExpression': return setX(n, {elements: n.elements.map(ref)});
+            case 'ModuleExpression': return setModuleX(n.module);
+            case 'NotExpression': return setX(n, {expression: ref(n.expression)});
+            case 'NullLiteralExpression': return setX(n, n);
+            case 'NumericLiteralExpression': return setX(n, n);
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
-            case 'QuantifiedExpression': return set(n, {expression: ref(n.expression), quantifier: n.quantifier});
-            case 'RecordExpression': return set(n, {/*TODO*/});
-            case 'ReferenceExpression': return set(n, {/*TODO*/});
-            case 'SelectionExpression': return set(n, {expressions: n.expressions.map(ref)});
-            case 'SequenceExpression': return set(n, {expressions: n.expressions.map(ref)});
-            case 'StringLiteralExpression': return set(n, n);
+            case 'QuantifiedExpression': return setX(n, {expression: ref(n.expression), quantifier: n.quantifier});
+            case 'RecordExpression': return setX(n, {fields: n.fields.map(f => ({name: f.name, value: ref(f.value)}))});
+            case 'ReferenceExpression': {
+                // TODO: wha? how?
+                findReferencedExpression(n); // use this?
+                return setX(n, {/*TODO*/});
+            }
+            case 'SelectionExpression': return setX(n, {expressions: n.expressions.map(ref)});
+            case 'SequenceExpression': return setX(n, {expressions: n.expressions.map(ref)});
+            case 'StringLiteralExpression': return setX(n, n);
 
             // TODO: exhaustiveness check
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
@@ -59,8 +75,14 @@ export function createFlatExpressionList(program: Program): Entry[] {
             return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
         }
 
-        function set<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
+        function setX<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
             entry.expr = {kind: expr.kind, ...vals, meta: {}} as any;
+            return entry;
+        }
+
+        function setModuleX(mod: Module) {
+            // TODO: ...
+            entry.expr = ...;
             return entry;
         }
     }
@@ -81,14 +103,15 @@ type ReferenceExpression = AstNodes.ReferenceExpression<Metadata>;
 type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
 
 
-function createExpressionHasher(program: Program) {
+function createProgramHelpers(program: Program) {
     type Signature = [string, ...unknown[]];
     const allBindings = [] as SimpleBinding[];
     const signaturesByNode = new Map<Expression, Signature>();
     const hashesByNode = new Map<Expression, string>();
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+    return {getHashFor, findReferencedExpression};
 
-    return function getHashFor(expr: Expression) {
+    function getHashFor(expr: Expression) {
         if (hashesByNode.has(expr)) return hashesByNode.get(expr)!;
         let sig = getSignatureFor(expr);
         let hash = objectHash(sig);
