@@ -27,7 +27,6 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
     return (n: Node): Node => {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
-            case 'BindingLookupExpression': return {...n, module: rec(n.module)};
             case 'BooleanLiteralExpression': return n;
             case 'DestructuredBinding': return {...n, value: rec(n.value)};
             case 'ExtensionFile': return n;
@@ -35,6 +34,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
+            case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
             case 'NotExpression': return {...n, expression: rec(n.expression)};
