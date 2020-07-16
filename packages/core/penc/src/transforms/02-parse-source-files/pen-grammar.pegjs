@@ -56,7 +56,7 @@ DestructuredBindingName
 
     PRECEDENCE 5
         ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
-        BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                  NB: no whitespace between terms, may relax later
+        MemberExpression            a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
@@ -91,7 +91,7 @@ Precedence4OrHigher
     / Precedence5OrHigher
 
 Precedence5OrHigher
-    = ApplicationOrBindingLookupExpression
+    = ApplicationOrMemberExpression
     / Precedence6OrHigher
 
 Precedence6OrHigher
@@ -127,19 +127,19 @@ QuantifiedExpression
     = expression:Precedence5OrHigher   __   quantifier:("?" / "*")
     { return {kind: 'QuantifiedExpression', expression, quantifier}; }
 
-ApplicationOrBindingLookupExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
+ApplicationOrMemberExpression
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
-                ? {kind: 'BindingLookupExpression', module: lhs, bindingName: rhs.name}
+                ? {kind: 'MemberExpression', module: lhs, bindingName: rhs.name}
                 : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
             ),
             head
         );
     }
 
-BindingNameLookup
+MemberLookup
     = "."   /* NO WHITESPACE */   name:IDENTIFIER
     { return {name}; }
 

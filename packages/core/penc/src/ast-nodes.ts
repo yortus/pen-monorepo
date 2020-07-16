@@ -21,12 +21,12 @@ export type Binding<M extends Metadata = {}> =
 
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
-    | BindingLookupExpression<M>
     | BooleanLiteralExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
     | ListExpression<M>
+    | MemberExpression<M>
     | ModuleExpression<M>
     | NotExpression<M>
     | NullLiteralExpression<M>
@@ -116,14 +116,6 @@ export interface ApplicationExpression<M extends Metadata = {}> {
 }
 
 
-export interface BindingLookupExpression<M extends Metadata = {}> {
-    readonly kind: 'BindingLookupExpression';
-    readonly module: Expression<M>;
-    readonly bindingName: string;
-    readonly meta: M[this['kind']];
-}
-
-
 export interface BooleanLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'BooleanLiteralExpression';
     readonly value: boolean;
@@ -160,6 +152,14 @@ export interface ListExpression<M extends Metadata = {}> {
 //     readonly body: Expression<M>;
 //     readonly meta: M[this['kind']];
 // }
+
+
+export interface MemberExpression<M extends Metadata = {}> {
+    readonly kind: 'MemberExpression';
+    readonly module: Expression<M>;
+    readonly bindingName: string;
+    readonly meta: M[this['kind']];
+}
 
 
 export interface ModuleExpression<M extends Metadata = {}> {

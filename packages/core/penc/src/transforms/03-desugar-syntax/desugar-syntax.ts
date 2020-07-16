@@ -1,4 +1,4 @@
-import {BindingLookupExpression, Node, Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
+import {MemberExpression, Node, Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
 import {makeNodeMapper} from '../../utils';
 import {Metadata} from './metadata';
 
@@ -28,9 +28,9 @@ export function desugarSyntax(program: Program) {
                     // Introduce a simple binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
                         let ref: ReferenceExpression<Metadata> = {kind: 'ReferenceExpression', name, meta: {}};
-                        let ble: BindingLookupExpression<Metadata>;
-                        ble = {kind: 'BindingLookupExpression', module: ref, bindingName, meta: {}};
-                        bindings.push({kind: 'SimpleBinding', name: alias ?? bindingName, value: ble, exported, meta});
+                        let mem: MemberExpression<Metadata>;
+                        mem = {kind: 'MemberExpression', module: ref, bindingName, meta: {}};
+                        bindings.push({kind: 'SimpleBinding', name: alias ?? bindingName, value: mem, exported, meta});
                     }
                 }
             }

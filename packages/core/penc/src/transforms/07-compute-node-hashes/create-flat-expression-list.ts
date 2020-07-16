@@ -38,11 +38,11 @@ export function createFlatExpressionList(program: Program) {
         // 2. 
 
         switch (expr.kind) {
-            case 'BindingLookupExpression':
             case 'BooleanLiteralExpression':
             case 'FieldExpression':
             case 'ImportExpression':
             case 'ListExpression':
+            case 'MemberExpression':
             case 'ModuleExpression':
             case 'NotExpression':
             case 'NullLiteralExpression':
@@ -100,10 +100,6 @@ function createExpressionHasher(program: Program) {
         signaturesByNode.set(n, sig);
         switch (n.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
-            case 'BindingLookupExpression': {
-                let expr = tryStaticBindingLookup(n.module, n.bindingName);
-                return expr ? getSig(expr, false) : setSig('BLE', getSig(n.module), n.bindingName);
-            }
             case 'BooleanLiteralExpression': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'ImportExpression': {
@@ -111,6 +107,10 @@ function createExpressionHasher(program: Program) {
                 return sf.kind === 'PenSourceFile' ? setModuleSig(sf.module) : setSig('EXF', sf.path);
             }
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
+            case 'MemberExpression': {
+                let expr = tryStaticBindingLookup(n.module, n.bindingName);
+                return expr ? getSig(expr, false) : setSig('BLE', getSig(n.module), n.bindingName);
+            }
             case 'ModuleExpression': return setModuleSig(n.module);
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteralExpression': return setSig('LIT', n.value);
@@ -131,7 +131,7 @@ function createExpressionHasher(program: Program) {
                 // TODO: room for improvement with this error message, and how it is constructed
                 let name
                     = expr.kind === 'ReferenceExpression' ? expr.name
-                    : expr.kind === 'BindingLookupExpression' ? expr.bindingName
+                    : expr.kind === 'MemberExpression' ? expr.bindingName
                     : '';
                 assert(name);
                 throw new Error(`'${name}' is circularly defined`);
@@ -170,11 +170,6 @@ function createExpressionHasher(program: Program) {
                 // TODO: don't know how to do this static lookup *yet*...
                 return undefined;
             }
-            case 'BindingLookupExpression': {
-                // Try simplifying the lhs and recursing.
-                lhs = tryStaticBindingLookup(module.module, module.bindingName);
-                return lhs ? tryStaticBindingLookup(lhs, bindingName) : undefined;
-            }
             case 'ImportExpression': {
                 let sourceFile = program.sourceFiles.get(module.sourceFilePath)!;
                 if (sourceFile.kind === 'PenSourceFile') {
@@ -185,6 +180,11 @@ function createExpressionHasher(program: Program) {
                     // TODO: why not? We can make one 'entry' per extfile binding, we know the names statically...
                     return undefined;
                 }
+            }
+            case 'MemberExpression': {
+                // Try simplifying the lhs and recursing.
+                lhs = tryStaticBindingLookup(module.module, module.bindingName);
+                return lhs ? tryStaticBindingLookup(lhs, bindingName) : undefined;
             }
             case 'ModuleExpression': {
                 return staticModuleLookup(module.module);

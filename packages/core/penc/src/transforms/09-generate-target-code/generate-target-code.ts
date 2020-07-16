@@ -167,12 +167,6 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
             emit.text(`)`);
             break;
 
-        case 'BindingLookupExpression':
-            // TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
-            emitExpression(emit, expr.module, symbolTable, mode);
-            emit.text(`('${expr.bindingName}')`);
-            break;
-
         case 'BooleanLiteralExpression':
         case 'NullLiteralExpression':
         case 'NumericLiteralExpression': {
@@ -220,6 +214,12 @@ function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTabl
                 emit.dedent().down(1);
             }
             emit.text('],').dedent().down(1).text('})');
+            break;
+
+        case 'MemberExpression':
+            // TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
+            emitExpression(emit, expr.module, symbolTable, mode);
+            emit.text(`('${expr.bindingName}')`);
             break;
 
         case 'ModuleExpression':

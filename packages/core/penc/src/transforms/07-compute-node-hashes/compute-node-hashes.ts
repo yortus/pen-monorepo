@@ -86,8 +86,8 @@ export function computeNodeHashes(program: Program<Metadata>) {
 
         let x: string;
         switch (ref.kind) {
-            case 'BindingLookupExpression': {
-                x = 'BLE';
+            case 'MemberExpression': {
+                x = 'MEM';
                 break;
             }
             case 'ImportExpression': {
@@ -176,7 +176,7 @@ export function computeNodeHashes(program: Program<Metadata>) {
             case 'SequenceExpression': return {$: ['SEQ', n.expressions.map(e => sigFor(e))]};
 
             // Aliasing nodes (ie nodes that *directly* create graph cycles)
-            case 'BindingLookupExpression': return {$: {ref: n.module, bindingName: n.bindingName}};
+            case 'MemberExpression': return {$: {ref: n.module, bindingName: n.bindingName}};
             case 'ImportExpression': return {$: {ref: program.sourceFiles.get(n.sourceFilePath)!}};
             case 'ModuleExpression': return {$: {ref: n.module}};
             case 'PenSourceFile': return {$: {ref: n.module}};

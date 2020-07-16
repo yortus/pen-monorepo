@@ -8,7 +8,6 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
     function rec(n: Node<M>): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
-            case 'BindingLookupExpression': return rec(n.module), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
             case 'DestructuredBinding': return rec(n.value), cb(n);
             case 'ExtensionFile': return cb(n);
@@ -16,6 +15,7 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
+            case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);

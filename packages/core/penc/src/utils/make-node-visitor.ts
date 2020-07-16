@@ -27,7 +27,6 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
     return (n: Node): void => {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
-            case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
             case 'DestructuredBinding': return rec(n.value), undefined;
             case 'ExtensionFile': return;
@@ -35,6 +34,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), undefined;
+            case 'MemberExpression': return rec(n.module), undefined;
             case 'Module': return n.bindings.forEach(rec), undefined;
             case 'ModuleExpression': return rec(n.module), undefined;
             case 'NotExpression': return rec(n.expression), undefined;

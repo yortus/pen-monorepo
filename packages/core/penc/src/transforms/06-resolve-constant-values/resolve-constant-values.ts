@@ -15,7 +15,7 @@ export function resolveConstantValues(program: Program<Metadata>) {
             assert(symbol.kind === 'NameSymbol');
             symbol.constant = rec(value) || undefined;
         },
-        // BindingLookupExpression: return rec(n.module), undefined;
+        // MemberExpression: return rec(n.module), undefined;
         BooleanLiteralExpression: expr => ({value: expr.value}),
         // FieldExpression: return rec(n.name), rec(n.value), undefined;
         // ImportExpression: return;

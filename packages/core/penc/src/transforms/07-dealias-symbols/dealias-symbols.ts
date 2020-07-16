@@ -71,7 +71,7 @@
 //                         else if (value.kind === 'ReferenceExpression') {
 //                             toSymbolId = value.meta.symbolId;
 //                         }
-//                         // BUG: BindingLookupExpression belongs here too... or does it??
+//                         // BUG: MemberExpression belongs here too... or does it??
 //                         else {
 //                             // TODO: tidy up / check logic...
 //                             throw new Error(`Internal error: should never get here`);
@@ -91,7 +91,7 @@
 //                     else if (value.kind === 'ReferenceExpression') {
 //                         toSymbolId = value.meta.symbolId;
 //                     }
-//                     // BUG: BindingLookupExpression belongs here too... or does it??
+//                     // BUG: MemberExpression belongs here too... or does it??
 //                     else {
 //                         // TODO: tidy up / check logic...
 //                         throw new Error(`Internal error: should never get here`);
@@ -111,7 +111,7 @@
 
 // // TODO: helper function
 // function isLValue(e: Expression): e is Expression & {kind: 'ImportExpression' | 'ModuleExpression' | 'ReferenceExpression'} {
-//     // BUG: BindingLookupExpression belongs here too...
+//     // BUG: MemberExpression belongs here too...
 //     // TODO: ^^^
 //     return e.kind === 'ImportExpression' || e.kind === 'ModuleExpression' || e.kind === 'ReferenceExpression';
 // }
