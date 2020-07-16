@@ -24,7 +24,7 @@ export function createFlatExpressionList(program: Program): Entry[] {
 
 
     // Create helper functions for this program.
-    let {getHashFor, resolveReference, resolveBindingLookup} = createProgramHelpers(program);
+    let {getHashFor, resolveReference, resolveMember} = createProgramHelpers(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
@@ -67,8 +67,8 @@ export function createFlatExpressionList(program: Program): Entry[] {
             }
             case 'ListExpression': return setX(n, {elements: n.elements.map(ref)});
             case 'MemberExpression': {
-                let expr = resolveBindingLookup(n.module, n.bindingName);
-                return expr ? getEnt(expr, false) : setX(n, {module: ref(n.module), bindingName: n.bindingName});
+                let expr = resolveMember(n);
+                return expr !== n ? getEnt(expr, false) : setX(n, {module: ref(n.module), bindingName: n.bindingName});
             }
             case 'ModuleExpression': return setX(n, {module: getModule(n.module)});
             case 'NotExpression': return setX(n, {expression: ref(n.expression)});
@@ -125,6 +125,7 @@ export interface Entry {
 
 
 type Expression = AstNodes.Expression<Metadata>;
+type MemberExpression = AstNodes.MemberExpression<Metadata>;
 type Module = AstNodes.Module<Metadata>;
 type PenSourceFile = AstNodes.PenSourceFile<Metadata>;
 type Program = AstNodes.Program<Metadata>;
@@ -137,9 +138,9 @@ function createProgramHelpers(program: Program) {
     const allBindings = [] as SimpleBinding[];
     const signaturesByNode = new Map<Expression, Signature>();
     const hashesByNode = new Map<Expression, string>();
-    const {resolveBindingLookup, resolveReference} = createLookupHelpers(program);
+    const {resolveMember, resolveReference} = createLookupHelpers(program);
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
-    return {getHashFor, resolveReference, resolveBindingLookup};
+    return {getHashFor, resolveReference, resolveMember};
 
     function getHashFor(expr: Expression) {
         if (hashesByNode.has(expr)) return hashesByNode.get(expr)!;
@@ -163,8 +164,8 @@ function createProgramHelpers(program: Program) {
             }
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': {
-                let expr = resolveBindingLookup(n.module, n.bindingName);
-                return expr ? getSig(expr, false) : setSig('MEM', getSig(n.module), n.bindingName);
+                let expr = resolveMember(n);
+                return expr !== n ? getSig(expr, false) : setSig('MEM', getSig(n.module), n.bindingName);
             }
             case 'ModuleExpression': return setModuleSig(n.module);
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
@@ -228,7 +229,7 @@ function createProgramHelpers(program: Program) {
 function createLookupHelpers(program: Program) {
     const allBindings = [] as SimpleBinding[];
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
-    return {resolveReference, resolveBindingLookup};
+    return {resolveReference, resolveMember};
 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: ReferenceExpression): Expression {
@@ -243,37 +244,39 @@ function createLookupHelpers(program: Program) {
      * Some lookups always succeed, such as when `module` is a module expression. Other lookups always fail, such
      * as when `module` is an application expression, or an import expression referencing an extension file.
      */
-    function resolveBindingLookup(module: Expression, bindingName: string): Expression | undefined {
-        let lhs: Expression | undefined;
-        switch (module.kind) {
+    function resolveMember(mem: MemberExpression): Expression {
+        switch (mem.module.kind) {
             case 'ApplicationExpression': {
                 // TODO: don't know how to do this static lookup *yet*...
-                return undefined;
+                return mem;
             }
             case 'ImportExpression': {
-                let sourceFile = program.sourceFiles.get(module.sourceFilePath)!;
+                let sourceFile = program.sourceFiles.get(mem.module.sourceFilePath)!;
                 if (sourceFile.kind === 'PenSourceFile') {
-                    return staticModuleLookup(sourceFile.module, bindingName);
+                    return staticModuleLookup(sourceFile.module, mem.bindingName);
                 }
                 else /* sourceFile.kind === 'ExtensionFile' */ {
                     // Can't simplify bindings within extension files.
                     // TODO: why not? We can make one 'entry' per extfile binding, we know the names statically...
-                    return undefined;
+                    return mem;
                 }
             }
             case 'MemberExpression': {
                 // Try simplifying the lhs and recursing.
-                lhs = resolveBindingLookup(module.module, module.bindingName);
-                return lhs ? resolveBindingLookup(lhs, bindingName) : undefined;
+                let module = resolveMember(mem.module);
+                if (module === mem.module) return mem;
+                return resolveMember({...mem, module});
             }
             case 'ModuleExpression': {
-                return staticModuleLookup(module.module, bindingName);
+                return staticModuleLookup(mem.module.module, mem.bindingName);
             }
             case 'ReferenceExpression': {
                 // Try simplifying the lhs and recursing.
-                lhs = resolveReference(module);
-                return lhs ? resolveBindingLookup(lhs, bindingName) : undefined;
+                let module = resolveReference(mem.module);
+                return resolveMember({...mem, module});
             }
+            default:
+                return mem;
         }
     }
 
