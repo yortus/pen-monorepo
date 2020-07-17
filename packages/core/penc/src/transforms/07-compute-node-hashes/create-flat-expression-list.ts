@@ -19,12 +19,27 @@ export function createFlatExpressionList(program: Program): Entry[] {
     // a. the expression in an ENTRY is always 'flat' - any subexpressions are ReferenceExpressions to other ENTRYs
     // b. each ENTRY has a unique name (to facilitate rule (a)). Can be human-readable / linked to source names
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
-    // d. ENTRY expressions are BindingLookupExpressions
+    // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
 
+    // Method:
+    // 1. start with the `start` reference
+    // 2. tryResolve the expression (so can't be a ReferenceExpression after this)
+    // 3. Q: have we already computed an entry for this expression or its equivalent?
+    //    3.1. compute the hash of the expression
+    //    3.2. lookup the hash in the map of already computed entries
+    // 4. IF YES: return the already computed entry. STOP
+    // 5. clone the expression, but with each direct subexpr replaced as follows:
+    //    5.1. recursively compute the entry for the subexpr
+    //    5.2. create a ReferenceExpression referring to the entry just computed
+    //    5.3. use the ReferenceExpression as the replacement for the subexpr
+    // 6. generate a unique name for the entry (may be based on names in source code)
+    // 7. construct an entry with the unique name and cloned expression
+    // 8. add the entry to the map of already computed entries, keyed by hash
+    // 9. return the entry.
 
 
     // Create helper functions for this program.
-    let {getHashFor, resolveReference, resolveMember} = createProgramHelpers(program);
+    let {getHashFor, tryResolve} = createProgramHelpers(program);
 
     // Find the `start` expression.
     let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
@@ -67,7 +82,7 @@ export function createFlatExpressionList(program: Program): Entry[] {
             }
             case 'ListExpression': return setX(n, {elements: n.elements.map(ref)});
             case 'MemberExpression': {
-                let expr = resolveMember(n);
+                let expr = tryResolve(n);
                 return expr !== n ? getEnt(expr, false) : setX(n, {module: ref(n.module), bindingName: n.bindingName});
             }
             case 'ModuleExpression': return setX(n, {module: getModule(n.module)});
@@ -77,7 +92,7 @@ export function createFlatExpressionList(program: Program): Entry[] {
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setX(n, {expression: ref(n.expression), quantifier: n.quantifier});
             case 'RecordExpression': return setX(n, {fields: n.fields.map(f => ({name: f.name, value: ref(f.value)}))});
-            case 'ReferenceExpression': return getEnt(resolveReference(n));
+            case 'ReferenceExpression': return getEnt(tryResolve(n));
             case 'SelectionExpression': return setX(n, {expressions: n.expressions.map(ref)});
             case 'SequenceExpression': return setX(n, {expressions: n.expressions.map(ref)});
             case 'StringLiteralExpression': return setX(n, n);
@@ -135,12 +150,10 @@ type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
 
 function createProgramHelpers(program: Program) {
     type Signature = [string, ...unknown[]];
-    const allBindings = [] as SimpleBinding[];
     const signaturesByNode = new Map<Expression, Signature>();
     const hashesByNode = new Map<Expression, string>();
-    const {resolveMember, resolveReference} = createLookupHelpers(program);
-    traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
-    return {getHashFor, resolveReference, resolveMember};
+    const tryResolve = createResolver(program);
+    return {getHashFor, tryResolve};
 
     function getHashFor(expr: Expression) {
         if (hashesByNode.has(expr)) return hashesByNode.get(expr)!;
@@ -164,7 +177,7 @@ function createProgramHelpers(program: Program) {
             }
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': {
-                let expr = resolveMember(n);
+                let expr = tryResolve(n);
                 return expr !== n ? getSig(expr, false) : setSig('MEM', getSig(n.module), n.bindingName);
             }
             case 'ModuleExpression': return setModuleSig(n.module);
@@ -174,7 +187,7 @@ function createProgramHelpers(program: Program) {
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setSig('QUA', getSig(n.expression), n.quantifier);
             case 'RecordExpression': return setSig('REC', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
-            case 'ReferenceExpression': return getSig(resolveReference(n), false);
+            case 'ReferenceExpression': return getSig(tryResolve(n), false);
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
             case 'StringLiteralExpression': return setSig('STR', n.value, n.abstract, n.concrete);
@@ -226,10 +239,19 @@ function createProgramHelpers(program: Program) {
 
 // TODO: jsdoc...
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createLookupHelpers(program: Program) {
+function createResolver(program: Program) {
     const allBindings = [] as SimpleBinding[];
     traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
-    return {resolveReference, resolveMember};
+    return resolve;
+
+    // TODO: jsdoc...
+    function resolve(expr: Expression): Expression {
+        switch (expr.kind) {
+            case 'ReferenceExpression': return resolveReference(expr);
+            case 'MemberExpression': return resolveMember(expr);
+            default: return expr;
+        }
+    }
 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: ReferenceExpression): Expression {
