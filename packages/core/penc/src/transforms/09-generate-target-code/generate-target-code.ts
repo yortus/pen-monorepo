@@ -17,6 +17,7 @@ type SequenceExpression = AstNodes.SequenceExpression<Metadata>;
 
 // TODO: doc...
 export function generateTargetCode(program: Program) {
+    counter = 1;
     const emit = makeEmitter();
 
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
