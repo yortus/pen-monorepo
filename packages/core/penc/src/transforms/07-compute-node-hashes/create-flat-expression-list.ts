@@ -302,25 +302,28 @@ function createResolver(program: Program) {
     return resolve;
 
     // TODO: jsdoc...
-    function resolve(e: Expression): Expression {
+    function resolve(expr: Expression): Expression {
+        let seen = [expr];
         while (true) {
-            // If `e` is a reference or member expression, try to resolve to its target expression.
-            let tgt = e.kind === 'ReferenceExpression' ? resolveReference(e)
-                : e.kind === 'MemberExpression' ? resolveMember(e)
+            // If `expr` is a reference or member expression, try to resolve to its target expression.
+            let tgt = expr.kind === 'ReferenceExpression' ? resolveReference(expr)
+                : expr.kind === 'MemberExpression' ? resolveMember(expr)
                 : undefined;
 
-            // If the target expression for `e` could not be determined, return `e` unchanged.
-            if (tgt === undefined) return e;
+            // If the target expression for `expr` could not be determined, return `expr` unchanged.
+            if (tgt === undefined) return expr;
 
-            // If `e` resolved to a target expression that isn't a Ref/Mem expression, return the target expression.
+            // If `expr` resolved to a target expression that isn't a Ref/Mem expression, return the target expression.
             if (tgt.kind !== 'ReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
 
             // If the target expression is still a Ref/Mem expression, keep iterating, but prevent an infinite loop.
-            if (tgt === e) {
+            if (seen.includes(tgt)) {
+                // TODO: improve diagnostic message, eg line/col ref
                 let name = tgt.kind === 'ReferenceExpression' ? tgt.name : tgt.bindingName;
                 throw new Error(`'${name}' is circularly defined`);
             }
-            e = tgt;
+            seen.push(tgt);
+            expr = tgt;
         }
     }
 
