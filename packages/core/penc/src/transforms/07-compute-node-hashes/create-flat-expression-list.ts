@@ -222,79 +222,56 @@ function createHasher(program: Program, resolve: (e: Expression) => Expression) 
 
     function getSignatureFor(ex: Expression): Signature {
         if (signaturesByNode.has(ex)) return signaturesByNode.get(ex)!;
+        let e2 = resolve(ex);
+        if (e2 !== ex) {
+            let sig2 = getSignatureFor(e2);
+            signaturesByNode.set(ex, sig2);
+            return sig2;
+        }
         let sig = [] as unknown as Signature;
         signaturesByNode.set(ex, sig);
+
+        const getSig = getSignatureFor;
+        const setSig = (...parts: Signature) => (sig.push(...parts), sig);
+
         switch (ex.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(ex.lambda), getSig(ex.argument));
             case 'BooleanLiteralExpression': return setSig('LIT', ex.value);
             case 'FieldExpression': return setSig('FLD', getSig(ex.name), getSig(ex.value));
             case 'ImportExpression': {
                 let sf = program.sourceFiles.get(ex.sourceFilePath)!;
-                return sf.kind === 'PenSourceFile' ? setModuleSig(sf.module) : setSig('EXF', sf.path);
+                assert(sf.kind !== 'PenSourceFile'); // The resolve() logic removed this node kind
+                return setSig('EXF', sf.path);
             }
             case 'ListExpression': return setSig('LST', ex.elements.map(e => getSig(e)));
-            case 'MemberExpression': {
-                let expr = resolve(ex);
-                return expr !== ex ? getSig(expr, false) : setSig('MEM', getSig(ex.module), ex.bindingName);
+            case 'MemberExpression': return setSig('MEM', getSig(ex.module), ex.bindingName);
+            case 'ModuleExpression': {
+                // Ensure binding order doesn't affect signature, by building an object keyed by binding name.
+                let obj = {} as Record<string, unknown>;
+                for (let binding of ex.module.bindings) {
+                    assert(binding.kind === 'SimpleBinding');
+                    obj[binding.name] = getSig(binding.value);
+                }
+                return setSig('MOD', obj);
             }
-            case 'ModuleExpression': return setModuleSig(ex.module);
             case 'NotExpression': return setSig('NOT', getSig(ex.expression));
             case 'NullLiteralExpression': return setSig('LIT', ex.value);
             case 'NumericLiteralExpression': return setSig('LIT', ex.value);
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setSig('QUA', getSig(ex.expression), ex.quantifier);
             case 'RecordExpression': return setSig('REC', ex.fields.map(f => ({n: f.name, v: getSig(f.value)})));
-            case 'ReferenceExpression': return getSig(resolve(ex), false);
+            case 'ReferenceExpression': assert(false); // the resolve() logic removed this node kind
             case 'SelectionExpression': return setSig('SEL', ex.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', ex.expressions.map(e => getSig(e)));
             case 'StringLiteralExpression': return setSig('STR', ex.value, ex.abstract, ex.concrete);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(ex);
         }
-
-        function getSig(expr: Expression, allowCircularity = true) {
-            let result = getSignatureFor(expr);
-            if (result === sig && !allowCircularity) {
-                // TODO: room for improvement with this error message, and how it is constructed
-                let name
-                    = expr.kind === 'ReferenceExpression' ? expr.name
-                    : expr.kind === 'MemberExpression' ? expr.bindingName
-                    : '';
-                assert(name);
-                throw new Error(`'${name}' is circularly defined`);
-            }
-            return result;
-        }
-
-        function setSig(...parts: Signature) {
-            sig.push(...parts);
-            return sig;
-        }
-
-        function setModuleSig(module: Module): Signature {
-            // Make an object keyed by binding name, to ensure binding order doesn't affect signature.
-            let obj = {} as Record<string, unknown>;
-            for (let binding of module.bindings) {
-                assert(binding.kind === 'SimpleBinding');
-                obj[binding.name] = getSig(binding.value);
-            }
-            sig.push('MOD', obj);
-            return sig;
-        }
     }
 }
 
 
-
-
-
-
-
-
-
-
-
-
 // TODO: jsdoc...
+// - return value is *never* a ReferenceExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 function createResolver(program: Program) {
     const allBindings = [] as SimpleBinding[];
