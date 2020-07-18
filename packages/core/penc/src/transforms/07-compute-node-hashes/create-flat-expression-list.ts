@@ -64,8 +64,8 @@ export function createFlatExpressionList(program: Program): Entry[] {
     let startHash = getHashFor(startExpr);
     console.log(`=====>   HASH:\t${startHash}\t${startExpr.kind}`);
 
-    const BLANK_ENTRY: Entry = {uniqueName: '???', expr: undefined!};
     let entriesByHash = new Map<string, Entry>();
+    let counter = 0;
     let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
     [] = [startEntry];
     return [...entriesByHash.values()];
@@ -73,120 +73,48 @@ export function createFlatExpressionList(program: Program): Entry[] {
 
     // TODO: recursive...
     function getEntryFor(e: Expression): Entry {
-        if (1 + 1 === 2) return null!;
         e = resolve(e);
         let hash = getHashFor(e);
-        let entry = entriesByHash.get(hash);
-        if (entry) return entry;
-        entry = {...BLANK_ENTRY};
+        if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
+        let entry: Entry = {uniqueName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
 
-        let e2: AstNodes.Expression | undefined;
-        switch (e.kind) {
-            case 'ApplicationExpression': e2 = clone(e, {lambda: ref(e.lambda), argument: ref(e.argument)}); break;
-            case 'BooleanLiteralExpression': e2 = e; break;
-            case 'FieldExpression': e2 = clone(e, {name: ref(e.name), value: ref(e.value)}); break;
-
-            case 'ImportExpression': throw new Error('Not implemented'); // ==========   TODO   ==========
-
-            case 'ListExpression': e2 = clone(e, {elements: e.elements.map(ref)}); break;
-            case 'MemberExpression': e2 = clone(e, {module: ref(e.module), bindingName: e.bindingName}); break;
-
-            case 'ModuleExpression': throw new Error('Not implemented'); // ==========   TODO   ==========
-
-            case 'NotExpression': e2 = clone(e, {expression: ref(e.expression)}); break;
-            case 'NullLiteralExpression': e2 = e; break;
-            case 'NumericLiteralExpression': e2 = e; break;
-            case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
-            case 'QuantifiedExpression': e2 = clone(e, {expression: ref(e.expression), quantifier: e.quantifier}); break;
-            case 'RecordExpression': e2 = clone(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))}); break;
-            case 'ReferenceExpression': assert(false); // the resolve() call removed this node kind
-            case 'SelectionExpression': e2 = clone(e, {expressions: e.expressions.map(ref)}); break;
-            case 'SequenceExpression': e2 = clone(e, {expressions: e.expressions.map(ref)}); break;
-            case 'StringLiteralExpression': e2 = e; break;
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
-        }
-
-        // TODO: ...
-        [] = [e2];
-        return null!;
-
-
-
-
-        // TODO: was...
-        // let hash = getHashFor(e);
-        // let entry = entriesByHash.get(hash)!;
-        // if (entry) return entry;
-        // entry = {uniqueName: '???', expr: undefined!};
-        // entriesByHash.set(hash, entry);
-
-/*
-        // TODO: set entry.expr to a new shallow expr
+        // Set `entry.expr` to a new shallow expr, and return `entry`.
         switch (e.kind) {
             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
-            case 'BooleanLiteralExpression': return setX(e, e);
+            case 'BooleanLiteralExpression': return setX(e);
             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
-            case 'ImportExpression': {
-                let sf = program.sourceFiles.get(e.sourceFilePath)!;
-                if (sf.kind === 'PenSourceFile') {
-                    entry.expr = {kind: 'ModuleExpression', module: getModule(sf.module), meta: {}};
-                    return entry;
-                }
-                else {
-                    // TODO: expr is a ref to extension file - how??
-                    throw new Error('getEntryFor(ExtensionFile): Not implemented');
-                }
-            }
+            case 'ImportExpression': return setX(e);
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
-            case 'MemberExpression': {
-                let expr = tryResolve(e);
-                return expr !== e ? getEnt(expr, false) : setX(e, {module: ref(e.module), bindingName: e.bindingName});
+            case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
+            case 'ModuleExpression': {
+                let bindings = e.module.bindings.map(binding => {
+                    assert(binding.kind === 'SimpleBinding');
+                    return {...binding, value: ref(binding.value), meta: {}} as SimpleBinding;
+                });
+                return setX(e, {module: {kind: 'Module', bindings, meta: {} as any}});
             }
-            case 'ModuleExpression': return setX(e, {module: getModule(e.module)});
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
-            case 'NullLiteralExpression': return setX(e, e);
-            case 'NumericLiteralExpression': return setX(e, e);
+            case 'NullLiteralExpression': return setX(e);
+            case 'NumericLiteralExpression': return setX(e);
             case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setX(e, {expression: ref(e.expression), quantifier: e.quantifier});
             case 'RecordExpression': return setX(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
-            case 'ReferenceExpression': return getEnt(tryResolve(e));
+            case 'ReferenceExpression': assert(false); // the resolve() call removed this node kind
             case 'SelectionExpression': return setX(e, {expressions: e.expressions.map(ref)});
             case 'SequenceExpression': return setX(e, {expressions: e.expressions.map(ref)});
-            case 'StringLiteralExpression': return setX(e, e);
+            case 'StringLiteralExpression': return setX(e);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
-*/
-
-        // function getEnt(expr: Expression, allowCircularity = true) {
-        //     let result = getEntryFor(expr);
-        //     if (result === entry && !allowCircularity) {
-        //         // TODO: room for improvement with this error message, and how it is constructed
-        //         let name
-        //             = expr.kind === 'ReferenceExpression' ? expr.name
-        //             : expr.kind === 'MemberExpression' ? expr.bindingName
-        //             : '';
-        //         assert(name);
-        //         throw new Error(`'${name}' is circularly defined`);
-        //     }
-        //     return result;
-        // }
 
         function ref(expr: Expression): AstNodes.ReferenceExpression<any> {
             return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
         }
 
-        function clone<E extends AstNodes.Expression>(expr: E, vals: Omit<E, 'kind' | 'meta'>) {
-            return {kind: expr.kind, ...vals, meta: {}} as unknown as AstNodes.Expression;
+        function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind' | 'meta'>) {
+            entry.expr = Object.assign({kind: expr.kind, meta: {}}, vals) as unknown as AstNodes.Expression;
+            return entry;
         }
-
-        // function getModule(module: Module): Module {
-        //     let bindings = module.bindings.map(binding => {
-        //         assert(binding.kind === 'SimpleBinding');
-        //         return {...binding, value: ref(binding.value)} as SimpleBinding;
-        //     });
-        //     return {...module, bindings};
-        // }
     }
 }
 
