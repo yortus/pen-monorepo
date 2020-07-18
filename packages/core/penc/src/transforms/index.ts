@@ -4,7 +4,6 @@ export {desugarSyntax} from './03-desugar-syntax';
 export {createSymbolDefinitions} from './04-create-symbol-definitions';
 export {resolveSymbolReferences} from './05-resolve-symbol-references';
 export {resolveConstantValues} from './06-resolve-constant-values';
-//export {dealiasSymbols} from './06-dealias-symbols';
-export {createFlatExpressionList, computeNodeHashes} from './07-compute-node-hashes';
+export {createFlatExpressionList} from './07-create-flat-expression-list';
 export {checkSemantics} from './08-check-semantics';
 export {generateTargetCode} from './09-generate-target-code';

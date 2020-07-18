@@ -7,8 +7,8 @@ import {assert, traverseDepthFirst} from '../../utils';
 import {Metadata} from './metadata';
 
 
-// TODO: doc...
-export function createFlatExpressionList(program: Program): Entry[] {
+// TODO: jsdoc...
+export function createFlatExpressionList(program: Program): AstNodes.SimpleBinding[] {
 
 
     // Objectives:
@@ -21,35 +21,6 @@ export function createFlatExpressionList(program: Program): Entry[] {
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
     // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
 
-    // Method:
-    // 1. start with the `start` reference
-    // 2. tryResolve the expression (so can't be a ReferenceExpression after this)
-    // 3. Q: have we already computed an entry for this expression or its equivalent?
-    //    3.1. compute the hash of the expression
-    //    3.2. lookup the hash in the map of already computed entries
-    // 4. IF YES: return the already computed entry. STOP
-    // 5. clone the expression, but with each direct subexpr replaced as follows:
-    //    5.1. recursively compute the entry for the subexpr
-    //    5.2. create a ReferenceExpression referring to the entry just computed
-    //    5.3. use the ReferenceExpression as the replacement for the subexpr
-    // 6. generate a unique name for the entry (may be based on names in source code)
-    // 7. construct an entry with the unique name and cloned expression
-    // 8. add the entry to the map of already computed entries, keyed by hash
-    // 9. return the entry.
-
-    // Implementation:
-    // function getEntryFor(e: Expression): Expression<M2>;
-    // function getSignatureFor(e: Expression): Signature;
-    // function resolve(e: Expression): Expression;
-
-
-
-
-
-
-
-
-
 
     // Create helper functions for this program.
     let resolve = createResolver(program);
@@ -60,15 +31,16 @@ export function createFlatExpressionList(program: Program): Entry[] {
     let startExpr = main.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
     assert(startExpr);
 
-    // TODO: temp testing...
-    let startHash = getHashFor(startExpr);
-    console.log(`=====>   HASH:\t${startHash}\t${startExpr.kind}`);
-
     let entriesByHash = new Map<string, Entry>();
     let counter = 0;
-    let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
-    [] = [startEntry];
-    return [...entriesByHash.values()];
+    getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
+
+    // TODO: temp testing... build the one and only internal module for emitting
+    let bindings = [] as AstNodes.SimpleBinding[];
+    for (let {uniqueName: name, expr: value} of entriesByHash.values()) {
+        bindings.push({kind: 'SimpleBinding', name, value, exported: false, meta: {}});
+    }
+    return bindings;
 
 
     // TODO: recursive...
@@ -112,7 +84,7 @@ export function createFlatExpressionList(program: Program): Entry[] {
         }
 
         function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind' | 'meta'>) {
-            entry.expr = Object.assign({kind: expr.kind, meta: {}}, vals) as unknown as AstNodes.Expression;
+            entry.expr = Object.assign({kind: expr.kind}, vals || expr, {meta: {}}) as unknown as AstNodes.Expression;
             return entry;
         }
     }

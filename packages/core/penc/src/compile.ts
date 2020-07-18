@@ -10,7 +10,6 @@ import {desugarSyntax} from './transforms';
 import {createSymbolDefinitions} from './transforms';
 import {resolveSymbolReferences} from './transforms';
 import {resolveConstantValues} from './transforms';
-// import {dealiasSymbols} from './transforms';
 import {createFlatExpressionList} from './transforms';
 import {checkSemantics} from './transforms';
 import {generateTargetCode} from './transforms';
@@ -32,8 +31,8 @@ export function compile(options: CompilerOptions) {
     let ast03 = createSymbolDefinitions(ast02);
     let ast04 = resolveSymbolReferences(ast03);
     let ast05 = resolveConstantValues(ast04);
-    let ast06Entries = createFlatExpressionList(ast05);
-    [] = ast06Entries;
+    let ast06 = createFlatExpressionList(ast05);
+    [] = [ast06];
 
     checkSemantics(ast05);
 
