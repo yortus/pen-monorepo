@@ -1567,12 +1567,6 @@ const parse = (() => {
     const 𝕊4 = createExtension𝕊4({mode: 6});
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('min').constant = {value: " "};
-    𝕊1('max').constant = {value: "￿"};
-    𝕊2('base').constant = {value: 16};
-    𝕊2('minDigits').constant = {value: 4};
-    𝕊2('maxDigits').constant = {value: 4};
-    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
 
     return 𝕊0('start');
 })();
@@ -2446,12 +2440,6 @@ const print = (() => {
     const 𝕊4 = createExtension𝕊4({mode: 7});
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('min').constant = {value: " "};
-    𝕊1('max').constant = {value: "￿"};
-    𝕊2('base').constant = {value: 16};
-    𝕊2('minDigits').constant = {value: 4};
-    𝕊2('maxDigits').constant = {value: 4};
-    𝕊0('DOUBLE_QUOTE').constant = {value: "\""};
 
     return 𝕊0('start');
 })();

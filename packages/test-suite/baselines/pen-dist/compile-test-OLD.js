@@ -555,13 +555,6 @@ const parse = (() => {
     let 𝕊5_ref6_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('foo').constant = {value: "foo"};
-    𝕊1('bar').constant = {value: "bar"};
-    𝕊0('b').constant = {value: "b2"};
-    𝕊0('baz').constant = {value: "baz"};
-    𝕊2('mem').constant = {value: "member"};
-    𝕊6('c1').constant = {value: "c1"};
-    𝕊6('c2').constant = {value: "c2"};
 
     return 𝕊0('start');
 })();
@@ -894,13 +887,6 @@ const print = (() => {
     let 𝕊5_ref6_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('foo').constant = {value: "foo"};
-    𝕊1('bar').constant = {value: "bar"};
-    𝕊0('b').constant = {value: "b2"};
-    𝕊0('baz').constant = {value: "baz"};
-    𝕊2('mem').constant = {value: "member"};
-    𝕊6('c1').constant = {value: "c1"};
-    𝕊6('c2').constant = {value: "c2"};
 
     return 𝕊0('start');
 })();

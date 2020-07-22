@@ -1106,19 +1106,6 @@ const parse = (() => {
     let 𝕊13_util2_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('min').constant = {value: "0"};
-    𝕊1('max').constant = {value: "9"};
-    𝕊2('min').constant = {value: "a"};
-    𝕊2('max').constant = {value: "z"};
-    𝕊3('min').constant = {value: "A"};
-    𝕊3('max').constant = {value: "Z"};
-    𝕊4('b').constant = {value: "b thing"};
-    𝕊4('d').constant = {value: "d thing"};
-    𝕊5('f').constant = {value: "foo"};
-    𝕊5('b').constant = {value: "bar"};
-    𝕊5('baz').constant = {value: "baz"};
-    𝕊12('util1').constant = {value: "util1"};
-    𝕊13('util2').constant = {value: "util2"};
 
     return 𝕊0('start');
 })();
@@ -1666,19 +1653,6 @@ const print = (() => {
     let 𝕊13_util2_memo;
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('min').constant = {value: "0"};
-    𝕊1('max').constant = {value: "9"};
-    𝕊2('min').constant = {value: "a"};
-    𝕊2('max').constant = {value: "z"};
-    𝕊3('min').constant = {value: "A"};
-    𝕊3('max').constant = {value: "Z"};
-    𝕊4('b').constant = {value: "b thing"};
-    𝕊4('d').constant = {value: "d thing"};
-    𝕊5('f').constant = {value: "foo"};
-    𝕊5('b').constant = {value: "bar"};
-    𝕊5('baz').constant = {value: "baz"};
-    𝕊12('util1').constant = {value: "util1"};
-    𝕊13('util2').constant = {value: "util2"};
 
     return 𝕊0('start');
 })();

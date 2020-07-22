@@ -763,7 +763,6 @@ const parse = (() => {
     const 𝕊2 = createExtension𝕊2({mode: 6});
 
     // -------------------- Compile-time constants --------------------
-    𝕊0('a').constant = {value: "aaa"};
 
     return 𝕊0('start');
 })();
@@ -941,7 +940,6 @@ const print = (() => {
     const 𝕊2 = createExtension𝕊2({mode: 7});
 
     // -------------------- Compile-time constants --------------------
-    𝕊0('a').constant = {value: "aaa"};
 
     return 𝕊0('start');
 })();

@@ -1083,11 +1083,6 @@ const parse = (() => {
     const 𝕊4 = createExtension𝕊4({mode: 6});
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('base').constant = {value: 16};
-    𝕊1('signed').constant = {value: false};
-    𝕊2('base').constant = {value: 2};
-    𝕊2('signed').constant = {value: false};
-    𝕊3('signed').constant = {value: false};
 
     return 𝕊0('start');
 })();
@@ -1601,11 +1596,6 @@ const print = (() => {
     const 𝕊4 = createExtension𝕊4({mode: 7});
 
     // -------------------- Compile-time constants --------------------
-    𝕊1('base').constant = {value: 16};
-    𝕊1('signed').constant = {value: false};
-    𝕊2('base').constant = {value: 2};
-    𝕊2('signed').constant = {value: false};
-    𝕊3('signed').constant = {value: false};
 
     return 𝕊0('start');
 })();

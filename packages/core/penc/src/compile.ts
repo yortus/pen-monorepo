@@ -9,9 +9,9 @@ import {parseSourceFiles} from './transforms';
 import {desugarSyntax} from './transforms';
 import {createSymbolDefinitions} from './transforms';
 import {resolveSymbolReferences} from './transforms';
-import {resolveConstantValues} from './transforms';
-import {createFlatExpressionList} from './transforms';
 import {checkSemantics} from './transforms';
+import {createFlatExpressionList} from './transforms';
+import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
 
 
@@ -30,13 +30,14 @@ export function compile(options: CompilerOptions) {
     let ast02 = desugarSyntax(ast01);
     let ast03 = createSymbolDefinitions(ast02);
     let ast04 = resolveSymbolReferences(ast03);
-    let ast05 = resolveConstantValues(ast04);
-    let ast06 = createFlatExpressionList(ast05);
-    [] = [ast06];
+    checkSemantics(ast04);
 
-    checkSemantics(ast05);
+    let il = createFlatExpressionList(ast04);
+    let consts = resolveConstantValues(il);
+    [] = [il, consts];
 
-    let targetCode = generateTargetCode(ast05);
+
+    let targetCode = generateTargetCode(ast04);
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     let outFilePath = path.resolve(outFile);

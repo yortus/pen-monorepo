@@ -1,4 +1,4 @@
-import {Metadata} from '../08-check-semantics';
+import {Metadata} from '../08-resolve-constant-values';
 
 
 export {Metadata};

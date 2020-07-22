@@ -1,4 +1,4 @@
-import {Metadata} from '../06-resolve-constant-values';
+import {Metadata} from '../06-check-semantics';
 
 
 export {Metadata};
