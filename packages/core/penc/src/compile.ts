@@ -34,10 +34,7 @@ export function compile(options: CompilerOptions) {
 
     let il = createFlatExpressionList(ast04);
     let consts = resolveConstantValues(il);
-    [] = [il, consts];
-
-
-    let targetCode = generateTargetCode(ast04);
+    let targetCode = generateTargetCode({il, consts});
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     let outFilePath = path.resolve(outFile);
