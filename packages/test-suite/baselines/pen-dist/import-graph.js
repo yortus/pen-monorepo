@@ -219,10 +219,10 @@ const objectToString = Object.prototype.toString;
 const parse = (() => {
 
     // ApplicationExpression
-    function id1() {
-        if (id1_memo) return id1_memo.apply(null, arguments);
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
         id1_memo = id2(id3);
-        return id1_memo.apply(null, arguments);
+        return id1_memo(arg);
     }
     let id1_memo;
 
@@ -282,10 +282,10 @@ const parse = (() => {
 const print = (() => {
 
     // ApplicationExpression
-    function id1() {
-        if (id1_memo) return id1_memo.apply(null, arguments);
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
         id1_memo = id2(id3);
-        return id1_memo.apply(null, arguments);
+        return id1_memo(arg);
     }
     let id1_memo;
 

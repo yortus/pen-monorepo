@@ -974,18 +974,18 @@ const parse = (() => {
     id32.constant = {value: "\""};
 
     // ApplicationExpression
-    function id33() {
-        if (id33_memo) return id33_memo.apply(null, arguments);
+    function id33(arg) {
+        if (id33_memo) return id33_memo(arg);
         id33_memo = id34(id36);
-        return id33_memo.apply(null, arguments);
+        return id33_memo(arg);
     }
     let id33_memo;
 
     // MemberExpression
-    function id34() {
-        if (id34_memo) return id34_memo.apply(null, arguments);
+    function id34(arg) {
+        if (id34_memo) return id34_memo(arg);
         id34_memo = id35('char');
-        return id34_memo.apply(null, arguments);
+        return id34_memo(arg);
     }
     let id34_memo;
 
@@ -1266,18 +1266,18 @@ const parse = (() => {
     id64.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function id65() {
-        if (id65_memo) return id65_memo.apply(null, arguments);
+    function id65(arg) {
+        if (id65_memo) return id65_memo(arg);
         id65_memo = id66(id68);
-        return id65_memo.apply(null, arguments);
+        return id65_memo(arg);
     }
     let id65_memo;
 
     // MemberExpression
-    function id66() {
-        if (id66_memo) return id66_memo.apply(null, arguments);
+    function id66(arg) {
+        if (id66_memo) return id66_memo(arg);
         id66_memo = id67('unicode');
-        return id66_memo.apply(null, arguments);
+        return id66_memo(arg);
     }
     let id66_memo;
 
@@ -1530,10 +1530,10 @@ const parse = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    function id92() {
-        if (id92_memo) return id92_memo.apply(null, arguments);
+    function id92(arg) {
+        if (id92_memo) return id92_memo(arg);
         id92_memo = id35('f64');
-        return id92_memo.apply(null, arguments);
+        return id92_memo(arg);
     }
     let id92_memo;
 
@@ -1855,18 +1855,18 @@ const print = (() => {
     id32.constant = {value: "\""};
 
     // ApplicationExpression
-    function id33() {
-        if (id33_memo) return id33_memo.apply(null, arguments);
+    function id33(arg) {
+        if (id33_memo) return id33_memo(arg);
         id33_memo = id34(id36);
-        return id33_memo.apply(null, arguments);
+        return id33_memo(arg);
     }
     let id33_memo;
 
     // MemberExpression
-    function id34() {
-        if (id34_memo) return id34_memo.apply(null, arguments);
+    function id34(arg) {
+        if (id34_memo) return id34_memo(arg);
         id34_memo = id35('char');
-        return id34_memo.apply(null, arguments);
+        return id34_memo(arg);
     }
     let id34_memo;
 
@@ -2145,18 +2145,18 @@ const print = (() => {
     id64.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function id65() {
-        if (id65_memo) return id65_memo.apply(null, arguments);
+    function id65(arg) {
+        if (id65_memo) return id65_memo(arg);
         id65_memo = id66(id68);
-        return id65_memo.apply(null, arguments);
+        return id65_memo(arg);
     }
     let id65_memo;
 
     // MemberExpression
-    function id66() {
-        if (id66_memo) return id66_memo.apply(null, arguments);
+    function id66(arg) {
+        if (id66_memo) return id66_memo(arg);
         id66_memo = id67('unicode');
-        return id66_memo.apply(null, arguments);
+        return id66_memo(arg);
     }
     let id66_memo;
 
@@ -2398,10 +2398,10 @@ const print = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    function id92() {
-        if (id92_memo) return id92_memo.apply(null, arguments);
+    function id92(arg) {
+        if (id92_memo) return id92_memo(arg);
         id92_memo = id35('f64');
-        return id92_memo.apply(null, arguments);
+        return id92_memo(arg);
     }
     let id92_memo;
 

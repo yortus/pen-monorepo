@@ -576,18 +576,18 @@ const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
     // ApplicationExpression
-    function id1() {
-        if (id1_memo) return id1_memo.apply(null, arguments);
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
         id1_memo = id2(id4);
-        return id1_memo.apply(null, arguments);
+        return id1_memo(arg);
     }
     let id1_memo;
 
     // MemberExpression
-    function id2() {
-        if (id2_memo) return id2_memo.apply(null, arguments);
+    function id2(arg) {
+        if (id2_memo) return id2_memo(arg);
         id2_memo = id3('memoise');
-        return id2_memo.apply(null, arguments);
+        return id2_memo(arg);
     }
     let id2_memo;
 
@@ -644,10 +644,10 @@ const parse = (() => {
     id8.constant = {value: "+"};
 
     // ApplicationExpression
-    function id9() {
-        if (id9_memo) return id9_memo.apply(null, arguments);
+    function id9(arg) {
+        if (id9_memo) return id9_memo(arg);
         id9_memo = id2(id10);
-        return id9_memo.apply(null, arguments);
+        return id9_memo(arg);
     }
     let id9_memo;
 
@@ -810,10 +810,10 @@ const parse = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    function id26() {
-        if (id26_memo) return id26_memo.apply(null, arguments);
+    function id26(arg) {
+        if (id26_memo) return id26_memo(arg);
         id26_memo = id3('f64');
-        return id26_memo.apply(null, arguments);
+        return id26_memo(arg);
     }
     let id26_memo;
 
@@ -839,18 +839,18 @@ const parse = (() => {
     id28.constant = {value: "0x"};
 
     // ApplicationExpression
-    function id29() {
-        if (id29_memo) return id29_memo.apply(null, arguments);
+    function id29(arg) {
+        if (id29_memo) return id29_memo(arg);
         id29_memo = id30(id31);
-        return id29_memo.apply(null, arguments);
+        return id29_memo(arg);
     }
     let id29_memo;
 
     // MemberExpression
-    function id30() {
-        if (id30_memo) return id30_memo.apply(null, arguments);
+    function id30(arg) {
+        if (id30_memo) return id30_memo(arg);
         id30_memo = id3('i32');
-        return id30_memo.apply(null, arguments);
+        return id30_memo(arg);
     }
     let id30_memo;
 
@@ -899,10 +899,10 @@ const parse = (() => {
     id35.constant = {value: "0b"};
 
     // ApplicationExpression
-    function id36() {
-        if (id36_memo) return id36_memo.apply(null, arguments);
+    function id36(arg) {
+        if (id36_memo) return id36_memo(arg);
         id36_memo = id30(id37);
-        return id36_memo.apply(null, arguments);
+        return id36_memo(arg);
     }
     let id36_memo;
 
@@ -943,10 +943,10 @@ const parse = (() => {
     id40.constant = {value: "i"};
 
     // ApplicationExpression
-    function id41() {
-        if (id41_memo) return id41_memo.apply(null, arguments);
+    function id41(arg) {
+        if (id41_memo) return id41_memo(arg);
         id41_memo = id30(id42);
-        return id41_memo.apply(null, arguments);
+        return id41_memo(arg);
     }
     let id41_memo;
 
@@ -1084,18 +1084,18 @@ const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
     // ApplicationExpression
-    function id1() {
-        if (id1_memo) return id1_memo.apply(null, arguments);
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
         id1_memo = id2(id4);
-        return id1_memo.apply(null, arguments);
+        return id1_memo(arg);
     }
     let id1_memo;
 
     // MemberExpression
-    function id2() {
-        if (id2_memo) return id2_memo.apply(null, arguments);
+    function id2(arg) {
+        if (id2_memo) return id2_memo(arg);
         id2_memo = id3('memoise');
-        return id2_memo.apply(null, arguments);
+        return id2_memo(arg);
     }
     let id2_memo;
 
@@ -1155,10 +1155,10 @@ const print = (() => {
     id8.constant = {value: "+"};
 
     // ApplicationExpression
-    function id9() {
-        if (id9_memo) return id9_memo.apply(null, arguments);
+    function id9(arg) {
+        if (id9_memo) return id9_memo(arg);
         id9_memo = id2(id10);
-        return id9_memo.apply(null, arguments);
+        return id9_memo(arg);
     }
     let id9_memo;
 
@@ -1339,10 +1339,10 @@ const print = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    function id26() {
-        if (id26_memo) return id26_memo.apply(null, arguments);
+    function id26(arg) {
+        if (id26_memo) return id26_memo(arg);
         id26_memo = id3('f64');
-        return id26_memo.apply(null, arguments);
+        return id26_memo(arg);
     }
     let id26_memo;
 
@@ -1364,18 +1364,18 @@ const print = (() => {
     id28.constant = {value: "0x"};
 
     // ApplicationExpression
-    function id29() {
-        if (id29_memo) return id29_memo.apply(null, arguments);
+    function id29(arg) {
+        if (id29_memo) return id29_memo(arg);
         id29_memo = id30(id31);
-        return id29_memo.apply(null, arguments);
+        return id29_memo(arg);
     }
     let id29_memo;
 
     // MemberExpression
-    function id30() {
-        if (id30_memo) return id30_memo.apply(null, arguments);
+    function id30(arg) {
+        if (id30_memo) return id30_memo(arg);
         id30_memo = id3('i32');
-        return id30_memo.apply(null, arguments);
+        return id30_memo(arg);
     }
     let id30_memo;
 
@@ -1424,10 +1424,10 @@ const print = (() => {
     id35.constant = {value: "0b"};
 
     // ApplicationExpression
-    function id36() {
-        if (id36_memo) return id36_memo.apply(null, arguments);
+    function id36(arg) {
+        if (id36_memo) return id36_memo(arg);
         id36_memo = id30(id37);
-        return id36_memo.apply(null, arguments);
+        return id36_memo(arg);
     }
     let id36_memo;
 
@@ -1467,10 +1467,10 @@ const print = (() => {
     id40.constant = {value: "i"};
 
     // ApplicationExpression
-    function id41() {
-        if (id41_memo) return id41_memo.apply(null, arguments);
+    function id41(arg) {
+        if (id41_memo) return id41_memo(arg);
         id41_memo = id30(id42);
-        return id41_memo.apply(null, arguments);
+        return id41_memo(arg);
     }
     let id41_memo;
 

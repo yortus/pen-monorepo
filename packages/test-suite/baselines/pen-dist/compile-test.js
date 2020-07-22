@@ -585,10 +585,10 @@ const parse = (() => {
     }
 
     // MemberExpression
-    function id2() {
-        if (id2_memo) return id2_memo.apply(null, arguments);
+    function id2(arg) {
+        if (id2_memo) return id2_memo(arg);
         id2_memo = id3('f64');
-        return id2_memo.apply(null, arguments);
+        return id2_memo(arg);
     }
     let id2_memo;
 
@@ -689,10 +689,10 @@ const print = (() => {
     }
 
     // MemberExpression
-    function id2() {
-        if (id2_memo) return id2_memo.apply(null, arguments);
+    function id2(arg) {
+        if (id2_memo) return id2_memo(arg);
         id2_memo = id3('f64');
-        return id2_memo.apply(null, arguments);
+        return id2_memo(arg);
     }
     let id2_memo;
 
