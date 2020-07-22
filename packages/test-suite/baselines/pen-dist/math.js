@@ -576,10 +576,20 @@ const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
     // ApplicationExpression
-    const id1 = id2(id4);
+    function id1() {
+        if (id1_memo) return id1_memo();
+        id1_memo = id2(id4);
+        return id1_memo();
+    }
+    let id1_memo;
 
     // MemberExpression
-    const id2 = id3('memoise');
+    function id2() {
+        if (id2_memo) return id2_memo();
+        id2_memo = id3('memoise');
+        return id2_memo();
+    }
+    let id2_memo;
 
     // ImportExpression
 
@@ -592,14 +602,19 @@ const parse = (() => {
     }
 
     // RecordExpression
-    const id5 = record({
-        mode: 6,
-        fields: [
-            {name: 'type', value: id6},
-            {name: 'lhs', value: id1},
-            {name: 'rhs', value: id7},
-        ],
-    })
+    function id5() {
+        if (id5_memo) return id5_memo();
+        id5_memo = record({
+            mode: 6,
+            fields: [
+                {name: 'type', value: id6},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id7},
+            ],
+        })
+        return id5_memo();
+    }
+    let id5_memo;
 
     // StringLiteralExpression
     function id6() {
@@ -629,7 +644,12 @@ const parse = (() => {
     id8.constant = {value: "+"};
 
     // ApplicationExpression
-    const id9 = id2(id10);
+    function id9() {
+        if (id9_memo) return id9_memo();
+        id9_memo = id2(id10);
+        return id9_memo();
+    }
+    let id9_memo;
 
     // SelectionExpression
     function id10() {
@@ -651,11 +671,16 @@ const parse = (() => {
     }
 
     // FieldExpression
-    const id12 = field({
-        mode: 6,
-        name: id13,
-        value: id14,
-    });
+    function id12() {
+        if (id12_memo) return id12_memo();
+        id12_memo = field({
+            mode: 6,
+            name: id13,
+            value: id14,
+        });
+        return id12_memo();
+    }
+    let id12_memo;
 
     // StringLiteralExpression
     function id13() {
@@ -672,19 +697,29 @@ const parse = (() => {
     id14.constant = {value: "mul"};
 
     // RecordExpression
-    const id15 = record({
-        mode: 6,
-        fields: [
-            {name: 'lhs', value: id9},
-        ],
-    })
+    function id15() {
+        if (id15_memo) return id15_memo();
+        id15_memo = record({
+            mode: 6,
+            fields: [
+                {name: 'lhs', value: id9},
+            ],
+        })
+        return id15_memo();
+    }
+    let id15_memo;
 
     // FieldExpression
-    const id16 = field({
-        mode: 6,
-        name: id17,
-        value: id18,
-    });
+    function id16() {
+        if (id16_memo) return id16_memo();
+        id16_memo = field({
+            mode: 6,
+            name: id17,
+            value: id18,
+        });
+        return id16_memo();
+    }
+    let id16_memo;
 
     // StringLiteralExpression
     function id17() {
@@ -775,7 +810,12 @@ const parse = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    const id26 = id3('f64');
+    function id26() {
+        if (id26_memo) return id26_memo();
+        id26_memo = id3('f64');
+        return id26_memo();
+    }
+    let id26_memo;
 
     // SequenceExpression
     function id27() {
@@ -799,10 +839,20 @@ const parse = (() => {
     id28.constant = {value: "0x"};
 
     // ApplicationExpression
-    const id29 = id30(id31);
+    function id29() {
+        if (id29_memo) return id29_memo();
+        id29_memo = id30(id31);
+        return id29_memo();
+    }
+    let id29_memo;
 
     // MemberExpression
-    const id30 = id3('i32');
+    function id30() {
+        if (id30_memo) return id30_memo();
+        id30_memo = id3('i32');
+        return id30_memo();
+    }
+    let id30_memo;
 
     // ModuleExpression
     function id31(bindingName) {
@@ -849,7 +899,12 @@ const parse = (() => {
     id35.constant = {value: "0b"};
 
     // ApplicationExpression
-    const id36 = id30(id37);
+    function id36() {
+        if (id36_memo) return id36_memo();
+        id36_memo = id30(id37);
+        return id36_memo();
+    }
+    let id36_memo;
 
     // ModuleExpression
     function id37(bindingName) {
@@ -888,7 +943,12 @@ const parse = (() => {
     id40.constant = {value: "i"};
 
     // ApplicationExpression
-    const id41 = id30(id42);
+    function id41() {
+        if (id41_memo) return id41_memo();
+        id41_memo = id30(id42);
+        return id41_memo();
+    }
+    let id41_memo;
 
     // ModuleExpression
     function id42(bindingName) {
@@ -930,14 +990,19 @@ const parse = (() => {
     id45.constant = {value: ")"};
 
     // RecordExpression
-    const id46 = record({
-        mode: 6,
-        fields: [
-            {name: 'type', value: id47},
-            {name: 'lhs', value: id9},
-            {name: 'rhs', value: id48},
-        ],
-    })
+    function id46() {
+        if (id46_memo) return id46_memo();
+        id46_memo = record({
+            mode: 6,
+            fields: [
+                {name: 'type', value: id47},
+                {name: 'lhs', value: id9},
+                {name: 'rhs', value: id48},
+            ],
+        })
+        return id46_memo();
+    }
+    let id46_memo;
 
     // StringLiteralExpression
     function id47() {
@@ -967,14 +1032,19 @@ const parse = (() => {
     id49.constant = {value: "/"};
 
     // RecordExpression
-    const id50 = record({
-        mode: 6,
-        fields: [
-            {name: 'type', value: id51},
-            {name: 'lhs', value: id1},
-            {name: 'rhs', value: id52},
-        ],
-    })
+    function id50() {
+        if (id50_memo) return id50_memo();
+        id50_memo = record({
+            mode: 6,
+            fields: [
+                {name: 'type', value: id51},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id52},
+            ],
+        })
+        return id50_memo();
+    }
+    let id50_memo;
 
     // StringLiteralExpression
     function id51() {
@@ -1014,10 +1084,20 @@ const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
     // ApplicationExpression
-    const id1 = id2(id4);
+    function id1() {
+        if (id1_memo) return id1_memo();
+        id1_memo = id2(id4);
+        return id1_memo();
+    }
+    let id1_memo;
 
     // MemberExpression
-    const id2 = id3('memoise');
+    function id2() {
+        if (id2_memo) return id2_memo();
+        id2_memo = id3('memoise');
+        return id2_memo();
+    }
+    let id2_memo;
 
     // ImportExpression
 
@@ -1030,14 +1110,19 @@ const print = (() => {
     }
 
     // RecordExpression
-    const id5 = record({
-        mode: 7,
-        fields: [
-            {name: 'type', value: id6},
-            {name: 'lhs', value: id1},
-            {name: 'rhs', value: id7},
-        ],
-    })
+    function id5() {
+        if (id5_memo) return id5_memo();
+        id5_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id6},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id7},
+            ],
+        })
+        return id5_memo();
+    }
+    let id5_memo;
 
     // StringLiteralExpression
     function id6() {
@@ -1070,7 +1155,12 @@ const print = (() => {
     id8.constant = {value: "+"};
 
     // ApplicationExpression
-    const id9 = id2(id10);
+    function id9() {
+        if (id9_memo) return id9_memo();
+        id9_memo = id2(id10);
+        return id9_memo();
+    }
+    let id9_memo;
 
     // SelectionExpression
     function id10() {
@@ -1092,11 +1182,16 @@ const print = (() => {
     }
 
     // FieldExpression
-    const id12 = field({
-        mode: 7,
-        name: id13,
-        value: id14,
-    });
+    function id12() {
+        if (id12_memo) return id12_memo();
+        id12_memo = field({
+            mode: 7,
+            name: id13,
+            value: id14,
+        });
+        return id12_memo();
+    }
+    let id12_memo;
 
     // StringLiteralExpression
     function id13() {
@@ -1126,19 +1221,29 @@ const print = (() => {
     id14.constant = {value: "mul"};
 
     // RecordExpression
-    const id15 = record({
-        mode: 7,
-        fields: [
-            {name: 'lhs', value: id9},
-        ],
-    })
+    function id15() {
+        if (id15_memo) return id15_memo();
+        id15_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'lhs', value: id9},
+            ],
+        })
+        return id15_memo();
+    }
+    let id15_memo;
 
     // FieldExpression
-    const id16 = field({
-        mode: 7,
-        name: id17,
-        value: id18,
-    });
+    function id16() {
+        if (id16_memo) return id16_memo();
+        id16_memo = field({
+            mode: 7,
+            name: id17,
+            value: id18,
+        });
+        return id16_memo();
+    }
+    let id16_memo;
 
     // StringLiteralExpression
     function id17() {
@@ -1234,7 +1339,12 @@ const print = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    const id26 = id3('f64');
+    function id26() {
+        if (id26_memo) return id26_memo();
+        id26_memo = id3('f64');
+        return id26_memo();
+    }
+    let id26_memo;
 
     // SequenceExpression
     function id27() {
@@ -1254,10 +1364,20 @@ const print = (() => {
     id28.constant = {value: "0x"};
 
     // ApplicationExpression
-    const id29 = id30(id31);
+    function id29() {
+        if (id29_memo) return id29_memo();
+        id29_memo = id30(id31);
+        return id29_memo();
+    }
+    let id29_memo;
 
     // MemberExpression
-    const id30 = id3('i32');
+    function id30() {
+        if (id30_memo) return id30_memo();
+        id30_memo = id3('i32');
+        return id30_memo();
+    }
+    let id30_memo;
 
     // ModuleExpression
     function id31(bindingName) {
@@ -1304,7 +1424,12 @@ const print = (() => {
     id35.constant = {value: "0b"};
 
     // ApplicationExpression
-    const id36 = id30(id37);
+    function id36() {
+        if (id36_memo) return id36_memo();
+        id36_memo = id30(id37);
+        return id36_memo();
+    }
+    let id36_memo;
 
     // ModuleExpression
     function id37(bindingName) {
@@ -1342,7 +1467,12 @@ const print = (() => {
     id40.constant = {value: "i"};
 
     // ApplicationExpression
-    const id41 = id30(id42);
+    function id41() {
+        if (id41_memo) return id41_memo();
+        id41_memo = id30(id42);
+        return id41_memo();
+    }
+    let id41_memo;
 
     // ModuleExpression
     function id42(bindingName) {
@@ -1378,14 +1508,19 @@ const print = (() => {
     id45.constant = {value: ")"};
 
     // RecordExpression
-    const id46 = record({
-        mode: 7,
-        fields: [
-            {name: 'type', value: id47},
-            {name: 'lhs', value: id9},
-            {name: 'rhs', value: id48},
-        ],
-    })
+    function id46() {
+        if (id46_memo) return id46_memo();
+        id46_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id47},
+                {name: 'lhs', value: id9},
+                {name: 'rhs', value: id48},
+            ],
+        })
+        return id46_memo();
+    }
+    let id46_memo;
 
     // StringLiteralExpression
     function id47() {
@@ -1418,14 +1553,19 @@ const print = (() => {
     id49.constant = {value: "/"};
 
     // RecordExpression
-    const id50 = record({
-        mode: 7,
-        fields: [
-            {name: 'type', value: id51},
-            {name: 'lhs', value: id1},
-            {name: 'rhs', value: id52},
-        ],
-    })
+    function id50() {
+        if (id50_memo) return id50_memo();
+        id50_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id51},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id52},
+            ],
+        })
+        return id50_memo();
+    }
+    let id50_memo;
 
     // StringLiteralExpression
     function id51() {

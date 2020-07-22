@@ -1,3 +1,7 @@
+
+// TODO: X_memo emitted names could clash with program ids? Ensure they can't...
+
+
 import * as fs from 'fs';
 import {Expression} from '../../ast-nodes';
 import {assert} from '../../utils';
@@ -124,7 +128,13 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'ApplicationExpression': {
             assert(expr.lambda.kind === 'ReferenceExpression');
             assert(expr.argument.kind === 'ReferenceExpression');
-            emit.down(1).text(`const ${name} = ${expr.lambda.name}(${expr.argument.name});`);
+            // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`${name}_memo = ${expr.lambda.name}(${expr.argument.name});`);
+            emit.down(1).text(`return ${name}_memo();`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`let ${name}_memo;`);
             break;
         }
 
@@ -146,11 +156,16 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'FieldExpression': {
             assert(expr.name.kind === 'ReferenceExpression');
             assert(expr.value.kind === 'ReferenceExpression');
-            emit.down(1).text(`const ${name} = field({`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`${name}_memo = field({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text(`name: ${expr.name.name},`);
             emit.down(1).text(`value: ${expr.value.name},`);
             emit.dedent().down(1).text('});');
+            emit.down(1).text(`return ${name}_memo();`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`let ${name}_memo;`);
             break;
         }
 
@@ -163,17 +178,27 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         //     break;
 
         case 'ListExpression': {
-            emit.down(1).text(`const ${name} = list({`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`${name}_memo = list({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('elements: [');
             emit.text(`${expr.elements.map(e => e.kind === 'ReferenceExpression' ? e.name : '?').join(', ')}`);
             emit.text('],').dedent().down(1).text('})');
+            emit.down(1).text(`return ${name}_memo();`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`let ${name}_memo;`);
             break;
         }
 
         case 'MemberExpression': {
             assert(expr.module.kind === 'ReferenceExpression');
-            emit.down(1).text(`const ${name} = ${expr.module.name}('${expr.bindingName}');`);
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`${name}_memo = ${expr.module.name}('${expr.bindingName}');`);
+            emit.down(1).text(`return ${name}_memo();`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`let ${name}_memo;`);
             break;
         }
 
@@ -225,7 +250,9 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'RecordExpression': {
-            emit.down(1).text(`const ${name} = record({`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`${name}_memo = record({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
@@ -237,6 +264,9 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
                 emit.dedent().down(1);
             }
             emit.text('],').dedent().down(1).text('})');
+            emit.down(1).text(`return ${name}_memo();`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`let ${name}_memo;`);
             break;
         }
 

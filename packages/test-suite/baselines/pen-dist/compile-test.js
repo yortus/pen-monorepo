@@ -585,7 +585,12 @@ const parse = (() => {
     }
 
     // MemberExpression
-    const id2 = id3('f64');
+    function id2() {
+        if (id2_memo) return id2_memo();
+        id2_memo = id3('f64');
+        return id2_memo();
+    }
+    let id2_memo;
 
     // ImportExpression
 
@@ -684,7 +689,12 @@ const print = (() => {
     }
 
     // MemberExpression
-    const id2 = id3('f64');
+    function id2() {
+        if (id2_memo) return id2_memo();
+        id2_memo = id3('f64');
+        return id2_memo();
+    }
+    let id2_memo;
 
     // ImportExpression
 

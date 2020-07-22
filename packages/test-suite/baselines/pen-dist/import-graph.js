@@ -219,7 +219,12 @@ const objectToString = Object.prototype.toString;
 const parse = (() => {
 
     // ApplicationExpression
-    const id1 = id2(id3);
+    function id1() {
+        if (id1_memo) return id1_memo();
+        id1_memo = id2(id3);
+        return id1_memo();
+    }
+    let id1_memo;
 
     // StringLiteralExpression
     function id2() {
@@ -277,7 +282,12 @@ const parse = (() => {
 const print = (() => {
 
     // ApplicationExpression
-    const id1 = id2(id3);
+    function id1() {
+        if (id1_memo) return id1_memo();
+        id1_memo = id2(id3);
+        return id1_memo();
+    }
+    let id1_memo;
 
     // StringLiteralExpression
     function id2() {

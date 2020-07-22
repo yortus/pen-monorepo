@@ -864,11 +864,16 @@ const parse = (() => {
     }
 
     // FieldExpression
-    const id23 = field({
-        mode: 6,
-        name: id24,
-        value: id71,
-    });
+    function id23() {
+        if (id23_memo) return id23_memo();
+        id23_memo = field({
+            mode: 6,
+            name: id24,
+            value: id71,
+        });
+        return id23_memo();
+    }
+    let id23_memo;
 
     // SequenceExpression
     function id24() {
@@ -969,10 +974,20 @@ const parse = (() => {
     id32.constant = {value: "\""};
 
     // ApplicationExpression
-    const id33 = id34(id36);
+    function id33() {
+        if (id33_memo) return id33_memo();
+        id33_memo = id34(id36);
+        return id33_memo();
+    }
+    let id33_memo;
 
     // MemberExpression
-    const id34 = id35('char');
+    function id34() {
+        if (id34_memo) return id34_memo();
+        id34_memo = id35('char');
+        return id34_memo();
+    }
+    let id34_memo;
 
     // ImportExpression
 
@@ -1251,10 +1266,20 @@ const parse = (() => {
     id64.constant = {value: "\\u"};
 
     // ApplicationExpression
-    const id65 = id66(id68);
+    function id65() {
+        if (id65_memo) return id65_memo();
+        id65_memo = id66(id68);
+        return id65_memo();
+    }
+    let id65_memo;
 
     // MemberExpression
-    const id66 = id67('unicode');
+    function id66() {
+        if (id66_memo) return id66_memo();
+        id66_memo = id67('unicode');
+        return id66_memo();
+    }
+    let id66_memo;
 
     // ImportExpression
 
@@ -1351,10 +1376,15 @@ const parse = (() => {
     id77.constant = {value: ","};
 
     // RecordExpression
-    const id78 = record({
-        mode: 6,
-        fields: [],
-    })
+    function id78() {
+        if (id78_memo) return id78_memo();
+        id78_memo = record({
+            mode: 6,
+            fields: [],
+        })
+        return id78_memo();
+    }
+    let id78_memo;
 
     // SequenceExpression
     function id79() {
@@ -1427,10 +1457,15 @@ const parse = (() => {
     }
 
     // ListExpression
-    const id86 = list({
-        mode: 6,
-        elements: [id8],
-    })
+    function id86() {
+        if (id86_memo) return id86_memo();
+        id86_memo = list({
+            mode: 6,
+            elements: [id8],
+        })
+        return id86_memo();
+    }
+    let id86_memo;
 
     // QuantifiedExpression
     function id87() {
@@ -1449,10 +1484,15 @@ const parse = (() => {
     }
 
     // ListExpression
-    const id89 = list({
-        mode: 6,
-        elements: [],
-    })
+    function id89() {
+        if (id89_memo) return id89_memo();
+        id89_memo = list({
+            mode: 6,
+            elements: [],
+        })
+        return id89_memo();
+    }
+    let id89_memo;
 
     // SequenceExpression
     function id90() {
@@ -1476,7 +1516,12 @@ const parse = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    const id92 = id35('f64');
+    function id92() {
+        if (id92_memo) return id92_memo();
+        id92_memo = id35('f64');
+        return id92_memo();
+    }
+    let id92_memo;
 
     return id1;
 })();
@@ -1687,11 +1732,16 @@ const print = (() => {
     }
 
     // FieldExpression
-    const id23 = field({
-        mode: 7,
-        name: id24,
-        value: id71,
-    });
+    function id23() {
+        if (id23_memo) return id23_memo();
+        id23_memo = field({
+            mode: 7,
+            name: id24,
+            value: id71,
+        });
+        return id23_memo();
+    }
+    let id23_memo;
 
     // SequenceExpression
     function id24() {
@@ -1791,10 +1841,20 @@ const print = (() => {
     id32.constant = {value: "\""};
 
     // ApplicationExpression
-    const id33 = id34(id36);
+    function id33() {
+        if (id33_memo) return id33_memo();
+        id33_memo = id34(id36);
+        return id33_memo();
+    }
+    let id33_memo;
 
     // MemberExpression
-    const id34 = id35('char');
+    function id34() {
+        if (id34_memo) return id34_memo();
+        id34_memo = id35('char');
+        return id34_memo();
+    }
+    let id34_memo;
 
     // ImportExpression
 
@@ -2071,10 +2131,20 @@ const print = (() => {
     id64.constant = {value: "\\u"};
 
     // ApplicationExpression
-    const id65 = id66(id68);
+    function id65() {
+        if (id65_memo) return id65_memo();
+        id65_memo = id66(id68);
+        return id65_memo();
+    }
+    let id65_memo;
 
     // MemberExpression
-    const id66 = id67('unicode');
+    function id66() {
+        if (id66_memo) return id66_memo();
+        id66_memo = id67('unicode');
+        return id66_memo();
+    }
+    let id66_memo;
 
     // ImportExpression
 
@@ -2169,10 +2239,15 @@ const print = (() => {
     id77.constant = {value: ","};
 
     // RecordExpression
-    const id78 = record({
-        mode: 7,
-        fields: [],
-    })
+    function id78() {
+        if (id78_memo) return id78_memo();
+        id78_memo = record({
+            mode: 7,
+            fields: [],
+        })
+        return id78_memo();
+    }
+    let id78_memo;
 
     // SequenceExpression
     function id79() {
@@ -2239,10 +2314,15 @@ const print = (() => {
     }
 
     // ListExpression
-    const id86 = list({
-        mode: 7,
-        elements: [id8],
-    })
+    function id86() {
+        if (id86_memo) return id86_memo();
+        id86_memo = list({
+            mode: 7,
+            elements: [id8],
+        })
+        return id86_memo();
+    }
+    let id86_memo;
 
     // QuantifiedExpression
     function id87() {
@@ -2261,10 +2341,15 @@ const print = (() => {
     }
 
     // ListExpression
-    const id89 = list({
-        mode: 7,
-        elements: [],
-    })
+    function id89() {
+        if (id89_memo) return id89_memo();
+        id89_memo = list({
+            mode: 7,
+            elements: [],
+        })
+        return id89_memo();
+    }
+    let id89_memo;
 
     // SequenceExpression
     function id90() {
@@ -2285,7 +2370,12 @@ const print = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    const id92 = id35('f64');
+    function id92() {
+        if (id92_memo) return id92_memo();
+        id92_memo = id35('f64');
+        return id92_memo();
+    }
+    let id92_memo;
 
     return id1;
 })();
