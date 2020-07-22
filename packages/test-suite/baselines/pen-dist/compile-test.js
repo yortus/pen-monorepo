@@ -586,9 +586,9 @@ const parse = (() => {
 
     // MemberExpression
     function id2() {
-        if (id2_memo) return id2_memo();
+        if (id2_memo) return id2_memo.apply(null, arguments);
         id2_memo = id3('f64');
-        return id2_memo();
+        return id2_memo.apply(null, arguments);
     }
     let id2_memo;
 
@@ -690,9 +690,9 @@ const print = (() => {
 
     // MemberExpression
     function id2() {
-        if (id2_memo) return id2_memo();
+        if (id2_memo) return id2_memo.apply(null, arguments);
         id2_memo = id3('f64');
-        return id2_memo();
+        return id2_memo.apply(null, arguments);
     }
     let id2_memo;
 

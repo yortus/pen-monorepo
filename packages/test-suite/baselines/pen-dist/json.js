@@ -975,17 +975,17 @@ const parse = (() => {
 
     // ApplicationExpression
     function id33() {
-        if (id33_memo) return id33_memo();
+        if (id33_memo) return id33_memo.apply(null, arguments);
         id33_memo = id34(id36);
-        return id33_memo();
+        return id33_memo.apply(null, arguments);
     }
     let id33_memo;
 
     // MemberExpression
     function id34() {
-        if (id34_memo) return id34_memo();
+        if (id34_memo) return id34_memo.apply(null, arguments);
         id34_memo = id35('char');
-        return id34_memo();
+        return id34_memo.apply(null, arguments);
     }
     let id34_memo;
 
@@ -1267,17 +1267,17 @@ const parse = (() => {
 
     // ApplicationExpression
     function id65() {
-        if (id65_memo) return id65_memo();
+        if (id65_memo) return id65_memo.apply(null, arguments);
         id65_memo = id66(id68);
-        return id65_memo();
+        return id65_memo.apply(null, arguments);
     }
     let id65_memo;
 
     // MemberExpression
     function id66() {
-        if (id66_memo) return id66_memo();
+        if (id66_memo) return id66_memo.apply(null, arguments);
         id66_memo = id67('unicode');
-        return id66_memo();
+        return id66_memo.apply(null, arguments);
     }
     let id66_memo;
 
@@ -1531,9 +1531,9 @@ const parse = (() => {
 
     // MemberExpression
     function id92() {
-        if (id92_memo) return id92_memo();
+        if (id92_memo) return id92_memo.apply(null, arguments);
         id92_memo = id35('f64');
-        return id92_memo();
+        return id92_memo.apply(null, arguments);
     }
     let id92_memo;
 
@@ -1856,17 +1856,17 @@ const print = (() => {
 
     // ApplicationExpression
     function id33() {
-        if (id33_memo) return id33_memo();
+        if (id33_memo) return id33_memo.apply(null, arguments);
         id33_memo = id34(id36);
-        return id33_memo();
+        return id33_memo.apply(null, arguments);
     }
     let id33_memo;
 
     // MemberExpression
     function id34() {
-        if (id34_memo) return id34_memo();
+        if (id34_memo) return id34_memo.apply(null, arguments);
         id34_memo = id35('char');
-        return id34_memo();
+        return id34_memo.apply(null, arguments);
     }
     let id34_memo;
 
@@ -2146,17 +2146,17 @@ const print = (() => {
 
     // ApplicationExpression
     function id65() {
-        if (id65_memo) return id65_memo();
+        if (id65_memo) return id65_memo.apply(null, arguments);
         id65_memo = id66(id68);
-        return id65_memo();
+        return id65_memo.apply(null, arguments);
     }
     let id65_memo;
 
     // MemberExpression
     function id66() {
-        if (id66_memo) return id66_memo();
+        if (id66_memo) return id66_memo.apply(null, arguments);
         id66_memo = id67('unicode');
-        return id66_memo();
+        return id66_memo.apply(null, arguments);
     }
     let id66_memo;
 
@@ -2399,9 +2399,9 @@ const print = (() => {
 
     // MemberExpression
     function id92() {
-        if (id92_memo) return id92_memo();
+        if (id92_memo) return id92_memo.apply(null, arguments);
         id92_memo = id35('f64');
-        return id92_memo();
+        return id92_memo.apply(null, arguments);
     }
     let id92_memo;
 

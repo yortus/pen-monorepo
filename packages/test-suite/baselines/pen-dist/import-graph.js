@@ -220,9 +220,9 @@ const parse = (() => {
 
     // ApplicationExpression
     function id1() {
-        if (id1_memo) return id1_memo();
+        if (id1_memo) return id1_memo.apply(null, arguments);
         id1_memo = id2(id3);
-        return id1_memo();
+        return id1_memo.apply(null, arguments);
     }
     let id1_memo;
 
@@ -283,9 +283,9 @@ const print = (() => {
 
     // ApplicationExpression
     function id1() {
-        if (id1_memo) return id1_memo();
+        if (id1_memo) return id1_memo.apply(null, arguments);
         id1_memo = id2(id3);
-        return id1_memo();
+        return id1_memo.apply(null, arguments);
     }
     let id1_memo;
 

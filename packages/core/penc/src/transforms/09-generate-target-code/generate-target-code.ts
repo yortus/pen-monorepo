@@ -130,9 +130,9 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.argument.kind === 'ReferenceExpression');
             // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo.apply(null, arguments);`);
             emit.down(1).text(`${name}_memo = ${expr.lambda.name}(${expr.argument.name});`);
-            emit.down(1).text(`return ${name}_memo();`);
+            emit.down(1).text(`return ${name}_memo.apply(null, arguments);`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`let ${name}_memo;`);
             break;
@@ -194,9 +194,9 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'MemberExpression': {
             assert(expr.module.kind === 'ReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
+            emit.down(1).text(`if (${name}_memo) return ${name}_memo.apply(null, arguments);`);
             emit.down(1).text(`${name}_memo = ${expr.module.name}('${expr.bindingName}');`);
-            emit.down(1).text(`return ${name}_memo();`);
+            emit.down(1).text(`return ${name}_memo.apply(null, arguments);`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`let ${name}_memo;`);
             break;
