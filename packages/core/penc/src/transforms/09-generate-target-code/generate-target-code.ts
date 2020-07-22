@@ -185,20 +185,20 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
     [] = [emit, name, mode];
+    emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
-        // case 'ApplicationExpression':
-        //     emit.text('(');
-        //     emitExpression(emit, expr.lambda, symbolTable, mode);
-        //     emit.text(')(');
-        //     emitExpression(emit, expr.argument, symbolTable, mode);
-        //     emit.text(`)`);
-        //     break;
+        case 'ApplicationExpression': {
+            assert(expr.lambda.kind === 'ReferenceExpression');
+            assert(expr.argument.kind === 'ReferenceExpression');
+            emit.down(1).text(`const ${name} = ${expr.lambda.name}(${expr.argument.name});`);
+            break;
+        }
 
         case 'BooleanLiteralExpression':
         case 'NullLiteralExpression':
         case 'NumericLiteralExpression': {
             const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
-            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
             if (modes.isPrint(mode) && modes.hasInput(mode)) {
                 emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
                 emit.down(1).text(`IP += 1;`);
@@ -220,11 +220,12 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         //     break;
 
         case 'ImportExpression':
-            // NB: already handled
+            // NB: already handled by emitExtensions
             break;
 
+        // TODO: implement...
         // case 'LambdaExpression':
-        //     break; // TODO...
+        //     break;
 
         // case 'ListExpression':
         //     emit.text('list({').indent();
@@ -242,11 +243,11 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         //     emit.text('],').dedent().down(1).text('})');
         //     break;
 
-        // case 'MemberExpression':
-        //     TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
-        //     emitExpression(emit, expr.module, symbolTable, mode);
-        //     emit.text(`('${expr.bindingName}')`);
-        //     break;
+        case 'MemberExpression': {
+            assert(expr.module.kind === 'ReferenceExpression');
+            emit.down(1).text(`const ${name} = ${expr.module.name}('${expr.bindingName}');`);
+            break;
+        }
 
         // case 'ModuleExpression':
         //     emit.text(expr.module.meta.scope.id);
@@ -305,7 +306,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
-            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
             }
@@ -317,7 +318,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
-            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('let stateₒ = getState();');
             emit.down(1).text('let out;');
             for (let i = 0; i < arity; ++i) {
@@ -331,7 +332,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'StringLiteralExpression': {
             const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
-            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            emit.down(1).text(`function ${name}() {`).indent();
             if (modes.hasInput(localMode)) {
                 if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
                 emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
@@ -347,7 +348,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         default:
-            emit.down(2).text(`// NOT HANDLED: ${name}`);
+            emit.down(1).text(`// NOT HANDLED: ${name}`);
             // TODO: was... restore...
             // throw new Error('Internal Error'); // TODO...
     }

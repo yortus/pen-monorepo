@@ -593,7 +593,8 @@ const createExtension_id3 = (() => {
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
-    function id1() { // SequenceExpression
+    // SequenceExpression
+    function id1() {
         let stateₒ = getState();
         let out;
         if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -605,11 +606,16 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id2
+    // MemberExpression
+    const id2 = id3('f64');
 
+    // ImportExpression
+
+    // ModuleExpression
     // NOT HANDLED: id4
 
-    function id5() { // SequenceExpression
+    // SequenceExpression
+    function id5() {
         let stateₒ = getState();
         let out;
         if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -618,7 +624,8 @@ const parse = (() => {
         return true;
     }
 
-    function id6() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id6() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
         if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -629,7 +636,8 @@ const parse = (() => {
         return true;
     }
 
-    function id7() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id7() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -639,7 +647,8 @@ const parse = (() => {
         return true;
     }
 
-    function id8() { // SequenceExpression
+    // SequenceExpression
+    function id8() {
         let stateₒ = getState();
         let out;
         if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -648,7 +657,8 @@ const parse = (() => {
         return true;
     }
 
-    function id9() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id9() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -668,7 +678,8 @@ const parse = (() => {
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
-    function id1() { // SequenceExpression
+    // SequenceExpression
+    function id1() {
         let stateₒ = getState();
         let out;
         if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -680,11 +691,16 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id2
+    // MemberExpression
+    const id2 = id3('f64');
 
+    // ImportExpression
+
+    // ModuleExpression
     // NOT HANDLED: id4
 
-    function id5() { // SequenceExpression
+    // SequenceExpression
+    function id5() {
         let stateₒ = getState();
         let out;
         if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -693,7 +709,8 @@ const print = (() => {
         return true;
     }
 
-    function id6() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id6() {
         if (typeof IN !== 'string') return false;
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
@@ -705,7 +722,8 @@ const print = (() => {
         return true;
     }
 
-    function id7() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id7() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -716,7 +734,8 @@ const print = (() => {
         return true;
     }
 
-    function id8() { // SequenceExpression
+    // SequenceExpression
+    function id8() {
         let stateₒ = getState();
         let out;
         if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -725,7 +744,8 @@ const print = (() => {
         return true;
     }
 
-    function id9() { // StringLiteralExpression
+    // StringLiteralExpression
+    function id9() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
