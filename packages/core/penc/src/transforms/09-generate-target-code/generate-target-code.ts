@@ -2,7 +2,7 @@ import * as fs from 'fs';
 //import * as path from 'path';
 import {Expression/*, SelectionExpression, SequenceExpression*/} from '../../ast-nodes';
 //import {SymbolTable} from '../../symbol-table';
-//import {assert, makeNodeVisitor} from '../../utils';
+import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 //import {Metadata} from './metadata';
 //import {Mode, PARSE, PRINT} from './modes';
@@ -55,31 +55,43 @@ export function generateTargetCode(program: Program) {
 
 function emitExtensions(emit: Emitter, {il}: Program) {
 
-    for (let [_, expr] of Object.entries(il)) {
-        if (expr.kind !== 'ImportExpression') continue;
-        emit.down(10).text(`==========   EXT: ${expr.sourceFilePath}   ==========`).down(10);
+    // Filter out extension file entries, and entries that reference definitions in extension files
+    let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
+    let refNames = Object.keys(il).filter(n => {
+        let e = il[n];
+        if (e.kind !== 'MemberExpression') return false;
+        assert(e.module.kind === 'ReferenceExpression');
+        return il[e.module.name].kind === 'ImportExpression';
+    });
+
+    for (let extName of extNames) {
+        let ext = il[extName];
+        assert(ext.kind === 'ImportExpression');
+        let exportedNames = refNames.map(n => {
+            let mem = il[n];
+            assert(mem.kind === 'MemberExpression');
+            return mem;
+        }).filter(mem => {
+            assert(mem.module.kind === 'ReferenceExpression');
+            let imp = il[mem.module.name];
+            assert(imp.kind === 'ImportExpression');
+            return mem.module.name === extName;
+        }).map(mem => mem.bindingName);
+
+        emit.down(1).text(`const createExtension_${extName} = (() => {`).indent();
+        let content = fs.readFileSync(ext.sourceFilePath, 'utf8') + '\n';
+        content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+        emit.down(2).text(`return ({mode}) => {`).indent();
+        exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}({mode});`));
+        emit.down(1).text(`return (name) => {`).indent();
+        emit.down(1).text(`switch(name) {`).indent();
+        exportedNames.forEach(name => emit.down(1).text(`case '${name}': return _${name};`));
+        emit.down(1).text(`default: return undefined;`);
+        emit.dedent().down(1).text('}');
+        emit.dedent().down(1).text('};');
+        emit.dedent().down(1).text('};');
+        emit.dedent().down(1).text('})();');
     }
-
-
-    // let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-    // emit.down(2).text(`// -------------------- Extensions --------------------`);
-    // visitNode(program, _ => ({
-    //     ExtensionFile: ext => {
-    //         emit.down(1).text(`const createExtension${ext.meta.scope.id} = (() => {`).indent();
-    //         let content = fs.readFileSync(ext.path, 'utf8') + '\n';
-    //         content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-    //         emit.down(2).text(`return ({mode}) => {`).indent();
-    //         ext.exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}({mode});`));
-    //         emit.down(1).text(`return (name) => {`).indent();
-    //         emit.down(1).text(`switch(name) {`).indent();
-    //         ext.exportedNames.forEach(name => emit.down(1).text(`case '${name}': return _${name};`));
-    //         emit.down(1).text(`default: return undefined;`);
-    //         emit.dedent().down(1).text('}');
-    //         emit.dedent().down(1).text('};');
-    //         emit.dedent().down(1).text('};');
-    //         emit.dedent().down(1).text('})();');
-    //     },
-    // }));
 }
 
 
