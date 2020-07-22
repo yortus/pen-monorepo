@@ -672,7 +672,10 @@ const parse = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id2
+    const id2 = zeroOrMore({
+        mode: 6,
+        expression: id3,
+    });
 
     // SelectionExpression
     function id3() {
@@ -865,7 +868,11 @@ const parse = (() => {
     }
 
     // FieldExpression
-    // NOT HANDLED: id23
+    const id23 = field({
+        mode: 6,
+        name: id24,
+        value: id71,
+    });
 
     // SequenceExpression
     function id24() {
@@ -888,7 +895,10 @@ const parse = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id26
+    const id26 = zeroOrMore({
+        mode: 6,
+        expression: id27,
+    });
 
     // SelectionExpression
     function id27() {
@@ -917,7 +927,13 @@ const parse = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id29
+    function id29() {
+        let stateₒ = getState();
+        let result = !id30();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id30() {
@@ -929,7 +945,13 @@ const parse = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id31
+    function id31() {
+        let stateₒ = getState();
+        let result = !id32();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id32() {
@@ -1251,7 +1273,10 @@ const parse = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id74
+    const id74 = zeroOrOne({
+        mode: 6,
+        expression: id75,
+    });
 
     // SequenceExpression
     function id75() {
@@ -1284,7 +1309,10 @@ const parse = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id78
+    const id78 = record({
+        mode: 6,
+        fields: [],
+    })
 
     // SequenceExpression
     function id79() {
@@ -1355,10 +1383,16 @@ const parse = (() => {
     }
 
     // ListExpression
-    // NOT HANDLED: id86
+    const id86 = list({
+        mode: 6,
+        elements: [id8],
+    })
 
     // QuantifiedExpression
-    // NOT HANDLED: id87
+    const id87 = zeroOrOne({
+        mode: 6,
+        expression: id88,
+    });
 
     // SequenceExpression
     function id88() {
@@ -1371,7 +1405,10 @@ const parse = (() => {
     }
 
     // ListExpression
-    // NOT HANDLED: id89
+    const id89 = list({
+        mode: 6,
+        elements: [],
+    })
 
     // SequenceExpression
     function id90() {
@@ -1419,7 +1456,10 @@ const print = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id2
+    const id2 = zeroOrMore({
+        mode: 7,
+        expression: id3,
+    });
 
     // SelectionExpression
     function id3() {
@@ -1584,7 +1624,11 @@ const print = (() => {
     }
 
     // FieldExpression
-    // NOT HANDLED: id23
+    const id23 = field({
+        mode: 7,
+        name: id24,
+        value: id71,
+    });
 
     // SequenceExpression
     function id24() {
@@ -1604,7 +1648,10 @@ const print = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id26
+    const id26 = zeroOrMore({
+        mode: 7,
+        expression: id27,
+    });
 
     // SelectionExpression
     function id27() {
@@ -1633,7 +1680,13 @@ const print = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id29
+    function id29() {
+        let stateₒ = getState();
+        let result = !id30();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id30() {
@@ -1646,7 +1699,13 @@ const print = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id31
+    function id31() {
+        let stateₒ = getState();
+        let result = !id32();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id32() {
@@ -1968,7 +2027,10 @@ const print = (() => {
     }
 
     // QuantifiedExpression
-    // NOT HANDLED: id74
+    const id74 = zeroOrOne({
+        mode: 7,
+        expression: id75,
+    });
 
     // SequenceExpression
     function id75() {
@@ -1998,7 +2060,10 @@ const print = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id78
+    const id78 = record({
+        mode: 7,
+        fields: [],
+    })
 
     // SequenceExpression
     function id79() {
@@ -2063,10 +2128,16 @@ const print = (() => {
     }
 
     // ListExpression
-    // NOT HANDLED: id86
+    const id86 = list({
+        mode: 7,
+        elements: [id8],
+    })
 
     // QuantifiedExpression
-    // NOT HANDLED: id87
+    const id87 = zeroOrOne({
+        mode: 7,
+        expression: id88,
+    });
 
     // SequenceExpression
     function id88() {
@@ -2079,7 +2150,10 @@ const print = (() => {
     }
 
     // ListExpression
-    // NOT HANDLED: id89
+    const id89 = list({
+        mode: 7,
+        elements: [],
+    })
 
     // SequenceExpression
     function id90() {

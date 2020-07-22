@@ -209,15 +209,16 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
         }
 
-        // case 'FieldExpression':
-        //     emit.text('field({').indent();
-        //     emit.down(1).text(`mode: ${mode},`);
-        //     emit.down(1).text('name: ');
-        //     emitExpression(emit, expr.name, symbolTable, mode);
-        //     emit.text(',').down(1).text('value: ');
-        //     emitExpression(emit, expr.value, symbolTable, mode);
-        //     emit.text(',').dedent().down(1).text('})');
-        //     break;
+        case 'FieldExpression': {
+            assert(expr.name.kind === 'ReferenceExpression');
+            assert(expr.value.kind === 'ReferenceExpression');
+            emit.down(1).text(`const ${name} = field({`).indent();
+            emit.down(1).text(`mode: ${mode},`);
+            emit.down(1).text(`name: ${expr.name.name},`);
+            emit.down(1).text(`value: ${expr.value.name},`);
+            emit.dedent().down(1).text('});');
+            break;
+        }
 
         case 'ImportExpression':
             // NB: already handled by emitExtensions
@@ -227,21 +228,14 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         // case 'LambdaExpression':
         //     break;
 
-        // case 'ListExpression':
-        //     emit.text('list({').indent();
-        //     emit.down(1).text(`mode: ${mode},`);
-        //     emit.down(1).text('elements: [');
-        //     if (expr.elements.length > 0) {
-        //         emit.indent();
-        //         for (let element of expr.elements) {
-        //             emit.down(1);
-        //             emitExpression(emit, element, symbolTable, mode);
-        //             emit.text(',');
-        //         }
-        //         emit.dedent().down(1);
-        //     }
-        //     emit.text('],').dedent().down(1).text('})');
-        //     break;
+        case 'ListExpression': {
+            emit.down(1).text(`const ${name} = list({`).indent();
+            emit.down(1).text(`mode: ${mode},`);
+            emit.down(1).text('elements: [');
+            emit.text(`${expr.elements.map(e => e.kind === 'ReferenceExpression' ? e.name : '?').join(', ')}`);
+            emit.text('],').dedent().down(1).text('})');
+            break;
+        }
 
         case 'MemberExpression': {
             assert(expr.module.kind === 'ReferenceExpression');
@@ -253,55 +247,45 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         //     emit.text(expr.module.meta.scope.id);
         //     break;
 
-        // case 'NotExpression': {
-        //     const exprVar = newId();
-        //     emit.text('(() => {').indent();
-        //     emit.down(1).text(`const ${exprVar} = `);
-        //     emitExpression(emit, expr.expression, symbolTable, mode);
-        //     emit.text(';');
-        //     emit.down(1).text(`return function NOT() {`).indent();
-        //     emit.down(1).text(`let stateₒ = getState();`);
-        //     emit.down(1).text(`let result = !${exprVar}();`);
-        //     emit.down(1).text(`setState(stateₒ);`);
-        //     emit.down(1).text(`OUT = undefined;`);
-        //     emit.down(1).text(`return result;`);
-        //     emit.dedent().down(1).text(`};`);
-        //     emit.dedent().down(1).text('})()');
-        //     break;
-        // }
+        case 'NotExpression': {
+            assert(expr.expression.kind === 'ReferenceExpression');
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`let stateₒ = getState();`);
+            emit.down(1).text(`let result = !${expr.expression.name}();`);
+            emit.down(1).text(`setState(stateₒ);`);
+            emit.down(1).text(`OUT = undefined;`);
+            emit.down(1).text(`return result;`);
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
 
-        // case 'QuantifiedExpression':
-        //     emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-        //     emit.down(1).text(`mode: ${mode},`);
-        //     emit.down(1).text('expression: ');
-        //     emitExpression(emit, expr.expression, symbolTable, mode);
-        //     emit.text(',');
-        //     emit.dedent().down(1).text('})');
-        //     break;
+        case 'QuantifiedExpression': {
+            assert(expr.expression.kind === 'ReferenceExpression');
+            emit.down(1).text(`const ${name} = ${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
+            emit.down(1).text(`mode: ${mode},`);
+            emit.down(1).text(`expression: ${expr.expression.name},`);
+            emit.dedent().down(1).text('});');
+            break;
+        }
 
-        // case 'RecordExpression':
-        //     emit.text('record({').indent();
-        //     emit.down(1).text(`mode: ${mode},`);
-        //     emit.down(1).text('fields: [');
-        //     if (expr.fields.length > 0) {
-        //         emit.indent();
-        //         for (let field of expr.fields) {
-        //             emit.down(1).text('{').indent();
-        //             emit.down(1).text(`name: '${field.name}',`);
-        //             emit.down(1).text(`value: `);
-        //             emitExpression(emit, field.value, symbolTable, mode);
-        //             emit.text(',').dedent().down(1).text('},');
-        //         }
-        //         emit.dedent().down(1);
-        //     }
-        //     emit.text('],').dedent().down(1).text('})');
-        //     break;
+        case 'RecordExpression': {
+            emit.down(1).text(`const ${name} = record({`).indent();
+            emit.down(1).text(`mode: ${mode},`);
+            emit.down(1).text('fields: [');
+            if (expr.fields.length > 0) {
+                emit.indent();
+                for (let field of expr.fields) {
+                    assert(field.value.kind === 'ReferenceExpression');
+                    emit.down(1).text(`{name: '${field.name}', value: ${field.value.name}},`);
+                }
+                emit.dedent().down(1);
+            }
+            emit.text('],').dedent().down(1).text('})');
+            break;
+        }
 
-        // case 'ReferenceExpression':
-        //     let ref = symbolTable.getSymbolById(expr.meta.symbolId);
-        //     assert(ref.kind === 'NameSymbol');
-        //     emit.text(`${ref.scope.id}('${ref.sourceName}')`);
-        //     break;
+        case 'ReferenceExpression':
+            assert(false); // Should never see a ReferenceExpression here.
 
         case 'SelectionExpression': {
             const arity = expr.expressions.length;

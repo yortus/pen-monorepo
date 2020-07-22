@@ -614,7 +614,14 @@ const parse = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id5
+    const id5 = record({
+        mode: 6,
+        fields: [
+            {name: 'type', value: id6},
+            {name: 'lhs', value: id1},
+            {name: 'rhs', value: id7},
+        ],
+    })
 
     // StringLiteralExpression
     function id6() {
@@ -664,7 +671,11 @@ const parse = (() => {
     }
 
     // FieldExpression
-    // NOT HANDLED: id12
+    const id12 = field({
+        mode: 6,
+        name: id13,
+        value: id14,
+    });
 
     // StringLiteralExpression
     function id13() {
@@ -679,10 +690,19 @@ const parse = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id15
+    const id15 = record({
+        mode: 6,
+        fields: [
+            {name: 'lhs', value: id9},
+        ],
+    })
 
     // FieldExpression
-    // NOT HANDLED: id16
+    const id16 = field({
+        mode: 6,
+        name: id17,
+        value: id18,
+    });
 
     // StringLiteralExpression
     function id17() {
@@ -731,7 +751,13 @@ const parse = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id22
+    function id22() {
+        let stateₒ = getState();
+        let result = !id23();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id23() {
@@ -744,7 +770,13 @@ const parse = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id24
+    function id24() {
+        let stateₒ = getState();
+        let result = !id25();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id25() {
@@ -887,7 +919,14 @@ const parse = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id46
+    const id46 = record({
+        mode: 6,
+        fields: [
+            {name: 'type', value: id47},
+            {name: 'lhs', value: id9},
+            {name: 'rhs', value: id48},
+        ],
+    })
 
     // StringLiteralExpression
     function id47() {
@@ -915,7 +954,14 @@ const parse = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id50
+    const id50 = record({
+        mode: 6,
+        fields: [
+            {name: 'type', value: id51},
+            {name: 'lhs', value: id1},
+            {name: 'rhs', value: id52},
+        ],
+    })
 
     // StringLiteralExpression
     function id51() {
@@ -969,7 +1015,14 @@ const print = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id5
+    const id5 = record({
+        mode: 7,
+        fields: [
+            {name: 'type', value: id6},
+            {name: 'lhs', value: id1},
+            {name: 'rhs', value: id7},
+        ],
+    })
 
     // StringLiteralExpression
     function id6() {
@@ -1022,7 +1075,11 @@ const print = (() => {
     }
 
     // FieldExpression
-    // NOT HANDLED: id12
+    const id12 = field({
+        mode: 7,
+        name: id13,
+        value: id14,
+    });
 
     // StringLiteralExpression
     function id13() {
@@ -1050,10 +1107,19 @@ const print = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id15
+    const id15 = record({
+        mode: 7,
+        fields: [
+            {name: 'lhs', value: id9},
+        ],
+    })
 
     // FieldExpression
-    // NOT HANDLED: id16
+    const id16 = field({
+        mode: 7,
+        name: id17,
+        value: id18,
+    });
 
     // StringLiteralExpression
     function id17() {
@@ -1105,7 +1171,13 @@ const print = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id22
+    function id22() {
+        let stateₒ = getState();
+        let result = !id23();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id23() {
@@ -1119,7 +1191,13 @@ const print = (() => {
     }
 
     // NotExpression
-    // NOT HANDLED: id24
+    function id24() {
+        let stateₒ = getState();
+        let result = !id25();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
 
     // StringLiteralExpression
     function id25() {
@@ -1252,7 +1330,14 @@ const print = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id46
+    const id46 = record({
+        mode: 7,
+        fields: [
+            {name: 'type', value: id47},
+            {name: 'lhs', value: id9},
+            {name: 'rhs', value: id48},
+        ],
+    })
 
     // StringLiteralExpression
     function id47() {
@@ -1283,7 +1368,14 @@ const print = (() => {
     }
 
     // RecordExpression
-    // NOT HANDLED: id50
+    const id50 = record({
+        mode: 7,
+        fields: [
+            {name: 'type', value: id51},
+            {name: 'lhs', value: id1},
+            {name: 'rhs', value: id52},
+        ],
+    })
 
     // StringLiteralExpression
     function id51() {
