@@ -211,28 +211,6 @@ function isInputFullyConsumed() {
     return IP === 1;
 }
 const objectToString = Object.prototype.toString;
-function zeroOrMore({ expression }) {
-    return function O_M() {
-        let IPₒ = IP;
-        let out;
-        do {
-            if (!expression())
-                break;
-            if (IP === IPₒ)
-                break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    };
-}
-function zeroOrOne({ expression }) {
-    return function O_1() {
-        if (!expression())
-            OUT = undefined;
-        return true;
-    };
-}
 const createExtension_id35 = (() => {
     "use strict";
     /* @pen exports = {
@@ -672,10 +650,17 @@ const parse = (() => {
     }
 
     // QuantifiedExpression
-    const id2 = zeroOrMore({
-        mode: 6,
-        expression: id3,
-    });
+    function id2() {
+        let IPₒ = IP;
+        let out;
+        do {
+            if (!id3()) break;
+            if (IP === IPₒ) break;
+            out = concat(out, OUT);
+        } while (true);
+        OUT = out;
+        return true;
+    }
 
     // SelectionExpression
     function id3() {
@@ -907,10 +892,17 @@ const parse = (() => {
     id25.constant = {value: "\""};
 
     // QuantifiedExpression
-    const id26 = zeroOrMore({
-        mode: 6,
-        expression: id27,
-    });
+    function id26() {
+        let IPₒ = IP;
+        let out;
+        do {
+            if (!id27()) break;
+            if (IP === IPₒ) break;
+            out = concat(out, OUT);
+        } while (true);
+        OUT = out;
+        return true;
+    }
 
     // SelectionExpression
     function id27() {
@@ -1322,10 +1314,10 @@ const parse = (() => {
     id73.constant = {value: ":"};
 
     // QuantifiedExpression
-    const id74 = zeroOrOne({
-        mode: 6,
-        expression: id75,
-    });
+    function id74() {
+        if (!id75()) OUT = undefined;
+        return true;
+    }
 
     // SequenceExpression
     function id75() {
@@ -1441,10 +1433,10 @@ const parse = (() => {
     })
 
     // QuantifiedExpression
-    const id87 = zeroOrOne({
-        mode: 6,
-        expression: id88,
-    });
+    function id87() {
+        if (!id88()) OUT = undefined;
+        return true;
+    }
 
     // SequenceExpression
     function id88() {
@@ -1509,10 +1501,17 @@ const print = (() => {
     }
 
     // QuantifiedExpression
-    const id2 = zeroOrMore({
-        mode: 7,
-        expression: id3,
-    });
+    function id2() {
+        let IPₒ = IP;
+        let out;
+        do {
+            if (!id3()) break;
+            if (IP === IPₒ) break;
+            out = concat(out, OUT);
+        } while (true);
+        OUT = out;
+        return true;
+    }
 
     // SelectionExpression
     function id3() {
@@ -1713,10 +1712,17 @@ const print = (() => {
     id25.constant = {value: "\""};
 
     // QuantifiedExpression
-    const id26 = zeroOrMore({
-        mode: 7,
-        expression: id27,
-    });
+    function id26() {
+        let IPₒ = IP;
+        let out;
+        do {
+            if (!id27()) break;
+            if (IP === IPₒ) break;
+            out = concat(out, OUT);
+        } while (true);
+        OUT = out;
+        return true;
+    }
 
     // SelectionExpression
     function id27() {
@@ -2129,10 +2135,10 @@ const print = (() => {
     id73.constant = {value: ":"};
 
     // QuantifiedExpression
-    const id74 = zeroOrOne({
-        mode: 7,
-        expression: id75,
-    });
+    function id74() {
+        if (!id75()) OUT = undefined;
+        return true;
+    }
 
     // SequenceExpression
     function id75() {
@@ -2239,10 +2245,10 @@ const print = (() => {
     })
 
     // QuantifiedExpression
-    const id87 = zeroOrOne({
-        mode: 7,
-        expression: id88,
-    });
+    function id87() {
+        if (!id88()) OUT = undefined;
+        return true;
+    }
 
     // SequenceExpression
     function id88() {

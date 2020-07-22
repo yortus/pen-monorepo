@@ -205,10 +205,22 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'QuantifiedExpression': {
             assert(expr.expression.kind === 'ReferenceExpression');
-            emit.down(1).text(`const ${name} = ${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-            emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text(`expression: ${expr.expression.name},`);
-            emit.dedent().down(1).text('});');
+            emit.down(1).text(`function ${name}() {`).indent();
+            if (expr.quantifier === '?') {
+                emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
+            }
+            else /* expr.quantifier === '*' */ {
+                emit.down(1).text(`let IPₒ = IP;`);
+                emit.down(1).text(`let out;`);
+                emit.down(1).text(`do {`).indent();
+                emit.down(1).text(`if (!${expr.expression.name}()) break;`);
+                emit.down(1).text(`if (IP === IPₒ) break;`);
+                emit.down(1).text(`out = concat(out, OUT);`);
+                emit.dedent().down(1).text(`} while (true);`);
+                emit.down(1).text(`OUT = out;`);
+            }
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('}');
             break;
         }
 

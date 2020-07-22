@@ -211,28 +211,6 @@ function isInputFullyConsumed() {
     return IP === 1;
 }
 const objectToString = Object.prototype.toString;
-function zeroOrMore({ expression }) {
-    return function O_M() {
-        let IPₒ = IP;
-        let out;
-        do {
-            if (!expression())
-                break;
-            if (IP === IPₒ)
-                break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    };
-}
-function zeroOrOne({ expression }) {
-    return function O_1() {
-        if (!expression())
-            OUT = undefined;
-        return true;
-    };
-}
 const createExtension_id3 = (() => {
     "use strict";
     /* @pen exports = {
@@ -599,9 +577,9 @@ const parse = (() => {
         let out;
         if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -623,14 +601,20 @@ const parse = (() => {
     function id5() {
         let stateₒ = getState();
         let out;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
+    // QuantifiedExpression
     function id6() {
+        if (!id5()) OUT = undefined;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id7() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
         if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -640,10 +624,10 @@ const parse = (() => {
         OUT = "rest";
         return true;
     }
-    id6.constant = {value: "rest"};
+    id7.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function id7() {
+    function id8() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -652,20 +636,20 @@ const parse = (() => {
         OUT = "aaa";
         return true;
     }
-    id7.constant = {value: "aaa"};
+    id8.constant = {value: "aaa"};
 
     // SequenceExpression
-    function id8() {
+    function id9() {
         let stateₒ = getState();
         let out;
+        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id9() {
+    function id10() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -674,7 +658,7 @@ const parse = (() => {
         OUT = "pre";
         return true;
     }
-    id9.constant = {value: "pre"};
+    id10.constant = {value: "pre"};
 
     return id1;
 })();
@@ -692,9 +676,9 @@ const print = (() => {
         let out;
         if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -716,14 +700,20 @@ const print = (() => {
     function id5() {
         let stateₒ = getState();
         let out;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
+    // QuantifiedExpression
     function id6() {
+        if (!id5()) OUT = undefined;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id7() {
         if (typeof IN !== 'string') return false;
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
@@ -734,10 +724,10 @@ const print = (() => {
         OUT = "rest";
         return true;
     }
-    id6.constant = {value: "rest"};
+    id7.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function id7() {
+    function id8() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -747,20 +737,20 @@ const print = (() => {
         OUT = "aaa";
         return true;
     }
-    id7.constant = {value: "aaa"};
+    id8.constant = {value: "aaa"};
 
     // SequenceExpression
-    function id8() {
+    function id9() {
         let stateₒ = getState();
         let out;
+        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id9() {
+    function id10() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
@@ -770,7 +760,7 @@ const print = (() => {
         OUT = "pre";
         return true;
     }
-    id9.constant = {value: "pre"};
+    id10.constant = {value: "pre"};
 
     return id1;
 })();

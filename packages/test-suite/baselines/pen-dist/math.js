@@ -211,28 +211,6 @@ function isInputFullyConsumed() {
     return IP === 1;
 }
 const objectToString = Object.prototype.toString;
-function zeroOrMore({ expression }) {
-    return function O_M() {
-        let IPₒ = IP;
-        let out;
-        do {
-            if (!expression())
-                break;
-            if (IP === IPₒ)
-                break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    };
-}
-function zeroOrOne({ expression }) {
-    return function O_1() {
-        if (!expression())
-            OUT = undefined;
-        return true;
-    };
-}
 const createExtension_id3 = (() => {
     "use strict";
     /* @pen exports = {
