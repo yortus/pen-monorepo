@@ -240,8 +240,7 @@ function zeroOrOne({ expression }) {
 // --------------------------------------------------------------------------------
 const parse = (() => {
 
-    function id1() {
-        // StringLiteralExpression
+    function id1() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -251,7 +250,7 @@ const parse = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();
 
 
@@ -260,8 +259,7 @@ const parse = (() => {
 // --------------------------------------------------------------------------------
 const print = (() => {
 
-    function id1() {
-        // StringLiteralExpression
+    function id1() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -272,5 +270,5 @@ const print = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();

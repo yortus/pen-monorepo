@@ -660,14 +660,27 @@ const parse = (() => {
     const id35 = createExtension_id35({mode: 6})
     const id67 = createExtension_id67({mode: 6})
 
-    // NOT HANDLED: id1
+    function id1() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id2
 
-    // NOT HANDLED: id3
+    function id3() { // SelectionExpression
+        if (id4()) return true;
+        if (id5()) return true;
+        if (id6()) return true;
+        if (id7()) return true;
+        return false;
+    }
 
-    function id4() {
-        // StringLiteralExpression
+    function id4() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
@@ -675,8 +688,7 @@ const parse = (() => {
         return true;
     }
 
-    function id5() {
-        // StringLiteralExpression
+    function id5() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
         IP += 1;
@@ -684,8 +696,7 @@ const parse = (() => {
         return true;
     }
 
-    function id6() {
-        // StringLiteralExpression
+    function id6() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
         IP += 1;
@@ -693,8 +704,7 @@ const parse = (() => {
         return true;
     }
 
-    function id7() {
-        // StringLiteralExpression
+    function id7() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
         IP += 1;
@@ -702,12 +712,27 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id8
+    function id8() { // SelectionExpression
+        if (id9()) return true;
+        if (id12()) return true;
+        if (id15()) return true;
+        if (id18()) return true;
+        if (id81()) return true;
+        if (id92()) return true;
+        if (id24()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id9
+    function id9() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id10() {
-        // StringLiteralExpression
+    function id10() { // StringLiteralExpression
         if (IP + 5 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -719,16 +744,21 @@ const parse = (() => {
         return true;
     }
 
-    function id11() {
-        // BooleanLiteralExpression
+    function id11() { // BooleanLiteralExpression
         OUT = false;
         return true;
     }
 
-    // NOT HANDLED: id12
+    function id12() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id13()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id13() {
-        // StringLiteralExpression
+    function id13() { // StringLiteralExpression
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 110) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -739,16 +769,21 @@ const parse = (() => {
         return true;
     }
 
-    function id14() {
-        // NullLiteralExpression
+    function id14() { // NullLiteralExpression
         OUT = null;
         return true;
     }
 
-    // NOT HANDLED: id15
+    function id15() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id16() {
-        // StringLiteralExpression
+    function id16() { // StringLiteralExpression
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 116) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -759,18 +794,32 @@ const parse = (() => {
         return true;
     }
 
-    function id17() {
-        // BooleanLiteralExpression
+    function id17() { // BooleanLiteralExpression
         OUT = true;
         return true;
     }
 
-    // NOT HANDLED: id18
+    function id18() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id21()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id79()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id19
+    function id19() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id20() {
-        // StringLiteralExpression
+    function id20() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 123) return false;
         IP += 1;
@@ -778,16 +827,34 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id21
+    function id21() { // SelectionExpression
+        if (id22()) return true;
+        if (id78()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id22
+    function id22() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id23
 
-    // NOT HANDLED: id24
+    function id24() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id25() {
-        // StringLiteralExpression
+    function id25() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
@@ -797,14 +864,33 @@ const parse = (() => {
 
     // NOT HANDLED: id26
 
-    // NOT HANDLED: id27
+    function id27() { // SelectionExpression
+        if (id28()) return true;
+        if (id39()) return true;
+        if (id42()) return true;
+        if (id45()) return true;
+        if (id48()) return true;
+        if (id51()) return true;
+        if (id54()) return true;
+        if (id57()) return true;
+        if (id60()) return true;
+        if (id63()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id28
+    function id28() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id31()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id29
 
-    function id30() {
-        // StringLiteralExpression
+    function id30() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         IP += 1;
@@ -814,8 +900,7 @@ const parse = (() => {
 
     // NOT HANDLED: id31
 
-    function id32() {
-        // StringLiteralExpression
+    function id32() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
@@ -829,8 +914,7 @@ const parse = (() => {
 
     // NOT HANDLED: id36
 
-    function id37() {
-        // StringLiteralExpression
+    function id37() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
@@ -838,8 +922,7 @@ const parse = (() => {
         return true;
     }
 
-    function id38() {
-        // StringLiteralExpression
+    function id38() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
         IP += 1;
@@ -847,10 +930,16 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id39
+    function id39() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id40() {
-        // StringLiteralExpression
+    function id40() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -859,16 +948,21 @@ const parse = (() => {
         return true;
     }
 
-    function id41() {
-        // StringLiteralExpression
+    function id41() { // StringLiteralExpression
         OUT = "\"";
         return true;
     }
 
-    // NOT HANDLED: id42
+    function id42() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id44()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id43() {
-        // StringLiteralExpression
+    function id43() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 92) return false;
@@ -877,16 +971,21 @@ const parse = (() => {
         return true;
     }
 
-    function id44() {
-        // StringLiteralExpression
+    function id44() { // StringLiteralExpression
         OUT = "\\";
         return true;
     }
 
-    // NOT HANDLED: id45
+    function id45() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id47()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id46() {
-        // StringLiteralExpression
+    function id46() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 47) return false;
@@ -895,16 +994,21 @@ const parse = (() => {
         return true;
     }
 
-    function id47() {
-        // StringLiteralExpression
+    function id47() { // StringLiteralExpression
         OUT = "/";
         return true;
     }
 
-    // NOT HANDLED: id48
+    function id48() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id50()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id49() {
-        // StringLiteralExpression
+    function id49() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -913,16 +1017,21 @@ const parse = (() => {
         return true;
     }
 
-    function id50() {
-        // StringLiteralExpression
+    function id50() { // StringLiteralExpression
         OUT = "\b";
         return true;
     }
 
-    // NOT HANDLED: id51
+    function id51() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id52() {
-        // StringLiteralExpression
+    function id52() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 102) return false;
@@ -931,16 +1040,21 @@ const parse = (() => {
         return true;
     }
 
-    function id53() {
-        // StringLiteralExpression
+    function id53() { // StringLiteralExpression
         OUT = "\f";
         return true;
     }
 
-    // NOT HANDLED: id54
+    function id54() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id56()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id55() {
-        // StringLiteralExpression
+    function id55() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -949,16 +1063,21 @@ const parse = (() => {
         return true;
     }
 
-    function id56() {
-        // StringLiteralExpression
+    function id56() { // StringLiteralExpression
         OUT = "\n";
         return true;
     }
 
-    // NOT HANDLED: id57
+    function id57() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id59()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id58() {
-        // StringLiteralExpression
+    function id58() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -967,16 +1086,21 @@ const parse = (() => {
         return true;
     }
 
-    function id59() {
-        // StringLiteralExpression
+    function id59() { // StringLiteralExpression
         OUT = "\r";
         return true;
     }
 
-    // NOT HANDLED: id60
+    function id60() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id62()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id61() {
-        // StringLiteralExpression
+    function id61() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 116) return false;
@@ -985,16 +1109,21 @@ const parse = (() => {
         return true;
     }
 
-    function id62() {
-        // StringLiteralExpression
+    function id62() { // StringLiteralExpression
         OUT = "\t";
         return true;
     }
 
-    // NOT HANDLED: id63
+    function id63() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id65()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id64() {
-        // StringLiteralExpression
+    function id64() { // StringLiteralExpression
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -1009,24 +1138,36 @@ const parse = (() => {
 
     // NOT HANDLED: id68
 
-    function id69() {
-        // NumericLiteralExpression
+    function id69() { // NumericLiteralExpression
         OUT = 16;
         return true;
     }
 
-    function id70() {
-        // NumericLiteralExpression
+    function id70() { // NumericLiteralExpression
         OUT = 4;
         return true;
     }
 
-    // NOT HANDLED: id71
+    function id71() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id72()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id72
+    function id72() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id73()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id73() {
-        // StringLiteralExpression
+    function id73() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 58) return false;
         IP += 1;
@@ -1036,12 +1177,26 @@ const parse = (() => {
 
     // NOT HANDLED: id74
 
-    // NOT HANDLED: id75
+    function id75() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id76()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id76
+    function id76() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id77()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id77() {
-        // StringLiteralExpression
+    function id77() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 44) return false;
         IP += 1;
@@ -1051,10 +1206,17 @@ const parse = (() => {
 
     // NOT HANDLED: id78
 
-    // NOT HANDLED: id79
+    function id79() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id80()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id80() {
-        // StringLiteralExpression
+    function id80() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 125) return false;
         IP += 1;
@@ -1062,12 +1224,27 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id81
+    function id81() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id82()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id90()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id82
+    function id82() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id83()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id83() {
-        // StringLiteralExpression
+    function id83() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 91) return false;
         IP += 1;
@@ -1075,22 +1252,47 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id84
+    function id84() { // SelectionExpression
+        if (id85()) return true;
+        if (id89()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id85
+    function id85() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id86()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id87()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id86
 
     // NOT HANDLED: id87
 
-    // NOT HANDLED: id88
+    function id88() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id76()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id85()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id89
 
-    // NOT HANDLED: id90
+    function id90() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id91()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id91() {
-        // StringLiteralExpression
+    function id91() { // StringLiteralExpression
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 93) return false;
         IP += 1;
@@ -1100,7 +1302,7 @@ const parse = (() => {
 
     // NOT HANDLED: id92
 
-    "START IS id1";
+    return id1;
 })();
 
 
@@ -1111,120 +1313,206 @@ const print = (() => {
     const id35 = createExtension_id35({mode: 7})
     const id67 = createExtension_id67({mode: 7})
 
-    // NOT HANDLED: id1
+    function id1() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id2
 
-    // NOT HANDLED: id3
+    function id3() { // SelectionExpression
+        if (id4()) return true;
+        if (id5()) return true;
+        if (id6()) return true;
+        if (id7()) return true;
+        return false;
+    }
 
-    function id4() {
-        // StringLiteralExpression
+    function id4() { // StringLiteralExpression
         OUT = " ";
         return true;
     }
 
-    function id5() {
-        // StringLiteralExpression
+    function id5() { // StringLiteralExpression
         OUT = "\t";
         return true;
     }
 
-    function id6() {
-        // StringLiteralExpression
+    function id6() { // StringLiteralExpression
         OUT = "\n";
         return true;
     }
 
-    function id7() {
-        // StringLiteralExpression
+    function id7() { // StringLiteralExpression
         OUT = "\r";
         return true;
     }
 
-    // NOT HANDLED: id8
+    function id8() { // SelectionExpression
+        if (id9()) return true;
+        if (id12()) return true;
+        if (id15()) return true;
+        if (id18()) return true;
+        if (id81()) return true;
+        if (id92()) return true;
+        if (id24()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id9
+    function id9() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id10() {
-        // StringLiteralExpression
+    function id10() { // StringLiteralExpression
         OUT = "false";
         return true;
     }
 
-    function id11() {
-        // BooleanLiteralExpression
+    function id11() { // BooleanLiteralExpression
         if (IN !== false || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
 
-    // NOT HANDLED: id12
+    function id12() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id13()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id13() {
-        // StringLiteralExpression
+    function id13() { // StringLiteralExpression
         OUT = "null";
         return true;
     }
 
-    function id14() {
-        // NullLiteralExpression
+    function id14() { // NullLiteralExpression
         if (IN !== null || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
 
-    // NOT HANDLED: id15
+    function id15() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id16() {
-        // StringLiteralExpression
+    function id16() { // StringLiteralExpression
         OUT = "true";
         return true;
     }
 
-    function id17() {
-        // BooleanLiteralExpression
+    function id17() { // BooleanLiteralExpression
         if (IN !== true || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
 
-    // NOT HANDLED: id18
+    function id18() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id21()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id79()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id19
+    function id19() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id20() {
-        // StringLiteralExpression
+    function id20() { // StringLiteralExpression
         OUT = "{";
         return true;
     }
 
-    // NOT HANDLED: id21
+    function id21() { // SelectionExpression
+        if (id22()) return true;
+        if (id78()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id22
+    function id22() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id23
 
-    // NOT HANDLED: id24
+    function id24() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id25() {
-        // StringLiteralExpression
+    function id25() { // StringLiteralExpression
         OUT = "\"";
         return true;
     }
 
     // NOT HANDLED: id26
 
-    // NOT HANDLED: id27
+    function id27() { // SelectionExpression
+        if (id28()) return true;
+        if (id39()) return true;
+        if (id42()) return true;
+        if (id45()) return true;
+        if (id48()) return true;
+        if (id51()) return true;
+        if (id54()) return true;
+        if (id57()) return true;
+        if (id60()) return true;
+        if (id63()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id28
+    function id28() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id31()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id29
 
-    function id30() {
-        // StringLiteralExpression
+    function id30() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1235,8 +1523,7 @@ const print = (() => {
 
     // NOT HANDLED: id31
 
-    function id32() {
-        // StringLiteralExpression
+    function id32() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1251,8 +1538,7 @@ const print = (() => {
 
     // NOT HANDLED: id36
 
-    function id37() {
-        // StringLiteralExpression
+    function id37() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
@@ -1261,8 +1547,7 @@ const print = (() => {
         return true;
     }
 
-    function id38() {
-        // StringLiteralExpression
+    function id38() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
@@ -1271,16 +1556,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id39
+    function id39() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id40() {
-        // StringLiteralExpression
+    function id40() { // StringLiteralExpression
         OUT = "\\\"";
         return true;
     }
 
-    function id41() {
-        // StringLiteralExpression
+    function id41() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1289,16 +1579,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id42
+    function id42() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id44()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id43() {
-        // StringLiteralExpression
+    function id43() { // StringLiteralExpression
         OUT = "\\\\";
         return true;
     }
 
-    function id44() {
-        // StringLiteralExpression
+    function id44() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1307,16 +1602,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id45
+    function id45() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id47()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id46() {
-        // StringLiteralExpression
+    function id46() { // StringLiteralExpression
         OUT = "\\/";
         return true;
     }
 
-    function id47() {
-        // StringLiteralExpression
+    function id47() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 47) return false;
@@ -1325,16 +1625,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id48
+    function id48() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id50()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id49() {
-        // StringLiteralExpression
+    function id49() { // StringLiteralExpression
         OUT = "\\b";
         return true;
     }
 
-    function id50() {
-        // StringLiteralExpression
+    function id50() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 8) return false;
@@ -1343,16 +1648,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id51
+    function id51() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id52() {
-        // StringLiteralExpression
+    function id52() { // StringLiteralExpression
         OUT = "\\f";
         return true;
     }
 
-    function id53() {
-        // StringLiteralExpression
+    function id53() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 12) return false;
@@ -1361,16 +1671,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id54
+    function id54() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id56()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id55() {
-        // StringLiteralExpression
+    function id55() { // StringLiteralExpression
         OUT = "\\n";
         return true;
     }
 
-    function id56() {
-        // StringLiteralExpression
+    function id56() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
@@ -1379,16 +1694,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id57
+    function id57() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id59()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id58() {
-        // StringLiteralExpression
+    function id58() { // StringLiteralExpression
         OUT = "\\r";
         return true;
     }
 
-    function id59() {
-        // StringLiteralExpression
+    function id59() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
@@ -1397,16 +1717,21 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id60
+    function id60() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id62()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id61() {
-        // StringLiteralExpression
+    function id61() { // StringLiteralExpression
         OUT = "\\t";
         return true;
     }
 
-    function id62() {
-        // StringLiteralExpression
+    function id62() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
@@ -1415,10 +1740,16 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id63
+    function id63() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id65()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id64() {
-        // StringLiteralExpression
+    function id64() { // StringLiteralExpression
         OUT = "\\u";
         return true;
     }
@@ -1429,85 +1760,158 @@ const print = (() => {
 
     // NOT HANDLED: id68
 
-    function id69() {
-        // NumericLiteralExpression
+    function id69() { // NumericLiteralExpression
         if (IN !== 16 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
 
-    function id70() {
-        // NumericLiteralExpression
+    function id70() { // NumericLiteralExpression
         if (IN !== 4 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
 
-    // NOT HANDLED: id71
+    function id71() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id72()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id72
+    function id72() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id73()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id73() {
-        // StringLiteralExpression
+    function id73() { // StringLiteralExpression
         OUT = ":";
         return true;
     }
 
     // NOT HANDLED: id74
 
-    // NOT HANDLED: id75
+    function id75() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id76()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id76
+    function id76() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id77()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id77() {
-        // StringLiteralExpression
+    function id77() { // StringLiteralExpression
         OUT = ",";
         return true;
     }
 
     // NOT HANDLED: id78
 
-    // NOT HANDLED: id79
+    function id79() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id80()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id80() {
-        // StringLiteralExpression
+    function id80() { // StringLiteralExpression
         OUT = "}";
         return true;
     }
 
-    // NOT HANDLED: id81
+    function id81() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id82()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id90()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    // NOT HANDLED: id82
+    function id82() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id83()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id83() {
-        // StringLiteralExpression
+    function id83() { // StringLiteralExpression
         OUT = "[";
         return true;
     }
 
-    // NOT HANDLED: id84
+    function id84() { // SelectionExpression
+        if (id85()) return true;
+        if (id89()) return true;
+        return false;
+    }
 
-    // NOT HANDLED: id85
+    function id85() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id86()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id87()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id86
 
     // NOT HANDLED: id87
 
-    // NOT HANDLED: id88
+    function id88() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id76()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id85()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id89
 
-    // NOT HANDLED: id90
+    function id90() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id91()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id91() {
-        // StringLiteralExpression
+    function id91() { // StringLiteralExpression
         OUT = "]";
         return true;
     }
 
     // NOT HANDLED: id92
 
-    "START IS id1";
+    return id1;
 })();

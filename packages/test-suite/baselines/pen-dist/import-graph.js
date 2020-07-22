@@ -242,8 +242,7 @@ const parse = (() => {
 
     // NOT HANDLED: id1
 
-    function id2() {
-        // StringLiteralExpression
+    function id2() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -253,10 +252,16 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id3
+    function id3() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id4() {
-        // StringLiteralExpression
+    function id4() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -266,8 +271,7 @@ const parse = (() => {
         return true;
     }
 
-    function id5() {
-        // StringLiteralExpression
+    function id5() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -277,7 +281,7 @@ const parse = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();
 
 
@@ -288,8 +292,7 @@ const print = (() => {
 
     // NOT HANDLED: id1
 
-    function id2() {
-        // StringLiteralExpression
+    function id2() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -300,10 +303,16 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id3
+    function id3() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id4() {
-        // StringLiteralExpression
+    function id4() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -314,8 +323,7 @@ const print = (() => {
         return true;
     }
 
-    function id5() {
-        // StringLiteralExpression
+    function id5() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -326,5 +334,5 @@ const print = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();

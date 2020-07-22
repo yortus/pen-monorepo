@@ -1,10 +1,7 @@
 import * as fs from 'fs';
-//import * as path from 'path';
-import {Expression/*, SelectionExpression, SequenceExpression*/} from '../../ast-nodes';
-//import {SymbolTable} from '../../symbol-table';
+import {Expression} from '../../ast-nodes';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
-//import {Metadata} from './metadata';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
@@ -119,9 +116,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
     // TODO: emit epilog...
     let startName = Object.keys(il)[0]; // TODO: dodgy af... should be an explicit way of finding 'start' expr
-    emit.down(2).text(`"START IS ${startName}";`);
-
-    //TODO: ???    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
+    emit.down(2).text(`return ${startName};`);
     emit.dedent().down(1).text('})();');
 }
 
@@ -203,9 +198,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'NullLiteralExpression':
         case 'NumericLiteralExpression': {
             const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
-            //const fname = expr.kind.substr(0, 3).toUpperCase();
-            emit.down(2).text(`function ${name}() {`).indent();
-            emit.down(1).text(`// ${expr.kind}`);
+            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
             if (modes.isPrint(mode) && modes.hasInput(mode)) {
                 emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
                 emit.down(1).text(`IP += 1;`);
@@ -309,18 +302,36 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         //     emit.text(`${ref.scope.id}('${ref.sourceName}')`);
         //     break;
 
-        // case 'SelectionExpression':
-        //     emitSelectionExpression(emit, expr, symbolTable, mode);
-        //     break;
+        case 'SelectionExpression': {
+            const arity = expr.expressions.length;
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (${exprVars[i]}()) return true;`);
+            }
+            emit.down(1).text('return false;');
+            emit.dedent().down(1).text('}');
+            break;
+        }
 
-        // case 'SequenceExpression':
-        //     emitSequenceExpression(emit, expr, symbolTable, mode);
-        //     break;
+        case 'SequenceExpression': {
+            const arity = expr.expressions.length;
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
+            emit.down(1).text('let stateₒ = getState();');
+            emit.down(1).text('let out;');
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (${exprVars[i]}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
+            }
+            emit.down(1).text('OUT = out;');
+            emit.down(1).text('return true;');
+            emit.dedent().down(1).text('}');
+            break;
+        }
 
         case 'StringLiteralExpression': {
             const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
-            emit.down(2).text(`function ${name}() {`).indent();
-            emit.down(1).text(`// ${expr.kind}`);
+            emit.down(2).text(`function ${name}() { // ${expr.kind}`).indent();
             if (modes.hasInput(localMode)) {
                 if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
                 emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
@@ -341,47 +352,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             // throw new Error('Internal Error'); // TODO...
     }
 }
-
-
-// function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable, mode: Mode) {
-//     const arity = expr.expressions.length;
-//     const exprVars = expr.expressions.map(_ => newId());
-//     emit.text('(() => {').indent();
-//     for (let i = 0; i < arity; ++i) {
-//         emit.down(1).text(`const ${exprVars[i]} = `);
-//         emitExpression(emit, expr.expressions[i], symbolTable, mode);
-//         emit.text(';');
-//     }
-//     emit.down(1).text('return function SEL() {').indent();
-//     for (let i = 0; i < arity; ++i) {
-//         emit.down(1).text(`if (${exprVars[i]}()) return true;`);
-//     }
-//     emit.down(1).text('return false;');
-//     emit.dedent().down(1).text('};');
-//     emit.dedent().down(1).text('})()');
-// }
-
-
-// function emitSequenceExpression(emit: Emitter, expr: SequenceExpression, symbolTable: SymbolTable, mode: Mode) {
-//     const arity = expr.expressions.length;
-//     const exprVars = expr.expressions.map(_ => newId());
-//     emit.text('(() => {').indent();
-//     for (let i = 0; i < arity; ++i) {
-//         emit.down(1).text(`const ${exprVars[i]} = `);
-//         emitExpression(emit, expr.expressions[i], symbolTable, mode);
-//         emit.text(';');
-//     }
-//     emit.down(1).text('return function SEQ() {').indent();
-//     emit.down(1).text('let stateₒ = getState();');
-//     emit.down(1).text('let out;');
-//     for (let i = 0; i < arity; ++i) {
-//         emit.down(1).text(`if (${exprVars[i]}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
-//     }
-//     emit.down(1).text('OUT = out;');
-//     emit.down(1).text('return true;');
-//     emit.dedent().down(1).text('};');
-//     emit.dedent().down(1).text('})()');
-// }
 
 
 // // TODO: helper function

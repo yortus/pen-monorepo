@@ -593,16 +593,32 @@ const createExtension_id3 = (() => {
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
-    // NOT HANDLED: id1
+    function id1() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id2
 
     // NOT HANDLED: id4
 
-    // NOT HANDLED: id5
+    function id5() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id6() {
-        // StringLiteralExpression
+    function id6() { // StringLiteralExpression
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
         if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -613,8 +629,7 @@ const parse = (() => {
         return true;
     }
 
-    function id7() {
-        // StringLiteralExpression
+    function id7() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -624,10 +639,16 @@ const parse = (() => {
         return true;
     }
 
-    // NOT HANDLED: id8
+    function id8() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id9() {
-        // StringLiteralExpression
+    function id9() { // StringLiteralExpression
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -637,7 +658,7 @@ const parse = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();
 
 
@@ -647,16 +668,32 @@ const parse = (() => {
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
-    // NOT HANDLED: id1
+    function id1() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
     // NOT HANDLED: id2
 
     // NOT HANDLED: id4
 
-    // NOT HANDLED: id5
+    function id5() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id6() {
-        // StringLiteralExpression
+    function id6() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
@@ -668,8 +705,7 @@ const print = (() => {
         return true;
     }
 
-    function id7() {
-        // StringLiteralExpression
+    function id7() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -680,10 +716,16 @@ const print = (() => {
         return true;
     }
 
-    // NOT HANDLED: id8
+    function id8() { // SequenceExpression
+        let stateₒ = getState();
+        let out;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    function id9() {
-        // StringLiteralExpression
+    function id9() { // StringLiteralExpression
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
@@ -694,5 +736,5 @@ const print = (() => {
         return true;
     }
 
-    "START IS id1";
+    return id1;
 })();
