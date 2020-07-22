@@ -8,19 +8,13 @@ import {Metadata} from './metadata';
 
 
 // TODO: jsdoc...
-export function createFlatExpressionList(program: Program): AstNodes.SimpleBinding[] {
-
-
-    // Objectives:
-    // 1. generate an ENTRY for the `start` reference
-    // 2. in the process of (1), generate an ENTRY for every sub-expression required to generate the `start` ENTRY.
+export function createFlatExpressionList(program: Program): Record<string, AstNodes.Expression> {
 
     // ENTRY rules:
     // a. the expression in an ENTRY is always 'flat' - any subexpressions are ReferenceExpressions to other ENTRYs
     // b. each ENTRY has a unique name (to facilitate rule (a)). Can be human-readable / linked to source names
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
     // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
-
 
     // Create helper functions for this program.
     let resolve = createResolver(program);
@@ -36,11 +30,9 @@ export function createFlatExpressionList(program: Program): AstNodes.SimpleBindi
     getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
     // TODO: temp testing... build the one and only internal module for emitting
-    let bindings = [] as AstNodes.SimpleBinding[];
-    for (let {uniqueName: name, expr: value} of entriesByHash.values()) {
-        bindings.push({kind: 'SimpleBinding', name, value, exported: false, meta: {}});
-    }
-    return bindings;
+    let flatList = {} as Record<string, AstNodes.Expression>;
+    for (let {uniqueName, expr} of entriesByHash.values()) flatList[uniqueName] = expr;
+    return flatList;
 
 
     // TODO: recursive...
