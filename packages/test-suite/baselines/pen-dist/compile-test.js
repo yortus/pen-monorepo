@@ -585,3 +585,114 @@ const createExtension_id3 = (() => {
         };
     };
 })();
+
+
+
+
+// --------------------------------------------------------------------------------
+const parse = (() => {
+    const id3 = createExtension_id3({mode: 6})
+
+    // NOT HANDLED: id1
+
+    // NOT HANDLED: id2
+
+    // NOT HANDLED: id4
+
+    // NOT HANDLED: id5
+
+    function id6() {
+        // StringLiteralExpression
+        if (IP + 4 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 114) return false;
+        if (IN.charCodeAt(IP + 1) !== 101) return false;
+        if (IN.charCodeAt(IP + 2) !== 115) return false;
+        if (IN.charCodeAt(IP + 3) !== 116) return false;
+        IP += 4;
+        OUT = "rest";
+        return true;
+    }
+
+    function id7() {
+        // StringLiteralExpression
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 97) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 97) return false;
+        IP += 3;
+        OUT = "aaa";
+        return true;
+    }
+
+    // NOT HANDLED: id8
+
+    function id9() {
+        // StringLiteralExpression
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 112) return false;
+        if (IN.charCodeAt(IP + 1) !== 114) return false;
+        if (IN.charCodeAt(IP + 2) !== 101) return false;
+        IP += 3;
+        OUT = "pre";
+        return true;
+    }
+
+    "START IS id1";
+})();
+
+
+
+
+// --------------------------------------------------------------------------------
+const print = (() => {
+    const id3 = createExtension_id3({mode: 7})
+
+    // NOT HANDLED: id1
+
+    // NOT HANDLED: id2
+
+    // NOT HANDLED: id4
+
+    // NOT HANDLED: id5
+
+    function id6() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 4 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 114) return false;
+        if (IN.charCodeAt(IP + 1) !== 101) return false;
+        if (IN.charCodeAt(IP + 2) !== 115) return false;
+        if (IN.charCodeAt(IP + 3) !== 116) return false;
+        IP += 4;
+        OUT = "rest";
+        return true;
+    }
+
+    function id7() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 97) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 97) return false;
+        IP += 3;
+        OUT = "aaa";
+        return true;
+    }
+
+    // NOT HANDLED: id8
+
+    function id9() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 112) return false;
+        if (IN.charCodeAt(IP + 1) !== 114) return false;
+        if (IN.charCodeAt(IP + 2) !== 101) return false;
+        IP += 3;
+        OUT = "pre";
+        return true;
+    }
+
+    "START IS id1";
+})();

@@ -651,3 +651,863 @@ const createExtension_id67 = (() => {
         };
     };
 })();
+
+
+
+
+// --------------------------------------------------------------------------------
+const parse = (() => {
+    const id35 = createExtension_id35({mode: 6})
+    const id67 = createExtension_id67({mode: 6})
+
+    // NOT HANDLED: id1
+
+    // NOT HANDLED: id2
+
+    // NOT HANDLED: id3
+
+    function id4() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 32) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    function id5() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 9) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    function id6() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 10) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    function id7() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 13) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id8
+
+    // NOT HANDLED: id9
+
+    function id10() {
+        // StringLiteralExpression
+        if (IP + 5 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 102) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 108) return false;
+        if (IN.charCodeAt(IP + 3) !== 115) return false;
+        if (IN.charCodeAt(IP + 4) !== 101) return false;
+        IP += 5;
+        OUT = undefined;
+        return true;
+    }
+
+    function id11() {
+        // BooleanLiteralExpression
+        OUT = false;
+        return true;
+    }
+
+    // NOT HANDLED: id12
+
+    function id13() {
+        // StringLiteralExpression
+        if (IP + 4 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 110) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 108) return false;
+        if (IN.charCodeAt(IP + 3) !== 108) return false;
+        IP += 4;
+        OUT = undefined;
+        return true;
+    }
+
+    function id14() {
+        // NullLiteralExpression
+        OUT = null;
+        return true;
+    }
+
+    // NOT HANDLED: id15
+
+    function id16() {
+        // StringLiteralExpression
+        if (IP + 4 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 116) return false;
+        if (IN.charCodeAt(IP + 1) !== 114) return false;
+        if (IN.charCodeAt(IP + 2) !== 117) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        IP += 4;
+        OUT = undefined;
+        return true;
+    }
+
+    function id17() {
+        // BooleanLiteralExpression
+        OUT = true;
+        return true;
+    }
+
+    // NOT HANDLED: id18
+
+    // NOT HANDLED: id19
+
+    function id20() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 123) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id21
+
+    // NOT HANDLED: id22
+
+    // NOT HANDLED: id23
+
+    // NOT HANDLED: id24
+
+    function id25() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 34) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id26
+
+    // NOT HANDLED: id27
+
+    // NOT HANDLED: id28
+
+    // NOT HANDLED: id29
+
+    function id30() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        IP += 1;
+        OUT = "\\";
+        return true;
+    }
+
+    // NOT HANDLED: id31
+
+    function id32() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 34) return false;
+        IP += 1;
+        OUT = "\"";
+        return true;
+    }
+
+    // NOT HANDLED: id33
+
+    // NOT HANDLED: id34
+
+    // NOT HANDLED: id36
+
+    function id37() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 32) return false;
+        IP += 1;
+        OUT = " ";
+        return true;
+    }
+
+    function id38() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 65535) return false;
+        IP += 1;
+        OUT = "￿";
+        return true;
+    }
+
+    // NOT HANDLED: id39
+
+    function id40() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 34) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id41() {
+        // StringLiteralExpression
+        OUT = "\"";
+        return true;
+    }
+
+    // NOT HANDLED: id42
+
+    function id43() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 92) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id44() {
+        // StringLiteralExpression
+        OUT = "\\";
+        return true;
+    }
+
+    // NOT HANDLED: id45
+
+    function id46() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 47) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id47() {
+        // StringLiteralExpression
+        OUT = "/";
+        return true;
+    }
+
+    // NOT HANDLED: id48
+
+    function id49() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id50() {
+        // StringLiteralExpression
+        OUT = "\b";
+        return true;
+    }
+
+    // NOT HANDLED: id51
+
+    function id52() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 102) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id53() {
+        // StringLiteralExpression
+        OUT = "\f";
+        return true;
+    }
+
+    // NOT HANDLED: id54
+
+    function id55() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id56() {
+        // StringLiteralExpression
+        OUT = "\n";
+        return true;
+    }
+
+    // NOT HANDLED: id57
+
+    function id58() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 114) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id59() {
+        // StringLiteralExpression
+        OUT = "\r";
+        return true;
+    }
+
+    // NOT HANDLED: id60
+
+    function id61() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 116) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    function id62() {
+        // StringLiteralExpression
+        OUT = "\t";
+        return true;
+    }
+
+    // NOT HANDLED: id63
+
+    function id64() {
+        // StringLiteralExpression
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id65
+
+    // NOT HANDLED: id66
+
+    // NOT HANDLED: id68
+
+    function id69() {
+        // NumericLiteralExpression
+        OUT = 16;
+        return true;
+    }
+
+    function id70() {
+        // NumericLiteralExpression
+        OUT = 4;
+        return true;
+    }
+
+    // NOT HANDLED: id71
+
+    // NOT HANDLED: id72
+
+    function id73() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 58) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id74
+
+    // NOT HANDLED: id75
+
+    // NOT HANDLED: id76
+
+    function id77() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 44) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id78
+
+    // NOT HANDLED: id79
+
+    function id80() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 125) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id81
+
+    // NOT HANDLED: id82
+
+    function id83() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 91) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id84
+
+    // NOT HANDLED: id85
+
+    // NOT HANDLED: id86
+
+    // NOT HANDLED: id87
+
+    // NOT HANDLED: id88
+
+    // NOT HANDLED: id89
+
+    // NOT HANDLED: id90
+
+    function id91() {
+        // StringLiteralExpression
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 93) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id92
+
+    "START IS id1";
+})();
+
+
+
+
+// --------------------------------------------------------------------------------
+const print = (() => {
+    const id35 = createExtension_id35({mode: 7})
+    const id67 = createExtension_id67({mode: 7})
+
+    // NOT HANDLED: id1
+
+    // NOT HANDLED: id2
+
+    // NOT HANDLED: id3
+
+    function id4() {
+        // StringLiteralExpression
+        OUT = " ";
+        return true;
+    }
+
+    function id5() {
+        // StringLiteralExpression
+        OUT = "\t";
+        return true;
+    }
+
+    function id6() {
+        // StringLiteralExpression
+        OUT = "\n";
+        return true;
+    }
+
+    function id7() {
+        // StringLiteralExpression
+        OUT = "\r";
+        return true;
+    }
+
+    // NOT HANDLED: id8
+
+    // NOT HANDLED: id9
+
+    function id10() {
+        // StringLiteralExpression
+        OUT = "false";
+        return true;
+    }
+
+    function id11() {
+        // BooleanLiteralExpression
+        if (IN !== false || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id12
+
+    function id13() {
+        // StringLiteralExpression
+        OUT = "null";
+        return true;
+    }
+
+    function id14() {
+        // NullLiteralExpression
+        if (IN !== null || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id15
+
+    function id16() {
+        // StringLiteralExpression
+        OUT = "true";
+        return true;
+    }
+
+    function id17() {
+        // BooleanLiteralExpression
+        if (IN !== true || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id18
+
+    // NOT HANDLED: id19
+
+    function id20() {
+        // StringLiteralExpression
+        OUT = "{";
+        return true;
+    }
+
+    // NOT HANDLED: id21
+
+    // NOT HANDLED: id22
+
+    // NOT HANDLED: id23
+
+    // NOT HANDLED: id24
+
+    function id25() {
+        // StringLiteralExpression
+        OUT = "\"";
+        return true;
+    }
+
+    // NOT HANDLED: id26
+
+    // NOT HANDLED: id27
+
+    // NOT HANDLED: id28
+
+    // NOT HANDLED: id29
+
+    function id30() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        IP += 1;
+        OUT = "\\";
+        return true;
+    }
+
+    // NOT HANDLED: id31
+
+    function id32() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 34) return false;
+        IP += 1;
+        OUT = "\"";
+        return true;
+    }
+
+    // NOT HANDLED: id33
+
+    // NOT HANDLED: id34
+
+    // NOT HANDLED: id36
+
+    function id37() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 32) return false;
+        IP += 1;
+        OUT = " ";
+        return true;
+    }
+
+    function id38() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 65535) return false;
+        IP += 1;
+        OUT = "￿";
+        return true;
+    }
+
+    // NOT HANDLED: id39
+
+    function id40() {
+        // StringLiteralExpression
+        OUT = "\\\"";
+        return true;
+    }
+
+    function id41() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 34) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id42
+
+    function id43() {
+        // StringLiteralExpression
+        OUT = "\\\\";
+        return true;
+    }
+
+    function id44() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 92) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id45
+
+    function id46() {
+        // StringLiteralExpression
+        OUT = "\\/";
+        return true;
+    }
+
+    function id47() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 47) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id48
+
+    function id49() {
+        // StringLiteralExpression
+        OUT = "\\b";
+        return true;
+    }
+
+    function id50() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 8) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id51
+
+    function id52() {
+        // StringLiteralExpression
+        OUT = "\\f";
+        return true;
+    }
+
+    function id53() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 12) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id54
+
+    function id55() {
+        // StringLiteralExpression
+        OUT = "\\n";
+        return true;
+    }
+
+    function id56() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 10) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id57
+
+    function id58() {
+        // StringLiteralExpression
+        OUT = "\\r";
+        return true;
+    }
+
+    function id59() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 13) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id60
+
+    function id61() {
+        // StringLiteralExpression
+        OUT = "\\t";
+        return true;
+    }
+
+    function id62() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 9) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id63
+
+    function id64() {
+        // StringLiteralExpression
+        OUT = "\\u";
+        return true;
+    }
+
+    // NOT HANDLED: id65
+
+    // NOT HANDLED: id66
+
+    // NOT HANDLED: id68
+
+    function id69() {
+        // NumericLiteralExpression
+        if (IN !== 16 || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    function id70() {
+        // NumericLiteralExpression
+        if (IN !== 4 || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+
+    // NOT HANDLED: id71
+
+    // NOT HANDLED: id72
+
+    function id73() {
+        // StringLiteralExpression
+        OUT = ":";
+        return true;
+    }
+
+    // NOT HANDLED: id74
+
+    // NOT HANDLED: id75
+
+    // NOT HANDLED: id76
+
+    function id77() {
+        // StringLiteralExpression
+        OUT = ",";
+        return true;
+    }
+
+    // NOT HANDLED: id78
+
+    // NOT HANDLED: id79
+
+    function id80() {
+        // StringLiteralExpression
+        OUT = "}";
+        return true;
+    }
+
+    // NOT HANDLED: id81
+
+    // NOT HANDLED: id82
+
+    function id83() {
+        // StringLiteralExpression
+        OUT = "[";
+        return true;
+    }
+
+    // NOT HANDLED: id84
+
+    // NOT HANDLED: id85
+
+    // NOT HANDLED: id86
+
+    // NOT HANDLED: id87
+
+    // NOT HANDLED: id88
+
+    // NOT HANDLED: id89
+
+    // NOT HANDLED: id90
+
+    function id91() {
+        // StringLiteralExpression
+        OUT = "]";
+        return true;
+    }
+
+    // NOT HANDLED: id92
+
+    "START IS id1";
+})();

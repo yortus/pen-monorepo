@@ -233,3 +233,44 @@ function zeroOrOne({ expression }) {
         return true;
     };
 }
+
+
+
+
+// --------------------------------------------------------------------------------
+const parse = (() => {
+
+    function id1() {
+        // StringLiteralExpression
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 102) return false;
+        if (IN.charCodeAt(IP + 1) !== 111) return false;
+        if (IN.charCodeAt(IP + 2) !== 111) return false;
+        IP += 3;
+        OUT = "foo";
+        return true;
+    }
+
+    "START IS id1";
+})();
+
+
+
+
+// --------------------------------------------------------------------------------
+const print = (() => {
+
+    function id1() {
+        // StringLiteralExpression
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 102) return false;
+        if (IN.charCodeAt(IP + 1) !== 111) return false;
+        if (IN.charCodeAt(IP + 2) !== 111) return false;
+        IP += 3;
+        OUT = "foo";
+        return true;
+    }
+
+    "START IS id1";
+})();

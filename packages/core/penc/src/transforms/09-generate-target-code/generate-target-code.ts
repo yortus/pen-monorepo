@@ -5,8 +5,8 @@ import {Expression/*, SelectionExpression, SequenceExpression*/} from '../../ast
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 //import {Metadata} from './metadata';
-//import {Mode, PARSE, PRINT} from './modes';
-//import * as modes from './modes';
+import {Mode, PARSE, PRINT} from './modes';
+import * as modes from './modes';
 
 
 export interface Program {
@@ -28,9 +28,9 @@ export function generateTargetCode(program: Program) {
     // TODO: emit extensions...
     emitExtensions(emit, program);
 
-    // // TODO: temp testing... emit parse() fn and print() fn
-    // emitProgram(emit, program, PARSE);
-    // emitProgram(emit, program, PRINT);
+    // TODO: temp testing... emit parse() fn and print() fn
+    emitProgram(emit, program, PARSE);
+    emitProgram(emit, program, PRINT);
 
     // // TODO: Emit main exports...
     // emit.down(2).text(`// -------------------- Main exports --------------------`);
@@ -95,24 +95,35 @@ function emitExtensions(emit: Emitter, {il}: Program) {
 }
 
 
-// function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
+function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
+    let {il} = program;
 
-//     // TODO: emit prolog...
-//     emit.down(5).text(`// --------------------------------------------------------------------------------`);
-//     emit.down(1).text(`const ${mode === PARSE ? 'parse' : 'print'} = (() => {`).indent();
+    // TODO: emit prolog...
+    emit.down(5).text(`// --------------------------------------------------------------------------------`);
+    emit.down(1).text(`const ${mode === PARSE ? 'parse' : 'print'} = (() => {`).indent();
 
-//     // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
-//     emitSymbolDefinitions(emit, program, mode);
+    let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
+    for (let extName of extNames) {
+        emit.down(1).text(`const ${extName} = createExtension_${extName}({mode: ${mode}})`);
+    }
 
-//     // TODO: Emit compile-time constants...
-//     emitConstants(emit, program);
+    for (let [name, expr] of Object.entries(il)) {
+        emitExpression(emit, name, expr, mode);
+    }
 
-//     // TODO: emit epilog...
-//     let start = program.meta.symbolTable.getSymbolById(program.meta.startSymbolId);
-//     assert(start.kind === 'NameSymbol');
-//     emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
-//     emit.dedent().down(1).text('})();');
-// }
+    // // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
+    // emitSymbolDefinitions(emit, program, mode);
+
+    // // TODO: Emit compile-time constants...
+    // emitConstants(emit, program);
+
+    // TODO: emit epilog...
+    let startName = Object.keys(il)[0]; // TODO: dodgy af... should be an explicit way of finding 'start' expr
+    emit.down(2).text(`"START IS ${startName}";`);
+
+    //TODO: ???    emit.down(2).text(`return ${start.scope.id}('${start.sourceName}');`);
+    emit.dedent().down(1).text('})();');
+}
 
 
 // function emitSymbolDefinitions(emit: Emitter, program: Program, mode: Mode) {
@@ -177,154 +188,159 @@ function emitExtensions(emit: Emitter, {il}: Program) {
 // }
 
 
-// function emitExpression(emit: Emitter, expr: Expression, symbolTable: SymbolTable, mode: Mode) {
-//     switch (expr.kind) {
-//         case 'ApplicationExpression':
-//             emit.text('(');
-//             emitExpression(emit, expr.lambda, symbolTable, mode);
-//             emit.text(')(');
-//             emitExpression(emit, expr.argument, symbolTable, mode);
-//             emit.text(`)`);
-//             break;
+function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
+    [] = [emit, name, mode];
+    switch (expr.kind) {
+        // case 'ApplicationExpression':
+        //     emit.text('(');
+        //     emitExpression(emit, expr.lambda, symbolTable, mode);
+        //     emit.text(')(');
+        //     emitExpression(emit, expr.argument, symbolTable, mode);
+        //     emit.text(`)`);
+        //     break;
 
-//         case 'BooleanLiteralExpression':
-//         case 'NullLiteralExpression':
-//         case 'NumericLiteralExpression': {
-//             const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
-//             const fname = expr.kind.substr(0, 3).toUpperCase();
-//             emit.text(`function ${fname}() {`).indent();
-//             if (modes.isPrint(mode) && modes.hasInput(mode)) {
-//                 emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
-//                 emit.down(1).text(`IP += 1;`);
-//             }
-//             emit.down(1).text(`OUT = ${outText};`);
-//             emit.down(1).text(`return true;`);
-//             emit.dedent().down(1).text('}');
-//             break;
-//         }
+        case 'BooleanLiteralExpression':
+        case 'NullLiteralExpression':
+        case 'NumericLiteralExpression': {
+            const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
+            //const fname = expr.kind.substr(0, 3).toUpperCase();
+            emit.down(2).text(`function ${name}() {`).indent();
+            emit.down(1).text(`// ${expr.kind}`);
+            if (modes.isPrint(mode) && modes.hasInput(mode)) {
+                emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
+                emit.down(1).text(`IP += 1;`);
+            }
+            emit.down(1).text(`OUT = ${outText};`);
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('}');
+            break;
+        }
 
-//         case 'FieldExpression':
-//             emit.text('field({').indent();
-//             emit.down(1).text(`mode: ${mode},`);
-//             emit.down(1).text('name: ');
-//             emitExpression(emit, expr.name, symbolTable, mode);
-//             emit.text(',').down(1).text('value: ');
-//             emitExpression(emit, expr.value, symbolTable, mode);
-//             emit.text(',').dedent().down(1).text('})');
-//             break;
+        // case 'FieldExpression':
+        //     emit.text('field({').indent();
+        //     emit.down(1).text(`mode: ${mode},`);
+        //     emit.down(1).text('name: ');
+        //     emitExpression(emit, expr.name, symbolTable, mode);
+        //     emit.text(',').down(1).text('value: ');
+        //     emitExpression(emit, expr.value, symbolTable, mode);
+        //     emit.text(',').dedent().down(1).text('})');
+        //     break;
 
-//         case 'ImportExpression':
-//             emit.text(expr.meta.scope.id);
-//             break;
+        case 'ImportExpression':
+            // NB: already handled
+            break;
 
-//         // case 'LambdaExpression':
-//         //     break; // TODO...
+        // case 'LambdaExpression':
+        //     break; // TODO...
 
-//         case 'ListExpression':
-//             emit.text('list({').indent();
-//             emit.down(1).text(`mode: ${mode},`);
-//             emit.down(1).text('elements: [');
-//             if (expr.elements.length > 0) {
-//                 emit.indent();
-//                 for (let element of expr.elements) {
-//                     emit.down(1);
-//                     emitExpression(emit, element, symbolTable, mode);
-//                     emit.text(',');
-//                 }
-//                 emit.dedent().down(1);
-//             }
-//             emit.text('],').dedent().down(1).text('})');
-//             break;
+        // case 'ListExpression':
+        //     emit.text('list({').indent();
+        //     emit.down(1).text(`mode: ${mode},`);
+        //     emit.down(1).text('elements: [');
+        //     if (expr.elements.length > 0) {
+        //         emit.indent();
+        //         for (let element of expr.elements) {
+        //             emit.down(1);
+        //             emitExpression(emit, element, symbolTable, mode);
+        //             emit.text(',');
+        //         }
+        //         emit.dedent().down(1);
+        //     }
+        //     emit.text('],').dedent().down(1).text('})');
+        //     break;
 
-//         case 'MemberExpression':
-//             // TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
-//             emitExpression(emit, expr.module, symbolTable, mode);
-//             emit.text(`('${expr.bindingName}')`);
-//             break;
+        // case 'MemberExpression':
+        //     TODO: analyse... console.log(`=====>   ${expr.module.kind}   ${expr.bindingName}`);
+        //     emitExpression(emit, expr.module, symbolTable, mode);
+        //     emit.text(`('${expr.bindingName}')`);
+        //     break;
 
-//         case 'ModuleExpression':
-//             emit.text(expr.module.meta.scope.id);
-//             break;
+        // case 'ModuleExpression':
+        //     emit.text(expr.module.meta.scope.id);
+        //     break;
 
-//         case 'NotExpression': {
-//             const exprVar = newId();
-//             emit.text('(() => {').indent();
-//             emit.down(1).text(`const ${exprVar} = `);
-//             emitExpression(emit, expr.expression, symbolTable, mode);
-//             emit.text(';');
-//             emit.down(1).text(`return function NOT() {`).indent();
-//             emit.down(1).text(`let stateₒ = getState();`);
-//             emit.down(1).text(`let result = !${exprVar}();`);
-//             emit.down(1).text(`setState(stateₒ);`);
-//             emit.down(1).text(`OUT = undefined;`);
-//             emit.down(1).text(`return result;`);
-//             emit.dedent().down(1).text(`};`);
-//             emit.dedent().down(1).text('})()');
-//             break;
-//         }
+        // case 'NotExpression': {
+        //     const exprVar = newId();
+        //     emit.text('(() => {').indent();
+        //     emit.down(1).text(`const ${exprVar} = `);
+        //     emitExpression(emit, expr.expression, symbolTable, mode);
+        //     emit.text(';');
+        //     emit.down(1).text(`return function NOT() {`).indent();
+        //     emit.down(1).text(`let stateₒ = getState();`);
+        //     emit.down(1).text(`let result = !${exprVar}();`);
+        //     emit.down(1).text(`setState(stateₒ);`);
+        //     emit.down(1).text(`OUT = undefined;`);
+        //     emit.down(1).text(`return result;`);
+        //     emit.dedent().down(1).text(`};`);
+        //     emit.dedent().down(1).text('})()');
+        //     break;
+        // }
 
-//         case 'QuantifiedExpression':
-//             emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
-//             emit.down(1).text(`mode: ${mode},`);
-//             emit.down(1).text('expression: ');
-//             emitExpression(emit, expr.expression, symbolTable, mode);
-//             emit.text(',');
-//             emit.dedent().down(1).text('})');
-//             break;
+        // case 'QuantifiedExpression':
+        //     emit.text(`${expr.quantifier === '?' ? 'zeroOrOne' : 'zeroOrMore'}({`).indent();
+        //     emit.down(1).text(`mode: ${mode},`);
+        //     emit.down(1).text('expression: ');
+        //     emitExpression(emit, expr.expression, symbolTable, mode);
+        //     emit.text(',');
+        //     emit.dedent().down(1).text('})');
+        //     break;
 
-//         case 'RecordExpression':
-//             emit.text('record({').indent();
-//             emit.down(1).text(`mode: ${mode},`);
-//             emit.down(1).text('fields: [');
-//             if (expr.fields.length > 0) {
-//                 emit.indent();
-//                 for (let field of expr.fields) {
-//                     emit.down(1).text('{').indent();
-//                     emit.down(1).text(`name: '${field.name}',`);
-//                     emit.down(1).text(`value: `);
-//                     emitExpression(emit, field.value, symbolTable, mode);
-//                     emit.text(',').dedent().down(1).text('},');
-//                 }
-//                 emit.dedent().down(1);
-//             }
-//             emit.text('],').dedent().down(1).text('})');
-//             break;
+        // case 'RecordExpression':
+        //     emit.text('record({').indent();
+        //     emit.down(1).text(`mode: ${mode},`);
+        //     emit.down(1).text('fields: [');
+        //     if (expr.fields.length > 0) {
+        //         emit.indent();
+        //         for (let field of expr.fields) {
+        //             emit.down(1).text('{').indent();
+        //             emit.down(1).text(`name: '${field.name}',`);
+        //             emit.down(1).text(`value: `);
+        //             emitExpression(emit, field.value, symbolTable, mode);
+        //             emit.text(',').dedent().down(1).text('},');
+        //         }
+        //         emit.dedent().down(1);
+        //     }
+        //     emit.text('],').dedent().down(1).text('})');
+        //     break;
 
-//         case 'ReferenceExpression':
-//             let ref = symbolTable.getSymbolById(expr.meta.symbolId);
-//             assert(ref.kind === 'NameSymbol');
-//             emit.text(`${ref.scope.id}('${ref.sourceName}')`);
-//             break;
+        // case 'ReferenceExpression':
+        //     let ref = symbolTable.getSymbolById(expr.meta.symbolId);
+        //     assert(ref.kind === 'NameSymbol');
+        //     emit.text(`${ref.scope.id}('${ref.sourceName}')`);
+        //     break;
 
-//         case 'SelectionExpression':
-//             emitSelectionExpression(emit, expr, symbolTable, mode);
-//             break;
+        // case 'SelectionExpression':
+        //     emitSelectionExpression(emit, expr, symbolTable, mode);
+        //     break;
 
-//         case 'SequenceExpression':
-//             emitSequenceExpression(emit, expr, symbolTable, mode);
-//             break;
+        // case 'SequenceExpression':
+        //     emitSequenceExpression(emit, expr, symbolTable, mode);
+        //     break;
 
-//         case 'StringLiteralExpression': {
-//             const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
-//             emit.text('function STR() {').indent();
-//             if (modes.hasInput(localMode)) {
-//                 if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
-//                 emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
-//                 for (let i = 0; i < expr.value.length; ++i) {
-//                     emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
-//                 }
-//                 emit.down(1).text(`IP += ${expr.value.length};`);
-//             }
-//             emit.down(1).text(`OUT = ${modes.hasOutput(localMode) ? JSON.stringify(expr.value) : 'undefined'};`);
-//             emit.down(1).text(`return true;`);
-//             emit.dedent().down(1).text('}');
-//             break;
-//         }
+        case 'StringLiteralExpression': {
+            const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
+            emit.down(2).text(`function ${name}() {`).indent();
+            emit.down(1).text(`// ${expr.kind}`);
+            if (modes.hasInput(localMode)) {
+                if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
+                emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
+                for (let i = 0; i < expr.value.length; ++i) {
+                    emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+                }
+                emit.down(1).text(`IP += ${expr.value.length};`);
+            }
+            emit.down(1).text(`OUT = ${modes.hasOutput(localMode) ? JSON.stringify(expr.value) : 'undefined'};`);
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('}');
+            break;
+        }
 
-//         default:
-//             throw new Error('Internal Error'); // TODO...
-//     }
-// }
+        default:
+            emit.down(2).text(`// NOT HANDLED: ${name}`);
+            // TODO: was... restore...
+            // throw new Error('Internal Error'); // TODO...
+    }
+}
 
 
 // function emitSelectionExpression(emit: Emitter, expr: SelectionExpression, symbolTable: SymbolTable, mode: Mode) {
