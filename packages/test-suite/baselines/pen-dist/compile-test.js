@@ -578,7 +578,7 @@ const createExtension_id3 = (() => {
     return ({mode}) => {
         let _f64 = f64({mode});
         return (name) => {
-            switch(name) {
+            switch (name) {
                 case 'f64': return _f64;
                 default: return undefined;
             }
@@ -589,7 +589,7 @@ const createExtension_id3 = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PARSE ------------------------------
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
@@ -612,7 +612,12 @@ const parse = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id4
+    function id4(bindingName) {
+        switch (bindingName) {
+            case 'x1': return id5;
+            default: return undefined;
+        }
+    }
 
     // SequenceExpression
     function id5() {
@@ -635,6 +640,7 @@ const parse = (() => {
         OUT = "rest";
         return true;
     }
+    id6.constant = {value: "rest"};
 
     // StringLiteralExpression
     function id7() {
@@ -646,6 +652,7 @@ const parse = (() => {
         OUT = "aaa";
         return true;
     }
+    id7.constant = {value: "aaa"};
 
     // SequenceExpression
     function id8() {
@@ -667,6 +674,7 @@ const parse = (() => {
         OUT = "pre";
         return true;
     }
+    id9.constant = {value: "pre"};
 
     return id1;
 })();
@@ -674,7 +682,7 @@ const parse = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PRINT ------------------------------
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
@@ -697,7 +705,12 @@ const print = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id4
+    function id4(bindingName) {
+        switch (bindingName) {
+            case 'x1': return id5;
+            default: return undefined;
+        }
+    }
 
     // SequenceExpression
     function id5() {
@@ -721,6 +734,7 @@ const print = (() => {
         OUT = "rest";
         return true;
     }
+    id6.constant = {value: "rest"};
 
     // StringLiteralExpression
     function id7() {
@@ -733,6 +747,7 @@ const print = (() => {
         OUT = "aaa";
         return true;
     }
+    id7.constant = {value: "aaa"};
 
     // SequenceExpression
     function id8() {
@@ -755,6 +770,28 @@ const print = (() => {
         OUT = "pre";
         return true;
     }
+    id9.constant = {value: "pre"};
 
     return id1;
 })();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};

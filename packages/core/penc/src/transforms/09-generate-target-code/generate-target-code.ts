@@ -14,7 +14,6 @@ export interface Program {
 
 // TODO: doc...
 export function generateTargetCode(program: Program) {
-//    counter = 1;
     const emit = makeEmitter();
 
     // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
@@ -29,21 +28,21 @@ export function generateTargetCode(program: Program) {
     emitProgram(emit, program, PARSE);
     emitProgram(emit, program, PRINT);
 
-    // // TODO: Emit main exports...
-    // emit.down(2).text(`// -------------------- Main exports --------------------`);
-    // emit.down(1).text(`module.exports = {`).indent();
-    // for (let mode of [PARSE, PRINT] as const) {
-    //     const fname = mode === PARSE ? 'parse' : 'print';
-    //     const paramName = mode === PARSE ? 'text' : 'node';
-    //     emit.down(1).text(`${fname}(${paramName}) {`).indent();
-    //     emit.down(1).text(`setState({ IN: ${paramName}, IP: 0 });`);
-    //     emit.down(1).text(`if (!${fname}()) throw new Error('${fname} failed');`);
-    //     emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${fname} didn\\\'t consume entire input');`);
-    //     emit.down(1).text(`if (OUT === undefined) throw new Error('${fname} didn\\\'t return a value');`);
-    //     emit.down(1).text(`return OUT;`);
-    //     emit.dedent().down(1).text(`},`);
-    // }
-    // emit.dedent().down(1).text(`};`);
+    // TODO: Emit main exports...
+    emit.down(5).text(`// ------------------------------ Main exports ------------------------------`);
+    emit.down(1).text(`module.exports = {`).indent();
+    for (let mode of [PARSE, PRINT] as const) {
+        const fname = mode === PARSE ? 'parse' : 'print';
+        const paramName = mode === PARSE ? 'text' : 'node';
+        emit.down(1).text(`${fname}(${paramName}) {`).indent();
+        emit.down(1).text(`setState({ IN: ${paramName}, IP: 0 });`);
+        emit.down(1).text(`if (!${fname}()) throw new Error('${fname} failed');`);
+        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${fname} didn\\\'t consume entire input');`);
+        emit.down(1).text(`if (OUT === undefined) throw new Error('${fname} didn\\\'t return a value');`);
+        emit.down(1).text(`return OUT;`);
+        emit.dedent().down(1).text(`},`);
+    }
+    emit.dedent().down(1).text(`};`);
 
     // All done.
     return emit.down(1).toString();
@@ -81,7 +80,7 @@ function emitExtensions(emit: Emitter, {il}: Program) {
         emit.down(2).text(`return ({mode}) => {`).indent();
         exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}({mode});`));
         emit.down(1).text(`return (name) => {`).indent();
-        emit.down(1).text(`switch(name) {`).indent();
+        emit.down(1).text(`switch (name) {`).indent();
         exportedNames.forEach(name => emit.down(1).text(`case '${name}': return _${name};`));
         emit.down(1).text(`default: return undefined;`);
         emit.dedent().down(1).text('}');
@@ -93,11 +92,12 @@ function emitExtensions(emit: Emitter, {il}: Program) {
 
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-    let {il} = program;
+    let {consts, il} = program;
 
     // TODO: emit prolog...
-    emit.down(5).text(`// --------------------------------------------------------------------------------`);
-    emit.down(1).text(`const ${mode === PARSE ? 'parse' : 'print'} = (() => {`).indent();
+    const modeName = mode === PARSE ? 'parse' : 'print';
+    emit.down(5).text(`// ------------------------------ ${modeName.toUpperCase()} ------------------------------`);
+    emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
     let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
     for (let extName of extNames) {
@@ -106,81 +106,15 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
     for (let [name, expr] of Object.entries(il)) {
         emitExpression(emit, name, expr, mode);
+        if (consts[name] === undefined) continue;
+        emitConstant(emit, name, consts[name].value);
     }
-
-    // // TODO: Emit definitions for all symbols (ie module bindings where lhs is a VariablePattern)
-    // emitSymbolDefinitions(emit, program, mode);
-
-    // // TODO: Emit compile-time constants...
-    // emitConstants(emit, program);
 
     // TODO: emit epilog...
     let startName = Object.keys(il)[0]; // TODO: dodgy af... should be an explicit way of finding 'start' expr
     emit.down(2).text(`return ${startName};`);
     emit.dedent().down(1).text('})();');
 }
-
-
-// function emitSymbolDefinitions(emit: Emitter, program: Program, mode: Mode) {
-//     const {symbolTable} = program.meta;
-//     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-//     visitNode(program, rec => ({
-//         ExtensionFile: ext => {
-//             let scope = ext.meta.scope;
-//             emit.down(2).text(`const ${scope.id} = createExtension${scope.id}({mode: ${mode}});`);
-//         },
-//         PenSourceFile: sf => {
-//             emit.down(2).text(`// -------------------- ${path.basename(sf.path)} --------------------`);
-//             rec(sf.module);
-//         },
-//         Module: mod => {
-//             // Emit module definition
-//             let moduleScope = mod.meta.scope;
-//             emit.down(2).text(`const ${moduleScope.id} = (name) => {`).indent();
-//             emit.down(1).text(`switch (name) {`).indent();
-//             for (let sourceName of moduleScope.sourceNames.keys()) {
-//                 emit.down(1).text(`case '${sourceName}': return ${moduleScope.id}_${sourceName};`);
-//             }
-//             emit.down(1).text(`default: return undefined;`);
-//             emit.dedent().down(1).text(`}`);
-//             emit.dedent().down(1).text(`};`);
-
-//             // Visit all child nodes recursively
-//             mod.bindings.forEach(rec);
-//         },
-//         SimpleBinding: bnd => {
-//             let symbol = symbolTable.getSymbolById(bnd.meta.symbolId);
-//             assert(symbol.kind === 'NameSymbol');
-//             let {scope, sourceName} = symbol;
-//             let qualName = `${scope.id}_${sourceName}`;
-//             emit.down(2).text(`const ${qualName} = (arg) => {`).indent();
-//             emit.down(1).text(`if (!${qualName}_memo) ${qualName}_memo = `);
-//             emitExpression(emit, bnd.value, symbolTable, mode);
-//             emit.text(`;`).down(1).text(`return ${qualName}_memo(arg);`);
-//             emit.dedent().down(1).text('};');
-//             emit.down(1).text(`let ${qualName}_memo;`);
-//             rec(bnd.value); // recurse
-//         },
-//     }));
-// }
-
-
-// function emitConstants(emit: Emitter, program: Program) {
-//     const {symbolTable} = program.meta;
-//     let visitNode = makeNodeVisitor<AstNodes.Node<Metadata>>();
-//     emit.down(2).text(`// -------------------- Compile-time constants --------------------`);
-//     visitNode(program, rec => ({
-//         SimpleBinding: bnd => {
-//             rec(bnd.value); // recurse
-//             let symbol = symbolTable.getSymbolById(bnd.meta.symbolId);
-//             assert(symbol.kind === 'NameSymbol');
-//             if (!symbol.constant) return;
-//             emit.down(1).text(`${symbol.scope.id}('${symbol.sourceName}').constant = {value: `);
-//             emitConstant(emit, symbol.constant.value);
-//             emit.text('};');
-//         },
-//     }));
-// }
 
 
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
@@ -221,7 +155,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'ImportExpression':
-            // NB: already handled by emitExtensions
+            // No-op - already handled by emitExtensions
             break;
 
         // TODO: implement...
@@ -243,9 +177,19 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
         }
 
-        // case 'ModuleExpression':
-        //     emit.text(expr.module.meta.scope.id);
-        //     break;
+        case 'ModuleExpression': {
+            emit.down(1).text(`function ${name}(bindingName) {`).indent();
+            emit.down(1).text(`switch (bindingName) {`).indent();
+            for (let binding of expr.module.bindings) {
+                assert(binding.kind === 'SimpleBinding');
+                assert(binding.value.kind === 'ReferenceExpression');
+                emit.down(1).text(`case '${binding.name}': return ${binding.value.name};`);
+            }
+            emit.down(1).text(`default: return undefined;`);
+            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
 
         case 'NotExpression': {
             assert(expr.expression.kind === 'ReferenceExpression');
@@ -339,22 +283,18 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 }
 
 
-// // TODO: helper function
-// function emitConstant(emit: Emitter, value: unknown) {
-//     if (typeof value === 'number' || typeof value === 'boolean' || value === 'null') {
-//         emit.text(String(value));
-//     }
-//     else if (typeof value === 'string') {
-//         emit.text(JSON.stringify(value));
-//     }
-//     else {
-//         throw new Error(`Unsupported constant type '${typeof value}'`); // TODO: revisit when more const types exist
-//     }
-// }
-
-
-// // TODO: helper function
-// function newId(prefix = 't') {
-//     return `${prefix}${++counter}`;
-// }
-// let counter = -1;
+// TODO: helper function
+function emitConstant(emit: Emitter, name: string, value: unknown) {
+    emit.down(1).text(`${name}.constant = {value: `);
+    if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
+        emit.text(String(value));
+    }
+    else if (typeof value === 'string') {
+        emit.text(JSON.stringify(value));
+    }
+    else {
+        // TODO: revisit when more const types exist
+        throw new Error(`Unsupported constant type '${typeof value}'`);
+    }
+    emit.text(`};`);
+}

@@ -237,7 +237,7 @@ function zeroOrOne({ expression }) {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
     // ApplicationExpression
@@ -253,6 +253,7 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
+    id2.constant = {value: "foo"};
 
     // SequenceExpression
     function id3() {
@@ -274,6 +275,7 @@ const parse = (() => {
         OUT = "bar";
         return true;
     }
+    id4.constant = {value: "bar"};
 
     // StringLiteralExpression
     function id5() {
@@ -285,6 +287,7 @@ const parse = (() => {
         OUT = "baz";
         return true;
     }
+    id5.constant = {value: "baz"};
 
     return id1;
 })();
@@ -292,7 +295,7 @@ const parse = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PRINT ------------------------------
 const print = (() => {
 
     // ApplicationExpression
@@ -309,6 +312,7 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
+    id2.constant = {value: "foo"};
 
     // SequenceExpression
     function id3() {
@@ -331,6 +335,7 @@ const print = (() => {
         OUT = "bar";
         return true;
     }
+    id4.constant = {value: "bar"};
 
     // StringLiteralExpression
     function id5() {
@@ -343,6 +348,28 @@ const print = (() => {
         OUT = "baz";
         return true;
     }
+    id5.constant = {value: "baz"};
 
     return id1;
 })();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};

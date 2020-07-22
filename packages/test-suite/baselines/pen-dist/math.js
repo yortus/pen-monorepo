@@ -580,7 +580,7 @@ const createExtension_id3 = (() => {
         let _f64 = f64({mode});
         let _i32 = i32({mode});
         return (name) => {
-            switch(name) {
+            switch (name) {
                 case 'memoise': return _memoise;
                 case 'f64': return _f64;
                 case 'i32': return _i32;
@@ -593,7 +593,7 @@ const createExtension_id3 = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PARSE ------------------------------
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
 
@@ -628,6 +628,7 @@ const parse = (() => {
         OUT = "add";
         return true;
     }
+    id6.constant = {value: "add"};
 
     // SequenceExpression
     function id7() {
@@ -647,6 +648,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id8.constant = {value: "+"};
 
     // ApplicationExpression
     const id9 = id2(id10);
@@ -682,12 +684,14 @@ const parse = (() => {
         OUT = "type";
         return true;
     }
+    id13.constant = {value: "type"};
 
     // StringLiteralExpression
     function id14() {
         OUT = "mul";
         return true;
     }
+    id14.constant = {value: "mul"};
 
     // RecordExpression
     const id15 = record({
@@ -709,6 +713,7 @@ const parse = (() => {
         OUT = "rhs";
         return true;
     }
+    id17.constant = {value: "rhs"};
 
     // SequenceExpression
     function id18() {
@@ -728,6 +733,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id19.constant = {value: "*"};
 
     // SelectionExpression
     function id20() {
@@ -768,6 +774,7 @@ const parse = (() => {
         OUT = "0x";
         return true;
     }
+    id23.constant = {value: "0x"};
 
     // NotExpression
     function id24() {
@@ -787,6 +794,7 @@ const parse = (() => {
         OUT = "0b";
         return true;
     }
+    id25.constant = {value: "0b"};
 
     // MemberExpression
     const id26 = id3('f64');
@@ -810,6 +818,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id28.constant = {value: "0x"};
 
     // ApplicationExpression
     const id29 = id30(id31);
@@ -818,19 +827,27 @@ const parse = (() => {
     const id30 = id3('i32');
 
     // ModuleExpression
-    // NOT HANDLED: id31
+    function id31(bindingName) {
+        switch (bindingName) {
+            case 'base': return id32;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id32() {
         OUT = 16;
         return true;
     }
+    id32.constant = {value: 16};
 
     // BooleanLiteralExpression
     function id33() {
         OUT = false;
         return true;
     }
+    id33.constant = {value: false};
 
     // SequenceExpression
     function id34() {
@@ -851,18 +868,26 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id35.constant = {value: "0b"};
 
     // ApplicationExpression
     const id36 = id30(id37);
 
     // ModuleExpression
-    // NOT HANDLED: id37
+    function id37(bindingName) {
+        switch (bindingName) {
+            case 'base': return id38;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id38() {
         OUT = 2;
         return true;
     }
+    id38.constant = {value: 2};
 
     // SequenceExpression
     function id39() {
@@ -882,12 +907,18 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id40.constant = {value: "i"};
 
     // ApplicationExpression
     const id41 = id30(id42);
 
     // ModuleExpression
-    // NOT HANDLED: id42
+    function id42(bindingName) {
+        switch (bindingName) {
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // SequenceExpression
     function id43() {
@@ -908,6 +939,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id44.constant = {value: "("};
 
     // StringLiteralExpression
     function id45() {
@@ -917,6 +949,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id45.constant = {value: ")"};
 
     // RecordExpression
     const id46 = record({
@@ -933,6 +966,7 @@ const parse = (() => {
         OUT = "div";
         return true;
     }
+    id47.constant = {value: "div"};
 
     // SequenceExpression
     function id48() {
@@ -952,6 +986,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id49.constant = {value: "/"};
 
     // RecordExpression
     const id50 = record({
@@ -968,6 +1003,7 @@ const parse = (() => {
         OUT = "sub";
         return true;
     }
+    id51.constant = {value: "sub"};
 
     // SequenceExpression
     function id52() {
@@ -987,6 +1023,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id53.constant = {value: "-"};
 
     return id1;
 })();
@@ -994,7 +1031,7 @@ const parse = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PRINT ------------------------------
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
 
@@ -1035,6 +1072,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id6.constant = {value: "add"};
 
     // SequenceExpression
     function id7() {
@@ -1051,6 +1089,7 @@ const print = (() => {
         OUT = "+";
         return true;
     }
+    id8.constant = {value: "+"};
 
     // ApplicationExpression
     const id9 = id2(id10);
@@ -1093,6 +1132,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id13.constant = {value: "type"};
 
     // StringLiteralExpression
     function id14() {
@@ -1105,6 +1145,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id14.constant = {value: "mul"};
 
     // RecordExpression
     const id15 = record({
@@ -1132,6 +1173,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id17.constant = {value: "rhs"};
 
     // SequenceExpression
     function id18() {
@@ -1148,6 +1190,7 @@ const print = (() => {
         OUT = "*";
         return true;
     }
+    id19.constant = {value: "*"};
 
     // SelectionExpression
     function id20() {
@@ -1189,6 +1232,7 @@ const print = (() => {
         OUT = "0x";
         return true;
     }
+    id23.constant = {value: "0x"};
 
     // NotExpression
     function id24() {
@@ -1209,6 +1253,7 @@ const print = (() => {
         OUT = "0b";
         return true;
     }
+    id25.constant = {value: "0b"};
 
     // MemberExpression
     const id26 = id3('f64');
@@ -1228,6 +1273,7 @@ const print = (() => {
         OUT = "0x";
         return true;
     }
+    id28.constant = {value: "0x"};
 
     // ApplicationExpression
     const id29 = id30(id31);
@@ -1236,7 +1282,13 @@ const print = (() => {
     const id30 = id3('i32');
 
     // ModuleExpression
-    // NOT HANDLED: id31
+    function id31(bindingName) {
+        switch (bindingName) {
+            case 'base': return id32;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id32() {
@@ -1245,6 +1297,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id32.constant = {value: 16};
 
     // BooleanLiteralExpression
     function id33() {
@@ -1253,6 +1306,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id33.constant = {value: false};
 
     // SequenceExpression
     function id34() {
@@ -1269,12 +1323,19 @@ const print = (() => {
         OUT = "0b";
         return true;
     }
+    id35.constant = {value: "0b"};
 
     // ApplicationExpression
     const id36 = id30(id37);
 
     // ModuleExpression
-    // NOT HANDLED: id37
+    function id37(bindingName) {
+        switch (bindingName) {
+            case 'base': return id38;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id38() {
@@ -1283,6 +1344,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id38.constant = {value: 2};
 
     // SequenceExpression
     function id39() {
@@ -1299,12 +1361,18 @@ const print = (() => {
         OUT = "i";
         return true;
     }
+    id40.constant = {value: "i"};
 
     // ApplicationExpression
     const id41 = id30(id42);
 
     // ModuleExpression
-    // NOT HANDLED: id42
+    function id42(bindingName) {
+        switch (bindingName) {
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
 
     // SequenceExpression
     function id43() {
@@ -1322,12 +1390,14 @@ const print = (() => {
         OUT = "(";
         return true;
     }
+    id44.constant = {value: "("};
 
     // StringLiteralExpression
     function id45() {
         OUT = ")";
         return true;
     }
+    id45.constant = {value: ")"};
 
     // RecordExpression
     const id46 = record({
@@ -1350,6 +1420,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id47.constant = {value: "div"};
 
     // SequenceExpression
     function id48() {
@@ -1366,6 +1437,7 @@ const print = (() => {
         OUT = "/";
         return true;
     }
+    id49.constant = {value: "/"};
 
     // RecordExpression
     const id50 = record({
@@ -1388,6 +1460,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id51.constant = {value: "sub"};
 
     // SequenceExpression
     function id52() {
@@ -1404,6 +1477,28 @@ const print = (() => {
         OUT = "-";
         return true;
     }
+    id53.constant = {value: "-"};
 
     return id1;
 })();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};

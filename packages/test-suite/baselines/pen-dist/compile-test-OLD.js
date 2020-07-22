@@ -237,7 +237,7 @@ function zeroOrOne({ expression }) {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
     // StringLiteralExpression
@@ -250,6 +250,7 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
+    id1.constant = {value: "foo"};
 
     return id1;
 })();
@@ -257,7 +258,7 @@ const parse = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PRINT ------------------------------
 const print = (() => {
 
     // StringLiteralExpression
@@ -271,6 +272,28 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
+    id1.constant = {value: "foo"};
 
     return id1;
 })();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};

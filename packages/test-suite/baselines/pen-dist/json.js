@@ -579,7 +579,7 @@ const createExtension_id35 = (() => {
         let _char = char({mode});
         let _f64 = f64({mode});
         return (name) => {
-            switch(name) {
+            switch (name) {
                 case 'char': return _char;
                 case 'f64': return _f64;
                 default: return undefined;
@@ -644,7 +644,7 @@ const createExtension_id67 = (() => {
     return ({mode}) => {
         let _unicode = unicode({mode});
         return (name) => {
-            switch(name) {
+            switch (name) {
                 case 'unicode': return _unicode;
                 default: return undefined;
             }
@@ -655,7 +655,7 @@ const createExtension_id67 = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PARSE ------------------------------
 const parse = (() => {
     const id35 = createExtension_id35({mode: 6})
     const id67 = createExtension_id67({mode: 6})
@@ -694,6 +694,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id4.constant = {value: " "};
 
     // StringLiteralExpression
     function id5() {
@@ -703,6 +704,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id5.constant = {value: "\t"};
 
     // StringLiteralExpression
     function id6() {
@@ -712,6 +714,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id6.constant = {value: "\n"};
 
     // StringLiteralExpression
     function id7() {
@@ -721,6 +724,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id7.constant = {value: "\r"};
 
     // SelectionExpression
     function id8() {
@@ -756,12 +760,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id10.constant = {value: "false"};
 
     // BooleanLiteralExpression
     function id11() {
         OUT = false;
         return true;
     }
+    id11.constant = {value: false};
 
     // SequenceExpression
     function id12() {
@@ -784,12 +790,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id13.constant = {value: "null"};
 
     // NullLiteralExpression
     function id14() {
         OUT = null;
         return true;
     }
+    id14.constant = {value: null};
 
     // SequenceExpression
     function id15() {
@@ -812,12 +820,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id16.constant = {value: "true"};
 
     // BooleanLiteralExpression
     function id17() {
         OUT = true;
         return true;
     }
+    id17.constant = {value: true};
 
     // SequenceExpression
     function id18() {
@@ -849,6 +859,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id20.constant = {value: "{"};
 
     // SelectionExpression
     function id21() {
@@ -893,6 +904,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id25.constant = {value: "\""};
 
     // QuantifiedExpression
     const id26 = zeroOrMore({
@@ -943,6 +955,7 @@ const parse = (() => {
         OUT = "\\";
         return true;
     }
+    id30.constant = {value: "\\"};
 
     // NotExpression
     function id31() {
@@ -961,6 +974,7 @@ const parse = (() => {
         OUT = "\"";
         return true;
     }
+    id32.constant = {value: "\""};
 
     // ApplicationExpression
     const id33 = id34(id36);
@@ -971,7 +985,13 @@ const parse = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id36
+    function id36(bindingName) {
+        switch (bindingName) {
+            case 'min': return id37;
+            case 'max': return id38;
+            default: return undefined;
+        }
+    }
 
     // StringLiteralExpression
     function id37() {
@@ -981,6 +1001,7 @@ const parse = (() => {
         OUT = " ";
         return true;
     }
+    id37.constant = {value: " "};
 
     // StringLiteralExpression
     function id38() {
@@ -990,6 +1011,7 @@ const parse = (() => {
         OUT = "￿";
         return true;
     }
+    id38.constant = {value: "￿"};
 
     // SequenceExpression
     function id39() {
@@ -1010,12 +1032,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id40.constant = {value: "\\\""};
 
     // StringLiteralExpression
     function id41() {
         OUT = "\"";
         return true;
     }
+    id41.constant = {value: "\""};
 
     // SequenceExpression
     function id42() {
@@ -1036,12 +1060,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id43.constant = {value: "\\\\"};
 
     // StringLiteralExpression
     function id44() {
         OUT = "\\";
         return true;
     }
+    id44.constant = {value: "\\"};
 
     // SequenceExpression
     function id45() {
@@ -1062,12 +1088,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id46.constant = {value: "\\/"};
 
     // StringLiteralExpression
     function id47() {
         OUT = "/";
         return true;
     }
+    id47.constant = {value: "/"};
 
     // SequenceExpression
     function id48() {
@@ -1088,12 +1116,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id49.constant = {value: "\\b"};
 
     // StringLiteralExpression
     function id50() {
         OUT = "\b";
         return true;
     }
+    id50.constant = {value: "\b"};
 
     // SequenceExpression
     function id51() {
@@ -1114,12 +1144,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id52.constant = {value: "\\f"};
 
     // StringLiteralExpression
     function id53() {
         OUT = "\f";
         return true;
     }
+    id53.constant = {value: "\f"};
 
     // SequenceExpression
     function id54() {
@@ -1140,12 +1172,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id55.constant = {value: "\\n"};
 
     // StringLiteralExpression
     function id56() {
         OUT = "\n";
         return true;
     }
+    id56.constant = {value: "\n"};
 
     // SequenceExpression
     function id57() {
@@ -1166,12 +1200,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id58.constant = {value: "\\r"};
 
     // StringLiteralExpression
     function id59() {
         OUT = "\r";
         return true;
     }
+    id59.constant = {value: "\r"};
 
     // SequenceExpression
     function id60() {
@@ -1192,12 +1228,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id61.constant = {value: "\\t"};
 
     // StringLiteralExpression
     function id62() {
         OUT = "\t";
         return true;
     }
+    id62.constant = {value: "\t"};
 
     // SequenceExpression
     function id63() {
@@ -1218,6 +1256,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id64.constant = {value: "\\u"};
 
     // ApplicationExpression
     const id65 = id66(id68);
@@ -1228,19 +1267,28 @@ const parse = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id68
+    function id68(bindingName) {
+        switch (bindingName) {
+            case 'base': return id69;
+            case 'minDigits': return id70;
+            case 'maxDigits': return id70;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id69() {
         OUT = 16;
         return true;
     }
+    id69.constant = {value: 16};
 
     // NumericLiteralExpression
     function id70() {
         OUT = 4;
         return true;
     }
+    id70.constant = {value: 4};
 
     // SequenceExpression
     function id71() {
@@ -1271,6 +1319,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id73.constant = {value: ":"};
 
     // QuantifiedExpression
     const id74 = zeroOrMore({
@@ -1307,6 +1356,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id77.constant = {value: ","};
 
     // RecordExpression
     const id78 = record({
@@ -1333,6 +1383,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id80.constant = {value: "}"};
 
     // SequenceExpression
     function id81() {
@@ -1364,6 +1415,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id83.constant = {value: "["};
 
     // SelectionExpression
     function id84() {
@@ -1429,6 +1481,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    id91.constant = {value: "]"};
 
     // MemberExpression
     const id92 = id35('f64');
@@ -1439,7 +1492,7 @@ const parse = (() => {
 
 
 
-// --------------------------------------------------------------------------------
+// ------------------------------ PRINT ------------------------------
 const print = (() => {
     const id35 = createExtension_id35({mode: 7})
     const id67 = createExtension_id67({mode: 7})
@@ -1475,24 +1528,28 @@ const print = (() => {
         OUT = " ";
         return true;
     }
+    id4.constant = {value: " "};
 
     // StringLiteralExpression
     function id5() {
         OUT = "\t";
         return true;
     }
+    id5.constant = {value: "\t"};
 
     // StringLiteralExpression
     function id6() {
         OUT = "\n";
         return true;
     }
+    id6.constant = {value: "\n"};
 
     // StringLiteralExpression
     function id7() {
         OUT = "\r";
         return true;
     }
+    id7.constant = {value: "\r"};
 
     // SelectionExpression
     function id8() {
@@ -1521,6 +1578,7 @@ const print = (() => {
         OUT = "false";
         return true;
     }
+    id10.constant = {value: "false"};
 
     // BooleanLiteralExpression
     function id11() {
@@ -1529,6 +1587,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id11.constant = {value: false};
 
     // SequenceExpression
     function id12() {
@@ -1545,6 +1604,7 @@ const print = (() => {
         OUT = "null";
         return true;
     }
+    id13.constant = {value: "null"};
 
     // NullLiteralExpression
     function id14() {
@@ -1553,6 +1613,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id14.constant = {value: null};
 
     // SequenceExpression
     function id15() {
@@ -1569,6 +1630,7 @@ const print = (() => {
         OUT = "true";
         return true;
     }
+    id16.constant = {value: "true"};
 
     // BooleanLiteralExpression
     function id17() {
@@ -1577,6 +1639,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id17.constant = {value: true};
 
     // SequenceExpression
     function id18() {
@@ -1605,6 +1668,7 @@ const print = (() => {
         OUT = "{";
         return true;
     }
+    id20.constant = {value: "{"};
 
     // SelectionExpression
     function id21() {
@@ -1646,6 +1710,7 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
+    id25.constant = {value: "\""};
 
     // QuantifiedExpression
     const id26 = zeroOrMore({
@@ -1697,6 +1762,7 @@ const print = (() => {
         OUT = "\\";
         return true;
     }
+    id30.constant = {value: "\\"};
 
     // NotExpression
     function id31() {
@@ -1716,6 +1782,7 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
+    id32.constant = {value: "\""};
 
     // ApplicationExpression
     const id33 = id34(id36);
@@ -1726,7 +1793,13 @@ const print = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id36
+    function id36(bindingName) {
+        switch (bindingName) {
+            case 'min': return id37;
+            case 'max': return id38;
+            default: return undefined;
+        }
+    }
 
     // StringLiteralExpression
     function id37() {
@@ -1737,6 +1810,7 @@ const print = (() => {
         OUT = " ";
         return true;
     }
+    id37.constant = {value: " "};
 
     // StringLiteralExpression
     function id38() {
@@ -1747,6 +1821,7 @@ const print = (() => {
         OUT = "￿";
         return true;
     }
+    id38.constant = {value: "￿"};
 
     // SequenceExpression
     function id39() {
@@ -1763,6 +1838,7 @@ const print = (() => {
         OUT = "\\\"";
         return true;
     }
+    id40.constant = {value: "\\\""};
 
     // StringLiteralExpression
     function id41() {
@@ -1773,6 +1849,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id41.constant = {value: "\""};
 
     // SequenceExpression
     function id42() {
@@ -1789,6 +1866,7 @@ const print = (() => {
         OUT = "\\\\";
         return true;
     }
+    id43.constant = {value: "\\\\"};
 
     // StringLiteralExpression
     function id44() {
@@ -1799,6 +1877,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id44.constant = {value: "\\"};
 
     // SequenceExpression
     function id45() {
@@ -1815,6 +1894,7 @@ const print = (() => {
         OUT = "\\/";
         return true;
     }
+    id46.constant = {value: "\\/"};
 
     // StringLiteralExpression
     function id47() {
@@ -1825,6 +1905,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id47.constant = {value: "/"};
 
     // SequenceExpression
     function id48() {
@@ -1841,6 +1922,7 @@ const print = (() => {
         OUT = "\\b";
         return true;
     }
+    id49.constant = {value: "\\b"};
 
     // StringLiteralExpression
     function id50() {
@@ -1851,6 +1933,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id50.constant = {value: "\b"};
 
     // SequenceExpression
     function id51() {
@@ -1867,6 +1950,7 @@ const print = (() => {
         OUT = "\\f";
         return true;
     }
+    id52.constant = {value: "\\f"};
 
     // StringLiteralExpression
     function id53() {
@@ -1877,6 +1961,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id53.constant = {value: "\f"};
 
     // SequenceExpression
     function id54() {
@@ -1893,6 +1978,7 @@ const print = (() => {
         OUT = "\\n";
         return true;
     }
+    id55.constant = {value: "\\n"};
 
     // StringLiteralExpression
     function id56() {
@@ -1903,6 +1989,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id56.constant = {value: "\n"};
 
     // SequenceExpression
     function id57() {
@@ -1919,6 +2006,7 @@ const print = (() => {
         OUT = "\\r";
         return true;
     }
+    id58.constant = {value: "\\r"};
 
     // StringLiteralExpression
     function id59() {
@@ -1929,6 +2017,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id59.constant = {value: "\r"};
 
     // SequenceExpression
     function id60() {
@@ -1945,6 +2034,7 @@ const print = (() => {
         OUT = "\\t";
         return true;
     }
+    id61.constant = {value: "\\t"};
 
     // StringLiteralExpression
     function id62() {
@@ -1955,6 +2045,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id62.constant = {value: "\t"};
 
     // SequenceExpression
     function id63() {
@@ -1971,6 +2062,7 @@ const print = (() => {
         OUT = "\\u";
         return true;
     }
+    id64.constant = {value: "\\u"};
 
     // ApplicationExpression
     const id65 = id66(id68);
@@ -1981,7 +2073,14 @@ const print = (() => {
     // ImportExpression
 
     // ModuleExpression
-    // NOT HANDLED: id68
+    function id68(bindingName) {
+        switch (bindingName) {
+            case 'base': return id69;
+            case 'minDigits': return id70;
+            case 'maxDigits': return id70;
+            default: return undefined;
+        }
+    }
 
     // NumericLiteralExpression
     function id69() {
@@ -1990,6 +2089,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id69.constant = {value: 16};
 
     // NumericLiteralExpression
     function id70() {
@@ -1998,6 +2098,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    id70.constant = {value: 4};
 
     // SequenceExpression
     function id71() {
@@ -2025,6 +2126,7 @@ const print = (() => {
         OUT = ":";
         return true;
     }
+    id73.constant = {value: ":"};
 
     // QuantifiedExpression
     const id74 = zeroOrMore({
@@ -2058,6 +2160,7 @@ const print = (() => {
         OUT = ",";
         return true;
     }
+    id77.constant = {value: ","};
 
     // RecordExpression
     const id78 = record({
@@ -2081,6 +2184,7 @@ const print = (() => {
         OUT = "}";
         return true;
     }
+    id80.constant = {value: "}"};
 
     // SequenceExpression
     function id81() {
@@ -2109,6 +2213,7 @@ const print = (() => {
         OUT = "[";
         return true;
     }
+    id83.constant = {value: "["};
 
     // SelectionExpression
     function id84() {
@@ -2171,9 +2276,31 @@ const print = (() => {
         OUT = "]";
         return true;
     }
+    id91.constant = {value: "]"};
 
     // MemberExpression
     const id92 = id35('f64');
 
     return id1;
 })();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};
