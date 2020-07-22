@@ -1,6 +1,6 @@
 import {Node, Program} from '../../ast-nodes';
 import {makeNodeVisitor} from '../../utils';
-import {Metadata} from '../05-resolve-constant-values';
+import {Metadata} from './metadata';
 
 
 // TODO: doc...
@@ -12,7 +12,7 @@ export function checkSemantics(program: Program<Metadata>) {
                 (names, field) => {
                     // Ensure Record field names are unique within the record definition
                     if (names.has(field.name)) throw new Error(`Duplicate field name '${field.name}'`);
-                    rec(field);
+                    rec(field.value);
                     return names.add(field.name);
                 },
                 new Set<string>()

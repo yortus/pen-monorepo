@@ -27,19 +27,16 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
     return (n: Node): void => {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
-            case 'Binding': return rec(n.pattern), rec(n.value), undefined;
-            case 'BindingLookupExpression': return rec(n.module), undefined;
             case 'BooleanLiteralExpression': return;
-            case 'CharacterExpression': return;
+            case 'DestructuredBinding': return rec(n.value), undefined;
             case 'ExtensionFile': return;
             case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), undefined;
+            case 'MemberExpression': return rec(n.module), undefined;
             case 'Module': return n.bindings.forEach(rec), undefined;
             case 'ModuleExpression': return rec(n.module), undefined;
-            case 'ModulePattern': return n.names.forEach(rec), undefined;
-            case 'ModulePatternName': return;
             case 'NotExpression': return rec(n.expression), undefined;
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
@@ -47,13 +44,14 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'PenSourceFile': return rec(n.module), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
             case 'QuantifiedExpression': return rec(n.expression), undefined;
-            case 'RecordExpression': return n.fields.forEach(rec), undefined;
+            case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), undefined;
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
             case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
-            case 'StaticField': return rec(n.value), undefined;
+            case 'SimpleBinding': {
+                return rec(n.value), undefined;
+            }
             case 'StringLiteralExpression': return;
-            case 'VariablePattern': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };

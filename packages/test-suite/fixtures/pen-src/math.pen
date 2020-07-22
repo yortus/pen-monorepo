@@ -26,9 +26,4 @@ factor =
     | `0x`   i32{base=16 signed=false}
     | `0b`   i32{base=2 signed=false}
     | `i`    i32{signed=false}
-    | `(` expr `)`
-
-
-// TODO: temp testing
-// {Maybe, OneOrMore} = 'experiments'
-// myNum = i32{digits = Maybe("-")   `0x`   OneOrMore("0-9" | "a-f" | "A-F")}
+    | `(`   expr   `)`

@@ -218,16 +218,8 @@ const objectToString = Object.prototype.toString;
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // ApplicationExpression
-    function id1(arg) {
-        if (id1_memo) return id1_memo(arg);
-        id1_memo = id2(id3);
-        return id1_memo(arg);
-    }
-    let id1_memo;
-
     // StringLiteralExpression
-    function id2() {
+    function id1() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -236,41 +228,7 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    id2.constant = {value: "foo"};
-
-    // SequenceExpression
-    function id3() {
-        let stateₒ = getState();
-        let out;
-        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteralExpression
-    function id4() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
-        return true;
-    }
-    id4.constant = {value: "bar"};
-
-    // StringLiteralExpression
-    function id5() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
-        return true;
-    }
-    id5.constant = {value: "baz"};
+    id1.constant = {value: "foo"};
 
     return id1;
 })();
@@ -281,16 +239,8 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // ApplicationExpression
-    function id1(arg) {
-        if (id1_memo) return id1_memo(arg);
-        id1_memo = id2(id3);
-        return id1_memo(arg);
-    }
-    let id1_memo;
-
     // StringLiteralExpression
-    function id2() {
+    function id1() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -300,43 +250,7 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    id2.constant = {value: "foo"};
-
-    // SequenceExpression
-    function id3() {
-        let stateₒ = getState();
-        let out;
-        if (id4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteralExpression
-    function id4() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
-        return true;
-    }
-    id4.constant = {value: "bar"};
-
-    // StringLiteralExpression
-    function id5() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
-        return true;
-    }
-    id5.constant = {value: "baz"};
+    id1.constant = {value: "foo"};
 
     return id1;
 })();

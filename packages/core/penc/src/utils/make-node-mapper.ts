@@ -27,19 +27,16 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
     return (n: Node): Node => {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
-            case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
-            case 'BindingLookupExpression': return {...n, module: rec(n.module)};
             case 'BooleanLiteralExpression': return n;
-            case 'CharacterExpression': return n;
+            case 'DestructuredBinding': return {...n, value: rec(n.value)};
             case 'ExtensionFile': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
+            case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
-            case 'ModulePattern': return {...n, names: n.names.map(rec)};
-            case 'ModulePatternName': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;
@@ -47,13 +44,12 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'PenSourceFile': return {...n, module: rec(n.module)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
-            case 'RecordExpression': return {...n, fields: n.fields.map(rec)};
+            case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
             case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'StaticField': return {...n, value: rec(n.value)};
+            case 'SimpleBinding': return {...n, value: rec(n.value)};
             case 'StringLiteralExpression': return n;
-            case 'VariablePattern': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };

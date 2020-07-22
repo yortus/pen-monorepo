@@ -72,7 +72,10 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
     for (let test of tests) {
         it(test.text, () => {
             let ast: unknown;
-            try { ast = parse(test.text); } catch { ast = Error; }
+            try { ast = parse(test.text); } catch (err) {
+                [] = [err];
+                ast = Error;
+            }
             expect(ast).to.deep.equal(test.ast);
             if (ast === Error) return;
             let textᐟ = print(ast);

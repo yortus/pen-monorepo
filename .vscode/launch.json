@@ -5,10 +5,50 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Parse 1MB",
+            "name": "Parse 1MB JSON",
             "type": "node",
             "request": "launch",
             "program": "${workspaceFolder}/packages/test-suite/scripts/parse-1mb.js",
+            "skipFiles": [
+                "<node_internals>/**",
+                "**/node_modules/**"
+            ]
+        },
+        {
+            "name": "Build compile-test.pen",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceFolder}/packages/test-suite/scripts/build-compile-test-pen.ts"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register",
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/packages/test-suite/tsconfig.json"
+            },
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**",
+                "**/node_modules/**"
+            ]
+        },
+        {
+            "name": "Build json.pen",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceFolder}/packages/test-suite/scripts/build-json-pen.ts"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register",
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/packages/test-suite/tsconfig.json"
+            },
+            "internalConsoleOptions": "openOnSessionStart",
             "skipFiles": [
                 "<node_internals>/**",
                 "**/node_modules/**"
@@ -42,7 +82,9 @@
             "name": "Run Benchmarks",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/packages/test-suite/bench/large-json.bench.ts",
+            "args": [
+                "${workspaceFolder}/packages/test-suite/bench/large-json.bench.ts"
+            ],
             "runtimeArgs": [
                 "-r",
                 "ts-node/register",

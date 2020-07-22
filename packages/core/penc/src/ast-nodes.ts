@@ -9,30 +9,24 @@ export type Node<M extends Metadata = {}> =
     | PenSourceFile<M>
     | ExtensionFile<M>
 
-    // Bindings, Patterns, and Expressions
+    // Bindings and Expressions
     | Binding<M>
-    | Pattern<M>
-    | Expression<M>
-
-    // Other nodes
-    | ModulePatternName<M>
-    | StaticField<M>;
+    | Expression<M>;
 
 
-export type Pattern<M extends Metadata = {}> =
-    | ModulePattern<M>
-    | VariablePattern<M>;
+export type Binding<M extends Metadata = {}> =
+    | SimpleBinding<M>
+    | DestructuredBinding<M>;
 
 
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
-    | BindingLookupExpression<M>
     | BooleanLiteralExpression<M>
-    | CharacterExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
     | ListExpression<M>
+    | MemberExpression<M>
     | ModuleExpression<M>
     | NotExpression<M>
     | NullLiteralExpression<M>
@@ -92,26 +86,23 @@ export interface Module<M extends Metadata = {}> {
 
 
 // ====================   Binding nodes   ====================
-export interface Binding<M extends Metadata = {}> {
-    readonly kind: 'Binding';
-    readonly pattern: Pattern<M>;
+export interface SimpleBinding<M extends Metadata = {}> {
+    readonly kind: 'SimpleBinding';
+    readonly name: string;
     readonly value: Expression<M>;
     readonly exported: boolean;
     readonly meta: M[this['kind']];
 }
 
 
-// ====================   Pattern nodes   ====================
-export interface ModulePattern<M extends Metadata = {}> {
-    readonly kind: 'ModulePattern';
-    readonly names: ReadonlyArray<ModulePatternName<M>>;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface VariablePattern<M extends Metadata = {}> {
-    readonly kind: 'VariablePattern';
-    readonly name: string;
+export interface DestructuredBinding<M extends Metadata = {}> {
+    readonly kind: 'DestructuredBinding';
+    readonly names: ReadonlyArray<{
+        readonly name: string;
+        readonly alias?: string;
+    }>;
+    readonly value: Expression<M>;
+    readonly exported: boolean;
     readonly meta: M[this['kind']];
 }
 
@@ -125,27 +116,9 @@ export interface ApplicationExpression<M extends Metadata = {}> {
 }
 
 
-export interface BindingLookupExpression<M extends Metadata = {}> {
-    readonly kind: 'BindingLookupExpression';
-    readonly module: Expression<M>;
-    readonly bindingName: string;
-    readonly meta: M[this['kind']];
-}
-
-
 export interface BooleanLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'BooleanLiteralExpression';
     readonly value: boolean;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface CharacterExpression<M extends Metadata = {}> {
-    readonly kind: 'CharacterExpression';
-    readonly minValue: string;
-    readonly maxValue: string;
-    readonly concrete: boolean;
-    readonly abstract: boolean;
     readonly meta: M[this['kind']];
 }
 
@@ -181,6 +154,14 @@ export interface ListExpression<M extends Metadata = {}> {
 // }
 
 
+export interface MemberExpression<M extends Metadata = {}> {
+    readonly kind: 'MemberExpression';
+    readonly module: Expression<M>;
+    readonly bindingName: string;
+    readonly meta: M[this['kind']];
+}
+
+
 export interface ModuleExpression<M extends Metadata = {}> {
     readonly kind: 'ModuleExpression';
     readonly module: Module<M>;
@@ -197,6 +178,7 @@ export interface NotExpression<M extends Metadata = {}> {
 
 export interface NullLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'NullLiteralExpression';
+    readonly value: null;
     readonly meta: M[this['kind']];
 }
 
@@ -225,7 +207,10 @@ export interface QuantifiedExpression<M extends Metadata = {}> {
 
 export interface RecordExpression<M extends Metadata = {}> {
     readonly kind: 'RecordExpression';
-    readonly fields: ReadonlyArray<StaticField<M>>;
+    readonly fields: ReadonlyArray<{
+        readonly name: string;
+        readonly value: Expression<M>;
+    }>;
     readonly meta: M[this['kind']];
 }
 
@@ -256,23 +241,6 @@ export interface StringLiteralExpression<M extends Metadata = {}> {
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;
-    readonly meta: M[this['kind']];
-}
-
-
-// // ====================   Other nodes   ====================
-export interface ModulePatternName<M extends Metadata = {}> {
-    readonly kind: 'ModulePatternName';
-    readonly name: string;
-    readonly alias?: string;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface StaticField<M extends Metadata = {}> {
-    readonly kind: 'StaticField';
-    readonly name: string;
-    readonly value: Expression<M>;
     readonly meta: M[this['kind']];
 }
 

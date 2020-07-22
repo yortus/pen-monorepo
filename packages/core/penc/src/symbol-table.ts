@@ -1,40 +1,70 @@
-import {Scope} from './scope'; // NB: this type-only import is elided at runtime
 import {assert} from './utils';
 
 
-export interface Symbol {
-    id: number;
-    name: string;
-    scope: Scope;
+// TODO: doc...
+export type Symbol = ScopeSymbol | NameSymbol;
+
+
+/** Corresponds to a scope (ie a module or extension) in the source code. */
+export interface ScopeSymbol {
+    kind: 'ScopeSymbol';
+    id: string;
+    sourceNames: Map<string, NameSymbol>;
+}
+
+
+/** Corresponds to a identifier name in the source code. */
+export interface NameSymbol {
+    kind: 'NameSymbol';
+    id: string;
+    scope: ScopeSymbol;
+    sourceName: string;
     constant?: {value: unknown};
 }
 
 
+// TODO: doc...
 export class SymbolTable {
 
-    create(name: string, scope: Scope): Symbol {
+    constructor() {
+        this.allSymbolsById = new Map();
+        this.parentScopes = new Map();
+    }
+
+    // TODO: doc... also creates a symbol for the scope in the parent scope.
+    createScope(parent?: ScopeSymbol): ScopeSymbol {
+        // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
+        let id = `𝕊${this.parentScopes.size}`;
+        let scopeSymbol: ScopeSymbol = {kind: 'ScopeSymbol', id, sourceNames: new Map()};
+        this.allSymbolsById.set(id, scopeSymbol);
+        this.parentScopes.set(scopeSymbol, parent ?? 'none');
+        return scopeSymbol;
+    }
+
+    createName(sourceName: string, scope: ScopeSymbol): NameSymbol {
         // ensure not already defined in this scope
-        if (scope.symbols.has(name)) throw new Error(`Symbol '${name}' is already defined.`);
-        let id = this.symbols.length;
-        let symbol: Symbol = {id, name, scope};
-        scope.symbols.set(name, symbol);
-        this.symbols.push(symbol);
+        if (scope.sourceNames.has(sourceName)) throw new Error(`Symbol '${sourceName}' is already defined.`);
+        let id = `${scope.id}_${sourceName}`; // TODO: temp... fix this...
+        let symbol: Symbol = {kind: 'NameSymbol', id, sourceName, scope};
+        scope.sourceNames.set(sourceName, symbol);
+        this.allSymbolsById.set(id, symbol);
         return symbol;
     }
 
-    lookup(id: number): Symbol;
-    lookup(name: string, scope: Scope): Symbol;
-    lookup(idOrName: number | string, scope?: Scope): Symbol {
-        if (typeof idOrName === 'number') return this.symbols[idOrName];
-        assert(scope !== undefined);
-        if (scope.symbols.has(idOrName)) return scope.symbols.get(idOrName)!;
-        if (scope.parent) return this.lookup(idOrName, scope.parent);
-        throw new Error(`Symbol '${idOrName}' is not defined.`);
+    lookupName(sourceName: string, scope: ScopeSymbol): NameSymbol {
+        if (scope.sourceNames.has(sourceName)) return scope.sourceNames.get(sourceName)!;
+        let parentScope = this.parentScopes.get(scope)!;
+        if (parentScope !== 'none') return this.lookupName(sourceName, parentScope);
+        throw new Error(`Symbol '${sourceName}' is not defined.`);
     }
 
-    forEach(cb: (symbol: Symbol, index: number) => void) {
-        this.symbols.forEach(cb);
+    getSymbolById(id: string): Symbol {
+        let result = this.allSymbolsById.get(id);
+        assert(result);
+        return result;
     }
 
-    private symbols: Symbol[] = [];
+    private allSymbolsById: Map<string, Symbol>;
+
+    private parentScopes: Map<ScopeSymbol, ScopeSymbol | 'none'>;
 }

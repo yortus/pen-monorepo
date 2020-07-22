@@ -1,12 +1,17 @@
+// TODO: transform order is important - it should be reflected in the export names from './transforms'
+
+
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
 import {parseSourceFiles} from './transforms';
+import {desugarSyntax} from './transforms';
 import {createSymbolDefinitions} from './transforms';
 import {resolveSymbolReferences} from './transforms';
-import {resolveConstantValues} from './transforms';
 import {checkSemantics} from './transforms';
+import {createFlatExpressionList} from './transforms';
+import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
 
 
@@ -22,13 +27,14 @@ export function compile(options: CompilerOptions) {
 
     // Proceed through all stages in the compiler pipeline.
     let ast01 = parseSourceFiles(sourceFiles);
-    let ast02 = createSymbolDefinitions(ast01);
-    let ast03 = resolveSymbolReferences(ast02);
-    let ast04 = resolveConstantValues(ast03);
-
+    let ast02 = desugarSyntax(ast01);
+    let ast03 = createSymbolDefinitions(ast02);
+    let ast04 = resolveSymbolReferences(ast03);
     checkSemantics(ast04);
 
-    let targetCode = generateTargetCode(ast04);
+    let il = createFlatExpressionList(ast04);
+    let consts = resolveConstantValues(il);
+    let targetCode = generateTargetCode({il, consts});
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     let outFilePath = path.resolve(outFile);

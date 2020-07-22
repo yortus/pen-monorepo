@@ -21,8 +21,11 @@
     },
     "include": ["src/"],
     "references": [
-        {"path": "../penrt"},
-        {"path": "../../extensions/experimental-features"},
-        {"path": "../../extensions/standard-library"},
+        // NB: don't reference penrt et al here, otherwise their global types will show up in source code here
+        // It's fine to omit them even hough they are technically deps, since they are in the root tsconfig and
+        // will be rebuilt on change.
+        // {"path": "../penrt"},
+        // {"path": "../../extensions/experimental-features"},
+        // {"path": "../../extensions/standard-library"},
     ]
 }

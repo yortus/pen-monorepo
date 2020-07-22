@@ -3,7 +3,7 @@ import * as Benchmark from 'benchmark';
 import * as fs from 'fs';
 import * as path from 'path';
 // @ts-expect-error Could not find a declaration file for module (7016)
-import {parse as penParse} from '../baselines/pen-dist/json.js';
+import {parse as penParse, print as penPrint} from '../baselines/pen-dist/json.js';
 import {parse as pegParse} from './pegjs-json-parser';
 
 
@@ -15,6 +15,7 @@ const suite = new Benchmark.Suite();
 suite.add('V8', () => JSON.parse(json));
 suite.add('penc', () => penParse(json));
 suite.add('pegjs', () => pegParse(json));
+suite.add('penc (print)', () => penPrint(json));
 
 
 // Add listeners.

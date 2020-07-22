@@ -1,6 +1,6 @@
 {
-    options.sourceFile = options.sourceFile || {};
-    options.sourceFile.imports = options.sourceFile.imports || {};
+    let sourceFile = options.sourceFile || {};
+    sourceFile.imports = sourceFile.imports || {};
 }
 
 
@@ -20,26 +20,24 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = ex:(EXPORT   __)?   pattern:Pattern   __   "="   __   value:Expression
-    { return Object.assign({kind: 'Binding', pattern, value}, ex ? {exported: true} : {}); }
+    = SimpleBinding
+    / DestructuredBinding
 
+SimpleBinding
+    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
+    { return Object.assign({kind: 'SimpleBinding', name, value}, ex ? {exported: true} : {}); }
 
-// ====================   Patterns   ====================
-Pattern
-    = VariablePattern
-    / ModulePattern
+DestructuredBinding
+    = ex:(EXPORT   __)?   names:DestructuredBindingNameList   __   "="   __   value:Expression
+    { return Object.assign({kind: 'DestructuredBinding', names, value}, ex ? {exported: true} : {}); }
 
-VariablePattern
-    = name:IDENTIFIER
-    { return {kind: 'VariablePattern', name}; }
+DestructuredBindingNameList
+    = "{"   __   !","   head:DestructuredBindingName?   tail:((__   ",")?   __   DestructuredBindingName)*   (__   ",")?   __   "}"
+    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-ModulePattern
-    = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
-    { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
-
-ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePattern
+DestructuredBindingName
     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
-    { return Object.assign({kind: 'ModulePatternName', name}, alias ? {alias: alias[3]} : {}); }
+    { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
 
 
 // ====================   Expressions   ====================
@@ -58,7 +56,7 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
 
     PRECEDENCE 5
         ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
-        BindingLookupExpression      a.b   a.b   (a b).e   {foo=f}.foo                                                  NB: no whitespace between terms, may relax later
+        MemberExpression            a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
@@ -68,7 +66,6 @@ ModulePatternName // NB: this itself is not a pattern, but a clause of ModulePat
         ListExpression              [a, b, c]   [a]   []
         NullLiteralExpression       null
         BooleanLiteralExpression    false   true
-        CharacterExpression         "a-z"   '0-9'   `A-F`
         StringLiteralExpression     "foo"   'a string!'   `a`
         ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression            import './foo'   import 'somelib'
@@ -94,7 +91,7 @@ Precedence4OrHigher
     / Precedence5OrHigher
 
 Precedence5OrHigher
-    = ApplicationOrBindingLookupExpression
+    = ApplicationOrMemberExpression
     / Precedence6OrHigher
 
 Precedence6OrHigher
@@ -110,7 +107,6 @@ PrimaryExpression
     / ImportExpression
     / NullLiteralExpression
     / BooleanLiteralExpression
-    / CharacterExpression
     / StringLiteralExpression
     / NumericLiteralExpression
     / ReferenceExpression
@@ -131,19 +127,19 @@ QuantifiedExpression
     = expression:Precedence5OrHigher   __   quantifier:("?" / "*")
     { return {kind: 'QuantifiedExpression', expression, quantifier}; }
 
-ApplicationOrBindingLookupExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   BindingNameLookup / ApplicationArgument)+
+ApplicationOrMemberExpression
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)+
     {
         return tail.reduce(
             (lhs, rhs) => (rhs.name
-                ? {kind: 'BindingLookupExpression', module: lhs, bindingName: rhs.name}
+                ? {kind: 'MemberExpression', module: lhs, bindingName: rhs.name}
                 : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
             ),
             head
         );
     }
 
-BindingNameLookup
+MemberLookup
     = "."   /* NO WHITESPACE */   name:IDENTIFIER
     { return {name}; }
 
@@ -156,7 +152,7 @@ ApplicationArgument
 //     { return {kind: 'LambdaExpression', pattern, body}; }
 
 RecordExpression
-    = "{"   __   fields:StaticFieldList   __   "}"
+    = "{"   __   fields:RecordFieldList   __   "}"
     { return {kind: 'RecordExpression', fields}; }
 
 FieldExpression
@@ -179,35 +175,25 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let modspec = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = options.sourceFile.imports[modspec];
+        let sourceFilePath = sourceFile.imports[modspec];
         return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
     }
 
 NullLiteralExpression
-    = NULL   { return {kind: 'NullLiteralExpression'}; }
+    = NULL   { return {kind: 'NullLiteralExpression', value: null}; }
 
 BooleanLiteralExpression
     = TRUE   { return {kind: 'BooleanLiteralExpression', value: true}; }
     / FALSE   { return {kind: 'BooleanLiteralExpression', value: false}; }
 
-CharacterExpression
-    = "'"   !['-]   minValue:CHARACTER   "-"   !['-]   maxValue:CHARACTER   "'"
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: true}; }
-
-    / '"'   !["-]   minValue:CHARACTER   "-"   !["-]   maxValue:CHARACTER   '"'
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: false, abstract: false}; }
-
-    / "`"   ![`-]   minValue:CHARACTER   "-"   ![`-]   maxValue:CHARACTER   "`"
-    { return {kind: 'CharacterExpression', minValue, maxValue, concrete: true, abstract: false}; }
-
 StringLiteralExpression
-    = !CharacterExpression   "'"   chars:(!"'"   CHARACTER)*   "'"
+    = "'"   chars:(!"'"   CHARACTER)*   "'"
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
-    / !CharacterExpression   '"'   chars:(!'"'   CHARACTER)*   '"'
+    / '"'   chars:(!'"'   CHARACTER)*   '"'
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
-    / !CharacterExpression   "`"   chars:(!"`"   CHARACTER)*   "`"
+    / "`"   chars:(!"`"   CHARACTER)*   "`"
     { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
 NumericLiteralExpression
@@ -226,13 +212,13 @@ ReferenceExpression
 
 
 // ====================   Record/List Parts   ====================
-StaticFieldList
-    = !","   head:StaticField?   tail:((__   ",")?   __   StaticField)*   (__   ",")?
+RecordFieldList
+    = !","   head:RecordField?   tail:((__   ",")?   __   RecordField)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-StaticField
+RecordField
     = name:IDENTIFIER   __   ":"   __   value:Expression
-    { return {kind: 'StaticField', name, value}; }
+    { return {name, value}; }
 
 ElementList
     = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?
@@ -251,7 +237,6 @@ ExponentPart
 // ====================   Literal characters and escape sequences   ====================
 CHARACTER
     = ![\x00-\x1F]   !"\\"   .   { return text(); }
-    / "\\-"   { return '-'; }
     / "\\"   c:[bfnrtv0'"\\]   { return eval(`"${text()}"`); }
     / "\\x"   d:(HEX_DIGIT   HEX_DIGIT)   { return eval(`"\\u00${d.join('')}"`); }
     / "\\u"   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   { return eval(`"${text()}"`); }

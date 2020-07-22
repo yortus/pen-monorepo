@@ -1,329 +1,168 @@
 
 "use strict";
-function booleanLiteral(options) {
-    const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
-        return { rule: function BOO() { return OUT = out, true; } };
-    }
-    return {
-        rule: function BOO() {
-            if (IN !== value || IP !== 0)
-                return false;
-            IP += 1;
-            OUT = out;
-            return true;
-        },
-    };
-}
-function character(options) {
-    const { min, max } = options;
-    if (options.in === 'nil') {
-        const out = options.out === 'nil' ? undefined : min;
-        return { rule: function CHA() { return OUT = out, true; } };
-    }
-    return {
-        rule: function CHA() {
-            if (typeof IN !== 'string')
-                return false;
-            if (IP < 0 || IP >= IN.length)
-                return false;
-            let c = IN.charAt(IP);
-            if (c < min || c > max)
-                return false;
-            IP += 1;
-            OUT = options.out === 'nil' ? undefined : c;
-            return true;
-        },
-    };
-}
-function createMainExports(createProgram) {
-    const parse = createProgram({ in: 'txt', out: 'ast' }).rule;
-    const print = createProgram({ in: 'ast', out: 'txt' }).rule;
-    return {
-        parse: (text) => {
-            setState({ IN: text, IP: 0 });
-            if (!parse())
-                throw new Error('parse failed');
-            if (!isInputFullyConsumed())
-                throw new Error(`parse didn't consume entire input`);
-            if (OUT === undefined)
-                throw new Error(`parse didn't return a value`);
-            return OUT;
-        },
-        print: (node) => {
-            setState({ IN: node, IP: 0 });
-            if (!print())
-                throw new Error('print failed');
-            if (!isInputFullyConsumed())
-                throw new Error(`print didn't consume entire input`);
-            if (OUT === undefined)
-                throw new Error(`print didn't return a value`);
-            return OUT;
-        },
-    };
-}
-function field(options) {
-    const { name, value } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule: function FLD() {
-                let stateₒ = getState();
-                let obj = {};
-                if (!name.rule())
-                    return false;
-                assert(typeof OUT === 'string');
-                let propName = OUT;
-                if (!value.rule())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                OUT = obj;
-                return true;
-            },
-        };
-    }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule: function FLD() {
-                if (!isPlainObject(IN))
-                    return false;
-                let stateₒ = getState();
-                let text;
-                let propNames = Object.keys(IN);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                const obj = IN;
-                let bitmask = IP;
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
-                    const propBit = 1 << i;
-                    if ((bitmask & propBit) !== 0)
-                        continue;
-                    setState({ IN: propName, IP: 0 });
-                    if (!name.rule())
-                        continue;
-                    if (IP !== propName.length)
-                        continue;
-                    text = concat(text, OUT);
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!value.rule())
-                        continue;
-                    if (!isInputFullyConsumed())
-                        continue;
-                    text = concat(text, OUT);
-                    bitmask += propBit;
-                    setState({ IN: obj, IP: bitmask });
-                    OUT = text;
-                    return true;
-                }
-                setState(stateₒ);
-                return false;
-            },
-        };
-    }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
-}
-function list(options) {
-    const { elements } = options;
-    const elementsLength = elements.length;
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule: function LST() {
-                let stateₒ = getState();
-                let arr = [];
-                for (let i = 0; i < elementsLength; ++i) {
-                    if (!elements[i].rule())
-                        return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    arr.push(OUT);
-                }
-                OUT = arr;
-                return true;
-            },
-        };
-    }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule: function LST() {
-                if (!Array.isArray(IN))
-                    return false;
-                if (IP < 0 || IP + elementsLength > IN.length)
-                    return false;
-                let stateₒ = getState();
-                let text;
-                const arr = IN;
-                const off = IP;
-                for (let i = 0; i < elementsLength; ++i) {
-                    setState({ IN: arr[off + i], IP: 0 });
-                    if (!elements[i].rule())
-                        return setState(stateₒ), false;
-                    if (!isInputFullyConsumed())
-                        return setState(stateₒ), false;
-                    text = concat(text, OUT);
-                }
-                setState({ IN: arr, IP: off + elementsLength });
-                OUT = text;
-                return true;
-            },
-        };
-    }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
-}
-function not(options) {
-    const { expression } = options;
-    return {
-        rule: function NOT() {
+function field({ mode, name, value }) {
+    if (isParse(mode)) {
+        return function FLD() {
             let stateₒ = getState();
-            let result = !expression.rule();
-            setState(stateₒ);
-            OUT = undefined;
-            return result;
-        },
-    };
-}
-function nullLiteral(options) {
-    const out = options.out === 'ast' ? null : undefined;
-    if (options.in !== 'ast') {
-        return { rule: function NUL() { return OUT = out, true; } };
-    }
-    return {
-        rule: function NUL() {
-            if (IN !== null || IP !== 0)
+            let obj = {};
+            if (!name())
                 return false;
-            IP = 1;
-            OUT = out;
+            assert(typeof OUT === 'string');
+            let propName = OUT;
+            if (!value())
+                return setState(stateₒ), false;
+            assert(OUT !== undefined);
+            obj[propName] = OUT;
+            OUT = obj;
             return true;
-        },
-    };
-}
-function numericLiteral(options) {
-    const { value } = options;
-    const out = options.out === 'ast' ? value : undefined;
-    if (options.in !== 'ast') {
-        return { rule: function NUM() { return OUT = out, true; } };
-    }
-    return {
-        rule: function NUM() {
-            if (IN !== value || IP !== 0)
-                return false;
-            IP = 1;
-            OUT = out;
-            return true;
-        },
-    };
-}
-function record(options) {
-    const { fields } = options;
-    if (options.in === 'txt' || options.out === 'ast') {
-        return {
-            rule: function RCD() {
-                let stateₒ = getState();
-                let obj = {};
-                for (let field of fields) {
-                    let propName = field.name;
-                    if (!field.value.rule())
-                        return setState(stateₒ), false;
-                    assert(OUT !== undefined);
-                    obj[propName] = OUT;
-                }
-                OUT = obj;
-                return true;
-            },
         };
     }
-    if (options.in === 'ast' || options.out === 'txt') {
-        return {
-            rule: function RCD() {
-                if (!isPlainObject(IN))
-                    return false;
-                let stateₒ = getState();
-                let text;
-                let propNames = Object.keys(IN);
-                let propCount = propNames.length;
-                assert(propCount <= 32);
-                const obj = IN;
-                let bitmask = IP;
-                for (let field of fields) {
-                    let i = propNames.indexOf(field.name);
-                    if (i < 0)
-                        return setState(stateₒ), false;
-                    let propName = propNames[i];
-                    const propBit = 1 << i;
-                    if ((bitmask & propBit) !== 0)
-                        return setState(stateₒ), false;
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!field.value.rule())
-                        return setState(stateₒ), false;
-                    if (!isInputFullyConsumed())
-                        return setState(stateₒ), false;
-                    text = concat(text, OUT);
-                    bitmask += propBit;
-                }
+    else {
+        return function FLD() {
+            if (objectToString.call(IN) !== '[object Object]')
+                return false;
+            let stateₒ = getState();
+            let text;
+            let propNames = Object.keys(IN);
+            let propCount = propNames.length;
+            assert(propCount <= 32);
+            const obj = IN;
+            let bitmask = IP;
+            for (let i = 0; i < propCount; ++i) {
+                let propName = propNames[i];
+                const propBit = 1 << i;
+                if ((bitmask & propBit) !== 0)
+                    continue;
+                setState({ IN: propName, IP: 0 });
+                if (!name())
+                    continue;
+                if (IP !== propName.length)
+                    continue;
+                text = concat(text, OUT);
+                setState({ IN: obj[propName], IP: 0 });
+                if (!value())
+                    continue;
+                if (!isInputFullyConsumed())
+                    continue;
+                text = concat(text, OUT);
+                bitmask += propBit;
                 setState({ IN: obj, IP: bitmask });
                 OUT = text;
                 return true;
-            },
+            }
+            setState(stateₒ);
+            return false;
         };
     }
-    throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
 }
-function selection(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return {
-        rule: function SEL() {
-            for (let i = 0; i < arity; ++i) {
-                if (expressions[i].rule())
-                    return true;
-            }
-            return false;
-        },
-    };
-}
-function sequence(options) {
-    const { expressions } = options;
-    const arity = expressions.length;
-    return {
-        rule: function SEQ() {
+function list({ mode, elements }) {
+    const elementsLength = elements.length;
+    if (isParse(mode)) {
+        return function LST() {
             let stateₒ = getState();
-            let out;
-            for (let i = 0; i < arity; ++i) {
-                if (!expressions[i].rule())
+            let arr = [];
+            for (let i = 0; i < elementsLength; ++i) {
+                if (!elements[i]())
                     return setState(stateₒ), false;
-                out = concat(out, OUT);
+                assert(OUT !== undefined);
+                arr.push(OUT);
             }
-            OUT = out;
+            OUT = arr;
             return true;
-        },
-    };
-}
-function stringLiteral(options) {
-    const { value } = options;
-    const out = options.out === 'nil' ? undefined : value;
-    if (options.in === 'nil') {
-        return { rule: function STR() { return OUT = out, true; } };
+        };
     }
-    return {
-        rule: function STR() {
-            if (typeof IN !== 'string')
+    else {
+        return function LST() {
+            if (!Array.isArray(IN))
                 return false;
-            if (!isMatch(value))
+            if (IP < 0 || IP + elementsLength > IN.length)
                 return false;
-            IP += value.length;
-            OUT = out;
+            let stateₒ = getState();
+            let text;
+            const arr = IN;
+            const off = IP;
+            for (let i = 0; i < elementsLength; ++i) {
+                setState({ IN: arr[off + i], IP: 0 });
+                if (!elements[i]())
+                    return setState(stateₒ), false;
+                if (!isInputFullyConsumed())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+            }
+            setState({ IN: arr, IP: off + elementsLength });
+            OUT = text;
             return true;
-        },
-    };
-}
-function isMatch(substr) {
-    let lastPos = IP + substr.length;
-    if (lastPos > IN.length)
-        return false;
-    for (let i = IP, j = 0; i < lastPos; ++i, ++j) {
-        if (IN.charAt(i) !== substr.charAt(j))
-            return false;
+        };
     }
+}
+function record({ mode, fields }) {
+    if (isParse(mode)) {
+        return function RCD() {
+            let stateₒ = getState();
+            let obj = {};
+            for (let field of fields) {
+                let propName = field.name;
+                if (!field.value())
+                    return setState(stateₒ), false;
+                assert(OUT !== undefined);
+                obj[propName] = OUT;
+            }
+            OUT = obj;
+            return true;
+        };
+    }
+    else {
+        return function RCD() {
+            if (objectToString.call(IN) !== '[object Object]')
+                return false;
+            let stateₒ = getState();
+            let text;
+            let propNames = Object.keys(IN);
+            let propCount = propNames.length;
+            assert(propCount <= 32);
+            const obj = IN;
+            let bitmask = IP;
+            for (let field of fields) {
+                let i = propNames.indexOf(field.name);
+                if (i < 0)
+                    return setState(stateₒ), false;
+                let propName = propNames[i];
+                const propBit = 1 << i;
+                if ((bitmask & propBit) !== 0)
+                    return setState(stateₒ), false;
+                setState({ IN: obj[propName], IP: 0 });
+                if (!field.value())
+                    return setState(stateₒ), false;
+                if (!isInputFullyConsumed())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+                bitmask += propBit;
+            }
+            setState({ IN: obj, IP: bitmask });
+            OUT = text;
+            return true;
+        };
+    }
+}
+const PARSE = 6;
+const PRINT = 7;
+const COVAL = 4;
+const COGEN = 5;
+const ABGEN = 2;
+const ABVAL = 3;
+const isParse = (mode) => (mode & 1) === 0;
+const isPrint = (mode) => (mode & 1) !== 0;
+const hasConcreteForm = (mode) => (mode & 4) !== 0;
+const hasAbstractForm = (mode) => (mode & 2) !== 0;
+const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
+const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
+function isRule(_x) {
+    return true;
+}
+function isLambda(_x) {
+    return true;
+}
+function isModule(_x) {
     return true;
 }
 let IN;
@@ -345,20 +184,24 @@ function concat(a, b) {
         return b;
     if (b === undefined)
         return a;
-    if (typeof a === 'string' && typeof b === 'string')
+    let type = objectToString.call(a);
+    if (type !== objectToString.call(b))
+        throw new Error(`Internal error: invalid sequence`);
+    if (type === '[object String]')
         return a + b;
-    if (Array.isArray(a) && Array.isArray(b))
+    if (type === '[object Array]')
         return [...a, ...b];
-    if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null)
+    if (type === '[object Object]')
         return Object.assign(Object.assign({}, a), b);
     throw new Error(`Internal error: invalid sequence`);
 }
 function isInputFullyConsumed() {
-    if (typeof IN === 'string')
+    let type = objectToString.call(IN);
+    if (type === '[object String]')
         return IP === IN.length;
-    if (Array.isArray(IN))
+    if (type === '[object Array]')
         return IP === IN.length;
-    if (typeof IN === 'object' && IN !== null) {
+    if (type === '[object Object]') {
         let keyCount = Object.keys(IN).length;
         assert(keyCount <= 32);
         if (keyCount === 0)
@@ -367,68 +210,102 @@ function isInputFullyConsumed() {
     }
     return IP === 1;
 }
-function isPlainObject(value) {
-    return value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype;
-}
-function zeroOrMore(options) {
-    const { expression } = options;
-    return {
-        rule: function O_M() {
-            let stateₒ = getState();
-            let out;
-            while (true) {
-                if (!expression.rule())
-                    break;
-                if (IP === stateₒ.IP)
-                    break;
-                out = concat(out, OUT);
-            }
-            OUT = out;
-            return true;
-        },
-    };
-}
-function zeroOrOne(options) {
-    const { expression } = options;
-    return {
-        rule: function O_1() {
-            if (!expression.rule())
-                OUT = undefined;
-            return true;
-        },
-    };
-}
-
-// -------------------- Extensions --------------------
-const 𝔼5 = (() => {
+const objectToString = Object.prototype.toString;
+const createExtension_id3 = (() => {
     "use strict";
     /* @pen exports = {
+        char,
         f64,
         i32,
         memoise,
     } */
     // TODO: doc... has both 'txt' and 'ast' representation
-    function f64(options) {
-        if (options.in === 'nil') {
-            const out = options.out === 'nil' ? undefined : 0;
-            return { rule: function F64() { return OUT = out, true; } };
+    // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
+    // TODO: optimise 'any char' case better
+    // TODO: optimise all cases better
+    function char({ mode }) {
+        return function CHA_lambda(expr) {
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
+            let max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
+            assert(typeof min === 'string' && min.length === 1);
+            assert(typeof max === 'string' && max.length === 1);
+            let checkRange = min !== '\u0000' || max !== '\uFFFF';
+            if (!hasInput(mode)) {
+                assert(hasOutput(mode));
+                return function CHA() { return OUT = min, true; };
+            }
+            return function CHA() {
+                if (isPrint(mode) && typeof IN !== 'string')
+                    return false;
+                if (IP < 0 || IP >= IN.length)
+                    return false;
+                let c = IN.charAt(IP);
+                if (checkRange && (c < min || c > max))
+                    return false;
+                IP += 1;
+                OUT = hasOutput(mode) ? c : undefined;
+                return true;
+            };
+        };
+    }
+    // TODO: doc... has both 'txt' and 'ast' representation
+    function f64({ mode }) {
+        if (!hasInput(mode)) {
+            assert(hasOutput(mode));
+            const out = isParse(mode) ? 0 : '0';
+            return function F64() { return OUT = out, true; };
         }
-        if (options.in === 'txt' || options.out === 'ast') {
-            return {
-                rule: function F64() {
-                    if (typeof IN !== 'string')
-                        return false;
-                    let stateₒ = getState();
-                    const LEN = IN.length;
-                    const EOS = 0;
-                    let digitCount = 0;
+        if (isParse(mode)) {
+            return function F64() {
+                if (typeof IN !== 'string')
+                    return false;
+                let stateₒ = getState();
+                const LEN = IN.length;
+                const EOS = 0;
+                let digitCount = 0;
+                // Parse optional '+' or '-' sign
+                let c = IN.charCodeAt(IP);
+                if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse 0..M digits
+                while (true) {
+                    if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                        break;
+                    digitCount += 1;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse optional '.'
+                if (c === DECIMAL_POINT) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Parse 0..M digits
+                while (true) {
+                    if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                        break;
+                    digitCount += 1;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+                // Ensure we have parsed at least one significant digit
+                if (digitCount === 0)
+                    return setState(stateₒ), false;
+                // Parse optional exponent
+                if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     // Parse optional '+' or '-' sign
-                    let c = IN.charCodeAt(IP);
                     if (c === PLUS_SIGN || c === MINUS_SIGN) {
                         IP += 1;
                         c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
-                    // Parse 0..M digits
+                    // Parse 1..M digits
+                    digitCount = 0;
                     while (true) {
                         if (c < ZERO_DIGIT || c > NINE_DIGIT)
                             break;
@@ -436,70 +313,32 @@ const 𝔼5 = (() => {
                         IP += 1;
                         c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                     }
-                    // Parse optional '.'
-                    if (c === DECIMAL_POINT) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Ensure we have parsed at least one significant digit
                     if (digitCount === 0)
                         return setState(stateₒ), false;
-                    // Parse optional exponent
-                    if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        // Parse optional '+' or '-' sign
-                        if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        }
-                        // Parse 1..M digits
-                        digitCount = 0;
-                        while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                                break;
-                            digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                        }
-                        if (digitCount === 0)
-                            return setState(stateₒ), false;
-                    }
-                    // There is a syntactically valid float. Delegate parsing to the JS runtime.
-                    // Reject the number if it parses to Infinity or Nan.
-                    // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
-                    if (!Number.isFinite(num))
-                        return setState(stateₒ), false;
-                    // Success
-                    OUT = options.out === 'nil' ? undefined : num;
-                    return true;
-                },
+                }
+                // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                // Reject the number if it parses to Infinity or Nan.
+                // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                if (!Number.isFinite(num))
+                    return setState(stateₒ), false;
+                // Success
+                OUT = hasOutput(mode) ? num : undefined;
+                return true;
             };
         }
-        if (options.in === 'ast' || options.out === 'txt') {
-            return {
-                rule: function F64() {
-                    // Ensure N is a number.
-                    if (typeof IN !== 'number' || IP !== 0)
-                        return false;
-                    // Delegate unparsing to the JS runtime.
-                    // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = options.out === 'nil' ? undefined : String(IN);
-                    IP = 1;
-                    return true;
-                },
+        else /* isPrint */ {
+            return function F64() {
+                // Ensure N is a number.
+                if (typeof IN !== 'number' || IP !== 0)
+                    return false;
+                // Delegate unparsing to the JS runtime.
+                // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                OUT = hasOutput(mode) ? String(IN) : undefined;
+                IP = 1;
+                return true;
             };
         }
-        throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
     }
     // These constants are used by the f64 rule.
     const PLUS_SIGN = '+'.charCodeAt(0);
@@ -509,113 +348,101 @@ const 𝔼5 = (() => {
     const NINE_DIGIT = '9'.charCodeAt(0);
     const LOWERCASE_E = 'e'.charCodeAt(0);
     const UPPERCASE_E = 'E'.charCodeAt(0);
-    // tslint:disable: no-bitwise
     // TODO: doc... has both 'txt' and 'ast' representation
-    function i32(options) {
-        let result = {
-            lambda(expr) {
-                var _a, _b, _c, _d, _e, _f, _g, _h;
-                let base = (_d = (_c = (_b = (_a = expr.bindings) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.constant) === null || _c === void 0 ? void 0 : _c.value) !== null && _d !== void 0 ? _d : 10;
-                let signed = (_h = (_g = (_f = (_e = expr.bindings) === null || _e === void 0 ? void 0 : _e.signed) === null || _f === void 0 ? void 0 : _f.constant) === null || _g === void 0 ? void 0 : _g.value) !== null && _h !== void 0 ? _h : true;
-                assert(typeof base === 'number' && base >= 2 && base <= 36);
-                assert(typeof signed === 'boolean');
-                if (options.in === 'nil') {
-                    const out = options.out === 'nil' ? undefined : 0;
-                    return { rule: function I32() { return OUT = out, true; } };
-                }
-                if (options.in === 'txt' || options.out === 'ast') {
-                    return {
-                        rule: function I32() {
-                            if (typeof IN !== 'string')
-                                return false;
-                            let stateₒ = getState();
-                            // Parse optional leading '-' sign (if signed)...
-                            let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                            let isNegative = false;
-                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                                isNegative = true;
-                                MAX_NUM = 0x80000000;
-                                IP += 1;
-                            }
-                            // ...followed by one or more decimal digits. (NB: no exponents).
-                            let num = 0;
-                            let digits = 0;
-                            while (IP < IN.length) {
-                                // Read a digit.
-                                let c = IN.charCodeAt(IP);
-                                if (c >= 256)
-                                    break;
-                                let digitValue = DIGIT_VALUES[c];
-                                if (digitValue >= base)
-                                    break;
-                                // Update parsed number.
-                                num *= base;
-                                num += digitValue;
-                                // Check for overflow.
-                                if (num > MAX_NUM)
-                                    return setState(stateₒ), false;
-                                // Loop again.
-                                IP += 1;
-                                digits += 1;
-                            }
-                            // Check that we parsed at least one digit.
-                            if (digits === 0)
-                                return setState(stateₒ), false;
-                            // Apply the sign.
-                            if (isNegative)
-                                num = -num;
-                            // Success
-                            OUT = options.out === 'nil' ? undefined : num;
-                            return true;
-                        },
-                    };
-                }
-                if (options.in === 'ast' || options.out === 'txt') {
-                    return {
-                        rule() {
-                            if (typeof IN !== 'number' || IP !== 0)
-                                return false;
-                            let num = IN;
-                            // Determine the number's sign and ensure it is in range.
-                            let isNegative = false;
-                            let MAX_NUM = 0x7FFFFFFF;
-                            if (num < 0) {
-                                if (!signed)
-                                    return false;
-                                isNegative = true;
-                                num = -num;
-                                MAX_NUM = 0x80000000;
-                            }
-                            if (num > MAX_NUM)
-                                return false;
-                            // Extract the digits.
-                            let digits = [];
-                            while (true) {
-                                let d = num % base;
-                                num = (num / base) | 0;
-                                digits.push(CHAR_CODES[d]);
-                                if (num === 0)
-                                    break;
-                            }
-                            // Compute the final string.
-                            if (isNegative)
-                                digits.push(0x2d); // char code for '-'
-                            // TODO: is String.fromCharCode(...) performant?
-                            OUT = options.out === 'nil' ? undefined : String.fromCharCode(...digits.reverse());
-                            IP = 1;
-                            return true;
-                        },
-                    };
-                }
-                throw new Error(`Unsupported operation '${options.in}'->'${options.out}'`);
-            },
+    function i32({ mode }) {
+        return function I32_lambda(expr) {
+            var _a, _b, _c, _d, _e, _f;
+            assert(isModule(expr));
+            let base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+            let signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+            assert(typeof base === 'number' && base >= 2 && base <= 36);
+            assert(typeof signed === 'boolean');
+            if (!hasInput(mode)) {
+                assert(hasOutput(mode));
+                const out = isParse(mode) ? 0 : '0';
+                return function I32() { return OUT = out, true; };
+            }
+            if (isParse(mode)) {
+                return function I32() {
+                    if (typeof IN !== 'string')
+                        return false;
+                    let stateₒ = getState();
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        IP += 1;
+                    }
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let num = 0;
+                    let digits = 0;
+                    while (IP < IN.length) {
+                        // Read a digit.
+                        let c = IN.charCodeAt(IP);
+                        if (c >= 256)
+                            break;
+                        let digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base)
+                            break;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
+                        // Check for overflow.
+                        if (num > MAX_NUM)
+                            return setState(stateₒ), false;
+                        // Loop again.
+                        IP += 1;
+                        digits += 1;
+                    }
+                    // Check that we parsed at least one digit.
+                    if (digits === 0)
+                        return setState(stateₒ), false;
+                    // Apply the sign.
+                    if (isNegative)
+                        num = -num;
+                    // Success
+                    OUT = hasOutput(mode) ? num : undefined;
+                    return true;
+                };
+            }
+            else /* isPrint */ {
+                return function I32() {
+                    if (typeof IN !== 'number' || IP !== 0)
+                        return false;
+                    let num = IN;
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed)
+                            return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM)
+                        return false;
+                    // Extract the digits.
+                    let digits = [];
+                    while (true) {
+                        let d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0)
+                            break;
+                    }
+                    // Compute the final string.
+                    if (isNegative)
+                        digits.push(0x2d); // char code for '-'
+                    // TODO: is String.fromCharCode(...) performant?
+                    OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
+                    IP = 1;
+                    return true;
+                };
+            }
         };
-        // TODO: temp testing...
-        result.rule = result.lambda({ bindings: {
-                base: { constant: { value: 10 } },
-                unsigned: { constant: { value: false } },
-            } }).rule;
-        return result;
     }
     // TODO: doc...
     // use this for bases between 2-36. Get the charCode, ensure < 256, look up DIGIT_VALUES[code], ensure < BASE
@@ -646,482 +473,1120 @@ const 𝔼5 = (() => {
         0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
         0x57, 0x58, 0x59, 0x5a,
     ];
-    function memoise(_options) {
-        return {
-            lambda(expr) {
-                // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
-                const memos = new Map();
-                return {
-                    rule: function MEM() {
-                        // Check whether the memo table already has an entry for the given initial state.
-                        let stateₒ = getState();
-                        let memos2 = memos.get(IN);
-                        if (memos2 === undefined) {
-                            memos2 = new Map();
-                            memos.set(IN, memos2);
-                        }
-                        let memo = memos2.get(IP);
-                        if (!memo) {
-                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                            // this initial state. The first thing we do is create a memo table entry, which is marked as
-                            // *unresolved*. All future applications of this rule with the same initial state will find this
-                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                            // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
-                            memos2.set(IP, memo);
-                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                            // At this point, any left-recursive paths encountered during application are guaranteed to have
-                            // been noted and aborted (see below).
-                            if (expr.rule()) {
-                                memo.result = true;
-                                memo.stateᐟ = getState();
-                                memo.OUT = OUT;
-                            }
-                            memo.resolved = true;
-                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                            // final.
-                            if (!memo.isLeftRecursive) {
-                                setState(memo.stateᐟ);
-                                OUT = memo.OUT;
-                                return memo.result;
-                            }
-                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                            // the same rule with the same initial state. We continue to iterate as long as the application
-                            // succeeds and consumes more input than the previous iteration did, in which case we update the
-                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                            // does not consume more input, at which point we take the result of the previous iteration as
-                            // final.
-                            while (memo.result === true) {
-                                setState(stateₒ);
-                                // TODO: break cases for UNPARSING:
-                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                                // some node --> some different non-empty node (assert: should never happen!)
-                                if (!expr.rule())
-                                    break;
-                                let state = getState();
-                                if (state.IP <= memo.stateᐟ.IP)
-                                    break;
-                                // TODO: was for unparse... comment above says should never happen...
-                                // if (!isInputFullyConsumed()) break;
-                                memo.stateᐟ = state;
-                                memo.OUT = OUT;
-                            }
-                        }
-                        else if (!memo.resolved) {
-                            // If we get here, then we have already applied the rule with this initial state, but not yet
-                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                            // note that the rule application encountered left-recursion, and return with failure. This means
-                            // that the initial application of the rule for this initial state can only possibly succeed along a
-                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                            // left-recursive rules.
-                            memo.isLeftRecursive = true;
-                            return false;
-                        }
-                        // We have a resolved memo, so the result of the rule application for the given initial state has
-                        // already been computed. Return it from the memo.
+    function memoise({}) {
+        return function MEM_lambda(expr) {
+            // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
+            const memos = new Map();
+            return function MEM() {
+                // Check whether the memo table already has an entry for the given initial state.
+                let stateₒ = getState();
+                let memos2 = memos.get(IN);
+                if (memos2 === undefined) {
+                    memos2 = new Map();
+                    memos.set(IN, memos2);
+                }
+                let memo = memos2.get(IP);
+                if (!memo) {
+                    // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                    // this initial state. The first thing we do is create a memo table entry, which is marked as
+                    // *unresolved*. All future applications of this rule with the same initial state will find this
+                    // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                    // left-recursion.
+                    memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
+                    memos2.set(IP, memo);
+                    // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                    // At this point, any left-recursive paths encountered during application are guaranteed to have
+                    // been noted and aborted (see below).
+                    if (expr()) { // TODO: fix cast
+                        memo.result = true;
+                        memo.stateᐟ = getState();
+                        memo.OUT = OUT;
+                    }
+                    memo.resolved = true;
+                    // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                    // final.
+                    if (!memo.isLeftRecursive) {
                         setState(memo.stateᐟ);
                         OUT = memo.OUT;
                         return memo.result;
-                    },
-                };
-            },
+                    }
+                    // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                    // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                    // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                    // the same rule with the same initial state. We continue to iterate as long as the application
+                    // succeeds and consumes more input than the previous iteration did, in which case we update the
+                    // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                    // does not consume more input, at which point we take the result of the previous iteration as
+                    // final.
+                    while (memo.result === true) {
+                        setState(stateₒ);
+                        // TODO: break cases for UNPARSING:
+                        // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                        // some node --> some different non-empty node (assert: should never happen!)
+                        if (!expr())
+                            break; // TODO: fix cast
+                        let state = getState();
+                        if (state.IP <= memo.stateᐟ.IP)
+                            break;
+                        // TODO: was for unparse... comment above says should never happen...
+                        // if (!isInputFullyConsumed()) break;
+                        memo.stateᐟ = state;
+                        memo.OUT = OUT;
+                    }
+                }
+                else if (!memo.resolved) {
+                    // If we get here, then we have already applied the rule with this initial state, but not yet
+                    // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                    // note that the rule application encountered left-recursion, and return with failure. This means
+                    // that the initial application of the rule for this initial state can only possibly succeed along a
+                    // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                    // left-recursive rules.
+                    memo.isLeftRecursive = true;
+                    return false;
+                }
+                // We have a resolved memo, so the result of the rule application for the given initial state has
+                // already been computed. Return it from the memo.
+                setState(memo.stateᐟ);
+                OUT = memo.OUT;
+                return memo.result;
+            };
         };
     }
 
-    return {
-        f64,
-        i32,
-        memoise,
+    return ({mode}) => {
+        let _memoise = memoise({mode});
+        let _f64 = f64({mode});
+        let _i32 = i32({mode});
+        return (name) => {
+            switch (name) {
+                case 'memoise': return _memoise;
+                case 'f64': return _f64;
+                case 'i32': return _i32;
+                default: return undefined;
+            }
+        };
     };
 })();
 
-function createProgram({in: IN, out: OUT}) {
 
-    const 𝕊1 = {
-        bindings: {
-            memoise: {},
-            f64: {},
-            i32: {},
-            start: {},
-            expr: {},
-            add: {},
-            sub: {},
-            term: {},
-            mul: {},
-            div: {},
-            factor: {},
-        },
-    };
 
-    const 𝕊2 = {
-        bindings: {
-            base: {},
-            signed: {},
-        },
-    };
 
-    const 𝕊3 = {
-        bindings: {
-            base: {},
-            signed: {},
-        },
-    };
+// ------------------------------ PARSE ------------------------------
+const parse = (() => {
+    const id3 = createExtension_id3({mode: 6})
+    const id2 = id3('memoise');
+    const id26 = id3('f64');
+    const id30 = id3('i32');
 
-    const 𝕊4 = {
-        bindings: {
-            signed: {},
-        },
-    };
+    // ApplicationExpression
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
+        id1_memo = id2(id4);
+        return id1_memo(arg);
+    }
+    let id1_memo;
 
-    const 𝕊5 = {
-        bindings: {
-            f64: {},
-            i32: {},
-            memoise: {},
-        },
-    };
+    // MemberExpression
 
-    // -------------------- Aliases --------------------
-    𝕊1.bindings.memoise = 𝕊5.bindings.memoise;
-    𝕊1.bindings.f64 = 𝕊5.bindings.f64;
-    𝕊1.bindings.i32 = 𝕊5.bindings.i32;
-    𝕊1.bindings.start = 𝕊1.bindings.expr;
+    // ImportExpression
 
-    // -------------------- Compile-time constants --------------------
-    𝕊2.bindings.base.constant = {value: 16};
-    𝕊2.bindings.signed.constant = {value: false};
-    𝕊3.bindings.base.constant = {value: 2};
-    𝕊3.bindings.signed.constant = {value: false};
-    𝕊4.bindings.signed.constant = {value: false};
+    // SelectionExpression
+    function id4() {
+        if (id5()) return true;
+        if (id50()) return true;
+        if (id9()) return true;
+        return false;
+    }
 
-    // -------------------- std.pen.js --------------------
-
-    Object.assign(
-        𝕊5.bindings.f64,
-        𝔼5.f64({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊5.bindings.i32,
-        𝔼5.i32({in: IN, out: OUT}),
-    );
-
-    Object.assign(
-        𝕊5.bindings.memoise,
-        𝔼5.memoise({in: IN, out: OUT}),
-    );
-
-    // -------------------- math.pen --------------------
-
-    Object.assign(
-        𝕊1.bindings.expr,
-        (𝕊1.bindings.memoise).lambda(selection({
-            in: IN,
-            out: OUT,
-            expressions: [
-                𝕊1.bindings.add,
-                𝕊1.bindings.sub,
-                𝕊1.bindings.term,
-            ],
-        }))
-    );
-
-    Object.assign(
-        𝕊1.bindings.add,
-        record({
-            in: IN,
-            out: OUT,
+    // RecordExpression
+    function id5() {
+        if (id5_memo) return id5_memo();
+        id5_memo = record({
+            mode: 6,
             fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "add",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊1.bindings.expr,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "+",
-                            }),
-                            𝕊1.bindings.term,
-                        ],
-                    }),
-                },
+                {name: 'type', value: id6},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id7},
             ],
         })
-    );
+        return id5_memo();
+    }
+    let id5_memo;
 
-    Object.assign(
-        𝕊1.bindings.sub,
-        record({
-            in: IN,
-            out: OUT,
+    // StringLiteralExpression
+    function id6() {
+        OUT = "add";
+        return true;
+    }
+    id6.constant = {value: "add"};
+
+    // SequenceExpression
+    function id7() {
+        let stateₒ = getState();
+        let out;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id8() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 43) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id8.constant = {value: "+"};
+
+    // ApplicationExpression
+    function id9(arg) {
+        if (id9_memo) return id9_memo(arg);
+        id9_memo = id2(id10);
+        return id9_memo(arg);
+    }
+    let id9_memo;
+
+    // SelectionExpression
+    function id10() {
+        if (id11()) return true;
+        if (id46()) return true;
+        if (id20()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function id11() {
+        let stateₒ = getState();
+        let out;
+        if (id12()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // FieldExpression
+    function id12() {
+        if (id12_memo) return id12_memo();
+        id12_memo = field({
+            mode: 6,
+            name: id13,
+            value: id14,
+        });
+        return id12_memo();
+    }
+    let id12_memo;
+
+    // StringLiteralExpression
+    function id13() {
+        OUT = "type";
+        return true;
+    }
+    id13.constant = {value: "type"};
+
+    // StringLiteralExpression
+    function id14() {
+        OUT = "mul";
+        return true;
+    }
+    id14.constant = {value: "mul"};
+
+    // RecordExpression
+    function id15() {
+        if (id15_memo) return id15_memo();
+        id15_memo = record({
+            mode: 6,
             fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "sub",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊1.bindings.expr,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "-",
-                            }),
-                            𝕊1.bindings.term,
-                        ],
-                    }),
-                },
+                {name: 'lhs', value: id9},
             ],
         })
-    );
+        return id15_memo();
+    }
+    let id15_memo;
 
-    Object.assign(
-        𝕊1.bindings.term,
-        (𝕊1.bindings.memoise).lambda(selection({
-            in: IN,
-            out: OUT,
-            expressions: [
-                𝕊1.bindings.mul,
-                𝕊1.bindings.div,
-                𝕊1.bindings.factor,
-            ],
-        }))
-    );
+    // FieldExpression
+    function id16() {
+        if (id16_memo) return id16_memo();
+        id16_memo = field({
+            mode: 6,
+            name: id17,
+            value: id18,
+        });
+        return id16_memo();
+    }
+    let id16_memo;
 
-    Object.assign(
-        𝕊1.bindings.mul,
-        sequence({
-            in: IN,
-            out: OUT,
-            expressions: [
-                field({
-                    in: IN,
-                    out: OUT,
-                    name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "type",
-                    }),
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "mul",
-                    }),
-                }),
-                record({
-                    in: IN,
-                    out: OUT,
-                    fields: [
-                        {
-                            name: 'lhs',
-                            value: 𝕊1.bindings.term,
-                        },
-                    ],
-                }),
-                field({
-                    in: IN,
-                    out: OUT,
-                    name: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "rhs",
-                    }),
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "*",
-                            }),
-                            𝕊1.bindings.factor,
-                        ],
-                    }),
-                }),
-            ],
-        })
-    );
+    // StringLiteralExpression
+    function id17() {
+        OUT = "rhs";
+        return true;
+    }
+    id17.constant = {value: "rhs"};
 
-    Object.assign(
-        𝕊1.bindings.div,
-        record({
-            in: IN,
-            out: OUT,
+    // SequenceExpression
+    function id18() {
+        let stateₒ = getState();
+        let out;
+        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id19() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 42) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id19.constant = {value: "*"};
+
+    // SelectionExpression
+    function id20() {
+        if (id21()) return true;
+        if (id27()) return true;
+        if (id34()) return true;
+        if (id39()) return true;
+        if (id43()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function id21() {
+        let stateₒ = getState();
+        let out;
+        if (id22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id24()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // NotExpression
+    function id22() {
+        let stateₒ = getState();
+        let result = !id23();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteralExpression
+    function id23() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
+        OUT = "0x";
+        return true;
+    }
+    id23.constant = {value: "0x"};
+
+    // NotExpression
+    function id24() {
+        let stateₒ = getState();
+        let result = !id25();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteralExpression
+    function id25() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = "0b";
+        return true;
+    }
+    id25.constant = {value: "0b"};
+
+    // MemberExpression
+
+    // SequenceExpression
+    function id27() {
+        let stateₒ = getState();
+        let out;
+        if (id28()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id28() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+    id28.constant = {value: "0x"};
+
+    // ApplicationExpression
+    function id29(arg) {
+        if (id29_memo) return id29_memo(arg);
+        id29_memo = id30(id31);
+        return id29_memo(arg);
+    }
+    let id29_memo;
+
+    // MemberExpression
+
+    // ModuleExpression
+    function id31(bindingName) {
+        switch (bindingName) {
+            case 'base': return id32;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // NumericLiteralExpression
+    function id32() {
+        OUT = 16;
+        return true;
+    }
+    id32.constant = {value: 16};
+
+    // BooleanLiteralExpression
+    function id33() {
+        OUT = false;
+        return true;
+    }
+    id33.constant = {value: false};
+
+    // SequenceExpression
+    function id34() {
+        let stateₒ = getState();
+        let out;
+        if (id35()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id36()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id35() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+    id35.constant = {value: "0b"};
+
+    // ApplicationExpression
+    function id36(arg) {
+        if (id36_memo) return id36_memo(arg);
+        id36_memo = id30(id37);
+        return id36_memo(arg);
+    }
+    let id36_memo;
+
+    // ModuleExpression
+    function id37(bindingName) {
+        switch (bindingName) {
+            case 'base': return id38;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // NumericLiteralExpression
+    function id38() {
+        OUT = 2;
+        return true;
+    }
+    id38.constant = {value: 2};
+
+    // SequenceExpression
+    function id39() {
+        let stateₒ = getState();
+        let out;
+        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id40() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id40.constant = {value: "i"};
+
+    // ApplicationExpression
+    function id41(arg) {
+        if (id41_memo) return id41_memo(arg);
+        id41_memo = id30(id42);
+        return id41_memo(arg);
+    }
+    let id41_memo;
+
+    // ModuleExpression
+    function id42(bindingName) {
+        switch (bindingName) {
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function id43() {
+        let stateₒ = getState();
+        let out;
+        if (id44()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id45()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id44() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 40) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id44.constant = {value: "("};
+
+    // StringLiteralExpression
+    function id45() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 41) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id45.constant = {value: ")"};
+
+    // RecordExpression
+    function id46() {
+        if (id46_memo) return id46_memo();
+        id46_memo = record({
+            mode: 6,
             fields: [
-                {
-                    name: 'type',
-                    value: stringLiteral({
-                        in: IN !== "ast" ? "nil" : IN,
-                        out: OUT !== "ast" ? "nil" : OUT,
-                        value: "div",
-                    }),
-                },
-                {
-                    name: 'lhs',
-                    value: 𝕊1.bindings.term,
-                },
-                {
-                    name: 'rhs',
-                    value: sequence({
-                        in: IN,
-                        out: OUT,
-                        expressions: [
-                            stringLiteral({
-                                in: IN !== "txt" ? "nil" : IN,
-                                out: OUT !== "txt" ? "nil" : OUT,
-                                value: "/",
-                            }),
-                            𝕊1.bindings.factor,
-                        ],
-                    }),
-                },
+                {name: 'type', value: id47},
+                {name: 'lhs', value: id9},
+                {name: 'rhs', value: id48},
             ],
         })
-    );
+        return id46_memo();
+    }
+    let id46_memo;
 
-    Object.assign(
-        𝕊1.bindings.factor,
-        selection({
-            in: IN,
-            out: OUT,
-            expressions: [
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        not({
-                            in: IN,
-                            out: OUT,
-                            expression: stringLiteral({
-                                in: IN,
-                                out: OUT,
-                                value: "0x",
-                            }),
-                        }),
-                        not({
-                            in: IN,
-                            out: OUT,
-                            expression: stringLiteral({
-                                in: IN,
-                                out: OUT,
-                                value: "0b",
-                            }),
-                        }),
-                        𝕊1.bindings.f64,
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "0x",
-                        }),
-                        (𝕊1.bindings.i32).lambda(𝕊2),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "0b",
-                        }),
-                        (𝕊1.bindings.i32).lambda(𝕊3),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "i",
-                        }),
-                        (𝕊1.bindings.i32).lambda(𝕊4),
-                    ],
-                }),
-                sequence({
-                    in: IN,
-                    out: OUT,
-                    expressions: [
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: "(",
-                        }),
-                        𝕊1.bindings.expr,
-                        stringLiteral({
-                            in: IN !== "txt" ? "nil" : IN,
-                            out: OUT !== "txt" ? "nil" : OUT,
-                            value: ")",
-                        }),
-                    ],
-                }),
+    // StringLiteralExpression
+    function id47() {
+        OUT = "div";
+        return true;
+    }
+    id47.constant = {value: "div"};
+
+    // SequenceExpression
+    function id48() {
+        let stateₒ = getState();
+        let out;
+        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id49() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 47) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id49.constant = {value: "/"};
+
+    // RecordExpression
+    function id50() {
+        if (id50_memo) return id50_memo();
+        id50_memo = record({
+            mode: 6,
+            fields: [
+                {name: 'type', value: id51},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id52},
             ],
         })
-    );
+        return id50_memo();
+    }
+    let id50_memo;
 
-    Object.assign(
-        𝕊2.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 16})
-    );
+    // StringLiteralExpression
+    function id51() {
+        OUT = "sub";
+        return true;
+    }
+    id51.constant = {value: "sub"};
 
-    Object.assign(
-        𝕊2.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
-    );
+    // SequenceExpression
+    function id52() {
+        let stateₒ = getState();
+        let out;
+        if (id53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
 
-    Object.assign(
-        𝕊3.bindings.base,
-        numericLiteral({in: IN, out: OUT, value: 2})
-    );
+    // StringLiteralExpression
+    function id53() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 45) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id53.constant = {value: "-"};
 
-    Object.assign(
-        𝕊3.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
-    );
+    return id1;
+})();
 
-    Object.assign(
-        𝕊4.bindings.signed,
-        booleanLiteral({in: IN, out: OUT, value: false})
-    );
 
-    return 𝕊1.bindings.start;
-}
 
-// -------------------- Main exports --------------------
-module.exports = createMainExports(createProgram);
+
+// ------------------------------ PRINT ------------------------------
+const print = (() => {
+    const id3 = createExtension_id3({mode: 7})
+    const id2 = id3('memoise');
+    const id26 = id3('f64');
+    const id30 = id3('i32');
+
+    // ApplicationExpression
+    function id1(arg) {
+        if (id1_memo) return id1_memo(arg);
+        id1_memo = id2(id4);
+        return id1_memo(arg);
+    }
+    let id1_memo;
+
+    // MemberExpression
+
+    // ImportExpression
+
+    // SelectionExpression
+    function id4() {
+        if (id5()) return true;
+        if (id50()) return true;
+        if (id9()) return true;
+        return false;
+    }
+
+    // RecordExpression
+    function id5() {
+        if (id5_memo) return id5_memo();
+        id5_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id6},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id7},
+            ],
+        })
+        return id5_memo();
+    }
+    let id5_memo;
+
+    // StringLiteralExpression
+    function id6() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 97) return false;
+        if (IN.charCodeAt(IP + 1) !== 100) return false;
+        if (IN.charCodeAt(IP + 2) !== 100) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    id6.constant = {value: "add"};
+
+    // SequenceExpression
+    function id7() {
+        let stateₒ = getState();
+        let out;
+        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id8() {
+        OUT = "+";
+        return true;
+    }
+    id8.constant = {value: "+"};
+
+    // ApplicationExpression
+    function id9(arg) {
+        if (id9_memo) return id9_memo(arg);
+        id9_memo = id2(id10);
+        return id9_memo(arg);
+    }
+    let id9_memo;
+
+    // SelectionExpression
+    function id10() {
+        if (id11()) return true;
+        if (id46()) return true;
+        if (id20()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function id11() {
+        let stateₒ = getState();
+        let out;
+        if (id12()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // FieldExpression
+    function id12() {
+        if (id12_memo) return id12_memo();
+        id12_memo = field({
+            mode: 7,
+            name: id13,
+            value: id14,
+        });
+        return id12_memo();
+    }
+    let id12_memo;
+
+    // StringLiteralExpression
+    function id13() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 4 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 116) return false;
+        if (IN.charCodeAt(IP + 1) !== 121) return false;
+        if (IN.charCodeAt(IP + 2) !== 112) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        IP += 4;
+        OUT = undefined;
+        return true;
+    }
+    id13.constant = {value: "type"};
+
+    // StringLiteralExpression
+    function id14() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 109) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 108) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    id14.constant = {value: "mul"};
+
+    // RecordExpression
+    function id15() {
+        if (id15_memo) return id15_memo();
+        id15_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'lhs', value: id9},
+            ],
+        })
+        return id15_memo();
+    }
+    let id15_memo;
+
+    // FieldExpression
+    function id16() {
+        if (id16_memo) return id16_memo();
+        id16_memo = field({
+            mode: 7,
+            name: id17,
+            value: id18,
+        });
+        return id16_memo();
+    }
+    let id16_memo;
+
+    // StringLiteralExpression
+    function id17() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 114) return false;
+        if (IN.charCodeAt(IP + 1) !== 104) return false;
+        if (IN.charCodeAt(IP + 2) !== 115) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    id17.constant = {value: "rhs"};
+
+    // SequenceExpression
+    function id18() {
+        let stateₒ = getState();
+        let out;
+        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id19() {
+        OUT = "*";
+        return true;
+    }
+    id19.constant = {value: "*"};
+
+    // SelectionExpression
+    function id20() {
+        if (id21()) return true;
+        if (id27()) return true;
+        if (id34()) return true;
+        if (id39()) return true;
+        if (id43()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function id21() {
+        let stateₒ = getState();
+        let out;
+        if (id22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id24()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // NotExpression
+    function id22() {
+        let stateₒ = getState();
+        let result = !id23();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteralExpression
+    function id23() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
+        OUT = "0x";
+        return true;
+    }
+    id23.constant = {value: "0x"};
+
+    // NotExpression
+    function id24() {
+        let stateₒ = getState();
+        let result = !id25();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteralExpression
+    function id25() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = "0b";
+        return true;
+    }
+    id25.constant = {value: "0b"};
+
+    // MemberExpression
+
+    // SequenceExpression
+    function id27() {
+        let stateₒ = getState();
+        let out;
+        if (id28()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id28() {
+        OUT = "0x";
+        return true;
+    }
+    id28.constant = {value: "0x"};
+
+    // ApplicationExpression
+    function id29(arg) {
+        if (id29_memo) return id29_memo(arg);
+        id29_memo = id30(id31);
+        return id29_memo(arg);
+    }
+    let id29_memo;
+
+    // MemberExpression
+
+    // ModuleExpression
+    function id31(bindingName) {
+        switch (bindingName) {
+            case 'base': return id32;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // NumericLiteralExpression
+    function id32() {
+        if (IN !== 16 || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id32.constant = {value: 16};
+
+    // BooleanLiteralExpression
+    function id33() {
+        if (IN !== false || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id33.constant = {value: false};
+
+    // SequenceExpression
+    function id34() {
+        let stateₒ = getState();
+        let out;
+        if (id35()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id36()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id35() {
+        OUT = "0b";
+        return true;
+    }
+    id35.constant = {value: "0b"};
+
+    // ApplicationExpression
+    function id36(arg) {
+        if (id36_memo) return id36_memo(arg);
+        id36_memo = id30(id37);
+        return id36_memo(arg);
+    }
+    let id36_memo;
+
+    // ModuleExpression
+    function id37(bindingName) {
+        switch (bindingName) {
+            case 'base': return id38;
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // NumericLiteralExpression
+    function id38() {
+        if (IN !== 2 || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    id38.constant = {value: 2};
+
+    // SequenceExpression
+    function id39() {
+        let stateₒ = getState();
+        let out;
+        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id40() {
+        OUT = "i";
+        return true;
+    }
+    id40.constant = {value: "i"};
+
+    // ApplicationExpression
+    function id41(arg) {
+        if (id41_memo) return id41_memo(arg);
+        id41_memo = id30(id42);
+        return id41_memo(arg);
+    }
+    let id41_memo;
+
+    // ModuleExpression
+    function id42(bindingName) {
+        switch (bindingName) {
+            case 'signed': return id33;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function id43() {
+        let stateₒ = getState();
+        let out;
+        if (id44()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id45()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id44() {
+        OUT = "(";
+        return true;
+    }
+    id44.constant = {value: "("};
+
+    // StringLiteralExpression
+    function id45() {
+        OUT = ")";
+        return true;
+    }
+    id45.constant = {value: ")"};
+
+    // RecordExpression
+    function id46() {
+        if (id46_memo) return id46_memo();
+        id46_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id47},
+                {name: 'lhs', value: id9},
+                {name: 'rhs', value: id48},
+            ],
+        })
+        return id46_memo();
+    }
+    let id46_memo;
+
+    // StringLiteralExpression
+    function id47() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 100) return false;
+        if (IN.charCodeAt(IP + 1) !== 105) return false;
+        if (IN.charCodeAt(IP + 2) !== 118) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    id47.constant = {value: "div"};
+
+    // SequenceExpression
+    function id48() {
+        let stateₒ = getState();
+        let out;
+        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id49() {
+        OUT = "/";
+        return true;
+    }
+    id49.constant = {value: "/"};
+
+    // RecordExpression
+    function id50() {
+        if (id50_memo) return id50_memo();
+        id50_memo = record({
+            mode: 7,
+            fields: [
+                {name: 'type', value: id51},
+                {name: 'lhs', value: id1},
+                {name: 'rhs', value: id52},
+            ],
+        })
+        return id50_memo();
+    }
+    let id50_memo;
+
+    // StringLiteralExpression
+    function id51() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 115) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 98) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    id51.constant = {value: "sub"};
+
+    // SequenceExpression
+    function id52() {
+        let stateₒ = getState();
+        let out;
+        if (id53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteralExpression
+    function id53() {
+        OUT = "-";
+        return true;
+    }
+    id53.constant = {value: "-"};
+
+    return id1;
+})();
+
+
+
+
+// ------------------------------ Main exports ------------------------------
+module.exports = {
+    parse(text) {
+        setState({ IN: text, IP: 0 });
+        if (!parse()) throw new Error('parse failed');
+        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('parse didn\'t return a value');
+        return OUT;
+    },
+    print(node) {
+        setState({ IN: node, IP: 0 });
+        if (!print()) throw new Error('print failed');
+        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
+        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        return OUT;
+    },
+};
