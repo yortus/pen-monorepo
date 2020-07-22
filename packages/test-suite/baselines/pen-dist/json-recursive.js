@@ -637,6 +637,9 @@ const createExtension_id67 = (() => {
 const parse = (() => {
     const id35 = createExtension_id35({mode: 6})
     const id67 = createExtension_id67({mode: 6})
+    const id34 = id35('char');
+    const id66 = id67('unicode');
+    const id92 = id35('f64');
 
     // SequenceExpression
     function id1() {
@@ -982,12 +985,6 @@ const parse = (() => {
     let id33_memo;
 
     // MemberExpression
-    function id34(arg) {
-        if (id34_memo) return id34_memo(arg);
-        id34_memo = id35('char');
-        return id34_memo(arg);
-    }
-    let id34_memo;
 
     // ImportExpression
 
@@ -1274,12 +1271,6 @@ const parse = (() => {
     let id65_memo;
 
     // MemberExpression
-    function id66(arg) {
-        if (id66_memo) return id66_memo(arg);
-        id66_memo = id67('unicode');
-        return id66_memo(arg);
-    }
-    let id66_memo;
 
     // ImportExpression
 
@@ -1516,12 +1507,6 @@ const parse = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    function id92(arg) {
-        if (id92_memo) return id92_memo(arg);
-        id92_memo = id35('f64');
-        return id92_memo(arg);
-    }
-    let id92_memo;
 
     return id1;
 })();
@@ -1533,6 +1518,9 @@ const parse = (() => {
 const print = (() => {
     const id35 = createExtension_id35({mode: 7})
     const id67 = createExtension_id67({mode: 7})
+    const id34 = id35('char');
+    const id66 = id67('unicode');
+    const id92 = id35('f64');
 
     // SequenceExpression
     function id1() {
@@ -1849,12 +1837,6 @@ const print = (() => {
     let id33_memo;
 
     // MemberExpression
-    function id34(arg) {
-        if (id34_memo) return id34_memo(arg);
-        id34_memo = id35('char');
-        return id34_memo(arg);
-    }
-    let id34_memo;
 
     // ImportExpression
 
@@ -2139,12 +2121,6 @@ const print = (() => {
     let id65_memo;
 
     // MemberExpression
-    function id66(arg) {
-        if (id66_memo) return id66_memo(arg);
-        id66_memo = id67('unicode');
-        return id66_memo(arg);
-    }
-    let id66_memo;
 
     // ImportExpression
 
@@ -2370,12 +2346,6 @@ const print = (() => {
     id91.constant = {value: "]"};
 
     // MemberExpression
-    function id92(arg) {
-        if (id92_memo) return id92_memo(arg);
-        id92_memo = id35('f64');
-        return id92_memo(arg);
-    }
-    let id92_memo;
 
     return id1;
 })();

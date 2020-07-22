@@ -103,11 +103,21 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(5).text(`// ------------------------------ ${modeName.toUpperCase()} ------------------------------`);
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
+    // Emit extension exports
     let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
     for (let extName of extNames) {
         emit.down(1).text(`const ${extName} = createExtension_${extName}({mode: ${mode}})`);
     }
+    let memNames = Object.keys(il).filter(n => il[n].kind === 'MemberExpression');
+    for (let memName of memNames) {
+        let mem = il[memName];
+        assert(mem.kind === 'MemberExpression');
+        assert(mem.module.kind === 'ReferenceExpression');
+        assert(extNames.includes(mem.module.name));
+        emit.down(1).text(`const ${memName} = ${mem.module.name}('${mem.bindingName}');`);
+    }
 
+    // TODO: emit each expression...
     for (let [name, expr] of Object.entries(il)) {
         emitExpression(emit, name, expr, mode);
         if (consts[name] === undefined) continue;
@@ -122,7 +132,6 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
 
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
-    [] = [emit, name, mode];
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
         case 'ApplicationExpression': {
@@ -192,13 +201,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'MemberExpression': {
-            assert(expr.module.kind === 'ReferenceExpression');
-            emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo(arg);`);
-            emit.down(1).text(`${name}_memo = ${expr.module.name}('${expr.bindingName}');`);
-            emit.down(1).text(`return ${name}_memo(arg);`);
-            emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}_memo;`);
+            // No-op - can only refer to an extension export, and they have already been emitted
             break;
         }
 

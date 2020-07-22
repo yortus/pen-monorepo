@@ -570,6 +570,7 @@ const createExtension_id3 = (() => {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
+    const id2 = id3('f64');
 
     // SequenceExpression
     function id1() {
@@ -585,12 +586,6 @@ const parse = (() => {
     }
 
     // MemberExpression
-    function id2(arg) {
-        if (id2_memo) return id2_memo(arg);
-        id2_memo = id3('f64');
-        return id2_memo(arg);
-    }
-    let id2_memo;
 
     // ImportExpression
 
@@ -674,6 +669,7 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
+    const id2 = id3('f64');
 
     // SequenceExpression
     function id1() {
@@ -689,12 +685,6 @@ const print = (() => {
     }
 
     // MemberExpression
-    function id2(arg) {
-        if (id2_memo) return id2_memo(arg);
-        id2_memo = id3('f64');
-        return id2_memo(arg);
-    }
-    let id2_memo;
 
     // ImportExpression
 

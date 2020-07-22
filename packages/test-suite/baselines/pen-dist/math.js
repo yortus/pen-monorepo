@@ -574,6 +574,9 @@ const createExtension_id3 = (() => {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
     const id3 = createExtension_id3({mode: 6})
+    const id2 = id3('memoise');
+    const id26 = id3('f64');
+    const id30 = id3('i32');
 
     // ApplicationExpression
     function id1(arg) {
@@ -584,12 +587,6 @@ const parse = (() => {
     let id1_memo;
 
     // MemberExpression
-    function id2(arg) {
-        if (id2_memo) return id2_memo(arg);
-        id2_memo = id3('memoise');
-        return id2_memo(arg);
-    }
-    let id2_memo;
 
     // ImportExpression
 
@@ -810,12 +807,6 @@ const parse = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    function id26(arg) {
-        if (id26_memo) return id26_memo(arg);
-        id26_memo = id3('f64');
-        return id26_memo(arg);
-    }
-    let id26_memo;
 
     // SequenceExpression
     function id27() {
@@ -847,12 +838,6 @@ const parse = (() => {
     let id29_memo;
 
     // MemberExpression
-    function id30(arg) {
-        if (id30_memo) return id30_memo(arg);
-        id30_memo = id3('i32');
-        return id30_memo(arg);
-    }
-    let id30_memo;
 
     // ModuleExpression
     function id31(bindingName) {
@@ -1082,6 +1067,9 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
     const id3 = createExtension_id3({mode: 7})
+    const id2 = id3('memoise');
+    const id26 = id3('f64');
+    const id30 = id3('i32');
 
     // ApplicationExpression
     function id1(arg) {
@@ -1092,12 +1080,6 @@ const print = (() => {
     let id1_memo;
 
     // MemberExpression
-    function id2(arg) {
-        if (id2_memo) return id2_memo(arg);
-        id2_memo = id3('memoise');
-        return id2_memo(arg);
-    }
-    let id2_memo;
 
     // ImportExpression
 
@@ -1339,12 +1321,6 @@ const print = (() => {
     id25.constant = {value: "0b"};
 
     // MemberExpression
-    function id26(arg) {
-        if (id26_memo) return id26_memo(arg);
-        id26_memo = id3('f64');
-        return id26_memo(arg);
-    }
-    let id26_memo;
 
     // SequenceExpression
     function id27() {
@@ -1372,12 +1348,6 @@ const print = (() => {
     let id29_memo;
 
     // MemberExpression
-    function id30(arg) {
-        if (id30_memo) return id30_memo(arg);
-        id30_memo = id3('i32');
-        return id30_memo(arg);
-    }
-    let id30_memo;
 
     // ModuleExpression
     function id31(bindingName) {
