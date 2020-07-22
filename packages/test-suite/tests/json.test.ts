@@ -6,9 +6,9 @@ import {parse, print} from '../baselines/pen-dist/json.js';
 describe(`Compiling and executing the 'json.pen' program`, async () => {
 
     const tests = [
-        // {text: '{}', ast: {}},
-        // {text: '[]', ast: []},
-        // {text: '123', ast: 123},
+        {text: '{}', ast: {}},
+        {text: '[]', ast: []},
+        {text: '123', ast: 123},
         {text: '"abc"', ast: 'abc'},
         {
             // NB: JSON doesn't accept some number formats that JS does - eg +3, 1., .1
