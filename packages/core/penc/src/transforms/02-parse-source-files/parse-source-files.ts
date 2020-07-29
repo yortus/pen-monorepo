@@ -15,7 +15,6 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
             return {
                 kind: 'PenSourceFile',
                 path: sourceFile.path,
-                imports: sourceFile.imports,
                 module,
                 meta: {},
             };

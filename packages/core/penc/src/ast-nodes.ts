@@ -55,13 +55,6 @@ export interface PenSourceFile<M extends Metadata = {}> {
     /** The normalised absolute path of the file. */
     readonly path: AbsPath;
 
-    /**
-     * A map with one entry for each import expression in this source file. The keys are the imported module
-     * specifiers, exactly as they appear in the source text. The values are the normalised absolute paths of
-     * the corresponding imported source files.
-     */
-    readonly imports: {[moduleSpecifier: string]: AbsPath};
-
     readonly module: Module<M>;
     readonly meta: M[this['kind']];
 }
