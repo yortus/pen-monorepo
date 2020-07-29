@@ -15,6 +15,7 @@ export function createSymbolDefinitions(program: Program) {
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
             let main = sourceFiles.get(program.mainPath)!;
+            // TODO: move this check to the 'check semantics' transform
             if (main.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
             let startSymbolId = main.module.meta.scope.sourceNames.get('start')?.id;
             if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
