@@ -14,12 +14,7 @@ export function createSymbolDefinitions(program: Program) {
         // Attach the symbol table to the Program node.
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let main = sourceFiles.get(program.mainPath)!;
-            // TODO: move this check to the 'check semantics' transform
-            if (main.kind !== 'PenSourceFile') throw new Error(`Main module must be a pen module, not an extension.`);
-            let startSymbolId = main.module.meta.scope.sourceNames.get('start')?.id;
-            if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
-            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable, startSymbolId}};
+            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable}};
             return prgᐟ;
         },
 
@@ -30,16 +25,6 @@ export function createSymbolDefinitions(program: Program) {
             let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
             currentScope = outerScope;
             return modᐟ;
-        },
-
-        // Attach a scope to each ExtensionFile node, and define a symbol for each of its exports.
-        ExtensionFile: ext => {
-            let outerScope = currentScope;
-            let scope = currentScope = symbolTable.createScope(currentScope);
-            ext.exportedNames.forEach(name => symbolTable.createName(name, scope));
-            let extᐟ = {...ext, meta: {scope}};
-            currentScope = outerScope;
-            return extᐟ;
         },
 
         // Attach a symbol to each SimpleBinding node. NB: There are no DestructuredBinding nodes after desugaring.

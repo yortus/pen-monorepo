@@ -10,7 +10,7 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
             case 'DestructuredBinding': return rec(n.value), cb(n);
-            case 'ExtensionFile': return cb(n);
+            case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
@@ -22,7 +22,6 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'NullLiteralExpression': return cb(n);
             case 'NumericLiteralExpression': return cb(n);
             case 'ParenthesisedExpression': return rec(n.expression), cb(n);
-            case 'PenSourceFile': return rec(n.module), cb(n);
             case 'Program': return mapMap(n.sourceFiles, rec), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
@@ -30,6 +29,7 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'SimpleBinding': return rec(n.value), cb(n);
+            case 'SourceFile': return rec(n.module), cb(n);
             case 'StringLiteralExpression': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

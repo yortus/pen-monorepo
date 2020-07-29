@@ -29,7 +29,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
             case 'BooleanLiteralExpression': return;
             case 'DestructuredBinding': return rec(n.value), undefined;
-            case 'ExtensionFile': return;
+            case 'ExtensionExpression': return;
             case 'FieldExpression': return rec(n.name), rec(n.value), undefined;
             case 'ImportExpression': return;
             // case 'LambdaExpression': TODO: ...
@@ -41,7 +41,6 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'NullLiteralExpression': return;
             case 'NumericLiteralExpression': return;
             case 'ParenthesisedExpression': return rec(n.expression), undefined;
-            case 'PenSourceFile': return rec(n.module), undefined;
             case 'Program': return mapMap(n.sourceFiles, rec), undefined;
             case 'QuantifiedExpression': return rec(n.expression), undefined;
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), undefined;
@@ -51,6 +50,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'SimpleBinding': {
                 return rec(n.value), undefined;
             }
+            case 'SourceFile': return rec(n.module), undefined;
             case 'StringLiteralExpression': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

@@ -6,8 +6,7 @@ export type Node<M extends Metadata = {}> =
     // Top-level nodes
     | Module<M>
     | Program<M>
-    | PenSourceFile<M>
-    | ExtensionFile<M>
+    | SourceFile<M>
 
     // Bindings and Expressions
     | Binding<M>
@@ -22,6 +21,7 @@ export type Binding<M extends Metadata = {}> =
 export type Expression<M extends Metadata = {}> =
     | ApplicationExpression<M>
     | BooleanLiteralExpression<M>
+    | ExtensionExpression<M>
     | FieldExpression<M>
     | ImportExpression<M>
     // | LambdaExpression<M>
@@ -43,30 +43,17 @@ export type Expression<M extends Metadata = {}> =
 // ====================   Top-level nodes   ====================
 export interface Program<M extends Metadata = {}> {
     readonly kind: 'Program';
-    readonly sourceFiles: ReadonlyMap<AbsPath, PenSourceFile<M> | ExtensionFile<M>>;
-    readonly mainPath: AbsPath; // TODO: need check to ensure this maps to pen source, not an extension
+    readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<M>>;
+    readonly mainPath: AbsPath;
     readonly meta: M[this['kind']];
 }
 
 
-export interface PenSourceFile<M extends Metadata = {}> {
-    readonly kind: 'PenSourceFile';
-
-    /** The normalised absolute path of the file. */
+export interface SourceFile<M extends Metadata = {}> {
+    readonly kind: 'SourceFile';
     readonly path: AbsPath;
-
+    readonly isExtension: boolean;
     readonly module: Module<M>;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface ExtensionFile<M extends Metadata = {}> {
-    readonly kind: 'ExtensionFile';
-
-    /** The normalised absolute path of the file. */
-    readonly path: AbsPath;
-
-    readonly exportedNames: string[];
     readonly meta: M[this['kind']];
 }
 
@@ -112,6 +99,14 @@ export interface ApplicationExpression<M extends Metadata = {}> {
 export interface BooleanLiteralExpression<M extends Metadata = {}> {
     readonly kind: 'BooleanLiteralExpression';
     readonly value: boolean;
+    readonly meta: M[this['kind']];
+}
+
+
+export interface ExtensionExpression<M extends Metadata = {}> {
+    readonly kind: 'ExtensionExpression';
+    readonly extensionPath: AbsPath;
+    readonly bindingName: string;
     readonly meta: M[this['kind']];
 }
 

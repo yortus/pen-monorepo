@@ -3,7 +3,7 @@
 
 
 import * as fs from 'fs';
-import {Expression} from '../../ast-nodes';
+import {Expression, ExtensionExpression} from '../../ast-nodes';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
@@ -20,20 +20,8 @@ export interface Program {
 export function generateTargetCode(program: Program) {
     const emit = makeEmitter();
 
-    // TODO: temp testing... emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
-    const RUNTIME_PATH = require.resolve('../../deps/penrt');
-    let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
-    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-
-    // TODO: emit extensions...
-    emitExtensions(emit, program);
-
-    // TODO: temp testing... emit parse() fn and print() fn
-    emitProgram(emit, program, PARSE);
-    emitProgram(emit, program, PRINT);
-
     // TODO: Emit main exports...
-    emit.down(5).text(`// ------------------------------ Main exports ------------------------------`);
+    emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
     emit.down(1).text(`module.exports = {`).indent();
     for (let mode of [PARSE, PRINT] as const) {
         const fname = mode === PARSE ? 'parse' : 'print';
@@ -48,50 +36,39 @@ export function generateTargetCode(program: Program) {
     }
     emit.dedent().down(1).text(`};`);
 
+    // TODO: Emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
+    emit.down(5).text(`// ------------------------------ Runtime ------------------------------`);
+    const RUNTIME_PATH = require.resolve('../../deps/penrt');
+    let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
+    content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
+
+    // TODO: Emit extensions...
+    emitExtensions(emit, program);
+
+    // TODO: Emit parse() and print() fns
+    emitProgram(emit, program, PARSE);
+    emitProgram(emit, program, PRINT);
+
     // All done.
     return emit.down(1).toString();
 }
 
 
 function emitExtensions(emit: Emitter, {il}: Program) {
-
-    // Filter out extension file entries, and entries that reference definitions in extension files
-    let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
-    let refNames = Object.keys(il).filter(n => {
-        let e = il[n];
-        if (e.kind !== 'MemberExpression') return false;
-        assert(e.module.kind === 'ReferenceExpression');
-        return il[e.module.name].kind === 'ImportExpression';
-    });
-
-    for (let extName of extNames) {
-        let ext = il[extName];
-        assert(ext.kind === 'ImportExpression');
-        let exportedNames = refNames.map(n => {
-            let mem = il[n];
-            assert(mem.kind === 'MemberExpression');
-            return mem;
-        }).filter(mem => {
-            assert(mem.module.kind === 'ReferenceExpression');
-            let imp = il[mem.module.name];
-            assert(imp.kind === 'ImportExpression');
-            return mem.module.name === extName;
-        }).map(mem => mem.bindingName);
-
-        emit.down(1).text(`const createExtension_${extName} = (() => {`).indent();
-        let content = fs.readFileSync(ext.sourceFilePath, 'utf8') + '\n';
+    let isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
+    let extExprs = Object.keys(il).map(id => il[id]).filter(isExtensionExpression);
+    let extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
+    emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
+    emit.down(1).text(`const extensions = {`).indent();
+    for (let extPath of extPaths.values()) {
+        let content = fs.readFileSync(extPath, 'utf8') + '\n';
+        emit.down(1).text(`${JSON.stringify(extPath)}: (() => {`).indent();
         content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-        emit.down(2).text(`return ({mode}) => {`).indent();
-        exportedNames.forEach(name => emit.down(1).text(`let _${name} = ${name}({mode});`));
-        emit.down(1).text(`return (name) => {`).indent();
-        emit.down(1).text(`switch (name) {`).indent();
-        exportedNames.forEach(name => emit.down(1).text(`case '${name}': return _${name};`));
-        emit.down(1).text(`default: return undefined;`);
-        emit.dedent().down(1).text('}');
-        emit.dedent().down(1).text('};');
-        emit.dedent().down(1).text('};');
-        emit.dedent().down(1).text('})();');
+        let refdNames = extExprs.filter(expr => expr.extensionPath === extPath).map(expr => expr.bindingName);
+        emit.down(1).text(`return {${refdNames.join(', ')}};`);
+        emit.dedent().down(1).text(`})(),`);
     }
+    emit.dedent().down(1).text(`};`);
 }
 
 
@@ -103,18 +80,12 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(5).text(`// ------------------------------ ${modeName.toUpperCase()} ------------------------------`);
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
-    // Emit extension exports
-    let extNames = Object.keys(il).filter(n => il[n].kind === 'ImportExpression');
-    for (let extName of extNames) {
-        emit.down(1).text(`const ${extName} = createExtension_${extName}({mode: ${mode}})`);
-    }
-    let memNames = Object.keys(il).filter(n => il[n].kind === 'MemberExpression');
-    for (let memName of memNames) {
-        let mem = il[memName];
-        assert(mem.kind === 'MemberExpression');
-        assert(mem.module.kind === 'ReferenceExpression');
-        assert(extNames.includes(mem.module.name));
-        emit.down(1).text(`const ${memName} = ${mem.module.name}('${mem.bindingName}');`);
+    // Emit extension exports before anything else
+    let extExprIds = Object.keys(il).filter(name => il[name].kind === 'ExtensionExpression');
+    if (extExprIds.length > 0) emit.down(2).text(`// ExtensionExpressions`);
+    for (let id of extExprIds) {
+        let extExpr = il[id] as ExtensionExpression;
+        emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.extensionPath)}].${extExpr.bindingName}({mode: ${mode}});`);
     }
 
     // TODO: emit each expression...
@@ -134,6 +105,12 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
+        // TODO: No-op cases... explain why for each
+        case 'ExtensionExpression': // already handled by emitProgram
+        case 'ImportExpression': // TODO: old comment... revise... already handled by emitExtensions
+        case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
+            break;
+
         case 'ApplicationExpression': {
             assert(expr.lambda.kind === 'ReferenceExpression');
             assert(expr.argument.kind === 'ReferenceExpression');
@@ -178,10 +155,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
         }
 
-        case 'ImportExpression':
-            // No-op - already handled by emitExtensions
-            break;
-
         // TODO: implement...
         // case 'LambdaExpression':
         //     break;
@@ -197,11 +170,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`return ${name}_memo();`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`let ${name}_memo;`);
-            break;
-        }
-
-        case 'MemberExpression': {
-            // No-op - can only refer to an extension export, and they have already been emitted
             break;
         }
 

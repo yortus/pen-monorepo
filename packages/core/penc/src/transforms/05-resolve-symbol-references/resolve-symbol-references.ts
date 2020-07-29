@@ -24,7 +24,7 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
         // Resolve import expressions.
         ImportExpression: imp => {
             let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
-            let scope = sourceFile.kind === 'PenSourceFile' ? sourceFile.module.meta.scope : sourceFile.meta.scope;
+            let scope = sourceFile.module.meta.scope;
             let impᐟ = {...imp, meta: {scope}};
             return impᐟ;
         },

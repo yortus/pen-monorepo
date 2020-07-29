@@ -18,10 +18,10 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
 
     // Create helper functions for this program.
     let resolve = createResolver(program);
-    let getHashFor = createHasher(program, resolve);
+    let getHashFor = createHasher(resolve);
 
     // Find the `start` expression.
-    let main = program.sourceFiles.get(program.mainPath) as PenSourceFile;
+    let main = program.sourceFiles.get(program.mainPath)!;
     let startExpr = main.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
     assert(startExpr);
 
@@ -47,8 +47,9 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
         switch (e.kind) {
             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
             case 'BooleanLiteralExpression': return setX(e);
+            case 'ExtensionExpression': return setX(e);
             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
-            case 'ImportExpression': return setX(e);
+            case 'ImportExpression': assert(false); // the resolve() call removed this node kind
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
             case 'ModuleExpression': {
@@ -92,13 +93,12 @@ export interface Entry {
 type Expression = AstNodes.Expression<Metadata>;
 type MemberExpression = AstNodes.MemberExpression<Metadata>;
 type Module = AstNodes.Module<Metadata>;
-type PenSourceFile = AstNodes.PenSourceFile<Metadata>;
 type Program = AstNodes.Program<Metadata>;
 type ReferenceExpression = AstNodes.ReferenceExpression<Metadata>;
 type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
 
 
-function createHasher(program: Program, resolve: (e: Expression) => Expression) {
+function createHasher(resolve: (e: Expression) => Expression) {
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<Expression, Signature>();
     const hashesByNode = new Map<Expression, string>();
@@ -129,12 +129,9 @@ function createHasher(program: Program, resolve: (e: Expression) => Expression) 
         switch (ex.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(ex.lambda), getSig(ex.argument));
             case 'BooleanLiteralExpression': return setSig('LIT', ex.value);
+            case 'ExtensionExpression': return setSig('EXT', ex.extensionPath, ex.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(ex.name), getSig(ex.value));
-            case 'ImportExpression': {
-                let sf = program.sourceFiles.get(ex.sourceFilePath)!;
-                assert(sf.kind !== 'PenSourceFile'); // The resolve() logic removed this node kind
-                return setSig('EXF', sf.path);
-            }
+            case 'ImportExpression': assert(false); // the resolve() logic removed this node kind
             case 'ListExpression': return setSig('LST', ex.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(ex.module), ex.bindingName);
             case 'ModuleExpression': {
@@ -163,7 +160,7 @@ function createHasher(program: Program, resolve: (e: Expression) => Expression) 
 
 
 // TODO: jsdoc...
-// - return value is *never* a ReferenceExpression
+// - return value is *never* a ReferenceExpression or ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 function createResolver(program: Program) {
     const allBindings = [] as SimpleBinding[];
@@ -216,15 +213,8 @@ function createResolver(program: Program) {
             // TODO: case 'ApplicationExpression': ...
             case 'ImportExpression': {
                 let sourceFile = program.sourceFiles.get(moduleExpr.sourceFilePath)!;
-                if (sourceFile.kind === 'PenSourceFile') {
-                    module = sourceFile.module;
-                    break;
-                }
-                else /* sourceFile.kind === 'ExtensionFile' */ {
-                    // Can't simplify bindings within extension files.
-                    // TODO: why not? We can make one 'entry' per extfile binding, we know the names statically...
-                    return undefined;
-                }
+                module = sourceFile.module;
+                break;
             }
             case 'ModuleExpression': {
                 module = moduleExpr.module;

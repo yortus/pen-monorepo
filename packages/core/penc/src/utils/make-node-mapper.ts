@@ -29,7 +29,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'BooleanLiteralExpression': return n;
             case 'DestructuredBinding': return {...n, value: rec(n.value)};
-            case 'ExtensionFile': return n;
+            case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
@@ -41,7 +41,6 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
-            case 'PenSourceFile': return {...n, module: rec(n.module)};
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
             case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
@@ -49,6 +48,7 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SimpleBinding': return {...n, value: rec(n.value)};
+            case 'SourceFile': return {...n, module: rec(n.module)};
             case 'StringLiteralExpression': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
