@@ -21,14 +21,6 @@ export function resolveSymbolReferences(program: Program<OldMetadata>) {
             return modᐟ;
         },
 
-        // Resolve import expressions.
-        ImportExpression: imp => {
-            let sourceFile = program.sourceFiles.get(imp.sourceFilePath)!;
-            let scope = sourceFile.module.meta.scope;
-            let impᐟ = {...imp, meta: {scope}};
-            return impᐟ;
-        },
-
         // Resolve symbol references.
         ReferenceExpression: ref => {
             assert(currentScope);
