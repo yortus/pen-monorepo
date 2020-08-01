@@ -1,4 +1,4 @@
-import {Metadata} from '../05-resolve-symbol-references';
+import {Metadata} from '../04-resolve-symbols';
 
 
 export {Metadata};

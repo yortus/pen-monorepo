@@ -7,8 +7,7 @@ import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
 import {parseSourceFiles} from './transforms';
 import {desugarSyntax} from './transforms';
-import {createSymbolDefinitions} from './transforms';
-import {resolveSymbolReferences} from './transforms';
+import {resolveSymbols} from './transforms';
 import {checkSemantics} from './transforms';
 import {createFlatExpressionList} from './transforms';
 import {resolveConstantValues} from './transforms';
@@ -28,11 +27,10 @@ export function compile(options: CompilerOptions) {
     // Proceed through all stages in the compiler pipeline.
     let ast01 = parseSourceFiles(sourceFiles);
     let ast02 = desugarSyntax(ast01);
-    let ast03 = createSymbolDefinitions(ast02);
-    let ast04 = resolveSymbolReferences(ast03);
-    checkSemantics(ast04);
+    let ast03 = resolveSymbols(ast02);
+    checkSemantics(ast03);
 
-    let il = createFlatExpressionList(ast04);
+    let il = createFlatExpressionList(ast03);
     let consts = resolveConstantValues(il);
     let targetCode = generateTargetCode({il, consts});
 

@@ -1,13 +1,14 @@
-import {Node, Program} from '../../ast-nodes';
+import {Node, Program, ReferenceExpression} from '../../ast-nodes';
 import {ScopeSymbol, SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {Metadata} from './metadata';
 
 
 // TODO: doc...
-export function createSymbolDefinitions(program: Program) {
+export function resolveSymbols(program: Program) {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression<Metadata>}>;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 
@@ -34,7 +35,21 @@ export function createSymbolDefinitions(program: Program) {
             let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolId: symbol.id}};
             return bndᐟ;
         },
+
+        // Make a list of all the ReferenceExpression nodes, for backpatching after this traversal.
+        ReferenceExpression: ref => {
+            assert(currentScope);
+            let refᐟ = {...ref, meta: {symbolId: '---'}}; // TODO: use proper 'badRef' symbolId here
+            allRefs.push({scope: currentScope, ref: refᐟ});
+            return refᐟ;
+        },
     }));
+
+    // Every definition now has a symbol. Backpatch all the ReferenceExpression nodes with the symbol they refer to.
+    for (let {scope, ref} of allRefs) {
+        let symbol = symbolTable.lookupName(ref.name, scope);
+        Object.assign(ref.meta, {symbolId: symbol.id});
+    }
 
     // sanity check - we should be back to the scope we started with here.
     assert(currentScope === undefined);

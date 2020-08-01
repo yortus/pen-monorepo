@@ -14,4 +14,7 @@ export type Metadata = OldMetadata & {
     SimpleBinding: {
         readonly symbolId: string;
     };
-}
+    ReferenceExpression: {
+        readonly symbolId: string;
+    };
+};
