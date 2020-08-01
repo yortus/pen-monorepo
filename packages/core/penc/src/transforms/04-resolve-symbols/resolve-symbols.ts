@@ -1,7 +1,7 @@
 import {Node, Program, ReferenceExpression} from '../../ast-nodes';
-import {ScopeSymbol, SymbolTable} from '../../symbol-table';
 import {assert, makeNodeMapper, mapMap} from '../../utils';
 import {Metadata} from './metadata';
+import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 
 // TODO: doc...
@@ -16,7 +16,7 @@ export function resolveSymbols(program: Program) {
         // Attach the symbol table to the Program node.
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable, startSymbolId}};
+            let prgᐟ = {...prg, sourceFiles, meta: {startSymbolId}};
             return prgᐟ;
         },
 

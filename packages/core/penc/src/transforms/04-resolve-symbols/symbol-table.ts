@@ -1,4 +1,4 @@
-import {assert} from './utils';
+import {assert} from '../../utils';
 
 
 // TODO: doc...
@@ -19,7 +19,6 @@ export interface NameSymbol {
     id: string;
     scope: ScopeSymbol;
     sourceName: string;
-    constant?: {value: unknown};
 }
 
 
