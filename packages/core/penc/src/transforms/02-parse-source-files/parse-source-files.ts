@@ -10,7 +10,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
     let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
-            return parsePenSource(sourceText, {sourceFile});
+            return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};
         }
         else {
             let {exportedNames} = parseExtension(sourceText);

@@ -8,6 +8,7 @@ import {Metadata} from './metadata';
 export function resolveSymbols(program: Program) {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
+    let startSymbolId: string;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression<Metadata>}>;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
@@ -15,15 +16,20 @@ export function resolveSymbols(program: Program) {
         // Attach the symbol table to the Program node.
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable}};
+            let prgᐟ = {...prg, sourceFiles, meta: {symbolTable, startSymbolId}};
             return prgᐟ;
         },
 
         // Attach a scope to each Module node.
         Module: mod => {
             let outerScope = currentScope;
-            let scope = currentScope = symbolTable.createScope(currentScope);
-            let modᐟ = {...mod, bindings: mod.bindings.map(rec), meta: {scope}};
+            currentScope = symbolTable.createScope(currentScope);
+            let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
+            if (mod.path === program.mainPath) {
+                // This is the main module. Assign to startSymbolId.
+                startSymbolId = currentScope.sourceNames.get('start')?.id!;
+                if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
+            }
             currentScope = outerScope;
             return modᐟ;
         },

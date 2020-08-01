@@ -51,6 +51,7 @@ export interface Program<M extends Metadata = {}> {
 export interface Module<M extends Metadata = {}> {
     readonly kind: 'Module';
     readonly bindings: ReadonlyArray<Binding<M>>;
+    readonly path?: AbsPath;
     readonly meta: M[this['kind']];
 }
 
