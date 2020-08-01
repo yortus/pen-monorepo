@@ -1,5 +1,5 @@
 import {Node, Program} from '../../ast-nodes';
-import {makeNodeVisitor, mapMap} from '../../utils';
+import {isExtension, makeNodeVisitor, mapMap} from '../../utils';
 import {Metadata} from './metadata';
 
 
@@ -20,7 +20,7 @@ export function checkSemantics(program: Program<Metadata>) {
         Program: prg => {
             // Ensure the 'main' source file is a pen source file that has a 'start' rule.
             let main = prg.sourceFiles.get(program.mainPath)!;
-            if (main.isExtension) throw new Error(`Main module must be a pen module, not an extension.`);
+            if (isExtension(main.path)) throw new Error(`Main module must be a pen module, not an extension.`);
             let startSymbolId = main.module.meta.scope.sourceNames.get('start')?.id;
             if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
             mapMap(prg.sourceFiles, rec);

@@ -52,7 +52,6 @@ export interface Program<M extends Metadata = {}> {
 export interface SourceFile<M extends Metadata = {}> {
     readonly kind: 'SourceFile';
     readonly path: AbsPath;
-    readonly isExtension: boolean;
     readonly module: Module<M>;
     readonly meta: M[this['kind']];
 }
