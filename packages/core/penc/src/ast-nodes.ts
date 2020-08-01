@@ -1,7 +1,7 @@
 import {AbsPath} from './utils';
 
 
-// // ====================   Node types by category   ====================
+// ====================   Node types by category   ====================
 export type Node<M extends Metadata = {}> =
     // Top-level nodes
     | Module<M>
