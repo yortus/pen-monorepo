@@ -19,9 +19,9 @@ export function checkSemantics(program: Program<Metadata>) {
 
         Program: prg => {
             // Ensure the 'main' source file is a pen source file that has a 'start' rule.
-            let main = prg.sourceFiles.get(program.mainPath)!;
-            if (isExtension(main.path)) throw new Error(`Main module must be a pen module, not an extension.`);
-            let startSymbolId = main.module.meta.scope.sourceNames.get('start')?.id;
+            let mainModule = prg.sourceFiles.get(program.mainPath)!;
+            if (isExtension(program.mainPath)) throw new Error(`Main module must be a pen module, not an extension.`);
+            let startSymbolId = mainModule.meta.scope.sourceNames.get('start')?.id;
             if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
             mapMap(prg.sourceFiles, rec);
         },

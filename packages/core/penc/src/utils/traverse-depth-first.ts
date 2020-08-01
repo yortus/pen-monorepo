@@ -29,7 +29,6 @@ export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): 
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'SimpleBinding': return rec(n.value), cb(n);
-            case 'SourceFile': return rec(n.module), cb(n);
             case 'StringLiteralExpression': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

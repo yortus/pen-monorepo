@@ -21,8 +21,8 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
     let getHashFor = createHasher(resolve);
 
     // Find the `start` expression.
-    let main = program.sourceFiles.get(program.mainPath)!;
-    let startExpr = main.module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
+    let mainModule = program.sourceFiles.get(program.mainPath)!;
+    let startExpr = mainModule.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
     assert(startExpr);
 
     let entriesByHash = new Map<string, Entry>();
@@ -212,8 +212,7 @@ function createResolver(program: Program) {
         switch (moduleExpr.kind) {
             // TODO: case 'ApplicationExpression': ...
             case 'ImportExpression': {
-                let sourceFile = program.sourceFiles.get(moduleExpr.sourceFilePath)!;
-                module = sourceFile.module;
+                module = program.sourceFiles.get(moduleExpr.sourceFilePath)!;
                 break;
             }
             case 'ModuleExpression': {

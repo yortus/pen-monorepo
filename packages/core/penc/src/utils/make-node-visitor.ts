@@ -47,10 +47,7 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
             case 'ReferenceExpression': return;
             case 'SelectionExpression': return n.expressions.forEach(rec), undefined;
             case 'SequenceExpression': return n.expressions.forEach(rec), undefined;
-            case 'SimpleBinding': {
-                return rec(n.value), undefined;
-            }
-            case 'SourceFile': return rec(n.module), undefined;
+            case 'SimpleBinding': return rec(n.value), undefined;
             case 'StringLiteralExpression': return;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

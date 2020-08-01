@@ -6,7 +6,6 @@ export type Node<M extends Metadata = {}> =
     // Top-level nodes
     | Module<M>
     | Program<M>
-    | SourceFile<M>
 
     // Bindings and Expressions
     | Binding<M>
@@ -43,16 +42,8 @@ export type Expression<M extends Metadata = {}> =
 // ====================   Top-level nodes   ====================
 export interface Program<M extends Metadata = {}> {
     readonly kind: 'Program';
-    readonly sourceFiles: ReadonlyMap<AbsPath, SourceFile<M>>;
+    readonly sourceFiles: ReadonlyMap<AbsPath, Module<M>>;
     readonly mainPath: AbsPath;
-    readonly meta: M[this['kind']];
-}
-
-
-export interface SourceFile<M extends Metadata = {}> {
-    readonly kind: 'SourceFile';
-    readonly path: AbsPath;
-    readonly module: Module<M>;
     readonly meta: M[this['kind']];
 }
 
