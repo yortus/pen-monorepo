@@ -8,7 +8,7 @@ import {ScopeSymbol, SymbolTable} from './symbol-table';
 export function resolveSymbols(program: Program) {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
-    let startSymbolId: string;
+    let startSymbolId: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression<Metadata>}>;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
@@ -16,7 +16,7 @@ export function resolveSymbols(program: Program) {
         // Attach the symbol table to the Program node.
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let prgᐟ = {...prg, sourceFiles, meta: {startSymbolId}};
+            let prgᐟ = {...prg, sourceFiles, startSymbolId};
             return prgᐟ;
         },
 
@@ -27,7 +27,7 @@ export function resolveSymbols(program: Program) {
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
             if (mod.path === program.mainPath) {
                 // This is the main module. Assign to startSymbolId.
-                startSymbolId = currentScope.sourceNames.get('start')?.id!;
+                startSymbolId = currentScope.sourceNames.get('start')?.id;
                 if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
             }
             currentScope = outerScope;
@@ -37,15 +37,15 @@ export function resolveSymbols(program: Program) {
         // Attach a symbol to each SimpleBinding node. NB: There are no DestructuredBinding nodes after desugaring.
         SimpleBinding: bnd => {
             assert(currentScope);
-            let symbol = symbolTable.createName(bnd.name, currentScope);
-            let bndᐟ = {...bnd, value: rec(bnd.value), meta: {symbolId: symbol.id}};
+            let symbolId = symbolTable.createName(bnd.name, currentScope).id;
+            let bndᐟ = {...bnd, value: rec(bnd.value), symbolId};
             return bndᐟ;
         },
 
         // Make a list of all the ReferenceExpression nodes, for backpatching after this traversal.
         ReferenceExpression: ref => {
             assert(currentScope);
-            let refᐟ = {...ref, meta: {symbolId: '---'}}; // TODO: use proper 'badRef' symbolId here
+            let refᐟ = {...ref};
             allRefs.push({scope: currentScope, ref: refᐟ});
             return refᐟ;
         },
@@ -53,8 +53,8 @@ export function resolveSymbols(program: Program) {
 
     // Every definition now has a symbol. Backpatch all the ReferenceExpression nodes with the symbol they refer to.
     for (let {scope, ref} of allRefs) {
-        let symbol = symbolTable.lookupName(ref.name, scope);
-        Object.assign(ref.meta, {symbolId: symbol.id});
+        let symbolId = symbolTable.lookupName(ref.name, scope).id;
+        Object.assign(ref, {symbolId});
     }
 
     // sanity check - we should be back to the scope we started with here.

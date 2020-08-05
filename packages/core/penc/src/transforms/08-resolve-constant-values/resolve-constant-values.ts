@@ -1,10 +1,10 @@
-import {Expression} from '../../ast-nodes';
+import {FlatExpressionList} from '../07-create-flat-expression-list';
 
 
 // TODO: doc...
-export function resolveConstantValues(il: Record<string, Expression>): Record<string, {value: unknown}> {
+export function resolveConstantValues({flatList}: FlatExpressionList): Record<string, {value: unknown}> {
     let result = {} as Record<string, {value: unknown}>;
-    for (let [name, expr] of Object.entries(il)) {
+    for (let [name, expr] of Object.entries(flatList)) {
         switch (expr.kind) {
             case 'BooleanLiteralExpression': result[name] = {value: expr.value}; break;
             case 'NullLiteralExpression': result[name] = {value: expr.value}; break;

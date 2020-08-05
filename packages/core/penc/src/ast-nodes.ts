@@ -44,6 +44,7 @@ export interface Program<M extends Metadata = {}> {
     readonly kind: 'Program';
     readonly sourceFiles: ReadonlyMap<AbsPath, Module<M>>;
     readonly mainPath: AbsPath;
+    readonly startSymbolId?: string;
     readonly meta: M[this['kind']];
 }
 
@@ -62,6 +63,7 @@ export interface SimpleBinding<M extends Metadata = {}> {
     readonly name: string;
     readonly value: Expression<M>;
     readonly exported: boolean;
+    readonly symbolId?: string;
     readonly meta: M[this['kind']];
 }
 
@@ -197,6 +199,7 @@ export interface RecordExpression<M extends Metadata = {}> {
 export interface ReferenceExpression<M extends Metadata = {}> {
     readonly kind: 'ReferenceExpression';
     readonly name: string;
+    readonly symbolId?: string;
     readonly meta: M[this['kind']];
 }
 

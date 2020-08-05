@@ -1,2 +1,2 @@
 export {Metadata} from './metadata';
-export {createFlatExpressionList} from './create-flat-expression-list';
+export {createFlatExpressionList, FlatExpressionList} from './create-flat-expression-list';

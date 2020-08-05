@@ -1,17 +1,17 @@
-
 // TODO: X_memo emitted names could clash with program ids? Ensure they can't...
 
 
 import * as fs from 'fs';
 import {Expression, ExtensionExpression} from '../../ast-nodes';
 import {assert} from '../../utils';
+import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
 
 export interface Program {
-    il: Record<string, Expression>;
+    il: FlatExpressionList;
     consts: Record<string, {value: unknown}>;
 }
 
@@ -54,9 +54,9 @@ export function generateTargetCode(program: Program) {
 }
 
 
-function emitExtensions(emit: Emitter, {il}: Program) {
+function emitExtensions(emit: Emitter, {il: {flatList}}: Program) {
     let isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
-    let extExprs = Object.keys(il).map(id => il[id]).filter(isExtensionExpression);
+    let extExprs = Object.keys(flatList).map(id => flatList[id]).filter(isExtensionExpression);
     let extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
     emit.down(1).text(`const extensions = {`).indent();
@@ -73,7 +73,7 @@ function emitExtensions(emit: Emitter, {il}: Program) {
 
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-    let {consts, il} = program;
+    let {consts, il: {startName, flatList}} = program;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';
@@ -81,22 +81,21 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
     // Emit extension exports before anything else
-    let extExprIds = Object.keys(il).filter(name => il[name].kind === 'ExtensionExpression');
+    let extExprIds = Object.keys(flatList).filter(name => flatList[name].kind === 'ExtensionExpression');
     if (extExprIds.length > 0) emit.down(2).text(`// ExtensionExpressions`);
     for (let id of extExprIds) {
-        let extExpr = il[id] as ExtensionExpression;
+        let extExpr = flatList[id] as ExtensionExpression;
         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.extensionPath)}].${extExpr.bindingName}({mode: ${mode}});`);
     }
 
     // TODO: emit each expression...
-    for (let [name, expr] of Object.entries(il)) {
+    for (let [name, expr] of Object.entries(flatList)) {
         emitExpression(emit, name, expr, mode);
         if (consts[name] === undefined) continue;
         emitConstant(emit, name, consts[name].value);
     }
 
     // TODO: emit epilog...
-    let startName = Object.keys(il)[0]; // TODO: dodgy af... should be an explicit way of finding 'start' expr
     emit.down(2).text(`return ${startName};`);
     emit.dedent().down(1).text('})();');
 }

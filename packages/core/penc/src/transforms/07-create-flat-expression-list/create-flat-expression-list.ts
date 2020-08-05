@@ -8,7 +8,7 @@ import {Metadata} from './metadata';
 
 
 // TODO: jsdoc...
-export function createFlatExpressionList(program: Program): Record<string, AstNodes.Expression> {
+export function createFlatExpressionList(program: Program): FlatExpressionList {
 
     // ENTRY rules:
     // a. the expression in an ENTRY is always 'flat' - any subexpressions are ReferenceExpressions to other ENTRYs
@@ -16,24 +16,27 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
     // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
 
+    // Make a flat list of every SimpleBinding in the entire program.
+    const allBindings = [] as SimpleBinding[];
+    traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+
     // Create helper functions for this program.
-    let resolve = createResolver(program);
+    let resolve = createResolver(program, allBindings);
     let getHashFor = createHasher(resolve);
 
     // Find the `start` expression.
-    let mainModule = program.sourceFiles.get(program.mainPath)!;
-    let startExpr = mainModule.bindings.find(b => b.kind === 'SimpleBinding' && b.name === 'start')?.value;
+    let startExpr = allBindings.find(n => n.symbolId === program.startSymbolId)?.value;
     assert(startExpr);
 
+    // Populate the `entriesByHash` map.
     let entriesByHash = new Map<string, Entry>();
     let counter = 0;
-    getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
+    let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
     // TODO: temp testing... build the one and only internal module for emitting
     let flatList = {} as Record<string, AstNodes.Expression>;
     for (let {uniqueName, expr} of entriesByHash.values()) flatList[uniqueName] = expr;
-    return flatList;
-
+    return {startName: startEntry.uniqueName, flatList};
 
     // TODO: recursive...
     function getEntryFor(e: Expression): Entry {
@@ -55,9 +58,9 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
             case 'ModuleExpression': {
                 let bindings = e.module.bindings.map(binding => {
                     assert(binding.kind === 'SimpleBinding');
-                    return {...binding, value: ref(binding.value), meta: {}} as SimpleBinding;
+                    return {...binding, value: ref(binding.value)} as SimpleBinding;
                 });
-                return setX(e, {module: {kind: 'Module', bindings, meta: {} as any}});
+                return setX(e, {module: {kind: 'Module', bindings, meta: {}}});
             }
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
             case 'NullLiteralExpression': return setX(e);
@@ -77,14 +80,20 @@ export function createFlatExpressionList(program: Program): Record<string, AstNo
         }
 
         function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind' | 'meta'>) {
-            entry.expr = Object.assign({kind: expr.kind}, vals || expr, {meta: {}}) as unknown as AstNodes.Expression;
+            entry.expr = Object.assign({kind: expr.kind}, vals || expr) as unknown as AstNodes.Expression;
             return entry;
         }
     }
 }
 
 
-export interface Entry {
+export interface FlatExpressionList {
+    startName: string;
+    flatList: Record<string, AstNodes.Expression>;
+}
+
+
+interface Entry {
     uniqueName: string;
     expr: AstNodes.Expression;
 }
@@ -162,9 +171,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
 // TODO: jsdoc...
 // - return value is *never* a ReferenceExpression or ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createResolver(program: Program) {
-    const allBindings = [] as SimpleBinding[];
-    traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+function createResolver(program: Program, allBindings: SimpleBinding[]) {
     return resolve;
 
     // TODO: jsdoc...
@@ -195,8 +202,7 @@ function createResolver(program: Program) {
 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: ReferenceExpression): Expression {
-        let symbolId = ref.meta.symbolId;
-        let result = allBindings.find(n => n.meta.symbolId === symbolId);
+        let result = allBindings.find(n => n.symbolId === ref.symbolId);
         assert(result && result.kind === 'SimpleBinding');
         return result.value;
     }
