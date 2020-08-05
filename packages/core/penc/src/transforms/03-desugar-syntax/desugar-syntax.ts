@@ -22,15 +22,15 @@ export function desugarSyntax(program: Program) {
                     // Introduce a new simple binding for the RHS.
                     // TODO: ensure no collisions with program names. '$1' etc is ok since '$' isn't allowed in PEN ids.
                     let name = `$${++counter}`;
-                    let {names, value, exported, meta} = binding;
-                    bindings.push({kind: 'SimpleBinding', name, value, exported, meta});
+                    let {names, value, exported} = binding;
+                    bindings.push({kind: 'SimpleBinding', name, value, exported});
 
                     // Introduce a simple binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
-                        let ref: ReferenceExpression<Metadata> = {kind: 'ReferenceExpression', name, meta: {}};
+                        let ref: ReferenceExpression = {kind: 'ReferenceExpression', name};
                         let mem: MemberExpression<Metadata>;
-                        mem = {kind: 'MemberExpression', module: ref, bindingName, meta: {}};
-                        bindings.push({kind: 'SimpleBinding', name: alias ?? bindingName, value: mem, exported, meta});
+                        mem = {kind: 'MemberExpression', module: ref, bindingName};
+                        bindings.push({kind: 'SimpleBinding', name: alias ?? bindingName, value: mem, exported});
                     }
                 }
             }

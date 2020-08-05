@@ -23,12 +23,9 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
                         kind: 'ExtensionExpression',
                         extensionPath: sourceFile.path,
                         bindingName: name,
-                        meta: {},
                     },
                     exported: true,
-                    meta: {},
                 })),
-                meta: {},
             };
         }
     });
@@ -36,6 +33,5 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program {
         kind: 'Program',
         sourceFiles,
         mainPath: sourceFileGraph.mainPath,
-        meta: {},
     };
 }

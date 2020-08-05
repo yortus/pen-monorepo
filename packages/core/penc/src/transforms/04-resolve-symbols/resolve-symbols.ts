@@ -9,7 +9,7 @@ export function resolveSymbols(program: Program) {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startSymbolId: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression<Metadata>}>;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression}>;
     let mapNode = makeNodeMapper<Node, Node<Metadata>>();
     let result = mapNode(program, rec => ({
 

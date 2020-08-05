@@ -60,7 +60,7 @@ export function createFlatExpressionList(program: Program): FlatExpressionList {
                     assert(binding.kind === 'SimpleBinding');
                     return {...binding, value: ref(binding.value)} as SimpleBinding;
                 });
-                return setX(e, {module: {kind: 'Module', bindings, meta: {}}});
+                return setX(e, {module: {kind: 'Module', bindings}});
             }
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
             case 'NullLiteralExpression': return setX(e);
@@ -75,11 +75,11 @@ export function createFlatExpressionList(program: Program): FlatExpressionList {
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: Expression): AstNodes.ReferenceExpression<any> {
-            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, meta: {}};
+        function ref(expr: Expression): AstNodes.ReferenceExpression {
+            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName};
         }
 
-        function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind' | 'meta'>) {
+        function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind'>) {
             entry.expr = Object.assign({kind: expr.kind}, vals || expr) as unknown as AstNodes.Expression;
             return entry;
         }
@@ -103,7 +103,7 @@ type Expression = AstNodes.Expression<Metadata>;
 type MemberExpression = AstNodes.MemberExpression<Metadata>;
 type Module = AstNodes.Module<Metadata>;
 type Program = AstNodes.Program<Metadata>;
-type ReferenceExpression = AstNodes.ReferenceExpression<Metadata>;
+type ReferenceExpression = AstNodes.ReferenceExpression;
 type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
 
 
