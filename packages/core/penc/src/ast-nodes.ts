@@ -1,86 +1,104 @@
 import {AbsPath} from './utils';
 
 
+// TODO: temp testing...
+export const BindingKind = ['SimpleBinding', 'DestructuredBinding'] as const;
+export type BindingKind = (typeof BindingKind)[any];
+export const ExpressionKind = [
+    'ApplicationExpression', 'BooleanLiteralExpression', 'ExtensionExpression', 'FieldExpression', 'ImportExpression',
+    /*'LambdaExpression', */'ListExpression', 'MemberExpression', 'ModuleExpression', 'NotExpression',
+    'NullLiteralExpression', 'NumericLiteralExpression', 'ParenthesisedExpression', 'QuantifiedExpression',
+    'RecordExpression', 'ReferenceExpression', 'SelectionExpression', 'SequenceExpression', 'StringLiteralExpression',
+] as const;
+export type ExpressionKind = (typeof ExpressionKind)[any];
+export const NodeKind = ['Module', 'Program', ...BindingKind, ...ExpressionKind] as const;
+export type NodeKind = (typeof NodeKind)[any];
+
+
+
 // ====================   Node types by category   ====================
-export type Node<M extends Metadata = {}> =
+export type Node<K extends NodeKind = NodeKind> = Filter<K,
     // Top-level nodes
-    | Module<M>
-    | Program<M>
+    | Module<K>
+    | Program<K>
 
     // Bindings and Expressions
-    | Binding<M>
-    | Expression<M>;
+    | Binding<K>
+    | Expression<K>
+>;
 
 
-export type Binding<M extends Metadata = {}> =
-    | SimpleBinding<M>
-    | DestructuredBinding<M>;
+export type Binding<K extends NodeKind = NodeKind> = Filter<K,
+    | SimpleBinding<K>
+    | DestructuredBinding<K>
+>;
 
 
-export type Expression<M extends Metadata = {}> =
-    | ApplicationExpression<M>
+export type Expression<K extends NodeKind = NodeKind> = Filter<K,
+    | ApplicationExpression<K>
     | BooleanLiteralExpression
     | ExtensionExpression
-    | FieldExpression
+    | FieldExpression<K>
     | ImportExpression
-    // | LambdaExpression<M>
-    | ListExpression<M>
-    | MemberExpression<M>
-    | ModuleExpression<M>
-    | NotExpression<M>
+    // | LambdaExpression<K>
+    | ListExpression<K>
+    | MemberExpression<K>
+    | ModuleExpression<K>
+    | NotExpression<K>
     | NullLiteralExpression
     | NumericLiteralExpression
-    | ParenthesisedExpression<M>
-    | QuantifiedExpression<M>
-    | RecordExpression<M>
+    | ParenthesisedExpression<K>
+    | QuantifiedExpression<K>
+    | RecordExpression<K>
     | ReferenceExpression
-    | SelectionExpression<M>
-    | SequenceExpression<M>
-    | StringLiteralExpression;
+    | SelectionExpression<K>
+    | SequenceExpression<K>
+    | StringLiteralExpression
+>;
 
 
 // ====================   Top-level nodes   ====================
-export interface Program<M extends Metadata = {}> {
+export interface Program<K extends NodeKind = NodeKind> {
     readonly kind: 'Program';
-    readonly sourceFiles: ReadonlyMap<AbsPath, Module<M>>;
+    readonly sourceFiles: ReadonlyMap<AbsPath, Module<K>>;
     readonly mainPath: AbsPath;
     readonly startSymbolId?: string;
 }
 
 
-export interface Module<M extends Metadata = {}> {
+export interface Module<K extends NodeKind = NodeKind> {
     readonly kind: 'Module';
-    readonly bindings: ReadonlyArray<Binding<M>>;
+    readonly bindings: ReadonlyArray<Binding<K>>;
     readonly path?: AbsPath;
 }
 
 
 // ====================   Binding nodes   ====================
-export interface SimpleBinding<M extends Metadata = {}> {
+export interface SimpleBinding<K extends NodeKind = NodeKind> {
     readonly kind: 'SimpleBinding';
     readonly name: string;
-    readonly value: Expression<M>;
+    readonly value: Expression<K>;
     readonly exported: boolean;
     readonly symbolId?: string;
 }
 
 
-export interface DestructuredBinding<M extends Metadata = {}> {
+export interface DestructuredBinding<K extends NodeKind = NodeKind> {
     readonly kind: 'DestructuredBinding';
     readonly names: ReadonlyArray<{
         readonly name: string;
         readonly alias?: string;
     }>;
-    readonly value: Expression<M>;
+    readonly value: Expression<K>;
     readonly exported: boolean;
 }
 
 
 // // ====================   Expression nodes   ====================
-export interface ApplicationExpression<M extends Metadata = {}> {
+export interface ApplicationExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'ApplicationExpression';
-    readonly lambda: Expression<M>;
-    readonly argument: Expression<M>;
+    readonly lambda: Expression<K>;
+    readonly argument: Expression<K>;
 }
 
 
@@ -97,10 +115,10 @@ export interface ExtensionExpression {
 }
 
 
-export interface FieldExpression<M extends Metadata = {}> {
+export interface FieldExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'FieldExpression';
-    readonly name: Expression<M>;
-    readonly value: Expression<M>;
+    readonly name: Expression<K>;
+    readonly value: Expression<K>;
 }
 
 
@@ -111,35 +129,35 @@ export interface ImportExpression {
 }
 
 
-export interface ListExpression<M extends Metadata = {}> {
+export interface ListExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'ListExpression';
-    readonly elements: ReadonlyArray<Expression<M>>;
+    readonly elements: ReadonlyArray<Expression<K>>;
 }
 
 
-// export interface LambdaExpression<M extends Metadata = {}> {
+// export interface LambdaExpression<K extends AllNodeKinds = AllNodeKinds> {
 //     readonly kind: 'LambdaExpression';
-//     readonly pattern: Pattern<M>;
-//     readonly body: Expression<M>;
+//     readonly pattern: Pattern<K>;
+//     readonly body: Expression<K>;
 // }
 
 
-export interface MemberExpression<M extends Metadata = {}> {
+export interface MemberExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'MemberExpression';
-    readonly module: Expression<M>;
+    readonly module: Expression<K>;
     readonly bindingName: string;
 }
 
 
-export interface ModuleExpression<M extends Metadata = {}> {
+export interface ModuleExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'ModuleExpression';
-    readonly module: Module<M>;
+    readonly module: Module<K>;
 }
 
 
-export interface NotExpression<M extends Metadata = {}> {
+export interface NotExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'NotExpression';
-    readonly expression: Expression<M>;
+    readonly expression: Expression<K>;
 }
 
 
@@ -155,24 +173,24 @@ export interface NumericLiteralExpression {
 }
 
 
-export interface ParenthesisedExpression<M extends Metadata = {}> {
+export interface ParenthesisedExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'ParenthesisedExpression';
-    readonly expression: Expression<M>;
+    readonly expression: Expression<K>;
 }
 
 
-export interface QuantifiedExpression<M extends Metadata = {}> {
+export interface QuantifiedExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'QuantifiedExpression';
-    readonly expression: Expression<M>;
+    readonly expression: Expression<K>;
     readonly quantifier: '?' | '*';
 }
 
 
-export interface RecordExpression<M extends Metadata = {}> {
+export interface RecordExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'RecordExpression';
     readonly fields: ReadonlyArray<{
         readonly name: string;
-        readonly value: Expression<M>;
+        readonly value: Expression<K>;
     }>;
 }
 
@@ -184,15 +202,15 @@ export interface ReferenceExpression {
 }
 
 
-export interface SelectionExpression<M extends Metadata = {}> {
+export interface SelectionExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'SelectionExpression';
-    readonly expressions: ReadonlyArray<Expression<M>>;
+    readonly expressions: ReadonlyArray<Expression<K>>;
 }
 
 
-export interface SequenceExpression<M extends Metadata = {}> {
+export interface SequenceExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'SequenceExpression';
-    readonly expressions: ReadonlyArray<Expression<M>>;
+    readonly expressions: ReadonlyArray<Expression<K>>;
 }
 
 
@@ -204,5 +222,5 @@ export interface StringLiteralExpression {
 }
 
 
-// Helper type
-type Metadata = {[K in Node['kind']]?: {}};
+// TODO: Helper type
+type Filter<K extends NodeKind, N> = N extends {kind: K} ? N : never;

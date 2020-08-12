@@ -1,17 +1,17 @@
-import {Node} from '../ast-nodes';
+import {Node, NodeKind} from '../ast-nodes';
 import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function makeNodeVisitor<N extends Node, R = void>() {
-    return function nv<SpecificNode extends N, VisObj>(node: SpecificNode, makeVisitors: MakeVisitors<N, VisObj, R>) {
-        const rec: <NN extends N>(n: NN) => R = n => {
+export function makeNodeVisitor<NS extends {kind: NodeKind}, R = void>() {
+    return function nodeVisitor<N extends NS, VisObj>(node: N, makeVisitors: MakeVisitors<VisObj, NS, R>): R {
+        const rec: any = (n: any) => {
             try {
                 let visFn = visitors[n.kind];
                 return visFn ? visFn(n) : defaultVisitors(n);
             }
             catch (err) {
-                [] = [err]; // TODO: how to handle? May be better to let caller handle it?
+                // TODO: how to handle? May be better to let caller handle it?
                 throw err;
             }
         };
@@ -56,16 +56,14 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
 
 
 // TODO: doc...
-type MakeVisitors<N extends Node, VisObj, R> =
-    (rec: <SpecificNode extends N>(n: SpecificNode) => R) => (
-        & VisObj
-        & {[K in keyof VisObj]: K extends Node['kind'] ? unknown : never}   // all keys must be node kinds
-        & {[K in Node['kind']]?: (n: NodeOfKind<N, K>) => R}                // all values must be visitor functions
-    );
+type MakeVisitors<VisObj, NS extends {kind: NodeKind}, R> =
+    (rec: <N extends NS>(n: N) => R) => VisObj & {
+        [K in keyof VisObj]: K extends NS['kind'] ? (n: NodeOfKind<NS, K>) => R : never
+    };
 
 
 /**
- * Helper type that narrows from the union of node types `N` to the
+ * Helper type that narrows from the union of node types `NS` to the
  * single node type corresponding to the node kind given by `K`.
  */
-type NodeOfKind<N extends Node, K extends Node['kind']> = N extends {kind: K} ? N : never;
+type NodeOfKind<NS extends {kind: NodeKind}, K extends NodeKind, N extends NS = NS> = N extends {kind: K} ? N : never;

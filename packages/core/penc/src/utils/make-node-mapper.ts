@@ -1,21 +1,26 @@
-import {Node} from '../ast-nodes';
+import {Expression, ExpressionKind, Node, NodeKind} from '../ast-nodes';
 import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function makeNodeMapper<N extends Node, Nᐟ extends Node>() {
-    return function nm<SpecificNode extends N, MapObj>(node: SpecificNode, mappings: Mappings<N, Nᐟ, MapObj>) {
-        const rec: <NN extends N>(n: NN) => NodeOfKind<Nᐟ, NN['kind']> = n => {
+export function makeNodeMapper<NS extends {kind: NodeKind}, NSᐟ extends {kind: NodeKind}>() {
+    return function nodeMapper<N extends NS, MapObj>(node: N, mappings: Mappings<MapObj, NS, NSᐟ>): NodeOfKind<NSᐟ, N['kind']> {
+        const rec: any = (n: any) => {
             try {
+                // If result is an expression, call the general 'PreExpression' handler if provided, before mapping.
+                if (ExpressionKind.includes(n.kind) && mappers.PreExpression) {
+                    n = mappers.PreExpression(n) ?? n;
+                }
+
                 let mapFn = mappers[n.kind];
                 return mapFn ? mapFn(n) : defaultMappers(n);
             }
             catch (err) {
-                [] = [err]; // TODO: how to handle? May be better to let caller handle it?
+                // TODO: how to handle? May be better to let caller handle it?
                 throw err;
             }
         };
-        const defaultMappers: any = makeDefaultMappers(rec as any);
+        const defaultMappers: any = makeDefaultMappers(rec);
         const mappers: any = mappings(rec);
         return rec(node);
     };
@@ -56,38 +61,18 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
 
 
 // TODO: doc...
-type Mappings<N extends Node, Nᐟ extends Node, MapObj> =
-    (rec: <SpecificNode extends N>(n: SpecificNode) => NodeOfKind<Nᐟ, SpecificNode['kind']>) => (
-        & MapObj
-        & {[K in keyof MapObj]: K extends Node['kind'] ? unknown : never}
-        //& {[K in DiffMetaKeys<N, Nᐟ>]: (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>}
-        & {[K in Node['kind']]?: (n: NodeOfKind<N, K>) => NodeOfKind<Nᐟ, K>}
-    );
+type Mappings<MapObj, NS extends {kind: NodeKind}, NSᐟ extends {kind: NodeKind}> =
+    (rec: <N extends NS>(n: N) => NodeOfKind<NSᐟ, N['kind']>) => MapObj & {
+        [K in keyof MapObj]:
+            K extends NS['kind'] ? (n: NodeOfKind<NS, K>) => NodeOfKind<NSᐟ, K> :
+            K extends 'PreExpression' ? (n: Expression<NS['kind']>) => Expression<NS['kind']> | undefined :
+            never
+    };
+
 
 
 /**
- * Helper type that narrows from the union of node types `N` to the
+ * Helper type that narrows from the union of node types `NS` to the
  * single node type corresponding to the node kind given by `K`.
  */
-type NodeOfKind<N extends Node, K extends Node['kind']> = N extends {kind: K} ? N : never;
-
-
-// TODO: doc...
-// type DiffMetaKeys<N extends Node, Nᐟ extends Node> =
-//     N extends Node<infer M> ? (
-//         Nᐟ extends Node<infer Mᐟ> ? (
-//             {
-//                 [K in keyof M | keyof Mᐟ]:
-//                     SameType<
-//                         K extends keyof M ? M[K] : unknown,
-//                         K extends keyof Mᐟ ? Mᐟ[K] : unknown
-//                     > extends true ? never : K
-//             }[keyof M | keyof Mᐟ]
-//         )
-//         : never
-//     )
-//     : never;
-
-
-// // TODO: doc...
-// type SameType<T, U> = T extends U ? U extends T ? true : false : false;
+type NodeOfKind<NS extends {kind: NodeKind}, K extends NodeKind, N extends NS = NS> = N extends {kind: K} ? N : never;

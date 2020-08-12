@@ -4,11 +4,11 @@
 import * as objectHash from 'object-hash';
 import * as AstNodes from '../../ast-nodes';
 import {assert, traverseDepthFirst} from '../../utils';
-import {Metadata} from './metadata';
+import {ResolvedNodes, ResolvedProgram} from '../asts';
 
 
 // TODO: jsdoc...
-export function createFlatExpressionList(program: Program): FlatExpressionList {
+export function createFlatExpressionList(program: ResolvedProgram): FlatExpressionList {
 
     // ENTRY rules:
     // a. the expression in an ENTRY is always 'flat' - any subexpressions are ReferenceExpressions to other ENTRYs
@@ -65,7 +65,6 @@ export function createFlatExpressionList(program: Program): FlatExpressionList {
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
             case 'NullLiteralExpression': return setX(e);
             case 'NumericLiteralExpression': return setX(e);
-            case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setX(e, {expression: ref(e.expression), quantifier: e.quantifier});
             case 'RecordExpression': return setX(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
             case 'ReferenceExpression': assert(false); // the resolve() call removed this node kind
@@ -75,11 +74,11 @@ export function createFlatExpressionList(program: Program): FlatExpressionList {
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: Expression): AstNodes.ReferenceExpression {
+        function ref(expr: Expression): ReferenceExpression {
             return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName};
         }
 
-        function setX<E extends AstNodes.Expression>(expr: E, vals?: Omit<E, 'kind'>) {
+        function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
             entry.expr = Object.assign({kind: expr.kind}, vals || expr) as unknown as AstNodes.Expression;
             return entry;
         }
@@ -99,12 +98,11 @@ interface Entry {
 }
 
 
-type Expression = AstNodes.Expression<Metadata>;
-type MemberExpression = AstNodes.MemberExpression<Metadata>;
-type Module = AstNodes.Module<Metadata>;
-type Program = AstNodes.Program<Metadata>;
+type Expression = AstNodes.Expression<ResolvedNodes['kind']>;
+type MemberExpression = AstNodes.MemberExpression<ResolvedNodes['kind']>;
+type Module = AstNodes.Module<ResolvedNodes['kind']>;
 type ReferenceExpression = AstNodes.ReferenceExpression;
-type SimpleBinding = AstNodes.SimpleBinding<Metadata>;
+type SimpleBinding = AstNodes.SimpleBinding<ResolvedNodes['kind']>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {
@@ -155,7 +153,6 @@ function createHasher(resolve: (e: Expression) => Expression) {
             case 'NotExpression': return setSig('NOT', getSig(ex.expression));
             case 'NullLiteralExpression': return setSig('LIT', ex.value);
             case 'NumericLiteralExpression': return setSig('LIT', ex.value);
-            case 'ParenthesisedExpression': assert(false); // the 'desugar-syntax' transform removed this node kind
             case 'QuantifiedExpression': return setSig('QUA', getSig(ex.expression), ex.quantifier);
             case 'RecordExpression': return setSig('REC', ex.fields.map(f => ({n: f.name, v: getSig(f.value)})));
             case 'ReferenceExpression': assert(false); // the resolve() logic removed this node kind
@@ -171,7 +168,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
 // TODO: jsdoc...
 // - return value is *never* a ReferenceExpression or ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createResolver(program: Program, allBindings: SimpleBinding[]) {
+function createResolver(program: ResolvedProgram, allBindings: SimpleBinding[]) {
     return resolve;
 
     // TODO: jsdoc...

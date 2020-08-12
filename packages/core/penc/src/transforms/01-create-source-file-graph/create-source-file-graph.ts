@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import {AbsPath} from '../../utils';
+import {SourceFileGraph, SourceFileInfo} from '../asts';
 import {parse as detectImports} from './pen-import-detection-grammar';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
-import {SourceFileGraph, SourceFileInfo} from './source-file-graph';
 
 
 // TODO: doc...

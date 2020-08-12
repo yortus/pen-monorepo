@@ -1,11 +1,12 @@
-import {Node} from '../ast-nodes';
+import {Node, NodeKind} from '../ast-nodes';
 import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function traverseDepthFirst<M>(node: Node<M>, cb: (n: Node<M>) => void): void {
-    return rec(node);
-    function rec(n: Node<M>): void {
+export function traverseDepthFirst<F extends NodeKind>(node: Node<F>, callback: (n: Node<F>) => void): void {
+    let cb = callback as (n: Node) => void;
+    return rec(node as Node);
+    function rec(n: Node): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
