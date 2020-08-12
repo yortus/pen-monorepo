@@ -1,5 +1,5 @@
 import {Program, ReferenceExpression} from '../../ast-nodes';
-import {assert, makeNodeMapper, mapMap} from '../../utils';
+import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
@@ -10,8 +10,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     let currentScope: ScopeSymbol | undefined;
     let startSymbolId: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression}>;
-    let mapNode = makeNodeMapper<DesugaredNodeKind, ResolvedNodeKind>();
-    let result = mapNode(program, rec => ({
+    let result = mapAst(program, ResolvedNodeKind, rec => ({
 
         // Attach the symbol table to the Program node.
         Program: prg => {

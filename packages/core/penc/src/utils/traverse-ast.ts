@@ -2,8 +2,8 @@ import {Node, NodeKind} from '../ast-nodes';
 import {mapMap} from './map-map';
 
 
-// TODO: doc...
-export function traverseDepthFirst<F extends NodeKind>(node: Node<F>, callback: (n: Node<F>) => void): void {
+/** Performs a depth-first traversal of the AST rooted at `node`, calling `cb` on each node. */
+export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: Node<KS>) => void): void {
     let cb = callback as (n: Node) => void;
     return rec(node as Node);
     function rec(n: Node): void {

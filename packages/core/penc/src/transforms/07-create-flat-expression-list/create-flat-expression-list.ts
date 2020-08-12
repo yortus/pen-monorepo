@@ -3,7 +3,7 @@
 
 import * as objectHash from 'object-hash';
 import * as AstNodes from '../../ast-nodes';
-import {assert, traverseDepthFirst} from '../../utils';
+import {assert, traverseAst} from '../../utils';
 import {ResolvedNodeKind} from '../asts';
 
 
@@ -18,7 +18,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // Make a flat list of every SimpleBinding in the entire program.
     const allBindings = [] as SimpleBinding[];
-    traverseDepthFirst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+    traverseAst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
     let resolve = createResolver(program, allBindings);

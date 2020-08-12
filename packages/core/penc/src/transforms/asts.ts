@@ -25,6 +25,9 @@ export interface SourceFileInfo {
 
 
 // TODO: ...
+export const SourceNodeKind = NodeKind;
 export type SourceNodeKind = NodeKind;
+export const DesugaredNodeKind = NodeKind.filter(k => !['DestructuredBinding', 'ParenthesisedExpression'].includes(k)) as DesugaredNodeKind[];
 export type DesugaredNodeKind = Exclude<NodeKind, 'DestructuredBinding' | 'ParenthesisedExpression'>;
+export const ResolvedNodeKind = DesugaredNodeKind;
 export type ResolvedNodeKind = DesugaredNodeKind;

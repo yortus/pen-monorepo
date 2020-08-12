@@ -1,29 +1,39 @@
 import {Expression, ExpressionKind, Node, NodeKind} from '../ast-nodes';
+import {assert} from './assert';
 import {mapMap} from './map-map';
 
 
-// TODO: doc...
-export function makeNodeMapper<KS extends NodeKind, KSᐟ extends NodeKind>() {
-    return function nodeMapper<N extends Node<KS>, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
-        const rec: any = (n: any) => {
-            try {
-                // If result is an expression, call the general 'PreExpression' handler if provided, before mapping.
-                if (ExpressionKind.includes(n.kind) && mappers.PreExpression) {
-                    n = mappers.PreExpression(n) ?? n;
-                }
+/**
+ * Creates and returns a new AST derived from the AST rooted at `node`. By default, each node is recursively cloned, in
+ * which case the returned AST is a deep clone of `node`. The mapping function for each node kind can be specified in
+ * the `mappings` object, which allows the resulting AST to differ in structure and node kinds from the AST given by
+ * `node`. The `kinds` parameter specifies the node kinds that the resulting AST is expected to consist of.
+ */
+export function mapAst<N extends {kind: NodeKind}, KSᐟ extends NodeKind, MapObj, KS extends NodeKind = KindsOfNode<N>>(
+    node: N,
+    kinds: readonly KSᐟ[],
+    mappings: Mappings<MapObj, KS, KSᐟ>
+) {
+    const rec: any = (n: any) => {
+        try {
+            // If result is an expression, call the general 'PreExpression' handler if provided, before mapping.
+            if (ExpressionKind.includes(n.kind) && mappers.PreExpression) {
+                n = mappers.PreExpression(n) ?? n;
+            }
 
-                let mapFn = mappers[n.kind];
-                return mapFn ? mapFn(n) : defaultMappers(n);
-            }
-            catch (err) {
-                // TODO: how to handle? May be better to let caller handle it?
-                throw err;
-            }
-        };
-        const defaultMappers: any = makeDefaultMappers(rec);
-        const mappers: any = mappings(rec);
-        return rec(node) as NodeOfKind<KSᐟ, N['kind']>;
+            let mapFn = mappers[n.kind];
+            let result = mapFn ? mapFn(n) : defaultMappers(n);
+            assert(kinds.includes(result.kind));
+            return result;
+        }
+        catch (err) {
+            // TODO: how to handle? May be better to let caller handle it?
+            throw err;
+        }
     };
+    const defaultMappers: any = makeDefaultMappers(rec);
+    const mappers: any = mappings(rec);
+    return rec(node) as NodeOfKind<KSᐟ, N['kind']>;
 }
 
 
@@ -58,6 +68,10 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
         }
     };
 }
+
+
+// TODO: doc...
+type KindsOfNode<N> = N extends Node<infer KS> ? KS : never;
 
 
 // TODO: doc...

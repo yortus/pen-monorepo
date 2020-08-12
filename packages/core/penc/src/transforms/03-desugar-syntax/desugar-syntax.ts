@@ -1,5 +1,5 @@
 import {MemberExpression, Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
-import {makeNodeMapper} from '../../utils';
+import {mapAst} from '../../utils';
 import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 
 
@@ -8,8 +8,7 @@ import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 // - ParenthesisedExpression
 export function desugarSyntax(program: Program<SourceNodeKind>): Program<DesugaredNodeKind> {
     let counter = 0;
-    let mapNode = makeNodeMapper<SourceNodeKind, DesugaredNodeKind>();
-    return mapNode(program, rec => ({
+    return mapAst(program, DesugaredNodeKind, rec => ({
 
         // Replace each DestructuredBinding with a series of SimpleBindings
         Module: mod => {
