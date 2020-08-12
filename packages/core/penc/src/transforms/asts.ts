@@ -1,4 +1,4 @@
-import {Node, NodeKind, Program} from '../ast-nodes';
+import {NodeKind} from '../ast-nodes';
 import {AbsPath} from '../utils';
 
 
@@ -25,10 +25,6 @@ export interface SourceFileInfo {
 
 
 // TODO: ...
-export type SourceNodes = Node<NodeKind>;
-export type DesugaredNodes = Node<Exclude<NodeKind, 'DestructuredBinding' | 'ParenthesisedExpression'>>;
-export type ResolvedNodes = DesugaredNodes;
-
-export type SourceProgram = Program<SourceNodes['kind']>;
-export type DesugaredProgram = Program<DesugaredNodes['kind']>;
-export type ResolvedProgram = Program<ResolvedNodes['kind']>;
+export type SourceNodeKind = NodeKind;
+export type DesugaredNodeKind = Exclude<NodeKind, 'DestructuredBinding' | 'ParenthesisedExpression'>;
+export type ResolvedNodeKind = DesugaredNodeKind;

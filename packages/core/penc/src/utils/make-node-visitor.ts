@@ -3,8 +3,8 @@ import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function makeNodeVisitor<NS extends {kind: NodeKind}, R = void>() {
-    return function nodeVisitor<N extends NS, VisObj>(node: N, makeVisitors: MakeVisitors<VisObj, NS, R>): R {
+export function makeNodeVisitor<KS extends NodeKind, R = void>() {
+    return function nodeVisitor<N extends Node<KS>, VisObj>(node: N, makeVisitors: MakeVisitors<VisObj, KS, R>): R {
         const rec: any = (n: any) => {
             try {
                 let visFn = visitors[n.kind];
@@ -23,7 +23,7 @@ export function makeNodeVisitor<NS extends {kind: NodeKind}, R = void>() {
 
 
 // TODO: ...
-function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) => void) {
+function makeDefaultVisitors(rec: <N extends Node>(n: N) => void) {
     return (n: Node): void => {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), undefined;
@@ -56,9 +56,9 @@ function makeDefaultVisitors(rec: <SpecificNode extends Node>(n: SpecificNode) =
 
 
 // TODO: doc...
-type MakeVisitors<VisObj, NS extends {kind: NodeKind}, R> =
-    (rec: <N extends NS>(n: N) => R) => VisObj & {
-        [K in keyof VisObj]: K extends NS['kind'] ? (n: NodeOfKind<NS, K>) => R : never
+type MakeVisitors<VisObj, KS extends NodeKind, R> =
+    (rec: <N extends Node<KS>>(n: N) => R) => VisObj & {
+        [K in keyof VisObj]: K extends KS ? (n: NodeOfKind<KS, K>) => R : never
     };
 
 
@@ -66,4 +66,4 @@ type MakeVisitors<VisObj, NS extends {kind: NodeKind}, R> =
  * Helper type that narrows from the union of node types `NS` to the
  * single node type corresponding to the node kind given by `K`.
  */
-type NodeOfKind<NS extends {kind: NodeKind}, K extends NodeKind, N extends NS = NS> = N extends {kind: K} ? N : never;
+type NodeOfKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;

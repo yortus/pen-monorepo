@@ -4,7 +4,7 @@
 import * as objectHash from 'object-hash';
 import * as AstNodes from '../../ast-nodes';
 import {assert, traverseDepthFirst} from '../../utils';
-import {ResolvedNodes, ResolvedProgram} from '../asts';
+import {ResolvedNodeKind} from '../asts';
 
 
 // TODO: jsdoc...
@@ -98,11 +98,12 @@ interface Entry {
 }
 
 
-type Expression = AstNodes.Expression<ResolvedNodes['kind']>;
-type MemberExpression = AstNodes.MemberExpression<ResolvedNodes['kind']>;
-type Module = AstNodes.Module<ResolvedNodes['kind']>;
+type Expression = AstNodes.Expression<ResolvedNodeKind>;
+type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
+type Module = AstNodes.Module<ResolvedNodeKind>;
 type ReferenceExpression = AstNodes.ReferenceExpression;
-type SimpleBinding = AstNodes.SimpleBinding<ResolvedNodes['kind']>;
+type ResolvedProgram = AstNodes.Program<ResolvedNodeKind>;
+type SimpleBinding = AstNodes.SimpleBinding<ResolvedNodeKind>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {

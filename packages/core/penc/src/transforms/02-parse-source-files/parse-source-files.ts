@@ -1,12 +1,12 @@
 import * as fs from 'fs';
-import {Module} from '../../ast-nodes';
+import {Module, Program} from '../../ast-nodes';
 import {isExtension, mapMap} from '../../utils';
-import {SourceFileGraph, SourceProgram} from '../asts';
+import {SourceFileGraph, SourceNodeKind} from '../asts';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
-export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
+export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<SourceNodeKind> {
     let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {

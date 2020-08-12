@@ -1,19 +1,19 @@
-import {MemberExpression, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
+import {MemberExpression, Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
 import {makeNodeMapper} from '../../utils';
-import {DesugaredNodes, DesugaredProgram, SourceNodes, SourceProgram} from '../asts';
+import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - DestructuredBinding
 // - ParenthesisedExpression
-export function desugarSyntax(program: SourceProgram): DesugaredProgram {
+export function desugarSyntax(program: Program<SourceNodeKind>): Program<DesugaredNodeKind> {
     let counter = 0;
-    let mapNode = makeNodeMapper<SourceNodes, DesugaredNodes>();
+    let mapNode = makeNodeMapper<SourceNodeKind, DesugaredNodeKind>();
     return mapNode(program, rec => ({
 
         // Replace each DestructuredBinding with a series of SimpleBindings
         Module: mod => {
-            let bindings = [] as Array<SimpleBinding<DesugaredNodes['kind']>>;
+            let bindings = [] as Array<SimpleBinding<DesugaredNodeKind>>;
             for (let binding of mod.bindings) {
                 if (binding.kind === 'SimpleBinding') {
                     bindings.push(rec(binding));
@@ -28,7 +28,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                     // Introduce a simple binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
                         let ref: ReferenceExpression = {kind: 'ReferenceExpression', name};
-                        let mem: MemberExpression<DesugaredNodes['kind']>;
+                        let mem: MemberExpression<DesugaredNodeKind>;
                         mem = {kind: 'MemberExpression', module: ref, bindingName};
                         bindings.push({kind: 'SimpleBinding', name: alias ?? bindingName, value: mem, exported});
                     }

@@ -3,8 +3,8 @@ import {mapMap} from './map-map';
 
 
 // TODO: doc...
-export function makeNodeMapper<NS extends {kind: NodeKind}, NSᐟ extends {kind: NodeKind}>() {
-    return function nodeMapper<N extends NS, MapObj>(node: N, mappings: Mappings<MapObj, NS, NSᐟ>): NodeOfKind<NSᐟ, N['kind']> {
+export function makeNodeMapper<KS extends NodeKind, KSᐟ extends NodeKind>() {
+    return function nodeMapper<N extends Node<KS>, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
         const rec: any = (n: any) => {
             try {
                 // If result is an expression, call the general 'PreExpression' handler if provided, before mapping.
@@ -22,13 +22,13 @@ export function makeNodeMapper<NS extends {kind: NodeKind}, NSᐟ extends {kind:
         };
         const defaultMappers: any = makeDefaultMappers(rec);
         const mappers: any = mappings(rec);
-        return rec(node);
+        return rec(node) as NodeOfKind<KSᐟ, N['kind']>;
     };
 }
 
 
 // TODO: ...
-function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) => SpecificNode) {
+function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
@@ -61,12 +61,12 @@ function makeDefaultMappers(rec: <SpecificNode extends Node>(n: SpecificNode) =>
 
 
 // TODO: doc...
-type Mappings<MapObj, NS extends {kind: NodeKind}, NSᐟ extends {kind: NodeKind}> =
-    (rec: <N extends NS>(n: N) => NodeOfKind<NSᐟ, N['kind']>) => MapObj & {
+type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
+    (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, N['kind']>) => MapObj & {
         [K in keyof MapObj]:
-            K extends NS['kind'] ? (n: NodeOfKind<NS, K>) => NodeOfKind<NSᐟ, K> :
-            K extends 'PreExpression' ? (n: Expression<NS['kind']>) => Expression<NS['kind']> | undefined :
-            never
+            K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, K> :
+            K extends 'PreExpression' ? (n: Expression<KS>) => Expression<KS> | undefined :
+            never;
     };
 
 
@@ -75,4 +75,4 @@ type Mappings<MapObj, NS extends {kind: NodeKind}, NSᐟ extends {kind: NodeKind
  * Helper type that narrows from the union of node types `NS` to the
  * single node type corresponding to the node kind given by `K`.
  */
-type NodeOfKind<NS extends {kind: NodeKind}, K extends NodeKind, N extends NS = NS> = N extends {kind: K} ? N : never;
+type NodeOfKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;

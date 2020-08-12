@@ -1,10 +1,11 @@
+import {Program} from '../../ast-nodes';
 import {makeNodeVisitor} from '../../utils';
-import {ResolvedNodes, ResolvedProgram} from '../asts';
+import {ResolvedNodeKind} from '../asts';
 
 
 // TODO: doc...
-export function checkSemantics(program: ResolvedProgram) {
-    let visitNode = makeNodeVisitor<ResolvedNodes>();
+export function checkSemantics(program: Program<ResolvedNodeKind>) {
+    let visitNode = makeNodeVisitor<ResolvedNodeKind>();
     visitNode(program, rec => ({
         RecordExpression: ({fields}) => {
             // Ensure Record field names are unique within the record definition
