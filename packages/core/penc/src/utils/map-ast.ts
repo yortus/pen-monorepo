@@ -1,4 +1,4 @@
-import {Expression, ExpressionKind, Node, NodeKind} from '../ast-nodes';
+import {BindingKind, ExpressionKind, Node, NodeKind} from '../ast-nodes';
 import {assert} from './assert';
 import {mapMap} from './map-map';
 
@@ -76,12 +76,25 @@ type KindsOfNode<N> = N extends Node<infer KS> ? KS : never;
 
 // TODO: doc...
 type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
-    (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, N['kind']>) => MapObj & {
+    (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, WidenKind<N['kind']>>) => MapObj & {
         [K in keyof MapObj]:
-            K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, K> :
-            K extends 'PreExpression' ? (n: Expression<KS>) => Expression<KS> | undefined :
+            K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, WidenKind<K>> :
             never;
     };
+
+type WidenKind<K extends NodeKind> =
+    K extends ExpressionKind ? ExpressionKind :
+    K extends BindingKind ? BindingKind :
+    K;
+
+
+// type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
+//     (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, N['kind']>) => MapObj & {
+//         [K in keyof MapObj]:
+//             K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, K> :
+//             K extends 'PreExpression' ? (n: Expression<KS>) => Expression<KS> | undefined :
+//             never;
+//     };
 
 
 

@@ -39,8 +39,8 @@ export function desugarSyntax(program: Program<SourceNodeKind>): Program<Desugar
         },
 
         // Remove all ParenthesisedExpressions from the AST
-        PreExpression: expr => {
-            if (expr.kind === 'ParenthesisedExpression') return expr.expression;
+        ParenthesisedExpression: par => {
+            return rec(par.expression);
         },
     }));
 }
