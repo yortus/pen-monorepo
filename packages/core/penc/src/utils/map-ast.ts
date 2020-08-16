@@ -61,6 +61,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
             case 'ReferenceExpression': return n;
             case 'ResolvedBinding': return {...n, value: rec(n.value)};
+            case 'ResolvedReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SimpleBinding': return {...n, value: rec(n.value)};

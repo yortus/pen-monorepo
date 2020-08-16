@@ -28,6 +28,7 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
             case 'ReferenceExpression': return cb(n);
             case 'ResolvedBinding': return rec(n.value), cb(n);
+            case 'ResolvedReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'SimpleBinding': return rec(n.value), cb(n);

@@ -116,8 +116,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
 
         case 'ApplicationExpression': {
-            assert(expr.lambda.kind === 'ReferenceExpression');
-            assert(expr.argument.kind === 'ReferenceExpression');
+            assert(expr.lambda.kind === 'ResolvedReferenceExpression');
+            assert(expr.argument.kind === 'ResolvedReferenceExpression');
             // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text(`if (${name}_memo) return ${name}_memo(arg);`);
@@ -144,8 +144,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'FieldExpression': {
-            assert(expr.name.kind === 'ReferenceExpression');
-            assert(expr.value.kind === 'ReferenceExpression');
+            assert(expr.name.kind === 'ResolvedReferenceExpression');
+            assert(expr.value.kind === 'ResolvedReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
             emit.down(1).text(`${name}_memo = field({`).indent();
@@ -169,7 +169,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`${name}_memo = list({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('elements: [');
-            emit.text(`${expr.elements.map(e => e.kind === 'ReferenceExpression' ? e.name : '?').join(', ')}`);
+            emit.text(`${expr.elements.map(e => e.kind === 'ResolvedReferenceExpression' ? e.name : '?').join(', ')}`);
             emit.text('],').dedent().down(1).text('})');
             emit.down(1).text(`return ${name}_memo();`);
             emit.dedent().down(1).text(`}`);
@@ -182,7 +182,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`switch (bindingName) {`).indent();
             for (let binding of expr.module.bindings) {
                 assert(binding.kind === 'ResolvedBinding');
-                assert(binding.value.kind === 'ReferenceExpression');
+                assert(binding.value.kind === 'ResolvedReferenceExpression');
                 emit.down(1).text(`case '${binding.name}': return ${binding.value.name};`);
             }
             emit.down(1).text(`default: return undefined;`);
@@ -192,7 +192,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'NotExpression': {
-            assert(expr.expression.kind === 'ReferenceExpression');
+            assert(expr.expression.kind === 'ResolvedReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`let stateₒ = getState();`);
             emit.down(1).text(`let result = !${expr.expression.name}();`);
@@ -204,7 +204,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'QuantifiedExpression': {
-            assert(expr.expression.kind === 'ReferenceExpression');
+            assert(expr.expression.kind === 'ResolvedReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
                 emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
@@ -233,7 +233,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             if (expr.fields.length > 0) {
                 emit.indent();
                 for (let field of expr.fields) {
-                    assert(field.value.kind === 'ReferenceExpression');
+                    assert(field.value.kind === 'ResolvedReferenceExpression');
                     emit.down(1).text(`{name: '${field.name}', value: ${field.value.name}},`);
                 }
                 emit.dedent().down(1);
@@ -245,12 +245,12 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
         }
 
-        case 'ReferenceExpression':
-            assert(false); // Should never see a ReferenceExpression here.
+        case 'ResolvedReferenceExpression':
+            assert(false); // Should never see a ResolvedReferenceExpression here.
 
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ResolvedReferenceExpression'); return e.name; });
             emit.down(1).text(`function ${name}() {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
@@ -262,7 +262,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ResolvedReferenceExpression'); return e.name; });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('let stateₒ = getState();');
             emit.down(1).text('let out;');

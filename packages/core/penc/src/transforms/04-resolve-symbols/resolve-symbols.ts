@@ -1,4 +1,4 @@
-import {Program, ReferenceExpression, ResolvedBinding} from '../../ast-nodes';
+import {Program, ResolvedBinding, ResolvedReferenceExpression} from '../../ast-nodes';
 import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -9,7 +9,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startSymbolId: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression}>;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ResolvedReferenceExpression}>;
     let result = mapAst(program, ResolvedNodeKind, rec => ({
 
         // Attach the symbol table to the Program node.
@@ -41,11 +41,11 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
         },
 
         // Make a list of all the ReferenceExpression nodes, for backpatching after this traversal.
-        ReferenceExpression: ref => {
+        ReferenceExpression: ({name}) => {
             assert(currentScope);
-            let refᐟ = {...ref};
-            allRefs.push({scope: currentScope, ref: refᐟ});
-            return refᐟ;
+            let ref: ResolvedReferenceExpression = {kind: 'ResolvedReferenceExpression', name, symbolId: 'badRef'};
+            allRefs.push({scope: currentScope, ref});
+            return ref;
         },
     }));
 

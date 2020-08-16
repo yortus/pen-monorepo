@@ -27,7 +27,7 @@ export interface SourceFileInfo {
 // TODO: ...
 const SourceDeletions = ['ResolvedBinding', 'ResolvedReferenceExpression'] as const;
 const DesugaredDeletions = ['DestructuredBinding', 'ParenthesisedExpression', 'ResolvedBinding', 'ResolvedReferenceExpression'] as const;
-const ResolvedDeletions = ['DestructuredBinding', 'ParenthesisedExpression', 'SimpleBinding', 'UnresolvedReferenceExpression'] as const;
+const ResolvedDeletions = ['DestructuredBinding', 'ParenthesisedExpression', 'SimpleBinding', 'ReferenceExpression'] as const;
 
 export type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;
 export type DesugaredNodeKind = Exclude<NodeKind, typeof DesugaredDeletions[any]>;

@@ -8,7 +8,8 @@ export const ExpressionKind = [
     'ApplicationExpression', 'BooleanLiteralExpression', 'ExtensionExpression', 'FieldExpression', 'ImportExpression',
     /*'LambdaExpression', */'ListExpression', 'MemberExpression', 'ModuleExpression', 'NotExpression',
     'NullLiteralExpression', 'NumericLiteralExpression', 'ParenthesisedExpression', 'QuantifiedExpression',
-    'RecordExpression', 'ReferenceExpression', 'SelectionExpression', 'SequenceExpression', 'StringLiteralExpression',
+    'RecordExpression', 'ReferenceExpression', 'ResolvedReferenceExpression', 'SelectionExpression',
+    'SequenceExpression', 'StringLiteralExpression',
 ] as const;
 export type ExpressionKind = (typeof ExpressionKind)[any];
 export const NodeKind = ['Module', 'Program', ...BindingKind, ...ExpressionKind] as const;
@@ -52,6 +53,7 @@ export type Expression<K extends NodeKind = NodeKind> = Filter<K,
     | QuantifiedExpression<K>
     | RecordExpression<K>
     | ReferenceExpression
+    | ResolvedReferenceExpression
     | SelectionExpression<K>
     | SequenceExpression<K>
     | StringLiteralExpression
@@ -207,7 +209,13 @@ export interface RecordExpression<K extends NodeKind = NodeKind> {
 export interface ReferenceExpression {
     readonly kind: 'ReferenceExpression';
     readonly name: string;
-    readonly symbolId?: string;
+}
+
+
+export interface ResolvedReferenceExpression {
+    readonly kind: 'ResolvedReferenceExpression';
+    readonly name: string;
+    readonly symbolId: string;
 }
 
 
