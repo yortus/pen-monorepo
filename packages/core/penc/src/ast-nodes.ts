@@ -2,14 +2,14 @@ import {AbsPath} from './utils';
 
 
 // TODO: temp testing...
-export const BindingKind = ['SimpleBinding', 'DestructuredBinding', 'ResolvedBinding'] as const;
+export const BindingKind = ['SimpleBinding', 'UnresolvedDestructuredBinding', 'UnresolvedSimpleBinding'] as const;
 export type BindingKind = (typeof BindingKind)[any];
 export const ExpressionKind = [
     'ApplicationExpression', 'BooleanLiteralExpression', 'ExtensionExpression', 'FieldExpression', 'ImportExpression',
     /*'LambdaExpression', */'ListExpression', 'MemberExpression', 'ModuleExpression', 'NotExpression',
     'NullLiteralExpression', 'NumericLiteralExpression', 'ParenthesisedExpression', 'QuantifiedExpression',
-    'RecordExpression', 'ReferenceExpression', 'ResolvedReferenceExpression', 'SelectionExpression',
-    'SequenceExpression', 'StringLiteralExpression',
+    'RecordExpression', 'ReferenceExpression', 'SelectionExpression', 'SequenceExpression',
+    'StringLiteralExpression', 'UnresolvedReferenceExpression',
 ] as const;
 export type ExpressionKind = (typeof ExpressionKind)[any];
 export const NodeKind = ['Module', 'Program', ...BindingKind, ...ExpressionKind] as const;
@@ -19,20 +19,17 @@ export type NodeKind = (typeof NodeKind)[any];
 
 // ====================   Node types by category   ====================
 export type Node<K extends NodeKind = NodeKind> = Filter<K,
-    // Top-level nodes
-    | Module<K>
-    | Program<K>
-
-    // Bindings and Expressions
     | Binding<K>
     | Expression<K>
+    | Module<K>
+    | Program<K>
 >;
 
 
 export type Binding<K extends NodeKind = NodeKind> = Filter<K,
     | SimpleBinding<K>
-    | DestructuredBinding<K>
-    | ResolvedBinding<K>
+    | UnresolvedDestructuredBinding<K>
+    | UnresolvedSimpleBinding<K>
 >;
 
 
@@ -53,26 +50,26 @@ export type Expression<K extends NodeKind = NodeKind> = Filter<K,
     | QuantifiedExpression<K>
     | RecordExpression<K>
     | ReferenceExpression
-    | ResolvedReferenceExpression
     | SelectionExpression<K>
     | SequenceExpression<K>
     | StringLiteralExpression
+    | UnresolvedReferenceExpression
 >;
 
 
 // ====================   Top-level nodes   ====================
+export interface Module<K extends NodeKind = NodeKind> {
+    readonly kind: 'Module';
+    readonly bindings: ReadonlyArray<Binding<K>>;
+    readonly path?: AbsPath;
+}
+
+
 export interface Program<K extends NodeKind = NodeKind> {
     readonly kind: 'Program';
     readonly sourceFiles: ReadonlyMap<AbsPath, Module<K>>;
     readonly mainPath: AbsPath;
     readonly startSymbolId?: string;
-}
-
-
-export interface Module<K extends NodeKind = NodeKind> {
-    readonly kind: 'Module';
-    readonly bindings: ReadonlyArray<Binding<K>>;
-    readonly path?: AbsPath;
 }
 
 
@@ -82,11 +79,12 @@ export interface SimpleBinding<K extends NodeKind = NodeKind> {
     readonly name: string;
     readonly value: Expression<K>;
     readonly exported: boolean;
+    readonly symbolId: string;
 }
 
 
-export interface DestructuredBinding<K extends NodeKind = NodeKind> {
-    readonly kind: 'DestructuredBinding';
+export interface UnresolvedDestructuredBinding<K extends NodeKind = NodeKind> {
+    readonly kind: 'UnresolvedDestructuredBinding';
     readonly names: ReadonlyArray<{
         readonly name: string;
         readonly alias?: string;
@@ -96,12 +94,11 @@ export interface DestructuredBinding<K extends NodeKind = NodeKind> {
 }
 
 
-export interface ResolvedBinding<K extends NodeKind = NodeKind> {
-    readonly kind: 'ResolvedBinding';
+export interface UnresolvedSimpleBinding<K extends NodeKind = NodeKind> {
+    readonly kind: 'UnresolvedSimpleBinding';
     readonly name: string;
     readonly value: Expression<K>;
     readonly exported: boolean;
-    readonly symbolId: string;
 }
 
 
@@ -209,12 +206,6 @@ export interface RecordExpression<K extends NodeKind = NodeKind> {
 export interface ReferenceExpression {
     readonly kind: 'ReferenceExpression';
     readonly name: string;
-}
-
-
-export interface ResolvedReferenceExpression {
-    readonly kind: 'ResolvedReferenceExpression';
-    readonly name: string;
     readonly symbolId: string;
 }
 
@@ -236,6 +227,12 @@ export interface StringLiteralExpression {
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;
+}
+
+
+export interface UnresolvedReferenceExpression {
+    readonly kind: 'UnresolvedReferenceExpression';
+    readonly name: string;
 }
 
 

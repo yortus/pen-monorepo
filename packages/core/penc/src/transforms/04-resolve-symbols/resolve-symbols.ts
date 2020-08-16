@@ -1,4 +1,4 @@
-import {Program, ResolvedBinding, ResolvedReferenceExpression} from '../../ast-nodes';
+import {Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
 import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -9,7 +9,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startSymbolId: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ResolvedReferenceExpression}>;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression}>;
     let result = mapAst(program, ResolvedNodeKind, rec => ({
 
         // Attach the symbol table to the Program node.
@@ -33,23 +33,26 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
             return modᐟ;
         },
 
-        // Attach a symbol to each SimpleBinding node. NB: There are no DestructuredBinding nodes after desugaring.
-        SimpleBinding: ({name, value, exported}): ResolvedBinding<ResolvedNodeKind> => {
+        // Attach a symbol to each simple binding, returning a resolved SimpleBinding node.
+        // NB: There are no UnresolvedDestructuredBinding nodes after desugaring.
+        UnresolvedSimpleBinding: ({name, value, exported}): SimpleBinding<ResolvedNodeKind> => {
             assert(currentScope);
             let symbolId = symbolTable.createName(name, currentScope).id;
-            return {kind: 'ResolvedBinding', name, value: rec(value), exported, symbolId};
+            return {kind: 'SimpleBinding', name, value: rec(value), exported, symbolId};
         },
 
-        // Make a list of all the ReferenceExpression nodes, for backpatching after this traversal.
-        ReferenceExpression: ({name}) => {
+        // Attach a symbol to each reference expression, returning a resolved ReferenceExpression node.
+        // Make a list of all the ReferenceExpression nodes, for backpatching the symbolIds after this traversal.
+        UnresolvedReferenceExpression: ({name}) => {
             assert(currentScope);
-            let ref: ResolvedReferenceExpression = {kind: 'ResolvedReferenceExpression', name, symbolId: 'badRef'};
+            let ref: ReferenceExpression = {kind: 'ReferenceExpression', name, symbolId: 'badRef'};
             allRefs.push({scope: currentScope, ref});
             return ref;
         },
     }));
 
-    // Every definition now has a symbol. Backpatch all the ReferenceExpression nodes with the symbol they refer to.
+    // Every definition now has a symbol.
+    // Backpatch all the UnresolvedReferenceExpression nodes with the symbol they refer to.
     for (let {scope, ref} of allRefs) {
         let symbolId = symbolTable.lookupName(ref.name, scope).id;
         Object.assign(ref, {symbolId});

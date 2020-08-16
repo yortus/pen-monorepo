@@ -20,16 +20,16 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = SimpleBinding
-    / DestructuredBinding
+    = UnresolvedSimpleBinding
+    / UnresolvedDestructuredBinding
 
-SimpleBinding
+UnresolvedSimpleBinding
     = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return Object.assign({kind: 'SimpleBinding', name, value}, ex ? {exported: true} : {}); }
+    { return Object.assign({kind: 'UnresolvedSimpleBinding', name, value}, ex ? {exported: true} : {}); }
 
-DestructuredBinding
+UnresolvedDestructuredBinding
     = ex:(EXPORT   __)?   names:DestructuredBindingNameList   __   "="   __   value:Expression
-    { return Object.assign({kind: 'DestructuredBinding', names, value}, ex ? {exported: true} : {}); }
+    { return Object.assign({kind: 'UnresolvedDestructuredBinding', names, value}, ex ? {exported: true} : {}); }
 
 DestructuredBindingNameList
     = "{"   __   !","   head:DestructuredBindingName?   tail:((__   ",")?   __   DestructuredBindingName)*   (__   ",")?   __   "}"
@@ -43,32 +43,32 @@ DestructuredBindingName
 // ====================   Expressions   ====================
 /*
     PRECEDENCE 1 (LOWEST)
-        SelectionExpression         a | b      | a | b | c
+        SelectionExpression             a | b      | a | b | c
 
     PRECEDENCE 2
-        SequenceExpression          a b      a  b c                                                                     NB: whitespace between terms, else is application
+        SequenceExpression              a b      a  b c                                                                     NB: whitespace between terms, else is application
 
     PRECEDENCE 3
-        NotExpression               !a   !a(b)   !a.b   !{a: b}
+        NotExpression                   !a   !a(b)   !a.b   !{a: b}
 
     PRECEDENCE 4
-        QuantifiedExpression        a?   a(b)?   a.b?   {a: b}?
+        QuantifiedExpression            a?   a(b)?   a.b?   {a: b}?
 
     PRECEDENCE 5
-        ApplicationExpression       a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
-        MemberExpression            a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
+        ApplicationExpression           a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
+        MemberExpression                a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
-        RecordExpression            {a: b   c: d   e: f}   {a: b}   {}
-        FieldExpression             {[a]: b}
-        ModuleExpression            {export a=b c=d e=f}   {a=b}
-        ListExpression              [a, b, c]   [a]   []
-        NullLiteralExpression       null
-        BooleanLiteralExpression    false   true
-        StringLiteralExpression     "foo"   'a string!'   `a`
-        ReferenceExpression         a   Rule1   MY_FOO_45   x32   __bar
-        ImportExpression            import './foo'   import 'somelib'
+        RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
+        FieldExpression                 {[a]: b}
+        ModuleExpression                {export a=b c=d e=f}   {a=b}
+        ListExpression                  [a, b, c]   [a]   []
+        NullLiteralExpression           null
+        BooleanLiteralExpression        false   true
+        StringLiteralExpression         "foo"   'a string!'   `a`
+        UnresolvedReferenceExpression   a   Rule1   MY_FOO_45   x32   __bar
+        ImportExpression                import './foo'   import 'somelib'
 */
 
 Expression
@@ -109,7 +109,7 @@ PrimaryExpression
     / BooleanLiteralExpression
     / StringLiteralExpression
     / NumericLiteralExpression
-    / ReferenceExpression
+    / UnresolvedReferenceExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
@@ -206,9 +206,9 @@ NumericLiteralExpression
 
     // TODO: HexIntegerLiteral
 
-ReferenceExpression
+UnresolvedReferenceExpression
     = name:IDENTIFIER
-    { return {kind: 'ReferenceExpression', name}; }
+    { return {kind: 'UnresolvedReferenceExpression', name}; }
 
 
 // ====================   Record/List Parts   ====================
