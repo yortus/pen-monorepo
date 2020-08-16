@@ -2,12 +2,17 @@
 
 
 import * as fs from 'fs';
-import {Expression, ExtensionExpression} from '../../ast-nodes';
+import * as AstNodes from '../../ast-nodes';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
+import {ResolvedNodeKind} from '../asts';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
+
+
+type Expression = AstNodes.Expression<ResolvedNodeKind>;
+type ExtensionExpression = AstNodes.ExtensionExpression;
 
 
 export interface Program {
@@ -176,7 +181,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`function ${name}(bindingName) {`).indent();
             emit.down(1).text(`switch (bindingName) {`).indent();
             for (let binding of expr.module.bindings) {
-                assert(binding.kind === 'SimpleBinding');
+                assert(binding.kind === 'ResolvedBinding');
                 assert(binding.value.kind === 'ReferenceExpression');
                 emit.down(1).text(`case '${binding.name}': return ${binding.value.name};`);
             }

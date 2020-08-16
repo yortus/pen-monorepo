@@ -7,7 +7,7 @@ import {parse as parsePenSource} from './pen-grammar';
 
 
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<SourceNodeKind> {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
+    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module<SourceNodeKind> => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
             return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};

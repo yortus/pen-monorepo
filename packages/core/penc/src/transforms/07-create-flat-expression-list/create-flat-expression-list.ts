@@ -16,9 +16,9 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
     // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
 
-    // Make a flat list of every SimpleBinding in the entire program.
-    const allBindings = [] as SimpleBinding[];
-    traverseAst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+    // Make a flat list of every ResolvedBinding in the entire program.
+    const allBindings = [] as ResolvedBinding[];
+    traverseAst(program, n => n.kind === 'ResolvedBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
     let resolve = createResolver(program, allBindings);
@@ -34,7 +34,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
     // TODO: temp testing... build the one and only internal module for emitting
-    let flatList = {} as Record<string, AstNodes.Expression>;
+    let flatList = {} as Record<string, Expression>;
     for (let {uniqueName, expr} of entriesByHash.values()) flatList[uniqueName] = expr;
     return {startName: startEntry.uniqueName, flatList};
 
@@ -56,10 +56,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
             case 'ModuleExpression': {
-                let bindings = e.module.bindings.map(binding => {
-                    assert(binding.kind === 'SimpleBinding');
-                    return {...binding, value: ref(binding.value)} as SimpleBinding;
-                });
+                let bindings = e.module.bindings.map(binding => ({...binding, value: ref(binding.value)}));
                 return setX(e, {module: {kind: 'Module', bindings}});
             }
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
@@ -79,7 +76,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
-            entry.expr = Object.assign({kind: expr.kind}, vals || expr) as unknown as AstNodes.Expression;
+            entry.expr = Object.assign({kind: expr.kind}, vals || expr) as unknown as Expression;
             return entry;
         }
     }
@@ -88,13 +85,13 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
 export interface FlatExpressionList {
     startName: string;
-    flatList: Record<string, AstNodes.Expression>;
+    flatList: Record<string, Expression>;
 }
 
 
 interface Entry {
     uniqueName: string;
-    expr: AstNodes.Expression;
+    expr: Expression;
 }
 
 
@@ -102,8 +99,8 @@ type Expression = AstNodes.Expression<ResolvedNodeKind>;
 type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
 type Module = AstNodes.Module<ResolvedNodeKind>;
 type ReferenceExpression = AstNodes.ReferenceExpression;
+type ResolvedBinding = AstNodes.ResolvedBinding<ResolvedNodeKind>;
 type ResolvedProgram = AstNodes.Program<ResolvedNodeKind>;
-type SimpleBinding = AstNodes.SimpleBinding<ResolvedNodeKind>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {
@@ -145,10 +142,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
             case 'ModuleExpression': {
                 // Ensure binding order doesn't affect signature, by building an object keyed by binding name.
                 let obj = {} as Record<string, unknown>;
-                for (let binding of ex.module.bindings) {
-                    assert(binding.kind === 'SimpleBinding');
-                    obj[binding.name] = getSig(binding.value);
-                }
+                for (let binding of ex.module.bindings) obj[binding.name] = getSig(binding.value);
                 return setSig('MOD', obj);
             }
             case 'NotExpression': return setSig('NOT', getSig(ex.expression));
@@ -169,7 +163,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
 // TODO: jsdoc...
 // - return value is *never* a ReferenceExpression or ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createResolver(program: ResolvedProgram, allBindings: SimpleBinding[]) {
+function createResolver(program: ResolvedProgram, allBindings: ResolvedBinding[]) {
     return resolve;
 
     // TODO: jsdoc...
@@ -201,7 +195,7 @@ function createResolver(program: ResolvedProgram, allBindings: SimpleBinding[]) 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: ReferenceExpression): Expression {
         let result = allBindings.find(n => n.symbolId === ref.symbolId);
-        assert(result && result.kind === 'SimpleBinding');
+        assert(result);
         return result.value;
     }
 
@@ -228,8 +222,8 @@ function createResolver(program: ResolvedProgram, allBindings: SimpleBinding[]) 
         }
 
         // Do a static lookup of the expression bound to the name `bindingName` in the module `module`.
-        let binding = module.bindings.find(b => b.kind === 'SimpleBinding' && b.name === mem.bindingName);
-        assert(binding && binding.kind === 'SimpleBinding');
+        let binding = module.bindings.find(b => b.name === mem.bindingName);
+        assert(binding);
         return binding.value;
     }
 }

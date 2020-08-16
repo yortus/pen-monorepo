@@ -1,4 +1,4 @@
-import {Program, ReferenceExpression} from '../../ast-nodes';
+import {Program, ReferenceExpression, ResolvedBinding} from '../../ast-nodes';
 import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -34,11 +34,10 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
         },
 
         // Attach a symbol to each SimpleBinding node. NB: There are no DestructuredBinding nodes after desugaring.
-        SimpleBinding: bnd => {
+        SimpleBinding: ({name, value, exported}): ResolvedBinding<ResolvedNodeKind> => {
             assert(currentScope);
-            let symbolId = symbolTable.createName(bnd.name, currentScope).id;
-            let bndᐟ = {...bnd, value: rec(bnd.value), symbolId};
-            return bndᐟ;
+            let symbolId = symbolTable.createName(name, currentScope).id;
+            return {kind: 'ResolvedBinding', name, value: rec(value), exported, symbolId};
         },
 
         // Make a list of all the ReferenceExpression nodes, for backpatching after this traversal.

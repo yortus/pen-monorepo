@@ -2,7 +2,7 @@ import {AbsPath} from './utils';
 
 
 // TODO: temp testing...
-export const BindingKind = ['SimpleBinding', 'DestructuredBinding'] as const;
+export const BindingKind = ['SimpleBinding', 'DestructuredBinding', 'ResolvedBinding'] as const;
 export type BindingKind = (typeof BindingKind)[any];
 export const ExpressionKind = [
     'ApplicationExpression', 'BooleanLiteralExpression', 'ExtensionExpression', 'FieldExpression', 'ImportExpression',
@@ -31,6 +31,7 @@ export type Node<K extends NodeKind = NodeKind> = Filter<K,
 export type Binding<K extends NodeKind = NodeKind> = Filter<K,
     | SimpleBinding<K>
     | DestructuredBinding<K>
+    | ResolvedBinding<K>
 >;
 
 
@@ -79,7 +80,6 @@ export interface SimpleBinding<K extends NodeKind = NodeKind> {
     readonly name: string;
     readonly value: Expression<K>;
     readonly exported: boolean;
-    readonly symbolId?: string;
 }
 
 
@@ -94,7 +94,16 @@ export interface DestructuredBinding<K extends NodeKind = NodeKind> {
 }
 
 
-// // ====================   Expression nodes   ====================
+export interface ResolvedBinding<K extends NodeKind = NodeKind> {
+    readonly kind: 'ResolvedBinding';
+    readonly name: string;
+    readonly value: Expression<K>;
+    readonly exported: boolean;
+    readonly symbolId: string;
+}
+
+
+// ====================   Expression nodes   ====================
 export interface ApplicationExpression<K extends NodeKind = NodeKind> {
     readonly kind: 'ApplicationExpression';
     readonly lambda: Expression<K>;
