@@ -12,9 +12,12 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'BooleanLiteralExpression': return cb(n);
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
+            case 'GlobalBinding': return rec(n.value), cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
+            case 'LocalBinding': return rec(n.value), cb(n);
+            case 'LocalMultiBinding': return rec(n.value), cb(n);
             case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
@@ -28,11 +31,8 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
-            case 'SimpleBinding': return rec(n.value), cb(n);
             case 'StringLiteralExpression': return cb(n);
-            case 'UnresolvedDestructuredBinding': return rec(n.value), cb(n);
             case 'UnresolvedReferenceExpression': return cb(n);
-            case 'UnresolvedSimpleBinding': return rec(n.value), cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

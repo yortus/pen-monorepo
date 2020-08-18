@@ -16,9 +16,9 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     // c. ENTRY expressions are never ReferenceExpressions - these are always resolved before creating entries
     // d. ENTRY expressions *may be* MemberExpressions, if they cannot be resolved
 
-    // Make a flat list of every SimpleBinding in the entire program.
-    const allBindings = [] as SimpleBinding[];
-    traverseAst(program, n => n.kind === 'SimpleBinding' ? allBindings.push(n) : 0);
+    // Make a flat list of every GlobalBinding in the entire program.
+    const allBindings = [] as GlobalBinding[];
+    traverseAst(program, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
     let resolve = createResolver(program, allBindings);
@@ -97,9 +97,9 @@ interface Entry {
 
 
 type Expression = AstNodes.Expression<ResolvedNodeKind>;
+type GlobalBinding = AstNodes.GlobalBinding<ResolvedNodeKind>;
 type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
 type Module = AstNodes.Module<ResolvedNodeKind>;
-type SimpleBinding = AstNodes.SimpleBinding<ResolvedNodeKind>;
 type ReferenceExpression = AstNodes.ReferenceExpression;
 type ResolvedProgram = AstNodes.Program<ResolvedNodeKind>;
 
@@ -164,7 +164,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
 // TODO: jsdoc...
 // - return value is *never* an UnresolvedReferenceExpression or an ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createResolver(program: ResolvedProgram, allBindings: SimpleBinding[]) {
+function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) {
     return resolve;
 
     // TODO: jsdoc...

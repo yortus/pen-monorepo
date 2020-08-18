@@ -5,7 +5,7 @@ export * from './ast';
 
 
 // TODO: temp testing...
-export const BindingKind = ['SimpleBinding', 'UnresolvedDestructuredBinding', 'UnresolvedSimpleBinding'] as const;
+export const BindingKind = ['GlobalBinding', 'LocalBinding', 'LocalMultiBinding'] as const;
 export type BindingKind = (typeof BindingKind)[any];
 export const ExpressionKind = [
     'ApplicationExpression', 'BooleanLiteralExpression', 'ExtensionExpression', 'FieldExpression', 'ImportExpression',

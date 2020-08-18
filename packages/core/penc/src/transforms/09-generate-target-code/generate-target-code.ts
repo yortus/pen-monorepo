@@ -181,7 +181,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`function ${name}(bindingName) {`).indent();
             emit.down(1).text(`switch (bindingName) {`).indent();
             for (let binding of expr.module.bindings) {
-                assert(binding.kind === 'SimpleBinding');
+                assert(binding.kind === 'GlobalBinding');
                 assert(binding.value.kind === 'ReferenceExpression');
                 emit.down(1).text(`case '${binding.name}': return ${binding.value.name};`);
             }

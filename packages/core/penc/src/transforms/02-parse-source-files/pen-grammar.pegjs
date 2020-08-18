@@ -20,22 +20,22 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = UnresolvedSimpleBinding
-    / UnresolvedDestructuredBinding
+    = LocalBinding
+    / LocalMultiBinding
 
-UnresolvedSimpleBinding
+LocalBinding
     = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return Object.assign({kind: 'UnresolvedSimpleBinding', name, value}, ex ? {exported: true} : {}); }
+    { return Object.assign({kind: 'LocalBinding', name, value}, ex ? {exported: true} : {}); }
 
-UnresolvedDestructuredBinding
-    = ex:(EXPORT   __)?   names:DestructuredBindingNameList   __   "="   __   value:Expression
-    { return Object.assign({kind: 'UnresolvedDestructuredBinding', names, value}, ex ? {exported: true} : {}); }
+LocalMultiBinding
+    = ex:(EXPORT   __)?   names:MultiBindingNameList   __   "="   __   value:Expression
+    { return Object.assign({kind: 'LocalMultiBinding', names, value}, ex ? {exported: true} : {}); }
 
-DestructuredBindingNameList
-    = "{"   __   !","   head:DestructuredBindingName?   tail:((__   ",")?   __   DestructuredBindingName)*   (__   ",")?   __   "}"
+MultiBindingNameList
+    = "{"   __   !","   head:MultiBindingName?   tail:((__   ",")?   __   MultiBindingName)*   (__   ",")?   __   "}"
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-DestructuredBindingName
+MultiBindingName
     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
     { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
 

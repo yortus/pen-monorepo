@@ -1,4 +1,4 @@
-import {Program, ReferenceExpression, SimpleBinding} from '../../ast-nodes';
+import {GlobalBinding, Program, ReferenceExpression} from '../../ast-nodes';
 import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -33,12 +33,11 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
             return modᐟ;
         },
 
-        // Attach a symbol to each simple binding, returning a resolved SimpleBinding node.
-        // NB: There are no UnresolvedDestructuredBinding nodes after desugaring.
-        UnresolvedSimpleBinding: ({name, value, exported}): SimpleBinding<ResolvedNodeKind> => {
+        // Attach a symbol to each local binding, returning a GlobalBinding node.
+        LocalBinding: ({name, value, exported}): GlobalBinding<ResolvedNodeKind> => {
             assert(currentScope);
             let symbolId = symbolTable.createName(name, currentScope).id;
-            return {kind: 'SimpleBinding', name, value: rec(value), exported, symbolId};
+            return {kind: 'GlobalBinding', name, value: rec(value), exported, symbolId};
         },
 
         // Attach a symbol to each reference expression, returning a resolved ReferenceExpression node.

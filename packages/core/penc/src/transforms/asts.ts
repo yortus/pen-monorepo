@@ -26,20 +26,20 @@ export interface SourceFileInfo {
 
 // TODO: ...
 const SourceDeletions = [
+    'GlobalBinding',
     'ReferenceExpression',
-    'SimpleBinding',
 ] as const;
 const DesugaredDeletions = [
+    'GlobalBinding',
+    'LocalMultiBinding',
     'ParenthesisedExpression',
     'ReferenceExpression',
-    'SimpleBinding',
-    'UnresolvedDestructuredBinding',
 ] as const;
 const ResolvedDeletions = [
+    'LocalBinding',
+    'LocalMultiBinding',
     'ParenthesisedExpression',
-    'UnresolvedDestructuredBinding',
     'UnresolvedReferenceExpression',
-    'UnresolvedSimpleBinding',
 ] as const;
 
 export type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;

@@ -45,9 +45,12 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'BooleanLiteralExpression': return n;
             case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
+            case 'GlobalBinding': return {...n, value: rec(n.value)};
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
+            case 'LocalBinding': return {...n, value: rec(n.value)};
+            case 'LocalMultiBinding': return {...n, value: rec(n.value)};
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
@@ -61,11 +64,8 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'SimpleBinding': return {...n, value: rec(n.value)};
             case 'StringLiteralExpression': return n;
-            case 'UnresolvedDestructuredBinding': return {...n, value: rec(n.value)};
             case 'UnresolvedReferenceExpression': return n;
-            case 'UnresolvedSimpleBinding': return {...n, value: rec(n.value)};
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };
