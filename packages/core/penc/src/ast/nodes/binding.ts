@@ -21,7 +21,7 @@ export interface GlobalBinding<KS extends NodeKind = NodeKind> {
 
 export interface LocalBinding<KS extends NodeKind = NodeKind> {
     readonly kind: 'LocalBinding';
-    readonly name: string;
+    readonly localName: string;
     readonly value: Expression<KS>;
     readonly exported: boolean;
 }

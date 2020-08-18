@@ -20,16 +20,16 @@ export function desugarSyntax(program: Program<SourceNodeKind>): Program<Desugar
                 else {
                     // Introduce a new local binding for the RHS.
                     // TODO: ensure no collisions with program names. '$1' etc is ok since '$' isn't allowed in PEN ids.
-                    let name = `$${++counter}`;
+                    let localName = `$${++counter}`;
                     let {names, value, exported} = binding;
-                    bindings.push({kind: 'LocalBinding', name, value: rec(value), exported});
+                    bindings.push({kind: 'LocalBinding', localName, value: rec(value), exported});
 
                     // Introduce a local binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
-                        let ref: UnresolvedReferenceExpression = {kind: 'UnresolvedReferenceExpression', name};
+                        let ref: UnresolvedReferenceExpression = {kind: 'UnresolvedReferenceExpression', localName};
                         let mem: MemberExpression<DesugaredNodeKind>;
                         mem = {kind: 'MemberExpression', module: ref, bindingName};
-                        bindings.push({kind: 'LocalBinding', name: alias ?? bindingName, value: mem, exported});
+                        bindings.push({kind: 'LocalBinding', localName: alias ?? bindingName, value: mem, exported});
                     }
                 }
             }

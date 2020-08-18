@@ -24,8 +24,8 @@ Binding
     / LocalMultiBinding
 
 LocalBinding
-    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return Object.assign({kind: 'LocalBinding', name, value}, ex ? {exported: true} : {}); }
+    = ex:(EXPORT   __)?   localName:IDENTIFIER   __   "="   __   value:Expression
+    { return Object.assign({kind: 'LocalBinding', localName, value}, ex ? {exported: true} : {}); }
 
 LocalMultiBinding
     = ex:(EXPORT   __)?   names:MultiBindingNameList   __   "="   __   value:Expression
@@ -207,8 +207,8 @@ NumericLiteralExpression
     // TODO: HexIntegerLiteral
 
 UnresolvedReferenceExpression
-    = name:IDENTIFIER
-    { return {kind: 'UnresolvedReferenceExpression', name}; }
+    = localName:IDENTIFIER
+    { return {kind: 'UnresolvedReferenceExpression', localName}; }
 
 
 // ====================   Record/List Parts   ====================

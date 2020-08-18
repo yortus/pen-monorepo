@@ -18,7 +18,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<Sour
                 kind: 'Module',
                 bindings: exportedNames.map(name => ({
                     kind: 'LocalBinding',
-                    name,
+                    localName: name,
                     value: {
                         kind: 'ExtensionExpression',
                         extensionPath: sourceFile.path,

@@ -156,5 +156,5 @@ export interface StringLiteralExpression {
 
 export interface UnresolvedReferenceExpression {
     readonly kind: 'UnresolvedReferenceExpression';
-    readonly name: string;
+    readonly localName: string;
 }
