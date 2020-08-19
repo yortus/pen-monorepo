@@ -37,14 +37,14 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
         LocalBinding: ({localName, value, exported}): GlobalBinding<ResolvedNodeKind> => {
             assert(currentScope);
             let symbolId = symbolTable.createName(localName, currentScope).id;
-            return {kind: 'GlobalBinding', name: localName, value: rec(value), exported, symbolId};
+            return {kind: 'GlobalBinding', localName, globalName: symbolId, value: rec(value), exported};
         },
 
         // Attach a symbol to each reference expression, returning a resolved ReferenceExpression node.
         // Make a list of all the ReferenceExpression nodes, for backpatching the symbolIds after this traversal.
         UnresolvedReferenceExpression: ({localName}) => {
             assert(currentScope);
-            let ref: ReferenceExpression = {kind: 'ReferenceExpression', name: localName, symbolId: 'badRef'};
+            let ref: ReferenceExpression = {kind: 'ReferenceExpression', globalName: localName};
             allRefs.push({scope: currentScope, ref});
             return ref;
         },
@@ -53,8 +53,8 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     // Every definition now has a symbol.
     // Backpatch all the UnresolvedReferenceExpression nodes with the symbol they refer to.
     for (let {scope, ref} of allRefs) {
-        let symbolId = symbolTable.lookupName(ref.name, scope).id;
-        Object.assign(ref, {symbolId});
+        let symbolId = symbolTable.lookupName(ref.globalName, scope).id;
+        Object.assign(ref, {globalName: symbolId});
     }
 
     // sanity check - we should be back to the scope we started with here.

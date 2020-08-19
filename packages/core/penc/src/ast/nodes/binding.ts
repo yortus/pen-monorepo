@@ -12,10 +12,10 @@ export type Binding<KS extends NodeKind = NodeKind> = FilterKinds<KS,
 
 export interface GlobalBinding<KS extends NodeKind = NodeKind> {
     readonly kind: 'GlobalBinding';
-    readonly name: string;
+    readonly localName: string;
+    readonly globalName: string;
     readonly value: Expression<KS>;
     readonly exported: boolean;
-    readonly symbolId: string;
 }
 
 

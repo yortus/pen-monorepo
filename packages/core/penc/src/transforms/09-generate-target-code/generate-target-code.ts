@@ -121,7 +121,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text(`if (${name}_memo) return ${name}_memo(arg);`);
-            emit.down(1).text(`${name}_memo = ${expr.lambda.name}(${expr.argument.name});`);
+            emit.down(1).text(`${name}_memo = ${expr.lambda.globalName}(${expr.argument.globalName});`);
             emit.down(1).text(`return ${name}_memo(arg);`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`let ${name}_memo;`);
@@ -150,8 +150,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
             emit.down(1).text(`${name}_memo = field({`).indent();
             emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text(`name: ${expr.name.name},`);
-            emit.down(1).text(`value: ${expr.value.name},`);
+            emit.down(1).text(`name: ${expr.name.globalName},`);
+            emit.down(1).text(`value: ${expr.value.globalName},`);
             emit.dedent().down(1).text('});');
             emit.down(1).text(`return ${name}_memo();`);
             emit.dedent().down(1).text(`}`);
@@ -169,7 +169,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`${name}_memo = list({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('elements: [');
-            emit.text(`${expr.elements.map(e => e.kind === 'ReferenceExpression' ? e.name : '?').join(', ')}`);
+            emit.text(`${expr.elements.map(e => e.kind === 'ReferenceExpression' ? e.globalName : '?').join(', ')}`);
             emit.text('],').dedent().down(1).text('})');
             emit.down(1).text(`return ${name}_memo();`);
             emit.dedent().down(1).text(`}`);
@@ -183,7 +183,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             for (let binding of expr.module.bindings) {
                 assert(binding.kind === 'GlobalBinding');
                 assert(binding.value.kind === 'ReferenceExpression');
-                emit.down(1).text(`case '${binding.name}': return ${binding.value.name};`);
+                emit.down(1).text(`case '${binding.localName}': return ${binding.value.globalName};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);
@@ -195,7 +195,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.expression.kind === 'ReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`let stateₒ = getState();`);
-            emit.down(1).text(`let result = !${expr.expression.name}();`);
+            emit.down(1).text(`let result = !${expr.expression.globalName}();`);
             emit.down(1).text(`setState(stateₒ);`);
             emit.down(1).text(`OUT = undefined;`);
             emit.down(1).text(`return result;`);
@@ -207,13 +207,13 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.expression.kind === 'ReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
-                emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
+                emit.down(1).text(`if (!${expr.expression.globalName}()) OUT = undefined;`);
             }
             else /* expr.quantifier === '*' */ {
                 emit.down(1).text(`let IPₒ = IP;`);
                 emit.down(1).text(`let out;`);
                 emit.down(1).text(`do {`).indent();
-                emit.down(1).text(`if (!${expr.expression.name}()) break;`);
+                emit.down(1).text(`if (!${expr.expression.globalName}()) break;`);
                 emit.down(1).text(`if (IP === IPₒ) break;`);
                 emit.down(1).text(`out = concat(out, OUT);`);
                 emit.dedent().down(1).text(`} while (true);`);
@@ -234,7 +234,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
                 emit.indent();
                 for (let field of expr.fields) {
                     assert(field.value.kind === 'ReferenceExpression');
-                    emit.down(1).text(`{name: '${field.name}', value: ${field.value.name}},`);
+                    emit.down(1).text(`{name: '${field.name}', value: ${field.value.globalName}},`);
                 }
                 emit.dedent().down(1);
             }
@@ -250,7 +250,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.globalName; });
             emit.down(1).text(`function ${name}() {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
@@ -262,7 +262,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.name; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'ReferenceExpression'); return e.globalName; });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('let stateₒ = getState();');
             emit.down(1).text('let out;');

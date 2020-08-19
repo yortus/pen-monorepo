@@ -25,7 +25,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     let getHashFor = createHasher(resolve);
 
     // Find the `start` expression.
-    let startExpr = allBindings.find(n => n.symbolId === program.startSymbolId)?.value;
+    let startExpr = allBindings.find(n => n.globalName === program.startSymbolId)?.value;
     assert(startExpr);
 
     // Populate the `entriesByHash` map.
@@ -73,7 +73,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
         function ref(expr: Expression): ReferenceExpression {
             // TODO: set symbolId to something proper? use same value as `name`?
-            return {kind: 'ReferenceExpression', name: getEntryFor(expr).uniqueName, symbolId: 'badRef'};
+            return {kind: 'ReferenceExpression', globalName: getEntryFor(expr).uniqueName};
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
@@ -143,7 +143,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
             case 'ModuleExpression': {
                 // Ensure binding order doesn't affect signature, by building an object keyed by binding name.
                 let obj = {} as Record<string, unknown>;
-                for (let binding of ex.module.bindings) obj[binding.name] = getSig(binding.value);
+                for (let binding of ex.module.bindings) obj[binding.globalName] = getSig(binding.value);
                 return setSig('MOD', obj);
             }
             case 'NotExpression': return setSig('NOT', getSig(ex.expression));
@@ -185,7 +185,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
             // If the target expression is still a Ref/Mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(tgt)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                let name = tgt.kind === 'ReferenceExpression' ? tgt.name : tgt.bindingName;
+                let name = tgt.kind === 'ReferenceExpression' ? tgt.globalName : tgt.bindingName;
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(tgt);
@@ -195,7 +195,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: ReferenceExpression): Expression {
-        let result = allBindings.find(n => n.symbolId === ref.symbolId);
+        let result = allBindings.find(n => n.globalName === ref.globalName);
         assert(result);
         return result.value;
     }
@@ -223,7 +223,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
         }
 
         // Do a static lookup of the expression bound to the name `bindingName` in the module `module`.
-        let binding = module.bindings.find(b => b.name === mem.bindingName);
+        let binding = module.bindings.find(b => b.localName === mem.bindingName);
         assert(binding);
         return binding.value;
     }

@@ -129,8 +129,7 @@ export interface RecordExpression<KS extends NodeKind = NodeKind> {
 
 export interface ReferenceExpression {
     readonly kind: 'ReferenceExpression';
-    readonly name: string;
-    readonly symbolId: string;
+    readonly globalName: string;
 }
 
 
