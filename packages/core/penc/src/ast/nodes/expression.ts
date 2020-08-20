@@ -56,6 +56,7 @@ export interface FieldExpression<KS extends NodeKind = NodeKind> {
 
 export interface GlobalReferenceExpression {
     readonly kind: 'GlobalReferenceExpression';
+    readonly localName: string;
     readonly globalName: string;
 }
 

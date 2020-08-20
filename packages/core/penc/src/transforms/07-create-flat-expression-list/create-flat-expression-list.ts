@@ -72,8 +72,8 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
         }
 
         function ref(expr: Expression): GlobalReferenceExpression {
-            // TODO: set symbolId to something proper? use same value as `name`?
-            return {kind: 'GlobalReferenceExpression', globalName: getEntryFor(expr).uniqueName};
+            // TODO: set globalName to something proper? use same value as `name`?
+            return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).uniqueName};
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
