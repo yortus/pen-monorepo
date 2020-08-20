@@ -27,13 +27,13 @@ export interface SourceFileInfo {
 // TODO: ...
 const SourceDeletions = [
     'GlobalBinding',
-    'ReferenceExpression',
+    'GlobalReferenceExpression',
 ] as const;
 const DesugaredDeletions = [
     'GlobalBinding',
+    'GlobalReferenceExpression',
     'LocalMultiBinding',
     'ParenthesisedExpression',
-    'ReferenceExpression',
 ] as const;
 const ResolvedDeletions = [
     'LocalBinding',

@@ -13,6 +13,7 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GlobalBinding': return rec(n.value), cb(n);
+            case 'GlobalReferenceExpression': return cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
@@ -28,7 +29,6 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'Program': return mapMap(n.sourceFiles, rec), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
-            case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'StringLiteralExpression': return cb(n);

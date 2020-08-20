@@ -46,6 +46,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'GlobalBinding': return {...n, value: rec(n.value)};
+            case 'GlobalReferenceExpression': return n;
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
@@ -61,7 +62,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Program': return {...n, sourceFiles: mapMap(n.sourceFiles, rec)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
             case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
-            case 'ReferenceExpression': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'StringLiteralExpression': return n;

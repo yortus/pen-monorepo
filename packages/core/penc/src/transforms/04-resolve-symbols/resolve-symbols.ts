@@ -1,4 +1,4 @@
-import {GlobalBinding, Program, ReferenceExpression} from '../../ast-nodes';
+import {GlobalBinding, GlobalReferenceExpression, Program} from '../../ast-nodes';
 import {assert, mapAst, mapMap} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -9,7 +9,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startSymbolId: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ReferenceExpression}>;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
     let result = mapAst(program, ResolvedNodeKind, rec => ({
 
         // Attach the symbol table to the Program node.
@@ -40,11 +40,11 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
             return {kind: 'GlobalBinding', localName, globalName: symbolId, value: rec(value), exported};
         },
 
-        // Attach a symbol to each reference expression, returning a resolved ReferenceExpression node.
-        // Make a list of all the ReferenceExpression nodes, for backpatching the symbolIds after this traversal.
+        // Convert each LocalReferenceExpression to a GlobalReferenceExpression.
+        // Make a list of all the GlobalReferenceExpression nodes, for backpatching the names after this traversal.
         UnresolvedReferenceExpression: ({localName}) => {
             assert(currentScope);
-            let ref: ReferenceExpression = {kind: 'ReferenceExpression', globalName: localName};
+            let ref: GlobalReferenceExpression = {kind: 'GlobalReferenceExpression', globalName: localName};
             allRefs.push({scope: currentScope, ref});
             return ref;
         },

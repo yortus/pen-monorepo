@@ -52,6 +52,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
             case 'BooleanLiteralExpression': return setX(e);
             case 'ExtensionExpression': return setX(e);
             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
+            case 'GlobalReferenceExpression': assert(false); // the resolve() call removed this node kind
             case 'ImportExpression': assert(false); // the resolve() call removed this node kind
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
@@ -64,16 +65,15 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
             case 'NumericLiteralExpression': return setX(e);
             case 'QuantifiedExpression': return setX(e, {expression: ref(e.expression), quantifier: e.quantifier});
             case 'RecordExpression': return setX(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
-            case 'ReferenceExpression': assert(false); // the resolve() call removed this node kind
             case 'SelectionExpression': return setX(e, {expressions: e.expressions.map(ref)});
             case 'SequenceExpression': return setX(e, {expressions: e.expressions.map(ref)});
             case 'StringLiteralExpression': return setX(e);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: Expression): ReferenceExpression {
+        function ref(expr: Expression): GlobalReferenceExpression {
             // TODO: set symbolId to something proper? use same value as `name`?
-            return {kind: 'ReferenceExpression', globalName: getEntryFor(expr).uniqueName};
+            return {kind: 'GlobalReferenceExpression', globalName: getEntryFor(expr).uniqueName};
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
@@ -98,9 +98,9 @@ interface Entry {
 
 type Expression = AstNodes.Expression<ResolvedNodeKind>;
 type GlobalBinding = AstNodes.GlobalBinding<ResolvedNodeKind>;
+type GlobalReferenceExpression = AstNodes.GlobalReferenceExpression;
 type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
 type Module = AstNodes.Module<ResolvedNodeKind>;
-type ReferenceExpression = AstNodes.ReferenceExpression;
 type ResolvedProgram = AstNodes.Program<ResolvedNodeKind>;
 
 
@@ -137,6 +137,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
             case 'BooleanLiteralExpression': return setSig('LIT', ex.value);
             case 'ExtensionExpression': return setSig('EXT', ex.extensionPath, ex.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(ex.name), getSig(ex.value));
+            case 'GlobalReferenceExpression': assert(false); // the resolve() logic removed this node kind
             case 'ImportExpression': assert(false); // the resolve() logic removed this node kind
             case 'ListExpression': return setSig('LST', ex.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(ex.module), ex.bindingName);
@@ -151,7 +152,6 @@ function createHasher(resolve: (e: Expression) => Expression) {
             case 'NumericLiteralExpression': return setSig('LIT', ex.value);
             case 'QuantifiedExpression': return setSig('QUA', getSig(ex.expression), ex.quantifier);
             case 'RecordExpression': return setSig('REC', ex.fields.map(f => ({n: f.name, v: getSig(f.value)})));
-            case 'ReferenceExpression': assert(false); // the resolve() logic removed this node kind
             case 'SelectionExpression': return setSig('SEL', ex.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', ex.expressions.map(e => getSig(e)));
             case 'StringLiteralExpression': return setSig('STR', ex.value, ex.abstract, ex.concrete);
@@ -172,7 +172,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
         let seen = [expr];
         while (true) {
             // If `expr` is a reference or member expression, try to resolve to its target expression.
-            let tgt = expr.kind === 'ReferenceExpression' ? resolveReference(expr)
+            let tgt = expr.kind === 'GlobalReferenceExpression' ? resolveReference(expr)
                 : expr.kind === 'MemberExpression' ? resolveMember(expr)
                 : undefined;
 
@@ -180,12 +180,12 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
             if (tgt === undefined) return expr;
 
             // If `expr` resolved to a target expression that isn't a Ref/Mem expression, return the target expression.
-            if (tgt.kind !== 'ReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
+            if (tgt.kind !== 'GlobalReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
 
             // If the target expression is still a Ref/Mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(tgt)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                let name = tgt.kind === 'ReferenceExpression' ? tgt.globalName : tgt.bindingName;
+                let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.bindingName;
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(tgt);
@@ -194,7 +194,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
     }
 
     /** Find the value expression referenced by `ref`. */
-    function resolveReference(ref: ReferenceExpression): Expression {
+    function resolveReference(ref: GlobalReferenceExpression): Expression {
         let result = allBindings.find(n => n.globalName === ref.globalName);
         assert(result);
         return result.value;

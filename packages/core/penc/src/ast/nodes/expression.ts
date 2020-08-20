@@ -8,6 +8,7 @@ export type Expression<KS extends NodeKind = NodeKind> = FilterKinds<KS,
     | BooleanLiteralExpression
     | ExtensionExpression
     | FieldExpression<KS>
+    | GlobalReferenceExpression
     | ImportExpression
     // | LambdaExpression<KS>
     | ListExpression<KS>
@@ -19,7 +20,6 @@ export type Expression<KS extends NodeKind = NodeKind> = FilterKinds<KS,
     | ParenthesisedExpression<KS>
     | QuantifiedExpression<KS>
     | RecordExpression<KS>
-    | ReferenceExpression
     | SelectionExpression<KS>
     | SequenceExpression<KS>
     | StringLiteralExpression
@@ -51,6 +51,12 @@ export interface FieldExpression<KS extends NodeKind = NodeKind> {
     readonly kind: 'FieldExpression';
     readonly name: Expression<KS>;
     readonly value: Expression<KS>;
+}
+
+
+export interface GlobalReferenceExpression {
+    readonly kind: 'GlobalReferenceExpression';
+    readonly globalName: string;
 }
 
 
@@ -124,12 +130,6 @@ export interface RecordExpression<KS extends NodeKind = NodeKind> {
         readonly name: string;
         readonly value: Expression<KS>;
     }>;
-}
-
-
-export interface ReferenceExpression {
-    readonly kind: 'ReferenceExpression';
-    readonly globalName: string;
 }
 
 
