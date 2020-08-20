@@ -38,8 +38,8 @@ const DesugaredDeletions = [
 const ResolvedDeletions = [
     'LocalBinding',
     'LocalMultiBinding',
+    'LocalReferenceExpression',
     'ParenthesisedExpression',
-    'UnresolvedReferenceExpression',
 ] as const;
 
 export type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;

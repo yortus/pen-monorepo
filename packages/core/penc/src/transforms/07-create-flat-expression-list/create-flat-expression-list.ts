@@ -162,7 +162,7 @@ function createHasher(resolve: (e: Expression) => Expression) {
 
 
 // TODO: jsdoc...
-// - return value is *never* an UnresolvedReferenceExpression or an ImportExpression
+// - return value is *never* an LocalReferenceExpression or an ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) {
     return resolve;

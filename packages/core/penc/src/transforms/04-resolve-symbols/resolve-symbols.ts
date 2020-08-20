@@ -33,7 +33,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
             return modᐟ;
         },
 
-        // Attach a symbol to each local binding, returning a GlobalBinding node.
+        // Attach a unique name to each local binding, returning a GlobalBinding node.
         LocalBinding: ({localName, value, exported}): GlobalBinding<ResolvedNodeKind> => {
             assert(currentScope);
             let symbolId = symbolTable.createName(localName, currentScope).id;
@@ -42,7 +42,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
 
         // Convert each LocalReferenceExpression to a GlobalReferenceExpression.
         // Make a list of all the GlobalReferenceExpression nodes, for backpatching the names after this traversal.
-        UnresolvedReferenceExpression: ({localName}) => {
+        LocalReferenceExpression: ({localName}) => {
             assert(currentScope);
             let ref: GlobalReferenceExpression = {kind: 'GlobalReferenceExpression', globalName: localName};
             allRefs.push({scope: currentScope, ref});
@@ -50,8 +50,8 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
         },
     }));
 
-    // Every definition now has a symbol.
-    // Backpatch all the UnresolvedReferenceExpression nodes with the symbol they refer to.
+    // Every binding now has a unique name.
+    // Backpatch all the GlobalReferenceExpression nodes with its corresponding unique name.
     for (let {scope, ref} of allRefs) {
         let symbolId = symbolTable.lookupName(ref.globalName, scope).id;
         Object.assign(ref, {globalName: symbolId});

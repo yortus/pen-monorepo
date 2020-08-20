@@ -52,6 +52,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'LocalBinding': return {...n, value: rec(n.value)};
             case 'LocalMultiBinding': return {...n, value: rec(n.value)};
+            case 'LocalReferenceExpression': return n;
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
@@ -65,7 +66,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'StringLiteralExpression': return n;
-            case 'UnresolvedReferenceExpression': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };

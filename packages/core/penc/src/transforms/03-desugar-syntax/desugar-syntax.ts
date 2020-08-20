@@ -1,4 +1,4 @@
-import {LocalBinding, MemberExpression, Program, UnresolvedReferenceExpression} from '../../ast-nodes';
+import {LocalBinding, LocalReferenceExpression, MemberExpression, Program} from '../../ast-nodes';
 import {mapAst} from '../../utils';
 import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 
@@ -26,7 +26,7 @@ export function desugarSyntax(program: Program<SourceNodeKind>): Program<Desugar
 
                     // Introduce a local binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
-                        let ref: UnresolvedReferenceExpression = {kind: 'UnresolvedReferenceExpression', localName};
+                        let ref: LocalReferenceExpression = {kind: 'LocalReferenceExpression', localName};
                         let mem: MemberExpression<DesugaredNodeKind>;
                         mem = {kind: 'MemberExpression', module: ref, bindingName};
                         bindings.push({kind: 'LocalBinding', localName: alias ?? bindingName, value: mem, exported});

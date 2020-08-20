@@ -67,7 +67,7 @@ MultiBindingName
         NullLiteralExpression           null
         BooleanLiteralExpression        false   true
         StringLiteralExpression         "foo"   'a string!'   `a`
-        UnresolvedReferenceExpression   a   Rule1   MY_FOO_45   x32   __bar
+        LocalReferenceExpression        a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
 
@@ -109,7 +109,7 @@ PrimaryExpression
     / BooleanLiteralExpression
     / StringLiteralExpression
     / NumericLiteralExpression
-    / UnresolvedReferenceExpression
+    / LocalReferenceExpression
 
 SelectionExpression
     = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
@@ -206,9 +206,9 @@ NumericLiteralExpression
 
     // TODO: HexIntegerLiteral
 
-UnresolvedReferenceExpression
+LocalReferenceExpression
     = localName:IDENTIFIER
-    { return {kind: 'UnresolvedReferenceExpression', localName}; }
+    { return {kind: 'LocalReferenceExpression', localName}; }
 
 
 // ====================   Record/List Parts   ====================

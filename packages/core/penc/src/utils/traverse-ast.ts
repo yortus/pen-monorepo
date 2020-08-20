@@ -19,6 +19,7 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'LocalBinding': return rec(n.value), cb(n);
             case 'LocalMultiBinding': return rec(n.value), cb(n);
+            case 'LocalReferenceExpression': return cb(n);
             case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
@@ -32,7 +33,6 @@ export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: N
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'StringLiteralExpression': return cb(n);
-            case 'UnresolvedReferenceExpression': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

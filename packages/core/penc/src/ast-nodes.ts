@@ -20,6 +20,7 @@ export const ExpressionKind = [
     'ImportExpression',
     // 'LambdaExpression',
     'ListExpression',
+    'LocalReferenceExpression',
     'MemberExpression',
     'ModuleExpression',
     'NotExpression',
@@ -31,7 +32,6 @@ export const ExpressionKind = [
     'SelectionExpression',
     'SequenceExpression',
     'StringLiteralExpression',
-    'UnresolvedReferenceExpression',
 ] as const;
 export type ExpressionKind = (typeof ExpressionKind)[any];
 export const NodeKind = ['Module', 'Program', ...BindingKind, ...ExpressionKind] as const;

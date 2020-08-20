@@ -12,6 +12,7 @@ export type Expression<KS extends NodeKind = NodeKind> = FilterKinds<KS,
     | ImportExpression
     // | LambdaExpression<KS>
     | ListExpression<KS>
+    | LocalReferenceExpression
     | MemberExpression<KS>
     | ModuleExpression<KS>
     | NotExpression<KS>
@@ -23,7 +24,6 @@ export type Expression<KS extends NodeKind = NodeKind> = FilterKinds<KS,
     | SelectionExpression<KS>
     | SequenceExpression<KS>
     | StringLiteralExpression
-    | UnresolvedReferenceExpression
 >;
 
 
@@ -67,17 +67,23 @@ export interface ImportExpression {
 }
 
 
+// export interface LambdaExpression<KS extends AllNodeKinds = AllNodeKinds> {
+//     readonly kind: 'LambdaExpression';
+//     readonly pattern: Pattern<KS>;
+//     readonly body: Expression<KS>;
+// }
+
+
 export interface ListExpression<KS extends NodeKind = NodeKind> {
     readonly kind: 'ListExpression';
     readonly elements: ReadonlyArray<Expression<KS>>;
 }
 
 
-// export interface LambdaExpression<KS extends AllNodeKinds = AllNodeKinds> {
-//     readonly kind: 'LambdaExpression';
-//     readonly pattern: Pattern<KS>;
-//     readonly body: Expression<KS>;
-// }
+export interface LocalReferenceExpression {
+    readonly kind: 'LocalReferenceExpression';
+    readonly localName: string;
+}
 
 
 export interface MemberExpression<KS extends NodeKind = NodeKind> {
@@ -150,10 +156,4 @@ export interface StringLiteralExpression {
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;
-}
-
-
-export interface UnresolvedReferenceExpression {
-    readonly kind: 'UnresolvedReferenceExpression';
-    readonly localName: string;
 }
