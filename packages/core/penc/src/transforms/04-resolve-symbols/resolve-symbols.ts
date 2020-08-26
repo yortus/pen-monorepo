@@ -1,12 +1,11 @@
 import {GlobalBinding, GlobalReferenceExpression} from '../../ast-nodes';
-import {Program} from '../../representations';
+import {DesugaredProgram, ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert, mapAst} from '../../utils';
-import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 
 // TODO: doc...
-export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<ResolvedNodeKind> {
+export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;

@@ -1,10 +1,9 @@
-import {Program} from '../../representations';
+import {ResolvedProgram} from '../../representations';
 import {traverseAst} from '../../utils';
-import {ResolvedNodeKind} from '../asts';
 
 
 // TODO: doc...
-export function checkSemantics(program: Program<ResolvedNodeKind>) {
+export function checkSemantics(program: ResolvedProgram) {
     traverseAst(program.sourceFiles, n => {
         switch (n.kind) {
             case 'RecordExpression': {

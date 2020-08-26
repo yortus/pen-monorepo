@@ -3,9 +3,8 @@
 
 import * as objectHash from 'object-hash';
 import * as AstNodes from '../../ast-nodes';
-import {Program} from '../../representations';
+import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert, traverseAst} from '../../utils';
-import {ResolvedNodeKind} from '../asts';
 
 
 // TODO: jsdoc...
@@ -102,7 +101,6 @@ type GlobalBinding = AstNodes.GlobalBinding<ResolvedNodeKind>;
 type GlobalReferenceExpression = AstNodes.GlobalReferenceExpression;
 type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
 type Module = AstNodes.Module<ResolvedNodeKind>;
-type ResolvedProgram = Program<ResolvedNodeKind>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {

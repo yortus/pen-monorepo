@@ -1,13 +1,12 @@
 import {LocalBinding, LocalReferenceExpression, MemberExpression} from '../../ast-nodes';
-import {Program} from '../../representations';
+import {DesugaredNodeKind, DesugaredProgram, SourceProgram} from '../../representations';
 import {mapAst} from '../../utils';
-import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
 // - ParenthesisedExpression
-export function desugarSyntax(program: Program<SourceNodeKind>): Program<DesugaredNodeKind> {
+export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
     let moduleMapᐟ = mapAst(program.sourceFiles, DesugaredNodeKind, rec => ({
 

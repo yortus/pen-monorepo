@@ -1,5 +1,4 @@
-import type {Module} from '../../ast-nodes';
-import type {SourceFileInfo, SourceNodeKind} from '../asts';
+import type {SourceFileInfo, SourceModule, SourceProgram} from '../../representations';
 
 
-export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): Module<SourceNodeKind>;
+export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): SourceModule;

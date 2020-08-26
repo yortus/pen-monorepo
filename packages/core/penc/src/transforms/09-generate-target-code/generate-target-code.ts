@@ -3,9 +3,9 @@
 
 import * as fs from 'fs';
 import * as AstNodes from '../../ast-nodes';
+import {ResolvedNodeKind} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
-import {ResolvedNodeKind} from '../asts';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
