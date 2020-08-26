@@ -11,11 +11,12 @@ export * from './program';
 
 
 // TODO: temp testing........
-type NodeKindsFromProgram<P extends Program<any>> = P extends Program<infer KS> ? KS : never;
-type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
-type NodeFromProgram<P extends Program<any>, K extends NodeKind> = NodeFromNodeKind<NodeKindsFromProgram<P>, K>;
+export type NodeKindsFromProgram<P extends Program<any>> = P extends Program<infer KS> ? KS : never;
+export type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
+export type NodeFromProgram<P extends Program<any>, K extends NodeKind> = NodeFromNodeKind<NodeKindsFromProgram<P>, K>;
 
 
+// TODO: remove these...
 type MyProgram = Program<'ModuleMap' | 'Module' | 'LocalBinding' | 'StringLiteralExpression'>;
 type Kinds1 = NodeKindsFromProgram<MyProgram>; //           ✓
 type Module2 = NodeFromProgram<MyProgram, 'Module'>; //     ✓

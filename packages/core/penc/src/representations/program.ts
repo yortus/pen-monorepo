@@ -3,7 +3,7 @@ import {ModuleMap} from './nodes';
 import {NodeKind} from './node-kind';
 
 
-export interface Program<KS extends NodeKind = NodeKind> {
+export interface Program<KS extends NodeKind = any> {
     readonly kind: 'Program';
     readonly sourceFiles: ModuleMap<KS>;
     readonly mainPath: AbsPath;

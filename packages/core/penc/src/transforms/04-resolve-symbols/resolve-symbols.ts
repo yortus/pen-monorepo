@@ -1,6 +1,6 @@
 import {GlobalBinding, GlobalReferenceExpression} from '../../representations';
 import {DesugaredProgram, ResolvedNodeKind, ResolvedProgram} from '../../representations';
-import {assert, mapAst} from '../../utils';
+import {assert, createAstMapper} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 
@@ -10,7 +10,8 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
-    let moduleMapᐟ = mapAst(program.sourceFiles, ResolvedNodeKind, rec => ({
+    let mapAst = createAstMapper<DesugaredProgram, ResolvedProgram>();
+    let moduleMapᐟ = mapAst(program.sourceFiles, rec => ({
 
         // Attach a scope to each Module node.
         Module: mod => {
