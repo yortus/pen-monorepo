@@ -1,19 +1,24 @@
 import {AbsPath} from '../utils';
 import {Node} from './nodes';
-import {NodeKind} from './node-kind';
+import {ExpressionKind, NodeKind} from './node-kind';
 import {Program} from './program';
 
 
 // TODO: temp testing........
-export * from './nodes';
-export * from './node-kind';
-export * from './program';
+export {Binding, Expression, Node} from './nodes';
+export {NodeKind} from './node-kind';
+export {Program} from './program';
 
 
 // TODO: temp testing........
 export type NodeKindsFromProgram<P extends Program<any>> = P extends Program<infer KS> ? KS : never;
 export type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
-export type NodeFromProgram<P extends Program<any>, K extends NodeKind> = NodeFromNodeKind<NodeKindsFromProgram<P>, K>;
+export type NodeFromProgram<P extends Program<any>, K extends NodeKind | 'Expression'> = NodeFromNodeKind<
+    NodeKindsFromProgram<P>,
+    K extends NodeKind ? K :
+    K extends 'Expression' ? ExpressionKind :
+    never
+>;
 
 
 // TODO: remove these...
@@ -88,10 +93,10 @@ const ResolvedDeletions = [
 ] as const;
 
 // TODO: don't export these... but first need to change mapAst signature to do so
-export type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;
-export type DesugaredNodeKind = Exclude<NodeKind, typeof DesugaredDeletions[any]>;
-export type ResolvedNodeKind = Exclude<NodeKind, typeof ResolvedDeletions[any]>;
+type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;
+type DesugaredNodeKind = Exclude<NodeKind, typeof DesugaredDeletions[any]>;
+type ResolvedNodeKind = Exclude<NodeKind, typeof ResolvedDeletions[any]>;
 
-export const SourceNodeKind = NodeKind.filter((k: any) => !SourceDeletions.includes(k)) as SourceNodeKind[];
-export const DesugaredNodeKind = NodeKind.filter((k: any) => !DesugaredDeletions.includes(k)) as DesugaredNodeKind[];
-export const ResolvedNodeKind = NodeKind.filter((k: any) => !ResolvedDeletions.includes(k)) as ResolvedNodeKind[];
+const SourceNodeKind = NodeKind.filter((k: any) => !SourceDeletions.includes(k)) as SourceNodeKind[];
+const DesugaredNodeKind = NodeKind.filter((k: any) => !DesugaredDeletions.includes(k)) as DesugaredNodeKind[];
+const ResolvedNodeKind = NodeKind.filter((k: any) => !ResolvedDeletions.includes(k)) as ResolvedNodeKind[];

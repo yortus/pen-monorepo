@@ -2,8 +2,7 @@
 
 
 import * as objectHash from 'object-hash';
-import * as AstNodes from '../../representations'; // TODO: remove this... too vague
-import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
+import {NodeFromProgram, ResolvedProgram} from '../../representations';
 import {assert, traverseAst} from '../../utils';
 
 
@@ -96,11 +95,11 @@ interface Entry {
 }
 
 
-type Expression = AstNodes.Expression<ResolvedNodeKind>;
-type GlobalBinding = AstNodes.GlobalBinding<ResolvedNodeKind>;
-type GlobalReferenceExpression = AstNodes.GlobalReferenceExpression;
-type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
-type Module = AstNodes.Module<ResolvedNodeKind>;
+type Expression = NodeFromProgram<ResolvedProgram, 'Expression'>
+type GlobalBinding = NodeFromProgram<ResolvedProgram, 'GlobalBinding'>;
+type GlobalReferenceExpression = NodeFromProgram<ResolvedProgram, 'GlobalReferenceExpression'>;
+type MemberExpression = NodeFromProgram<ResolvedProgram, 'MemberExpression'>;
+type Module = NodeFromProgram<ResolvedProgram, 'Module'>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {

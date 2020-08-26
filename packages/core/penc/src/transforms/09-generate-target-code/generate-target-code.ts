@@ -2,8 +2,7 @@
 
 
 import * as fs from 'fs';
-import * as AstNodes from '../../representations'; // TODO: remove this... too vague
-import {ResolvedNodeKind} from '../../representations';
+import {NodeFromProgram, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';
@@ -11,8 +10,8 @@ import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
 
-type Expression = AstNodes.Expression<ResolvedNodeKind>;
-type ExtensionExpression = AstNodes.ExtensionExpression;
+type Expression = NodeFromProgram<ResolvedProgram, 'Expression'>;
+type ExtensionExpression = NodeFromProgram<ResolvedProgram, 'ExtensionExpression'>;
 
 
 export interface Program {

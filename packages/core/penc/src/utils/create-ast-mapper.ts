@@ -1,4 +1,4 @@
-import {BindingKind, ExpressionKind, Node, NodeKind, NodeKindsFromProgram, Program} from '../representations';
+import {Binding, Expression, Node, NodeKind, NodeKindsFromProgram, Program} from '../representations';
 import {mapMap} from './map-map';
 
 
@@ -75,8 +75,8 @@ type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
     };
 
 type WidenKind<K extends NodeKind> =
-    K extends ExpressionKind ? ExpressionKind :
-    K extends BindingKind ? BindingKind :
+    K extends Expression['kind'] ? Expression['kind'] :
+    K extends Binding['kind'] ? Binding['kind'] :
     K;
 
 
