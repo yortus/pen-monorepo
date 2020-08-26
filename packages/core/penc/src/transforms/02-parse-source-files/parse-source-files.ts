@@ -1,12 +1,12 @@
 import * as fs from 'fs';
-import {SourceFileGraph, SourceModule, SourceProgram} from '../../representations';
+import {NodeFromProgram, SourceFileGraph, SourceProgram} from '../../representations';
 import {isExtension, mapMap} from '../../utils';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): SourceModule => {
+    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): NodeFromProgram<SourceProgram, 'Module'> => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
             return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};

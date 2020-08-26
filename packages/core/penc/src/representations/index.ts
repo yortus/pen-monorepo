@@ -1,6 +1,6 @@
 import {AbsPath} from '../utils';
-import {Node} from './nodes';
-import {ExpressionKind, NodeKind} from './node-kind';
+import {Expression, Node} from './nodes';
+import {NodeKind} from './node-kind';
 import {Program} from './program';
 
 
@@ -12,30 +12,19 @@ export {Program} from './program';
 
 // TODO: temp testing........
 export type NodeKindsFromProgram<P extends Program<any>> = P extends Program<infer KS> ? KS : never;
-export type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
+type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
 export type NodeFromProgram<P extends Program<any>, K extends NodeKind | 'Expression'> = NodeFromNodeKind<
     NodeKindsFromProgram<P>,
     K extends NodeKind ? K :
-    K extends 'Expression' ? ExpressionKind :
+    K extends 'Expression' ? Expression['kind'] :
     never
 >;
-
-
-// TODO: remove these...
-type MyProgram = Program<'ModuleMap' | 'Module' | 'LocalBinding' | 'StringLiteralExpression'>;
-type Kinds1 = NodeKindsFromProgram<MyProgram>; //           ✓
-type Module2 = NodeFromProgram<MyProgram, 'Module'>; //     ✓
-[] = [] as any as [Kinds1, Module2];
-
-
 
 
 // TODO: temp testing........
 export interface SourceProgram extends Program<SourceNodeKind> {/***/}
 export interface DesugaredProgram extends Program<DesugaredNodeKind> {/***/}
 export interface ResolvedProgram extends Program<ResolvedNodeKind> {/***/}
-
-export type SourceModule = NodeFromProgram<SourceProgram, 'Module'>;
 
 
 
@@ -75,28 +64,24 @@ export interface SourceFileInfo {
 
 
 // TODO: ...
-const SourceDeletions = [
-    'GlobalBinding',
-    'GlobalReferenceExpression',
-] as const;
-const DesugaredDeletions = [
-    'GlobalBinding',
-    'GlobalReferenceExpression',
-    'LocalMultiBinding',
-    'ParenthesisedExpression',
-] as const;
-const ResolvedDeletions = [
-    'LocalBinding',
-    'LocalMultiBinding',
-    'LocalReferenceExpression',
-    'ParenthesisedExpression',
-] as const;
+type SourceExclusions =
+    | 'GlobalBinding'
+    | 'GlobalReferenceExpression'
+;
+type DesugaredExclusions =
+    | 'GlobalBinding'
+    | 'GlobalReferenceExpression'
+    | 'LocalMultiBinding'
+    | 'ParenthesisedExpression'
+;
+type ResolvedExclusions =
+    | 'LocalBinding'
+    | 'LocalMultiBinding'
+    | 'LocalReferenceExpression'
+    | 'ParenthesisedExpression'
+;
 
 // TODO: don't export these... but first need to change mapAst signature to do so
-type SourceNodeKind = Exclude<NodeKind, typeof SourceDeletions[any]>;
-type DesugaredNodeKind = Exclude<NodeKind, typeof DesugaredDeletions[any]>;
-type ResolvedNodeKind = Exclude<NodeKind, typeof ResolvedDeletions[any]>;
-
-const SourceNodeKind = NodeKind.filter((k: any) => !SourceDeletions.includes(k)) as SourceNodeKind[];
-const DesugaredNodeKind = NodeKind.filter((k: any) => !DesugaredDeletions.includes(k)) as DesugaredNodeKind[];
-const ResolvedNodeKind = NodeKind.filter((k: any) => !ResolvedDeletions.includes(k)) as ResolvedNodeKind[];
+type SourceNodeKind = Exclude<NodeKind, SourceExclusions>;
+type DesugaredNodeKind = Exclude<NodeKind, DesugaredExclusions>;
+type ResolvedNodeKind = Exclude<NodeKind, ResolvedExclusions>;
