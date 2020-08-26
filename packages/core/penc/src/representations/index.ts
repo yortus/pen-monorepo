@@ -6,6 +6,9 @@ import {Program} from './program';
 // TODO: temp testing........
 export * from './nodes';
 export {Program} from './program';
+export {SourceProgram} from './01-source-program';
+export {DesugaredProgram} from './02-desugared-program';
+export {ResolvedProgram} from './03-resolved-program';
 
 
 // TODO: temp testing........
@@ -17,12 +20,6 @@ export type NodeFromProgram<P extends Program<any>, K extends NodeKind | 'Expres
     K extends 'Expression' ? Expression['kind'] :
     never
 >;
-
-
-// TODO: temp testing........
-export interface SourceProgram extends Program<SourceNodeKind> {/***/}
-export interface DesugaredProgram extends Program<DesugaredNodeKind> {/***/}
-export interface ResolvedProgram extends Program<ResolvedNodeKind> {/***/}
 
 
 
@@ -59,27 +56,3 @@ export interface SourceFileInfo {
      */
     readonly imports: {[moduleSpecifier: string]: AbsPath};
 }
-
-
-// TODO: ...
-type SourceExclusions =
-    | 'GlobalBinding'
-    | 'GlobalReferenceExpression'
-;
-type DesugaredExclusions =
-    | 'GlobalBinding'
-    | 'GlobalReferenceExpression'
-    | 'LocalMultiBinding'
-    | 'ParenthesisedExpression'
-;
-type ResolvedExclusions =
-    | 'LocalBinding'
-    | 'LocalMultiBinding'
-    | 'LocalReferenceExpression'
-    | 'ParenthesisedExpression'
-;
-
-// TODO: don't export these... but first need to change mapAst signature to do so
-type SourceNodeKind = Exclude<NodeKind, SourceExclusions>;
-type DesugaredNodeKind = Exclude<NodeKind, DesugaredExclusions>;
-type ResolvedNodeKind = Exclude<NodeKind, ResolvedExclusions>;
