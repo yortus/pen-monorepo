@@ -1,4 +1,5 @@
-export * from './binding';
-export * from './expression';
-export * from './module';
-export * from './node';
+export {Binding} from './binding';
+export {Expression} from './expression';
+export {Module, ModuleMap} from './module';
+export {Node} from './node';
+export {NodeKind} from './node-kind';

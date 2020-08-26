@@ -1,7 +1,7 @@
-import {NodeKind} from '../node-kind';
 import {Binding} from './binding';
 import {Expression} from './expression';
 import {Module, ModuleMap} from './module';
+import {NodeKind} from './node-kind';
 import {FilterKinds} from './util';
 
 

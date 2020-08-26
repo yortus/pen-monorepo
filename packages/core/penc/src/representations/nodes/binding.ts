@@ -1,5 +1,5 @@
-import {NodeKind} from '../node-kind';
 import {Expression} from './expression';
+import {NodeKind} from './node-kind';
 import {FilterKinds} from './util';
 
 

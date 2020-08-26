@@ -1,4 +1,3 @@
-// TODO: temp testing...
 export type NodeKind =
     // Top-level nodes
     | 'Module'

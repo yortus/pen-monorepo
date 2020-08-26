@@ -1,6 +1,6 @@
 import {AbsPath} from '../../utils';
-import {NodeKind} from '../node-kind';
 import {Binding} from './binding';
+import {NodeKind} from './node-kind';
 
 
 export interface Module<KS extends NodeKind = NodeKind> {

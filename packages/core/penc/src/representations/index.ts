@@ -1,12 +1,10 @@
 import {AbsPath} from '../utils';
-import {Expression, Node} from './nodes';
-import {NodeKind} from './node-kind';
+import {Expression, Node, NodeKind} from './nodes';
 import {Program} from './program';
 
 
 // TODO: temp testing........
-export {Binding, Expression, Node} from './nodes';
-export {NodeKind} from './node-kind';
+export * from './nodes';
 export {Program} from './program';
 
 
