@@ -2,7 +2,7 @@
 
 
 import * as objectHash from 'object-hash';
-import {NodeFromProgram, ResolvedProgram} from '../../representations';
+import {NodeFromAst, ResolvedProgram} from '../../representations';
 import {assert, traverseAst} from '../../utils';
 
 
@@ -95,11 +95,11 @@ interface Entry {
 }
 
 
-type Expression = NodeFromProgram<ResolvedProgram, 'Expression'>
-type GlobalBinding = NodeFromProgram<ResolvedProgram, 'GlobalBinding'>;
-type GlobalReferenceExpression = NodeFromProgram<ResolvedProgram, 'GlobalReferenceExpression'>;
-type MemberExpression = NodeFromProgram<ResolvedProgram, 'MemberExpression'>;
-type Module = NodeFromProgram<ResolvedProgram, 'Module'>;
+type Expression = NodeFromAst<ResolvedProgram, 'Expression'>
+type GlobalBinding = NodeFromAst<ResolvedProgram, 'GlobalBinding'>;
+type GlobalReferenceExpression = NodeFromAst<ResolvedProgram, 'GlobalReferenceExpression'>;
+type MemberExpression = NodeFromAst<ResolvedProgram, 'MemberExpression'>;
+type Module = NodeFromAst<ResolvedProgram, 'Module'>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {

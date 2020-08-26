@@ -1,4 +1,4 @@
-import {DesugaredProgram, NodeFromProgram, SourceProgram} from '../../representations';
+import {DesugaredProgram, NodeFromAst, SourceProgram} from '../../representations';
 import {createAstMapper} from '../../utils';
 
 
@@ -12,7 +12,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
-            let bindings = [] as Array<NodeFromProgram<DesugaredProgram, 'LocalBinding'>>;
+            let bindings = [] as Array<NodeFromAst<DesugaredProgram, 'LocalBinding'>>;
             for (let binding of mod.bindings) {
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
@@ -26,8 +26,8 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
 
                     // Introduce a local binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
-                        let ref: NodeFromProgram<DesugaredProgram, 'LocalReferenceExpression'>;
-                        let mem: NodeFromProgram<DesugaredProgram, 'MemberExpression'>;
+                        let ref: NodeFromAst<DesugaredProgram, 'LocalReferenceExpression'>;
+                        let mem: NodeFromAst<DesugaredProgram, 'MemberExpression'>;
                         ref = {kind: 'LocalReferenceExpression', localName};
                         mem = {kind: 'MemberExpression', module: ref, bindingName};
                         bindings.push({kind: 'LocalBinding', localName: alias ?? bindingName, value: mem, exported});

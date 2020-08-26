@@ -1,9 +1,9 @@
 import {AbsPath} from '../utils';
 import {ModuleMap, NodeKind} from './nodes';
-import {Program} from './program';
+import {Ast} from './ast';
 
 
-export interface DesugaredProgram extends Program<DesugaredNodeKind> {
+export interface DesugaredProgram extends Ast<DesugaredNodeKind> {
     readonly sourceFiles: ModuleMap<DesugaredNodeKind>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;

@@ -1,9 +1,9 @@
 import {AbsPath} from '../utils';
 import {ModuleMap, NodeKind} from './nodes';
-import {Program} from './program';
+import {Ast} from './ast';
 
 
-export interface SourceProgram extends Program<SourceNodeKind> {
+export interface SourceProgram extends Ast<SourceNodeKind> {
     readonly sourceFiles: ModuleMap<SourceNodeKind>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;

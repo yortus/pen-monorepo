@@ -1,27 +1,27 @@
-import {AbsPath} from '../utils';
 import {Expression, Node, NodeKind} from './nodes';
-import {Program} from './program';
+import {Ast} from './ast';
 
 
 // TODO: temp testing........
 export * from './nodes';
-export {Program} from './program';
-export {SourceProgram} from './01-source-program';
-export {DesugaredProgram} from './02-desugared-program';
-export {ResolvedProgram} from './03-resolved-program';
+export {Ast} from './ast';
+export {SourceFileGraph, SourceFileInfo} from './01-source-file-graph';
+export {SourceProgram} from './02-source-program';
+export {DesugaredProgram} from './03-desugared-program';
+export {ResolvedProgram} from './04-resolved-program';
 
 
 // TODO: temp testing........
-export type NodeKindsFromProgram<P extends Program<any>> = P extends Program<infer KS> ? KS : never;
-type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
-export type NodeFromProgram<P extends Program<any>, K extends NodeKind | 'Expression'> = NodeFromNodeKind<
-    NodeKindsFromProgram<P>,
+export type NodeKindsFromAst<T extends Ast> = T extends Ast<infer NodeKinds> ? NodeKinds : never;
+export type NodeFromAst<T extends Ast, K extends NodeKind | 'Expression'> = NodeFromNodeKind<
+    NodeKindsFromAst<T>,
     K extends NodeKind ? K :
     K extends 'Expression' ? Expression['kind'] :
     never
 >;
 
 
+type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
 
 
 
@@ -36,23 +36,5 @@ export type NodeFromProgram<P extends Program<any>, K extends NodeKind | 'Expres
 
 
 
-// TODO: ...
-export interface SourceFileGraph {
-    sourceFiles: Map<AbsPath, SourceFileInfo>;
-    mainPath: AbsPath;
-}
 
 
-// TODO: ...
-export interface SourceFileInfo {
-
-    /** The source file's normalised absolute path. */
-    readonly path: AbsPath;
-
-    /**
-     * A map with one entry for each import expression in this source file. The keys are the imported module
-     * specifiers, exactly as they appear in the source text. The values are the normalised absolute paths of
-     * the corresponding imported SourceFiles.
-     */
-    readonly imports: {[moduleSpecifier: string]: AbsPath};
-}

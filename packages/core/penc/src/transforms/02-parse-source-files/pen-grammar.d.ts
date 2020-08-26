@@ -1,4 +1,4 @@
-import type {NodeFromProgram, SourceFileInfo, SourceProgram} from '../../representations';
+import type {NodeFromAst, SourceFileInfo, SourceProgram} from '../../representations';
 
 
-export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): NodeFromProgram<SourceProgram, 'Module'>;
+export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): NodeFromAst<SourceProgram, 'Module'>;
