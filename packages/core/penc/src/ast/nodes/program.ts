@@ -7,7 +7,7 @@ export interface Program<KS extends NodeKind = NodeKind> {
     readonly kind: 'Program';
     readonly sourceFiles: ReadonlyMap<AbsPath, Module<KS>>;
     readonly mainPath: AbsPath;
-    readonly startSymbolId?: string;
+    readonly startGlobalName?: string;
 }
 
 
@@ -23,7 +23,7 @@ type NodeFromProgram<P extends Program<any>, K extends NodeKind> = NodeFromNodeK
 type MyProgram = Program<'Program' | 'Module' | 'LocalBinding' | 'StringLiteralExpression'>;
 type Kinds1 = NodeKindsFromProgram<MyProgram>; //           ✓
 type Module2 = NodeFromProgram<MyProgram, 'Module'>; //     ✓
-
+[] = [] as any as [Kinds1, Module2];
 
 // So representations can each be a RepNameProgram<KS> type
 // - export from where?

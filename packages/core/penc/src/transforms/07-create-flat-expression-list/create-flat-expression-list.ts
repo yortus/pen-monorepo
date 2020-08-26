@@ -25,7 +25,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     let getHashFor = createHasher(resolve);
 
     // Find the `start` expression.
-    let startExpr = allBindings.find(n => n.globalName === program.startSymbolId)?.value;
+    let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
     assert(startExpr);
 
     // Populate the `entriesByHash` map.

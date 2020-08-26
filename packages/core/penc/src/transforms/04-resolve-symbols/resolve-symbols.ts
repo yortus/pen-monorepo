@@ -8,14 +8,14 @@ import {ScopeSymbol, SymbolTable} from './symbol-table';
 export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<ResolvedNodeKind> {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
-    let startSymbolId: string | undefined;
+    let startGlobalName: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
     let result = mapAst(program, ResolvedNodeKind, rec => ({
 
         // Attach the symbol table to the Program node.
         Program: prg => {
             let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let prgᐟ = {...prg, sourceFiles, startSymbolId};
+            let prgᐟ = {...prg, sourceFiles, startGlobalName};
             return prgᐟ;
         },
 
@@ -25,9 +25,9 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
             currentScope = symbolTable.createScope(currentScope);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
             if (mod.path === program.mainPath) {
-                // This is the main module. Assign to startSymbolId.
-                startSymbolId = currentScope.sourceNames.get('start')?.id;
-                if (startSymbolId === undefined) throw new Error(`Main module must define a 'start' rule.`);
+                // This is the main module. Assign to startGlobalName.
+                startGlobalName = currentScope.sourceNames.get('start')?.id;
+                if (startGlobalName === undefined) throw new Error(`Main module must define a 'start' rule.`);
             }
             currentScope = outerScope;
             return modᐟ;
