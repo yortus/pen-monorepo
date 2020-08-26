@@ -1,5 +1,6 @@
-import {Module, NodeKind} from '../../ast-nodes';
 import {AbsPath} from '../../utils';
+import {NodeKind} from '../node-kind';
+import {Module} from './module';
 import {FilterKinds} from './util';
 
 

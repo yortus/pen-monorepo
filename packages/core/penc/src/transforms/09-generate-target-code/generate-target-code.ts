@@ -2,7 +2,7 @@
 
 
 import * as fs from 'fs';
-import * as AstNodes from '../../ast-nodes';
+import * as AstNodes from '../../representations'; // TODO: remove this... too vague
 import {ResolvedNodeKind} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';

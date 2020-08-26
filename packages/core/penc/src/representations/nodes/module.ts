@@ -1,5 +1,5 @@
-import {NodeKind} from '../../ast-nodes';
 import {AbsPath} from '../../utils';
+import {NodeKind} from '../node-kind';
 import {Binding} from './binding';
 
 

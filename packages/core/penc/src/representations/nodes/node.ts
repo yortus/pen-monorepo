@@ -1,4 +1,4 @@
-import {NodeKind} from '../../ast-nodes';
+import {NodeKind} from '../node-kind';
 import {Binding} from './binding';
 import {Expression} from './expression';
 import {Module, ModuleMap} from './module';

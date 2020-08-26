@@ -1,4 +1,4 @@
-import {LocalBinding, LocalReferenceExpression, MemberExpression} from '../../ast-nodes';
+import {LocalBinding, LocalReferenceExpression, MemberExpression} from '../../representations';
 import {DesugaredNodeKind, DesugaredProgram, SourceProgram} from '../../representations';
 import {mapAst} from '../../utils';
 

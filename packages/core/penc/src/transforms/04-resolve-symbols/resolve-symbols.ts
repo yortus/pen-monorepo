@@ -1,4 +1,4 @@
-import {GlobalBinding, GlobalReferenceExpression} from '../../ast-nodes';
+import {GlobalBinding, GlobalReferenceExpression} from '../../representations';
 import {DesugaredProgram, ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert, mapAst} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';

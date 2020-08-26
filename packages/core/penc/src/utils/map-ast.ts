@@ -1,4 +1,4 @@
-import {BindingKind, ExpressionKind, Node, NodeKind} from '../ast-nodes';
+import {BindingKind, ExpressionKind, Node, NodeKind} from '../representations';
 import {assert} from './assert';
 import {mapMap} from './map-map';
 

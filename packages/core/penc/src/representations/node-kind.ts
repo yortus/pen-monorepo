@@ -1,9 +1,3 @@
-
-
-// TODO: temp testing...
-export * from './ast';
-
-
 // TODO: temp testing...
 export const BindingKind = [
     'GlobalBinding',

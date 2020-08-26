@@ -1,4 +1,4 @@
-import {Node, NodeKind} from '../ast-nodes';
+import {Node, NodeKind} from '../representations';
 import {mapMap} from './map-map';
 
 

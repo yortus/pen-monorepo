@@ -1,4 +1,4 @@
-import {NodeKind} from '../../ast-nodes';
+import {NodeKind} from '../node-kind';
 import {Expression} from './expression';
 import {FilterKinds} from './util';
 

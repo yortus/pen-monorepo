@@ -2,7 +2,7 @@
 
 
 import * as objectHash from 'object-hash';
-import * as AstNodes from '../../ast-nodes';
+import * as AstNodes from '../../representations'; // TODO: remove this... too vague
 import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert, traverseAst} from '../../utils';
 

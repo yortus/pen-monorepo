@@ -1,9 +1,12 @@
-import {Node, NodeKind} from '../ast-nodes';
 import {AbsPath} from '../utils';
+import {Node} from './nodes';
+import {NodeKind} from './node-kind';
 import {Program} from './program';
 
 
 // TODO: temp testing........
+export * from './nodes';
+export * from './node-kind';
 export * from './program';
 
 
@@ -27,6 +30,14 @@ export interface DesugaredProgram extends Program<DesugaredNodeKind> {/***/}
 export interface ResolvedProgram extends Program<ResolvedNodeKind> {/***/}
 
 export type SourceModule = NodeFromProgram<SourceProgram, 'Module'>;
+
+
+
+
+
+
+
+
 
 
 
