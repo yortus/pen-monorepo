@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import {Module, Program} from '../../ast-nodes';
+import {Module} from '../../ast-nodes';
+import {Program} from '../../representations';
 import {isExtension, mapMap} from '../../utils';
 import {SourceFileGraph, SourceNodeKind} from '../asts';
 import {parse as parseExtension} from './extension-grammar';
@@ -31,7 +32,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): Program<Sour
     });
     return {
         kind: 'Program',
-        sourceFiles,
+        sourceFiles: {kind: 'ModuleMap', byAbsPath: sourceFiles},
         mainPath: sourceFileGraph.mainPath,
     };
 }

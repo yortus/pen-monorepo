@@ -3,6 +3,7 @@
 
 import * as objectHash from 'object-hash';
 import * as AstNodes from '../../ast-nodes';
+import {Program} from '../../representations';
 import {assert, traverseAst} from '../../utils';
 import {ResolvedNodeKind} from '../asts';
 
@@ -18,7 +19,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // Make a flat list of every GlobalBinding in the entire program.
     const allBindings = [] as GlobalBinding[];
-    traverseAst(program, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
+    traverseAst(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
     let resolve = createResolver(program, allBindings);
@@ -101,7 +102,7 @@ type GlobalBinding = AstNodes.GlobalBinding<ResolvedNodeKind>;
 type GlobalReferenceExpression = AstNodes.GlobalReferenceExpression;
 type MemberExpression = AstNodes.MemberExpression<ResolvedNodeKind>;
 type Module = AstNodes.Module<ResolvedNodeKind>;
-type ResolvedProgram = AstNodes.Program<ResolvedNodeKind>;
+type ResolvedProgram = Program<ResolvedNodeKind>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {
@@ -211,7 +212,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
         switch (moduleExpr.kind) {
             // TODO: case 'ApplicationExpression': ...
             case 'ImportExpression': {
-                module = program.sourceFiles.get(moduleExpr.sourceFilePath)!;
+                module = program.sourceFiles.byAbsPath.get(moduleExpr.sourceFilePath)!;
                 break;
             }
             case 'ModuleExpression': {

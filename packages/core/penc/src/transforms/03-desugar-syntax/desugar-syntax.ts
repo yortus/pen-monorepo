@@ -1,4 +1,5 @@
-import {LocalBinding, LocalReferenceExpression, MemberExpression, Program} from '../../ast-nodes';
+import {LocalBinding, LocalReferenceExpression, MemberExpression} from '../../ast-nodes';
+import {Program} from '../../representations';
 import {mapAst} from '../../utils';
 import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 
@@ -8,7 +9,7 @@ import {DesugaredNodeKind, SourceNodeKind} from '../asts';
 // - ParenthesisedExpression
 export function desugarSyntax(program: Program<SourceNodeKind>): Program<DesugaredNodeKind> {
     let counter = 0;
-    return mapAst(program, DesugaredNodeKind, rec => ({
+    let moduleMapᐟ = mapAst(program.sourceFiles, DesugaredNodeKind, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
@@ -43,4 +44,5 @@ export function desugarSyntax(program: Program<SourceNodeKind>): Program<Desugar
             return rec(par.expression);
         },
     }));
+    return {...program, sourceFiles: moduleMapᐟ};
 }

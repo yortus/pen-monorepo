@@ -1,5 +1,6 @@
-import {GlobalBinding, GlobalReferenceExpression, Program} from '../../ast-nodes';
-import {assert, mapAst, mapMap} from '../../utils';
+import {GlobalBinding, GlobalReferenceExpression} from '../../ast-nodes';
+import {Program} from '../../representations';
+import {assert, mapAst} from '../../utils';
 import {DesugaredNodeKind, ResolvedNodeKind} from '../asts';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
@@ -10,14 +11,7 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
-    let result = mapAst(program, ResolvedNodeKind, rec => ({
-
-        // Attach the symbol table to the Program node.
-        Program: prg => {
-            let sourceFiles = mapMap(prg.sourceFiles, rec);
-            let prgᐟ = {...prg, sourceFiles, startGlobalName};
-            return prgᐟ;
-        },
+    let moduleMapᐟ = mapAst(program.sourceFiles, ResolvedNodeKind, rec => ({
 
         // Attach a scope to each Module node.
         Module: mod => {
@@ -61,5 +55,5 @@ export function resolveSymbols(program: Program<DesugaredNodeKind>): Program<Res
     assert(currentScope === undefined);
 
     // All done.
-    return result;
+    return {...program, sourceFiles: moduleMapᐟ, startGlobalName};
 }

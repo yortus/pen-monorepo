@@ -1,11 +1,11 @@
-import {Program} from '../../ast-nodes';
+import {Program} from '../../representations';
 import {traverseAst} from '../../utils';
 import {ResolvedNodeKind} from '../asts';
 
 
 // TODO: doc...
 export function checkSemantics(program: Program<ResolvedNodeKind>) {
-    traverseAst(program, n => {
+    traverseAst(program.sourceFiles, n => {
         switch (n.kind) {
             case 'RecordExpression': {
                 // Ensure Record field names are unique within the record definition

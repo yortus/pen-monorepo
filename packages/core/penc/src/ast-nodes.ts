@@ -34,5 +34,5 @@ export const ExpressionKind = [
     'StringLiteralExpression',
 ] as const;
 export type ExpressionKind = (typeof ExpressionKind)[any];
-export const NodeKind = ['Module', 'Program', ...BindingKind, ...ExpressionKind] as const;
+export const NodeKind = ['Module', 'ModuleMap', ...BindingKind, ...ExpressionKind] as const;
 export type NodeKind = (typeof NodeKind)[any];
