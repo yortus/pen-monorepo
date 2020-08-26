@@ -35,15 +35,15 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: temp testing... build the one and only internal module for emitting
     let flatList = {} as Record<string, Expression>;
-    for (let {uniqueName, expr} of entriesByHash.values()) flatList[uniqueName] = expr;
-    return {startName: startEntry.uniqueName, flatList};
+    for (let {globalName, expr} of entriesByHash.values()) flatList[globalName] = expr;
+    return {startName: startEntry.globalName, flatList};
 
     // TODO: recursive...
     function getEntryFor(e: Expression): Entry {
         e = resolve(e);
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
-        let entry: Entry = {uniqueName: `id${++counter}`, expr: undefined!};
+        let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
@@ -73,7 +73,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
         function ref(expr: Expression): GlobalReferenceExpression {
             // TODO: set globalName to something proper? use same value as `name`?
-            return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).uniqueName};
+            return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).globalName};
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
@@ -91,7 +91,7 @@ export interface FlatExpressionList {
 
 
 interface Entry {
-    uniqueName: string;
+    globalName: string;
     expr: Expression;
 }
 
