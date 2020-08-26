@@ -29,7 +29,6 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
         }
     });
     return {
-        kind: 'Program',
         sourceFiles: {kind: 'ModuleMap', byAbsPath: sourceFiles},
         mainPath: sourceFileGraph.mainPath,
     };

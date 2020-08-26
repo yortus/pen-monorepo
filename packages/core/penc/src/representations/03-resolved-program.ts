@@ -4,7 +4,6 @@ import {Program} from './program';
 
 
 export interface ResolvedProgram extends Program<ResolvedNodeKind> {
-    readonly kind: 'Program';
     readonly sourceFiles: ModuleMap<ResolvedNodeKind>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;

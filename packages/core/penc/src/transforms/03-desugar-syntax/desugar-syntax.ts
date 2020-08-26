@@ -44,5 +44,9 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
             return rec(par.expression);
         },
     }));
-    return {...program, sourceFiles: moduleMapᐟ};
+    return {
+        sourceFiles: moduleMapᐟ,
+        mainPath: program.mainPath,
+        startGlobalName: program.startGlobalName,
+    };
 }

@@ -4,7 +4,6 @@ import {Program} from './program';
 
 
 export interface DesugaredProgram extends Program<DesugaredNodeKind> {
-    readonly kind: 'Program';
     readonly sourceFiles: ModuleMap<DesugaredNodeKind>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;

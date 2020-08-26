@@ -55,5 +55,9 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     assert(currentScope === undefined);
 
     // All done.
-    return {...program, sourceFiles: moduleMapᐟ, startGlobalName};
+    return {
+        sourceFiles: moduleMapᐟ,
+        mainPath: program.mainPath,
+        startGlobalName: startGlobalName,
+    };
 }

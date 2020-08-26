@@ -1,7 +1,10 @@
-import {ModuleMap, NodeKind} from './nodes';
+import {NodeKind} from './nodes';
+
+
+const Brand = Symbol();
+type Brand = typeof Brand;
 
 
 export interface Program<KS extends NodeKind = any> {
-    readonly kind: 'Program';
-    readonly sourceFiles: ModuleMap<KS>;
+    readonly [Brand]?: KS; // TODO: clean up?
 }
