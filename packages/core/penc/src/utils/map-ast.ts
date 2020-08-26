@@ -16,11 +16,6 @@ export function mapAst<N extends {kind: NodeKind}, KSᐟ extends NodeKind, MapOb
 ) {
     const rec: any = (n: any) => {
         try {
-            // If result is an expression, call the general 'PreExpression' handler if provided, before mapping.
-            if (ExpressionKind.includes(n.kind) && mappers.PreExpression) {
-                n = mappers.PreExpression(n) ?? n;
-            }
-
             let mapFn = mappers[n.kind];
             let result = mapFn ? mapFn(n) : defaultMappers(n);
             assert(kinds.includes(result.kind));
@@ -88,16 +83,6 @@ type WidenKind<K extends NodeKind> =
     K extends ExpressionKind ? ExpressionKind :
     K extends BindingKind ? BindingKind :
     K;
-
-
-// type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
-//     (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, N['kind']>) => MapObj & {
-//         [K in keyof MapObj]:
-//             K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, K> :
-//             K extends 'PreExpression' ? (n: Expression<KS>) => Expression<KS> | undefined :
-//             never;
-//     };
-
 
 
 /**
