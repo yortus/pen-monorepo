@@ -21,7 +21,6 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
             if (mod.path === program.mainPath) {
                 // This is the main module. Assign to startGlobalName.
                 startGlobalName = currentScope.sourceNames.get('start')?.id;
-                if (startGlobalName === undefined) throw new Error(`Main module must define a 'start' rule.`);
             }
             currentScope = outerScope;
             return modᐟ;
@@ -55,10 +54,13 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     // sanity check - we should be back to the scope we started with here.
     assert(currentScope === undefined);
 
+    // Ensure a start rule was found in the program
+    if (!startGlobalName) throw new Error(`Main module must define a 'start' rule.`);
+
     // All done.
     return {
         sourceFiles: moduleMapᐟ,
         mainPath: program.mainPath,
-        startGlobalName: startGlobalName,
+        startGlobalName,
     };
 }

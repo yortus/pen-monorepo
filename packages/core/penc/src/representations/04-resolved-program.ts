@@ -5,7 +5,7 @@ import {AstType, ModuleMap, NodeKind} from '../abstract-syntax-trees';
 export type ResolvedProgram = AstType<ResolvedNodeKinds> & {
     readonly sourceFiles: ModuleMap<ResolvedNodeKinds>;
     readonly mainPath: AbsPath;
-    readonly startGlobalName?: string;
+    readonly startGlobalName: string;
 }
 
 

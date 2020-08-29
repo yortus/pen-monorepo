@@ -3,8 +3,8 @@ import {AbsPath} from '../utils';
 
 // TODO: ...
 export interface SourceFileGraph {
-    sourceFiles: Map<AbsPath, SourceFileInfo>;
-    mainPath: AbsPath;
+    readonly sourceFiles: Map<AbsPath, SourceFileInfo>;
+    readonly mainPath: AbsPath;
 }
 
 
