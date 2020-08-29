@@ -2,7 +2,7 @@
 
 
 import * as fs from 'fs';
-import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {ExtractNode} from '../../abstract-syntax-trees';
 import type {ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
@@ -11,8 +11,8 @@ import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
 
-type Expression = NodeFromAstType<ResolvedProgram, 'Expression'>;
-type ExtensionExpression = NodeFromAstType<ResolvedProgram, 'ExtensionExpression'>;
+type Expression = ExtractNode<ResolvedProgram, 'Expression'>;
+type ExtensionExpression = ExtractNode<ResolvedProgram, 'ExtensionExpression'>;
 
 
 export interface Program {

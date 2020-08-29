@@ -6,18 +6,18 @@ type AstBrand = typeof AstBrand;
 
 
 // TODO: doc... type-only 'brand' to associate representations with sets of AST node kinds
-export interface AstType<NodeKinds extends NodeKind = any> {
+export interface AstType<NodeKinds extends NodeKind = NodeKind> {
     readonly [AstBrand]?: NodeKinds; // TODO: clean up?
 }
 
 
 // TODO: doc...
-export type NodeKindsFromAstType<T extends AstType> = T extends AstType<infer NodeKinds> ? NodeKinds : never;
+export type ExtractNodeKinds<T extends AstType> = T extends AstType<infer NodeKinds> ? NodeKinds : never;
 
 
 // TODO: doc...
-export type NodeFromAstType<T extends AstType, K extends NodeKind | 'Binding' | 'Expression'> = NodeFromNodeKind<
-    NodeKindsFromAstType<T>,
+export type ExtractNode<T extends AstType, K extends NodeKind | 'Binding' | 'Expression'> = NodeFromNodeKind<
+    ExtractNodeKinds<T>,
     K extends NodeKind ? K :
     K extends 'Expression' ? Expression['kind'] :
     K extends 'Binding' ? Binding['kind'] :

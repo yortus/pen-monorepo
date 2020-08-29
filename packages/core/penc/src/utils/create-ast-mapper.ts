@@ -1,4 +1,4 @@
-import type {AstType, Binding, Expression, Node, NodeKind, NodeKindsFromAstType} from '../abstract-syntax-trees';
+import type {AstType, Binding, Expression, Node, NodeKind, ExtractNodeKinds} from '../abstract-syntax-trees';
 import {mapMap} from './map-map';
 
 
@@ -10,8 +10,8 @@ import {mapMap} from './map-map';
  * Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
 export function createAstMapper<T extends AstType, Tᐟ extends AstType>() {
-    type KS = NodeKindsFromAstType<T>;
-    type KSᐟ = NodeKindsFromAstType<Tᐟ>;
+    type KS = ExtractNodeKinds<T>;
+    type KSᐟ = ExtractNodeKinds<Tᐟ>;
     return function mapAst<N extends {kind: KS}, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
         const rec: any = (n: any) => {
             try {
