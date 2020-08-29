@@ -1,16 +1,16 @@
 import {AbsPath} from '../utils';
 import {ModuleMap, NodeKind} from './nodes';
-import {Ast} from './ast';
+import {AstType} from './ast-type';
 
 
-export interface ResolvedProgram extends Ast<ResolvedNodeKind> {
-    readonly sourceFiles: ModuleMap<ResolvedNodeKind>;
+export type ResolvedProgram = AstType<ResolvedNodeKinds> & {
+    readonly sourceFiles: ModuleMap<ResolvedNodeKinds>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;
 }
 
 
-type ResolvedNodeKind = Exclude<NodeKind,
+type ResolvedNodeKinds = Exclude<NodeKind,
     | 'LocalBinding'
     | 'LocalMultiBinding'
     | 'LocalReferenceExpression'

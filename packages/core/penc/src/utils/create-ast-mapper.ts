@@ -1,4 +1,4 @@
-import {Ast, Binding, Expression, Node, NodeKind, NodeKindsFromAst} from '../representations';
+import {AstType, Binding, Expression, Node, NodeKind, NodeKindsFromAstType} from '../representations';
 import {mapMap} from './map-map';
 
 
@@ -9,9 +9,9 @@ import {mapMap} from './map-map';
  * `mappings` object, which allows the resulting AST to differ in structure and node kinds from the AST given by `node`.
  * Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createAstMapper<P extends Ast, Pᐟ extends Ast>() {
-    type KS = NodeKindsFromAst<P>;
-    type KSᐟ = NodeKindsFromAst<Pᐟ>;
+export function createAstMapper<T extends AstType, Tᐟ extends AstType>() {
+    type KS = NodeKindsFromAstType<T>;
+    type KSᐟ = NodeKindsFromAstType<Tᐟ>;
     return function mapAst<N extends {kind: KS}, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
         const rec: any = (n: any) => {
             try {

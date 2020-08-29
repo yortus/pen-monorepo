@@ -1,4 +1,4 @@
-import {DesugaredProgram, NodeFromAst, ResolvedProgram} from '../../representations';
+import {DesugaredProgram, NodeFromAstType, ResolvedProgram} from '../../representations';
 import {assert, createAstMapper} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
@@ -8,7 +8,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: NodeFromAst<ResolvedProgram, 'GlobalReferenceExpression'>}>;
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: NodeFromAstType<ResolvedProgram, 'GlobalReferenceExpression'>}>;
     let mapAst = createAstMapper<DesugaredProgram, ResolvedProgram>();
     let moduleMapᐟ = mapAst(program.sourceFiles, rec => ({
 
@@ -27,7 +27,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         },
 
         // Attach a unique name to each local binding, returning a GlobalBinding node.
-        LocalBinding: ({localName, value, exported}): NodeFromAst<ResolvedProgram, 'GlobalBinding'> => {
+        LocalBinding: ({localName, value, exported}): NodeFromAstType<ResolvedProgram, 'GlobalBinding'> => {
             assert(currentScope);
             let globalName = symbolTable.createName(localName, currentScope).id;
             return {kind: 'GlobalBinding', localName, globalName, value: rec(value), exported};
@@ -37,7 +37,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         // Make a list of all the GlobalReferenceExpression nodes, for backpatching the names after this traversal.
         LocalReferenceExpression: ({localName}) => {
             assert(currentScope);
-            let ref: NodeFromAst<ResolvedProgram, 'GlobalReferenceExpression'>;
+            let ref: NodeFromAstType<ResolvedProgram, 'GlobalReferenceExpression'>;
             ref = {kind: 'GlobalReferenceExpression', localName, globalName: ''};
             allRefs.push({scope: currentScope, ref});
             return ref;

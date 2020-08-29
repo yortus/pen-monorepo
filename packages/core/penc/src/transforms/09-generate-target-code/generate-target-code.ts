@@ -2,7 +2,7 @@
 
 
 import * as fs from 'fs';
-import {NodeFromAst, ResolvedProgram} from '../../representations';
+import {NodeFromAstType, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';
@@ -10,8 +10,8 @@ import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
 
-type Expression = NodeFromAst<ResolvedProgram, 'Expression'>;
-type ExtensionExpression = NodeFromAst<ResolvedProgram, 'ExtensionExpression'>;
+type Expression = NodeFromAstType<ResolvedProgram, 'Expression'>;
+type ExtensionExpression = NodeFromAstType<ResolvedProgram, 'ExtensionExpression'>;
 
 
 export interface Program {

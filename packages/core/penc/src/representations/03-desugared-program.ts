@@ -1,16 +1,16 @@
 import {AbsPath} from '../utils';
 import {ModuleMap, NodeKind} from './nodes';
-import {Ast} from './ast';
+import {AstType} from './ast-type';
 
 
-export interface DesugaredProgram extends Ast<DesugaredNodeKind> {
-    readonly sourceFiles: ModuleMap<DesugaredNodeKind>;
+export type DesugaredProgram = AstType<DesugaredNodeKinds> & {
+    readonly sourceFiles: ModuleMap<DesugaredNodeKinds>;
     readonly mainPath: AbsPath;
     readonly startGlobalName?: string;
 }
 
 
-type DesugaredNodeKind = Exclude<NodeKind,
+type DesugaredNodeKinds = Exclude<NodeKind,
     | 'GlobalBinding'
     | 'GlobalReferenceExpression'
     | 'LocalMultiBinding'
