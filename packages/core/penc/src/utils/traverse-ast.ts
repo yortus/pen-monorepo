@@ -1,4 +1,4 @@
-import {Node, NodeKind} from '../representations';
+import type {Node, NodeKind} from '../abstract-syntax-trees';
 import {mapMap} from './map-map';
 
 

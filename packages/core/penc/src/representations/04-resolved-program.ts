@@ -1,6 +1,5 @@
 import {AbsPath} from '../utils';
-import {ModuleMap, NodeKind} from './nodes';
-import {AstType} from './ast-type';
+import {AstType, ModuleMap, NodeKind} from '../abstract-syntax-trees';
 
 
 export type ResolvedProgram = AstType<ResolvedNodeKinds> & {

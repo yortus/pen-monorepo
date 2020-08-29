@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import {NodeFromAstType, SourceFileGraph, SourceProgram} from '../../representations';
+import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {SourceFileGraph, SourceProgram} from '../../representations';
 import {isExtension, mapMap} from '../../utils';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';

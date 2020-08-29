@@ -1,4 +1,5 @@
-import {DesugaredProgram, NodeFromAstType, ResolvedProgram} from '../../representations';
+import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {DesugaredProgram, ResolvedProgram} from '../../representations';
 import {assert, createAstMapper} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 

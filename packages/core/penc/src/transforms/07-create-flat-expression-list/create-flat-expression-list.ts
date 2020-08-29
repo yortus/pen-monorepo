@@ -2,7 +2,8 @@
 
 
 import * as objectHash from 'object-hash';
-import {NodeFromAstType, ResolvedProgram} from '../../representations';
+import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {ResolvedProgram} from '../../representations';
 import {assert, traverseAst} from '../../utils';
 
 

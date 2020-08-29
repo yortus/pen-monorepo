@@ -1,4 +1,4 @@
-import {AstType, Binding, Expression, Node, NodeKind, NodeKindsFromAstType} from '../representations';
+import type {AstType, Binding, Expression, Node, NodeKind, NodeKindsFromAstType} from '../abstract-syntax-trees';
 import {mapMap} from './map-map';
 
 

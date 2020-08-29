@@ -2,7 +2,8 @@
 
 
 import * as fs from 'fs';
-import {NodeFromAstType, ResolvedProgram} from '../../representations';
+import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';

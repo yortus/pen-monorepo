@@ -1,4 +1,5 @@
-import {DesugaredProgram, NodeFromAstType, SourceProgram} from '../../representations';
+import type {NodeFromAstType} from '../../abstract-syntax-trees';
+import type {DesugaredProgram, SourceProgram} from '../../representations';
 import {createAstMapper} from '../../utils';
 
 
