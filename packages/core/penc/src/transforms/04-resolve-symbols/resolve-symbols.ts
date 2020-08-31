@@ -20,7 +20,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
             if (mod.path === program.mainPath) {
                 // This is the main module. Assign to startGlobalName.
-                startGlobalName = currentScope.sourceNames.get('start')?.id;
+                startGlobalName = currentScope.localNames.get('start')?.globalName;
             }
             currentScope = outerScope;
             return modᐟ;
@@ -29,7 +29,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         // Attach a unique name to each local binding, returning a GlobalBinding node.
         LocalBinding: ({localName, value, exported}): ExtractNode<ResolvedProgram, 'GlobalBinding'> => {
             assert(currentScope);
-            let globalName = symbolTable.createName(localName, currentScope).id;
+            let {globalName} = symbolTable.createName(localName, currentScope);
             return {kind: 'GlobalBinding', localName, globalName, value: rec(value), exported};
         },
 
@@ -47,7 +47,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     // Every binding now has a unique name.
     // Backpatch all the GlobalReferenceExpression nodes with its corresponding unique name.
     for (let {scope, ref} of allRefs) {
-        let globalName = symbolTable.lookupName(ref.localName, scope).id;
+        let {globalName} = symbolTable.lookupName(ref.localName, scope);
         Object.assign(ref, {globalName});
     }
 
