@@ -1,6 +1,6 @@
 import type {ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredProgram, ResolvedProgram} from '../../representations';
-import {assert, createAstMapper} from '../../utils';
+import {assert, createNodeMapper} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 
@@ -10,8 +10,8 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: ExtractNode<ResolvedProgram, 'GlobalReferenceExpression'>}>;
-    let mapAst = createAstMapper<DesugaredProgram, ResolvedProgram>();
-    let moduleMapᐟ = mapAst(program.sourceFiles, rec => ({
+    let mapNode = createNodeMapper<DesugaredProgram, ResolvedProgram>();
+    let moduleMapᐟ = mapNode(program.sourceFiles, rec => ({
 
         // Attach a scope to each Module node.
         Module: mod => {

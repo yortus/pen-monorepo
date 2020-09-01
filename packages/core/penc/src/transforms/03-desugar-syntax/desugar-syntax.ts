@@ -1,6 +1,6 @@
 import type {ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredProgram, SourceProgram} from '../../representations';
-import {createAstMapper} from '../../utils';
+import {createNodeMapper} from '../../utils';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
@@ -8,8 +8,8 @@ import {createAstMapper} from '../../utils';
 // - ParenthesisedExpression
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
-    let mapAst = createAstMapper<SourceProgram, DesugaredProgram>();
-    let moduleMapᐟ = mapAst(program.sourceFiles, rec => ({
+    let mapNode = createNodeMapper<SourceProgram, DesugaredProgram>();
+    let moduleMapᐟ = mapNode(program.sourceFiles, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
