@@ -1,5 +1,5 @@
 import {AbsPath} from '../../utils';
-import {Module} from './module';
+import {Module} from './module-map';
 import {NodeKind} from './node-kind';
 import {FilterKinds} from './util';
 

@@ -30,7 +30,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
         }
     });
     return {
-        sourceFiles: {kind: 'ModuleMap', byAbsPath: sourceFiles},
+        sourceFiles: {kind: 'ModuleMap', modulesByAbsPath: sourceFiles},
         mainPath: sourceFileGraph.mainPath,
     };
 }

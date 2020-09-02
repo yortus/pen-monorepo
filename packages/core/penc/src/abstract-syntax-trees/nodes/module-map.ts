@@ -12,5 +12,5 @@ export interface Module<KS extends NodeKind = NodeKind> {
 
 export interface ModuleMap<KS extends NodeKind = NodeKind> {
     readonly kind: 'ModuleMap';
-    readonly byAbsPath: ReadonlyMap<AbsPath, Module<KS>>;
+    readonly modulesByAbsPath: ReadonlyMap<AbsPath, Module<KS>>;
 }

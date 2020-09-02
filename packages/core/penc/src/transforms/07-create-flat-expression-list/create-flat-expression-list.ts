@@ -210,7 +210,7 @@ function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) 
         switch (moduleExpr.kind) {
             // TODO: case 'ApplicationExpression': ...
             case 'ImportExpression': {
-                module = program.sourceFiles.byAbsPath.get(moduleExpr.sourceFilePath)!;
+                module = program.sourceFiles.modulesByAbsPath.get(moduleExpr.sourceFilePath)!;
                 break;
             }
             case 'ModuleExpression': {

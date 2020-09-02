@@ -66,7 +66,7 @@ export function createNodeHasher<T extends AstType<HashableNodeKind>>() {
             case 'ModuleExpression': return setSig('MEX', getSig(n.module));
             case 'ModuleMap': {
                 let map = new Map<string, Signature>();
-                for (let [absPath, module] of n.byAbsPath.entries()) map.set(absPath, getSig(module));
+                for (let [absPath, module] of n.modulesByAbsPath.entries()) map.set(absPath, getSig(module));
                 return setSig('MODMAP', map);
             }
             case 'NotExpression': return setSig('NOT', getSig(n.expression));

@@ -23,7 +23,7 @@ export function traverseAst<KS extends NodeKind>(ast: Node<KS>, callback: (n: No
             case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
-            case 'ModuleMap': return mapMap(n.byAbsPath, rec), cb(n);
+            case 'ModuleMap': return mapMap(n.modulesByAbsPath, rec), cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteralExpression': return cb(n);
             case 'NumericLiteralExpression': return cb(n);
