@@ -1,5 +1,6 @@
-import type {AstType, Binding, Expression, Node, NodeKind, ExtractNodeKinds} from '../abstract-syntax-trees';
-import {mapMap} from './map-map';
+import {mapMap} from '../utils';
+import {AstType, ExtractNodeKinds} from './ast-type';
+import type {Binding, Expression, Node, NodeKind} from './nodes';
 
 
 /**

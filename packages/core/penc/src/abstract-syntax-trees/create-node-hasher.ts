@@ -1,6 +1,6 @@
 import * as objectHash from 'object-hash';
 import type {Node} from '../abstract-syntax-trees';
-import {assert} from './assert';
+import {assert} from '../utils';
 
 
 export function createNodeHasher(resolve: (e: Node) => Node) {

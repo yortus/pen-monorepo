@@ -2,9 +2,9 @@
 
 
 import * as objectHash from 'object-hash';
-import type {ExtractNode} from '../../abstract-syntax-trees';
+import {ExtractNode, traverseAst} from '../../abstract-syntax-trees';
 import type {ResolvedProgram} from '../../representations';
-import {assert, traverseAst} from '../../utils';
+import {assert} from '../../utils';
 
 
 // TODO: jsdoc...

@@ -1,6 +1,6 @@
-import type {ExtractNode} from '../../abstract-syntax-trees';
+import {createNodeMapper, ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredProgram, ResolvedProgram} from '../../representations';
-import {assert, createNodeMapper} from '../../utils';
+import {assert} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 

@@ -1,6 +1,5 @@
-import type {ExtractNode} from '../../abstract-syntax-trees';
+import {createNodeMapper, ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredProgram, SourceProgram} from '../../representations';
-import {createNodeMapper} from '../../utils';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:

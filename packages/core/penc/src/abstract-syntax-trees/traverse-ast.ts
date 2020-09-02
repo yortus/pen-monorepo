@@ -1,5 +1,5 @@
-import type {Node, NodeKind} from '../abstract-syntax-trees';
-import {mapMap} from './map-map';
+import {mapMap} from '../utils';
+import type {Node, NodeKind} from './nodes';
 
 
 /** Performs a depth-first traversal of the AST rooted at `node`, calling `cb` on each node. */

@@ -1,5 +1,5 @@
+import {traverseAst} from '../../abstract-syntax-trees';
 import {ResolvedProgram} from '../../representations';
-import {traverseAst} from '../../utils';
 
 
 // TODO: doc...
