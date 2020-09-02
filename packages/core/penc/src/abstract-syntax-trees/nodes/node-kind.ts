@@ -1,7 +1,7 @@
 export type NodeKind =
     // Top-level nodes
+    | 'AbstractSyntaxTree'
     | 'Module'
-    | 'ModuleMap'
 
     // Binding nodes
     | 'GlobalBinding'

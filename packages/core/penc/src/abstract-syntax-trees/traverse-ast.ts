@@ -8,6 +8,7 @@ export function traverseAst<KS extends NodeKind>(ast: Node<KS>, callback: (n: No
     return rec(ast as Node);
     function rec(n: Node): void {
         switch (n.kind) {
+            case 'AbstractSyntaxTree': return mapMap(n.modulesByAbsPath, rec), cb(n);
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
             case 'ExtensionExpression': return cb(n);
@@ -23,7 +24,6 @@ export function traverseAst<KS extends NodeKind>(ast: Node<KS>, callback: (n: No
             case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
-            case 'ModuleMap': return mapMap(n.modulesByAbsPath, rec), cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteralExpression': return cb(n);
             case 'NumericLiteralExpression': return cb(n);

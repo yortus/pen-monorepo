@@ -1,14 +1,14 @@
 import {AbsPath} from '../utils';
-import {AstType, ModuleMap, NodeKind} from '../abstract-syntax-trees';
+import {AbstractSyntaxTree, NodeKind} from '../abstract-syntax-trees';
 
 
-export type SourceProgram = AstType<SourceNodeKinds> & {
-    readonly sourceFiles: ModuleMap<SourceNodeKinds>;
+export interface SourceProgram {
+    readonly sourceFiles: SourceAst;
     readonly mainPath: AbsPath;
 }
 
 
-type SourceNodeKinds = Exclude<NodeKind,
+export type SourceAst = AbstractSyntaxTree<Exclude<NodeKind,
     | 'GlobalBinding'
     | 'GlobalReferenceExpression'
->;
+>>;

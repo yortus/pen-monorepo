@@ -1,4 +1,4 @@
-// import {AstType, ExtractNode, ModuleMap, NodeKind, traverseAst} from '../abstract-syntax-trees';
+// import {AstType, ExtractNode, AbstractSyntaxTree, NodeKind, traverseAst} from '../abstract-syntax-trees';
 // import {assert} from '../utils';
 
 
@@ -17,7 +17,7 @@
 // // TODO: jsdoc...
 // // - return value is *never* an LocalReferenceExpression or an ImportExpression
 // // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-// export function createNodeDereferencer(ast: ModuleMap<DereferenceableNodeKind>) {
+// export function createNodeDereferencer(ast: AbstractSyntaxTree<DereferenceableNodeKind>) {
 
 
 //     // TODO: ...

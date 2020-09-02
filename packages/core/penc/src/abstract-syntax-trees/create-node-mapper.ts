@@ -1,6 +1,5 @@
 import {mapMap} from '../utils';
-import {AstType, ExtractNodeKinds} from './ast-type';
-import type {Binding, Expression, Node, NodeKind} from './nodes';
+import type {AbstractSyntaxTree, Binding, Expression, Node, NodeKind} from './nodes';
 
 
 /**
@@ -10,9 +9,9 @@ import type {Binding, Expression, Node, NodeKind} from './nodes';
  * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
  * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createNodeMapper<T extends AstType, Tᐟ extends AstType>() {
-    type KS = ExtractNodeKinds<T>;
-    type KSᐟ = ExtractNodeKinds<Tᐟ>;
+export function createNodeMapper<AST extends AbstractSyntaxTree, ASTᐟ extends AbstractSyntaxTree>() {
+    type KS = AST extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
+    type KSᐟ = ASTᐟ extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
     return function mapNode<N extends {kind: KS}, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
         const rec: any = (n: any) => {
             try {
@@ -36,6 +35,7 @@ export function createNodeMapper<T extends AstType, Tᐟ extends AstType>() {
 function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
+            case 'AbstractSyntaxTree': return {...n, modulesByAbsPath: mapMap(n.modulesByAbsPath, rec)};
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'BooleanLiteralExpression': return n;
             case 'ExtensionExpression': return n;
@@ -51,7 +51,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
-            case 'ModuleMap': return {...n, modulesByAbsPath: mapMap(n.modulesByAbsPath, rec)};
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;

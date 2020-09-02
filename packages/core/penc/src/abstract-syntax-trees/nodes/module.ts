@@ -8,9 +8,3 @@ export interface Module<KS extends NodeKind = NodeKind> {
     readonly bindings: ReadonlyArray<Binding<KS>>;
     readonly path?: AbsPath;
 }
-
-
-export interface ModuleMap<KS extends NodeKind = NodeKind> {
-    readonly kind: 'ModuleMap';
-    readonly modulesByAbsPath: ReadonlyMap<AbsPath, Module<KS>>;
-}

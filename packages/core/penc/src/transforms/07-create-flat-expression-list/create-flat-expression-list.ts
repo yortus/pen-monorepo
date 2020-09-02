@@ -3,7 +3,7 @@
 
 import * as objectHash from 'object-hash';
 import {ExtractNode, traverseAst} from '../../abstract-syntax-trees';
-import type {ResolvedProgram} from '../../representations';
+import type {ResolvedAst, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 
 
@@ -96,11 +96,11 @@ interface Entry {
 }
 
 
-type Expression = ExtractNode<ResolvedProgram, 'Expression'>
-type GlobalBinding = ExtractNode<ResolvedProgram, 'GlobalBinding'>;
-type GlobalReferenceExpression = ExtractNode<ResolvedProgram, 'GlobalReferenceExpression'>;
-type MemberExpression = ExtractNode<ResolvedProgram, 'MemberExpression'>;
-type Module = ExtractNode<ResolvedProgram, 'Module'>;
+type Expression = ExtractNode<ResolvedAst, 'Expression'>
+type GlobalBinding = ExtractNode<ResolvedAst, 'GlobalBinding'>;
+type GlobalReferenceExpression = ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>;
+type MemberExpression = ExtractNode<ResolvedAst, 'MemberExpression'>;
+type Module = ExtractNode<ResolvedAst, 'Module'>;
 
 
 function createHasher(resolve: (e: Expression) => Expression) {

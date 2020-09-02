@@ -1,17 +1,17 @@
 import {AbsPath} from '../utils';
-import {AstType, ModuleMap, NodeKind} from '../abstract-syntax-trees';
+import {AbstractSyntaxTree, NodeKind} from '../abstract-syntax-trees';
 
 
-export type ResolvedProgram = AstType<ResolvedNodeKinds> & {
-    readonly sourceFiles: ModuleMap<ResolvedNodeKinds>;
+export interface ResolvedProgram {
+    readonly sourceFiles: ResolvedAst;
     readonly mainPath: AbsPath;
     readonly startGlobalName: string;
 }
 
 
-type ResolvedNodeKinds = Exclude<NodeKind,
+export type ResolvedAst = AbstractSyntaxTree<Exclude<NodeKind,
     | 'LocalBinding'
     | 'LocalMultiBinding'
     | 'LocalReferenceExpression'
     | 'ParenthesisedExpression'
->;
+>>;
