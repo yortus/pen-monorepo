@@ -1,4 +1,4 @@
-import {createNodeMapper, ExtractNode} from '../../abstract-syntax-trees';
+import {createAstMapper, ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredAst, DesugaredProgram, ResolvedAst, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
@@ -10,8 +10,8 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
     let allRefs = [] as Array<{scope: ScopeSymbol, ref: ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>}>;
-    let mapNode = createNodeMapper<DesugaredAst, ResolvedAst>();
-    let moduleMapᐟ = mapNode(program.sourceFiles, rec => ({
+    let mapAst = createAstMapper<DesugaredAst, ResolvedAst>();
+    let sourceFiles = mapAst(program.sourceFiles, rec => ({
 
         // Attach a scope to each Module node.
         Module: mod => {
@@ -58,9 +58,5 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     if (!startGlobalName) throw new Error(`Main module must define a 'start' rule.`);
 
     // All done.
-    return {
-        sourceFiles: moduleMapᐟ,
-        mainPath: program.mainPath,
-        startGlobalName,
-    };
+    return {sourceFiles, mainPath: program.mainPath, startGlobalName};
 }

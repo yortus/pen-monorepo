@@ -9,10 +9,10 @@ import type {AbstractSyntaxTree, Binding, Expression, Node, NodeKind} from './no
  * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
  * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createNodeMapper<AST extends AbstractSyntaxTree, ASTᐟ extends AbstractSyntaxTree>() {
+export function createAstMapper<AST extends AbstractSyntaxTree, ASTᐟ extends AbstractSyntaxTree>() {
     type KS = AST extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
     type KSᐟ = ASTᐟ extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
-    return function mapNode<N extends {kind: KS}, MapObj>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>) {
+    return function mapAst<MapObj>(node: AST, mappings: Mappings<MapObj, KS, KSᐟ>): ASTᐟ {
         const rec: any = (n: any) => {
             try {
                 let mapFn = mappers[n.kind];
@@ -26,7 +26,7 @@ export function createNodeMapper<AST extends AbstractSyntaxTree, ASTᐟ extends 
         };
         const defaultMappers: any = makeDefaultMappers(rec);
         const mappers: any = mappings(rec);
-        return rec(node) as NodeOfKind<KSᐟ, N['kind']>;
+        return rec(node);
     };
 }
 

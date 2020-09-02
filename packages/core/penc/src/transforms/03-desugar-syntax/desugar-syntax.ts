@@ -1,4 +1,4 @@
-import {createNodeMapper, ExtractNode} from '../../abstract-syntax-trees';
+import {createAstMapper, ExtractNode} from '../../abstract-syntax-trees';
 import type {DesugaredAst, DesugaredProgram, SourceAst, SourceProgram} from '../../representations';
 
 
@@ -7,8 +7,8 @@ import type {DesugaredAst, DesugaredProgram, SourceAst, SourceProgram} from '../
 // - ParenthesisedExpression
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
-    let mapNode = createNodeMapper<SourceAst, DesugaredAst>();
-    let moduleMapᐟ = mapNode(program.sourceFiles, rec => ({
+    let mapAst = createAstMapper<SourceAst, DesugaredAst>();
+    let sourceFiles = mapAst(program.sourceFiles, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
@@ -44,8 +44,6 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
             return rec(par.expression);
         },
     }));
-    return {
-        sourceFiles: moduleMapᐟ,
-        mainPath: program.mainPath,
-    };
+
+    return {sourceFiles, mainPath: program.mainPath};
 }
