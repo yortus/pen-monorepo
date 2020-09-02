@@ -1,15 +1,10 @@
 import * as objectHash from 'object-hash';
-import {createNodeDereferencer} from './create-node-dereferencer';
 import {ExtractNode} from './extract-node';
 import {AbstractSyntaxTree, Node, NodeKind} from './nodes';
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.
-export function createNodeHasher<KS extends HashableNodeKind>(ast: AbstractSyntaxTree<KS>) {
-
-    // TODO: temp testing...
-    let deref = createNodeDereferencer(ast);
-
+export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node) => Node) { // TODO: use generic here...
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<HashableNode, Signature>();
     const hashesByNode = new Map<HashableNode, string>();
@@ -31,7 +26,7 @@ export function createNodeHasher<KS extends HashableNodeKind>(ast: AbstractSynta
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = deref(n as Node);
+        let derefdNode = deref(n as Node); // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             let derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -79,7 +74,7 @@ export function createNodeHasher<KS extends HashableNodeKind>(ast: AbstractSynta
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
             case 'StringLiteralExpression': return setSig('STR', n.value, n.abstract, n.concrete);
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
+            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n as never); // TODO: fix types
         }
     }
 }

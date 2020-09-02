@@ -21,7 +21,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // Create helper functions for this program.
     let deref = createNodeDereferencer(program.sourceFiles);
-    let getHashFor = createNodeHasher(program.sourceFiles);
+    let getHashFor = createNodeHasher(deref as any); // TODO: fix typing
 
     // Find the `start` expression.
     let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
@@ -39,8 +39,8 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: recursive...
     function getEntryFor(e: Expression): Entry {
-        e = deref(e as any) as any; // TODO: fix types
-        let hash = getHashFor(e);
+        e = deref(e);
+        let hash = getHashFor(e as any); // TODO: fix types
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
         let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
@@ -51,8 +51,6 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
             case 'BooleanLiteralExpression': return setX(e);
             case 'ExtensionExpression': return setX(e);
             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
-            case 'GlobalReferenceExpression': assert(false); // the resolve() call removed this node kind
-            case 'ImportExpression': assert(false); // the resolve() call removed this node kind
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
             case 'ModuleExpression': {

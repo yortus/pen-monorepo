@@ -1,19 +1,23 @@
-import {ExtractNode, AbstractSyntaxTree, Node, NodeKind, traverseAst} from '../abstract-syntax-trees';
+import {ExtractNode, AbstractSyntaxTree, Node, traverseAst} from '../abstract-syntax-trees';
 import {assert} from '../utils';
 
 
 // TODO: jsdoc...
 // - return value is *never* an LocalReferenceExpression or an ImportExpression
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-export function createNodeDereferencer<KS extends DereferenceableNodeKind>(ast: AbstractSyntaxTree<KS>) {
+
+// TODO: _do_ statically enforce DereferenceableNodeKind constraint somehow...
+export function createNodeDereferencer<AST extends AbstractSyntaxTree>(ast: AST) {
+    type KS = AST extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
 
     // TODO: ...
     // Make a flat list of every GlobalBinding in the entire program.
     const allBindings = [] as GlobalBinding[];
-    traverseAst(ast as unknown as DereferenceableAst, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
+    traverseAst(ast, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // TODO: ... better typing? generic?
-    return deref as (node: Node) => Node<Exclude<NodeKind, 'GlobalReferenceExpression' | 'ImportExpression'>>;
+    return deref as <N extends Node<KS>>(node: N) => Deref<N>;
+    type Deref<N extends Node<KS>> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
 
     // TODO: jsdoc...
     function deref(node: Node): Node {
@@ -82,9 +86,7 @@ export function createNodeDereferencer<KS extends DereferenceableNodeKind>(ast: 
 
 
 // TODO: temp testing...
-type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type DereferenceableAst = AbstractSyntaxTree<DereferenceableNodeKind>;
-//type DereferencedNode<N extends DereferenceableNodeKind> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
+//type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
 type Expression = ExtractNode<AbstractSyntaxTree, 'Expression'>;
 type GlobalBinding = ExtractNode<AbstractSyntaxTree, 'GlobalBinding'>;
 type GlobalReferenceExpression = ExtractNode<AbstractSyntaxTree, 'GlobalReferenceExpression'>;
