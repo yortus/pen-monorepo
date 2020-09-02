@@ -16,7 +16,7 @@ export type ExtractNodeKinds<T extends AstType> = T extends AstType<infer NodeKi
 
 
 // TODO: doc...
-export type ExtractNode<T extends AstType, K extends NodeKind | 'Binding' | 'Expression'> = NodeFromNodeKind<
+export type ExtractNode<T extends AstType, K extends NodeKind | 'Binding' | 'Expression' = NodeKind> = NodeFromNodeKind<
     ExtractNodeKinds<T>,
     K extends NodeKind ? K :
     K extends 'Expression' ? Expression['kind'] :
