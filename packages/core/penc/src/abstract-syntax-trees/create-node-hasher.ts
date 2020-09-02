@@ -1,20 +1,14 @@
 import * as objectHash from 'object-hash';
-import {AbstractSyntaxTree, ExtractNode, Node, NodeKind, traverseAst} from '../abstract-syntax-trees';
+import {createNodeDereferencer} from './create-node-dereferencer';
+import {ExtractNode} from './extract-node';
+import {AbstractSyntaxTree, Node, NodeKind} from './nodes';
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.
 export function createNodeHasher<KS extends HashableNodeKind>(ast: AbstractSyntaxTree<KS>) {
 
     // TODO: temp testing...
-    const allBindings = [] as Array<ExtractNode<AbstractSyntaxTree, 'GlobalBinding'>>;
-    traverseAst(ast as AbstractSyntaxTree, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
-
-
-    // TODO: impl...
-    let deref!: <N extends Node>(n: N) => DereferencedNode<N>
-
-
-
+    let deref = createNodeDereferencer(ast);
 
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<HashableNode, Signature>();
@@ -93,4 +87,3 @@ export function createNodeHasher<KS extends HashableNodeKind>(ast: AbstractSynta
 
 type HashableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
 type HashableNode = Node<HashableNodeKind>;
-type DereferencedNode<N extends Node> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;

@@ -1,8 +1,7 @@
-// TODO: error on unreferenced non-exported bindings. Need to impl exports properly first...
+// TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import * as objectHash from 'object-hash';
-import {ExtractNode, traverseAst} from '../../abstract-syntax-trees';
+import {createNodeDereferencer, createNodeHasher, ExtractNode, traverseAst} from '../../abstract-syntax-trees';
 import type {ResolvedAst, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 
@@ -21,8 +20,8 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     traverseAst(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
-    let resolve = createResolver(program, allBindings);
-    let getHashFor = createHasher(resolve);
+    let deref = createNodeDereferencer(program.sourceFiles);
+    let getHashFor = createNodeHasher(program.sourceFiles);
 
     // Find the `start` expression.
     let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
@@ -40,7 +39,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: recursive...
     function getEntryFor(e: Expression): Entry {
-        e = resolve(e);
+        e = deref(e as any) as any; // TODO: fix types
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
         let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
@@ -99,131 +98,3 @@ interface Entry {
 type Expression = ExtractNode<ResolvedAst, 'Expression'>
 type GlobalBinding = ExtractNode<ResolvedAst, 'GlobalBinding'>;
 type GlobalReferenceExpression = ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>;
-type MemberExpression = ExtractNode<ResolvedAst, 'MemberExpression'>;
-type Module = ExtractNode<ResolvedAst, 'Module'>;
-
-
-function createHasher(resolve: (e: Expression) => Expression) {
-    type Signature = [string, ...unknown[]];
-    const signaturesByNode = new Map<Expression, Signature>();
-    const hashesByNode = new Map<Expression, string>();
-    return getHashFor;
-
-    function getHashFor(ex: Expression) {
-        if (hashesByNode.has(ex)) return hashesByNode.get(ex)!;
-        let sig = getSignatureFor(ex);
-        let hash = objectHash(sig);
-        hashesByNode.set(ex, hash);
-        return hash;
-    }
-
-    function getSignatureFor(ex: Expression): Signature {
-        if (signaturesByNode.has(ex)) return signaturesByNode.get(ex)!;
-        let e2 = resolve(ex);
-        if (e2 !== ex) {
-            let sig2 = getSignatureFor(e2);
-            signaturesByNode.set(ex, sig2);
-            return sig2;
-        }
-        let sig = [] as unknown as Signature;
-        signaturesByNode.set(ex, sig);
-
-        const getSig = getSignatureFor;
-        const setSig = (...parts: Signature) => (sig.push(...parts), sig);
-
-        switch (ex.kind) {
-            case 'ApplicationExpression': return setSig('APP', getSig(ex.lambda), getSig(ex.argument));
-            case 'BooleanLiteralExpression': return setSig('LIT', ex.value);
-            case 'ExtensionExpression': return setSig('EXT', ex.extensionPath, ex.bindingName);
-            case 'FieldExpression': return setSig('FLD', getSig(ex.name), getSig(ex.value));
-            case 'GlobalReferenceExpression': assert(false); // the resolve() logic removed this node kind
-            case 'ImportExpression': assert(false); // the resolve() logic removed this node kind
-            case 'ListExpression': return setSig('LST', ex.elements.map(e => getSig(e)));
-            case 'MemberExpression': return setSig('MEM', getSig(ex.module), ex.bindingName);
-            case 'ModuleExpression': {
-                // Ensure binding order doesn't affect signature, by building an object keyed by binding name.
-                let obj = {} as Record<string, unknown>;
-                for (let binding of ex.module.bindings) obj[binding.globalName] = getSig(binding.value);
-                return setSig('MOD', obj);
-            }
-            case 'NotExpression': return setSig('NOT', getSig(ex.expression));
-            case 'NullLiteralExpression': return setSig('LIT', ex.value);
-            case 'NumericLiteralExpression': return setSig('LIT', ex.value);
-            case 'QuantifiedExpression': return setSig('QUA', getSig(ex.expression), ex.quantifier);
-            case 'RecordExpression': return setSig('REC', ex.fields.map(f => ({n: f.name, v: getSig(f.value)})));
-            case 'SelectionExpression': return setSig('SEL', ex.expressions.map(e => getSig(e)));
-            case 'SequenceExpression': return setSig('SEQ', ex.expressions.map(e => getSig(e)));
-            case 'StringLiteralExpression': return setSig('STR', ex.value, ex.abstract, ex.concrete);
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(ex);
-        }
-    }
-}
-
-
-// TODO: jsdoc...
-// - return value is *never* an LocalReferenceExpression or an ImportExpression
-// - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
-function createResolver(program: ResolvedProgram, allBindings: GlobalBinding[]) {
-    return resolve;
-
-    // TODO: jsdoc...
-    function resolve(expr: Expression): Expression {
-        let seen = [expr];
-        while (true) {
-            // If `expr` is a reference or member expression, try to resolve to its target expression.
-            let tgt = expr.kind === 'GlobalReferenceExpression' ? resolveReference(expr)
-                : expr.kind === 'MemberExpression' ? resolveMember(expr)
-                : undefined;
-
-            // If the target expression for `expr` could not be determined, return `expr` unchanged.
-            if (tgt === undefined) return expr;
-
-            // If `expr` resolved to a target expression that isn't a Ref/Mem expression, return the target expression.
-            if (tgt.kind !== 'GlobalReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
-
-            // If the target expression is still a Ref/Mem expression, keep iterating, but prevent an infinite loop.
-            if (seen.includes(tgt)) {
-                // TODO: improve diagnostic message, eg line/col ref
-                let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.bindingName;
-                throw new Error(`'${name}' is circularly defined`);
-            }
-            seen.push(tgt);
-            expr = tgt;
-        }
-    }
-
-    /** Find the value expression referenced by `ref`. */
-    function resolveReference(ref: GlobalReferenceExpression): Expression {
-        let result = allBindings.find(n => n.globalName === ref.globalName);
-        assert(result);
-        return result.value;
-    }
-
-    /**
-     * Find the value expression referenced by `module`.`bindingName`, if possible, otherwise return `undefined`.
-     * Some lookups always succeed, such as when `module` is a module expression. Other lookups always fail, such
-     * as when `module` is an application expression, or an import expression referencing an extension file.
-     */
-    function resolveMember(mem: MemberExpression): Expression | undefined {
-        let moduleExpr = resolve(mem.module);
-        let module: Module;
-        switch (moduleExpr.kind) {
-            // TODO: case 'ApplicationExpression': ...
-            case 'ImportExpression': {
-                module = program.sourceFiles.modulesByAbsPath.get(moduleExpr.sourceFilePath)!;
-                break;
-            }
-            case 'ModuleExpression': {
-                module = moduleExpr.module;
-                break;
-            }
-            default:
-                return undefined;
-        }
-
-        // Do a static lookup of the expression bound to the name `bindingName` in the module `module`.
-        let binding = module.bindings.find(b => b.localName === mem.bindingName);
-        assert(binding);
-        return binding.value;
-    }
-}
