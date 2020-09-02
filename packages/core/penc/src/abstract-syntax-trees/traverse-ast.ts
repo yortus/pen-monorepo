@@ -3,9 +3,9 @@ import type {Node, NodeKind} from './nodes';
 
 
 /** Performs a depth-first traversal of the AST rooted at `node`, calling `cb` on each node. */
-export function traverseAst<KS extends NodeKind>(node: Node<KS>, callback: (n: Node<KS>) => void): void {
+export function traverseAst<KS extends NodeKind>(ast: Node<KS>, callback: (n: Node<KS>) => void): void {
     let cb = callback as (n: Node) => void;
-    return rec(node as Node);
+    return rec(ast as Node);
     function rec(n: Node): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);

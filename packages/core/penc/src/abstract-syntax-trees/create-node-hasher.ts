@@ -1,14 +1,12 @@
 import * as objectHash from 'object-hash';
-import type {AstType, ExtractNode, NodeKind} from '../abstract-syntax-trees';
-import {assert} from '../utils';
+import type {AstType, ExtractNode, Node, NodeKind} from '../abstract-syntax-trees';
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.
 export function createNodeHasher<T extends AstType<HashableNodeKind>>() {
-    type HashableNode = ExtractNode<AstType<HashableNodeKind>>;
 
     // TODO: impl/import this...
-    let resolve!: (e: HashableNode) => HashableNode;
+    //let dereference!: (e: HashableNode) => HashableNode;
 
 
     type Signature = [string, ...unknown[]];
@@ -16,37 +14,48 @@ export function createNodeHasher<T extends AstType<HashableNodeKind>>() {
     const hashesByNode = new Map<HashableNode, string>();
     return getHashFor;
 
-    function getHashFor(node: ExtractNode<T>) {
+    function getHashFor(node: ExtractNode<T>, deref: <N extends Node>(n: N) => DereferencedNode<N>) {
         let n = node as HashableNode;
         if (hashesByNode.has(n)) return hashesByNode.get(n)!;
-        let sig = getSignatureFor(n);
+        let sig = getSignatureFor(n, deref);
         let hash = objectHash(sig);
         hashesByNode.set(n, hash);
         return hash;
     }
 
-    function getSignatureFor(n: HashableNode): Signature {
+    function getSignatureFor(n: HashableNode, deref: <N extends Node>(n: N) => DereferencedNode<N>): Signature {
+
+        // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
-        let n2 = resolve(n);
-        if (n2 !== n) {
-            let sig2 = getSignatureFor(n2);
-            signaturesByNode.set(n, sig2);
-            return sig2;
+
+        // No signature has been computed for this node yet. Try dereferencing the node so that different references
+        // to the same thing are treated as the same thing, and end up with the same signature.
+        let derefdNode = deref(n as Node);
+        if (derefdNode !== n) {
+            // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
+            let derefdSig = getSignatureFor(derefdNode as HashableNode, deref);
+            signaturesByNode.set(n, derefdSig);
+            return derefdSig;
         }
+
+        // Compute the signature of this node for the first time. This operation is recursive, and possibly cyclic (eg
+        // due to dereferencing cyclic references). To avoid an infinite loop, we first store the memo for the signature
+        // before computing it. If a cycle occurs, the recursive call will just use the memoised signature object and
+        // return immediately.
         let sig = [] as unknown as Signature;
         signaturesByNode.set(n, sig);
 
-        const getSig = getSignatureFor;
+        // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
+        const getSig = (n: HashableNode) => getSignatureFor(n, deref);
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
+        // Recursively compute the signature according to the node type.
         switch (n.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
             case 'BooleanLiteralExpression': return setSig('LIT', n.value);
             case 'ExtensionExpression': return setSig('EXT', n.extensionPath, n.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'GlobalBinding': return setSig('GB', n.localName, getSig(n.value));
-            case 'GlobalReferenceExpression': assert(false); // the resolve() logic removed this node kind
-            case 'ImportExpression': assert(false); // the resolve() logic removed this node kind
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.bindingName);
             case 'Module': {
@@ -56,8 +65,9 @@ export function createNodeHasher<T extends AstType<HashableNodeKind>>() {
             }
             case 'ModuleExpression': return setSig('MEX', getSig(n.module));
             case 'ModuleMap': {
-                // TODO: ...
-                throw 1;
+                let map = new Map<string, Signature>();
+                for (let [absPath, module] of n.byAbsPath.entries()) map.set(absPath, getSig(module));
+                return setSig('MODMAP', map);
             }
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteralExpression': return setSig('LIT', n.value);
@@ -75,3 +85,5 @@ export function createNodeHasher<T extends AstType<HashableNodeKind>>() {
 
 
 type HashableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
+type HashableNode = ExtractNode<AstType<HashableNodeKind>>;
+type DereferencedNode<N extends Node> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
