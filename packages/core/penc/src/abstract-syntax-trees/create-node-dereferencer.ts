@@ -1,5 +1,17 @@
-import {ExtractNode, AbstractSyntaxTree, Node, traverseAst} from '../abstract-syntax-trees';
+import {Expression, ExtractNode, AbstractSyntaxTree, NodeKind, traverseAst} from '../abstract-syntax-trees';
 import {assert} from '../utils';
+
+
+
+
+
+// TODO: temp testing...
+type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
+type Deref<N> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
+
+
+
+
 
 
 // TODO: jsdoc...
@@ -7,29 +19,27 @@ import {assert} from '../utils';
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 
 // TODO: _do_ statically enforce DereferenceableNodeKind constraint somehow...
-export function createNodeDereferencer<AST extends AbstractSyntaxTree>(ast: AST) {
-    type KS = AST extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
+export function createNodeDereferencer<KS extends DereferenceableNodeKind>(ast: AbstractSyntaxTree<KS>) {
 
     // TODO: ...
     // Make a flat list of every GlobalBinding in the entire program.
     const allBindings = [] as GlobalBinding[];
-    traverseAst(ast, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
+    traverseAst(ast as AbstractSyntaxTree, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // TODO: ... better typing? generic?
-    return deref as <N extends Node<KS>>(node: N) => Deref<N>;
-    type Deref<N extends Node<KS>> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
+    return deref as unknown as (expr: Expression<KS>) => Deref<Expression<KS>>
 
     // TODO: jsdoc...
-    function deref(node: Node): Node {
-        let seen = [node];
+    function deref(expr: Expression): Expression {
+        let seen = [expr];
         while (true) {
             // If `expr` is a reference or member expression, try to resolve to its target expression.
-            let tgt = node.kind === 'GlobalReferenceExpression' ? resolveReference(node)
-                : node.kind === 'MemberExpression' ? resolveMember(node)
+            let tgt = expr.kind === 'GlobalReferenceExpression' ? resolveReference(expr)
+                : expr.kind === 'MemberExpression' ? resolveMember(expr)
                 : undefined;
 
             // If the target expression for `expr` could not be determined, return `expr` unchanged.
-            if (tgt === undefined) return node;
+            if (tgt === undefined) return expr;
 
             // If `expr` resolved to a target expression that isn't a ref|mem expression, return the target expression.
             if (tgt.kind !== 'GlobalReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
@@ -41,7 +51,7 @@ export function createNodeDereferencer<AST extends AbstractSyntaxTree>(ast: AST)
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(tgt);
-            node = tgt;
+            expr = tgt;
         }
     }
 
@@ -87,7 +97,6 @@ export function createNodeDereferencer<AST extends AbstractSyntaxTree>(ast: AST)
 
 // TODO: temp testing...
 //type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type Expression = ExtractNode<AbstractSyntaxTree, 'Expression'>;
 type GlobalBinding = ExtractNode<AbstractSyntaxTree, 'GlobalBinding'>;
 type GlobalReferenceExpression = ExtractNode<AbstractSyntaxTree, 'GlobalReferenceExpression'>;
 type MemberExpression = ExtractNode<AbstractSyntaxTree, 'MemberExpression'>;
