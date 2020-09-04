@@ -1,4 +1,5 @@
-import {Expression, ExtractNode, AbstractSyntaxTree, NodeKind, traverseAst} from '../abstract-syntax-trees';
+import {Expression, AbstractSyntaxTree, NodeKind, traverseAst} from '../abstract-syntax-trees';
+import type {GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from '../abstract-syntax-trees';
 import {assert} from '../utils';
 
 
@@ -93,11 +94,3 @@ export function createNodeDereferencer<KS extends DereferenceableNodeKind>(ast: 
         return binding.value;
     }
 }
-
-
-// TODO: temp testing...
-//type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type GlobalBinding = ExtractNode<AbstractSyntaxTree, 'GlobalBinding'>;
-type GlobalReferenceExpression = ExtractNode<AbstractSyntaxTree, 'GlobalReferenceExpression'>;
-type MemberExpression = ExtractNode<AbstractSyntaxTree, 'MemberExpression'>;
-type Module = ExtractNode<AbstractSyntaxTree, 'Module'>;
