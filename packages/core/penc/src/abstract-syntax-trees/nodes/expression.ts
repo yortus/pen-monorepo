@@ -1,31 +1,41 @@
-import {AbsPath} from '../../utils';
-import {Module} from './module';
-import {NodeKind} from './node-kind';
-import {FilterKinds} from './util';
+import type {AbsPath} from '../../utils';
+import type {Module} from './module';
+import type {NodeKind} from './node-kind';
 
 
-export type Expression<KS extends NodeKind = NodeKind> = FilterKinds<KS,
-    | ApplicationExpression<KS>
-    | BooleanLiteralExpression
-    | ExtensionExpression
-    | FieldExpression<KS>
-    | GlobalReferenceExpression
-    | ImportExpression
-    // | LambdaExpression<KS>
-    | ListExpression<KS>
-    | LocalReferenceExpression
-    | MemberExpression<KS>
-    | ModuleExpression<KS>
-    | NotExpression<KS>
-    | NullLiteralExpression
-    | NumericLiteralExpression
-    | ParenthesisedExpression<KS>
-    | QuantifiedExpression<KS>
-    | RecordExpression<KS>
-    | SelectionExpression<KS>
-    | SequenceExpression<KS>
-    | StringLiteralExpression
->;
+export type Expression<KS extends NodeKind = NodeKind> = {
+
+    // Top-level nodes
+    AbstractSyntaxTree: never,
+    Module: never,
+
+    // Binding nodes
+    GlobalBinding: never,
+    LocalBinding: never,
+    LocalMultiBinding: never,
+
+    // Expression nodes
+    ApplicationExpression: ApplicationExpression<KS>,
+    BooleanLiteralExpression: BooleanLiteralExpression,
+    ExtensionExpression: ExtensionExpression,
+    FieldExpression: FieldExpression<KS>,
+    GlobalReferenceExpression: GlobalReferenceExpression,
+    ImportExpression: ImportExpression,
+    // LambdaExpression: LambdaExpression<KS>,
+    ListExpression: ListExpression<KS>,
+    LocalReferenceExpression: LocalReferenceExpression,
+    MemberExpression: MemberExpression<KS>,
+    ModuleExpression: ModuleExpression<KS>,
+    NotExpression: NotExpression<KS>,
+    NullLiteralExpression: NullLiteralExpression,
+    NumericLiteralExpression: NumericLiteralExpression,
+    ParenthesisedExpression: ParenthesisedExpression<KS>,
+    QuantifiedExpression: QuantifiedExpression<KS>,
+    RecordExpression: RecordExpression<KS>,
+    SelectionExpression: SelectionExpression<KS>,
+    SequenceExpression: SequenceExpression<KS>,
+    StringLiteralExpression: StringLiteralExpression,
+}[KS];
 
 
 export interface ApplicationExpression<KS extends NodeKind = NodeKind> {

@@ -1,14 +1,40 @@
-import {AbstractSyntaxTree} from './abstract-syntax-tree';
-import {Binding} from './binding';
-import {Expression} from './expression';
-import {Module} from './module';
-import {NodeKind} from './node-kind';
-import {FilterKinds} from './util';
+import type {AbstractSyntaxTree} from './abstract-syntax-tree';
+import * as Binding from './binding';
+import * as Expression from './expression';
+import type {Module} from './module';
+import type {NodeKind} from './node-kind';
 
 
-export type Node<KS extends NodeKind = NodeKind> = FilterKinds<KS,
-    | AbstractSyntaxTree<KS>
-    | Binding<KS>
-    | Expression<KS>
-    | Module<KS>
->;
+export type Node<KS extends NodeKind = NodeKind> = {
+
+    // Top-level nodes
+    AbstractSyntaxTree: AbstractSyntaxTree<KS>,
+    Module: Module<KS>,
+
+    // Binding nodes
+    GlobalBinding: Binding.GlobalBinding<KS>,
+    LocalBinding: Binding.LocalBinding<KS>,
+    LocalMultiBinding: Binding.LocalMultiBinding<KS>,
+
+    // Expression nodes
+    ApplicationExpression: Expression.ApplicationExpression<KS>,
+    BooleanLiteralExpression: Expression.BooleanLiteralExpression,
+    ExtensionExpression: Expression.ExtensionExpression,
+    FieldExpression: Expression.FieldExpression<KS>,
+    GlobalReferenceExpression: Expression.GlobalReferenceExpression,
+    ImportExpression: Expression.ImportExpression,
+    // LambdaExpression: Expression.LambdaExpression<KS>,
+    ListExpression: Expression.ListExpression<KS>,
+    LocalReferenceExpression: Expression.LocalReferenceExpression,
+    MemberExpression: Expression.MemberExpression<KS>,
+    ModuleExpression: Expression.ModuleExpression<KS>,
+    NotExpression: Expression.NotExpression<KS>,
+    NullLiteralExpression: Expression.NullLiteralExpression,
+    NumericLiteralExpression: Expression.NumericLiteralExpression,
+    ParenthesisedExpression: Expression.ParenthesisedExpression<KS>,
+    QuantifiedExpression: Expression.QuantifiedExpression<KS>,
+    RecordExpression: Expression.RecordExpression<KS>,
+    SelectionExpression: Expression.SelectionExpression<KS>,
+    SequenceExpression: Expression.SequenceExpression<KS>,
+    StringLiteralExpression: Expression.StringLiteralExpression,
+}[KS];

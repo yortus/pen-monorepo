@@ -1,13 +1,40 @@
-import {Expression} from './expression';
-import {NodeKind} from './node-kind';
-import {FilterKinds} from './util';
+import type {Expression} from './expression';
+import type {NodeKind} from './node-kind';
 
 
-export type Binding<KS extends NodeKind = NodeKind> = FilterKinds<KS,
-    | GlobalBinding<KS>
-    | LocalBinding<KS>
-    | LocalMultiBinding<KS>
->;
+export type Binding<KS extends NodeKind = NodeKind> = {
+
+    // Top-level nodes
+    AbstractSyntaxTree: never,
+    Module: never,
+
+    // Binding nodes
+    GlobalBinding: GlobalBinding<KS>,
+    LocalBinding: LocalBinding<KS>,
+    LocalMultiBinding: LocalMultiBinding<KS>,
+
+    // Expression nodes
+    ApplicationExpression: never,
+    BooleanLiteralExpression: never,
+    ExtensionExpression: never,
+    FieldExpression: never,
+    GlobalReferenceExpression: never,
+    ImportExpression: never,
+    // LambdaExpression: never,
+    ListExpression: never,
+    LocalReferenceExpression: never,
+    MemberExpression: never,
+    ModuleExpression: never,
+    NotExpression: never,
+    NullLiteralExpression: never,
+    NumericLiteralExpression: never,
+    ParenthesisedExpression: never,
+    QuantifiedExpression: never,
+    RecordExpression: never,
+    SelectionExpression: never,
+    SequenceExpression: never,
+    StringLiteralExpression: never,
+}[KS];
 
 
 export interface GlobalBinding<KS extends NodeKind = NodeKind> {

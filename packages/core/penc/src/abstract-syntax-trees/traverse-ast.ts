@@ -4,10 +4,10 @@ import type {Node, NodeKind, AbstractSyntaxTree} from './nodes';
 
 /** Performs a depth-first traversal of the AST rooted at `node`, calling `cb` on each node. */
 export function traverseAst<KS extends NodeKind>(ast: AbstractSyntaxTree<KS>, callback: (n: Node<KS>) => void): void {
-    let cb = callback as (n: Node<any>) => void;
+    let cb = callback as (n: Node) => void;
     return rec(ast);
 
-    function rec(n: Node<any>): void {
+    function rec(n: Node): void {
         switch (n.kind) {
             case 'AbstractSyntaxTree': return mapMap(n.modulesByAbsPath, rec), cb(n);
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);

@@ -2,13 +2,19 @@ export type NodeKind =
     // Top-level nodes
     | 'AbstractSyntaxTree'
     | 'Module'
+    | BindingKind
+    | ExpressionKind
+;
 
-    // Binding nodes
+
+export type BindingKind =
     | 'GlobalBinding'
     | 'LocalBinding'
     | 'LocalMultiBinding'
+;
 
-    // Expression nodes
+
+export type ExpressionKind =
     | 'ApplicationExpression'
     | 'BooleanLiteralExpression'
     | 'ExtensionExpression'
@@ -29,3 +35,4 @@ export type NodeKind =
     | 'SelectionExpression'
     | 'SequenceExpression'
     | 'StringLiteralExpression'
+;
