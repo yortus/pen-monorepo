@@ -1,4 +1,3 @@
-import {ExtractNodeKinds} from './extract-node-kinds';
 import {AbstractSyntaxTree, Binding, Expression, Node, NodeKind} from './nodes';
 
 
@@ -14,3 +13,7 @@ export type ExtractNode<T extends AbstractSyntaxTree, K extends NodeKind | 'Bind
 
 // TODO: doc helper
 type NodeFromNodeKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
+
+
+// TODO: doc helper
+type ExtractNodeKinds<T extends AbstractSyntaxTree> = T extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
