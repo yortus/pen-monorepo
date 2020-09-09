@@ -32,7 +32,7 @@ const ExcludedDereferencedNode = [
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 
 // TODO: _do_ statically enforce DereferenceableNodeKind constraint somehow...
-export function createNodeDereferencer<KS extends DereferenceableNodeKind>(ast: AbstractSyntaxTree<KS>) {
+export function createExpressionDereferencer<KS extends DereferenceableNodeKind>(ast: AbstractSyntaxTree<KS>) {
 
     // TODO: ...
     // Make a flat list of every GlobalBinding in the entire program.
