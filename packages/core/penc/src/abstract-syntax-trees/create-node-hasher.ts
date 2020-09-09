@@ -1,6 +1,7 @@
 import * as objectHash from 'object-hash';
 import {ExtractNode} from './extract-node';
-import {AbstractSyntaxTree, Node, NodeKind} from './nodes';
+import {NodeKind} from './node-kind';
+import {AbstractSyntaxTree, Node} from './nodes';
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.

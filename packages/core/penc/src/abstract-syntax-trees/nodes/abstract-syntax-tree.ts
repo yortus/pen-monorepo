@@ -1,6 +1,6 @@
 import type {AbsPath} from '../../utils';
+import type {NodeKind} from '../node-kind';
 import type {Module} from './module';
-import type {NodeKind} from './node-kind';
 
 
 export interface AbstractSyntaxTree<KS extends NodeKind = NodeKind> {

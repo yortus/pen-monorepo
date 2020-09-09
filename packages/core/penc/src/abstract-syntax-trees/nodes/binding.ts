@@ -1,5 +1,5 @@
+import type {NodeKind} from '../node-kind';
 import type {Expression} from './expression';
-import type {NodeKind} from './node-kind';
 
 
 export type Binding<KS extends NodeKind = NodeKind> = {

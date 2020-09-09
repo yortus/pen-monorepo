@@ -1,5 +1,6 @@
 import {mapMap} from '../utils';
-import type {Node, NodeKind, AbstractSyntaxTree} from './nodes';
+import {NodeKind} from './node-kind';
+import type {Node, AbstractSyntaxTree} from './nodes';
 
 
 /** Performs a depth-first traversal of the AST rooted at `node`, calling `cb` on each node. */

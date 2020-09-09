@@ -1,7 +1,7 @@
-import {Expression, AbstractSyntaxTree, NodeKind, traverseAst} from '../abstract-syntax-trees';
-import type {GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from '../abstract-syntax-trees';
 import {assert} from '../utils';
-
+import {NodeKind} from './node-kind';
+import type {AbstractSyntaxTree, Expression, GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from './nodes';
+import {traverseAst} from './traverse-ast';
 
 
 

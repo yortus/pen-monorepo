@@ -1,4 +1,5 @@
-import {AbstractSyntaxTree, Binding, Expression, Node, NodeKind} from './nodes';
+import {NodeKind} from './node-kind';
+import {AbstractSyntaxTree, Binding, Expression, Node} from './nodes';
 
 
 // TODO: doc...

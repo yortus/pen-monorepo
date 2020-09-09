@@ -1,8 +1,8 @@
+import type {NodeKind} from '../node-kind';
 import type {AbstractSyntaxTree} from './abstract-syntax-tree';
 import * as Binding from './binding';
 import * as Expression from './expression';
 import type {Module} from './module';
-import type {NodeKind} from './node-kind';
 
 
 export type Node<KS extends NodeKind = NodeKind> = {
