@@ -8,7 +8,9 @@ import {traverseAst} from './traverse-ast';
 
 // TODO: temp testing...
 //type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type Deref = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
+
+// TODO: proper name...
+export type Deref = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
 
 
 

@@ -1,16 +1,26 @@
 import * as objectHash from 'object-hash';
-import {NodeKind} from './node-kind';
-import {AbstractSyntaxTree, Node} from './nodes';
+import {assertNodeKind} from './assert-node-kind';
+import type {Deref} from './create-expression-dereferencer';
+import {isNodeKind} from './is-node-kind';
+import {ExpressionNodeKind, NodeKind} from './node-kind';
+import {Node} from './nodes';
 
 
 
 
 
 // TODO: temp testing...
-type HashableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type HashableNode = Node<HashableNodeKind>;
+type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
 
 
+export type HashableNodeKind = Exclude<NodeKind, ExcludedHashableNode>;
+export const HashableNodeKind = NodeKind.filter(k => !ExcludedHashableNode.includes(k as any)) as HashableNodeKind[];
+type ExcludedHashableNode = typeof ExcludedHashableNode[any];
+const ExcludedHashableNode = [
+    'LocalBinding',
+    'LocalMultiBinding',
+    'LocalReferenceExpression',
+] as const;
 
 
 
@@ -18,13 +28,13 @@ type HashableNode = Node<HashableNodeKind>;
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.
-export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node) => Node) { // TODO: use generic here...
+export function createNodeHasher(deref: Deref) {
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<HashableNode, Signature>();
     const hashesByNode = new Map<HashableNode, string>();
     return getHashFor;
 
-    function getHashFor(node: Node) {
+    function getHashFor(node: HashableNode) {
         let n = node as HashableNode;
         if (hashesByNode.has(n)) return hashesByNode.get(n)!;
         let sig = getSignatureFor(n);
@@ -40,7 +50,7 @@ export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = deref(n as Node); // TODO: fix type...
+        let derefdNode = isNodeKind(n, ExpressionNodeKind) ? deref(n) : n; // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             let derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -56,7 +66,10 @@ export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = getSignatureFor;
+        const getSig = (n: Node) => {
+            assertNodeKind(n.kind, HashableNodeKind);
+            return getSignatureFor(n);
+        };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
         // Recursively compute the signature according to the node type.
@@ -88,7 +101,7 @@ export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
             case 'StringLiteralExpression': return setSig('STR', n.value, n.abstract, n.concrete);
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n as never); // TODO: fix types
+            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }
 }

@@ -22,7 +22,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // Create helper functions for this program.
     let deref = createExpressionDereferencer(program.sourceFiles);
-    let getHashFor = createNodeHasher(deref as any); // TODO: fix typing
+    let getHashFor = createNodeHasher(deref); // TODO: fix typing
 
     // Find the `start` expression.
     let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
@@ -42,7 +42,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     function getEntryFor(expr: Expression): Entry {
         assertNodeKind(expr.kind, ResolvedNodeKind);
         let e = deref(expr);
-        let hash = getHashFor(e as any); // TODO: fix types
+        let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
         let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
