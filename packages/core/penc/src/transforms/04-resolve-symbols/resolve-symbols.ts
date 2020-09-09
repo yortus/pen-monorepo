@@ -1,5 +1,5 @@
-import {createAstMapper, ExtractNode} from '../../abstract-syntax-trees';
-import type {DesugaredAst, DesugaredProgram, ResolvedAst, ResolvedProgram} from '../../representations';
+import {createAstMapper, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
+import {DesugaredNodeKind, DesugaredProgram, ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
@@ -9,8 +9,8 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;
     let startGlobalName: string | undefined;
-    let allRefs = [] as Array<{scope: ScopeSymbol, ref: ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>}>;
-    let mapAst = createAstMapper<DesugaredAst, ResolvedAst>();
+    let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
+    let mapAst = createAstMapper(DesugaredNodeKind, ResolvedNodeKind);
     let sourceFiles = mapAst(program.sourceFiles, rec => ({
 
         // Attach a scope to each Module node.
@@ -27,7 +27,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         },
 
         // Attach a unique name to each local binding, returning a GlobalBinding node.
-        LocalBinding: ({localName, value, exported}): ExtractNode<ResolvedAst, 'GlobalBinding'> => {
+        LocalBinding: ({localName, value, exported}): GlobalBinding => {
             assert(currentScope);
             let {globalName} = symbolTable.createName(localName, currentScope);
             return {kind: 'GlobalBinding', localName, globalName, value: rec(value), exported};
@@ -37,7 +37,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         // Make a list of all the GlobalReferenceExpression nodes, for backpatching the names after this traversal.
         LocalReferenceExpression: ({localName}) => {
             assert(currentScope);
-            let ref: ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>;
+            let ref: GlobalReferenceExpression;
             ref = {kind: 'GlobalReferenceExpression', localName, globalName: ''};
             allRefs.push({scope: currentScope, ref});
             return ref;
@@ -58,5 +58,9 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     if (!startGlobalName) throw new Error(`Main module must define a 'start' rule.`);
 
     // All done.
-    return {sourceFiles, mainPath: program.mainPath, startGlobalName};
+    return {
+        kind: 'ResolvedProgram',
+        sourceFiles,
+        mainPath: program.mainPath, startGlobalName
+    };
 }

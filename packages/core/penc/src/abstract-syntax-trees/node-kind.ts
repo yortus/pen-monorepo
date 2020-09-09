@@ -1,22 +1,13 @@
-export type NodeKind =
-    // Top-level nodes
-    | 'AbstractSyntaxTree'
-    | 'Module'
-    | BindingKind
-    | ExpressionKind
-;
-
-
-export type BindingKind = (typeof BindingKind)[any];
-export const BindingKind = [
+export type BindingNodeKind = typeof BindingNodeKind[any];
+export const BindingNodeKind = [
     'GlobalBinding',
     'LocalBinding',
     'LocalMultiBinding',
 ] as const;
 
 
-export type ExpressionKind = (typeof ExpressionKind)[any];
-export const ExpressionKind = [
+export type ExpressionNodeKind = typeof ExpressionNodeKind[any];
+export const ExpressionNodeKind = [
     'ApplicationExpression',
     'BooleanLiteralExpression',
     'ExtensionExpression',
@@ -37,4 +28,13 @@ export const ExpressionKind = [
     'SelectionExpression',
     'SequenceExpression',
     'StringLiteralExpression',
+] as const;
+
+
+export type NodeKind = typeof NodeKind[any];
+export const NodeKind = [
+    'AbstractSyntaxTree',
+    'Module',
+    ...BindingNodeKind,
+    ...ExpressionNodeKind,
 ] as const;

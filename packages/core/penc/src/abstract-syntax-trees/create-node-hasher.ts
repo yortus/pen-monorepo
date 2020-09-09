@@ -1,7 +1,20 @@
 import * as objectHash from 'object-hash';
-import {ExtractNode} from './extract-node';
 import {NodeKind} from './node-kind';
 import {AbstractSyntaxTree, Node} from './nodes';
+
+
+
+
+
+// TODO: temp testing...
+type HashableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
+type HashableNode = Node<HashableNodeKind>;
+
+
+
+
+
+
 
 
 // TODO: doc... can't deal with Local* nodes... will throw if any encountered.
@@ -11,7 +24,7 @@ export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node
     const hashesByNode = new Map<HashableNode, string>();
     return getHashFor;
 
-    function getHashFor(node: ExtractNode<AbstractSyntaxTree<KS>>) {
+    function getHashFor(node: Node) {
         let n = node as HashableNode;
         if (hashesByNode.has(n)) return hashesByNode.get(n)!;
         let sig = getSignatureFor(n);
@@ -79,7 +92,3 @@ export function createNodeHasher<KS extends HashableNodeKind>(deref: (node: Node
         }
     }
 }
-
-
-type HashableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type HashableNode = Node<HashableNodeKind>;

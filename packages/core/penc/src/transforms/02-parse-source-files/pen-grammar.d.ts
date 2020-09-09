@@ -1,5 +1,5 @@
-import type {ExtractNode} from '../../abstract-syntax-trees';
-import type {SourceFileInfo, SourceAst} from '../../representations';
+import type {Module} from '../../abstract-syntax-trees';
+import type {SourceFileInfo} from '../../representations';
 
 
-export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): ExtractNode<SourceAst, 'Module'>;
+export declare function parse(source: string, options: {sourceFile: SourceFileInfo}): Module;

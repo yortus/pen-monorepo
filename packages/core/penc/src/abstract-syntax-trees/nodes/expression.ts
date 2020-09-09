@@ -1,47 +1,35 @@
 import type {AbsPath} from '../../utils';
-import type {NodeKind} from '../node-kind';
 import type {Module} from './module';
 
 
-export type Expression<KS extends NodeKind = NodeKind> = {
-
-    // Top-level nodes
-    AbstractSyntaxTree: never,
-    Module: never,
-
-    // Binding nodes
-    GlobalBinding: never,
-    LocalBinding: never,
-    LocalMultiBinding: never,
-
-    // Expression nodes
-    ApplicationExpression: ApplicationExpression<KS>,
-    BooleanLiteralExpression: BooleanLiteralExpression,
-    ExtensionExpression: ExtensionExpression,
-    FieldExpression: FieldExpression<KS>,
-    GlobalReferenceExpression: GlobalReferenceExpression,
-    ImportExpression: ImportExpression,
-    // LambdaExpression: LambdaExpression<KS>,
-    ListExpression: ListExpression<KS>,
-    LocalReferenceExpression: LocalReferenceExpression,
-    MemberExpression: MemberExpression<KS>,
-    ModuleExpression: ModuleExpression<KS>,
-    NotExpression: NotExpression<KS>,
-    NullLiteralExpression: NullLiteralExpression,
-    NumericLiteralExpression: NumericLiteralExpression,
-    ParenthesisedExpression: ParenthesisedExpression<KS>,
-    QuantifiedExpression: QuantifiedExpression<KS>,
-    RecordExpression: RecordExpression<KS>,
-    SelectionExpression: SelectionExpression<KS>,
-    SequenceExpression: SequenceExpression<KS>,
-    StringLiteralExpression: StringLiteralExpression,
-}[KS];
+export type Expression =
+    | ApplicationExpression
+    | BooleanLiteralExpression
+    | ExtensionExpression
+    | FieldExpression
+    | GlobalReferenceExpression
+    | ImportExpression
+    // | LambdaExpression
+    | ListExpression
+    | LocalReferenceExpression
+    | MemberExpression
+    | ModuleExpression
+    | NotExpression
+    | NullLiteralExpression
+    | NumericLiteralExpression
+    | ParenthesisedExpression
+    | QuantifiedExpression
+    | RecordExpression
+    | SelectionExpression
+    | SequenceExpression
+    | StringLiteralExpression
+;
 
 
-export interface ApplicationExpression<KS extends NodeKind = NodeKind> {
+export interface ApplicationExpression {
     readonly kind: 'ApplicationExpression';
-    readonly lambda: Expression<KS>;
-    readonly argument: Expression<KS>;
+    readonly lambda: Expression;
+    readonly argument: Expression;
 }
 
 
@@ -58,10 +46,10 @@ export interface ExtensionExpression {
 }
 
 
-export interface FieldExpression<KS extends NodeKind = NodeKind> {
+export interface FieldExpression {
     readonly kind: 'FieldExpression';
-    readonly name: Expression<KS>;
-    readonly value: Expression<KS>;
+    readonly name: Expression;
+    readonly value: Expression;
 }
 
 
@@ -79,16 +67,16 @@ export interface ImportExpression {
 }
 
 
-// export interface LambdaExpression<KS extends AllNodeKinds = AllNodeKinds> {
+// export interface LambdaExpression {
 //     readonly kind: 'LambdaExpression';
-//     readonly pattern: Pattern<KS>;
-//     readonly body: Expression<KS>;
+//     readonly pattern: Pattern;
+//     readonly body: Expression;
 // }
 
 
-export interface ListExpression<KS extends NodeKind = NodeKind> {
+export interface ListExpression {
     readonly kind: 'ListExpression';
-    readonly elements: ReadonlyArray<Expression<KS>>;
+    readonly elements: ReadonlyArray<Expression>;
 }
 
 
@@ -98,22 +86,22 @@ export interface LocalReferenceExpression {
 }
 
 
-export interface MemberExpression<KS extends NodeKind = NodeKind> {
+export interface MemberExpression {
     readonly kind: 'MemberExpression';
-    readonly module: Expression<KS>;
+    readonly module: Expression;
     readonly bindingName: string;
 }
 
 
-export interface ModuleExpression<KS extends NodeKind = NodeKind> {
+export interface ModuleExpression {
     readonly kind: 'ModuleExpression';
-    readonly module: Module<KS>;
+    readonly module: Module;
 }
 
 
-export interface NotExpression<KS extends NodeKind = NodeKind> {
+export interface NotExpression {
     readonly kind: 'NotExpression';
-    readonly expression: Expression<KS>;
+    readonly expression: Expression;
 }
 
 
@@ -129,37 +117,37 @@ export interface NumericLiteralExpression {
 }
 
 
-export interface ParenthesisedExpression<KS extends NodeKind = NodeKind> {
+export interface ParenthesisedExpression {
     readonly kind: 'ParenthesisedExpression';
-    readonly expression: Expression<KS>;
+    readonly expression: Expression;
 }
 
 
-export interface QuantifiedExpression<KS extends NodeKind = NodeKind> {
+export interface QuantifiedExpression {
     readonly kind: 'QuantifiedExpression';
-    readonly expression: Expression<KS>;
+    readonly expression: Expression;
     readonly quantifier: '?' | '*';
 }
 
 
-export interface RecordExpression<KS extends NodeKind = NodeKind> {
+export interface RecordExpression {
     readonly kind: 'RecordExpression';
     readonly fields: ReadonlyArray<{
         readonly name: string;
-        readonly value: Expression<KS>;
+        readonly value: Expression;
     }>;
 }
 
 
-export interface SelectionExpression<KS extends NodeKind = NodeKind> {
+export interface SelectionExpression {
     readonly kind: 'SelectionExpression';
-    readonly expressions: ReadonlyArray<Expression<KS>>;
+    readonly expressions: ReadonlyArray<Expression>;
 }
 
 
-export interface SequenceExpression<KS extends NodeKind = NodeKind> {
+export interface SequenceExpression {
     readonly kind: 'SequenceExpression';
-    readonly expressions: ReadonlyArray<Expression<KS>>;
+    readonly expressions: ReadonlyArray<Expression>;
 }
 
 

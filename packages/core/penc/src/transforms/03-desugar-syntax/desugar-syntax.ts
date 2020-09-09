@@ -1,5 +1,5 @@
-import {createAstMapper, ExtractNode} from '../../abstract-syntax-trees';
-import type {DesugaredAst, DesugaredProgram, SourceAst, SourceProgram} from '../../representations';
+import {assertNodeKind, createAstMapper, LocalBinding, LocalReferenceExpression, MemberExpression} from '../../abstract-syntax-trees';
+import {DesugaredNodeKind, DesugaredProgram, SourceNodeKind, SourceProgram} from '../../representations';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
@@ -7,13 +7,14 @@ import type {DesugaredAst, DesugaredProgram, SourceAst, SourceProgram} from '../
 // - ParenthesisedExpression
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
-    let mapAst = createAstMapper<SourceAst, DesugaredAst>();
+    let mapAst = createAstMapper(SourceNodeKind, DesugaredNodeKind);
     let sourceFiles = mapAst(program.sourceFiles, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
-            let bindings = [] as Array<ExtractNode<DesugaredAst, 'LocalBinding'>>;
+            let bindings = [] as LocalBinding[];
             for (let binding of mod.bindings) {
+                assertNodeKind(binding.kind, SourceNodeKind);
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
                 }
@@ -22,15 +23,23 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                     // TODO: ensure no collisions with program names. '$1' etc is ok since '$' isn't allowed in PEN ids.
                     let localName = `$${++counter}`;
                     let {names, value, exported} = binding;
-                    bindings.push({kind: 'LocalBinding', localName, value: rec(value), exported});
+                    bindings.push({
+                        kind: 'LocalBinding',
+                        localName, value: rec(value),
+                        exported
+                    });
 
                     // Introduce a local binding for each name in the LHS
                     for (let {name: bindingName, alias} of names) {
-                        let ref: ExtractNode<DesugaredAst, 'LocalReferenceExpression'>;
-                        let mem: ExtractNode<DesugaredAst, 'MemberExpression'>;
+                        let ref: LocalReferenceExpression;
+                        let mem: MemberExpression;
                         ref = {kind: 'LocalReferenceExpression', localName};
                         mem = {kind: 'MemberExpression', module: ref, bindingName};
-                        bindings.push({kind: 'LocalBinding', localName: alias ?? bindingName, value: mem, exported});
+                        bindings.push({
+                            kind: 'LocalBinding',
+                            localName: alias ?? bindingName,
+                            value: mem, exported
+                        });
                     }
                 }
             }
@@ -43,7 +52,14 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
         ParenthesisedExpression: par => {
             return rec(par.expression);
         },
+
+        // This is handled within the 'Module' callback, but must be present since it's in Source but not Desugared
+        LocalMultiBinding: 'default',
     }));
 
-    return {sourceFiles, mainPath: program.mainPath};
+    return {
+        kind: 'DesugaredProgram',
+        sourceFiles,
+        mainPath: program.mainPath
+    };
 }

@@ -1,8 +1,9 @@
 // TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import {createNodeDereferencer, createNodeHasher, ExtractNode, traverseAst} from '../../abstract-syntax-trees';
-import type {ResolvedAst, ResolvedProgram} from '../../representations';
+import {assertNodeKind, createNodeDereferencer, createNodeHasher, DereferencedNodeKind, traverseAst} from '../../abstract-syntax-trees';
+import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
+import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 
 
@@ -46,6 +47,8 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
+        assertNodeKind(e.kind, ResolvedNodeKind);
+        assertNodeKind(e.kind, DereferencedNodeKind);
         switch (e.kind) {
             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
             case 'BooleanLiteralExpression': return setX(e);
@@ -91,8 +94,3 @@ interface Entry {
     globalName: string;
     expr: Expression;
 }
-
-
-type Expression = ExtractNode<ResolvedAst, 'Expression'>
-type GlobalBinding = ExtractNode<ResolvedAst, 'GlobalBinding'>;
-type GlobalReferenceExpression = ExtractNode<ResolvedAst, 'GlobalReferenceExpression'>;

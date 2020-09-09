@@ -1,6 +1,7 @@
 import {mapMap} from '../utils';
-import {NodeKind} from './node-kind';
-import type {AbstractSyntaxTree, Binding, Expression, Node} from './nodes';
+import {assertNodeKind} from './assert-node-kind';
+import type {BindingNodeKind, ExpressionNodeKind, NodeKind} from './node-kind';
+import type {Node} from './nodes';
 
 
 /**
@@ -10,14 +11,14 @@ import type {AbstractSyntaxTree, Binding, Expression, Node} from './nodes';
  * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
  * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createAstMapper<AST extends AbstractSyntaxTree, ASTᐟ extends AbstractSyntaxTree>() {
-    type KS = AST extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
-    type KSᐟ = ASTᐟ extends AbstractSyntaxTree<infer NodeKinds> ? NodeKinds : never;
-    return function mapAst<MapObj>(node: AST, mappings: Mappings<MapObj, KS, KSᐟ>): ASTᐟ {
+export function createAstMapper<KS extends NodeKind, KSᐟ extends NodeKind>(inNodeKind: KS[], outNodeKind: KSᐟ[]) {
+    return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
         const rec: any = (n: any) => {
             try {
+                assertNodeKind(n.kind, inNodeKind);
                 let mapFn = mappers[n.kind];
-                let result = mapFn ? mapFn(n) : defaultMappers(n);
+                let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
+                assertNodeKind(result.kind, outNodeKind);
                 return result;
             }
             catch (err) {
@@ -69,20 +70,26 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
 
 // TODO: doc...
 type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
-    (rec: <N extends Node<KS>>(n: N) => NodeOfKind<KSᐟ, WidenKind<N['kind']>>) => MapObj & {
-        [K in keyof MapObj]:
-            K extends KS ? (n: NodeOfKind<KS, K>) => NodeOfKind<KSᐟ, WidenKind<K>> :
-            never;
-    };
+    (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind'], KSᐟ>>) =>
+        & MapObj
 
-type WidenKind<K extends NodeKind> =
-    K extends Expression['kind'] ? Expression['kind'] :
-    K extends Binding['kind'] ? Binding['kind'] :
-    K;
+        // All keys must be NodeKinds in KS
+        & {[K in keyof MapObj]: K extends KS ? unknown : never}
+
+        // All node kinds that are in KS but not in KSᐟ must be handled (or set to 'default')
+        & {[K in Exclude<KS, KSᐟ>]: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K, KSᐟ>>) | 'default'}
+
+        // All handled node kinds must be either a mapping function, or 'default'
+        & {[K in KS]?: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K, KSᐟ>>) | 'default'};
 
 
-/**
- * Helper type that narrows from the union of node types `NS` to the
- * single node type corresponding to the node kind given by `K`.
- */
-type NodeOfKind<KS extends NodeKind, K extends NodeKind, N = Node<KS>> = N extends {kind: K} ? N : never;
+// TODO: doc...
+type WidenKind<K extends NodeKind, AllowedKinds extends NodeKind> =
+    K extends ExpressionNodeKind ? Extract<ExpressionNodeKind, AllowedKinds> :
+    K extends BindingNodeKind ? Extract<BindingNodeKind, AllowedKinds> :
+    K extends AllowedKinds ? K :
+    never;
+
+
+// TODO: doc...
+type NodeOfKind<K extends NodeKind, N = Node> = N extends {kind: K} ? N : never;

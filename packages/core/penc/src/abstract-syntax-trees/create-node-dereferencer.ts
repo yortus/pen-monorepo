@@ -12,6 +12,18 @@ type Deref<N> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression
 
 
 
+export type DereferencedNodeKind = Exclude<NodeKind, ExcludedDereferencedNode>;
+export const DereferencedNodeKind = NodeKind.filter(k => !ExcludedDereferencedNode.includes(k as any)) as DereferencedNodeKind[];
+type ExcludedDereferencedNode = typeof ExcludedDereferencedNode[any];
+const ExcludedDereferencedNode = [
+    'GlobalReferenceExpression',
+    'ImportExpression',
+] as const;
+
+
+
+
+
 
 
 

@@ -1,13 +1,13 @@
 import * as fs from 'fs';
-import type {ExtractNode} from '../../abstract-syntax-trees';
-import type {SourceFileGraph, SourceAst, SourceProgram} from '../../representations';
+import type {Module} from '../../abstract-syntax-trees';
+import type {SourceFileGraph, SourceProgram} from '../../representations';
 import {isExtension, mapMap} from '../../utils';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): ExtractNode<SourceAst, 'Module'> => {
+    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
             return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};
@@ -30,7 +30,11 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
         }
     });
     return {
-        sourceFiles: {kind: 'AbstractSyntaxTree', modulesByAbsPath: sourceFiles},
+        kind: 'SourceProgram',
+        sourceFiles: {
+            kind: 'AbstractSyntaxTree',
+            modulesByAbsPath: sourceFiles
+        },
         mainPath: sourceFileGraph.mainPath,
     };
 }

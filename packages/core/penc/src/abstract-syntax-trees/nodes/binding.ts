@@ -1,65 +1,36 @@
-import type {NodeKind} from '../node-kind';
 import type {Expression} from './expression';
 
 
-export type Binding<KS extends NodeKind = NodeKind> = {
-
-    // Top-level nodes
-    AbstractSyntaxTree: never,
-    Module: never,
-
-    // Binding nodes
-    GlobalBinding: GlobalBinding<KS>,
-    LocalBinding: LocalBinding<KS>,
-    LocalMultiBinding: LocalMultiBinding<KS>,
-
-    // Expression nodes
-    ApplicationExpression: never,
-    BooleanLiteralExpression: never,
-    ExtensionExpression: never,
-    FieldExpression: never,
-    GlobalReferenceExpression: never,
-    ImportExpression: never,
-    // LambdaExpression: never,
-    ListExpression: never,
-    LocalReferenceExpression: never,
-    MemberExpression: never,
-    ModuleExpression: never,
-    NotExpression: never,
-    NullLiteralExpression: never,
-    NumericLiteralExpression: never,
-    ParenthesisedExpression: never,
-    QuantifiedExpression: never,
-    RecordExpression: never,
-    SelectionExpression: never,
-    SequenceExpression: never,
-    StringLiteralExpression: never,
-}[KS];
+export type Binding =
+    | GlobalBinding
+    | LocalBinding
+    | LocalMultiBinding
+;
 
 
-export interface GlobalBinding<KS extends NodeKind = NodeKind> {
+export interface GlobalBinding {
     readonly kind: 'GlobalBinding';
     readonly localName: string;
     readonly globalName: string;
-    readonly value: Expression<KS>;
+    readonly value: Expression;
     readonly exported: boolean;
 }
 
 
-export interface LocalBinding<KS extends NodeKind = NodeKind> {
+export interface LocalBinding {
     readonly kind: 'LocalBinding';
     readonly localName: string;
-    readonly value: Expression<KS>;
+    readonly value: Expression;
     readonly exported: boolean;
 }
 
 
-export interface LocalMultiBinding<KS extends NodeKind = NodeKind> {
+export interface LocalMultiBinding {
     readonly kind: 'LocalMultiBinding';
     readonly names: ReadonlyArray<{
         readonly name: string;
         readonly alias?: string;
     }>;
-    readonly value: Expression<KS>;
+    readonly value: Expression;
     readonly exported: boolean;
 }

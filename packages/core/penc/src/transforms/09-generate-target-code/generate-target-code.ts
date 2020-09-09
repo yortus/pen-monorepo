@@ -2,8 +2,7 @@
 
 
 import * as fs from 'fs';
-import type {ExtractNode} from '../../abstract-syntax-trees';
-import type {ResolvedAst} from '../../representations';
+import type {Expression, ExtensionExpression} from '../../abstract-syntax-trees';
 import {assert} from '../../utils';
 import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';
@@ -11,8 +10,6 @@ import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
 
 
-type Expression = ExtractNode<ResolvedAst, 'Expression'>;
-type ExtensionExpression = ExtractNode<ResolvedAst, 'ExtensionExpression'>;
 
 
 export interface Program {
@@ -293,6 +290,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         default:
+            // TODO: add exhaustiveness check...
             emit.down(1).text(`// NOT HANDLED: ${name}`);
             // TODO: was... restore...
             // throw new Error('Internal Error'); // TODO...

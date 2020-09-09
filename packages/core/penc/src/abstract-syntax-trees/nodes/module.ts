@@ -1,10 +1,9 @@
 import type {AbsPath} from '../../utils';
-import type {NodeKind} from '../node-kind';
 import type {Binding} from './binding';
 
 
-export interface Module<KS extends NodeKind = NodeKind> {
+export interface Module {
     readonly kind: 'Module';
-    readonly bindings: ReadonlyArray<Binding<KS>>;
+    readonly bindings: ReadonlyArray<Binding>;
     readonly path?: AbsPath;
 }
