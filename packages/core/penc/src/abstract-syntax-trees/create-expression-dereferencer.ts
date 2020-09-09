@@ -7,8 +7,8 @@ import {traverseAst} from './traverse-ast';
 
 
 // TODO: temp testing...
-type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
-type Deref<N> = N extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : N;
+//type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
+type Deref = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
 
 
 
@@ -32,7 +32,7 @@ const ExcludedDereferencedNode = [
 // - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 
 // TODO: _do_ statically enforce DereferenceableNodeKind constraint somehow...
-export function createExpressionDereferencer<KS extends DereferenceableNodeKind>(ast: AbstractSyntaxTree<KS>) {
+export function createExpressionDereferencer(ast: AbstractSyntaxTree) {
 
     // TODO: ...
     // Make a flat list of every GlobalBinding in the entire program.
@@ -40,7 +40,7 @@ export function createExpressionDereferencer<KS extends DereferenceableNodeKind>
     traverseAst(ast as AbstractSyntaxTree, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // TODO: ... better typing? generic?
-    return deref as unknown as (expr: Expression<KS>) => Deref<Expression<KS>>
+    return deref as Deref;
 
     // TODO: jsdoc...
     function deref(expr: Expression): Expression {

@@ -1,7 +1,7 @@
 // TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import {assertNodeKind, createExpressionDereferencer, createNodeHasher, DereferencedNodeKind, traverseAst} from '../../abstract-syntax-trees';
+import {assertNodeKind, createExpressionDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
 import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
@@ -39,16 +39,16 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     return {startName: startEntry.globalName, flatList};
 
     // TODO: recursive...
-    function getEntryFor(e: Expression): Entry {
-        e = deref(e);
+    function getEntryFor(expr: Expression): Entry {
+        assertNodeKind(expr.kind, ResolvedNodeKind);
+        let e = deref(expr);
         let hash = getHashFor(e as any); // TODO: fix types
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
         let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
-        assertNodeKind(e.kind, ResolvedNodeKind);
-        assertNodeKind(e.kind, DereferencedNodeKind);
+        // assertNodeKind(e.kind, DereferencedNodeKind);
         switch (e.kind) {
             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
             case 'BooleanLiteralExpression': return setX(e);
