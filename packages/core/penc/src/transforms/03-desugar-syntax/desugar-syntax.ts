@@ -14,7 +14,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
         Module: mod => {
             let bindings = [] as LocalBinding[];
             for (let binding of mod.bindings) {
-                assertNodeKind(binding.kind, SourceNodeKind);
+                assertNodeKind(binding, SourceNodeKind);
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
                 }

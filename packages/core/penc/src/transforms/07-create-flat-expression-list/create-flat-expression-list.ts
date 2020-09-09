@@ -40,7 +40,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
-        assertNodeKind(expr.kind, ResolvedNodeKind);
+        assertNodeKind(expr, ResolvedNodeKind);
         let e = deref(expr);
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;

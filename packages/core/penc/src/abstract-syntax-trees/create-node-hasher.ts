@@ -67,7 +67,7 @@ export function createNodeHasher(deref: Deref) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assertNodeKind(n.kind, HashableNodeKind);
+            assertNodeKind(n, HashableNodeKind);
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
