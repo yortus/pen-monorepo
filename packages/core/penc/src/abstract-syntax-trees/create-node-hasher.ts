@@ -1,8 +1,9 @@
 import * as objectHash from 'object-hash';
 import {assertNodeKind} from './assert-node-kind';
 import type {Deref} from './create-expression-dereferencer';
+import {createNodeKind} from './create-node-kind';
 import {isNodeKind} from './is-node-kind';
-import {ExpressionNodeKind, NodeKind} from './node-kind';
+import {ExpressionNodeKind} from './node-kind';
 import {Node} from './nodes';
 
 
@@ -13,14 +14,26 @@ import {Node} from './nodes';
 type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
 
 
-export type HashableNodeKind = Exclude<NodeKind, ExcludedHashableNode>;
-export const HashableNodeKind = NodeKind.filter(k => !ExcludedHashableNode.includes(k as any)) as HashableNodeKind[];
-type ExcludedHashableNode = typeof ExcludedHashableNode[any];
-const ExcludedHashableNode = [
-    'LocalBinding',
-    'LocalMultiBinding',
-    'LocalReferenceExpression',
-] as const;
+// TODO:
+// [x] make helper for this
+// [x] apply here
+// [x] apply to DereferencedNodeKind
+// [x] apply to SourceNodeKind
+// [x] apply to DesugaredNodeKind
+// [x] apply to ResolvedNodeKind
+// [ ] mostly just values now - should be camelCase?
+// [ ] fix runtime error seen during `npm run build`
+
+
+export type HashableNodeKind = typeof HashableNodeKind[any];
+export const HashableNodeKind = createNodeKind({
+    exclude: [
+        'LocalBinding',
+        'LocalMultiBinding',
+        'LocalReferenceExpression'
+    ],
+});
+
 
 
 
