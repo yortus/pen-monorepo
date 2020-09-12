@@ -15,10 +15,10 @@ export function createAstMapper<KS extends NodeKind, KSᐟ extends NodeKind>(inN
     return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
         const rec: any = (n: any) => {
             try {
-                assertNodeKind(n.kind, inNodeKind);
+                assertNodeKind(n, inNodeKind);
                 let mapFn = mappers[n.kind];
                 let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-                assertNodeKind(result.kind, outNodeKind);
+                assertNodeKind(result, outNodeKind);
                 return result;
             }
             catch (err) {

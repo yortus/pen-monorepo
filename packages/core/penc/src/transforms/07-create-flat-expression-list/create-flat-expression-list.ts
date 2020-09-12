@@ -48,7 +48,6 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
-        // assertNodeKind(e.kind, DereferencedNodeKind);
         switch (e.kind) {
             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
             case 'BooleanLiteralExpression': return setX(e);
