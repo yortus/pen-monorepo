@@ -1,4 +1,4 @@
-import type {NodeKind} from './node-kind';
+import type {NodeKind} from './node-kinds';
 import type {Node} from './nodes';
 
 

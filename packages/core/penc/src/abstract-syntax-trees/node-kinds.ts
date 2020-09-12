@@ -1,13 +1,17 @@
-export type BindingNodeKind = typeof BindingNodeKind[any];
-export const BindingNodeKind = [
+import type {Node} from './nodes';
+
+
+export type NodeKind = Node['kind'];
+
+
+export const bindingNodeKinds = makeNodeKindList(
     'GlobalBinding',
     'LocalBinding',
     'LocalMultiBinding',
-] as const;
+);
 
 
-export type ExpressionNodeKind = typeof ExpressionNodeKind[any];
-export const ExpressionNodeKind = [
+export const expressionNodeKinds = makeNodeKindList(
     'ApplicationExpression',
     'BooleanLiteralExpression',
     'ExtensionExpression',
@@ -28,13 +32,22 @@ export const ExpressionNodeKind = [
     'SelectionExpression',
     'SequenceExpression',
     'StringLiteralExpression',
-] as const;
+);
 
 
-export type NodeKind = typeof NodeKind[any];
-export const NodeKind = [
+export const allNodeKinds = makeNodeKindList(
     'AbstractSyntaxTree',
     'Module',
-    ...BindingNodeKind,
-    ...ExpressionNodeKind,
-] as const;
+    ...bindingNodeKinds,
+    ...expressionNodeKinds,
+);
+
+
+// TODO: doc helper...
+function makeNodeKindList<K extends NodeKind>(...kinds: K[]) {
+    function without<X extends K>(...excluded: X[]) {
+        let result = kinds.filter(k => !excluded.includes(k as any));
+        return makeNodeKindList(...result as Array<Exclude<K, X>>);
+    }
+    return Object.assign([] as K[], kinds, {without});
+}

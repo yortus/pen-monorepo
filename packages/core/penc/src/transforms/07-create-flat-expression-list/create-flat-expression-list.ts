@@ -3,7 +3,7 @@
 
 import {assertNodeKind, createExpressionDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
-import {ResolvedNodeKind, ResolvedProgram} from '../../representations';
+import {resolvedNodeKinds, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
 
 
@@ -40,7 +40,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
-        assertNodeKind(expr, ResolvedNodeKind);
+        assertNodeKind(expr, resolvedNodeKinds);
         let e = deref(expr);
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;

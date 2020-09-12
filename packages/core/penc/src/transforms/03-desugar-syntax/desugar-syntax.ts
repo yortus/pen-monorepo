@@ -1,5 +1,5 @@
 import {assertNodeKind, createAstMapper, LocalBinding, LocalReferenceExpression, MemberExpression} from '../../abstract-syntax-trees';
-import {DesugaredNodeKind, DesugaredProgram, SourceNodeKind, SourceProgram} from '../../representations';
+import {desugaredNodeKinds, DesugaredProgram, sourceNodeKinds, SourceProgram} from '../../representations';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
@@ -7,14 +7,14 @@ import {DesugaredNodeKind, DesugaredProgram, SourceNodeKind, SourceProgram} from
 // - ParenthesisedExpression
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
-    let mapAst = createAstMapper(SourceNodeKind, DesugaredNodeKind);
+    let mapAst = createAstMapper(sourceNodeKinds, desugaredNodeKinds);
     let sourceFiles = mapAst(program.sourceFiles, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
             let bindings = [] as LocalBinding[];
             for (let binding of mod.bindings) {
-                assertNodeKind(binding, SourceNodeKind);
+                assertNodeKind(binding, sourceNodeKinds);
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
                 }

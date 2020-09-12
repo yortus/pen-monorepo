@@ -1,5 +1,5 @@
 import {AbsPath} from '../utils';
-import {createNodeKind, AbstractSyntaxTree} from '../abstract-syntax-trees';
+import {AbstractSyntaxTree, allNodeKinds} from '../abstract-syntax-trees';
 
 
 export interface SourceProgram {
@@ -9,4 +9,7 @@ export interface SourceProgram {
 }
 
 
-export const SourceNodeKind = createNodeKind({exclude: ['GlobalBinding', 'GlobalReferenceExpression']});
+export const sourceNodeKinds = allNodeKinds.without(
+    'GlobalBinding',
+    'GlobalReferenceExpression',
+);

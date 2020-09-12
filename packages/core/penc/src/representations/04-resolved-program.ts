@@ -1,5 +1,5 @@
 import {AbsPath} from '../utils';
-import {AbstractSyntaxTree, createNodeKind} from '../abstract-syntax-trees';
+import {AbstractSyntaxTree, allNodeKinds} from '../abstract-syntax-trees';
 
 
 export interface ResolvedProgram {
@@ -10,11 +10,9 @@ export interface ResolvedProgram {
 }
 
 
-export const ResolvedNodeKind = createNodeKind({
-    exclude: [
-        'LocalBinding',
-        'LocalMultiBinding',
-        'LocalReferenceExpression',
-        'ParenthesisedExpression',
-    ],
-});
+export const resolvedNodeKinds = allNodeKinds.without(
+    'LocalBinding',
+    'LocalMultiBinding',
+    'LocalReferenceExpression',
+    'ParenthesisedExpression',
+);

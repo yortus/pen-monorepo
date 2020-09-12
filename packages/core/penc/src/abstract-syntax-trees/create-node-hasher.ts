@@ -1,17 +1,12 @@
 import * as objectHash from 'object-hash';
 import {assertNodeKind} from './assert-node-kind';
 import type {Deref} from './create-expression-dereferencer';
-import {createNodeKind} from './create-node-kind';
 import {isNodeKind} from './is-node-kind';
-import {ExpressionNodeKind} from './node-kind';
+import {allNodeKinds, expressionNodeKinds} from './node-kinds';
 import {Node} from './nodes';
 
 
 
-
-
-// TODO: temp testing...
-type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
 
 
 // TODO:
@@ -21,18 +16,18 @@ type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ?
 // [x] apply to SourceNodeKind
 // [x] apply to DesugaredNodeKind
 // [x] apply to ResolvedNodeKind
-// [ ] mostly just values now - should be camelCase?
+// [x] mostly just values now - should be camelCase?
 // [ ] fix runtime error seen during `npm run build`
 
 
-export type HashableNodeKind = typeof HashableNodeKind[any];
-export const HashableNodeKind = createNodeKind({
-    exclude: [
-        'LocalBinding',
-        'LocalMultiBinding',
-        'LocalReferenceExpression'
-    ],
-});
+
+
+
+
+// TODO: temp testing... move to bottom & doc
+type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
+type HashableNodeKind = typeof hashableNodeKinds[any];
+const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'LocalReferenceExpression');
 
 
 
@@ -63,7 +58,7 @@ export function createNodeHasher(deref: Deref) {
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = isNodeKind(n, ExpressionNodeKind) ? deref(n) : n; // TODO: fix type...
+        let derefdNode = isNodeKind(n, expressionNodeKinds) ? deref(n) : n; // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             let derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -80,7 +75,7 @@ export function createNodeHasher(deref: Deref) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assertNodeKind(n, HashableNodeKind);
+            assertNodeKind(n, hashableNodeKinds);
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);

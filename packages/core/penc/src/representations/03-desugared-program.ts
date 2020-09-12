@@ -1,5 +1,5 @@
 import {AbsPath} from '../utils';
-import {AbstractSyntaxTree, createNodeKind} from '../abstract-syntax-trees';
+import {AbstractSyntaxTree, allNodeKinds} from '../abstract-syntax-trees';
 
 
 export interface DesugaredProgram {
@@ -9,11 +9,9 @@ export interface DesugaredProgram {
 }
 
 
-export const DesugaredNodeKind = createNodeKind({
-    exclude: [
-        'GlobalBinding',
-        'GlobalReferenceExpression',
-        'LocalMultiBinding',
-        'ParenthesisedExpression',
-    ],
-});
+export const desugaredNodeKinds = allNodeKinds.without(
+    'GlobalBinding',
+    'GlobalReferenceExpression',
+    'LocalMultiBinding',
+    'ParenthesisedExpression',
+);

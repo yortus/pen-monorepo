@@ -1,7 +1,7 @@
 import {mapMap} from '../utils';
 import {assertNodeKind} from './assert-node-kind';
-import type {BindingNodeKind, ExpressionNodeKind, NodeKind} from './node-kind';
-import type {Node} from './nodes';
+import type {NodeKind} from './node-kinds';
+import type {Binding, Expression, Node} from './nodes';
 
 
 /**
@@ -85,8 +85,8 @@ type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
 
 // TODO: doc...
 type WidenKind<K extends NodeKind, AllowedKinds extends NodeKind> =
-    K extends ExpressionNodeKind ? Extract<ExpressionNodeKind, AllowedKinds> :
-    K extends BindingNodeKind ? Extract<BindingNodeKind, AllowedKinds> :
+    K extends Expression['kind'] ? Extract<Expression['kind'], AllowedKinds> :
+    K extends Binding['kind'] ? Extract<Binding['kind'], AllowedKinds> :
     K extends AllowedKinds ? K :
     never;
 

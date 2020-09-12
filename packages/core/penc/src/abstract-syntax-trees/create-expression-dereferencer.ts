@@ -1,5 +1,5 @@
 import {assert} from '../utils';
-import {createNodeKind} from './create-node-kind';
+//import {allNodeKinds} from './node-kinds';
 import type {AbstractSyntaxTree, Expression, GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from './nodes';
 import {traverseAst} from './traverse-ast';
 
@@ -13,7 +13,7 @@ import {traverseAst} from './traverse-ast';
 export type Deref = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
 
 
-export const DereferencedNodeKind = createNodeKind({exclude: ['GlobalReferenceExpression', 'ImportExpression']});
+//const DereferencedNodeKind = allNodeKinds.without('GlobalReferenceExpression', 'ImportExpression');
 
 
 
