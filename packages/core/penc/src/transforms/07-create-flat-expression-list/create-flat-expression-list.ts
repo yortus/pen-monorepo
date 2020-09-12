@@ -1,7 +1,7 @@
 // TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import {createExpressionDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
+import {createDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
 import {resolvedNodeKinds, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
@@ -21,7 +21,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     traverseAst(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
-    let deref = createExpressionDereferencer(program.sourceFiles);
+    let deref = createDereferencer(program.sourceFiles);
     let getHashFor = createNodeHasher(deref); // TODO: fix typing
 
     // Find the `start` expression.

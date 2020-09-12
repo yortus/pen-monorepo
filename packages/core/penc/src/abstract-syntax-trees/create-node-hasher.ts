@@ -1,36 +1,23 @@
 import * as objectHash from 'object-hash';
 import {assert} from '../utils';
-import type {Deref} from './create-expression-dereferencer';
+import type {DereferenceFunction} from './create-dereferencer';
 import {allNodeKinds, expressionNodeKinds} from './node-kinds';
 import {Node} from './nodes';
 
 
-
-
-
-
-
-
-
-// TODO: temp testing... move to bottom & doc
-type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
-type HashableNodeKind = typeof hashableNodeKinds[any];
-const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'LocalReferenceExpression');
-
-
-
-
-
-
-
-// TODO: doc... can't deal with Local* nodes... will throw if any encountered.
-export function createNodeHasher(deref: Deref) {
+/**
+ * Returns a function that returns a hash value for any given node. Any node kind may be hashed except the Local* kinds.
+ * The same hash value is returned for most logically equivalent nodes, that is, nodes that may be substituted for one
+ * another without changing the semantics of the AST. For example, a reference expression and the expression it
+ * refers to will have the same hash value. This allows the AST to be simplified without changing it semantically.
+ * @param deref function to be used to dereference expressions (see createExpressionDereferencer).
+ */
+export function createNodeHasher(deref: DereferenceFunction) {
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<HashableNode, Signature>();
     const hashesByNode = new Map<HashableNode, string>();
-    return getHashFor;
 
-    function getHashFor(node: HashableNode) {
+    return function getHashFor(node: HashableNode) {
         let n = node as HashableNode;
         if (hashesByNode.has(n)) return hashesByNode.get(n)!;
         let sig = getSignatureFor(n);
@@ -39,6 +26,10 @@ export function createNodeHasher(deref: Deref) {
         return hash;
     }
 
+    /**
+     * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
+     * Logically equivalent nodes will end up with signatures that produce the same hash. 
+     */
     function getSignatureFor(n: HashableNode): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
@@ -101,3 +92,15 @@ export function createNodeHasher(deref: Deref) {
         }
     }
 }
+
+
+// Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
+type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
+
+
+// Helper type: union of all node kinds that support hashing. Includes all node kinds except 'Local*'.
+type HashableNodeKind = typeof hashableNodeKinds[any];
+
+
+// Helper array of all node kinds that support hashing. Includes all node kinds except 'Local*'. 
+const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'LocalReferenceExpression');

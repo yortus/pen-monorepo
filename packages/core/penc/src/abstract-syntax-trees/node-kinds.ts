@@ -1,4 +1,4 @@
-import {createNodeKinds} from './create-node-kinds';
+import {createNodeKinds} from './utils';
 
 
 export const bindingNodeKinds = createNodeKinds(

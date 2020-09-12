@@ -1,6 +1,6 @@
 import {assert, mapMap} from '../utils';
-import {NodeKinds} from './create-node-kinds';
 import type {Binding, Expression, Node} from './nodes';
+import {NodeKinds} from './utils';
 
 
 /**
@@ -68,7 +68,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
 }
 
 
-// TODO: doc...
+// Helper type for constraining and contextually typing the node mapping functions.
 type Mappings<MapObj, KS extends Node['kind'], KSᐟ extends Node['kind']> =
     (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind'], KSᐟ>>) =>
         & MapObj
@@ -83,7 +83,7 @@ type Mappings<MapObj, KS extends Node['kind'], KSᐟ extends Node['kind']> =
         & {[K in KS]?: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K, KSᐟ>>) | 'default'};
 
 
-// TODO: doc...
+// Helper type for widening specific node kinds to general node kind categories.
 type WidenKind<K extends Node['kind'], AllowedKinds extends Node['kind']> =
     K extends Expression['kind'] ? Extract<Expression['kind'], AllowedKinds> :
     K extends Binding['kind'] ? Extract<Binding['kind'], AllowedKinds> :
@@ -91,5 +91,5 @@ type WidenKind<K extends Node['kind'], AllowedKinds extends Node['kind']> =
     never;
 
 
-// TODO: doc...
+// Helper type returning the union of nodes corresponding to the given union of node kinds.
 type NodeOfKind<K extends Node['kind'], N = Node> = N extends {kind: K} ? N : never;

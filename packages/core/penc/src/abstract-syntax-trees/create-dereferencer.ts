@@ -1,5 +1,4 @@
 import {assert} from '../utils';
-//import {allNodeKinds} from './node-kinds';
 import type {AbstractSyntaxTree, Expression, GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from './nodes';
 import {traverseAst} from './traverse-ast';
 
@@ -7,22 +6,31 @@ import {traverseAst} from './traverse-ast';
 
 
 
-// TODO: proper name...
-export type Deref = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
+
+/**
+ * A function that returns the result of _dereferencing_ the expression node `expr`. If expr is a global reference
+ * or member expression, then the returned node will be the node `expr` refers to in the same AST, if it can be
+ * statically determined. In all other cases, `expr` is returned unchanged.
+ * NB: the result of dereferencing an expression is guaranteed to never be a global reference or import expression.
+ */
+export type DereferenceFunction = <E extends Expression>(expr: E) => E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E
 
 
-//const DereferencedNodeKind = allNodeKinds.without('GlobalReferenceExpression', 'ImportExpression');
 
 
-
-
-
-// TODO: jsdoc...
-// - return value is *never* an LocalReferenceExpression or an ImportExpression
-// - TODO: can we impl these such that the 'resolve symbol refs' transform can be removed?
 
 // TODO: _do_ statically enforce DereferenceableNodeKind constraint somehow...
-export function createExpressionDereferencer(ast: AbstractSyntaxTree) {
+//type DereferenceableNodeKind = Exclude<NodeKind, 'LocalBinding' | 'LocalMultiBinding' | 'LocalReferenceExpression'>;
+
+
+
+
+
+
+
+
+
+export function createDereferencer(ast: AbstractSyntaxTree) {
 
     // TODO: ...
     // Make a flat list of every GlobalBinding in the entire program.
@@ -30,7 +38,7 @@ export function createExpressionDereferencer(ast: AbstractSyntaxTree) {
     traverseAst(ast as AbstractSyntaxTree, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // TODO: ... better typing? generic?
-    return deref as Deref;
+    return deref as DereferenceFunction;
 
     // TODO: jsdoc...
     function deref(expr: Expression): Expression {
