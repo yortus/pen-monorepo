@@ -4,14 +4,15 @@ import type {Binding, Expression, Node} from './nodes';
 
 
 /**
- * Returns a node mapping function that maps from one type of AST to another. The returned mapping function creates and
- * returns a new node graph derived from the node graph rooted at `node`. By default, each node is recursively cloned,
- * in which case the returned node is a deep clone of `node`. The mapping function for each node kind can be specified
- * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
- * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
+ * Returns a recursive node mapping function that maps from one type of AST to another. The returned mapping function
+ * creates and returns a new node graph derived from the node graph rooted at `node`. By default, each node is
+ * recursively cloned, in which case the returned node is a deep clone of `node`. The mapping function for each node
+ * kind can be specified in the `mappings` object, which allows the resulting node graph to differ in structure and node
+ * kinds from the graph rooted at `node`. The source and target ASTs must satisfy the node kind constraints given by
+ * `inNodeKinds` and `outNodeKinds`.
  */
-export function createAstMapper<KS extends Node['kind'], KSᐟ extends Node['kind']>(inNodeKinds: NodeKinds<KS>, outNodeKinds: NodeKinds<KSᐟ>) {
-    return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
+export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind']>(inNodeKinds: NodeKinds<K>, outNodeKinds: NodeKinds<Kᐟ>) {
+    return function mapAst<MapObj, N extends NodeOfKind<K>>(node: N, mappings: Mappings<MapObj, K, Kᐟ>): N {
         const rec: any = (n: any) => {
             try {
                 assert(inNodeKinds.includes(n));

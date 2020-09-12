@@ -8,17 +8,6 @@ import {Node} from './nodes';
 
 
 
-// TODO:
-// [x] make helper for this
-// [x] apply here
-// [x] apply to DereferencedNodeKind
-// [x] apply to SourceNodeKind
-// [x] apply to DesugaredNodeKind
-// [x] apply to ResolvedNodeKind
-// [x] mostly just values now - should be camelCase?
-// [ ] fix runtime error seen during `npm run build`
-
-
 
 
 
