@@ -1,6 +1,5 @@
 import {mapMap} from '../utils';
 import {assertNodeKind} from './assert-node-kind';
-import type {NodeKind} from './node-kinds';
 import type {Binding, Expression, Node} from './nodes';
 
 
@@ -11,7 +10,7 @@ import type {Binding, Expression, Node} from './nodes';
  * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
  * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createAstMapper<KS extends NodeKind, KSᐟ extends NodeKind>(inNodeKind: KS[], outNodeKind: KSᐟ[]) {
+export function createAstMapper<KS extends Node['kind'], KSᐟ extends Node['kind']>(inNodeKind: KS[], outNodeKind: KSᐟ[]) {
     return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
         const rec: any = (n: any) => {
             try {
@@ -69,7 +68,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
 
 
 // TODO: doc...
-type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
+type Mappings<MapObj, KS extends Node['kind'], KSᐟ extends Node['kind']> =
     (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind'], KSᐟ>>) =>
         & MapObj
 
@@ -84,7 +83,7 @@ type Mappings<MapObj, KS extends NodeKind, KSᐟ extends NodeKind> =
 
 
 // TODO: doc...
-type WidenKind<K extends NodeKind, AllowedKinds extends NodeKind> =
+type WidenKind<K extends Node['kind'], AllowedKinds extends Node['kind']> =
     K extends Expression['kind'] ? Extract<Expression['kind'], AllowedKinds> :
     K extends Binding['kind'] ? Extract<Binding['kind'], AllowedKinds> :
     K extends AllowedKinds ? K :
@@ -92,4 +91,4 @@ type WidenKind<K extends NodeKind, AllowedKinds extends NodeKind> =
 
 
 // TODO: doc...
-type NodeOfKind<K extends NodeKind, N = Node> = N extends {kind: K} ? N : never;
+type NodeOfKind<K extends Node['kind'], N = Node> = N extends {kind: K} ? N : never;

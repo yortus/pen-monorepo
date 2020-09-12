@@ -1,9 +1,6 @@
 import type {Node} from './nodes';
 
 
-export type NodeKind = Node['kind'];
-
-
 export const bindingNodeKinds = makeNodeKindList(
     'GlobalBinding',
     'LocalBinding',
@@ -44,10 +41,16 @@ export const allNodeKinds = makeNodeKindList(
 
 
 // TODO: doc helper...
-function makeNodeKindList<K extends NodeKind>(...kinds: K[]) {
+function makeNodeKindList<K extends Node['kind']>(...kinds: K[]) {
+
+    function assert<K extends Node['kind']>(node: Node): asserts node is Node extends infer N ? (N extends {kind: K} ? N : never) : never {
+        if (kinds.includes(node.kind as any)) return;
+        throw new Error(`Unexpected node kind '${node.kind}'. Expected one of: '${kinds.join(`', '`)}'`);
+    }
+
     function without<X extends K>(...excluded: X[]) {
         let result = kinds.filter(k => !excluded.includes(k as any));
         return makeNodeKindList(...result as Array<Exclude<K, X>>);
     }
-    return Object.assign([] as K[], kinds, {without});
+    return Object.assign([] as K[], kinds, {assert, without});
 }
