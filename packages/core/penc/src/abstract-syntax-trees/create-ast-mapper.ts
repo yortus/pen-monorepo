@@ -1,5 +1,5 @@
 import {assert, mapMap} from '../utils';
-import {isNodeKind} from './is-node-kind';
+import {NodeKinds} from './create-node-kinds';
 import type {Binding, Expression, Node} from './nodes';
 
 
@@ -10,14 +10,14 @@ import type {Binding, Expression, Node} from './nodes';
  * in the `mappings` object, which allows the resulting node graph to differ in structure and node kinds from the graph
  * rooted at `node`. Both the source and target ASTs must satisfy the type constraints given by `P` and `Pᐟ`.
  */
-export function createAstMapper<KS extends Node['kind'], KSᐟ extends Node['kind']>(inNodeKind: KS[], outNodeKind: KSᐟ[]) {
+export function createAstMapper<KS extends Node['kind'], KSᐟ extends Node['kind']>(inNodeKinds: NodeKinds<KS>, outNodeKinds: NodeKinds<KSᐟ>) {
     return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
         const rec: any = (n: any) => {
             try {
-                assert(isNodeKind(n, inNodeKind));
+                assert(inNodeKinds.includes(n));
                 let mapFn = mappers[n.kind];
                 let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-                assert(isNodeKind(result, outNodeKind));
+                assert(outNodeKinds.includes(result));
                 return result;
             }
             catch (err) {

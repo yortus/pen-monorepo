@@ -1,7 +1,6 @@
 import * as objectHash from 'object-hash';
 import {assert} from '../utils';
 import type {Deref} from './create-expression-dereferencer';
-import {isNodeKind} from './is-node-kind';
 import {allNodeKinds, expressionNodeKinds} from './node-kinds';
 import {Node} from './nodes';
 
@@ -58,7 +57,7 @@ export function createNodeHasher(deref: Deref) {
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = isNodeKind(n, expressionNodeKinds) ? deref(n) : n; // TODO: fix type...
+        let derefdNode = expressionNodeKinds.includes(n) ? deref(n) : n; // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             let derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -75,7 +74,7 @@ export function createNodeHasher(deref: Deref) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assert(isNodeKind(n, hashableNodeKinds));
+            assert(hashableNodeKinds.includes(n));
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);

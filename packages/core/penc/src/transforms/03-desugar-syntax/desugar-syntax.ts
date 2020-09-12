@@ -1,4 +1,4 @@
-import {createAstMapper, isNodeKind, LocalBinding, LocalReferenceExpression, MemberExpression} from '../../abstract-syntax-trees';
+import {createAstMapper, LocalBinding, LocalReferenceExpression, MemberExpression} from '../../abstract-syntax-trees';
 import {desugaredNodeKinds, DesugaredProgram, sourceNodeKinds, SourceProgram} from '../../representations';
 import {assert} from '../../utils';
 
@@ -15,7 +15,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
         Module: mod => {
             let bindings = [] as LocalBinding[];
             for (let binding of mod.bindings) {
-                assert(isNodeKind(binding, sourceNodeKinds));
+                assert(sourceNodeKinds.includes(binding));
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
                 }
