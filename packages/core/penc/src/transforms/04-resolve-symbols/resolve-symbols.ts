@@ -4,7 +4,7 @@ import {assert} from '../../utils';
 import {ScopeSymbol, SymbolTable} from './symbol-table';
 
 
-// TODO: doc...
+// TODO: jsdoc...
 export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
     const symbolTable = new SymbolTable();
     let currentScope: ScopeSymbol | undefined;

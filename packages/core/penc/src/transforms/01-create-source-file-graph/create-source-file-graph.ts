@@ -5,7 +5,7 @@ import {parse as detectImports} from './pen-import-detection-grammar';
 import {resolveModuleSpecifier} from './resolve-module-specifier';
 
 
-// TODO: doc...
+// TODO: jsdoc...
 export function createSourceFileGraph(options: {main: string}): SourceFileGraph {
     let sourceFiles = new Map<AbsPath, SourceFileInfo>();
 

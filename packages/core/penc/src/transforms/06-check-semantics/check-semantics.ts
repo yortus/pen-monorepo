@@ -2,7 +2,7 @@ import {traverseAst} from '../../abstract-syntax-trees';
 import {ResolvedProgram} from '../../representations';
 
 
-// TODO: doc...
+// TODO: jsdoc...
 export function checkSemantics(program: ResolvedProgram) {
     traverseAst(program.sourceFiles, n => {
         switch (n.kind) {

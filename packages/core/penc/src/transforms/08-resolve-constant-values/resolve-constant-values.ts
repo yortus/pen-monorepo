@@ -1,7 +1,7 @@
 import {FlatExpressionList} from '../07-create-flat-expression-list';
 
 
-// TODO: doc...
+// TODO: jsdoc...
 export function resolveConstantValues({flatList}: FlatExpressionList): Record<string, {value: unknown}> {
     let result = {} as Record<string, {value: unknown}>;
     for (let [name, expr] of Object.entries(flatList)) {

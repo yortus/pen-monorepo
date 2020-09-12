@@ -18,7 +18,7 @@ export interface Program {
 }
 
 
-// TODO: doc...
+// TODO: jsdoc...
 export function generateTargetCode(program: Program) {
     const emit = makeEmitter();
 

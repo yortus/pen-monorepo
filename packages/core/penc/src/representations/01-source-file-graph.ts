@@ -1,14 +1,23 @@
 import {AbsPath} from '../utils';
 
 
-// TODO: ...
+/**
+ * Data structure holding the absolute paths to all source files that make up a PEN program, as well as the
+ * direct importing relationships between source files.
+ */
 export interface SourceFileGraph {
+
+    /** List of all source files comprising a PEN program, as determined by transitive imports from the main file. */
     readonly sourceFiles: Map<AbsPath, SourceFileInfo>;
+
+    /** Absolute path to the PEN program's main entry point file. */
     readonly mainPath: AbsPath;
 }
 
 
-// TODO: ...
+/**
+ * Descriptor for a single source file withing a PEN program.
+ */
 export interface SourceFileInfo {
 
     /** The source file's normalised absolute path. */

@@ -6,6 +6,7 @@ import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
+// TODO: jsdoc...
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
     let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
