@@ -22,7 +22,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // Create helper functions for this program.
     let deref = createDereferencer(program.sourceFiles);
-    let getHashFor = createNodeHasher(deref); // TODO: fix typing
+    let getHashFor = createNodeHasher(deref);
 
     // Find the `start` expression.
     let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;

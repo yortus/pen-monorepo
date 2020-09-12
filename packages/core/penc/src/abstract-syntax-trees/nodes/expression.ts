@@ -2,6 +2,7 @@ import type {AbsPath} from '../../utils';
 import type {Module} from './module';
 
 
+/** Union of all node types that represent PEN expressions. */
 export type Expression =
     | ApplicationExpression
     | BooleanLiteralExpression

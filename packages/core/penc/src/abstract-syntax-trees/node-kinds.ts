@@ -1,6 +1,7 @@
 import {createNodeKinds} from './utils';
 
 
+/** Array of all node kinds which are bindings. */
 export const bindingNodeKinds = createNodeKinds(
     'GlobalBinding',
     'LocalBinding',
@@ -8,6 +9,7 @@ export const bindingNodeKinds = createNodeKinds(
 );
 
 
+/** Array of all node kinds which are expressions. */
 export const expressionNodeKinds = createNodeKinds(
     'ApplicationExpression',
     'BooleanLiteralExpression',
@@ -32,6 +34,7 @@ export const expressionNodeKinds = createNodeKinds(
 );
 
 
+/** Array of all node kinds. */
 export const allNodeKinds = createNodeKinds(
     'AbstractSyntaxTree',
     'Module',

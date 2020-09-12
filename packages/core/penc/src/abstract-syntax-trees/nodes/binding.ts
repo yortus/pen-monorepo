@@ -1,6 +1,7 @@
 import type {Expression} from './expression';
 
 
+/** Union of all node types that bind names to expressions. */
 export type Binding =
     | GlobalBinding
     | LocalBinding

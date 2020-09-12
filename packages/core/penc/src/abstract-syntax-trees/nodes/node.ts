@@ -4,6 +4,7 @@ import {Expression} from './expression';
 import type {Module} from './module';
 
 
+/** Union of all possible node types that may occur in a PEN AST. */
 export type Node =
     | AbstractSyntaxTree
     | Binding
