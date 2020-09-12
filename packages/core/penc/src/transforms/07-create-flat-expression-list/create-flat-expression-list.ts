@@ -1,7 +1,7 @@
 // TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import {assertNodeKind, createExpressionDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
+import {createExpressionDereferencer, createNodeHasher, isNodeKind, traverseAst} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
 import {resolvedNodeKinds, ResolvedProgram} from '../../representations';
 import {assert} from '../../utils';
@@ -40,7 +40,7 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
 
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
-        assertNodeKind(expr, resolvedNodeKinds);
+        assert(isNodeKind(expr, resolvedNodeKinds));
         let e = deref(expr);
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;

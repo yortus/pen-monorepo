@@ -1,4 +1,3 @@
-export {assertNodeKind} from './assert-node-kind';
 export {createAstMapper} from './create-ast-mapper';
 export {createExpressionDereferencer} from './create-expression-dereferencer';
 export {createNodeHasher} from './create-node-hasher';

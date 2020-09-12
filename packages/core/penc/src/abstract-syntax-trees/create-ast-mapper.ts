@@ -1,5 +1,5 @@
-import {mapMap} from '../utils';
-import {assertNodeKind} from './assert-node-kind';
+import {assert, mapMap} from '../utils';
+import {isNodeKind} from './is-node-kind';
 import type {Binding, Expression, Node} from './nodes';
 
 
@@ -14,10 +14,10 @@ export function createAstMapper<KS extends Node['kind'], KSᐟ extends Node['kin
     return function mapAst<MapObj, N extends NodeOfKind<KS>>(node: N, mappings: Mappings<MapObj, KS, KSᐟ>): N {
         const rec: any = (n: any) => {
             try {
-                assertNodeKind(n, inNodeKind);
+                assert(isNodeKind(n, inNodeKind));
                 let mapFn = mappers[n.kind];
                 let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-                assertNodeKind(result, outNodeKind);
+                assert(isNodeKind(result, outNodeKind));
                 return result;
             }
             catch (err) {

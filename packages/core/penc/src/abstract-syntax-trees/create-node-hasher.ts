@@ -1,5 +1,5 @@
 import * as objectHash from 'object-hash';
-import {assertNodeKind} from './assert-node-kind';
+import {assert} from '../utils';
 import type {Deref} from './create-expression-dereferencer';
 import {isNodeKind} from './is-node-kind';
 import {allNodeKinds, expressionNodeKinds} from './node-kinds';
@@ -75,7 +75,7 @@ export function createNodeHasher(deref: Deref) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assertNodeKind(n, hashableNodeKinds);
+            assert(isNodeKind(n, hashableNodeKinds));
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
