@@ -8,6 +8,8 @@ import {assert} from '../../utils';
 
 
 // TODO: jsdoc...
+// - result omits all unreferenced expressions
+// - result dedupes semantically equivalent expressions
 export function generateSingleExpression(program: ResolvedProgram): SingleExpressionProgram {
 
     // ENTRY rules:
@@ -33,7 +35,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     let counter = 0;
     let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
-    // TODO: temp testing... build the one and only internal module for emitting
+    // TODO: temp testing... build the single-expression program representation
     let subexpressions = {} as Record<string, Expression>;
     for (let {globalName, expr} of entriesByHash.values()) subexpressions[globalName] = expr;
     return {
@@ -45,9 +47,13 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
         assert(resolvedNodeKinds.includes(expr));
+
+        // TODO: doc...
         let e = deref(expr);
         let hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
+
+        // TODO: doc...
         let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
         entriesByHash.set(hash, entry);
 
