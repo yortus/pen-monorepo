@@ -9,7 +9,7 @@ import {parseSourceFiles} from './transforms';
 import {desugarSyntax} from './transforms';
 import {resolveSymbols} from './transforms';
 import {checkSemantics} from './transforms';
-import {createFlatExpressionList} from './transforms';
+import {generateSingleExpression} from './transforms';
 import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
 
@@ -30,7 +30,7 @@ export function compile(options: CompilerOptions) {
     let ast03 = resolveSymbols(ast02);
     checkSemantics(ast03);
 
-    let il = createFlatExpressionList(ast03);
+    let il = generateSingleExpression(ast03);
     let consts = resolveConstantValues(il);
     let targetCode = generateTargetCode({il, consts});
 

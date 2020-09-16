@@ -3,12 +3,12 @@
 
 import {createDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
-import {resolvedNodeKinds, ResolvedProgram} from '../../representations';
+import {resolvedNodeKinds, ResolvedProgram, SingleExpressionProgram} from '../../representations';
 import {assert} from '../../utils';
 
 
 // TODO: jsdoc...
-export function createFlatExpressionList(program: ResolvedProgram): FlatExpressionList {
+export function generateSingleExpression(program: ResolvedProgram): SingleExpressionProgram {
 
     // ENTRY rules:
     // a. the expression in an ENTRY is always 'flat' - any subexpressions are ReferenceExpressions to other ENTRYs
@@ -34,9 +34,13 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
     let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
     // TODO: temp testing... build the one and only internal module for emitting
-    let flatList = {} as Record<string, Expression>;
-    for (let {globalName, expr} of entriesByHash.values()) flatList[globalName] = expr;
-    return {startName: startEntry.globalName, flatList};
+    let subexpressions = {} as Record<string, Expression>;
+    for (let {globalName, expr} of entriesByHash.values()) subexpressions[globalName] = expr;
+    return {
+        kind: 'SingleExpressionProgram',
+        startName: startEntry.globalName,
+        subexpressions
+    };
 
     // TODO: recursive...
     function getEntryFor(expr: Expression): Entry {
@@ -80,12 +84,6 @@ export function createFlatExpressionList(program: ResolvedProgram): FlatExpressi
             return entry;
         }
     }
-}
-
-
-export interface FlatExpressionList {
-    startName: string;
-    flatList: Record<string, Expression>;
 }
 
 

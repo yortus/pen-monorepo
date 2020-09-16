@@ -3,8 +3,8 @@
 
 import * as fs from 'fs';
 import type {Expression, ExtensionExpression} from '../../abstract-syntax-trees';
+import {SingleExpressionProgram} from '../../representations';
 import {assert} from '../../utils';
-import {FlatExpressionList} from '../07-create-flat-expression-list';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
 import * as modes from './modes';
@@ -12,8 +12,9 @@ import * as modes from './modes';
 
 
 
+// TODO: is this a representation? Move out...
 export interface Program {
-    il: FlatExpressionList;
+    il: SingleExpressionProgram;
     consts: Record<string, {value: unknown}>;
 }
 
@@ -56,9 +57,9 @@ export function generateTargetCode(program: Program) {
 }
 
 
-function emitExtensions(emit: Emitter, {il: {flatList}}: Program) {
+function emitExtensions(emit: Emitter, {il: {subexpressions}}: Program) {
     let isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
-    let extExprs = Object.keys(flatList).map(id => flatList[id]).filter(isExtensionExpression);
+    let extExprs = Object.keys(subexpressions).map(id => subexpressions[id]).filter(isExtensionExpression);
     let extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
     emit.down(1).text(`const extensions = {`).indent();
@@ -75,7 +76,7 @@ function emitExtensions(emit: Emitter, {il: {flatList}}: Program) {
 
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-    let {consts, il: {startName, flatList}} = program;
+    let {consts, il: {startName, subexpressions}} = program;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';
@@ -83,15 +84,15 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
     // Emit extension exports before anything else
-    let extExprIds = Object.keys(flatList).filter(name => flatList[name].kind === 'ExtensionExpression');
+    let extExprIds = Object.keys(subexpressions).filter(name => subexpressions[name].kind === 'ExtensionExpression');
     if (extExprIds.length > 0) emit.down(2).text(`// ExtensionExpressions`);
     for (let id of extExprIds) {
-        let extExpr = flatList[id] as ExtensionExpression;
+        let extExpr = subexpressions[id] as ExtensionExpression;
         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.extensionPath)}].${extExpr.bindingName}({mode: ${mode}});`);
     }
 
     // TODO: emit each expression...
-    for (let [name, expr] of Object.entries(flatList)) {
+    for (let [name, expr] of Object.entries(subexpressions)) {
         emitExpression(emit, name, expr, mode);
         if (consts[name] === undefined) continue;
         emitConstant(emit, name, consts[name].value);
