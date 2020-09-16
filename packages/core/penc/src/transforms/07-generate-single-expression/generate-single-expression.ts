@@ -1,7 +1,7 @@
 // TODO: raise an error for unreferenced non-exported bindings. Need to impl exports properly first...
 
 
-import {createDereferencer, createNodeHasher, traverseAst} from '../../abstract-syntax-trees';
+import {createDereferencer, createNodeHasher, traverseNode} from '../../abstract-syntax-trees';
 import type {Expression, GlobalBinding, GlobalReferenceExpression} from '../../abstract-syntax-trees';
 import {resolvedNodeKinds, ResolvedProgram, SingleExpressionProgram} from '../../representations';
 import {assert} from '../../utils';
@@ -20,7 +20,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
 
     // Make a flat list of every GlobalBinding in the entire program.
     const allBindings = [] as GlobalBinding[];
-    traverseAst(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
+    traverseNode(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
     let deref = createDereferencer(program.sourceFiles);
@@ -32,15 +32,42 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
 
     // Populate the `entriesByHash` map.
     let entriesByHash = new Map<string, Entry>();
-    let counter = 0;
     let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
+
+    // TODO: Fill in the expression names using the binding names from bindings with the same hash value...
+    let namesByHash = new Map<string, string>();
+    for (let binding of allBindings) {
+        // TODO: skip if already named? this impl will overwrite earlier names with later ones. See how output looks...
+        assert(resolvedNodeKinds.includes(binding.value));
+        namesByHash.set(getHashFor(binding.value), binding.globalName);
+    }
+
+    // TODO: fill in all other names using generated names
+    // TODO: ensure generated names can't clash with any other global names
+    let counter = 0;
+    for (let hash of entriesByHash.keys()) {
+        if (namesByHash.has(hash)) continue;
+        namesByHash.set(hash, `e${++counter}`)
+    }
 
     // TODO: temp testing... build the single-expression program representation
     let subexpressions = {} as Record<string, Expression>;
-    for (let {globalName, expr} of entriesByHash.values()) subexpressions[globalName] = expr;
+    for (let {hash, expr} of entriesByHash.values()) {
+        let name = namesByHash.get(hash)!;
+        subexpressions[name] = expr;
+    }
+
+    // TODO: temp testing... fix up every GlobalReferenceExpression with the proper name
+    for (let {expr} of entriesByHash.values()) {
+        traverseNode(expr, n => {
+            if (n.kind !== 'GlobalReferenceExpression') return;
+            Object.assign(n, {globalName: namesByHash.get(n.globalName)!});
+        });
+    }
+
     return {
         kind: 'SingleExpressionProgram',
-        startName: startEntry.globalName,
+        startName: namesByHash.get(startEntry.hash)!,
         subexpressions
     };
 
@@ -54,7 +81,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
 
         // TODO: doc...
-        let entry: Entry = {globalName: `id${++counter}`, expr: undefined!};
+        let entry: Entry = {hash, expr: undefined!};
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
@@ -63,6 +90,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
             case 'BooleanLiteralExpression': return setX(e);
             case 'ExtensionExpression': return setX(e);
             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
+            case 'ImportExpression': assert(false); // Should never see an ImportExpression here
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
             case 'ModuleExpression': {
@@ -82,7 +110,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
 
         function ref(expr: Expression): GlobalReferenceExpression {
             // TODO: set globalName to something proper? use same value as `name`?
-            return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).globalName};
+            return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).hash};
         }
 
         function setX<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
@@ -94,6 +122,6 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
 
 
 interface Entry {
-    globalName: string;
+    hash: string;
     expr: Expression;
 }

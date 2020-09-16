@@ -247,7 +247,7 @@ const extensions = {
 const parse = (() => {
 
     // StringLiteralExpression
-    function id1() {
+    function 𝕊1_foo() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -256,9 +256,9 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    id1.constant = {value: "foo"};
+    𝕊1_foo.constant = {value: "foo"};
 
-    return id1;
+    return 𝕊1_foo;
 })();
 
 
@@ -268,7 +268,7 @@ const parse = (() => {
 const print = (() => {
 
     // StringLiteralExpression
-    function id1() {
+    function 𝕊1_foo() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -278,7 +278,7 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    id1.constant = {value: "foo"};
+    𝕊1_foo.constant = {value: "foo"};
 
-    return id1;
+    return 𝕊1_foo;
 })();

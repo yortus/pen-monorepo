@@ -645,27 +645,27 @@ const extensions = {
 const parse = (() => {
 
     // ExtensionExpressions
-    const id34 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 6});
-    const id65 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 6});
-    const id90 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    const 𝕊3_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 6});
+    const 𝕊4_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 6});
+    const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function id1() {
+    function 𝕊0_start() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function id2() {
+    function 𝕊0_WS() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id3()) break;
+            if (!e1()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -674,78 +674,78 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function id3() {
-        if (id4()) return true;
-        if (id5()) return true;
-        if (id6()) return true;
-        if (id7()) return true;
+    function e1() {
+        if (e2()) return true;
+        if (e3()) return true;
+        if (e4()) return true;
+        if (e5()) return true;
         return false;
     }
 
     // StringLiteralExpression
-    function id4() {
+    function e2() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id4.constant = {value: " "};
+    e2.constant = {value: " "};
 
     // StringLiteralExpression
-    function id5() {
+    function e3() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id5.constant = {value: "\t"};
+    e3.constant = {value: "\t"};
 
     // StringLiteralExpression
-    function id6() {
+    function e4() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id6.constant = {value: "\n"};
+    e4.constant = {value: "\n"};
 
     // StringLiteralExpression
-    function id7() {
+    function e5() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id7.constant = {value: "\r"};
+    e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function id8() {
-        if (id9()) return true;
-        if (id12()) return true;
-        if (id15()) return true;
-        if (id18()) return true;
-        if (id79()) return true;
-        if (id90()) return true;
-        if (id24()) return true;
+    function 𝕊0_Value() {
+        if (𝕊0_False()) return true;
+        if (𝕊0_Null()) return true;
+        if (𝕊0_True()) return true;
+        if (𝕊0_Object()) return true;
+        if (𝕊0_Array()) return true;
+        if (𝕊3_f64()) return true;
+        if (𝕊0_String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id9() {
+    function 𝕊0_False() {
         let stateₒ = getState();
         let out;
-        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e7()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id10() {
+    function e6() {
         if (IP + 5 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -756,27 +756,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id10.constant = {value: "false"};
+    e6.constant = {value: "false"};
 
     // BooleanLiteralExpression
-    function id11() {
+    function e7() {
         OUT = false;
         return true;
     }
-    id11.constant = {value: false};
+    e7.constant = {value: false};
 
     // SequenceExpression
-    function id12() {
+    function 𝕊0_Null() {
         let stateₒ = getState();
         let out;
-        if (id13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id13() {
+    function e8() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 110) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -786,27 +786,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id13.constant = {value: "null"};
+    e8.constant = {value: "null"};
 
     // NullLiteralExpression
-    function id14() {
+    function e9() {
         OUT = null;
         return true;
     }
-    id14.constant = {value: null};
+    e9.constant = {value: null};
 
     // SequenceExpression
-    function id15() {
+    function 𝕊0_True() {
         let stateₒ = getState();
         let out;
-        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e11()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id16() {
+    function e10() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 116) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -816,103 +816,103 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id16.constant = {value: "true"};
+    e10.constant = {value: "true"};
 
     // BooleanLiteralExpression
-    function id17() {
+    function e11() {
         OUT = true;
         return true;
     }
-    id17.constant = {value: true};
+    e11.constant = {value: true};
 
     // SequenceExpression
-    function id18() {
+    function 𝕊0_Object() {
         let stateₒ = getState();
         let out;
-        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id77()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id19() {
+    function 𝕊0_LBRACE() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id20() {
+    function e12() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 123) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id20.constant = {value: "{"};
+    e12.constant = {value: "{"};
 
     // SelectionExpression
-    function id21() {
-        if (id22()) return true;
-        if (id76()) return true;
+    function e13() {
+        if (e14()) return true;
+        if (e56()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id22() {
+    function e14() {
         let stateₒ = getState();
         let out;
-        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id72()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e53()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function id23() {
-        if (id23_memo) return id23_memo();
-        id23_memo = field({
+    function 𝕊0_Property() {
+        if (𝕊0_Property_memo) return 𝕊0_Property_memo();
+        𝕊0_Property_memo = field({
             mode: 6,
-            name: id24,
-            value: id69,
+            name: 𝕊0_String,
+            value: e51,
         });
-        return id23_memo();
+        return 𝕊0_Property_memo();
     }
-    let id23_memo;
+    let 𝕊0_Property_memo;
 
     // SequenceExpression
-    function id24() {
+    function 𝕊0_String() {
         let stateₒ = getState();
         let out;
-        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id25() {
+    function 𝕊0_DOUBLE_QUOTE() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id25.constant = {value: "\""};
+    𝕊0_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
-    function id26() {
+    function e15() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id27()) break;
+            if (!𝕊0_CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -921,120 +921,120 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function id27() {
-        if (id28()) return true;
-        if (id38()) return true;
-        if (id41()) return true;
-        if (id44()) return true;
-        if (id47()) return true;
-        if (id50()) return true;
-        if (id53()) return true;
-        if (id56()) return true;
-        if (id59()) return true;
-        if (id62()) return true;
+    function 𝕊0_CHAR() {
+        if (e16()) return true;
+        if (e23()) return true;
+        if (e26()) return true;
+        if (e29()) return true;
+        if (e32()) return true;
+        if (e35()) return true;
+        if (e38()) return true;
+        if (e41()) return true;
+        if (e44()) return true;
+        if (e47()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id28() {
+    function e16() {
         let stateₒ = getState();
         let out;
-        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id31()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e21()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // NotExpression
-    function id29() {
+    function e17() {
         let stateₒ = getState();
-        let result = !id30();
+        let result = !e18();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
     // StringLiteralExpression
-    function id30() {
+    function e18() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         IP += 1;
         OUT = "\\";
         return true;
     }
-    id30.constant = {value: "\\"};
+    e18.constant = {value: "\\"};
 
     // NotExpression
-    function id31() {
+    function e19() {
         let stateₒ = getState();
-        let result = !id32();
+        let result = !e20();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
     // StringLiteralExpression
-    function id32() {
+    function e20() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
         OUT = "\"";
         return true;
     }
-    id32.constant = {value: "\""};
+    e20.constant = {value: "\""};
 
     // ApplicationExpression
-    function id33(arg) {
-        if (id33_memo) return id33_memo(arg);
-        id33_memo = id34(id35);
-        return id33_memo(arg);
+    function e21(arg) {
+        if (e21_memo) return e21_memo(arg);
+        e21_memo = 𝕊3_char(e22);
+        return e21_memo(arg);
     }
-    let id33_memo;
+    let e21_memo;
 
     // ExtensionExpression
 
     // ModuleExpression
-    function id35(bindingName) {
+    function e22(bindingName) {
         switch (bindingName) {
-            case 'min': return id36;
-            case 'max': return id37;
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
             default: return undefined;
         }
     }
 
     // StringLiteralExpression
-    function id36() {
+    function 𝕊1_min() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
         OUT = " ";
         return true;
     }
-    id36.constant = {value: " "};
+    𝕊1_min.constant = {value: " "};
 
     // StringLiteralExpression
-    function id37() {
+    function 𝕊1_max() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
         IP += 1;
         OUT = "￿";
         return true;
     }
-    id37.constant = {value: "￿"};
+    𝕊1_max.constant = {value: "￿"};
 
     // SequenceExpression
-    function id38() {
+    function e23() {
         let stateₒ = getState();
         let out;
-        if (id39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e24()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e25()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id39() {
+    function e24() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -1042,27 +1042,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id39.constant = {value: "\\\""};
+    e24.constant = {value: "\\\""};
 
     // StringLiteralExpression
-    function id40() {
+    function e25() {
         OUT = "\"";
         return true;
     }
-    id40.constant = {value: "\""};
+    e25.constant = {value: "\""};
 
     // SequenceExpression
-    function id41() {
+    function e26() {
         let stateₒ = getState();
         let out;
-        if (id42()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e27()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e28()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id42() {
+    function e27() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 92) return false;
@@ -1070,27 +1070,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id42.constant = {value: "\\\\"};
+    e27.constant = {value: "\\\\"};
 
     // StringLiteralExpression
-    function id43() {
+    function e28() {
         OUT = "\\";
         return true;
     }
-    id43.constant = {value: "\\"};
+    e28.constant = {value: "\\"};
 
     // SequenceExpression
-    function id44() {
+    function e29() {
         let stateₒ = getState();
         let out;
-        if (id45()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e30()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e31()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id45() {
+    function e30() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 47) return false;
@@ -1098,27 +1098,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id45.constant = {value: "\\/"};
+    e30.constant = {value: "\\/"};
 
     // StringLiteralExpression
-    function id46() {
+    function e31() {
         OUT = "/";
         return true;
     }
-    id46.constant = {value: "/"};
+    e31.constant = {value: "/"};
 
     // SequenceExpression
-    function id47() {
+    function e32() {
         let stateₒ = getState();
         let out;
-        if (id48()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e34()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id48() {
+    function e33() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -1126,27 +1126,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id48.constant = {value: "\\b"};
+    e33.constant = {value: "\\b"};
 
     // StringLiteralExpression
-    function id49() {
+    function e34() {
         OUT = "\b";
         return true;
     }
-    id49.constant = {value: "\b"};
+    e34.constant = {value: "\b"};
 
     // SequenceExpression
-    function id50() {
+    function e35() {
         let stateₒ = getState();
         let out;
-        if (id51()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e37()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id51() {
+    function e36() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 102) return false;
@@ -1154,27 +1154,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id51.constant = {value: "\\f"};
+    e36.constant = {value: "\\f"};
 
     // StringLiteralExpression
-    function id52() {
+    function e37() {
         OUT = "\f";
         return true;
     }
-    id52.constant = {value: "\f"};
+    e37.constant = {value: "\f"};
 
     // SequenceExpression
-    function id53() {
+    function e38() {
         let stateₒ = getState();
         let out;
-        if (id54()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e40()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id54() {
+    function e39() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -1182,27 +1182,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id54.constant = {value: "\\n"};
+    e39.constant = {value: "\\n"};
 
     // StringLiteralExpression
-    function id55() {
+    function e40() {
         OUT = "\n";
         return true;
     }
-    id55.constant = {value: "\n"};
+    e40.constant = {value: "\n"};
 
     // SequenceExpression
-    function id56() {
+    function e41() {
         let stateₒ = getState();
         let out;
-        if (id57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e42()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e43()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id57() {
+    function e42() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -1210,27 +1210,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id57.constant = {value: "\\r"};
+    e42.constant = {value: "\\r"};
 
     // StringLiteralExpression
-    function id58() {
+    function e43() {
         OUT = "\r";
         return true;
     }
-    id58.constant = {value: "\r"};
+    e43.constant = {value: "\r"};
 
     // SequenceExpression
-    function id59() {
+    function e44() {
         let stateₒ = getState();
         let out;
-        if (id60()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e45()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e46()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id60() {
+    function e45() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 116) return false;
@@ -1238,27 +1238,27 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id60.constant = {value: "\\t"};
+    e45.constant = {value: "\\t"};
 
     // StringLiteralExpression
-    function id61() {
+    function e46() {
         OUT = "\t";
         return true;
     }
-    id61.constant = {value: "\t"};
+    e46.constant = {value: "\t"};
 
     // SequenceExpression
-    function id62() {
+    function e47() {
         let stateₒ = getState();
         let out;
-        if (id63()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e48()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e49()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id63() {
+    function e48() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -1266,79 +1266,79 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    id63.constant = {value: "\\u"};
+    e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function id64(arg) {
-        if (id64_memo) return id64_memo(arg);
-        id64_memo = id65(id66);
-        return id64_memo(arg);
+    function e49(arg) {
+        if (e49_memo) return e49_memo(arg);
+        e49_memo = 𝕊4_unicode(e50);
+        return e49_memo(arg);
     }
-    let id64_memo;
+    let e49_memo;
 
     // ExtensionExpression
 
     // ModuleExpression
-    function id66(bindingName) {
+    function e50(bindingName) {
         switch (bindingName) {
-            case 'base': return id67;
-            case 'minDigits': return id68;
-            case 'maxDigits': return id68;
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_maxDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
             default: return undefined;
         }
     }
 
     // NumericLiteralExpression
-    function id67() {
+    function 𝕊2_base() {
         OUT = 16;
         return true;
     }
-    id67.constant = {value: 16};
+    𝕊2_base.constant = {value: 16};
 
     // NumericLiteralExpression
-    function id68() {
+    function 𝕊2_maxDigits() {
         OUT = 4;
         return true;
     }
-    id68.constant = {value: 4};
+    𝕊2_maxDigits.constant = {value: 4};
 
     // SequenceExpression
-    function id69() {
+    function e51() {
         let stateₒ = getState();
         let out;
-        if (id70()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id70() {
+    function 𝕊0_COLON() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id71()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id71() {
+    function e52() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 58) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id71.constant = {value: ":"};
+    e52.constant = {value: ":"};
 
     // QuantifiedExpression
-    function id72() {
+    function e53() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id73()) break;
+            if (!e54()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1347,134 +1347,134 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function id73() {
+    function e54() {
         let stateₒ = getState();
         let out;
-        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id74() {
+    function 𝕊0_COMMA() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id75()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id75() {
+    function e55() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 44) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id75.constant = {value: ","};
+    e55.constant = {value: ","};
 
     // RecordExpression
-    function id76() {
-        if (id76_memo) return id76_memo();
-        id76_memo = record({
+    function e56() {
+        if (e56_memo) return e56_memo();
+        e56_memo = record({
             mode: 6,
             fields: [],
         })
-        return id76_memo();
+        return e56_memo();
     }
-    let id76_memo;
+    let e56_memo;
 
     // SequenceExpression
-    function id77() {
+    function 𝕊0_RBRACE() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id78()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id78() {
+    function e57() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 125) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id78.constant = {value: "}"};
+    e57.constant = {value: "}"};
 
     // SequenceExpression
-    function id79() {
+    function 𝕊0_Array() {
         let stateₒ = getState();
         let out;
-        if (id80()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id82()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id88()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id80() {
+    function 𝕊0_LBRACKET() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id81()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id81() {
+    function e58() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 91) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id81.constant = {value: "["};
+    e58.constant = {value: "["};
 
     // SelectionExpression
-    function id82() {
-        if (id83()) return true;
-        if (id87()) return true;
+    function e59() {
+        if (e60()) return true;
+        if (e63()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id83() {
+    function e60() {
         let stateₒ = getState();
         let out;
-        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id85()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e61()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function id84() {
-        if (id84_memo) return id84_memo();
-        id84_memo = list({
+    function 𝕊0_Element() {
+        if (𝕊0_Element_memo) return 𝕊0_Element_memo();
+        𝕊0_Element_memo = list({
             mode: 6,
-            elements: [id8],
+            elements: [𝕊0_Value],
         })
-        return id84_memo();
+        return 𝕊0_Element_memo();
     }
-    let id84_memo;
+    let 𝕊0_Element_memo;
 
     // QuantifiedExpression
-    function id85() {
+    function e61() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id86()) break;
+            if (!e62()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1483,50 +1483,50 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function id86() {
+    function e62() {
         let stateₒ = getState();
         let out;
-        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function id87() {
-        if (id87_memo) return id87_memo();
-        id87_memo = list({
+    function e63() {
+        if (e63_memo) return e63_memo();
+        e63_memo = list({
             mode: 6,
             elements: [],
         })
-        return id87_memo();
+        return e63_memo();
     }
-    let id87_memo;
+    let e63_memo;
 
     // SequenceExpression
-    function id88() {
+    function 𝕊0_RBRACKET() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id89()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id89() {
+    function e64() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 93) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id89.constant = {value: "]"};
+    e64.constant = {value: "]"};
 
     // ExtensionExpression
 
-    return id1;
+    return 𝕊0_start;
 })();
 
 
@@ -1536,27 +1536,27 @@ const parse = (() => {
 const print = (() => {
 
     // ExtensionExpressions
-    const id34 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 7});
-    const id65 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 7});
-    const id90 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    const 𝕊3_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 7});
+    const 𝕊4_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 7});
+    const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function id1() {
+    function 𝕊0_start() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function id2() {
+    function 𝕊0_WS() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id3()) break;
+            if (!e1()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1565,214 +1565,214 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function id3() {
-        if (id4()) return true;
-        if (id5()) return true;
-        if (id6()) return true;
-        if (id7()) return true;
+    function e1() {
+        if (e2()) return true;
+        if (e3()) return true;
+        if (e4()) return true;
+        if (e5()) return true;
         return false;
     }
 
     // StringLiteralExpression
-    function id4() {
+    function e2() {
         OUT = " ";
         return true;
     }
-    id4.constant = {value: " "};
+    e2.constant = {value: " "};
 
     // StringLiteralExpression
-    function id5() {
+    function e3() {
         OUT = "\t";
         return true;
     }
-    id5.constant = {value: "\t"};
+    e3.constant = {value: "\t"};
 
     // StringLiteralExpression
-    function id6() {
+    function e4() {
         OUT = "\n";
         return true;
     }
-    id6.constant = {value: "\n"};
+    e4.constant = {value: "\n"};
 
     // StringLiteralExpression
-    function id7() {
+    function e5() {
         OUT = "\r";
         return true;
     }
-    id7.constant = {value: "\r"};
+    e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function id8() {
-        if (id9()) return true;
-        if (id12()) return true;
-        if (id15()) return true;
-        if (id18()) return true;
-        if (id79()) return true;
-        if (id90()) return true;
-        if (id24()) return true;
+    function 𝕊0_Value() {
+        if (𝕊0_False()) return true;
+        if (𝕊0_Null()) return true;
+        if (𝕊0_True()) return true;
+        if (𝕊0_Object()) return true;
+        if (𝕊0_Array()) return true;
+        if (𝕊3_f64()) return true;
+        if (𝕊0_String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id9() {
+    function 𝕊0_False() {
         let stateₒ = getState();
         let out;
-        if (id10()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e7()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id10() {
+    function e6() {
         OUT = "false";
         return true;
     }
-    id10.constant = {value: "false"};
+    e6.constant = {value: "false"};
 
     // BooleanLiteralExpression
-    function id11() {
+    function e7() {
         if (IN !== false || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id11.constant = {value: false};
+    e7.constant = {value: false};
 
     // SequenceExpression
-    function id12() {
+    function 𝕊0_Null() {
         let stateₒ = getState();
         let out;
-        if (id13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id13() {
+    function e8() {
         OUT = "null";
         return true;
     }
-    id13.constant = {value: "null"};
+    e8.constant = {value: "null"};
 
     // NullLiteralExpression
-    function id14() {
+    function e9() {
         if (IN !== null || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id14.constant = {value: null};
+    e9.constant = {value: null};
 
     // SequenceExpression
-    function id15() {
+    function 𝕊0_True() {
         let stateₒ = getState();
         let out;
-        if (id16()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e11()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id16() {
+    function e10() {
         OUT = "true";
         return true;
     }
-    id16.constant = {value: "true"};
+    e10.constant = {value: "true"};
 
     // BooleanLiteralExpression
-    function id17() {
+    function e11() {
         if (IN !== true || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id17.constant = {value: true};
+    e11.constant = {value: true};
 
     // SequenceExpression
-    function id18() {
+    function 𝕊0_Object() {
         let stateₒ = getState();
         let out;
-        if (id19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id77()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id19() {
+    function 𝕊0_LBRACE() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id20()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id20() {
+    function e12() {
         OUT = "{";
         return true;
     }
-    id20.constant = {value: "{"};
+    e12.constant = {value: "{"};
 
     // SelectionExpression
-    function id21() {
-        if (id22()) return true;
-        if (id76()) return true;
+    function e13() {
+        if (e14()) return true;
+        if (e56()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id22() {
+    function e14() {
         let stateₒ = getState();
         let out;
-        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id72()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e53()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function id23() {
-        if (id23_memo) return id23_memo();
-        id23_memo = field({
+    function 𝕊0_Property() {
+        if (𝕊0_Property_memo) return 𝕊0_Property_memo();
+        𝕊0_Property_memo = field({
             mode: 7,
-            name: id24,
-            value: id69,
+            name: 𝕊0_String,
+            value: e51,
         });
-        return id23_memo();
+        return 𝕊0_Property_memo();
     }
-    let id23_memo;
+    let 𝕊0_Property_memo;
 
     // SequenceExpression
-    function id24() {
+    function 𝕊0_String() {
         let stateₒ = getState();
         let out;
-        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id26()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id25() {
+    function 𝕊0_DOUBLE_QUOTE() {
         OUT = "\"";
         return true;
     }
-    id25.constant = {value: "\""};
+    𝕊0_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
-    function id26() {
+    function e15() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id27()) break;
+            if (!𝕊0_CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1781,42 +1781,42 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function id27() {
-        if (id28()) return true;
-        if (id38()) return true;
-        if (id41()) return true;
-        if (id44()) return true;
-        if (id47()) return true;
-        if (id50()) return true;
-        if (id53()) return true;
-        if (id56()) return true;
-        if (id59()) return true;
-        if (id62()) return true;
+    function 𝕊0_CHAR() {
+        if (e16()) return true;
+        if (e23()) return true;
+        if (e26()) return true;
+        if (e29()) return true;
+        if (e32()) return true;
+        if (e35()) return true;
+        if (e38()) return true;
+        if (e41()) return true;
+        if (e44()) return true;
+        if (e47()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id28() {
+    function e16() {
         let stateₒ = getState();
         let out;
-        if (id29()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id31()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e21()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // NotExpression
-    function id29() {
+    function e17() {
         let stateₒ = getState();
-        let result = !id30();
+        let result = !e18();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
     // StringLiteralExpression
-    function id30() {
+    function e18() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1824,19 +1824,19 @@ const print = (() => {
         OUT = "\\";
         return true;
     }
-    id30.constant = {value: "\\"};
+    e18.constant = {value: "\\"};
 
     // NotExpression
-    function id31() {
+    function e19() {
         let stateₒ = getState();
-        let result = !id32();
+        let result = !e20();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
     // StringLiteralExpression
-    function id32() {
+    function e20() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1844,29 +1844,29 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
-    id32.constant = {value: "\""};
+    e20.constant = {value: "\""};
 
     // ApplicationExpression
-    function id33(arg) {
-        if (id33_memo) return id33_memo(arg);
-        id33_memo = id34(id35);
-        return id33_memo(arg);
+    function e21(arg) {
+        if (e21_memo) return e21_memo(arg);
+        e21_memo = 𝕊3_char(e22);
+        return e21_memo(arg);
     }
-    let id33_memo;
+    let e21_memo;
 
     // ExtensionExpression
 
     // ModuleExpression
-    function id35(bindingName) {
+    function e22(bindingName) {
         switch (bindingName) {
-            case 'min': return id36;
-            case 'max': return id37;
+            case 'min': return 𝕊1_min;
+            case 'max': return 𝕊1_max;
             default: return undefined;
         }
     }
 
     // StringLiteralExpression
-    function id36() {
+    function 𝕊1_min() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
@@ -1874,10 +1874,10 @@ const print = (() => {
         OUT = " ";
         return true;
     }
-    id36.constant = {value: " "};
+    𝕊1_min.constant = {value: " "};
 
     // StringLiteralExpression
-    function id37() {
+    function 𝕊1_max() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
@@ -1885,27 +1885,27 @@ const print = (() => {
         OUT = "￿";
         return true;
     }
-    id37.constant = {value: "￿"};
+    𝕊1_max.constant = {value: "￿"};
 
     // SequenceExpression
-    function id38() {
+    function e23() {
         let stateₒ = getState();
         let out;
-        if (id39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e24()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e25()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id39() {
+    function e24() {
         OUT = "\\\"";
         return true;
     }
-    id39.constant = {value: "\\\""};
+    e24.constant = {value: "\\\""};
 
     // StringLiteralExpression
-    function id40() {
+    function e25() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1913,27 +1913,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id40.constant = {value: "\""};
+    e25.constant = {value: "\""};
 
     // SequenceExpression
-    function id41() {
+    function e26() {
         let stateₒ = getState();
         let out;
-        if (id42()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e27()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e28()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id42() {
+    function e27() {
         OUT = "\\\\";
         return true;
     }
-    id42.constant = {value: "\\\\"};
+    e27.constant = {value: "\\\\"};
 
     // StringLiteralExpression
-    function id43() {
+    function e28() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1941,27 +1941,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id43.constant = {value: "\\"};
+    e28.constant = {value: "\\"};
 
     // SequenceExpression
-    function id44() {
+    function e29() {
         let stateₒ = getState();
         let out;
-        if (id45()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e30()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e31()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id45() {
+    function e30() {
         OUT = "\\/";
         return true;
     }
-    id45.constant = {value: "\\/"};
+    e30.constant = {value: "\\/"};
 
     // StringLiteralExpression
-    function id46() {
+    function e31() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 47) return false;
@@ -1969,27 +1969,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id46.constant = {value: "/"};
+    e31.constant = {value: "/"};
 
     // SequenceExpression
-    function id47() {
+    function e32() {
         let stateₒ = getState();
         let out;
-        if (id48()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e34()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id48() {
+    function e33() {
         OUT = "\\b";
         return true;
     }
-    id48.constant = {value: "\\b"};
+    e33.constant = {value: "\\b"};
 
     // StringLiteralExpression
-    function id49() {
+    function e34() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 8) return false;
@@ -1997,27 +1997,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id49.constant = {value: "\b"};
+    e34.constant = {value: "\b"};
 
     // SequenceExpression
-    function id50() {
+    function e35() {
         let stateₒ = getState();
         let out;
-        if (id51()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e37()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id51() {
+    function e36() {
         OUT = "\\f";
         return true;
     }
-    id51.constant = {value: "\\f"};
+    e36.constant = {value: "\\f"};
 
     // StringLiteralExpression
-    function id52() {
+    function e37() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 12) return false;
@@ -2025,27 +2025,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id52.constant = {value: "\f"};
+    e37.constant = {value: "\f"};
 
     // SequenceExpression
-    function id53() {
+    function e38() {
         let stateₒ = getState();
         let out;
-        if (id54()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e40()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id54() {
+    function e39() {
         OUT = "\\n";
         return true;
     }
-    id54.constant = {value: "\\n"};
+    e39.constant = {value: "\\n"};
 
     // StringLiteralExpression
-    function id55() {
+    function e40() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
@@ -2053,27 +2053,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id55.constant = {value: "\n"};
+    e40.constant = {value: "\n"};
 
     // SequenceExpression
-    function id56() {
+    function e41() {
         let stateₒ = getState();
         let out;
-        if (id57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e42()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e43()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id57() {
+    function e42() {
         OUT = "\\r";
         return true;
     }
-    id57.constant = {value: "\\r"};
+    e42.constant = {value: "\\r"};
 
     // StringLiteralExpression
-    function id58() {
+    function e43() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
@@ -2081,27 +2081,27 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id58.constant = {value: "\r"};
+    e43.constant = {value: "\r"};
 
     // SequenceExpression
-    function id59() {
+    function e44() {
         let stateₒ = getState();
         let out;
-        if (id60()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e45()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e46()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id60() {
+    function e45() {
         OUT = "\\t";
         return true;
     }
-    id60.constant = {value: "\\t"};
+    e45.constant = {value: "\\t"};
 
     // StringLiteralExpression
-    function id61() {
+    function e46() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
@@ -2109,97 +2109,97 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    id61.constant = {value: "\t"};
+    e46.constant = {value: "\t"};
 
     // SequenceExpression
-    function id62() {
+    function e47() {
         let stateₒ = getState();
         let out;
-        if (id63()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e48()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e49()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id63() {
+    function e48() {
         OUT = "\\u";
         return true;
     }
-    id63.constant = {value: "\\u"};
+    e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function id64(arg) {
-        if (id64_memo) return id64_memo(arg);
-        id64_memo = id65(id66);
-        return id64_memo(arg);
+    function e49(arg) {
+        if (e49_memo) return e49_memo(arg);
+        e49_memo = 𝕊4_unicode(e50);
+        return e49_memo(arg);
     }
-    let id64_memo;
+    let e49_memo;
 
     // ExtensionExpression
 
     // ModuleExpression
-    function id66(bindingName) {
+    function e50(bindingName) {
         switch (bindingName) {
-            case 'base': return id67;
-            case 'minDigits': return id68;
-            case 'maxDigits': return id68;
+            case 'base': return 𝕊2_base;
+            case 'minDigits': return 𝕊2_maxDigits;
+            case 'maxDigits': return 𝕊2_maxDigits;
             default: return undefined;
         }
     }
 
     // NumericLiteralExpression
-    function id67() {
+    function 𝕊2_base() {
         if (IN !== 16 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id67.constant = {value: 16};
+    𝕊2_base.constant = {value: 16};
 
     // NumericLiteralExpression
-    function id68() {
+    function 𝕊2_maxDigits() {
         if (IN !== 4 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    id68.constant = {value: 4};
+    𝕊2_maxDigits.constant = {value: 4};
 
     // SequenceExpression
-    function id69() {
+    function e51() {
         let stateₒ = getState();
         let out;
-        if (id70()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id70() {
+    function 𝕊0_COLON() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id71()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id71() {
+    function e52() {
         OUT = ":";
         return true;
     }
-    id71.constant = {value: ":"};
+    e52.constant = {value: ":"};
 
     // QuantifiedExpression
-    function id72() {
+    function e53() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id73()) break;
+            if (!e54()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -2208,125 +2208,125 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function id73() {
+    function e54() {
         let stateₒ = getState();
         let out;
-        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id74() {
+    function 𝕊0_COMMA() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id75()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id75() {
+    function e55() {
         OUT = ",";
         return true;
     }
-    id75.constant = {value: ","};
+    e55.constant = {value: ","};
 
     // RecordExpression
-    function id76() {
-        if (id76_memo) return id76_memo();
-        id76_memo = record({
+    function e56() {
+        if (e56_memo) return e56_memo();
+        e56_memo = record({
             mode: 7,
             fields: [],
         })
-        return id76_memo();
+        return e56_memo();
     }
-    let id76_memo;
+    let e56_memo;
 
     // SequenceExpression
-    function id77() {
+    function 𝕊0_RBRACE() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id78()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id78() {
+    function e57() {
         OUT = "}";
         return true;
     }
-    id78.constant = {value: "}"};
+    e57.constant = {value: "}"};
 
     // SequenceExpression
-    function id79() {
+    function 𝕊0_Array() {
         let stateₒ = getState();
         let out;
-        if (id80()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id82()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id88()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function id80() {
+    function 𝕊0_LBRACKET() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id81()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id81() {
+    function e58() {
         OUT = "[";
         return true;
     }
-    id81.constant = {value: "["};
+    e58.constant = {value: "["};
 
     // SelectionExpression
-    function id82() {
-        if (id83()) return true;
-        if (id87()) return true;
+    function e59() {
+        if (e60()) return true;
+        if (e63()) return true;
         return false;
     }
 
     // SequenceExpression
-    function id83() {
+    function e60() {
         let stateₒ = getState();
         let out;
-        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id85()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e61()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function id84() {
-        if (id84_memo) return id84_memo();
-        id84_memo = list({
+    function 𝕊0_Element() {
+        if (𝕊0_Element_memo) return 𝕊0_Element_memo();
+        𝕊0_Element_memo = list({
             mode: 7,
-            elements: [id8],
+            elements: [𝕊0_Value],
         })
-        return id84_memo();
+        return 𝕊0_Element_memo();
     }
-    let id84_memo;
+    let 𝕊0_Element_memo;
 
     // QuantifiedExpression
-    function id85() {
+    function e61() {
         let IPₒ = IP;
         let out;
         do {
-            if (!id86()) break;
+            if (!e62()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -2335,45 +2335,45 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function id86() {
+    function e62() {
         let stateₒ = getState();
         let out;
-        if (id74()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id84()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function id87() {
-        if (id87_memo) return id87_memo();
-        id87_memo = list({
+    function e63() {
+        if (e63_memo) return e63_memo();
+        e63_memo = list({
             mode: 7,
             elements: [],
         })
-        return id87_memo();
+        return e63_memo();
     }
-    let id87_memo;
+    let e63_memo;
 
     // SequenceExpression
-    function id88() {
+    function 𝕊0_RBRACKET() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id89()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id89() {
+    function e64() {
         OUT = "]";
         return true;
     }
-    id89.constant = {value: "]"};
+    e64.constant = {value: "]"};
 
     // ExtensionExpression
 
-    return id1;
+    return 𝕊0_start;
 })();

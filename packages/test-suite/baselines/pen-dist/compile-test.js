@@ -590,17 +590,17 @@ const extensions = {
 const parse = (() => {
 
     // ExtensionExpressions
-    const id2 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function id1() {
+    function 𝕊0_start() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -608,31 +608,31 @@ const parse = (() => {
     // ExtensionExpression
 
     // ModuleExpression
-    function id3(bindingName) {
+    function 𝕊0_x(bindingName) {
         switch (bindingName) {
-            case 'x1': return id4;
+            case 'x1': return 𝕊1_x1;
             default: return undefined;
         }
     }
 
     // SequenceExpression
-    function id4() {
+    function 𝕊1_x1() {
         let stateₒ = getState();
         let out;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function id5() {
-        if (!id4()) OUT = undefined;
+    function e1() {
+        if (!𝕊1_x1()) OUT = undefined;
         return true;
     }
 
     // StringLiteralExpression
-    function id6() {
+    function e2() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
         if (IN.charCodeAt(IP + 1) !== 101) return false;
@@ -642,10 +642,10 @@ const parse = (() => {
         OUT = "rest";
         return true;
     }
-    id6.constant = {value: "rest"};
+    e2.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function id7() {
+    function 𝕊0_a() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -654,20 +654,20 @@ const parse = (() => {
         OUT = "aaa";
         return true;
     }
-    id7.constant = {value: "aaa"};
+    𝕊0_a.constant = {value: "aaa"};
 
     // SequenceExpression
-    function id8() {
+    function 𝕊0_c() {
         let stateₒ = getState();
         let out;
-        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id9() {
+    function e3() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -676,9 +676,9 @@ const parse = (() => {
         OUT = "pre";
         return true;
     }
-    id9.constant = {value: "pre"};
+    e3.constant = {value: "pre"};
 
-    return id1;
+    return 𝕊0_start;
 })();
 
 
@@ -688,17 +688,17 @@ const parse = (() => {
 const print = (() => {
 
     // ExtensionExpressions
-    const id2 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function id1() {
+    function 𝕊0_start() {
         let stateₒ = getState();
         let out;
-        if (id2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id7()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -706,31 +706,31 @@ const print = (() => {
     // ExtensionExpression
 
     // ModuleExpression
-    function id3(bindingName) {
+    function 𝕊0_x(bindingName) {
         switch (bindingName) {
-            case 'x1': return id4;
+            case 'x1': return 𝕊1_x1;
             default: return undefined;
         }
     }
 
     // SequenceExpression
-    function id4() {
+    function 𝕊1_x1() {
         let stateₒ = getState();
         let out;
-        if (id5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id6()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function id5() {
-        if (!id4()) OUT = undefined;
+    function e1() {
+        if (!𝕊1_x1()) OUT = undefined;
         return true;
     }
 
     // StringLiteralExpression
-    function id6() {
+    function e2() {
         if (typeof IN !== 'string') return false;
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
@@ -741,10 +741,10 @@ const print = (() => {
         OUT = "rest";
         return true;
     }
-    id6.constant = {value: "rest"};
+    e2.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function id7() {
+    function 𝕊0_a() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -754,20 +754,20 @@ const print = (() => {
         OUT = "aaa";
         return true;
     }
-    id7.constant = {value: "aaa"};
+    𝕊0_a.constant = {value: "aaa"};
 
     // SequenceExpression
-    function id8() {
+    function 𝕊0_c() {
         let stateₒ = getState();
         let out;
-        if (id9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (id8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function id9() {
+    function e3() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 112) return false;
@@ -777,7 +777,7 @@ const print = (() => {
         OUT = "pre";
         return true;
     }
-    id9.constant = {value: "pre"};
+    e3.constant = {value: "pre"};
 
-    return id1;
+    return 𝕊0_start;
 })();
