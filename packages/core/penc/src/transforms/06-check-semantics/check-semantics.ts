@@ -1,10 +1,10 @@
-import {traverseAst} from '../../abstract-syntax-trees';
+import {traverseNode} from '../../abstract-syntax-trees';
 import {ResolvedProgram} from '../../representations';
 
 
 // TODO: jsdoc...
 export function checkSemantics(program: ResolvedProgram) {
-    traverseAst(program.sourceFiles, n => {
+    traverseNode(program.sourceFiles, n => {
         switch (n.kind) {
             case 'RecordExpression': {
                 // Ensure Record field names are unique within the record definition

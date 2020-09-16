@@ -1,6 +1,6 @@
 import {assert} from '../utils';
 import type {AbstractSyntaxTree, Expression, GlobalBinding, GlobalReferenceExpression, MemberExpression, Module} from './nodes';
-import {traverseAst} from './traverse-ast';
+import {traverseNode} from './traverse-node';
 
 
 /**
@@ -14,7 +14,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
 
     // Make a flat list of every GlobalBinding in the entire program. This will be needed for dereferencing ref exprs.
     const allBindings = [] as GlobalBinding[];
-    traverseAst(ast as AbstractSyntaxTree, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
+    traverseNode(ast, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Return the dereference function closed over the given AST.
     return deref as DereferenceFunction;
