@@ -62,9 +62,9 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
     }
 
     /**
-     * Find the value expression referenced by `module`.`bindingName`, if possible, otherwise return `undefined`.
-     * Some lookups always succeed, such as when `module` is a module expression. Other lookups always fail, such
-     * as when `module` is an application expression, or an import expression referencing an extension file.
+     * Find the value expression referenced by `module.bindingName` if possible, otherwise return `undefined`. Some
+     * lookups always succeed, such as when `module` is a module expression or import expression. Other lookups always
+     * fail, such as when `module` is an application expression.
      */
     function resolveMember(mem: MemberExpression): Expression | undefined {
         let moduleExpr = deref(mem.module);
@@ -99,8 +99,8 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
  * or member expression, then the returned node will be the node `expr` refers to in the same AST, if it can be
  * statically determined. In all other cases, `expr` is returned unchanged.
  * NB: LocalReferenceExpression nodes cannot be dereferenced, and will throw an error if encountered.
- * NB2: the result of dereferencing an expression is guaranteed to never be a global reference or import expression.
+ * NB2: the result of dereferencing an expression is guaranteed to never be a global reference.
  */
 export interface DereferenceFunction {
-    <E extends Expression>(expr: E): E extends {kind: 'GlobalReferenceExpression' | 'ImportExpression'} ? never : E;
+    <E extends Expression>(expr: E): E extends {kind: 'GlobalReferenceExpression'} ? never : E;
 }
