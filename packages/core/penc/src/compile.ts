@@ -1,4 +1,6 @@
-// TODO: transform order is important - it should be reflected in the export names from './transforms'
+// TODO: transform order is important
+// - should it be reflected in the export names from './transforms'?
+// - not if the param/return types basically dictate the order
 
 
 import * as fs from 'fs-extra';

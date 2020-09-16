@@ -6,8 +6,8 @@ import {allNodeKinds, Expression} from '../abstract-syntax-trees';
  */
 export interface SingleExpressionProgram {
     readonly kind: 'SingleExpressionProgram';
-    readonly startName: string;
-    readonly subexpressions: Record<string, Expression>;
+    readonly startName: string; // TODO: remove this prop
+    readonly subexpressions: Record<string, Expression>; // TODO: better type: {start: Expression;} & {[x in string]?: Expression};
 }
 
 
