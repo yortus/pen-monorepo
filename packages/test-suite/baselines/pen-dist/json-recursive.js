@@ -650,18 +650,18 @@ const parse = (() => {
     const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function 𝕊0_start() {
+    function json_recursive_start() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function 𝕊0_WS() {
+    function json_recursive_WS() {
         let IPₒ = IP;
         let out;
         do {
@@ -723,19 +723,19 @@ const parse = (() => {
     e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function 𝕊0_Value() {
-        if (𝕊0_False()) return true;
-        if (𝕊0_Null()) return true;
-        if (𝕊0_True()) return true;
-        if (𝕊0_Object()) return true;
-        if (𝕊0_Array()) return true;
+    function json_recursive_Value() {
+        if (json_recursive_False()) return true;
+        if (json_recursive_Null()) return true;
+        if (json_recursive_True()) return true;
+        if (json_recursive_Object()) return true;
+        if (json_recursive_Array()) return true;
         if (𝕊3_f64()) return true;
-        if (𝕊0_String()) return true;
+        if (json_recursive_String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_False() {
+    function json_recursive_False() {
         let stateₒ = getState();
         let out;
         if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -766,7 +766,7 @@ const parse = (() => {
     e7.constant = {value: false};
 
     // SequenceExpression
-    function 𝕊0_Null() {
+    function json_recursive_Null() {
         let stateₒ = getState();
         let out;
         if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -796,7 +796,7 @@ const parse = (() => {
     e9.constant = {value: null};
 
     // SequenceExpression
-    function 𝕊0_True() {
+    function json_recursive_True() {
         let stateₒ = getState();
         let out;
         if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -826,23 +826,23 @@ const parse = (() => {
     e11.constant = {value: true};
 
     // SequenceExpression
-    function 𝕊0_Object() {
+    function json_recursive_Object() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_LBRACE() {
+    function json_recursive_LBRACE() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -859,13 +859,13 @@ const parse = (() => {
 
     // SelectionExpression
     function e13() {
-        if (𝕊0_Properties()) return true;
+        if (json_recursive_Properties()) return true;
         if (e56()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_Properties() {
+    function json_recursive_Properties() {
         let stateₒ = getState();
         let out;
         if (e14()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -879,7 +879,7 @@ const parse = (() => {
         if (e14_memo) return e14_memo();
         e14_memo = field({
             mode: 6,
-            name: 𝕊0_String,
+            name: json_recursive_String,
             value: e51,
         });
         return e14_memo();
@@ -887,32 +887,32 @@ const parse = (() => {
     let e14_memo;
 
     // SequenceExpression
-    function 𝕊0_String() {
+    function json_recursive_String() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function 𝕊0_DOUBLE_QUOTE() {
+    function json_recursive_DOUBLE_QUOTE() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    𝕊0_DOUBLE_QUOTE.constant = {value: "\""};
+    json_recursive_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
     function e15() {
         let IPₒ = IP;
         let out;
         do {
-            if (!𝕊0_CHAR()) break;
+            if (!json_recursive_CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -921,7 +921,7 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function 𝕊0_CHAR() {
+    function json_recursive_CHAR() {
         if (e16()) return true;
         if (e23()) return true;
         if (e26()) return true;
@@ -1306,19 +1306,19 @@ const parse = (() => {
     function e51() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_COLON() {
+    function json_recursive_COLON() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1343,19 +1343,19 @@ const parse = (() => {
     function e54() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_COMMA() {
+    function json_recursive_COMMA() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1382,12 +1382,12 @@ const parse = (() => {
     let e56_memo;
 
     // SequenceExpression
-    function 𝕊0_RBRACE() {
+    function json_recursive_RBRACE() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1403,23 +1403,23 @@ const parse = (() => {
     e57.constant = {value: "}"};
 
     // SequenceExpression
-    function 𝕊0_Array() {
+    function json_recursive_Array() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_LBRACKET() {
+    function json_recursive_LBRACKET() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1436,13 +1436,13 @@ const parse = (() => {
 
     // SelectionExpression
     function e59() {
-        if (𝕊0_Elements()) return true;
+        if (json_recursive_Elements()) return true;
         if (e63()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_Elements() {
+    function json_recursive_Elements() {
         let stateₒ = getState();
         let out;
         if (e60()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1456,7 +1456,7 @@ const parse = (() => {
         if (e60_memo) return e60_memo();
         e60_memo = list({
             mode: 6,
-            elements: [𝕊0_Value],
+            elements: [json_recursive_Value],
         })
         return e60_memo();
     }
@@ -1472,8 +1472,8 @@ const parse = (() => {
     function e62() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1490,12 +1490,12 @@ const parse = (() => {
     let e63_memo;
 
     // SequenceExpression
-    function 𝕊0_RBRACKET() {
+    function json_recursive_RBRACKET() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1512,7 +1512,7 @@ const parse = (() => {
 
     // ExtensionExpression
 
-    return 𝕊0_start;
+    return json_recursive_start;
 })();
 
 
@@ -1527,18 +1527,18 @@ const print = (() => {
     const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function 𝕊0_start() {
+    function json_recursive_start() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function 𝕊0_WS() {
+    function json_recursive_WS() {
         let IPₒ = IP;
         let out;
         do {
@@ -1588,19 +1588,19 @@ const print = (() => {
     e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function 𝕊0_Value() {
-        if (𝕊0_False()) return true;
-        if (𝕊0_Null()) return true;
-        if (𝕊0_True()) return true;
-        if (𝕊0_Object()) return true;
-        if (𝕊0_Array()) return true;
+    function json_recursive_Value() {
+        if (json_recursive_False()) return true;
+        if (json_recursive_Null()) return true;
+        if (json_recursive_True()) return true;
+        if (json_recursive_Object()) return true;
+        if (json_recursive_Array()) return true;
         if (𝕊3_f64()) return true;
-        if (𝕊0_String()) return true;
+        if (json_recursive_String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_False() {
+    function json_recursive_False() {
         let stateₒ = getState();
         let out;
         if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1626,7 +1626,7 @@ const print = (() => {
     e7.constant = {value: false};
 
     // SequenceExpression
-    function 𝕊0_Null() {
+    function json_recursive_Null() {
         let stateₒ = getState();
         let out;
         if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1652,7 +1652,7 @@ const print = (() => {
     e9.constant = {value: null};
 
     // SequenceExpression
-    function 𝕊0_True() {
+    function json_recursive_True() {
         let stateₒ = getState();
         let out;
         if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1678,23 +1678,23 @@ const print = (() => {
     e11.constant = {value: true};
 
     // SequenceExpression
-    function 𝕊0_Object() {
+    function json_recursive_Object() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_LBRACE() {
+    function json_recursive_LBRACE() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1708,13 +1708,13 @@ const print = (() => {
 
     // SelectionExpression
     function e13() {
-        if (𝕊0_Properties()) return true;
+        if (json_recursive_Properties()) return true;
         if (e56()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_Properties() {
+    function json_recursive_Properties() {
         let stateₒ = getState();
         let out;
         if (e14()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1728,7 +1728,7 @@ const print = (() => {
         if (e14_memo) return e14_memo();
         e14_memo = field({
             mode: 7,
-            name: 𝕊0_String,
+            name: json_recursive_String,
             value: e51,
         });
         return e14_memo();
@@ -1736,29 +1736,29 @@ const print = (() => {
     let e14_memo;
 
     // SequenceExpression
-    function 𝕊0_String() {
+    function json_recursive_String() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function 𝕊0_DOUBLE_QUOTE() {
+    function json_recursive_DOUBLE_QUOTE() {
         OUT = "\"";
         return true;
     }
-    𝕊0_DOUBLE_QUOTE.constant = {value: "\""};
+    json_recursive_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
     function e15() {
         let IPₒ = IP;
         let out;
         do {
-            if (!𝕊0_CHAR()) break;
+            if (!json_recursive_CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1767,7 +1767,7 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function 𝕊0_CHAR() {
+    function json_recursive_CHAR() {
         if (e16()) return true;
         if (e23()) return true;
         if (e26()) return true;
@@ -2156,19 +2156,19 @@ const print = (() => {
     function e51() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_COLON() {
+    function json_recursive_COLON() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2190,19 +2190,19 @@ const print = (() => {
     function e54() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_COMMA() {
+    function json_recursive_COMMA() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2226,12 +2226,12 @@ const print = (() => {
     let e56_memo;
 
     // SequenceExpression
-    function 𝕊0_RBRACE() {
+    function json_recursive_RBRACE() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2244,23 +2244,23 @@ const print = (() => {
     e57.constant = {value: "}"};
 
     // SequenceExpression
-    function 𝕊0_Array() {
+    function json_recursive_Array() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function 𝕊0_LBRACKET() {
+    function json_recursive_LBRACKET() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2274,13 +2274,13 @@ const print = (() => {
 
     // SelectionExpression
     function e59() {
-        if (𝕊0_Elements()) return true;
+        if (json_recursive_Elements()) return true;
         if (e63()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_Elements() {
+    function json_recursive_Elements() {
         let stateₒ = getState();
         let out;
         if (e60()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -2294,7 +2294,7 @@ const print = (() => {
         if (e60_memo) return e60_memo();
         e60_memo = list({
             mode: 7,
-            elements: [𝕊0_Value],
+            elements: [json_recursive_Value],
         })
         return e60_memo();
     }
@@ -2310,8 +2310,8 @@ const print = (() => {
     function e62() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2328,12 +2328,12 @@ const print = (() => {
     let e63_memo;
 
     // SequenceExpression
-    function 𝕊0_RBRACKET() {
+    function json_recursive_RBRACKET() {
         let stateₒ = getState();
         let out;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (json_recursive_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -2347,5 +2347,5 @@ const print = (() => {
 
     // ExtensionExpression
 
-    return 𝕊0_start;
+    return json_recursive_start;
 })();

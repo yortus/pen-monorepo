@@ -16,7 +16,7 @@ export function resolveSymbols(program: DesugaredProgram): ResolvedProgram {
         // Attach a scope to each Module node.
         Module: mod => {
             let outerScope = currentScope;
-            currentScope = symbolTable.createScope(currentScope);
+            currentScope = symbolTable.createScope(currentScope, mod.path);
             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
             if (mod.path === program.mainPath) {
                 // This is the main module. Assign to startGlobalName.

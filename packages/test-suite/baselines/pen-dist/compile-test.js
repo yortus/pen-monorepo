@@ -593,14 +593,14 @@ const parse = (() => {
     const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function 𝕊0_start() {
+    function compile_test_start() {
         let stateₒ = getState();
         let out;
         if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_x()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -608,7 +608,7 @@ const parse = (() => {
     // ExtensionExpression
 
     // ModuleExpression
-    function 𝕊0_x(bindingName) {
+    function compile_test_x(bindingName) {
         switch (bindingName) {
             case 'x1': return 𝕊1_x1;
             default: return undefined;
@@ -645,7 +645,7 @@ const parse = (() => {
     e2.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function 𝕊0_a() {
+    function compile_test_a() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -654,14 +654,14 @@ const parse = (() => {
         OUT = "aaa";
         return true;
     }
-    𝕊0_a.constant = {value: "aaa"};
+    compile_test_a.constant = {value: "aaa"};
 
     // SequenceExpression
-    function 𝕊0_c() {
+    function compile_test_c() {
         let stateₒ = getState();
         let out;
         if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -678,7 +678,7 @@ const parse = (() => {
     }
     e3.constant = {value: "pre"};
 
-    return 𝕊0_start;
+    return compile_test_start;
 })();
 
 
@@ -691,14 +691,14 @@ const print = (() => {
     const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function 𝕊0_start() {
+    function compile_test_start() {
         let stateₒ = getState();
         let out;
         if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_x()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -706,7 +706,7 @@ const print = (() => {
     // ExtensionExpression
 
     // ModuleExpression
-    function 𝕊0_x(bindingName) {
+    function compile_test_x(bindingName) {
         switch (bindingName) {
             case 'x1': return 𝕊1_x1;
             default: return undefined;
@@ -744,7 +744,7 @@ const print = (() => {
     e2.constant = {value: "rest"};
 
     // StringLiteralExpression
-    function 𝕊0_a() {
+    function compile_test_a() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -754,14 +754,14 @@ const print = (() => {
         OUT = "aaa";
         return true;
     }
-    𝕊0_a.constant = {value: "aaa"};
+    compile_test_a.constant = {value: "aaa"};
 
     // SequenceExpression
-    function 𝕊0_c() {
+    function compile_test_c() {
         let stateₒ = getState();
         let out;
         if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_c()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -779,5 +779,5 @@ const print = (() => {
     }
     e3.constant = {value: "pre"};
 
-    return 𝕊0_start;
+    return compile_test_start;
 })();

@@ -247,15 +247,15 @@ const extensions = {
 const parse = (() => {
 
     // ApplicationExpression
-    function 𝕊0_result(arg) {
-        if (𝕊0_result_memo) return 𝕊0_result_memo(arg);
-        𝕊0_result_memo = 𝕊5_f(e1);
-        return 𝕊0_result_memo(arg);
+    function import_graph_result(arg) {
+        if (import_graph_result_memo) return import_graph_result_memo(arg);
+        import_graph_result_memo = a_f(e1);
+        return import_graph_result_memo(arg);
     }
-    let 𝕊0_result_memo;
+    let import_graph_result_memo;
 
     // StringLiteralExpression
-    function 𝕊5_f() {
+    function a_f() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -264,20 +264,20 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    𝕊5_f.constant = {value: "foo"};
+    a_f.constant = {value: "foo"};
 
     // SequenceExpression
     function e1() {
         let stateₒ = getState();
         let out;
-        if (𝕊5_b()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊5_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function 𝕊5_b() {
+    function a_b() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -286,10 +286,10 @@ const parse = (() => {
         OUT = "bar";
         return true;
     }
-    𝕊5_b.constant = {value: "bar"};
+    a_b.constant = {value: "bar"};
 
     // StringLiteralExpression
-    function 𝕊5_baz() {
+    function a_baz() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -298,9 +298,9 @@ const parse = (() => {
         OUT = "baz";
         return true;
     }
-    𝕊5_baz.constant = {value: "baz"};
+    a_baz.constant = {value: "baz"};
 
-    return 𝕊0_result;
+    return import_graph_result;
 })();
 
 
@@ -310,15 +310,15 @@ const parse = (() => {
 const print = (() => {
 
     // ApplicationExpression
-    function 𝕊0_result(arg) {
-        if (𝕊0_result_memo) return 𝕊0_result_memo(arg);
-        𝕊0_result_memo = 𝕊5_f(e1);
-        return 𝕊0_result_memo(arg);
+    function import_graph_result(arg) {
+        if (import_graph_result_memo) return import_graph_result_memo(arg);
+        import_graph_result_memo = a_f(e1);
+        return import_graph_result_memo(arg);
     }
-    let 𝕊0_result_memo;
+    let import_graph_result_memo;
 
     // StringLiteralExpression
-    function 𝕊5_f() {
+    function a_f() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -328,20 +328,20 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    𝕊5_f.constant = {value: "foo"};
+    a_f.constant = {value: "foo"};
 
     // SequenceExpression
     function e1() {
         let stateₒ = getState();
         let out;
-        if (𝕊5_b()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊5_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteralExpression
-    function 𝕊5_b() {
+    function a_b() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -351,10 +351,10 @@ const print = (() => {
         OUT = "bar";
         return true;
     }
-    𝕊5_b.constant = {value: "bar"};
+    a_b.constant = {value: "bar"};
 
     // StringLiteralExpression
-    function 𝕊5_baz() {
+    function a_baz() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -364,7 +364,7 @@ const print = (() => {
         OUT = "baz";
         return true;
     }
-    𝕊5_baz.constant = {value: "baz"};
+    a_baz.constant = {value: "baz"};
 
-    return 𝕊0_result;
+    return import_graph_result;
 })();

@@ -595,37 +595,37 @@ const parse = (() => {
     const 𝕊4_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 6});
 
     // ApplicationExpression
-    function 𝕊0_expr(arg) {
-        if (𝕊0_expr_memo) return 𝕊0_expr_memo(arg);
-        𝕊0_expr_memo = 𝕊4_memoise(e1);
-        return 𝕊0_expr_memo(arg);
+    function math_expr(arg) {
+        if (math_expr_memo) return math_expr_memo(arg);
+        math_expr_memo = 𝕊4_memoise(e1);
+        return math_expr_memo(arg);
     }
-    let 𝕊0_expr_memo;
+    let math_expr_memo;
 
     // ExtensionExpression
 
     // SelectionExpression
     function e1() {
-        if (𝕊0_add()) return true;
-        if (𝕊0_sub()) return true;
-        if (𝕊0_term()) return true;
+        if (math_add()) return true;
+        if (math_sub()) return true;
+        if (math_term()) return true;
         return false;
     }
 
     // RecordExpression
-    function 𝕊0_add() {
-        if (𝕊0_add_memo) return 𝕊0_add_memo();
-        𝕊0_add_memo = record({
+    function math_add() {
+        if (math_add_memo) return math_add_memo();
+        math_add_memo = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e2},
-                {name: 'lhs', value: 𝕊0_expr},
+                {name: 'lhs', value: math_expr},
                 {name: 'rhs', value: e3},
             ],
         })
-        return 𝕊0_add_memo();
+        return math_add_memo();
     }
-    let 𝕊0_add_memo;
+    let math_add_memo;
 
     // StringLiteralExpression
     function e2() {
@@ -639,7 +639,7 @@ const parse = (() => {
         let stateₒ = getState();
         let out;
         if (e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -655,23 +655,23 @@ const parse = (() => {
     e4.constant = {value: "+"};
 
     // ApplicationExpression
-    function 𝕊0_term(arg) {
-        if (𝕊0_term_memo) return 𝕊0_term_memo(arg);
-        𝕊0_term_memo = 𝕊4_memoise(e5);
-        return 𝕊0_term_memo(arg);
+    function math_term(arg) {
+        if (math_term_memo) return math_term_memo(arg);
+        math_term_memo = 𝕊4_memoise(e5);
+        return math_term_memo(arg);
     }
-    let 𝕊0_term_memo;
+    let math_term_memo;
 
     // SelectionExpression
     function e5() {
-        if (𝕊0_mul()) return true;
-        if (𝕊0_div()) return true;
-        if (𝕊0_factor()) return true;
+        if (math_mul()) return true;
+        if (math_div()) return true;
+        if (math_factor()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_mul() {
+    function math_mul() {
         let stateₒ = getState();
         let out;
         if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -713,7 +713,7 @@ const parse = (() => {
         e9_memo = record({
             mode: 6,
             fields: [
-                {name: 'lhs', value: 𝕊0_term},
+                {name: 'lhs', value: math_term},
             ],
         })
         return e9_memo();
@@ -744,7 +744,7 @@ const parse = (() => {
         let stateₒ = getState();
         let out;
         if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -760,7 +760,7 @@ const parse = (() => {
     e13.constant = {value: "*"};
 
     // SelectionExpression
-    function 𝕊0_factor() {
+    function math_factor() {
         if (e14()) return true;
         if (e19()) return true;
         if (e23()) return true;
@@ -962,7 +962,7 @@ const parse = (() => {
         let stateₒ = getState();
         let out;
         if (e32()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_expr()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_expr()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -989,19 +989,19 @@ const parse = (() => {
     e33.constant = {value: ")"};
 
     // RecordExpression
-    function 𝕊0_div() {
-        if (𝕊0_div_memo) return 𝕊0_div_memo();
-        𝕊0_div_memo = record({
+    function math_div() {
+        if (math_div_memo) return math_div_memo();
+        math_div_memo = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e34},
-                {name: 'lhs', value: 𝕊0_term},
+                {name: 'lhs', value: math_term},
                 {name: 'rhs', value: e35},
             ],
         })
-        return 𝕊0_div_memo();
+        return math_div_memo();
     }
-    let 𝕊0_div_memo;
+    let math_div_memo;
 
     // StringLiteralExpression
     function e34() {
@@ -1015,7 +1015,7 @@ const parse = (() => {
         let stateₒ = getState();
         let out;
         if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1031,19 +1031,19 @@ const parse = (() => {
     e36.constant = {value: "/"};
 
     // RecordExpression
-    function 𝕊0_sub() {
-        if (𝕊0_sub_memo) return 𝕊0_sub_memo();
-        𝕊0_sub_memo = record({
+    function math_sub() {
+        if (math_sub_memo) return math_sub_memo();
+        math_sub_memo = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e37},
-                {name: 'lhs', value: 𝕊0_expr},
+                {name: 'lhs', value: math_expr},
                 {name: 'rhs', value: e38},
             ],
         })
-        return 𝕊0_sub_memo();
+        return math_sub_memo();
     }
-    let 𝕊0_sub_memo;
+    let math_sub_memo;
 
     // StringLiteralExpression
     function e37() {
@@ -1057,7 +1057,7 @@ const parse = (() => {
         let stateₒ = getState();
         let out;
         if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1072,7 +1072,7 @@ const parse = (() => {
     }
     e39.constant = {value: "-"};
 
-    return 𝕊0_expr;
+    return math_expr;
 })();
 
 
@@ -1087,37 +1087,37 @@ const print = (() => {
     const 𝕊4_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 7});
 
     // ApplicationExpression
-    function 𝕊0_expr(arg) {
-        if (𝕊0_expr_memo) return 𝕊0_expr_memo(arg);
-        𝕊0_expr_memo = 𝕊4_memoise(e1);
-        return 𝕊0_expr_memo(arg);
+    function math_expr(arg) {
+        if (math_expr_memo) return math_expr_memo(arg);
+        math_expr_memo = 𝕊4_memoise(e1);
+        return math_expr_memo(arg);
     }
-    let 𝕊0_expr_memo;
+    let math_expr_memo;
 
     // ExtensionExpression
 
     // SelectionExpression
     function e1() {
-        if (𝕊0_add()) return true;
-        if (𝕊0_sub()) return true;
-        if (𝕊0_term()) return true;
+        if (math_add()) return true;
+        if (math_sub()) return true;
+        if (math_term()) return true;
         return false;
     }
 
     // RecordExpression
-    function 𝕊0_add() {
-        if (𝕊0_add_memo) return 𝕊0_add_memo();
-        𝕊0_add_memo = record({
+    function math_add() {
+        if (math_add_memo) return math_add_memo();
+        math_add_memo = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e2},
-                {name: 'lhs', value: 𝕊0_expr},
+                {name: 'lhs', value: math_expr},
                 {name: 'rhs', value: e3},
             ],
         })
-        return 𝕊0_add_memo();
+        return math_add_memo();
     }
-    let 𝕊0_add_memo;
+    let math_add_memo;
 
     // StringLiteralExpression
     function e2() {
@@ -1137,7 +1137,7 @@ const print = (() => {
         let stateₒ = getState();
         let out;
         if (e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1150,23 +1150,23 @@ const print = (() => {
     e4.constant = {value: "+"};
 
     // ApplicationExpression
-    function 𝕊0_term(arg) {
-        if (𝕊0_term_memo) return 𝕊0_term_memo(arg);
-        𝕊0_term_memo = 𝕊4_memoise(e5);
-        return 𝕊0_term_memo(arg);
+    function math_term(arg) {
+        if (math_term_memo) return math_term_memo(arg);
+        math_term_memo = 𝕊4_memoise(e5);
+        return math_term_memo(arg);
     }
-    let 𝕊0_term_memo;
+    let math_term_memo;
 
     // SelectionExpression
     function e5() {
-        if (𝕊0_mul()) return true;
-        if (𝕊0_div()) return true;
-        if (𝕊0_factor()) return true;
+        if (math_mul()) return true;
+        if (math_div()) return true;
+        if (math_factor()) return true;
         return false;
     }
 
     // SequenceExpression
-    function 𝕊0_mul() {
+    function math_mul() {
         let stateₒ = getState();
         let out;
         if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1221,7 +1221,7 @@ const print = (() => {
         e9_memo = record({
             mode: 7,
             fields: [
-                {name: 'lhs', value: 𝕊0_term},
+                {name: 'lhs', value: math_term},
             ],
         })
         return e9_memo();
@@ -1258,7 +1258,7 @@ const print = (() => {
         let stateₒ = getState();
         let out;
         if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1271,7 +1271,7 @@ const print = (() => {
     e13.constant = {value: "*"};
 
     // SelectionExpression
-    function 𝕊0_factor() {
+    function math_factor() {
         if (e14()) return true;
         if (e19()) return true;
         if (e23()) return true;
@@ -1470,7 +1470,7 @@ const print = (() => {
         let stateₒ = getState();
         let out;
         if (e32()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_expr()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_expr()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -1491,19 +1491,19 @@ const print = (() => {
     e33.constant = {value: ")"};
 
     // RecordExpression
-    function 𝕊0_div() {
-        if (𝕊0_div_memo) return 𝕊0_div_memo();
-        𝕊0_div_memo = record({
+    function math_div() {
+        if (math_div_memo) return math_div_memo();
+        math_div_memo = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e34},
-                {name: 'lhs', value: 𝕊0_term},
+                {name: 'lhs', value: math_term},
                 {name: 'rhs', value: e35},
             ],
         })
-        return 𝕊0_div_memo();
+        return math_div_memo();
     }
-    let 𝕊0_div_memo;
+    let math_div_memo;
 
     // StringLiteralExpression
     function e34() {
@@ -1523,7 +1523,7 @@ const print = (() => {
         let stateₒ = getState();
         let out;
         if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1536,19 +1536,19 @@ const print = (() => {
     e36.constant = {value: "/"};
 
     // RecordExpression
-    function 𝕊0_sub() {
-        if (𝕊0_sub_memo) return 𝕊0_sub_memo();
-        𝕊0_sub_memo = record({
+    function math_sub() {
+        if (math_sub_memo) return math_sub_memo();
+        math_sub_memo = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e37},
-                {name: 'lhs', value: 𝕊0_expr},
+                {name: 'lhs', value: math_expr},
                 {name: 'rhs', value: e38},
             ],
         })
-        return 𝕊0_sub_memo();
+        return math_sub_memo();
     }
-    let 𝕊0_sub_memo;
+    let math_sub_memo;
 
     // StringLiteralExpression
     function e37() {
@@ -1568,7 +1568,7 @@ const print = (() => {
         let stateₒ = getState();
         let out;
         if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊0_term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (math_term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1580,5 +1580,5 @@ const print = (() => {
     }
     e39.constant = {value: "-"};
 
-    return 𝕊0_expr;
+    return math_expr;
 })();

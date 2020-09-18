@@ -1,3 +1,6 @@
+import {AbsPath} from '../../utils';
+
+
 // TODO: doc...
 export type Symbol = ScopeSymbol | NameSymbol;
 
@@ -28,9 +31,9 @@ export class SymbolTable {
     }
 
     // TODO: doc... also creates a symbol for the scope in the parent scope.
-    createScope(parent?: ScopeSymbol): ScopeSymbol {
+    createScope(parent: ScopeSymbol | undefined, modulePath?: AbsPath): ScopeSymbol {
         // TODO: must ensure this synthetic scope name never clashes with any program-defined identifiers.
-        let scopeName = `𝕊${this.parentScopes.size}`;
+        let scopeName = this.generateUniqueScopeName(modulePath);
         let scopeSymbol: ScopeSymbol = {kind: 'ScopeSymbol', scopeName, localNames: new Map()};
         this.allSymbolsByGlobalName.set(scopeName, scopeSymbol);
         this.parentScopes.set(scopeSymbol, parent ?? 'none');
@@ -57,4 +60,23 @@ export class SymbolTable {
     private allSymbolsByGlobalName: Map<string, Symbol>;
 
     private parentScopes: Map<ScopeSymbol, ScopeSymbol | 'none'>;
+
+    private generateUniqueScopeName(modulePath = '') {
+        let name = modulePath
+            .split(/\/+|\\+/) // split on segment delimiters / and \
+            .map(s => s.substring(0, s.lastIndexOf('.')) || s) // remove extensions
+            .reverse() // reverse the order of the segments
+            .concat(`𝕊${this.parentScopes.size}`) // add a fallback name to guarantee the result is not undefined
+            .filter(seg => seg && seg !== 'index') // remove empty and 'index' segments
+            .shift()! // take the first segment
+            .replace(/^[0-9]+/g, '') // remove leading digits, if any
+            .replace(/[^a-zA-Z0-9𝕊]/g, '_'); // replace all non-alphanumeric chars with '_'
+
+        // Ensure no duplicate scope names
+        let existingScopeNames = [...this.parentScopes.keys()].map(s => s.scopeName);
+        let newScopeName = name;
+        let counter = 0;
+        while (existingScopeNames.includes(newScopeName)) newScopeName = `${name}${++counter}`;
+        return newScopeName;
+    }
 }
