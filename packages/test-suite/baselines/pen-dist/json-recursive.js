@@ -645,9 +645,9 @@ const extensions = {
 const parse = (() => {
 
     // ExtensionExpressions
-    const 𝕊3_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 6});
-    const 𝕊4_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 6});
-    const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    const std_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 6});
+    const experiments_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 6});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
     function json_recursive_start() {
@@ -729,7 +729,7 @@ const parse = (() => {
         if (json_recursive_True()) return true;
         if (json_recursive_Object()) return true;
         if (json_recursive_Array()) return true;
-        if (𝕊3_f64()) return true;
+        if (std_f64()) return true;
         if (json_recursive_String()) return true;
         return false;
     }
@@ -987,7 +987,7 @@ const parse = (() => {
     // ApplicationExpression
     function e21(arg) {
         if (e21_memo) return e21_memo(arg);
-        e21_memo = 𝕊3_char(e22);
+        e21_memo = std_char(e22);
         return e21_memo(arg);
     }
     let e21_memo;
@@ -1271,7 +1271,7 @@ const parse = (() => {
     // ApplicationExpression
     function e49(arg) {
         if (e49_memo) return e49_memo(arg);
-        e49_memo = 𝕊4_unicode(e50);
+        e49_memo = experiments_unicode(e50);
         return e49_memo(arg);
     }
     let e49_memo;
@@ -1522,9 +1522,9 @@ const parse = (() => {
 const print = (() => {
 
     // ExtensionExpressions
-    const 𝕊3_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 7});
-    const 𝕊4_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 7});
-    const 𝕊3_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    const std_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 7});
+    const experiments_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 7});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
     function json_recursive_start() {
@@ -1594,7 +1594,7 @@ const print = (() => {
         if (json_recursive_True()) return true;
         if (json_recursive_Object()) return true;
         if (json_recursive_Array()) return true;
-        if (𝕊3_f64()) return true;
+        if (std_f64()) return true;
         if (json_recursive_String()) return true;
         return false;
     }
@@ -1835,7 +1835,7 @@ const print = (() => {
     // ApplicationExpression
     function e21(arg) {
         if (e21_memo) return e21_memo(arg);
-        e21_memo = 𝕊3_char(e22);
+        e21_memo = std_char(e22);
         return e21_memo(arg);
     }
     let e21_memo;
@@ -2117,7 +2117,7 @@ const print = (() => {
     // ApplicationExpression
     function e49(arg) {
         if (e49_memo) return e49_memo(arg);
-        e49_memo = 𝕊4_unicode(e50);
+        e49_memo = experiments_unicode(e50);
         return e49_memo(arg);
     }
     let e49_memo;

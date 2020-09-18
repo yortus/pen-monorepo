@@ -590,13 +590,13 @@ const extensions = {
 const parse = (() => {
 
     // ExtensionExpressions
-    const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
     function compile_test_start() {
         let stateₒ = getState();
         let out;
-        if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_a()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -688,13 +688,13 @@ const parse = (() => {
 const print = (() => {
 
     // ExtensionExpressions
-    const 𝕊2_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
     function compile_test_start() {
         let stateₒ = getState();
         let out;
-        if (𝕊2_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_a()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;

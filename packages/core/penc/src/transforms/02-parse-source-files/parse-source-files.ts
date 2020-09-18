@@ -27,6 +27,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
                     },
                     exported: true,
                 })),
+                path: sourceFile.path,
             };
         }
     });

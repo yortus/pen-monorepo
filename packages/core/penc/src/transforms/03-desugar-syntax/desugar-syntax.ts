@@ -45,7 +45,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                 }
             }
 
-            let modᐟ = {...mod, bindings, abc: 4}; // TODO: remove abc prop after type testing
+            let modᐟ = {...mod, bindings};
             return modᐟ;
         },
 

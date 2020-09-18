@@ -64,7 +64,7 @@ export class SymbolTable {
     private generateUniqueScopeName(modulePath = '') {
         let name = modulePath
             .split(/\/+|\\+/) // split on segment delimiters / and \
-            .map(s => s.substring(0, s.lastIndexOf('.')) || s) // remove extensions
+            .map(s => s.substring(0, s.indexOf('.')) || s) // remove extensions
             .reverse() // reverse the order of the segments
             .concat(`𝕊${this.parentScopes.size}`) // add a fallback name to guarantee the result is not undefined
             .filter(seg => seg && seg !== 'index') // remove empty and 'index' segments

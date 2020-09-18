@@ -590,14 +590,14 @@ const extensions = {
 const parse = (() => {
 
     // ExtensionExpressions
-    const 𝕊4_memoise = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].memoise({mode: 6});
-    const 𝕊4_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
-    const 𝕊4_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 6});
+    const std_memoise = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].memoise({mode: 6});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    const std_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 6});
 
     // ApplicationExpression
     function math_expr(arg) {
         if (math_expr_memo) return math_expr_memo(arg);
-        math_expr_memo = 𝕊4_memoise(e1);
+        math_expr_memo = std_memoise(e1);
         return math_expr_memo(arg);
     }
     let math_expr_memo;
@@ -657,7 +657,7 @@ const parse = (() => {
     // ApplicationExpression
     function math_term(arg) {
         if (math_term_memo) return math_term_memo(arg);
-        math_term_memo = 𝕊4_memoise(e5);
+        math_term_memo = std_memoise(e5);
         return math_term_memo(arg);
     }
     let math_term_memo;
@@ -775,7 +775,7 @@ const parse = (() => {
         let out;
         if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊4_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -846,7 +846,7 @@ const parse = (() => {
     // ApplicationExpression
     function e21(arg) {
         if (e21_memo) return e21_memo(arg);
-        e21_memo = 𝕊4_i32(e22);
+        e21_memo = std_i32(e22);
         return e21_memo(arg);
     }
     let e21_memo;
@@ -900,7 +900,7 @@ const parse = (() => {
     // ApplicationExpression
     function e25(arg) {
         if (e25_memo) return e25_memo(arg);
-        e25_memo = 𝕊4_i32(e26);
+        e25_memo = std_i32(e26);
         return e25_memo(arg);
     }
     let e25_memo;
@@ -944,7 +944,7 @@ const parse = (() => {
     // ApplicationExpression
     function e29(arg) {
         if (e29_memo) return e29_memo(arg);
-        e29_memo = 𝕊4_i32(e30);
+        e29_memo = std_i32(e30);
         return e29_memo(arg);
     }
     let e29_memo;
@@ -1082,14 +1082,14 @@ const parse = (() => {
 const print = (() => {
 
     // ExtensionExpressions
-    const 𝕊4_memoise = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].memoise({mode: 7});
-    const 𝕊4_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
-    const 𝕊4_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 7});
+    const std_memoise = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].memoise({mode: 7});
+    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    const std_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 7});
 
     // ApplicationExpression
     function math_expr(arg) {
         if (math_expr_memo) return math_expr_memo(arg);
-        math_expr_memo = 𝕊4_memoise(e1);
+        math_expr_memo = std_memoise(e1);
         return math_expr_memo(arg);
     }
     let math_expr_memo;
@@ -1152,7 +1152,7 @@ const print = (() => {
     // ApplicationExpression
     function math_term(arg) {
         if (math_term_memo) return math_term_memo(arg);
-        math_term_memo = 𝕊4_memoise(e5);
+        math_term_memo = std_memoise(e5);
         return math_term_memo(arg);
     }
     let math_term_memo;
@@ -1286,7 +1286,7 @@ const print = (() => {
         let out;
         if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (𝕊4_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -1355,7 +1355,7 @@ const print = (() => {
     // ApplicationExpression
     function e21(arg) {
         if (e21_memo) return e21_memo(arg);
-        e21_memo = 𝕊4_i32(e22);
+        e21_memo = std_i32(e22);
         return e21_memo(arg);
     }
     let e21_memo;
@@ -1409,7 +1409,7 @@ const print = (() => {
     // ApplicationExpression
     function e25(arg) {
         if (e25_memo) return e25_memo(arg);
-        e25_memo = 𝕊4_i32(e26);
+        e25_memo = std_i32(e26);
         return e25_memo(arg);
     }
     let e25_memo;
@@ -1452,7 +1452,7 @@ const print = (() => {
     // ApplicationExpression
     function e29(arg) {
         if (e29_memo) return e29_memo(arg);
-        e29_memo = 𝕊4_i32(e30);
+        e29_memo = std_i32(e30);
         return e29_memo(arg);
     }
     let e29_memo;
