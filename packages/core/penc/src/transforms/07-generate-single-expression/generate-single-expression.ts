@@ -47,7 +47,10 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     let counter = 0;
     for (let hash of entriesByHash.keys()) {
         if (namesByHash.has(hash)) continue;
-        namesByHash.set(hash, `e${++counter}`)
+        namesByHash.set(hash, `e${++counter}`); // TODO: can't currently clash with a `scope_local` style name,
+            // but what if naming system changes? Better to have a standard helper that intenally holds a name pool,
+            // and maps suggested names to guaranteed unique names within the pool? Then use it elsewhere where names
+            // are generated too.
     }
 
     // TODO: temp testing... build the single-expression program representation
@@ -109,7 +112,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
         }
 
         function ref(expr: Expression): GlobalReferenceExpression {
-            // TODO: set globalName to something proper? use same value as `name`?
+            // TODO: doc/fix the temporary use of 'hash' here - it gets patched up later (see L64 above)
             return {kind: 'GlobalReferenceExpression', localName: '', globalName: getEntryFor(expr).hash};
         }
 

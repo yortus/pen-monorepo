@@ -43,7 +43,7 @@ export class SymbolTable {
     createName(localName: string, scope: ScopeSymbol): NameSymbol {
         // ensure not already defined in this scope
         if (scope.localNames.has(localName)) throw new Error(`Symbol '${localName}' is already defined.`);
-        let globalName = `${scope.scopeName}_${localName}`; // TODO: temp... fix this...
+        let globalName = `${scope.scopeName}_${localName}`;
         let symbol: Symbol = {kind: 'NameSymbol', globalName, localName, scope};
         scope.localNames.set(localName, symbol);
         this.allSymbolsByGlobalName.set(globalName, symbol);
