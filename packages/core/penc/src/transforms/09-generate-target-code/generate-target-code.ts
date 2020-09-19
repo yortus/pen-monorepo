@@ -102,9 +102,9 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
 
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
-    // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
-    // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
-    const MEMO_SUFFIX = 'ₘ';
+    // Should never see a GlobalReferenceExpression here.
+    // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
+    assert(expr.kind !== 'GlobalReferenceExpression');
 
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
@@ -115,15 +115,22 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             break;
 
         case 'ApplicationExpression': {
+            // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
+            // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
+            const MEMO_SUFFIX = 'ₘ';
+
             assert(expr.lambda.kind === 'GlobalReferenceExpression');
             assert(expr.argument.kind === 'GlobalReferenceExpression');
-            // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
+            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text(`if (${name}${MEMO_SUFFIX}) return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.down(1).text('try {').indent();
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
+            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
             emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.lambda.globalName}(${expr.argument.globalName});`);
             emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
+            emit.dedent().down(1).text(`}`);
             break;
         }
 
@@ -146,36 +153,24 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.name.kind === 'GlobalReferenceExpression');
             assert(expr.value.kind === 'GlobalReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}${MEMO_SUFFIX}) return ${name}${MEMO_SUFFIX}();`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = field({`).indent();
-            emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text(`name: ${expr.name.globalName},`);
-            emit.down(1).text(`value: ${expr.value.globalName},`);
-            emit.dedent().down(1).text('});');
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}();`);
+            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseField' : 'printField'}`);
+            emit.text(`(${expr.name.globalName}, ${expr.value.globalName});`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             break;
         }
-
-        case 'GlobalReferenceExpression':
-            assert(false); // Should never see a GlobalReferenceExpression here.
 
         // TODO: implement...
         // case 'LambdaExpression':
         //     break;
 
         case 'ListExpression': {
+            let elements = expr.elements.map(element => {
+                assert(element.kind === 'GlobalReferenceExpression');
+                return element.globalName;
+            });
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}${MEMO_SUFFIX}) return ${name}${MEMO_SUFFIX}();`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = list({`).indent();
-            emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text('elements: [');
-            emit.text(`${expr.elements.map(e => e.kind === 'GlobalReferenceExpression' ? e.globalName : '?').join(', ')}`);
-            emit.text('],').dedent().down(1).text('})');
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}();`);
+            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseList' : 'printList'}([${elements.join(', ')}]);`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             break;
         }
 
@@ -227,23 +222,19 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'RecordExpression': {
+            let fields = expr.fields.map(field => {
+                assert(field.value.kind === 'GlobalReferenceExpression');
+                return `{name: '${field.name}', value: ${field.value.globalName}},`;
+            });
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}${MEMO_SUFFIX}) return ${name}${MEMO_SUFFIX}();`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = record({`).indent();
-            emit.down(1).text(`mode: ${mode},`);
-            emit.down(1).text('fields: [');
-            if (expr.fields.length > 0) {
+            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseRecord' : 'printRecord'}([`);
+            if (fields.length > 0) {
                 emit.indent();
-                for (let field of expr.fields) {
-                    assert(field.value.kind === 'GlobalReferenceExpression');
-                    emit.down(1).text(`{name: '${field.name}', value: ${field.value.globalName}},`);
-                }
+                for (let field of fields) emit.down(1).text(field);
                 emit.dedent().down(1);
             }
-            emit.text('],').dedent().down(1).text('})');
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}();`);
+            emit.text(`]);`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             break;
         }
 

@@ -21,149 +21,132 @@ module.exports = {
 
 // ------------------------------ Runtime ------------------------------
 "use strict";
-function field({ mode, name, value }) {
-    if (isParse(mode)) {
-        return function FLD() {
-            let stateₒ = getState();
-            let obj = {};
-            if (!name())
-                return false;
-            assert(typeof OUT === 'string');
-            let propName = OUT;
-            if (!value())
-                return setState(stateₒ), false;
-            assert(OUT !== undefined);
-            obj[propName] = OUT;
-            OUT = obj;
-            return true;
-        };
-    }
-    else {
-        return function FLD() {
-            if (objectToString.call(IN) !== '[object Object]')
-                return false;
-            let stateₒ = getState();
-            let text;
-            let propNames = Object.keys(IN);
-            let propCount = propNames.length;
-            assert(propCount <= 32);
-            const obj = IN;
-            let bitmask = IP;
-            for (let i = 0; i < propCount; ++i) {
-                let propName = propNames[i];
-                const propBit = 1 << i;
-                if ((bitmask & propBit) !== 0)
-                    continue;
-                setState({ IN: propName, IP: 0 });
-                if (!name())
-                    continue;
-                if (IP !== propName.length)
-                    continue;
-                text = concat(text, OUT);
-                setState({ IN: obj[propName], IP: 0 });
-                if (!value())
-                    continue;
-                if (!isInputFullyConsumed())
-                    continue;
-                text = concat(text, OUT);
-                bitmask += propBit;
-                setState({ IN: obj, IP: bitmask });
-                OUT = text;
-                return true;
-            }
-            setState(stateₒ);
-            return false;
-        };
-    }
+function parseField(name, value) {
+    let stateₒ = getState();
+    let obj = {};
+    if (!name())
+        return false;
+    assert(typeof OUT === 'string');
+    let propName = OUT;
+    if (!value())
+        return setState(stateₒ), false;
+    assert(OUT !== undefined);
+    obj[propName] = OUT;
+    OUT = obj;
+    return true;
 }
-function list({ mode, elements }) {
+function printField(name, value) {
+    if (objectToString.call(IN) !== '[object Object]')
+        return false;
+    let stateₒ = getState();
+    let text;
+    let propNames = Object.keys(IN);
+    let propCount = propNames.length;
+    assert(propCount <= 32);
+    const obj = IN;
+    let bitmask = IP;
+    for (let i = 0; i < propCount; ++i) {
+        let propName = propNames[i];
+        const propBit = 1 << i;
+        if ((bitmask & propBit) !== 0)
+            continue;
+        setState({ IN: propName, IP: 0 });
+        if (!name())
+            continue;
+        if (IP !== propName.length)
+            continue;
+        text = concat(text, OUT);
+        setState({ IN: obj[propName], IP: 0 });
+        if (!value())
+            continue;
+        if (!isInputFullyConsumed())
+            continue;
+        text = concat(text, OUT);
+        bitmask += propBit;
+        setState({ IN: obj, IP: bitmask });
+        OUT = text;
+        return true;
+    }
+    setState(stateₒ);
+    return false;
+}
+function parseList(elements) {
     const elementsLength = elements.length;
-    if (isParse(mode)) {
-        return function LST() {
-            let stateₒ = getState();
-            let arr = [];
-            for (let i = 0; i < elementsLength; ++i) {
-                if (!elements[i]())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
-            }
-            OUT = arr;
-            return true;
-        };
+    let stateₒ = getState();
+    let arr = [];
+    for (let i = 0; i < elementsLength; ++i) {
+        if (!elements[i]())
+            return setState(stateₒ), false;
+        assert(OUT !== undefined);
+        arr.push(OUT);
     }
-    else {
-        return function LST() {
-            if (!Array.isArray(IN))
-                return false;
-            if (IP < 0 || IP + elementsLength > IN.length)
-                return false;
-            let stateₒ = getState();
-            let text;
-            const arr = IN;
-            const off = IP;
-            for (let i = 0; i < elementsLength; ++i) {
-                setState({ IN: arr[off + i], IP: 0 });
-                if (!elements[i]())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-            }
-            setState({ IN: arr, IP: off + elementsLength });
-            OUT = text;
-            return true;
-        };
-    }
+    OUT = arr;
+    return true;
 }
-function record({ mode, fields }) {
-    if (isParse(mode)) {
-        return function RCD() {
-            let stateₒ = getState();
-            let obj = {};
-            for (let field of fields) {
-                let propName = field.name;
-                if (!field.value())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-            }
-            OUT = obj;
-            return true;
-        };
+function printList(elements) {
+    const elementsLength = elements.length;
+    if (!Array.isArray(IN))
+        return false;
+    if (IP < 0 || IP + elementsLength > IN.length)
+        return false;
+    let stateₒ = getState();
+    let text;
+    const arr = IN;
+    const off = IP;
+    for (let i = 0; i < elementsLength; ++i) {
+        setState({ IN: arr[off + i], IP: 0 });
+        if (!elements[i]())
+            return setState(stateₒ), false;
+        if (!isInputFullyConsumed())
+            return setState(stateₒ), false;
+        text = concat(text, OUT);
     }
-    else {
-        return function RCD() {
-            if (objectToString.call(IN) !== '[object Object]')
-                return false;
-            let stateₒ = getState();
-            let text;
-            let propNames = Object.keys(IN);
-            let propCount = propNames.length;
-            assert(propCount <= 32);
-            const obj = IN;
-            let bitmask = IP;
-            for (let field of fields) {
-                let i = propNames.indexOf(field.name);
-                if (i < 0)
-                    return setState(stateₒ), false;
-                let propName = propNames[i];
-                const propBit = 1 << i;
-                if ((bitmask & propBit) !== 0)
-                    return setState(stateₒ), false;
-                setState({ IN: obj[propName], IP: 0 });
-                if (!field.value())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                bitmask += propBit;
-            }
-            setState({ IN: obj, IP: bitmask });
-            OUT = text;
-            return true;
-        };
+    setState({ IN: arr, IP: off + elementsLength });
+    OUT = text;
+    return true;
+}
+function parseRecord(fields) {
+    let stateₒ = getState();
+    let obj = {};
+    for (let field of fields) {
+        let propName = field.name;
+        if (!field.value())
+            return setState(stateₒ), false;
+        assert(OUT !== undefined);
+        obj[propName] = OUT;
     }
+    OUT = obj;
+    return true;
+}
+function printRecord(fields) {
+    if (objectToString.call(IN) !== '[object Object]')
+        return false;
+    let stateₒ = getState();
+    let text;
+    let propNames = Object.keys(IN);
+    let propCount = propNames.length;
+    assert(propCount <= 32);
+    const obj = IN;
+    let bitmask = IP;
+    for (let field of fields) {
+        let i = propNames.indexOf(field.name);
+        if (i < 0)
+            return setState(stateₒ), false;
+        let propName = propNames[i];
+        const propBit = 1 << i;
+        if ((bitmask & propBit) !== 0)
+            return setState(stateₒ), false;
+        setState({ IN: obj[propName], IP: 0 });
+        if (!field.value())
+            return setState(stateₒ), false;
+        if (!isInputFullyConsumed())
+            return setState(stateₒ), false;
+        text = concat(text, OUT);
+        bitmask += propBit;
+    }
+    setState({ IN: obj, IP: bitmask });
+    OUT = text;
+    return true;
 }
 const PARSE = 6;
 const PRINT = 7;
@@ -595,12 +578,17 @@ const parse = (() => {
     const std_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 6});
 
     // ApplicationExpression
-    function math_expr(arg) {
-        if (math_exprₘ) return math_exprₘ(arg);
-        math_exprₘ = std_memoise(e1);
-        return math_exprₘ(arg);
-    }
     let math_exprₘ;
+    function math_expr(arg) {
+        try {
+            return math_exprₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('math_exprₘ is not a function')) throw err;
+            math_exprₘ = std_memoise(e1);
+            return math_exprₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -614,18 +602,12 @@ const parse = (() => {
 
     // RecordExpression
     function math_add() {
-        if (math_addₘ) return math_addₘ();
-        math_addₘ = record({
-            mode: 6,
-            fields: [
-                {name: 'type', value: e2},
-                {name: 'lhs', value: math_expr},
-                {name: 'rhs', value: e3},
-            ],
-        })
-        return math_addₘ();
+        return parseRecord([
+            {name: 'type', value: e2},
+            {name: 'lhs', value: math_expr},
+            {name: 'rhs', value: e3},
+        ]);
     }
-    let math_addₘ;
 
     // StringLiteralExpression
     function e2() {
@@ -655,12 +637,17 @@ const parse = (() => {
     e4.constant = {value: "+"};
 
     // ApplicationExpression
-    function math_term(arg) {
-        if (math_termₘ) return math_termₘ(arg);
-        math_termₘ = std_memoise(e5);
-        return math_termₘ(arg);
-    }
     let math_termₘ;
+    function math_term(arg) {
+        try {
+            return math_termₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('math_termₘ is not a function')) throw err;
+            math_termₘ = std_memoise(e5);
+            return math_termₘ(arg);
+        }
+    }
 
     // SelectionExpression
     function e5() {
@@ -683,15 +670,8 @@ const parse = (() => {
 
     // FieldExpression
     function e6() {
-        if (e6ₘ) return e6ₘ();
-        e6ₘ = field({
-            mode: 6,
-            name: e7,
-            value: e8,
-        });
-        return e6ₘ();
+        return parseField(e7, e8);
     }
-    let e6ₘ;
 
     // StringLiteralExpression
     function e7() {
@@ -709,28 +689,15 @@ const parse = (() => {
 
     // RecordExpression
     function e9() {
-        if (e9ₘ) return e9ₘ();
-        e9ₘ = record({
-            mode: 6,
-            fields: [
-                {name: 'lhs', value: math_term},
-            ],
-        })
-        return e9ₘ();
+        return parseRecord([
+            {name: 'lhs', value: math_term},
+        ]);
     }
-    let e9ₘ;
 
     // FieldExpression
     function e10() {
-        if (e10ₘ) return e10ₘ();
-        e10ₘ = field({
-            mode: 6,
-            name: e11,
-            value: e12,
-        });
-        return e10ₘ();
+        return parseField(e11, e12);
     }
-    let e10ₘ;
 
     // StringLiteralExpression
     function e11() {
@@ -844,12 +811,17 @@ const parse = (() => {
     e20.constant = {value: "0x"};
 
     // ApplicationExpression
-    function e21(arg) {
-        if (e21ₘ) return e21ₘ(arg);
-        e21ₘ = std_i32(e22);
-        return e21ₘ(arg);
-    }
     let e21ₘ;
+    function e21(arg) {
+        try {
+            return e21ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
+            e21ₘ = std_i32(e22);
+            return e21ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -898,12 +870,17 @@ const parse = (() => {
     e24.constant = {value: "0b"};
 
     // ApplicationExpression
-    function e25(arg) {
-        if (e25ₘ) return e25ₘ(arg);
-        e25ₘ = std_i32(e26);
-        return e25ₘ(arg);
-    }
     let e25ₘ;
+    function e25(arg) {
+        try {
+            return e25ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e25ₘ is not a function')) throw err;
+            e25ₘ = std_i32(e26);
+            return e25ₘ(arg);
+        }
+    }
 
     // ModuleExpression
     function e26(bindingName) {
@@ -942,12 +919,17 @@ const parse = (() => {
     e28.constant = {value: "i"};
 
     // ApplicationExpression
-    function e29(arg) {
-        if (e29ₘ) return e29ₘ(arg);
-        e29ₘ = std_i32(e30);
-        return e29ₘ(arg);
-    }
     let e29ₘ;
+    function e29(arg) {
+        try {
+            return e29ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e29ₘ is not a function')) throw err;
+            e29ₘ = std_i32(e30);
+            return e29ₘ(arg);
+        }
+    }
 
     // ModuleExpression
     function e30(bindingName) {
@@ -990,18 +972,12 @@ const parse = (() => {
 
     // RecordExpression
     function math_div() {
-        if (math_divₘ) return math_divₘ();
-        math_divₘ = record({
-            mode: 6,
-            fields: [
-                {name: 'type', value: e34},
-                {name: 'lhs', value: math_term},
-                {name: 'rhs', value: e35},
-            ],
-        })
-        return math_divₘ();
+        return parseRecord([
+            {name: 'type', value: e34},
+            {name: 'lhs', value: math_term},
+            {name: 'rhs', value: e35},
+        ]);
     }
-    let math_divₘ;
 
     // StringLiteralExpression
     function e34() {
@@ -1032,18 +1008,12 @@ const parse = (() => {
 
     // RecordExpression
     function math_sub() {
-        if (math_subₘ) return math_subₘ();
-        math_subₘ = record({
-            mode: 6,
-            fields: [
-                {name: 'type', value: e37},
-                {name: 'lhs', value: math_expr},
-                {name: 'rhs', value: e38},
-            ],
-        })
-        return math_subₘ();
+        return parseRecord([
+            {name: 'type', value: e37},
+            {name: 'lhs', value: math_expr},
+            {name: 'rhs', value: e38},
+        ]);
     }
-    let math_subₘ;
 
     // StringLiteralExpression
     function e37() {
@@ -1087,12 +1057,17 @@ const print = (() => {
     const std_i32 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].i32({mode: 7});
 
     // ApplicationExpression
-    function math_expr(arg) {
-        if (math_exprₘ) return math_exprₘ(arg);
-        math_exprₘ = std_memoise(e1);
-        return math_exprₘ(arg);
-    }
     let math_exprₘ;
+    function math_expr(arg) {
+        try {
+            return math_exprₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('math_exprₘ is not a function')) throw err;
+            math_exprₘ = std_memoise(e1);
+            return math_exprₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -1106,18 +1081,12 @@ const print = (() => {
 
     // RecordExpression
     function math_add() {
-        if (math_addₘ) return math_addₘ();
-        math_addₘ = record({
-            mode: 7,
-            fields: [
-                {name: 'type', value: e2},
-                {name: 'lhs', value: math_expr},
-                {name: 'rhs', value: e3},
-            ],
-        })
-        return math_addₘ();
+        return printRecord([
+            {name: 'type', value: e2},
+            {name: 'lhs', value: math_expr},
+            {name: 'rhs', value: e3},
+        ]);
     }
-    let math_addₘ;
 
     // StringLiteralExpression
     function e2() {
@@ -1150,12 +1119,17 @@ const print = (() => {
     e4.constant = {value: "+"};
 
     // ApplicationExpression
-    function math_term(arg) {
-        if (math_termₘ) return math_termₘ(arg);
-        math_termₘ = std_memoise(e5);
-        return math_termₘ(arg);
-    }
     let math_termₘ;
+    function math_term(arg) {
+        try {
+            return math_termₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('math_termₘ is not a function')) throw err;
+            math_termₘ = std_memoise(e5);
+            return math_termₘ(arg);
+        }
+    }
 
     // SelectionExpression
     function e5() {
@@ -1178,15 +1152,8 @@ const print = (() => {
 
     // FieldExpression
     function e6() {
-        if (e6ₘ) return e6ₘ();
-        e6ₘ = field({
-            mode: 7,
-            name: e7,
-            value: e8,
-        });
-        return e6ₘ();
+        return printField(e7, e8);
     }
-    let e6ₘ;
 
     // StringLiteralExpression
     function e7() {
@@ -1217,28 +1184,15 @@ const print = (() => {
 
     // RecordExpression
     function e9() {
-        if (e9ₘ) return e9ₘ();
-        e9ₘ = record({
-            mode: 7,
-            fields: [
-                {name: 'lhs', value: math_term},
-            ],
-        })
-        return e9ₘ();
+        return printRecord([
+            {name: 'lhs', value: math_term},
+        ]);
     }
-    let e9ₘ;
 
     // FieldExpression
     function e10() {
-        if (e10ₘ) return e10ₘ();
-        e10ₘ = field({
-            mode: 7,
-            name: e11,
-            value: e12,
-        });
-        return e10ₘ();
+        return printField(e11, e12);
     }
-    let e10ₘ;
 
     // StringLiteralExpression
     function e11() {
@@ -1353,12 +1307,17 @@ const print = (() => {
     e20.constant = {value: "0x"};
 
     // ApplicationExpression
-    function e21(arg) {
-        if (e21ₘ) return e21ₘ(arg);
-        e21ₘ = std_i32(e22);
-        return e21ₘ(arg);
-    }
     let e21ₘ;
+    function e21(arg) {
+        try {
+            return e21ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
+            e21ₘ = std_i32(e22);
+            return e21ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -1407,12 +1366,17 @@ const print = (() => {
     e24.constant = {value: "0b"};
 
     // ApplicationExpression
-    function e25(arg) {
-        if (e25ₘ) return e25ₘ(arg);
-        e25ₘ = std_i32(e26);
-        return e25ₘ(arg);
-    }
     let e25ₘ;
+    function e25(arg) {
+        try {
+            return e25ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e25ₘ is not a function')) throw err;
+            e25ₘ = std_i32(e26);
+            return e25ₘ(arg);
+        }
+    }
 
     // ModuleExpression
     function e26(bindingName) {
@@ -1450,12 +1414,17 @@ const print = (() => {
     e28.constant = {value: "i"};
 
     // ApplicationExpression
-    function e29(arg) {
-        if (e29ₘ) return e29ₘ(arg);
-        e29ₘ = std_i32(e30);
-        return e29ₘ(arg);
-    }
     let e29ₘ;
+    function e29(arg) {
+        try {
+            return e29ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e29ₘ is not a function')) throw err;
+            e29ₘ = std_i32(e30);
+            return e29ₘ(arg);
+        }
+    }
 
     // ModuleExpression
     function e30(bindingName) {
@@ -1492,18 +1461,12 @@ const print = (() => {
 
     // RecordExpression
     function math_div() {
-        if (math_divₘ) return math_divₘ();
-        math_divₘ = record({
-            mode: 7,
-            fields: [
-                {name: 'type', value: e34},
-                {name: 'lhs', value: math_term},
-                {name: 'rhs', value: e35},
-            ],
-        })
-        return math_divₘ();
+        return printRecord([
+            {name: 'type', value: e34},
+            {name: 'lhs', value: math_term},
+            {name: 'rhs', value: e35},
+        ]);
     }
-    let math_divₘ;
 
     // StringLiteralExpression
     function e34() {
@@ -1537,18 +1500,12 @@ const print = (() => {
 
     // RecordExpression
     function math_sub() {
-        if (math_subₘ) return math_subₘ();
-        math_subₘ = record({
-            mode: 7,
-            fields: [
-                {name: 'type', value: e37},
-                {name: 'lhs', value: math_expr},
-                {name: 'rhs', value: e38},
-            ],
-        })
-        return math_subₘ();
+        return printRecord([
+            {name: 'type', value: e37},
+            {name: 'lhs', value: math_expr},
+            {name: 'rhs', value: e38},
+        ]);
     }
-    let math_subₘ;
 
     // StringLiteralExpression
     function e37() {

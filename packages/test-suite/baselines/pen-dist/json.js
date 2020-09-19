@@ -21,149 +21,132 @@ module.exports = {
 
 // ------------------------------ Runtime ------------------------------
 "use strict";
-function field({ mode, name, value }) {
-    if (isParse(mode)) {
-        return function FLD() {
-            let stateₒ = getState();
-            let obj = {};
-            if (!name())
-                return false;
-            assert(typeof OUT === 'string');
-            let propName = OUT;
-            if (!value())
-                return setState(stateₒ), false;
-            assert(OUT !== undefined);
-            obj[propName] = OUT;
-            OUT = obj;
-            return true;
-        };
-    }
-    else {
-        return function FLD() {
-            if (objectToString.call(IN) !== '[object Object]')
-                return false;
-            let stateₒ = getState();
-            let text;
-            let propNames = Object.keys(IN);
-            let propCount = propNames.length;
-            assert(propCount <= 32);
-            const obj = IN;
-            let bitmask = IP;
-            for (let i = 0; i < propCount; ++i) {
-                let propName = propNames[i];
-                const propBit = 1 << i;
-                if ((bitmask & propBit) !== 0)
-                    continue;
-                setState({ IN: propName, IP: 0 });
-                if (!name())
-                    continue;
-                if (IP !== propName.length)
-                    continue;
-                text = concat(text, OUT);
-                setState({ IN: obj[propName], IP: 0 });
-                if (!value())
-                    continue;
-                if (!isInputFullyConsumed())
-                    continue;
-                text = concat(text, OUT);
-                bitmask += propBit;
-                setState({ IN: obj, IP: bitmask });
-                OUT = text;
-                return true;
-            }
-            setState(stateₒ);
-            return false;
-        };
-    }
+function parseField(name, value) {
+    let stateₒ = getState();
+    let obj = {};
+    if (!name())
+        return false;
+    assert(typeof OUT === 'string');
+    let propName = OUT;
+    if (!value())
+        return setState(stateₒ), false;
+    assert(OUT !== undefined);
+    obj[propName] = OUT;
+    OUT = obj;
+    return true;
 }
-function list({ mode, elements }) {
+function printField(name, value) {
+    if (objectToString.call(IN) !== '[object Object]')
+        return false;
+    let stateₒ = getState();
+    let text;
+    let propNames = Object.keys(IN);
+    let propCount = propNames.length;
+    assert(propCount <= 32);
+    const obj = IN;
+    let bitmask = IP;
+    for (let i = 0; i < propCount; ++i) {
+        let propName = propNames[i];
+        const propBit = 1 << i;
+        if ((bitmask & propBit) !== 0)
+            continue;
+        setState({ IN: propName, IP: 0 });
+        if (!name())
+            continue;
+        if (IP !== propName.length)
+            continue;
+        text = concat(text, OUT);
+        setState({ IN: obj[propName], IP: 0 });
+        if (!value())
+            continue;
+        if (!isInputFullyConsumed())
+            continue;
+        text = concat(text, OUT);
+        bitmask += propBit;
+        setState({ IN: obj, IP: bitmask });
+        OUT = text;
+        return true;
+    }
+    setState(stateₒ);
+    return false;
+}
+function parseList(elements) {
     const elementsLength = elements.length;
-    if (isParse(mode)) {
-        return function LST() {
-            let stateₒ = getState();
-            let arr = [];
-            for (let i = 0; i < elementsLength; ++i) {
-                if (!elements[i]())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
-            }
-            OUT = arr;
-            return true;
-        };
+    let stateₒ = getState();
+    let arr = [];
+    for (let i = 0; i < elementsLength; ++i) {
+        if (!elements[i]())
+            return setState(stateₒ), false;
+        assert(OUT !== undefined);
+        arr.push(OUT);
     }
-    else {
-        return function LST() {
-            if (!Array.isArray(IN))
-                return false;
-            if (IP < 0 || IP + elementsLength > IN.length)
-                return false;
-            let stateₒ = getState();
-            let text;
-            const arr = IN;
-            const off = IP;
-            for (let i = 0; i < elementsLength; ++i) {
-                setState({ IN: arr[off + i], IP: 0 });
-                if (!elements[i]())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-            }
-            setState({ IN: arr, IP: off + elementsLength });
-            OUT = text;
-            return true;
-        };
-    }
+    OUT = arr;
+    return true;
 }
-function record({ mode, fields }) {
-    if (isParse(mode)) {
-        return function RCD() {
-            let stateₒ = getState();
-            let obj = {};
-            for (let field of fields) {
-                let propName = field.name;
-                if (!field.value())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-            }
-            OUT = obj;
-            return true;
-        };
+function printList(elements) {
+    const elementsLength = elements.length;
+    if (!Array.isArray(IN))
+        return false;
+    if (IP < 0 || IP + elementsLength > IN.length)
+        return false;
+    let stateₒ = getState();
+    let text;
+    const arr = IN;
+    const off = IP;
+    for (let i = 0; i < elementsLength; ++i) {
+        setState({ IN: arr[off + i], IP: 0 });
+        if (!elements[i]())
+            return setState(stateₒ), false;
+        if (!isInputFullyConsumed())
+            return setState(stateₒ), false;
+        text = concat(text, OUT);
     }
-    else {
-        return function RCD() {
-            if (objectToString.call(IN) !== '[object Object]')
-                return false;
-            let stateₒ = getState();
-            let text;
-            let propNames = Object.keys(IN);
-            let propCount = propNames.length;
-            assert(propCount <= 32);
-            const obj = IN;
-            let bitmask = IP;
-            for (let field of fields) {
-                let i = propNames.indexOf(field.name);
-                if (i < 0)
-                    return setState(stateₒ), false;
-                let propName = propNames[i];
-                const propBit = 1 << i;
-                if ((bitmask & propBit) !== 0)
-                    return setState(stateₒ), false;
-                setState({ IN: obj[propName], IP: 0 });
-                if (!field.value())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                bitmask += propBit;
-            }
-            setState({ IN: obj, IP: bitmask });
-            OUT = text;
-            return true;
-        };
+    setState({ IN: arr, IP: off + elementsLength });
+    OUT = text;
+    return true;
+}
+function parseRecord(fields) {
+    let stateₒ = getState();
+    let obj = {};
+    for (let field of fields) {
+        let propName = field.name;
+        if (!field.value())
+            return setState(stateₒ), false;
+        assert(OUT !== undefined);
+        obj[propName] = OUT;
     }
+    OUT = obj;
+    return true;
+}
+function printRecord(fields) {
+    if (objectToString.call(IN) !== '[object Object]')
+        return false;
+    let stateₒ = getState();
+    let text;
+    let propNames = Object.keys(IN);
+    let propCount = propNames.length;
+    assert(propCount <= 32);
+    const obj = IN;
+    let bitmask = IP;
+    for (let field of fields) {
+        let i = propNames.indexOf(field.name);
+        if (i < 0)
+            return setState(stateₒ), false;
+        let propName = propNames[i];
+        const propBit = 1 << i;
+        if ((bitmask & propBit) !== 0)
+            return setState(stateₒ), false;
+        setState({ IN: obj[propName], IP: 0 });
+        if (!field.value())
+            return setState(stateₒ), false;
+        if (!isInputFullyConsumed())
+            return setState(stateₒ), false;
+        text = concat(text, OUT);
+        bitmask += propBit;
+    }
+    setState({ IN: obj, IP: bitmask });
+    OUT = text;
+    return true;
 }
 const PARSE = 6;
 const PRINT = 7;
@@ -876,15 +859,8 @@ const parse = (() => {
 
     // FieldExpression
     function json_Property() {
-        if (json_Propertyₘ) return json_Propertyₘ();
-        json_Propertyₘ = field({
-            mode: 6,
-            name: json_String,
-            value: e51,
-        });
-        return json_Propertyₘ();
+        return parseField(json_String, e51);
     }
-    let json_Propertyₘ;
 
     // SequenceExpression
     function json_String() {
@@ -985,12 +961,17 @@ const parse = (() => {
     e20.constant = {value: "\""};
 
     // ApplicationExpression
-    function e21(arg) {
-        if (e21ₘ) return e21ₘ(arg);
-        e21ₘ = std_char(e22);
-        return e21ₘ(arg);
-    }
     let e21ₘ;
+    function e21(arg) {
+        try {
+            return e21ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
+            e21ₘ = std_char(e22);
+            return e21ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -1269,12 +1250,17 @@ const parse = (() => {
     e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function e49(arg) {
-        if (e49ₘ) return e49ₘ(arg);
-        e49ₘ = experiments_unicode(e50);
-        return e49ₘ(arg);
-    }
     let e49ₘ;
+    function e49(arg) {
+        try {
+            return e49ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e49ₘ is not a function')) throw err;
+            e49ₘ = experiments_unicode(e50);
+            return e49ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -1379,14 +1365,8 @@ const parse = (() => {
 
     // RecordExpression
     function e56() {
-        if (e56ₘ) return e56ₘ();
-        e56ₘ = record({
-            mode: 6,
-            fields: [],
-        })
-        return e56ₘ();
+        return parseRecord([]);
     }
-    let e56ₘ;
 
     // SequenceExpression
     function json_RBRACE() {
@@ -1460,14 +1440,8 @@ const parse = (() => {
 
     // ListExpression
     function json_Element() {
-        if (json_Elementₘ) return json_Elementₘ();
-        json_Elementₘ = list({
-            mode: 6,
-            elements: [json_Value],
-        })
-        return json_Elementₘ();
+        return parseList([json_Value]);
     }
-    let json_Elementₘ;
 
     // QuantifiedExpression
     function e61() {
@@ -1494,14 +1468,8 @@ const parse = (() => {
 
     // ListExpression
     function e63() {
-        if (e63ₘ) return e63ₘ();
-        e63ₘ = list({
-            mode: 6,
-            elements: [],
-        })
-        return e63ₘ();
+        return parseList([]);
     }
-    let e63ₘ;
 
     // SequenceExpression
     function json_RBRACKET() {
@@ -1739,15 +1707,8 @@ const print = (() => {
 
     // FieldExpression
     function json_Property() {
-        if (json_Propertyₘ) return json_Propertyₘ();
-        json_Propertyₘ = field({
-            mode: 7,
-            name: json_String,
-            value: e51,
-        });
-        return json_Propertyₘ();
+        return printField(json_String, e51);
     }
-    let json_Propertyₘ;
 
     // SequenceExpression
     function json_String() {
@@ -1847,12 +1808,17 @@ const print = (() => {
     e20.constant = {value: "\""};
 
     // ApplicationExpression
-    function e21(arg) {
-        if (e21ₘ) return e21ₘ(arg);
-        e21ₘ = std_char(e22);
-        return e21ₘ(arg);
-    }
     let e21ₘ;
+    function e21(arg) {
+        try {
+            return e21ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
+            e21ₘ = std_char(e22);
+            return e21ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -2129,12 +2095,17 @@ const print = (() => {
     e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    function e49(arg) {
-        if (e49ₘ) return e49ₘ(arg);
-        e49ₘ = experiments_unicode(e50);
-        return e49ₘ(arg);
-    }
     let e49ₘ;
+    function e49(arg) {
+        try {
+            return e49ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('e49ₘ is not a function')) throw err;
+            e49ₘ = experiments_unicode(e50);
+            return e49ₘ(arg);
+        }
+    }
 
     // ExtensionExpression
 
@@ -2237,14 +2208,8 @@ const print = (() => {
 
     // RecordExpression
     function e56() {
-        if (e56ₘ) return e56ₘ();
-        e56ₘ = record({
-            mode: 7,
-            fields: [],
-        })
-        return e56ₘ();
+        return printRecord([]);
     }
-    let e56ₘ;
 
     // SequenceExpression
     function json_RBRACE() {
@@ -2312,14 +2277,8 @@ const print = (() => {
 
     // ListExpression
     function json_Element() {
-        if (json_Elementₘ) return json_Elementₘ();
-        json_Elementₘ = list({
-            mode: 7,
-            elements: [json_Value],
-        })
-        return json_Elementₘ();
+        return printList([json_Value]);
     }
-    let json_Elementₘ;
 
     // QuantifiedExpression
     function e61() {
@@ -2346,14 +2305,8 @@ const print = (() => {
 
     // ListExpression
     function e63() {
-        if (e63ₘ) return e63ₘ();
-        e63ₘ = list({
-            mode: 7,
-            elements: [],
-        })
-        return e63ₘ();
+        return printList([]);
     }
-    let e63ₘ;
 
     // SequenceExpression
     function json_RBRACKET() {
