@@ -1,6 +1,3 @@
-// TODO: X_memo emitted names could clash with program ids? Ensure they can't...
-
-
 import * as fs from 'fs';
 import type {Expression, ExtensionExpression} from '../../abstract-syntax-trees';
 import {SingleExpressionProgram} from '../../representations';
@@ -118,11 +115,11 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.argument.kind === 'GlobalReferenceExpression');
             // TODO: if lambda refers to an extension export, can safety emit const without fn wrapper (all exts def'd)
             emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo(arg);`);
-            emit.down(1).text(`${name}_memo = ${expr.lambda.globalName}(${expr.argument.globalName});`);
-            emit.down(1).text(`return ${name}_memo(arg);`);
+            emit.down(1).text(`if (${name}ₘ) return ${name}ₘ(arg);`);
+            emit.down(1).text(`${name}ₘ = ${expr.lambda.globalName}(${expr.argument.globalName});`);
+            emit.down(1).text(`return ${name}ₘ(arg);`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}_memo;`);
+            emit.down(1).text(`let ${name}ₘ;`);
             break;
         }
 
@@ -145,15 +142,15 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             assert(expr.name.kind === 'GlobalReferenceExpression');
             assert(expr.value.kind === 'GlobalReferenceExpression');
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
-            emit.down(1).text(`${name}_memo = field({`).indent();
+            emit.down(1).text(`if (${name}ₘ) return ${name}ₘ();`);
+            emit.down(1).text(`${name}ₘ = field({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text(`name: ${expr.name.globalName},`);
             emit.down(1).text(`value: ${expr.value.globalName},`);
             emit.dedent().down(1).text('});');
-            emit.down(1).text(`return ${name}_memo();`);
+            emit.down(1).text(`return ${name}ₘ();`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}_memo;`);
+            emit.down(1).text(`let ${name}ₘ;`);
             break;
         }
 
@@ -166,15 +163,15 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'ListExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
-            emit.down(1).text(`${name}_memo = list({`).indent();
+            emit.down(1).text(`if (${name}ₘ) return ${name}ₘ();`);
+            emit.down(1).text(`${name}ₘ = list({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('elements: [');
             emit.text(`${expr.elements.map(e => e.kind === 'GlobalReferenceExpression' ? e.globalName : '?').join(', ')}`);
             emit.text('],').dedent().down(1).text('})');
-            emit.down(1).text(`return ${name}_memo();`);
+            emit.down(1).text(`return ${name}ₘ();`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}_memo;`);
+            emit.down(1).text(`let ${name}ₘ;`);
             break;
         }
 
@@ -227,8 +224,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'RecordExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (${name}_memo) return ${name}_memo();`);
-            emit.down(1).text(`${name}_memo = record({`).indent();
+            emit.down(1).text(`if (${name}ₘ) return ${name}ₘ();`);
+            emit.down(1).text(`${name}ₘ = record({`).indent();
             emit.down(1).text(`mode: ${mode},`);
             emit.down(1).text('fields: [');
             if (expr.fields.length > 0) {
@@ -240,9 +237,9 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
                 emit.dedent().down(1);
             }
             emit.text('],').dedent().down(1).text('})');
-            emit.down(1).text(`return ${name}_memo();`);
+            emit.down(1).text(`return ${name}ₘ();`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`let ${name}_memo;`);
+            emit.down(1).text(`let ${name}ₘ;`);
             break;
         }
 

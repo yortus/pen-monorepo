@@ -248,11 +248,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function import_graph_result(arg) {
-        if (import_graph_result_memo) return import_graph_result_memo(arg);
-        import_graph_result_memo = a_f(e1);
-        return import_graph_result_memo(arg);
+        if (import_graph_resultₘ) return import_graph_resultₘ(arg);
+        import_graph_resultₘ = a_f(e1);
+        return import_graph_resultₘ(arg);
     }
-    let import_graph_result_memo;
+    let import_graph_resultₘ;
 
     // StringLiteralExpression
     function a_f() {
@@ -311,11 +311,11 @@ const print = (() => {
 
     // ApplicationExpression
     function import_graph_result(arg) {
-        if (import_graph_result_memo) return import_graph_result_memo(arg);
-        import_graph_result_memo = a_f(e1);
-        return import_graph_result_memo(arg);
+        if (import_graph_resultₘ) return import_graph_resultₘ(arg);
+        import_graph_resultₘ = a_f(e1);
+        return import_graph_resultₘ(arg);
     }
-    let import_graph_result_memo;
+    let import_graph_resultₘ;
 
     // StringLiteralExpression
     function a_f() {

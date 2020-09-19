@@ -596,11 +596,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function math_expr(arg) {
-        if (math_expr_memo) return math_expr_memo(arg);
-        math_expr_memo = std_memoise(e1);
-        return math_expr_memo(arg);
+        if (math_exprₘ) return math_exprₘ(arg);
+        math_exprₘ = std_memoise(e1);
+        return math_exprₘ(arg);
     }
-    let math_expr_memo;
+    let math_exprₘ;
 
     // ExtensionExpression
 
@@ -614,8 +614,8 @@ const parse = (() => {
 
     // RecordExpression
     function math_add() {
-        if (math_add_memo) return math_add_memo();
-        math_add_memo = record({
+        if (math_addₘ) return math_addₘ();
+        math_addₘ = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e2},
@@ -623,9 +623,9 @@ const parse = (() => {
                 {name: 'rhs', value: e3},
             ],
         })
-        return math_add_memo();
+        return math_addₘ();
     }
-    let math_add_memo;
+    let math_addₘ;
 
     // StringLiteralExpression
     function e2() {
@@ -656,11 +656,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function math_term(arg) {
-        if (math_term_memo) return math_term_memo(arg);
-        math_term_memo = std_memoise(e5);
-        return math_term_memo(arg);
+        if (math_termₘ) return math_termₘ(arg);
+        math_termₘ = std_memoise(e5);
+        return math_termₘ(arg);
     }
-    let math_term_memo;
+    let math_termₘ;
 
     // SelectionExpression
     function e5() {
@@ -683,15 +683,15 @@ const parse = (() => {
 
     // FieldExpression
     function e6() {
-        if (e6_memo) return e6_memo();
-        e6_memo = field({
+        if (e6ₘ) return e6ₘ();
+        e6ₘ = field({
             mode: 6,
             name: e7,
             value: e8,
         });
-        return e6_memo();
+        return e6ₘ();
     }
-    let e6_memo;
+    let e6ₘ;
 
     // StringLiteralExpression
     function e7() {
@@ -709,28 +709,28 @@ const parse = (() => {
 
     // RecordExpression
     function e9() {
-        if (e9_memo) return e9_memo();
-        e9_memo = record({
+        if (e9ₘ) return e9ₘ();
+        e9ₘ = record({
             mode: 6,
             fields: [
                 {name: 'lhs', value: math_term},
             ],
         })
-        return e9_memo();
+        return e9ₘ();
     }
-    let e9_memo;
+    let e9ₘ;
 
     // FieldExpression
     function e10() {
-        if (e10_memo) return e10_memo();
-        e10_memo = field({
+        if (e10ₘ) return e10ₘ();
+        e10ₘ = field({
             mode: 6,
             name: e11,
             value: e12,
         });
-        return e10_memo();
+        return e10ₘ();
     }
-    let e10_memo;
+    let e10ₘ;
 
     // StringLiteralExpression
     function e11() {
@@ -845,11 +845,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function e21(arg) {
-        if (e21_memo) return e21_memo(arg);
-        e21_memo = std_i32(e22);
-        return e21_memo(arg);
+        if (e21ₘ) return e21ₘ(arg);
+        e21ₘ = std_i32(e22);
+        return e21ₘ(arg);
     }
-    let e21_memo;
+    let e21ₘ;
 
     // ExtensionExpression
 
@@ -899,11 +899,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function e25(arg) {
-        if (e25_memo) return e25_memo(arg);
-        e25_memo = std_i32(e26);
-        return e25_memo(arg);
+        if (e25ₘ) return e25ₘ(arg);
+        e25ₘ = std_i32(e26);
+        return e25ₘ(arg);
     }
-    let e25_memo;
+    let e25ₘ;
 
     // ModuleExpression
     function e26(bindingName) {
@@ -943,11 +943,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function e29(arg) {
-        if (e29_memo) return e29_memo(arg);
-        e29_memo = std_i32(e30);
-        return e29_memo(arg);
+        if (e29ₘ) return e29ₘ(arg);
+        e29ₘ = std_i32(e30);
+        return e29ₘ(arg);
     }
-    let e29_memo;
+    let e29ₘ;
 
     // ModuleExpression
     function e30(bindingName) {
@@ -990,8 +990,8 @@ const parse = (() => {
 
     // RecordExpression
     function math_div() {
-        if (math_div_memo) return math_div_memo();
-        math_div_memo = record({
+        if (math_divₘ) return math_divₘ();
+        math_divₘ = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e34},
@@ -999,9 +999,9 @@ const parse = (() => {
                 {name: 'rhs', value: e35},
             ],
         })
-        return math_div_memo();
+        return math_divₘ();
     }
-    let math_div_memo;
+    let math_divₘ;
 
     // StringLiteralExpression
     function e34() {
@@ -1032,8 +1032,8 @@ const parse = (() => {
 
     // RecordExpression
     function math_sub() {
-        if (math_sub_memo) return math_sub_memo();
-        math_sub_memo = record({
+        if (math_subₘ) return math_subₘ();
+        math_subₘ = record({
             mode: 6,
             fields: [
                 {name: 'type', value: e37},
@@ -1041,9 +1041,9 @@ const parse = (() => {
                 {name: 'rhs', value: e38},
             ],
         })
-        return math_sub_memo();
+        return math_subₘ();
     }
-    let math_sub_memo;
+    let math_subₘ;
 
     // StringLiteralExpression
     function e37() {
@@ -1088,11 +1088,11 @@ const print = (() => {
 
     // ApplicationExpression
     function math_expr(arg) {
-        if (math_expr_memo) return math_expr_memo(arg);
-        math_expr_memo = std_memoise(e1);
-        return math_expr_memo(arg);
+        if (math_exprₘ) return math_exprₘ(arg);
+        math_exprₘ = std_memoise(e1);
+        return math_exprₘ(arg);
     }
-    let math_expr_memo;
+    let math_exprₘ;
 
     // ExtensionExpression
 
@@ -1106,8 +1106,8 @@ const print = (() => {
 
     // RecordExpression
     function math_add() {
-        if (math_add_memo) return math_add_memo();
-        math_add_memo = record({
+        if (math_addₘ) return math_addₘ();
+        math_addₘ = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e2},
@@ -1115,9 +1115,9 @@ const print = (() => {
                 {name: 'rhs', value: e3},
             ],
         })
-        return math_add_memo();
+        return math_addₘ();
     }
-    let math_add_memo;
+    let math_addₘ;
 
     // StringLiteralExpression
     function e2() {
@@ -1151,11 +1151,11 @@ const print = (() => {
 
     // ApplicationExpression
     function math_term(arg) {
-        if (math_term_memo) return math_term_memo(arg);
-        math_term_memo = std_memoise(e5);
-        return math_term_memo(arg);
+        if (math_termₘ) return math_termₘ(arg);
+        math_termₘ = std_memoise(e5);
+        return math_termₘ(arg);
     }
-    let math_term_memo;
+    let math_termₘ;
 
     // SelectionExpression
     function e5() {
@@ -1178,15 +1178,15 @@ const print = (() => {
 
     // FieldExpression
     function e6() {
-        if (e6_memo) return e6_memo();
-        e6_memo = field({
+        if (e6ₘ) return e6ₘ();
+        e6ₘ = field({
             mode: 7,
             name: e7,
             value: e8,
         });
-        return e6_memo();
+        return e6ₘ();
     }
-    let e6_memo;
+    let e6ₘ;
 
     // StringLiteralExpression
     function e7() {
@@ -1217,28 +1217,28 @@ const print = (() => {
 
     // RecordExpression
     function e9() {
-        if (e9_memo) return e9_memo();
-        e9_memo = record({
+        if (e9ₘ) return e9ₘ();
+        e9ₘ = record({
             mode: 7,
             fields: [
                 {name: 'lhs', value: math_term},
             ],
         })
-        return e9_memo();
+        return e9ₘ();
     }
-    let e9_memo;
+    let e9ₘ;
 
     // FieldExpression
     function e10() {
-        if (e10_memo) return e10_memo();
-        e10_memo = field({
+        if (e10ₘ) return e10ₘ();
+        e10ₘ = field({
             mode: 7,
             name: e11,
             value: e12,
         });
-        return e10_memo();
+        return e10ₘ();
     }
-    let e10_memo;
+    let e10ₘ;
 
     // StringLiteralExpression
     function e11() {
@@ -1354,11 +1354,11 @@ const print = (() => {
 
     // ApplicationExpression
     function e21(arg) {
-        if (e21_memo) return e21_memo(arg);
-        e21_memo = std_i32(e22);
-        return e21_memo(arg);
+        if (e21ₘ) return e21ₘ(arg);
+        e21ₘ = std_i32(e22);
+        return e21ₘ(arg);
     }
-    let e21_memo;
+    let e21ₘ;
 
     // ExtensionExpression
 
@@ -1408,11 +1408,11 @@ const print = (() => {
 
     // ApplicationExpression
     function e25(arg) {
-        if (e25_memo) return e25_memo(arg);
-        e25_memo = std_i32(e26);
-        return e25_memo(arg);
+        if (e25ₘ) return e25ₘ(arg);
+        e25ₘ = std_i32(e26);
+        return e25ₘ(arg);
     }
-    let e25_memo;
+    let e25ₘ;
 
     // ModuleExpression
     function e26(bindingName) {
@@ -1451,11 +1451,11 @@ const print = (() => {
 
     // ApplicationExpression
     function e29(arg) {
-        if (e29_memo) return e29_memo(arg);
-        e29_memo = std_i32(e30);
-        return e29_memo(arg);
+        if (e29ₘ) return e29ₘ(arg);
+        e29ₘ = std_i32(e30);
+        return e29ₘ(arg);
     }
-    let e29_memo;
+    let e29ₘ;
 
     // ModuleExpression
     function e30(bindingName) {
@@ -1492,8 +1492,8 @@ const print = (() => {
 
     // RecordExpression
     function math_div() {
-        if (math_div_memo) return math_div_memo();
-        math_div_memo = record({
+        if (math_divₘ) return math_divₘ();
+        math_divₘ = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e34},
@@ -1501,9 +1501,9 @@ const print = (() => {
                 {name: 'rhs', value: e35},
             ],
         })
-        return math_div_memo();
+        return math_divₘ();
     }
-    let math_div_memo;
+    let math_divₘ;
 
     // StringLiteralExpression
     function e34() {
@@ -1537,8 +1537,8 @@ const print = (() => {
 
     // RecordExpression
     function math_sub() {
-        if (math_sub_memo) return math_sub_memo();
-        math_sub_memo = record({
+        if (math_subₘ) return math_subₘ();
+        math_subₘ = record({
             mode: 7,
             fields: [
                 {name: 'type', value: e37},
@@ -1546,9 +1546,9 @@ const print = (() => {
                 {name: 'rhs', value: e38},
             ],
         })
-        return math_sub_memo();
+        return math_subₘ();
     }
-    let math_sub_memo;
+    let math_subₘ;
 
     // StringLiteralExpression
     function e37() {

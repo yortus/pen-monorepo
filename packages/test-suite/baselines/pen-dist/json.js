@@ -876,15 +876,15 @@ const parse = (() => {
 
     // FieldExpression
     function json_Property() {
-        if (json_Property_memo) return json_Property_memo();
-        json_Property_memo = field({
+        if (json_Propertyₘ) return json_Propertyₘ();
+        json_Propertyₘ = field({
             mode: 6,
             name: json_String,
             value: e51,
         });
-        return json_Property_memo();
+        return json_Propertyₘ();
     }
-    let json_Property_memo;
+    let json_Propertyₘ;
 
     // SequenceExpression
     function json_String() {
@@ -986,11 +986,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function e21(arg) {
-        if (e21_memo) return e21_memo(arg);
-        e21_memo = std_char(e22);
-        return e21_memo(arg);
+        if (e21ₘ) return e21ₘ(arg);
+        e21ₘ = std_char(e22);
+        return e21ₘ(arg);
     }
-    let e21_memo;
+    let e21ₘ;
 
     // ExtensionExpression
 
@@ -1270,11 +1270,11 @@ const parse = (() => {
 
     // ApplicationExpression
     function e49(arg) {
-        if (e49_memo) return e49_memo(arg);
-        e49_memo = experiments_unicode(e50);
-        return e49_memo(arg);
+        if (e49ₘ) return e49ₘ(arg);
+        e49ₘ = experiments_unicode(e50);
+        return e49ₘ(arg);
     }
-    let e49_memo;
+    let e49ₘ;
 
     // ExtensionExpression
 
@@ -1379,14 +1379,14 @@ const parse = (() => {
 
     // RecordExpression
     function e56() {
-        if (e56_memo) return e56_memo();
-        e56_memo = record({
+        if (e56ₘ) return e56ₘ();
+        e56ₘ = record({
             mode: 6,
             fields: [],
         })
-        return e56_memo();
+        return e56ₘ();
     }
-    let e56_memo;
+    let e56ₘ;
 
     // SequenceExpression
     function json_RBRACE() {
@@ -1460,14 +1460,14 @@ const parse = (() => {
 
     // ListExpression
     function json_Element() {
-        if (json_Element_memo) return json_Element_memo();
-        json_Element_memo = list({
+        if (json_Elementₘ) return json_Elementₘ();
+        json_Elementₘ = list({
             mode: 6,
             elements: [json_Value],
         })
-        return json_Element_memo();
+        return json_Elementₘ();
     }
-    let json_Element_memo;
+    let json_Elementₘ;
 
     // QuantifiedExpression
     function e61() {
@@ -1494,14 +1494,14 @@ const parse = (() => {
 
     // ListExpression
     function e63() {
-        if (e63_memo) return e63_memo();
-        e63_memo = list({
+        if (e63ₘ) return e63ₘ();
+        e63ₘ = list({
             mode: 6,
             elements: [],
         })
-        return e63_memo();
+        return e63ₘ();
     }
-    let e63_memo;
+    let e63ₘ;
 
     // SequenceExpression
     function json_RBRACKET() {
@@ -1739,15 +1739,15 @@ const print = (() => {
 
     // FieldExpression
     function json_Property() {
-        if (json_Property_memo) return json_Property_memo();
-        json_Property_memo = field({
+        if (json_Propertyₘ) return json_Propertyₘ();
+        json_Propertyₘ = field({
             mode: 7,
             name: json_String,
             value: e51,
         });
-        return json_Property_memo();
+        return json_Propertyₘ();
     }
-    let json_Property_memo;
+    let json_Propertyₘ;
 
     // SequenceExpression
     function json_String() {
@@ -1848,11 +1848,11 @@ const print = (() => {
 
     // ApplicationExpression
     function e21(arg) {
-        if (e21_memo) return e21_memo(arg);
-        e21_memo = std_char(e22);
-        return e21_memo(arg);
+        if (e21ₘ) return e21ₘ(arg);
+        e21ₘ = std_char(e22);
+        return e21ₘ(arg);
     }
-    let e21_memo;
+    let e21ₘ;
 
     // ExtensionExpression
 
@@ -2130,11 +2130,11 @@ const print = (() => {
 
     // ApplicationExpression
     function e49(arg) {
-        if (e49_memo) return e49_memo(arg);
-        e49_memo = experiments_unicode(e50);
-        return e49_memo(arg);
+        if (e49ₘ) return e49ₘ(arg);
+        e49ₘ = experiments_unicode(e50);
+        return e49ₘ(arg);
     }
-    let e49_memo;
+    let e49ₘ;
 
     // ExtensionExpression
 
@@ -2237,14 +2237,14 @@ const print = (() => {
 
     // RecordExpression
     function e56() {
-        if (e56_memo) return e56_memo();
-        e56_memo = record({
+        if (e56ₘ) return e56ₘ();
+        e56ₘ = record({
             mode: 7,
             fields: [],
         })
-        return e56_memo();
+        return e56ₘ();
     }
-    let e56_memo;
+    let e56ₘ;
 
     // SequenceExpression
     function json_RBRACE() {
@@ -2312,14 +2312,14 @@ const print = (() => {
 
     // ListExpression
     function json_Element() {
-        if (json_Element_memo) return json_Element_memo();
-        json_Element_memo = list({
+        if (json_Elementₘ) return json_Elementₘ();
+        json_Elementₘ = list({
             mode: 7,
             elements: [json_Value],
         })
-        return json_Element_memo();
+        return json_Elementₘ();
     }
-    let json_Element_memo;
+    let json_Elementₘ;
 
     // QuantifiedExpression
     function e61() {
@@ -2346,14 +2346,14 @@ const print = (() => {
 
     // ListExpression
     function e63() {
-        if (e63_memo) return e63_memo();
-        e63_memo = list({
+        if (e63ₘ) return e63ₘ();
+        e63ₘ = list({
             mode: 7,
             elements: [],
         })
-        return e63_memo();
+        return e63ₘ();
     }
-    let e63_memo;
+    let e63ₘ;
 
     // SequenceExpression
     function json_RBRACKET() {
