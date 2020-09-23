@@ -64,9 +64,11 @@ MultiBindingName
         FieldExpression                 {[a]: b}
         ModuleExpression                {export a=b c=d e=f}   {a=b}
         ListExpression                  [a, b, c]   [a]   []
+        ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         NullLiteralExpression           null
         BooleanLiteralExpression        false   true
         StringLiteralExpression         "foo"   'a string!'   `a`
+        NumericLiteralExpression        123   3.14   -0.1   5.7e-53
         LocalReferenceExpression        a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
@@ -76,11 +78,9 @@ Expression
 
 Precedence1OrHigher
     = SelectionExpression
-    / Precedence2OrHigher
 
 Precedence2OrHigher
     = SequenceExpression
-    / Precedence3OrHigher
 
 Precedence3OrHigher
     = NotExpression
@@ -88,11 +88,9 @@ Precedence3OrHigher
 
 Precedence4OrHigher
     = QuantifiedExpression
-    / Precedence5OrHigher
 
 Precedence5OrHigher
     = ApplicationOrMemberExpression
-    / Precedence6OrHigher
 
 Precedence6OrHigher
     = PrimaryExpression
@@ -104,32 +102,42 @@ PrimaryExpression
     / ModuleExpression
     / ListExpression
     / ParenthesisedExpression
-    / ImportExpression
     / NullLiteralExpression
     / BooleanLiteralExpression
     / StringLiteralExpression
     / NumericLiteralExpression
     / LocalReferenceExpression
+    / ImportExpression
 
 SelectionExpression
-    = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)+
-    { return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))}; }
+    = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)*
+    {
+        if (tail.length === 0) return head;
+        return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))};
+    }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))+
-    { return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))}; }
+    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))*
+    {
+        if (tail.length === 0) return head;
+        return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
+    }
 
 NotExpression
     = "!"   __   expression:Precedence4OrHigher
     { return {kind: 'NotExpression', expression}; }
 
 QuantifiedExpression
-    = expression:Precedence5OrHigher   __   quantifier:("?" / "*")
-    { return {kind: 'QuantifiedExpression', expression, quantifier}; }
+    = expression:Precedence5OrHigher   q:(__   ("?" / "*"))?
+    {
+        if (!q) return expression;
+        return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};
+    }
 
 ApplicationOrMemberExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)+
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)*
     {
+        if (tail.length === 0) return head;
         return tail.reduce(
             (lhs, rhs) => (rhs.name
                 ? {kind: 'MemberExpression', module: lhs, bindingName: rhs.name}
