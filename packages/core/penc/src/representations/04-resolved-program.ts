@@ -19,5 +19,4 @@ export const resolvedNodeKinds = allNodeKinds.without(
     'LocalBinding',
     'LocalMultiBinding',
     'LocalReferenceExpression',
-    'ParenthesisedExpression',
 );

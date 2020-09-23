@@ -83,7 +83,6 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteralExpression': return setSig('LIT', n.value);
             case 'NumericLiteralExpression': return setSig('LIT', n.value);
-            case 'ParenthesisedExpression': return getSig(n.expression);
             case 'QuantifiedExpression': return setSig('QUA', getSig(n.expression), n.quantifier);
             case 'RecordExpression': return setSig('REC', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));

@@ -5,7 +5,6 @@ import {assert} from '../../utils';
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
-// - ParenthesisedExpression
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
     let mapNode = createNodeMapper(sourceNodeKinds, desugaredNodeKinds);
@@ -49,11 +48,6 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
 
             let modᐟ = {...mod, bindings};
             return modᐟ;
-        },
-
-        // Remove all ParenthesisedExpressions from the AST
-        ParenthesisedExpression: par => {
-            return rec(par.expression);
         },
 
         // This is handled within the 'Module' callback, but must be present since it's in Source but not Desugared

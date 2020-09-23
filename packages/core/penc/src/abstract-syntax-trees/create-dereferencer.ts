@@ -5,8 +5,11 @@ import {traverseNode} from './traverse-node';
 
 /**
  * Returns a function that can follow references from a given node to the node it refers to within the same AST.
- * Only certain node types can be dereferenced, namely GlobalReferenceExpression and MemberExpression. Dereferencing
- * other expression nodes will return the given node unchanged.
+ * The result of dereferencing a node is computed as follows:
+ * - ParenthesisedExpression: deref of the inner expression 
+ * - GlobalReferenceExpression: deref of the value of the binding with the same globalName as the reference.
+ * - MemberExpression: deref of the value of the binding refered to (TODO: clearer wording?)
+ * - any other node kind: the node itself, unchanged.
  * NB: Some reference/member expressions cannot be statically dereferenced. This is a current implementation limitation.
  * @param ast the AST containing all possible nodes that may be dereferencing targets.
  */
@@ -26,9 +29,12 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
             // LocalReferenceExpression is not allowed for `expr`, as per jsdoc on DereferenceFunction.
             assert(expr.kind !== 'LocalReferenceExpression');
 
-            // If `expr` is a reference or member expression, try to resolve to its target expression.
+            // If `expr` is a par|ref|mem expression, try to resolve to its target expression.
             let tgt: Expression | undefined;
-            if (expr.kind === 'GlobalReferenceExpression') {
+            if (expr.kind === 'ParenthesisedExpression') {
+                tgt = expr.expression;
+            }
+            else if (expr.kind === 'GlobalReferenceExpression') {
                 // Global references can always be resolved to their target node (which may be another deref'able node).
                 tgt = resolveReference(expr);
             }
@@ -40,13 +46,13 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
             // If the target expression for `expr` could not be determined, return `expr` unchanged.
             if (tgt === undefined) return expr;
 
-            // If `expr` resolved to a target expression that isn't a ref|mem expression, return the target expression.
-            if (tgt.kind !== 'GlobalReferenceExpression' && tgt.kind !== 'MemberExpression') return tgt;
+            // If `expr` resolved to a target expression that isn't a par|ref|mem expression, return the target expression.
+            if (tgt.kind !== 'GlobalReferenceExpression' && tgt.kind !== 'MemberExpression' && tgt.kind !== 'ParenthesisedExpression') return tgt;
 
-            // If the target expression is still a ref|mem expression, keep iterating, but prevent an infinite loop.
+            // If the target expression is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(tgt)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.bindingName;
+                let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(tgt);
@@ -95,12 +101,12 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
 
 
 /**
- * A function that returns the result of _dereferencing_ the expression node `expr`. If `expr` is a global reference
- * or member expression, then the returned node will be the node `expr` refers to in the same AST, if it can be
- * statically determined. In all other cases, `expr` is returned unchanged.
+ * A function that returns the result of _dereferencing_ the expression node `expr`. If `expr` is a parenthesised,
+ * global reference, or member expression, then the returned node will be the node `expr` refers to in the same AST, if
+ * it can be statically determined. In all other cases, `expr` is returned unchanged.
  * NB: LocalReferenceExpression nodes cannot be dereferenced, and will throw an error if encountered.
- * NB2: the result of dereferencing an expression is guaranteed to never be a global reference.
+ * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends Expression>(expr: E): E extends {kind: 'GlobalReferenceExpression'} ? never : E;
+    <E extends Expression>(expr: E): E extends {kind: 'GlobalReferenceExpression' | 'ParenthesisedExpression'} ? never : E;
 }
