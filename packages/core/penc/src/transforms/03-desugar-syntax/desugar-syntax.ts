@@ -26,7 +26,8 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                     let {names, value, exported} = binding;
                     bindings.push({
                         kind: 'LocalBinding',
-                        localName, value: rec(value),
+                        localName,
+                        value: rec(value),
                         exported
                     });
 
@@ -39,7 +40,8 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                         bindings.push({
                             kind: 'LocalBinding',
                             localName: alias ?? bindingName,
-                            value: mem, exported
+                            value: mem,
+                            exported
                         });
                     }
                 }
