@@ -26,8 +26,8 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
     function deref(expr: Expression): Expression {
         let seen = [expr];
         while (true) {
-            // LocalReferenceExpression is not allowed for `expr`, as per jsdoc on DereferenceFunction.
-            assert(expr.kind !== 'LocalReferenceExpression');
+            // NameExpression is not allowed for `expr`, as per jsdoc on DereferenceFunction.
+            assert(expr.kind !== 'NameExpression');
 
             // If `expr` is a par|ref|mem expression, try to resolve to its target expression.
             let tgt: Expression | undefined;
@@ -104,7 +104,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
  * A function that returns the result of _dereferencing_ the expression node `expr`. If `expr` is a parenthesised,
  * global reference, or member expression, then the returned node will be the node `expr` refers to in the same AST, if
  * it can be statically determined. In all other cases, `expr` is returned unchanged.
- * NB: LocalReferenceExpression nodes cannot be dereferenced, and will throw an error if encountered.
+ * NB: NameExpression nodes cannot be dereferenced, and will throw an error if encountered.
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {

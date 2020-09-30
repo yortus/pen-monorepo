@@ -69,7 +69,7 @@ MultiBindingName
         BooleanLiteralExpression        false   true
         StringLiteralExpression         "foo"   'a string!'   `a`
         NumericLiteralExpression        123   3.14   -0.1   5.7e-53
-        LocalReferenceExpression        a   Rule1   MY_FOO_45   x32   __bar
+        NameExpression                  a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
 
@@ -106,7 +106,7 @@ PrimaryExpression
     / BooleanLiteralExpression
     / StringLiteralExpression
     / NumericLiteralExpression
-    / LocalReferenceExpression
+    / NameExpression
     / ImportExpression
 
 SelectionExpression
@@ -214,9 +214,9 @@ NumericLiteralExpression
 
     // TODO: HexIntegerLiteral
 
-LocalReferenceExpression
-    = localName:IDENTIFIER
-    { return {kind: 'LocalReferenceExpression', localName}; }
+NameExpression
+    = name:IDENTIFIER
+    { return {kind: 'NameExpression', name}; }
 
 
 // ====================   Record/List Parts   ====================

@@ -12,9 +12,9 @@ export type Expression =
     | ImportExpression
     // | LambdaExpression
     | ListExpression
-    | LocalReferenceExpression
     | MemberExpression
     | ModuleExpression
+    | NameExpression
     | NotExpression
     | NullLiteralExpression
     | NumericLiteralExpression
@@ -81,12 +81,6 @@ export interface ListExpression {
 }
 
 
-export interface LocalReferenceExpression {
-    readonly kind: 'LocalReferenceExpression';
-    readonly localName: string;
-}
-
-
 export interface MemberExpression {
     readonly kind: 'MemberExpression';
     readonly module: Expression;
@@ -97,6 +91,12 @@ export interface MemberExpression {
 export interface ModuleExpression {
     readonly kind: 'ModuleExpression';
     readonly module: Module;
+}
+
+
+export interface NameExpression {
+    readonly kind: 'NameExpression';
+    readonly name: string;
 }
 
 

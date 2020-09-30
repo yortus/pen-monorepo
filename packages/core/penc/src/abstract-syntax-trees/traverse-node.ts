@@ -21,10 +21,10 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'LocalBinding': return rec(n.value), cb(n);
             case 'LocalMultiBinding': return rec(n.value), cb(n);
-            case 'LocalReferenceExpression': return cb(n);
             case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
+            case 'NameExpression': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteralExpression': return cb(n);
             case 'NumericLiteralExpression': return cb(n);

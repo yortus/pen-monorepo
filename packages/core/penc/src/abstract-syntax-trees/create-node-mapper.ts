@@ -49,10 +49,10 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'LocalBinding': return {...n, value: rec(n.value)};
             case 'LocalMultiBinding': return {...n, value: rec(n.value)};
-            case 'LocalReferenceExpression': return n;
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
+            case 'NameExpression': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;

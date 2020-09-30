@@ -103,4 +103,4 @@ type HashableNodeKind = typeof hashableNodeKinds[any];
 
 
 // Helper array of all node kinds that support hashing. Includes all node kinds except 'Local*'. 
-const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'LocalReferenceExpression');
+const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'NameExpression');
