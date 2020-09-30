@@ -13,5 +13,5 @@ export interface SourceProgram {
 /** List of node kinds that may be present in a SourceProgram AST. */
 export const sourceNodeKinds = allNodeKinds.without(
     'GlobalBinding',
-    'GlobalReferenceExpression',
+    'ReferenceExpression',
 );

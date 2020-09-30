@@ -8,7 +8,6 @@ export type Expression =
     | BooleanLiteralExpression
     | ExtensionExpression
     | FieldExpression
-    | GlobalReferenceExpression
     | ImportExpression
     // | LambdaExpression
     | ListExpression
@@ -21,6 +20,7 @@ export type Expression =
     | ParenthesisedExpression
     | QuantifiedExpression
     | RecordExpression
+    | ReferenceExpression
     | SelectionExpression
     | SequenceExpression
     | StringLiteralExpression
@@ -51,13 +51,6 @@ export interface FieldExpression {
     readonly kind: 'FieldExpression';
     readonly name: Expression;
     readonly value: Expression;
-}
-
-
-export interface GlobalReferenceExpression {
-    readonly kind: 'GlobalReferenceExpression';
-    readonly localName: string;
-    readonly globalName: string;
 }
 
 
@@ -137,6 +130,13 @@ export interface RecordExpression {
         readonly name: string;
         readonly value: Expression;
     }>;
+}
+
+
+export interface ReferenceExpression {
+    readonly kind: 'ReferenceExpression';
+    readonly localName: string;
+    readonly globalName: string;
 }
 
 

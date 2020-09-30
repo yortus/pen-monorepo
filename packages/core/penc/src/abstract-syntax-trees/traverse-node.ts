@@ -15,7 +15,6 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GlobalBinding': return rec(n.value), cb(n);
-            case 'GlobalReferenceExpression': return cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
@@ -31,6 +30,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'ParenthesisedExpression': return rec(n.expression), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
+            case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'StringLiteralExpression': return cb(n);

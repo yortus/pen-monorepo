@@ -109,5 +109,5 @@ import type {Expression} from './nodes';
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends Expression>(expr: E): E extends {kind: 'GlobalReferenceExpression' | 'ParenthesisedExpression'} ? never : E;
+    <E extends Expression>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'ReferenceExpression'} ? never : E;
 }
