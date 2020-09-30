@@ -1,1 +1,1 @@
-export {checkSemantics} from './check-semantics';
+// export {checkSemantics} from './check-semantics';

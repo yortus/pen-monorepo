@@ -13,7 +13,7 @@
     ],
     "scripts": {
         "bootstrap": "npm install && lerna bootstrap",
-        "build": "tsc -b --verbose && lerna run postbuild --stream",
+        "build": "tsc -b --verbose && lerna run Xpostbuild --stream",
         "clean": "lerna exec rimraf dist/ *.tsbuildinfo --stream && lerna run clean",
         "lint": "lerna exec tslint {src,tests}/**/*.ts --stream",
         "test": "lerna run test --scope test-suite --stream",

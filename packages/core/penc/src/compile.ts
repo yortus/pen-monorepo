@@ -8,12 +8,12 @@ import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
 import {parseSourceFiles} from './transforms';
-import {desugarSyntax} from './transforms';
-import {resolveSymbols} from './transforms';
-import {checkSemantics} from './transforms';
-import {generateSingleExpression} from './transforms';
-import {resolveConstantValues} from './transforms';
-import {generateTargetCode} from './transforms';
+// import {desugarSyntax} from './transforms';
+// import {resolveSymbols} from './transforms';
+// import {checkSemantics} from './transforms';
+// import {generateSingleExpression} from './transforms';
+// import {resolveConstantValues} from './transforms';
+// import {generateTargetCode} from './transforms';
 
 
 export function compile(options: CompilerOptions) {
@@ -28,13 +28,17 @@ export function compile(options: CompilerOptions) {
 
     // Proceed through all stages in the compiler pipeline.
     let ast01 = parseSourceFiles(sourceFiles);
-    let ast02 = desugarSyntax(ast01);
-    let ast03 = resolveSymbols(ast02);
-    checkSemantics(ast03);
+    // let ast02 = desugarSyntax(ast01);
+    // let ast03 = resolveSymbols(ast02);
+    // checkSemantics(ast03);
 
-    let il = generateSingleExpression(ast03);
-    let consts = resolveConstantValues(il);
-    let targetCode = generateTargetCode({il, consts});
+    // let il = generateSingleExpression(ast03);
+    // let consts = resolveConstantValues(il);
+    // let targetCode = generateTargetCode({il, consts});
+
+    // TODO: temp testing...
+    [] = [ast01];
+    const targetCode = `console.log('Hello, World!');\n`;
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     let outFilePath = path.resolve(outFile);
