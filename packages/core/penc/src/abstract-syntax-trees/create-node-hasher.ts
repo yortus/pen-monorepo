@@ -61,24 +61,13 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
-            case 'AbstractSyntaxTree': {
-                let map = new Map<string, Signature>();
-                for (let [absPath, module] of n.modulesByAbsPath.entries()) map.set(absPath, getSig(module));
-                return setSig('MODMAP', map);
-            }
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
             case 'BooleanLiteralExpression': return setSig('LIT', n.value);
             case 'ExtensionExpression': return setSig('EXT', n.extensionPath, n.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'GlobalBinding': return setSig('GB', n.localName, getSig(n.value));
             case 'ImportExpression': return setSig('IMP', n.sourceFilePath);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.bindingName);
-            case 'Module': {
-                let set = new Set<Signature>();
-                for (let binding of n.bindings) set.add(getSig(binding));
-                return setSig('MOD', set);
-            }
             case 'ModuleExpression': return setSig('MEX', getSig(n.module));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteralExpression': return setSig('LIT', n.value);
@@ -102,5 +91,5 @@ type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ?
 type HashableNodeKind = typeof hashableNodeKinds[any];
 
 
-// Helper array of all node kinds that support hashing. Includes all node kinds except 'Local*'. 
-const hashableNodeKinds = allNodeKinds.without('LocalBinding', 'LocalMultiBinding', 'NameExpression');
+// Helper array of all node kinds that support hashing. Includes all expression node kinds except 'NameExpression'. 
+const hashableNodeKinds = allNodeKinds.without('AbstractSyntaxTree', 'Module', 'ModulePattern', 'NameExpression', 'NamePattern');

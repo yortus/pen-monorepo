@@ -1,5 +1,5 @@
 import {assert, mapMap} from '../utils';
-import type {Binding, Expression, Node} from './nodes';
+import type {Expression, Node, Pattern} from './nodes';
 import {NodeKinds} from './utils';
 
 
@@ -42,16 +42,15 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'BooleanLiteralExpression': return n;
             case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
-            case 'GlobalBinding': return {...n, value: rec(n.value)};
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
-            case 'LocalBinding': return {...n, value: rec(n.value)};
-            case 'LocalMultiBinding': return {...n, value: rec(n.value)};
             case 'MemberExpression': return {...n, module: rec(n.module)};
-            case 'Module': return {...n, bindings: n.bindings.map(rec)};
+            case 'Module': return {...n, bindings: n.bindings.map(b => ({...b, pattern: rec(b.pattern), value: rec(b.value)}))};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
+            case 'ModulePattern': return n;
             case 'NameExpression': return n;
+            case 'NamePattern': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteralExpression': return n;
             case 'NumericLiteralExpression': return n;
@@ -86,7 +85,7 @@ type Mappings<MapObj, KS extends Node['kind'], KSᐟ extends Node['kind']> =
 // Helper type for widening specific node kinds to general node kind categories.
 type WidenKind<K extends Node['kind'], AllowedKinds extends Node['kind']> =
     K extends Expression['kind'] ? Extract<Expression['kind'], AllowedKinds> :
-    K extends Binding['kind'] ? Extract<Binding['kind'], AllowedKinds> :
+    K extends Pattern['kind'] ? Extract<Pattern['kind'], AllowedKinds> :
     K extends AllowedKinds ? K :
     never;
 

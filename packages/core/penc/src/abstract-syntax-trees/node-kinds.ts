@@ -1,11 +1,10 @@
 import {createNodeKinds} from './utils';
 
 
-/** Array of all node kinds which are bindings. */
-export const bindingNodeKinds = createNodeKinds(
-    'GlobalBinding',
-    'LocalBinding',
-    'LocalMultiBinding',
+/** Array of all node kinds which are patterns. */
+export const patternNodeKinds = createNodeKinds(
+    'NamePattern',
+    'ModulePattern',
 );
 
 
@@ -38,6 +37,6 @@ export const expressionNodeKinds = createNodeKinds(
 export const allNodeKinds = createNodeKinds(
     'AbstractSyntaxTree',
     'Module',
-    ...bindingNodeKinds,
+    ...patternNodeKinds,
     ...expressionNodeKinds,
 );

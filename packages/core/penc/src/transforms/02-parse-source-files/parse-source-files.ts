@@ -18,13 +18,8 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
             return {
                 kind: 'Module',
                 bindings: exportedNames.map(name => ({
-                    kind: 'LocalBinding',
-                    localName: name,
-                    value: {
-                        kind: 'ExtensionExpression',
-                        extensionPath: sourceFile.path,
-                        bindingName: name,
-                    },
+                    pattern: {kind: 'NamePattern', name},
+                    value: {kind: 'ExtensionExpression', extensionPath: sourceFile.path, bindingName: name},
                     exported: true,
                 })),
                 path: sourceFile.path,

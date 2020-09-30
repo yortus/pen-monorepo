@@ -133,10 +133,17 @@ export interface RecordExpression {
 }
 
 
+// TODO: add:
+// export interface DefinitionExpression {
+//     readonly kind: 'DefinitionExpression';
+//     readonly id: string;
+//     readonly localName: string; // maybe???
+//     readonly globalName: string; // maybe???
+//     readonly expression: Expression;
+// }
 export interface ReferenceExpression {
     readonly kind: 'ReferenceExpression';
-    readonly localName: string;
-    readonly globalName: string;
+    readonly id: string;
 }
 
 

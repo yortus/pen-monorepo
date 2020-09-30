@@ -20,22 +20,22 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = LocalBinding
-    / LocalMultiBinding
+    = NameBinding
+    / ModuleBinding
 
-LocalBinding
-    = ex:(EXPORT   __)?   localName:IDENTIFIER   __   "="   __   value:Expression
-    { return Object.assign({kind: 'LocalBinding', localName, value}, ex ? {exported: true} : {}); }
+NameBinding
+    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
+    { return {pattern: {kind: 'NamePattern', name}, value, exported: !!ex}; }
 
-LocalMultiBinding
-    = ex:(EXPORT   __)?   names:MultiBindingNameList   __   "="   __   value:Expression
-    { return Object.assign({kind: 'LocalMultiBinding', names, value}, ex ? {exported: true} : {}); }
+ModuleBinding
+    = ex:(EXPORT   __)?   names:ModuleBindingNameList   __   "="   __   value:Expression
+    { return {pattern: {kind: 'ModulePattern', names}, value, exported: !!ex}; }
 
-MultiBindingNameList
-    = "{"   __   !","   head:MultiBindingName?   tail:((__   ",")?   __   MultiBindingName)*   (__   ",")?   __   "}"
+ModuleBindingNameList
+    = "{"   __   !","   head:ModuleBindingName?   tail:((__   ",")?   __   ModuleBindingName)*   (__   ",")?   __   "}"
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-MultiBindingName
+ModuleBindingName
     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
     { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
 
