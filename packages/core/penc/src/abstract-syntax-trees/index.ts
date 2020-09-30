@@ -1,4 +1,4 @@
-export {createDereferencer} from './create-dereferencer';
+// export {createDereferencer} from './create-dereferencer';
 export {createNodeHasher} from './create-node-hasher';
 export {createNodeMapper} from './create-node-mapper';
 export {allNodeKinds, bindingNodeKinds, expressionNodeKinds} from './node-kinds';
