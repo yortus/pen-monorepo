@@ -1,16 +1,15 @@
 import {allNodeKinds, Module} from '../abstract-syntax-trees';
 
 
-/** Initial AST of a PEN program. */
-export interface SourceProgram {
-    readonly kind: 'SourceProgram';
+/** A PEN program expressed as a map from module IDs to `Module` AST nodes. */
+export interface ModuleMap {
     readonly modulesById: ReadonlyMap<string, Module>;
     readonly startModuleId: string;
 }
 
 
-/** List of node kinds that may be present in a SourceProgram AST. */
-export const sourceNodeKinds = allNodeKinds.without(
+/** List of node kinds that may be present in a ModuleMap AST. */
+export const moduleMapKinds = allNodeKinds.without(
     'Definition',
     'ModuleExpression',
     'ReferenceExpression',

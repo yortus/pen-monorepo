@@ -1,11 +1,11 @@
 import {Definition, Expression, mapNode, ReferenceExpression, traverseNode} from '../../abstract-syntax-trees';
-import {sourceNodeKinds, SourceProgram, yoloNodeKinds, YoloProgram} from '../../representations';
+import {DefinitionMap, definitionMapKinds, ModuleMap, moduleMapKinds} from '../../representations';
 import {assert, mapMap} from '../../utils';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
-export function yolo(program: SourceProgram): YoloProgram {
+export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
     let currentScope = Object.create(null) as Record<string, Definition | undefined>;
     let refExprs = [] as {name: string, scope: Record<string, Definition | undefined>, ref: ReferenceExpression}[];
@@ -27,10 +27,10 @@ export function yolo(program: SourceProgram): YoloProgram {
         currentScope[name] = definition;
     }
 
-    mapMap(program.modulesById, module => {
+    mapMap(moduleMap.modulesById, module => {
 
         // TODO: temp testing...
-        traverseNode(module, n => assert(sourceNodeKinds.matches(n)));
+        traverseNode(module, n => assert(moduleMapKinds.matches(n)));
 
         // TODO: temp testing...
         mapNode(module, rec => ({
@@ -87,7 +87,7 @@ export function yolo(program: SourceProgram): YoloProgram {
 
     // TODO: temp testing... get this working
     if (1 + 1 !== 2) {
-        traverseNode(null!, n => assert(yoloNodeKinds.matches(n)));
+        traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
     }
 
     // TODO: backpatch each ReferenceExpression
@@ -190,7 +190,6 @@ export function yolo(program: SourceProgram): YoloProgram {
     // });
 
     return null!; /*{
-        kind: 'YoloProgram',
         definitions,
         startSomething: '????',
     };*/

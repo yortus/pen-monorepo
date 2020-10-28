@@ -7,14 +7,14 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
-import {parseSourceFiles} from './transforms';
+import {createModuleMap} from './transforms';
+import {createDefinitionMap} from './transforms';
 // import {desugarSyntax} from './transforms';
 // import {resolveSymbols} from './transforms';
 // import {checkSemantics} from './transforms';
 // import {generateSingleExpression} from './transforms';
 // import {resolveConstantValues} from './transforms';
 // import {generateTargetCode} from './transforms';
-import {yolo} from './transforms';
 
 
 export function compile(options: CompilerOptions) {
@@ -28,7 +28,7 @@ export function compile(options: CompilerOptions) {
     let sourceFiles = createSourceFileGraph({main});
 
     // Proceed through all stages in the compiler pipeline.
-    let ast01 = parseSourceFiles(sourceFiles);
+    let moduleMap = createModuleMap(sourceFiles);
     // let ast02 = desugarSyntax(ast01);
     // let ast03 = resolveSymbols(ast02);
     // checkSemantics(ast03);
@@ -38,8 +38,8 @@ export function compile(options: CompilerOptions) {
     // let targetCode = generateTargetCode({il, consts});
 
     // TODO: temp testing...
-    yolo(ast01);
-    [] = [ast01];
+    let definitionMap = createDefinitionMap(moduleMap);
+    [] = [moduleMap, definitionMap];
     const targetCode = `console.log('Hello, World!');\n`;
 
     // write the target code to the output file path. Creating containing dirs if necessary.

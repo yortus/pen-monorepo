@@ -1,26 +1,22 @@
 import * as fs from 'fs';
 import {ImportExpression, mapNode, Module} from '../../abstract-syntax-trees';
-import type {SourceFileGraph, SourceProgram} from '../../representations';
+import type {SourceFileGraph, ModuleMap} from '../../representations';
 import {isExtension} from '../../utils';
 import {parse as parseExtension} from './extension-grammar';
 import {parse as parsePenSource} from './pen-grammar';
 
 
 // TODO: jsdoc...
-export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
-
+export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
     const modulesById = new Map<string, Module>();
-
     for (let sourceFile of sourceFileGraph.sourceFiles.values()) {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (isExtension(sourceFile.path)) {
-
             // The file is an extension (.pen.js) file. Parse it into a Module node and add it to the module map.
             let module = parseExtension(sourceText, {sourceFile});
             modulesById.set(module.id, module);
         }
-        else /* PEN source file */ {
-
+        else {
             // The file is a PEN source file. Parse it to generate a Module AST node.
             let module = parsePenSource(sourceText, {sourceFile});
 
@@ -36,9 +32,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
             modulesById.set(module.id, module);
         }
     }
-
     return {
-        kind: 'SourceProgram',
         modulesById,
         startModuleId: `file://${sourceFileGraph.mainPath}`,
     };

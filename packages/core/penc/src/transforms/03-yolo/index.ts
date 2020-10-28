@@ -1,1 +1,0 @@
-export {yolo} from './yolo';
