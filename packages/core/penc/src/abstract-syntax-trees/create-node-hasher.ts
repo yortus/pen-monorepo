@@ -37,7 +37,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = expressionNodeKinds.includes(n) ? deref(n) : n; // TODO: fix type...
+        let derefdNode = expressionNodeKinds.matches(n) ? deref(n) : n; // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             let derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -54,7 +54,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assert(hashableNodeKinds.includes(n));
+            assert(hashableNodeKinds.matches(n));
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);

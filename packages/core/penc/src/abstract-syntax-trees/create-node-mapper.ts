@@ -1,6 +1,8 @@
 import {assert, mapMap} from '../utils';
 import type {Expression, Node, Pattern} from './nodes';
-import {NodeKinds} from './utils';
+import {traverseNode} from './traverse-node';
+import type {NodeKinds} from './utils';
+
 
 
 /**
@@ -15,10 +17,9 @@ export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind
     return function mapAst<MapObj, N extends NodeOfKind<K>>(node: N, mappings: Mappings<MapObj, K, Kᐟ>): N {
         const rec: any = (n: any) => {
             try {
-                assert(inNodeKinds.includes(n));
+                assert(inNodeKinds.matches(n));
                 let mapFn = mappers[n.kind];
                 let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-                assert(outNodeKinds.includes(result));
                 return result;
             }
             catch (err) {
@@ -28,7 +29,12 @@ export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind
         };
         const defaultMappers: any = makeDefaultMappers(rec);
         const mappers: any = mappings(rec);
-        return rec(node);
+        let result = rec(node);
+
+        // TODO: do a full traverse and ensure all nodes are of allowed kinds
+        traverseNode(result, n => assert(outNodeKinds.matches(n)));
+
+        return result;
     };
 }
 
