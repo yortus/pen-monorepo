@@ -1,4 +1,3 @@
-import {mapMap} from '../utils';
 import type {Node} from './nodes';
 
 
@@ -9,16 +8,17 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
 
     function rec(n: Node): void {
         switch (n.kind) {
-            case 'AbstractSyntaxTree': return mapMap(n.modulesByAbsPath, rec), cb(n);
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
+            case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
             case 'BooleanLiteralExpression': return cb(n);
+            case 'Definition': return rec(n.expression), cb(n);
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), cb(n);
-            case 'Module': return n.bindings.forEach(b => (rec(b.pattern), rec(b.value))), cb(n);
+            case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
             case 'ModulePattern': return cb(n);
             case 'NameExpression': return cb(n);

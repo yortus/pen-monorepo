@@ -14,6 +14,7 @@ import {parseSourceFiles} from './transforms';
 // import {generateSingleExpression} from './transforms';
 // import {resolveConstantValues} from './transforms';
 // import {generateTargetCode} from './transforms';
+import {yolo} from './transforms';
 
 
 export function compile(options: CompilerOptions) {
@@ -37,6 +38,7 @@ export function compile(options: CompilerOptions) {
     // let targetCode = generateTargetCode({il, consts});
 
     // TODO: temp testing...
+    yolo(ast01);
     [] = [ast01];
     const targetCode = `console.log('Hello, World!');\n`;
 

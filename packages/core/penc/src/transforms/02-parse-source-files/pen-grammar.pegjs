@@ -25,11 +25,11 @@ Binding
 
 NameBinding
     = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return {pattern: {kind: 'NamePattern', name}, value, exported: !!ex}; }
+    { return {kind: 'Binding', pattern: {kind: 'NamePattern', name}, value, exported: !!ex}; }
 
 ModuleBinding
     = ex:(EXPORT   __)?   names:ModuleBindingNameList   __   "="   __   value:Expression
-    { return {pattern: {kind: 'ModulePattern', names}, value, exported: !!ex}; }
+    { return {kind: 'Binding', pattern: {kind: 'ModulePattern', names}, value, exported: !!ex}; }
 
 ModuleBindingNameList
     = "{"   __   !","   head:ModuleBindingName?   tail:((__   ",")?   __   ModuleBindingName)*   (__   ",")?   __   "}"

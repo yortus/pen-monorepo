@@ -6,3 +6,7 @@ export {parseSourceFiles} from './02-parse-source-files';
 // export {generateSingleExpression} from './07-generate-single-expression';
 // export {resolveConstantValues} from './08-resolve-constant-values';
 // export {generateTargetCode} from './09-generate-target-code';
+
+
+// TODO: fix
+export {yolo} from './03-yolo';

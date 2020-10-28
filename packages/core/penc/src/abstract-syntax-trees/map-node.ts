@@ -1,12 +1,7 @@
-import {assert} from '../utils';
 import type {Expression, Node, Pattern} from './nodes';
-import {traverseNode} from './traverse-node';
-import type {NodeKinds} from './utils';
 
 
-// TODO: remove this util altogether... use mapNode() instead
-
-
+// TODO: revise/fix jsdoc...
 /**
  * Returns a recursive node mapping function that maps from one type of AST to another. The returned mapping function
  * creates and returns a new node graph derived from the node graph rooted at `node`. By default, each node is
@@ -15,29 +10,21 @@ import type {NodeKinds} from './utils';
  * kinds from the graph rooted at `node`. The source and target ASTs must satisfy the node kind constraints given by
  * `inNodeKinds` and `outNodeKinds`.
  */
-export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind']>(inNodeKinds: NodeKinds<K>, outNodeKinds: NodeKinds<Kᐟ>) {
-    return function mapAst<MapObj, N extends NodeOfKind<K>>(node: N, mappings: Mappings<MapObj, K, Kᐟ>): N {
-        const rec: any = (n: any) => {
-            try {
-                assert(inNodeKinds.matches(n));
-                let mapFn = mappers[n.kind];
-                let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-                return result;
-            }
-            catch (err) {
-                // TODO: how to handle? May be better to let caller handle it?
-                throw err;
-            }
-        };
-        const defaultMappers: any = makeDefaultMappers(rec);
-        const mappers: any = mappings(rec);
-        let result = rec(node);
-
-        // TODO: do a full traverse and ensure all nodes are of allowed kinds
-        traverseNode(result, n => assert(outNodeKinds.matches(n)));
-
-        return result;
+export function mapNode<MapObj, N extends Node>(node: N, mappings: Mappings<MapObj>): WidenKind<N['kind']> {
+    const rec: any = (n: any) => {
+        try {
+            let mapFn = mappers[n.kind];
+            let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
+            return result;
+        }
+        catch (err) {
+            // TODO: how to handle? May be better to let caller handle it?
+            throw err;
+        }
     };
+    const defaultMappers: any = makeDefaultMappers(rec);
+    const mappers: any = mappings(rec);
+    return rec(node);
 }
 
 
@@ -77,25 +64,22 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
 
 
 // Helper type for constraining and contextually typing the node mapping functions.
-type Mappings<MapObj, KS extends Node['kind'], KSᐟ extends Node['kind']> =
-    (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind'], KSᐟ>>) =>
+type Mappings<MapObj> =
+    (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind']>>) =>
         & MapObj
 
-        // All keys must be NodeKinds in KS
-        & {[K in keyof MapObj]: K extends KS ? unknown : never}
+        // All keys must be NodeKinds
+        & {[K in keyof MapObj]: K extends Node['kind'] ? unknown : never}
 
-        // All node kinds that are in KS but not in KSᐟ must be handled (or set to 'default')
-        & {[K in Exclude<KS, KSᐟ>]: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K, KSᐟ>>) | 'default'}
-
-        // All handled node kinds must be either a mapping function, or 'default'
-        & {[K in KS]?: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K, KSᐟ>>) | 'default'};
+        // All handled node kinds must be a mapping function
+        & {[K in Node['kind']]?: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K>>)};
 
 
 // Helper type for widening specific node kinds to general node kind categories.
-type WidenKind<K extends Node['kind'], AllowedKinds extends Node['kind']> =
-    K extends Expression['kind'] ? Extract<Expression['kind'], AllowedKinds> :
-    K extends Pattern['kind'] ? Extract<Pattern['kind'], AllowedKinds> :
-    K extends AllowedKinds ? K :
+type WidenKind<K extends Node['kind']> =
+    K extends Expression['kind'] ? Expression['kind'] :
+    K extends Pattern['kind'] ? Pattern['kind'] :
+    K extends Node['kind'] ? K :
     never;
 
 

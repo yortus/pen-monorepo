@@ -8,7 +8,7 @@ import {parse as parsePenSource} from './pen-grammar';
 
 // TODO: jsdoc...
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
+    let modulesByAbsPath = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
             return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};
@@ -18,8 +18,16 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
             return {
                 kind: 'Module',
                 bindings: exportedNames.map(name => ({
-                    pattern: {kind: 'NamePattern', name},
-                    value: {kind: 'ExtensionExpression', extensionPath: sourceFile.path, bindingName: name},
+                    kind: 'Binding',
+                    pattern: {
+                        kind: 'NamePattern',
+                        name
+                    },
+                    value: {
+                        kind: 'ExtensionExpression',
+                        extensionPath: sourceFile.path,
+                        bindingName: name
+                    },
                     exported: true,
                 })),
                 path: sourceFile.path,
@@ -28,10 +36,7 @@ export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgra
     });
     return {
         kind: 'SourceProgram',
-        sourceFiles: {
-            kind: 'AbstractSyntaxTree',
-            modulesByAbsPath: sourceFiles
-        },
+        modulesByAbsPath,
         mainPath: sourceFileGraph.mainPath,
     };
 }

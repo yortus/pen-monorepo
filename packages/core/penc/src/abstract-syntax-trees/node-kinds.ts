@@ -35,7 +35,8 @@ export const expressionNodeKinds = createNodeKinds(
 
 /** Array of all node kinds. */
 export const allNodeKinds = createNodeKinds(
-    'AbstractSyntaxTree',
+    'Binding',
+    'Definition',
     'Module',
     ...patternNodeKinds,
     ...expressionNodeKinds,
