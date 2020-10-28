@@ -1,89 +1,90 @@
 import {Definition, Expression, mapNode, ReferenceExpression, traverseNode} from '../../abstract-syntax-trees';
-import {DefinitionMap, definitionMapKinds, ModuleMap, moduleMapKinds} from '../../representations';
-import {assert, mapMap} from '../../utils';
+import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
+import {assert} from '../../utils';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
 export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
+    type Scope = Record<string, Definition | undefined>;
+    let scopesByModuleId = new Map<string, Scope>();
 
-    let currentScope = Object.create(null) as Record<string, Definition | undefined>;
-    let refExprs = [] as {name: string, scope: Record<string, Definition | undefined>, ref: ReferenceExpression}[];
+    let globalScope = Object.create(null) as Scope;
+    let refExprs = [] as {name: string, moduleId: string, ref: ReferenceExpression}[];
     let definitions = [] as Definition[];
 
-    function define(name: string, expression: Expression) {
+    function define(name: string, moduleId: string, expression: Expression) {
         console.log(`    DEF ${name}`);
-        if (Object.keys(currentScope).includes(name)) {
+        let scope = scopesByModuleId.get(moduleId);
+        assert(scope); // TODO: ...
+        if (Object.keys(scope).includes(name)) {
             throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message
         }
         let definition: Definition = {
             kind: 'Definition',
-            id: definitions.length,
+            definitionId: definitions.length,
             localName: name,
             globalName: '???', // TODO
             expression,
         };
         definitions.push(definition);
-        currentScope[name] = definition;
+        scope[name] = definition;
     }
 
-    mapMap(moduleMap.modulesById, module => {
 
-        // TODO: temp testing...
-        traverseNode(module, n => assert(moduleMapKinds.matches(n)));
 
-        // TODO: temp testing...
-        mapNode(module, rec => ({
 
-            Module: mod => {
-                console.log(`MODULE ${mod.id}`);
-                currentScope = Object.create(currentScope);
-                mod.bindings.forEach(rec);
-                currentScope = Object.getPrototypeOf(currentScope);
-                console.log(`END MODULE ${mod.id}`);
-                return mod;
-            },
+    // TODO: for each module...
+    for (let {moduleId, parentModuleId, bindings} of moduleMap.modulesById.values()) {
+        console.log(`MODULE ${moduleId}`);
+        let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
+        assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
+        let scope = Object.create(parentScope);
+        scopesByModuleId.set(moduleId, scope);
 
-            Binding: bnd => {
-                if (bnd.pattern.kind === 'NamePattern') {
-                    // - if NamePattern: collect 1 definition
-                    define(bnd.pattern.name, bnd.value);
+        // TODO: for each binding...
+        for (let {pattern, value} of bindings) {
+
+            value = mapNode(value, rec => ({
+                MemberExpression: mem => {
+                    // collect 1 reference (in specific scope)
+                    console.log(`    REF S?.${mem.bindingName}`);
+                    return {...mem, module: rec(mem.module)};
+                },
+    
+                NameExpression: nam => {
+                    // collect 1 reference (in enclosing scope)
+                    console.log(`    REF ${nam.name}`);
+    
+                    // Create placeholder ReferenceExpression that will be backpatched later when defId is known
+                    let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: -1};
+    
+                    refExprs.push({name: nam.name, moduleId, ref});
+                    return ref;
+                },
+            }));
+
+            if (pattern.kind === 'NamePattern') {
+                // - if NamePattern: collect 1 definition
+                define(pattern.name, moduleId, value);
+            }
+            else /* pattern.kind === 'ModulePattern' */ {
+                // - if ModulePattern: collect 1 definition (alias) and 1 reference (in specific scope)
+                for (let {name, alias} of pattern.names) {
+                    alias ??= name;
+
+                    // TODO: fix this...
+                    let expr: Expression = null!;
+
+                    define(alias, moduleId, expr);
+                    console.log(`    REF S?.${name}`);
                 }
-                else /* pattern.kind === 'ModulePattern' */ {
-                    // - if ModulePattern: collect 1 definition (alias) and 1 reference (in specific scope)
-                    for (let {name, alias} of bnd.pattern.names) {
-                        alias ??= name;
+            }
+        }
+        console.log(`END MODULE ${moduleId}`);
+    }
 
-                        // TODO: fix this...
-                        let expr: Expression = null!;
 
-                        define(alias, expr);
-                        console.log(`    REF S?.${name}`);
-                    }
-                }
-                rec(bnd.value);
-                return bnd
-            },
-
-            MemberExpression: mem => {
-                // collect 1 reference (in specific scope)
-                console.log(`    REF S?.${mem.bindingName}`);
-                rec(mem.module);
-                return mem;
-            },
-
-            NameExpression: nam => {
-                // collect 1 reference (in enclosing scope)
-                console.log(`    REF ${nam.name}`);
-
-                // Create placeholder ReferenceExpression that will be backpatched later when defId is known
-                let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: -1};
-
-                refExprs.push({name: nam.name, scope: currentScope, ref});
-                return ref;
-            },
-        }));
-    });
 
     // TODO: temp testing... get this working
     if (1 + 1 !== 2) {
@@ -91,10 +92,12 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     }
 
     // TODO: backpatch each ReferenceExpression
-    for (let {name, scope, ref} of refExprs) {
+    for (let {name, moduleId, ref} of refExprs) {
+        let scope = scopesByModuleId.get(moduleId);
+        assert(scope); // TODO: ...
         let definition = scope[name];
         if (!definition) throw new Error(`'${name}' is not defined`); // TODO: improve diagnostic message
-        Object.assign(ref, {definitionId: definition.id});
+        Object.assign(ref, {definitionId: definition.definitionId});
     }
 
     if (1 !== 1 + 1) return null!;

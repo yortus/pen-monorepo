@@ -11,7 +11,7 @@
 // ====================   Top-level file module   ====================
 FileModule
     = __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'Module', id: moduleId, bindings}; }
+    { return {kind: 'Module', moduleId, bindings}; }
 
 
 // ====================   Bindings and patterns   ====================
@@ -168,8 +168,8 @@ FieldExpression
     { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
-    = "{"   __   bindings:BindingList   __   "}"
-    { return {kind: 'ModuleExpression', module: {kind: 'Module', id: genModuleId(), bindings}}; }
+    = "{"   __   moduleId:(!{} {return genModuleId()})   bindings:BindingList   __   "}"
+    { return {kind: 'ModuleExpression', module: {kind: 'Module', moduleId, bindings}}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"

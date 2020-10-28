@@ -15,7 +15,7 @@ FileModule
             value: {kind: 'ExtensionExpression', extensionPath, bindingName: name},
             exported: true,
         }));
-        return {kind: 'Module', id: moduleId, bindings}
+        return {kind: 'Module', moduleId, bindings}
     }
 
 
