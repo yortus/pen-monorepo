@@ -1,6 +1,28 @@
-File
+{
+    let sourceFile = options.sourceFile || {};
+    let extensionPath = sourceFile.path || '???';
+    let moduleId = `file://${extensionPath}`;
+}
+
+
+// ====================   Top-level file module   ====================
+FileModule
+    = exportedNames:ExportedNames
+    {
+        let bindings = exportedNames.map(name => ({
+            kind: 'Binding',
+            pattern: {kind: 'NamePattern', name},
+            value: {kind: 'ExtensionExpression', extensionPath, bindingName: name},
+            exported: true,
+        }));
+        return {kind: 'Module', id: moduleId, bindings}
+    }
+
+
+// ====================   Exported names   ====================
+ExportedNames
     = items:(SkippedChars   ManifestComment)*   SkippedChars?   EOF
-    { return {exportedNames: items.reduce((list, item) => list.concat(item[1]), [])}; }
+    { return items.reduce((list, item) => list.concat(item[1]), []); }
 
 SkippedChars
     = ((!"/"   .) / (!ManifestMarker   .))*   {}

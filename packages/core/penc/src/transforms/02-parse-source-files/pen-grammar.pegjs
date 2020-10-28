@@ -1,20 +1,20 @@
 {
+	const genModuleId = () => `internal://${++counter}`;
+    let counter = 0;
+
     let sourceFile = options.sourceFile || {};
+    let moduleId = sourceFile.path ? `file://${sourceFile.path}` : genModuleId();
     sourceFile.imports = sourceFile.imports || {};
 }
 
 
-// ====================   Files and Modules   ====================
-File
-    = __   module:Module   __   END_OF_FILE
-    { return module; }
-
-Module
-    = bindings:BindingList
-    { return {kind: 'Module', bindings}; }
+// ====================   Top-level file module   ====================
+FileModule
+    = __   bindings:BindingList   __   END_OF_FILE
+    { return {kind: 'Module', id: moduleId, bindings}; }
 
 
-// ====================   Bindings   ====================
+// ====================   Bindings and patterns   ====================
 BindingList
     = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
@@ -46,7 +46,7 @@ ModuleBindingName
         SelectionExpression             a | b      | a | b | c
 
     PRECEDENCE 2
-        SequenceExpression              a b      a  b c                                                                     NB: whitespace between terms, else is application
+        SequenceExpression              a b      a  b c                                                                 NB: whitespace between terms, else is application
 
     PRECEDENCE 3
         NotExpression                   !a   !a(b)   !a.b   !{a: b}
@@ -55,8 +55,8 @@ ModuleBindingName
         QuantifiedExpression            a?   a(b)?   a.b?   {a: b}?
 
     PRECEDENCE 5
-        ApplicationExpression           a(b)   (a)b   a'blah'   a{b=c}                                                      NB: no whitespace between terms, else is sequence
-        MemberExpression                a.b   a.b   (a b).e   {foo=f}.foo                                                   NB: no whitespace between terms, may relax later
+        ApplicationExpression           a(b)   (a)b   a'blah'   a{b=c}                                                  NB: no whitespace between terms, else is sequence
+        MemberExpression                a.b   a.b   (a b).e   {foo=f}.foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
@@ -168,8 +168,8 @@ FieldExpression
     { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
-    = "{"   __   module:Module   __   "}"
-    { return {kind: 'ModuleExpression', module}; }
+    = "{"   __   bindings:BindingList   __   "}"
+    { return {kind: 'ModuleExpression', module: {kind: 'Module', id: genModuleId(), bindings}}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"
@@ -182,9 +182,10 @@ ParenthesisedExpression
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
-        let modspec = specifierChars.map(el => el[1]).join('');
-        let sourceFilePath = sourceFile.imports[modspec];
-        return {kind: 'ImportExpression', moduleSpecifier: modspec, sourceFilePath};
+        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        let absPath = sourceFile.imports[moduleSpecifier] || '???';
+        let moduleId = `file://${absPath}`;
+        return {kind: 'ImportExpression', moduleSpecifier, moduleId};
     }
 
 NullLiteralExpression

@@ -27,7 +27,7 @@ export function yolo(program: SourceProgram): YoloProgram {
         currentScope[name] = definition;
     }
 
-    mapMap(program.modulesByAbsPath, module => {
+    mapMap(program.modulesById, module => {
 
         // TODO: temp testing...
         traverseNode(module, n => assert(sourceNodeKinds.matches(n)));
@@ -36,11 +36,11 @@ export function yolo(program: SourceProgram): YoloProgram {
         mapNode(module, rec => ({
 
             Module: mod => {
-                console.log(`MODULE ${mod.path}`);
+                console.log(`MODULE ${mod.id}`);
                 currentScope = Object.create(currentScope);
                 mod.bindings.forEach(rec);
                 currentScope = Object.getPrototypeOf(currentScope);
-                console.log(`END MODULE ${mod.path}`);
+                console.log(`END MODULE ${mod.id}`);
                 return mod;
             },
 

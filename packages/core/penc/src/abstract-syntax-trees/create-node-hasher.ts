@@ -65,7 +65,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'BooleanLiteralExpression': return setSig('LIT', n.value);
             case 'ExtensionExpression': return setSig('EXT', n.extensionPath, n.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'ImportExpression': return setSig('IMP', n.sourceFilePath);
+            case 'ImportExpression': return setSig('IMP', n.moduleId);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.bindingName);
             case 'ModuleExpression': return setSig('MEX', getSig(n.module));

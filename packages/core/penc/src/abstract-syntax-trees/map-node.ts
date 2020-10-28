@@ -10,7 +10,7 @@ import type {Expression, Node, Pattern} from './nodes';
  * kinds from the graph rooted at `node`. The source and target ASTs must satisfy the node kind constraints given by
  * `inNodeKinds` and `outNodeKinds`.
  */
-export function mapNode<MapObj, N extends Node>(node: N, mappings: Mappings<MapObj>): WidenKind<N['kind']> {
+export function mapNode<MapObj, N extends Node>(node: N, mappings: Mappings<MapObj>): NodeOfKind<WidenKind<N['kind']>> {
     const rec: any = (n: any) => {
         try {
             let mapFn = mappers[n.kind];

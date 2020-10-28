@@ -15,6 +15,7 @@ export const yoloNodeKinds = allNodeKinds.without(
     'Binding',
     'Module',
     'ModulePattern',
+    'ModuleExpression',
     'NameExpression',
     'NamePattern',
 );

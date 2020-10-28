@@ -57,7 +57,7 @@ export interface FieldExpression {
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
-    readonly sourceFilePath: AbsPath;
+    readonly moduleId: string;
 }
 
 
