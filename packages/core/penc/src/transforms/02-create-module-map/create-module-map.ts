@@ -9,6 +9,7 @@ import {parse as parsePenSource} from './pen-grammar';
 // TODO: jsdoc...
 export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
     const modulesById = new Map<string, Module>();
+    const nextId = (() => { let counter = 0; return () => ++counter; })();
     for (let sourceFile of sourceFileGraph.sourceFiles.values()) {
         let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (isExtension(sourceFile.path)) {
@@ -18,7 +19,7 @@ export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
         }
         else {
             // The file is a PEN source file. Parse it to generate a Module AST node.
-            let module = parsePenSource(sourceText, {sourceFile});
+            let module = parsePenSource(sourceText, {sourceFile, nextId});
             let parentModuleIds = [module.moduleId];
             modulesById.set(module.moduleId, null!); // set placeholder now to keep map entries in depth-first preorder
 

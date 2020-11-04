@@ -1,9 +1,10 @@
 {
-	const genModuleId = () => `internal://${++counter}`;
+    const nextId = options.nextId || (() => ++counter);
+    const genModuleId = () => `internal://${nextId()}`;
     let counter = 0;
 
-    let sourceFile = options.sourceFile || {};
-    let moduleId = sourceFile.path ? `file://${sourceFile.path}` : genModuleId();
+    const sourceFile = options.sourceFile || {};
+    const moduleId = sourceFile.path ? `file://${sourceFile.path}` : genModuleId();
     sourceFile.imports = sourceFile.imports || {};
 }
 
