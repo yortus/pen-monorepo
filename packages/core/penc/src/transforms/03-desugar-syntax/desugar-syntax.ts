@@ -7,13 +7,13 @@ import {assert} from '../../utils';
 // - LocalMultiBinding
 export function desugarSyntax(program: SourceProgram): DesugaredProgram {
     let counter = 0;
-    let mapNode = createNodeMapper(sourceNodeKinds, desugaredNodeKinds);
-    let sourceFiles = mapNode(program.sourceFiles, rec => ({
+    const mapNode = createNodeMapper(sourceNodeKinds, desugaredNodeKinds);
+    const sourceFiles = mapNode(program.sourceFiles, rec => ({
 
         // Replace each LocalMultiBinding with a series of LocalBindings
         Module: mod => {
-            let bindings = [] as LocalBinding[];
-            for (let binding of mod.bindings) {
+            const bindings = [] as LocalBinding[];
+            for (const binding of mod.bindings) {
                 assert(sourceNodeKinds.includes(binding));
                 if (binding.kind === 'LocalBinding') {
                     bindings.push(rec(binding));
@@ -21,8 +21,8 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                 else {
                     // Introduce a new local binding for the RHS.
                     // TODO: ensure no collisions with program names. '$1' etc is ok since '$' isn't allowed in PEN ids.
-                    let localName = `$${++counter}`;
-                    let {names, value, exported} = binding;
+                    const localName = `$${++counter}`;
+                    const {names, value, exported} = binding;
                     bindings.push({
                         kind: 'LocalBinding',
                         localName,
@@ -31,7 +31,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                     });
 
                     // Introduce a local binding for each name in the LHS
-                    for (let {name: bindingName, alias} of names) {
+                    for (const {name: bindingName, alias} of names) {
                         let ref: LocalReferenceExpression;
                         let mem: MemberExpression;
                         ref = {kind: 'LocalReferenceExpression', localName};
@@ -46,7 +46,7 @@ export function desugarSyntax(program: SourceProgram): DesugaredProgram {
                 }
             }
 
-            let modᐟ = {...mod, bindings};
+            const modᐟ = {...mod, bindings};
             return modᐟ;
         },
 

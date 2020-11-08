@@ -8,10 +8,10 @@ export interface Emitter {
 
 
 export function makeEmitter() {
-    let parts = [] as string[];
+    const parts = [] as string[];
     let indent = 0;
 
-    let emitter: Emitter = {
+    const emitter: Emitter = {
         down(n: number) {
             parts.push('\n'.repeat(n), '    '.repeat(indent));
             return this;

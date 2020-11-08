@@ -20,7 +20,7 @@ export function resolveModuleSpecifier(modSpec: string, fromPath?: string): AbsP
 
     // 2. If `modSpec` is a relative path.
     else if (modSpec.startsWith('.')) {
-        let baseDir = fromPath ? path.dirname(fromPath) : process.cwd();
+        const baseDir = fromPath ? path.dirname(fromPath) : process.cwd();
         absPath = AbsPath(modSpec, baseDir);
     }
 

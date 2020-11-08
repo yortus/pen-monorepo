@@ -23,20 +23,20 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     traverseNode(program.sourceFiles, n => n.kind === 'GlobalBinding' ? allBindings.push(n) : 0);
 
     // Create helper functions for this program.
-    let deref = createDereferencer(program.sourceFiles);
-    let getHashFor = createNodeHasher(deref);
+    const deref = createDereferencer(program.sourceFiles);
+    const getHashFor = createNodeHasher(deref);
 
     // Find the `start` expression.
-    let startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
+    const startExpr = allBindings.find(n => n.globalName === program.startGlobalName)?.value;
     assert(startExpr);
 
     // Populate the `entriesByHash` map.
-    let entriesByHash = new Map<string, Entry>();
-    let startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
+    const entriesByHash = new Map<string, Entry>();
+    const startEntry = getEntryFor(startExpr); // NB: called for side-effect of populating `entriesByHash` map.
 
     // TODO: Fill in the expression names using the binding names from bindings with the same hash value...
-    let namesByHash = new Map<string, string>();
-    for (let binding of allBindings) {
+    const namesByHash = new Map<string, string>();
+    for (const binding of allBindings) {
         // TODO: skip if already named? this impl will overwrite earlier names with later ones. See how output looks...
         assert(resolvedNodeKinds.includes(binding.value));
         namesByHash.set(getHashFor(binding.value), binding.globalName);
@@ -45,7 +45,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     // TODO: fill in all other names using generated names
     // TODO: ensure generated names can't clash with any other global names
     let counter = 0;
-    for (let hash of entriesByHash.keys()) {
+    for (const hash of entriesByHash.keys()) {
         if (namesByHash.has(hash)) continue;
         namesByHash.set(hash, `e${++counter}`); // TODO: can't currently clash with a `scope_local` style name,
             // but what if naming system changes? Better to have a standard helper that intenally holds a name pool,
@@ -54,14 +54,14 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
     }
 
     // TODO: temp testing... build the single-expression program representation
-    let subexpressions = {} as Record<string, Expression>;
-    for (let {hash, expr} of entriesByHash.values()) {
-        let name = namesByHash.get(hash)!;
+    const subexpressions = {} as Record<string, Expression>;
+    for (const {hash, expr} of entriesByHash.values()) {
+        const name = namesByHash.get(hash)!;
         subexpressions[name] = expr;
     }
 
     // TODO: temp testing... fix up every GlobalReferenceExpression with the proper name
-    for (let {expr} of entriesByHash.values()) {
+    for (const {expr} of entriesByHash.values()) {
         traverseNode(expr, n => {
             if (n.kind !== 'GlobalReferenceExpression') return;
             Object.assign(n, {globalName: namesByHash.get(n.globalName)!});
@@ -79,12 +79,12 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
         assert(resolvedNodeKinds.includes(expr));
 
         // TODO: doc...
-        let e = deref(expr);
-        let hash = getHashFor(e);
+        const e = deref(expr);
+        const hash = getHashFor(e);
         if (entriesByHash.has(hash)) return entriesByHash.get(hash)!;
 
         // TODO: doc...
-        let entry: Entry = {hash, expr: undefined!};
+        const entry: Entry = {hash, expr: undefined!};
         entriesByHash.set(hash, entry);
 
         // Set `entry.expr` to a new shallow expr, and return `entry`.
@@ -97,7 +97,7 @@ export function generateSingleExpression(program: ResolvedProgram): SingleExpres
             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': return setX(e, {module: ref(e.module), bindingName: e.bindingName});
             case 'ModuleExpression': {
-                let bindings = e.module.bindings.map(binding => ({...binding, value: ref(binding.value)}));
+                const bindings = e.module.bindings.map(binding => ({...binding, value: ref(binding.value)}));
                 return setX(e, {module: {kind: 'Module', bindings}});
             }
             case 'NotExpression': return setX(e, {expression: ref(e.expression)});

@@ -16,8 +16,8 @@ export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind
         const rec: any = (n: any) => {
             try {
                 assert(inNodeKinds.includes(n));
-                let mapFn = mappers[n.kind];
-                let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
+                const mapFn = mappers[n.kind];
+                const result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
                 assert(outNodeKinds.includes(result));
                 return result;
             }

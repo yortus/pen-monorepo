@@ -8,13 +8,13 @@ import {parse as parsePenSource} from './pen-grammar';
 
 // TODO: jsdoc...
 export function parseSourceFiles(sourceFileGraph: SourceFileGraph): SourceProgram {
-    let sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
-        let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
+    const sourceFiles = mapMap(sourceFileGraph.sourceFiles, (sourceFile): Module => {
+        const sourceText = fs.readFileSync(sourceFile.path, 'utf8');
         if (!isExtension(sourceFile.path)) {
             return {...parsePenSource(sourceText, {sourceFile}), path: sourceFile.path};
         }
         else {
-            let {exportedNames} = parseExtension(sourceText);
+            const {exportedNames} = parseExtension(sourceText);
             return {
                 kind: 'Module',
                 bindings: exportedNames.map(name => ({

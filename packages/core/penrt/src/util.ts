@@ -72,7 +72,7 @@ function assert(value: unknown): asserts value {
 function concat(a: any, b: any): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
-    let type = objectToString.call(a);
+    const type = objectToString.call(a);
     // TODO: if program is statically proven valid, the following guard isn't necessary
     if (type !== objectToString.call(b)) throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]') return a + b;
@@ -85,11 +85,11 @@ function concat(a: any, b: any): unknown {
 
 // TODO: doc... helper...
 function isInputFullyConsumed(): boolean {
-    let type = objectToString.call(IN);
+    const type = objectToString.call(IN);
     if (type === '[object String]') return IP === (IN as any).length;
     if (type === '[object Array]') return IP === (IN as any).length;
     if (type === '[object Object]') {
-        let keyCount = Object.keys(IN as any).length;
+        const keyCount = Object.keys(IN as any).length;
         assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
         if (keyCount === 0) return true;
         return IP === -1 >>> (32 - keyCount);

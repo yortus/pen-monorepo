@@ -69,7 +69,7 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
         },
     ];
 
-    for (let test of tests) {
+    for (const test of tests) {
         it(test.text, () => {
             let ast: unknown;
             try { ast = parse(test.text); } catch (err) {
@@ -78,7 +78,7 @@ describe(`Compiling and executing the 'math.pen' program`, async () => {
             }
             expect(ast).to.deep.equal(test.ast);
             if (ast === Error) return;
-            let textᐟ = print(ast);
+            const textᐟ = print(ast);
             expect(textᐟ).to.equal(test.textᐟ || test.text);
         });
     }

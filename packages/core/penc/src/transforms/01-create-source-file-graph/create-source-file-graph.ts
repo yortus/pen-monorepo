@@ -7,7 +7,7 @@ import {resolveModuleSpecifier} from './resolve-module-specifier';
 
 // TODO: jsdoc...
 export function createSourceFileGraph(options: {main: string}): SourceFileGraph {
-    let sourceFiles = new Map<AbsPath, SourceFileInfo>();
+    const sourceFiles = new Map<AbsPath, SourceFileInfo>();
 
     function getSourceFile(absPath: AbsPath) {
         let sourceFile = sourceFiles.get(absPath);
@@ -18,20 +18,20 @@ export function createSourceFileGraph(options: {main: string}): SourceFileGraph 
         return sourceFile;
     }
 
-    let mainPath = resolveModuleSpecifier(options.main);
-    let unprocessedPaths = [mainPath];
-    let processedPaths = new Set<AbsPath>();
+    const mainPath = resolveModuleSpecifier(options.main);
+    const unprocessedPaths = [mainPath];
+    const processedPaths = new Set<AbsPath>();
     while (unprocessedPaths.length > 0) {
-        let sourceFilePath = unprocessedPaths.shift()!;
+        const sourceFilePath = unprocessedPaths.shift()!;
         if (processedPaths.has(sourceFilePath)) continue;
 
         processedPaths.add(sourceFilePath);
-        let sourceFile = getSourceFile(sourceFilePath);
+        const sourceFile = getSourceFile(sourceFilePath);
 
-        let sourceText = fs.readFileSync(sourceFilePath, 'utf8');
-        let importModSpecs = detectImports(sourceText);
-        for (let importModSpec of importModSpecs) {
-            let importPath = resolveModuleSpecifier(importModSpec, sourceFilePath);
+        const sourceText = fs.readFileSync(sourceFilePath, 'utf8');
+        const importModSpecs = detectImports(sourceText);
+        for (const importModSpec of importModSpecs) {
+            const importPath = resolveModuleSpecifier(importModSpec, sourceFilePath);
             sourceFile.imports[importModSpec] = getSourceFile(importPath).path;
             unprocessedPaths.push(importPath);
         }

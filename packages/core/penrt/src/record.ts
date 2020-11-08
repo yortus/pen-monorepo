@@ -1,10 +1,10 @@
 // TODO: doc... has only 'ast' representation
 
 function parseRecord(fields: Array<{name: string, value: Rule}>) {
-    let stateₒ = getState();
-    let obj = {} as Record<string, unknown>;
-    for (let field of fields) {
-        let propName = field.name;
+    const stateₒ = getState();
+    const obj = {} as Record<string, unknown>;
+    for (const field of fields) {
+        const propName = field.name;
         if (!field.value()) return setState(stateₒ), false;
         assert(OUT !== undefined);
         obj[propName] = OUT;
@@ -15,23 +15,23 @@ function parseRecord(fields: Array<{name: string, value: Rule}>) {
 
 function printRecord(fields: Array<{name: string, value: Rule}>) {
     if (objectToString.call(IN) !== '[object Object]') return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text: unknown;
 
-    let propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
-    let propCount = propNames.length;
+    const propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
+    const propCount = propNames.length;
     assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
 
     // TODO: temp testing...
     const obj = IN as Record<string, unknown>;
     let bitmask = IP;
 
-    for (let field of fields) {
+    for (const field of fields) {
 
         // Find the property key/value pair that matches this field name/value pair (if any)
-        let i = propNames.indexOf(field.name);
+        const i = propNames.indexOf(field.name);
         if (i < 0) return setState(stateₒ), false;
-        let propName = propNames[i];
+        const propName = propNames[i];
 
         // TODO: skip already-consumed key/value pairs
         const propBit = 1 << i;

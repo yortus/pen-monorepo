@@ -9,7 +9,7 @@ function f64({mode}: StaticOptions): Rule {
     if (isParse(mode)) {
         return function F64() {
             if (typeof IN !== 'string') return false;
-            let stateₒ = getState();
+            const stateₒ = getState();
             const LEN = IN.length;
             const EOS = 0;
             let digitCount = 0;
@@ -71,7 +71,7 @@ function f64({mode}: StaticOptions): Rule {
             // There is a syntactically valid float. Delegate parsing to the JS runtime.
             // Reject the number if it parses to Infinity or Nan.
             // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-            let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+            const num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
             if (!Number.isFinite(num)) return setState(stateₒ), false;
 
             // Success

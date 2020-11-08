@@ -19,25 +19,25 @@ import {generateTargetCode} from './transforms';
 export function compile(options: CompilerOptions) {
 
     // Parse and validate compiler options
-    let main = path.resolve(options.main);
-    let outFile = options.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
+    const main = path.resolve(options.main);
+    const outFile = options.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
     if (main === outFile) throw new Error(`output would overwrite input`);
 
     // Collect all source files in the compilation.
-    let sourceFiles = createSourceFileGraph({main});
+    const sourceFiles = createSourceFileGraph({main});
 
     // Proceed through all stages in the compiler pipeline.
-    let ast01 = parseSourceFiles(sourceFiles);
-    let ast02 = desugarSyntax(ast01);
-    let ast03 = resolveSymbols(ast02);
+    const ast01 = parseSourceFiles(sourceFiles);
+    const ast02 = desugarSyntax(ast01);
+    const ast03 = resolveSymbols(ast02);
     checkSemantics(ast03);
 
-    let il = generateSingleExpression(ast03);
-    let consts = resolveConstantValues(il);
-    let targetCode = generateTargetCode({il, consts});
+    const il = generateSingleExpression(ast03);
+    const consts = resolveConstantValues(il);
+    const targetCode = generateTargetCode({il, consts});
 
     // write the target code to the output file path. Creating containing dirs if necessary.
-    let outFilePath = path.resolve(outFile);
+    const outFilePath = path.resolve(outFile);
     fs.ensureDirSync(path.dirname(outFilePath));
     fs.writeFileSync(outFilePath, targetCode);
 }

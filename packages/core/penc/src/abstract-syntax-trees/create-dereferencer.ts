@@ -24,7 +24,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
 
     // The dereference function, closed over the given AST.
     function deref(expr: Expression): Expression {
-        let seen = [expr];
+        const seen = [expr];
         while (true) {
             // LocalReferenceExpression is not allowed for `expr`, as per jsdoc on DereferenceFunction.
             assert(expr.kind !== 'LocalReferenceExpression');
@@ -52,7 +52,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
             // If the target expression is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(tgt)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
+                const name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(tgt);
@@ -62,7 +62,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
 
     /** Find the value expression referenced by `ref`. */
     function resolveReference(ref: GlobalReferenceExpression): Expression {
-        let result = allBindings.find(n => n.globalName === ref.globalName);
+        const result = allBindings.find(n => n.globalName === ref.globalName);
         assert(result);
         return result.value;
     }
@@ -73,7 +73,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
      * fail, such as when `module` is an application expression.
      */
     function resolveMember(mem: MemberExpression): Expression | undefined {
-        let moduleExpr = deref(mem.module);
+        const moduleExpr = deref(mem.module);
         let module: Module;
         switch (moduleExpr.kind) {
             // TODO: case 'ApplicationExpression': ...
@@ -90,7 +90,7 @@ export function createDereferencer(ast: AbstractSyntaxTree) {
         }
 
         // Do a static lookup of the expression bound to the name `bindingName` in the module `module`.
-        let binding = module.bindings.find(b => {
+        const binding = module.bindings.find(b => {
             assert(b.kind === 'GlobalBinding');
             return b.localName === mem.bindingName;
         });

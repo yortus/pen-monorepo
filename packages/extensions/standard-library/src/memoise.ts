@@ -16,7 +16,7 @@ function memoise({}: StaticOptions): Lambda {
 
         return function MEM() {
             // Check whether the memo table already has an entry for the given initial state.
-            let stateₒ = getState();
+            const stateₒ = getState();
             let memos2 = memos.get(IN);
             if (memos2 === undefined) {
                 memos2 = new Map();
@@ -65,7 +65,7 @@ function memoise({}: StaticOptions): Lambda {
                     // anything --> same thing (covers all string cases, since they can only be same or shorter)
                     // some node --> some different non-empty node (assert: should never happen!)
                     if (!(expr as Rule)()) break; // TODO: fix cast
-                    let state = getState();
+                    const state = getState();
                     if (state.IP <= memo.stateᐟ.IP) break;
                     // TODO: was for unparse... comment above says should never happen...
                     // if (!isInputFullyConsumed()) break;
