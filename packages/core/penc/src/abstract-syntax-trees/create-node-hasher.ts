@@ -18,10 +18,10 @@ export function createNodeHasher(deref: DereferenceFunction) {
     const hashesByNode = new Map<HashableNode, string>();
 
     return function getHashFor(node: HashableNode) {
-        let n = node as HashableNode;
+        const n = node as HashableNode;
         if (hashesByNode.has(n)) return hashesByNode.get(n)!;
-        let sig = getSignatureFor(n);
-        let hash = objectHash(sig);
+        const sig = getSignatureFor(n);
+        const hash = objectHash(sig);
         hashesByNode.set(n, hash);
         return hash;
     }
@@ -37,10 +37,10 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        let derefdNode = expressionNodeKinds.matches(n) ? deref(n) : n; // TODO: fix type...
+        const derefdNode = expressionNodeKinds.matches(n) ? deref(n) : n; // TODO: fix type...
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
-            let derefdSig = getSignatureFor(derefdNode as HashableNode);
+            const derefdSig = getSignatureFor(derefdNode as HashableNode);
             signaturesByNode.set(n, derefdSig);
             return derefdSig;
         }
@@ -49,7 +49,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         // due to dereferencing cyclic references). To avoid an infinite loop, we first store the memo for the signature
         // before computing it. If a cycle occurs, the recursive call will just use the memoised signature object and
         // return immediately.
-        let sig = [] as unknown as Signature;
+        const sig = [] as unknown as Signature;
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.

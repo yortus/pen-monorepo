@@ -22,12 +22,12 @@ module.exports = {
 // ------------------------------ Runtime ------------------------------
 "use strict";
 function parseField(name, value) {
-    let stateₒ = getState();
-    let obj = {};
+    const stateₒ = getState();
+    const obj = {};
     if (!name())
         return false;
     assert(typeof OUT === 'string');
-    let propName = OUT;
+    const propName = OUT;
     if (!value())
         return setState(stateₒ), false;
     assert(OUT !== undefined);
@@ -38,15 +38,15 @@ function parseField(name, value) {
 function printField(name, value) {
     if (objectToString.call(IN) !== '[object Object]')
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
-    let propNames = Object.keys(IN);
-    let propCount = propNames.length;
+    const propNames = Object.keys(IN);
+    const propCount = propNames.length;
     assert(propCount <= 32);
     const obj = IN;
     let bitmask = IP;
     for (let i = 0; i < propCount; ++i) {
-        let propName = propNames[i];
+        const propName = propNames[i];
         const propBit = 1 << i;
         if ((bitmask & propBit) !== 0)
             continue;
@@ -72,8 +72,8 @@ function printField(name, value) {
 }
 function parseList(elements) {
     const elementsLength = elements.length;
-    let stateₒ = getState();
-    let arr = [];
+    const stateₒ = getState();
+    const arr = [];
     for (let i = 0; i < elementsLength; ++i) {
         if (!elements[i]())
             return setState(stateₒ), false;
@@ -89,7 +89,7 @@ function printList(elements) {
         return false;
     if (IP < 0 || IP + elementsLength > IN.length)
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
     const arr = IN;
     const off = IP;
@@ -106,10 +106,10 @@ function printList(elements) {
     return true;
 }
 function parseRecord(fields) {
-    let stateₒ = getState();
-    let obj = {};
-    for (let field of fields) {
-        let propName = field.name;
+    const stateₒ = getState();
+    const obj = {};
+    for (const field of fields) {
+        const propName = field.name;
         if (!field.value())
             return setState(stateₒ), false;
         assert(OUT !== undefined);
@@ -121,18 +121,18 @@ function parseRecord(fields) {
 function printRecord(fields) {
     if (objectToString.call(IN) !== '[object Object]')
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
-    let propNames = Object.keys(IN);
-    let propCount = propNames.length;
+    const propNames = Object.keys(IN);
+    const propCount = propNames.length;
     assert(propCount <= 32);
     const obj = IN;
     let bitmask = IP;
-    for (let field of fields) {
-        let i = propNames.indexOf(field.name);
+    for (const field of fields) {
+        const i = propNames.indexOf(field.name);
         if (i < 0)
             return setState(stateₒ), false;
-        let propName = propNames[i];
+        const propName = propNames[i];
         const propBit = 1 << i;
         if ((bitmask & propBit) !== 0)
             return setState(stateₒ), false;
@@ -188,7 +188,7 @@ function concat(a, b) {
         return b;
     if (b === undefined)
         return a;
-    let type = objectToString.call(a);
+    const type = objectToString.call(a);
     if (type !== objectToString.call(b))
         throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]')
@@ -200,13 +200,13 @@ function concat(a, b) {
     throw new Error(`Internal error: invalid sequence`);
 }
 function isInputFullyConsumed() {
-    let type = objectToString.call(IN);
+    const type = objectToString.call(IN);
     if (type === '[object String]')
         return IP === IN.length;
     if (type === '[object Array]')
         return IP === IN.length;
     if (type === '[object Object]') {
-        let keyCount = Object.keys(IN).length;
+        const keyCount = Object.keys(IN).length;
         assert(keyCount <= 32);
         if (keyCount === 0)
             return true;
@@ -256,7 +256,7 @@ const parse = (() => {
 
     // SequenceExpression
     function e1() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -325,7 +325,7 @@ const print = (() => {
 
     // SequenceExpression
     function e1() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;

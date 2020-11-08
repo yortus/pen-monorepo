@@ -7,7 +7,7 @@ import {parse as penParse, print as penPrint} from '../baselines/pen-dist/json.j
 import {parse as pegParse} from './pegjs-json-parser';
 
 
-let json = fs.readFileSync(path.join(__dirname, '../fixtures/documents/1mb.json'), 'utf8');
+const json = fs.readFileSync(path.join(__dirname, '../fixtures/documents/1mb.json'), 'utf8');
 const suite = new Benchmark.Suite();
 
 
@@ -20,7 +20,7 @@ suite.add('penc (print)', () => penPrint(json));
 
 // Add listeners.
 suite.on('cycle', (event: Benchmark.Event) => {
-    let avg = Math.round(event.target.stats!.mean * 1000);
+    const avg = Math.round(event.target.stats!.mean * 1000);
     console.log(`${event.target}   avg=${avg}ms/op`);
 });
 suite.on('complete', () => console.log('Finished.'));

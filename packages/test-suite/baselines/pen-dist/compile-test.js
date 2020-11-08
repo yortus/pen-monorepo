@@ -22,12 +22,12 @@ module.exports = {
 // ------------------------------ Runtime ------------------------------
 "use strict";
 function parseField(name, value) {
-    let stateₒ = getState();
-    let obj = {};
+    const stateₒ = getState();
+    const obj = {};
     if (!name())
         return false;
     assert(typeof OUT === 'string');
-    let propName = OUT;
+    const propName = OUT;
     if (!value())
         return setState(stateₒ), false;
     assert(OUT !== undefined);
@@ -38,15 +38,15 @@ function parseField(name, value) {
 function printField(name, value) {
     if (objectToString.call(IN) !== '[object Object]')
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
-    let propNames = Object.keys(IN);
-    let propCount = propNames.length;
+    const propNames = Object.keys(IN);
+    const propCount = propNames.length;
     assert(propCount <= 32);
     const obj = IN;
     let bitmask = IP;
     for (let i = 0; i < propCount; ++i) {
-        let propName = propNames[i];
+        const propName = propNames[i];
         const propBit = 1 << i;
         if ((bitmask & propBit) !== 0)
             continue;
@@ -72,8 +72,8 @@ function printField(name, value) {
 }
 function parseList(elements) {
     const elementsLength = elements.length;
-    let stateₒ = getState();
-    let arr = [];
+    const stateₒ = getState();
+    const arr = [];
     for (let i = 0; i < elementsLength; ++i) {
         if (!elements[i]())
             return setState(stateₒ), false;
@@ -89,7 +89,7 @@ function printList(elements) {
         return false;
     if (IP < 0 || IP + elementsLength > IN.length)
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
     const arr = IN;
     const off = IP;
@@ -106,10 +106,10 @@ function printList(elements) {
     return true;
 }
 function parseRecord(fields) {
-    let stateₒ = getState();
-    let obj = {};
-    for (let field of fields) {
-        let propName = field.name;
+    const stateₒ = getState();
+    const obj = {};
+    for (const field of fields) {
+        const propName = field.name;
         if (!field.value())
             return setState(stateₒ), false;
         assert(OUT !== undefined);
@@ -121,18 +121,18 @@ function parseRecord(fields) {
 function printRecord(fields) {
     if (objectToString.call(IN) !== '[object Object]')
         return false;
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text;
-    let propNames = Object.keys(IN);
-    let propCount = propNames.length;
+    const propNames = Object.keys(IN);
+    const propCount = propNames.length;
     assert(propCount <= 32);
     const obj = IN;
     let bitmask = IP;
-    for (let field of fields) {
-        let i = propNames.indexOf(field.name);
+    for (const field of fields) {
+        const i = propNames.indexOf(field.name);
         if (i < 0)
             return setState(stateₒ), false;
-        let propName = propNames[i];
+        const propName = propNames[i];
         const propBit = 1 << i;
         if ((bitmask & propBit) !== 0)
             return setState(stateₒ), false;
@@ -188,7 +188,7 @@ function concat(a, b) {
         return b;
     if (b === undefined)
         return a;
-    let type = objectToString.call(a);
+    const type = objectToString.call(a);
     if (type !== objectToString.call(b))
         throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]')
@@ -200,13 +200,13 @@ function concat(a, b) {
     throw new Error(`Internal error: invalid sequence`);
 }
 function isInputFullyConsumed() {
-    let type = objectToString.call(IN);
+    const type = objectToString.call(IN);
     if (type === '[object String]')
         return IP === IN.length;
     if (type === '[object Array]')
         return IP === IN.length;
     if (type === '[object Object]') {
-        let keyCount = Object.keys(IN).length;
+        const keyCount = Object.keys(IN).length;
         assert(keyCount <= 32);
         if (keyCount === 0)
             return true;
@@ -237,11 +237,11 @@ const extensions = {
             return function CHA_lambda(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
-                let min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
-                let max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
+                const min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
+                const max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
-                let checkRange = min !== '\u0000' || max !== '\uFFFF';
+                const checkRange = min !== '\u0000' || max !== '\uFFFF';
                 if (!hasInput(mode)) {
                     assert(hasOutput(mode));
                     return function CHA() { return OUT = min, true; };
@@ -251,7 +251,7 @@ const extensions = {
                         return false;
                     if (IP < 0 || IP >= IN.length)
                         return false;
-                    let c = IN.charAt(IP);
+                    const c = IN.charAt(IP);
                     if (checkRange && (c < min || c > max))
                         return false;
                     IP += 1;
@@ -271,7 +271,7 @@ const extensions = {
                 return function F64() {
                     if (typeof IN !== 'string')
                         return false;
-                    let stateₒ = getState();
+                    const stateₒ = getState();
                     const LEN = IN.length;
                     const EOS = 0;
                     let digitCount = 0;
@@ -329,7 +329,7 @@ const extensions = {
                     // There is a syntactically valid float. Delegate parsing to the JS runtime.
                     // Reject the number if it parses to Infinity or Nan.
                     // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    let num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                    const num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
                     if (!Number.isFinite(num))
                         return setState(stateₒ), false;
                     // Success
@@ -363,8 +363,8 @@ const extensions = {
             return function I32_lambda(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
-                let base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
-                let signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+                const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
+                const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 if (!hasInput(mode)) {
@@ -376,7 +376,7 @@ const extensions = {
                     return function I32() {
                         if (typeof IN !== 'string')
                             return false;
-                        let stateₒ = getState();
+                        const stateₒ = getState();
                         // Parse optional leading '-' sign (if signed)...
                         let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                         let isNegative = false;
@@ -393,7 +393,7 @@ const extensions = {
                             let c = IN.charCodeAt(IP);
                             if (c >= 256)
                                 break;
-                            let digitValue = DIGIT_VALUES[c];
+                            const digitValue = DIGIT_VALUES[c];
                             if (digitValue >= base)
                                 break;
                             // Update parsed number.
@@ -435,9 +435,9 @@ const extensions = {
                         if (num > MAX_NUM)
                             return false;
                         // Extract the digits.
-                        let digits = [];
+                        const digits = [];
                         while (true) {
-                            let d = num % base;
+                            const d = num % base;
                             num = (num / base) | 0;
                             digits.push(CHAR_CODES[d]);
                             if (num === 0)
@@ -489,7 +489,7 @@ const extensions = {
                 const memos = new Map();
                 return function MEM() {
                     // Check whether the memo table already has an entry for the given initial state.
-                    let stateₒ = getState();
+                    const stateₒ = getState();
                     let memos2 = memos.get(IN);
                     if (memos2 === undefined) {
                         memos2 = new Map();
@@ -535,7 +535,7 @@ const extensions = {
                             // some node --> some different non-empty node (assert: should never happen!)
                             if (!expr())
                                 break; // TODO: fix cast
-                            let state = getState();
+                            const state = getState();
                             if (state.IP <= memo.stateᐟ.IP)
                                 break;
                             // TODO: was for unparse... comment above says should never happen...
@@ -577,7 +577,7 @@ const parse = (() => {
 
     // SequenceExpression
     function compile_test_start() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -600,7 +600,7 @@ const parse = (() => {
 
     // SequenceExpression
     function 𝕊1_x1() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (e1()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e2()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -641,7 +641,7 @@ const parse = (() => {
 
     // SequenceExpression
     function compile_test_c() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -675,7 +675,7 @@ const print = (() => {
 
     // SequenceExpression
     function compile_test_start() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (std_f64()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_x()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -698,7 +698,7 @@ const print = (() => {
 
     // SequenceExpression
     function 𝕊1_x1() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (e1()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (e2()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -741,7 +741,7 @@ const print = (() => {
 
     // SequenceExpression
     function compile_test_c() {
-        let stateₒ = getState();
+        const stateₒ = getState();
         let out;
         if (e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (compile_test_c()) out = concat(out, OUT); else return setState(stateₒ), false;

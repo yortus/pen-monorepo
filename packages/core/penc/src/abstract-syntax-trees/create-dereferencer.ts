@@ -25,7 +25,7 @@ import type {Expression} from './nodes';
 
 //     // The dereference function, closed over the given AST.
 //     function deref(expr: Expression): Expression {
-//         let seen = [expr];
+//         const seen = [expr];
 //         while (true) {
 //             // NameExpression is not allowed for `expr`, as per jsdoc on DereferenceFunction.
 //             assert(expr.kind !== 'NameExpression');
@@ -53,7 +53,7 @@ import type {Expression} from './nodes';
 //             // If the target expression is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
 //             if (seen.includes(tgt)) {
 //                 // TODO: improve diagnostic message, eg line/col ref
-//                 let name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
+//                 const name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
 //                 throw new Error(`'${name}' is circularly defined`);
 //             }
 //             seen.push(tgt);
@@ -63,7 +63,7 @@ import type {Expression} from './nodes';
 
 //     /** Find the value expression referenced by `ref`. */
 //     function resolveReference(ref: GlobalReferenceExpression): Expression {
-//         let result = allBindings.find(n => n.globalName === ref.globalName);
+//         const result = allBindings.find(n => n.globalName === ref.globalName);
 //         assert(result);
 //         return result.value;
 //     }
@@ -74,7 +74,7 @@ import type {Expression} from './nodes';
 //      * fail, such as when `module` is an application expression.
 //      */
 //     function resolveMember(mem: MemberExpression): Expression | undefined {
-//         let moduleExpr = deref(mem.module);
+//         const moduleExpr = deref(mem.module);
 //         let module: Module;
 //         switch (moduleExpr.kind) {
 //             // TODO: case 'ApplicationExpression': ...

@@ -9,15 +9,15 @@
 //     const symbolTable = new SymbolTable();
 //     let currentScope: ScopeSymbol | undefined;
 //     let startGlobalName: string | undefined;
-//     let allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
-//     let mapNode = createNodeMapper(desugaredNodeKinds, resolvedNodeKinds);
-//     let sourceFiles = mapNode(program.sourceFiles, rec => ({
+//     const allRefs = [] as Array<{scope: ScopeSymbol, ref: GlobalReferenceExpression}>;
+//     const mapNode = createNodeMapper(desugaredNodeKinds, resolvedNodeKinds);
+//     const sourceFiles = mapNode(program.sourceFiles, rec => ({
 
 //         // Attach a scope to each Module node.
 //         Module: mod => {
-//             let outerScope = currentScope;
+//             const outerScope = currentScope;
 //             currentScope = symbolTable.createScope(currentScope, mod.path);
-//             let modᐟ = {...mod, bindings: mod.bindings.map(rec)};
+//             const modᐟ = {...mod, bindings: mod.bindings.map(rec)};
 //             if (mod.path === program.mainPath) {
 //                 // This is the main module. Assign to startGlobalName.
 //                 startGlobalName = currentScope.localNames.get('start')?.globalName;
@@ -29,7 +29,7 @@
 //         // Attach a unique name to each local binding, returning a GlobalBinding node.
 //         LocalBinding: ({localName, value, exported}): GlobalBinding => {
 //             assert(currentScope);
-//             let {globalName} = symbolTable.createName(localName, currentScope);
+//             const {globalName} = symbolTable.createName(localName, currentScope);
 //             return {kind: 'GlobalBinding', localName, globalName, value: rec(value), exported};
 //         },
 
@@ -46,8 +46,8 @@
 
 //     // Every binding now has a unique name.
 //     // Backpatch all the GlobalReferenceExpression nodes with its corresponding unique name.
-//     for (let {scope, ref} of allRefs) {
-//         let {globalName} = symbolTable.lookupName(ref.localName, scope);
+//     for (const {scope, ref} of allRefs) {
+//         const {globalName} = symbolTable.lookupName(ref.localName, scope);
 //         Object.assign(ref, {globalName});
 //     }
 

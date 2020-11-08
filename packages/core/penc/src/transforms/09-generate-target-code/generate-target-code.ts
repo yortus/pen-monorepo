@@ -23,7 +23,7 @@
 //     // TODO: Emit main exports...
 //     emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
 //     emit.down(1).text(`module.exports = {`).indent();
-//     for (let mode of [PARSE, PRINT] as const) {
+//     for (const mode of [PARSE, PRINT] as const) {
 //         const fname = mode === PARSE ? 'parse' : 'print';
 //         const paramName = mode === PARSE ? 'text' : 'node';
 //         emit.down(1).text(`${fname}(${paramName}) {`).indent();
@@ -39,7 +39,7 @@
 //     // TODO: Emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
 //     emit.down(5).text(`// ------------------------------ Runtime ------------------------------`);
 //     const RUNTIME_PATH = require.resolve('../../deps/penrt');
-//     let content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
+//     const content = fs.readFileSync(RUNTIME_PATH, 'utf8') + '\n';
 //     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
 //     // TODO: Emit extensions...
@@ -55,16 +55,16 @@
 
 
 // function emitExtensions(emit: Emitter, {il: {subexpressions}}: Program) {
-//     let isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
-//     let extExprs = Object.keys(subexpressions).map(id => subexpressions[id]).filter(isExtensionExpression);
-//     let extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
+//     const isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
+//     const extExprs = Object.keys(subexpressions).map(id => subexpressions[id]).filter(isExtensionExpression);
+//     const extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
 //     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
 //     emit.down(1).text(`const extensions = {`).indent();
-//     for (let extPath of extPaths.values()) {
-//         let content = fs.readFileSync(extPath, 'utf8') + '\n';
+//     for (const extPath of extPaths.values()) {
+//         const content = fs.readFileSync(extPath, 'utf8') + '\n';
 //         emit.down(1).text(`${JSON.stringify(extPath)}: (() => {`).indent();
 //         content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-//         let refdNames = extExprs.filter(expr => expr.extensionPath === extPath).map(expr => expr.bindingName);
+//         const refdNames = extExprs.filter(expr => expr.extensionPath === extPath).map(expr => expr.bindingName);
 //         emit.down(1).text(`return {${refdNames.join(', ')}};`);
 //         emit.dedent().down(1).text(`})(),`);
 //     }
@@ -73,7 +73,7 @@
 
 
 // function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-//     let {consts, il: {startName, subexpressions}} = program;
+//     const {consts, il: {startName, subexpressions}} = program;
 
 //     // TODO: emit prolog...
 //     const modeName = mode === PARSE ? 'parse' : 'print';
@@ -81,15 +81,15 @@
 //     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
 //     // Emit extension exports before anything else
-//     let extExprIds = Object.keys(subexpressions).filter(name => subexpressions[name].kind === 'ExtensionExpression');
+//     const extExprIds = Object.keys(subexpressions).filter(name => subexpressions[name].kind === 'ExtensionExpression');
 //     if (extExprIds.length > 0) emit.down(2).text(`// ExtensionExpressions`);
-//     for (let id of extExprIds) {
-//         let extExpr = subexpressions[id] as ExtensionExpression;
+//     for (const id of extExprIds) {
+//         const extExpr = subexpressions[id] as ExtensionExpression;
 //         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.extensionPath)}].${extExpr.bindingName}({mode: ${mode}});`);
 //     }
 
 //     // TODO: emit each expression...
-//     for (let [name, expr] of Object.entries(subexpressions)) {
+//     for (const [name, expr] of Object.entries(subexpressions)) {
 //         emitExpression(emit, name, expr, mode);
 //         if (consts[name] === undefined) continue;
 //         emitConstant(emit, name, consts[name].value);
@@ -164,7 +164,7 @@
 //         //     break;
 
 //         case 'ListExpression': {
-//             let elements = expr.elements.map(element => {
+//             const elements = expr.elements.map(element => {
 //                 assert(element.kind === 'GlobalReferenceExpression');
 //                 return element.globalName;
 //             });
@@ -177,7 +177,7 @@
 //         case 'ModuleExpression': {
 //             emit.down(1).text(`function ${name}(bindingName) {`).indent();
 //             emit.down(1).text(`switch (bindingName) {`).indent();
-//             for (let binding of expr.module.bindings) {
+//             for (const binding of expr.module.bindings) {
 //                 assert(binding.kind === 'GlobalBinding');
 //                 assert(binding.value.kind === 'GlobalReferenceExpression');
 //                 emit.down(1).text(`case '${binding.localName}': return ${binding.value.globalName};`);
@@ -191,8 +191,8 @@
 //         case 'NotExpression': {
 //             assert(expr.expression.kind === 'GlobalReferenceExpression');
 //             emit.down(1).text(`function ${name}() {`).indent();
-//             emit.down(1).text(`let stateₒ = getState();`);
-//             emit.down(1).text(`let result = !${expr.expression.globalName}();`);
+//             emit.down(1).text(`const stateₒ = getState();`);
+//             emit.down(1).text(`const result = !${expr.expression.globalName}();`);
 //             emit.down(1).text(`setState(stateₒ);`);
 //             emit.down(1).text(`OUT = undefined;`);
 //             emit.down(1).text(`return result;`);
@@ -207,7 +207,7 @@
 //                 emit.down(1).text(`if (!${expr.expression.globalName}()) OUT = undefined;`);
 //             }
 //             else /* expr.quantifier === '*' */ {
-//                 emit.down(1).text(`let IPₒ = IP;`);
+//                 emit.down(1).text(`const IPₒ = IP;`);
 //                 emit.down(1).text(`let out;`);
 //                 emit.down(1).text(`do {`).indent();
 //                 emit.down(1).text(`if (!${expr.expression.globalName}()) break;`);
@@ -222,7 +222,7 @@
 //         }
 
 //         case 'RecordExpression': {
-//             let fields = expr.fields.map(field => {
+//             const fields = expr.fields.map(field => {
 //                 assert(field.value.kind === 'GlobalReferenceExpression');
 //                 return `{name: '${field.name}', value: ${field.value.globalName}},`;
 //             });
@@ -230,7 +230,7 @@
 //             emit.down(1).text(`return ${modes.isParse(mode) ? 'parseRecord' : 'printRecord'}([`);
 //             if (fields.length > 0) {
 //                 emit.indent();
-//                 for (let field of fields) emit.down(1).text(field);
+//                 for (const field of fields) emit.down(1).text(field);
 //                 emit.dedent().down(1);
 //             }
 //             emit.text(`]);`);
@@ -254,7 +254,7 @@
 //             const arity = expr.expressions.length;
 //             const exprVars = expr.expressions.map(e => { assert(e.kind === 'GlobalReferenceExpression'); return e.globalName; });
 //             emit.down(1).text(`function ${name}() {`).indent();
-//             emit.down(1).text('let stateₒ = getState();');
+//             emit.down(1).text('const stateₒ = getState();');
 //             emit.down(1).text('let out;');
 //             for (let i = 0; i < arity; ++i) {
 //                 emit.down(1).text(`if (${exprVars[i]}()) out = concat(out, OUT); else return setState(stateₒ), false;`);

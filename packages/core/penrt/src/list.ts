@@ -2,8 +2,8 @@
 
 function parseList(elements: Rule[]) {
     const elementsLength = elements.length;
-    let stateₒ = getState();
-    let arr = [] as unknown[];
+    const stateₒ = getState();
+    const arr = [] as unknown[];
     for (let i = 0; i < elementsLength; ++i) {
         if (!elements[i]()) return setState(stateₒ), false;
         assert(OUT !== undefined);
@@ -18,7 +18,7 @@ function printList(elements: Rule[]) {
     if (!Array.isArray(IN)) return false;
     if (IP < 0 || IP + elementsLength > IN.length) return false;
 
-    let stateₒ = getState();
+    const stateₒ = getState();
     let text: unknown;
     const arr = IN;
     const off = IP;

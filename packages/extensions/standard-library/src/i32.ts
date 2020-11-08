@@ -2,8 +2,8 @@
 function i32({mode}: StaticOptions): Lambda {
     return function I32_lambda(expr) {
         assert(isModule(expr));
-        let base = expr('base')?.constant?.value as number | undefined ?? 10;
-        let signed = expr('signed')?.constant?.value as boolean | undefined ?? true;
+        const base = expr('base')?.constant?.value as number | undefined ?? 10;
+        const signed = expr('signed')?.constant?.value as boolean | undefined ?? true;
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
@@ -16,7 +16,7 @@ function i32({mode}: StaticOptions): Lambda {
         if (isParse(mode)) {
             return function I32() {
                 if (typeof IN !== 'string') return false;
-                let stateₒ = getState();
+                const stateₒ = getState();
 
                 // Parse optional leading '-' sign (if signed)...
                 let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
@@ -35,7 +35,7 @@ function i32({mode}: StaticOptions): Lambda {
                     // Read a digit.
                     let c = IN.charCodeAt(IP);
                     if (c >= 256) break;
-                    let digitValue = DIGIT_VALUES[c];
+                    const digitValue = DIGIT_VALUES[c];
                     if (digitValue >= base) break;
 
                     // Update parsed number.
@@ -79,9 +79,9 @@ function i32({mode}: StaticOptions): Lambda {
                 if (num > MAX_NUM) return false;
 
                 // Extract the digits.
-                let digits = [] as number[];
+                const digits = [] as number[];
                 while (true) {
-                    let d = num % base;
+                    const d = num % base;
                     num = (num / base) | 0;
                     digits.push(CHAR_CODES[d]);
                     if (num === 0) break;

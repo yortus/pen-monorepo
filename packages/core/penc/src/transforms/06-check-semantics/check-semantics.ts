@@ -8,8 +8,8 @@
 //         switch (n.kind) {
 //             case 'RecordExpression': {
 //                 // Ensure Record field names are unique within the record definition
-//                 let names = new Set<string>();
-//                 for (let field of n.fields) {
+//                 const names = new Set<string>();
+//                 for (const field of n.fields) {
 //                     if (names.has(field.name)) throw new Error(`Duplicate field name '${field.name}'`);
 //                     names.add(field.name);
 //                 }

@@ -20,8 +20,8 @@ export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind
         const rec: any = (n: any) => {
             try {
                 assert(inNodeKinds.matches(n));
-                let mapFn = mappers[n.kind];
-                let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
+                const mapFn = mappers[n.kind];
+                const result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
                 return result;
             }
             catch (err) {
@@ -31,7 +31,7 @@ export function createNodeMapper<K extends Node['kind'], Kᐟ extends Node['kind
         };
         const defaultMappers: any = makeDefaultMappers(rec);
         const mappers: any = mappings(rec);
-        let result = rec(node);
+        const result = rec(node);
 
         // TODO: do a full traverse and ensure all nodes are of allowed kinds
         traverseNode(result, n => assert(outNodeKinds.matches(n)));

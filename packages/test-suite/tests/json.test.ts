@@ -53,12 +53,12 @@ describe(`Compiling and executing the 'json.pen' program`, async () => {
 
     ];
 
-    for (let test of tests) {
+    for (const test of tests) {
         it(test.text, () => {
-            let ast = parse(test.text);
+            const ast = parse(test.text);
             expect(ast).to.deep.equal(JSON.parse(test.text));
 
-            let textᐟ = print(test.ast);
+            const textᐟ = print(test.ast);
             expect(JSON.parse(textᐟ)).to.deep.equal(test.ast);
         });
     }

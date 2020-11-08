@@ -5,8 +5,8 @@
  * and whose values are the results of calling `cb` on each value in `m`.
  */
 export function mapMap<K, V, Vᐟ>(m: ReadonlyMap<K, V>, cb: (v: V, k: K) => Vᐟ): Map<K, Vᐟ> {
-    let result = new Map<K, Vᐟ>();
-    for (let [key, value] of m.entries()) {
+    const result = new Map<K, Vᐟ>();
+    for (const [key, value] of m.entries()) {
         result.set(key, cb(value, key));
     }
     return result;
