@@ -39,31 +39,48 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
         console.log(`MODULE ${moduleId}`);
         let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
         assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
+
+        // Create a new scope for this module.
         let scope = Object.create(parentScope);
         scopesByModuleId.set(moduleId, scope);
 
         // TODO: for each binding...
         for (let {pattern, value} of bindings) {
 
+            // TODO: doc... what are we doing with `value` here?
+            // - `value` is an Expression
+            // - replace every NameExpression with a ReferenceExpression
+
             value = mapNode(value, rec => ({
+
+                // TODO: what is this for?
                 MemberExpression: mem => {
                     // collect 1 reference (in specific scope)
+                    // TODO: not actually collecting the reference yet...
                     console.log(`    REF S?.${mem.bindingName}`);
-                    return {...mem, module: rec(mem.module)};
+
+
+                    // TODO: get the moduleId referred to by mem.module (must be statically resolvable)
+                    // - recursive search, based on `createDereferencer`
+
+
+                    let memᐟ = {...mem, module: rec(mem.module)};
+                    return memᐟ;
                 },
     
+                // Replace every NameExpression with an equivalent ReferenceExpression.
                 NameExpression: nam => {
                     // collect 1 reference (in enclosing scope)
                     console.log(`    REF ${nam.name}`);
     
                     // Create placeholder ReferenceExpression that will be backpatched later when defId is known
-                    let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: -1};
-    
+                    let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: undefined!};
                     refExprs.push({name: nam.name, moduleId, ref});
                     return ref;
                 },
             }));
 
+            // TODO: doc... what are we doing with `pattern` here?
             if (pattern.kind === 'NamePattern') {
                 // - if NamePattern: collect 1 definition
                 define(pattern.name, moduleId, value);
@@ -106,46 +123,9 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
     //let symbolTable: unknown;
     //let counter = 0;
-
-
     // let definitions = [] as Definition[];
-
-
     // mapMap(program.modulesByAbsPath, mod => {
     //     return mapNode2(mod, rec => ({
-
-    //         Binding: 'default',
-
-    //         // TODO: this one will be discarded after this transform
-    //         Module: (({bindings}: Module): Definition => {
-    //             for (let {pattern, value} of bindings) {
-    //                 console.log(`PATTERN ${pattern.kind} --- VALUE ${value.kind}`);
-    //                 pattern.kind;
-    //                 value.kind;
-    //                 rec(value);
-    //             }
-
-    //             assert(true); // TODO: remove
-
-    //             return {
-    //                 kind: 'Definition',
-    //                 id: -1,
-    //                 expression: {kind: 'NullLiteralExpression', value: null},
-    //                 localName: '???',
-    //                 globalName: '???',
-    //             };
-    //         }) as any,
-
-    //         // TODO: this needs to be turned into a ReferenceExpression - collect it now and backpatch it later
-    //         NameExpression: ({name}): ReferenceExpression => {
-    //             console.log(`NAMEXPR "${name}"`);
-    //             return {kind: 'ReferenceExpression', definitionId: -1};
-    //         },
-
-    //         // TODO: these two are good - they are handled as part of `Module` handling
-    //         ModulePattern: 'default',
-    //         NamePattern: 'default',
-
 
     //         // // Replace each LocalMultiBinding with a series of LocalBindings
     //         // Module: mod => {
@@ -186,9 +166,6 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     //         //     let modᐟ = {...mod, bindings};
     //         //     return modᐟ;
     //         // },
-
-    //         // // This is handled within the 'Module' callback, but must be present since it's in Source but not Desugared
-    //         // LocalMultiBinding: 'default',
     //     }));
     // });
 
@@ -196,4 +173,13 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
         definitions,
         startSomething: '????',
     };*/
+
+
+
+
+
+    // // TODO: temp testing...
+    // function resolveExpressionToModuleId(expr: Expression) {
+
+    // }
 }
