@@ -3,7 +3,7 @@ import {allNodeKinds, Module} from '../abstract-syntax-trees';
 
 /** A PEN program expressed as a map from module IDs to `Module` AST nodes. */
 export interface ModuleMap {
-    readonly modulesById: ReadonlyMap<string, Module>;
+    readonly modulesById: Record<string, Module>;
     readonly startModuleId: string;
 }
 

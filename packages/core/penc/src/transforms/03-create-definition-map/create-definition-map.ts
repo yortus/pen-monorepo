@@ -35,7 +35,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
 
     // TODO: for each module...
-    for (let {moduleId, parentModuleId, bindings} of moduleMap.modulesById.values()) {
+    for (let {moduleId, parentModuleId, bindings} of Object.values(moduleMap.modulesById)) {
         console.log(`MODULE ${moduleId}`);
         let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
         assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
