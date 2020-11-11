@@ -1,4 +1,4 @@
-import {Definition, Expression, mapNode, ReferenceExpression, traverseNode} from '../../abstract-syntax-trees';
+import {Definition, Expression, /*mapNode,*/ MemberExpression, ReferenceExpression, traverseNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
 
@@ -8,10 +8,10 @@ import {assert} from '../../utils';
 export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     type Scope = Record<string, Definition | undefined>;
     let scopesByModuleId = new Map<string, Scope>();
-
     let globalScope = Object.create(null) as Scope;
     let refExprs = [] as {name: string, moduleId: string, ref: ReferenceExpression}[];
     let definitions = [] as Definition[];
+
 
     function define(name: string, moduleId: string, expression: Expression) {
         console.log(`    DEF ${name}`);
@@ -24,7 +24,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             kind: 'Definition',
             definitionId: definitions.length,
             localName: name,
-            globalName: '???', // TODO
+            globalName: undefined!, // TODO
             expression,
         };
         definitions.push(definition);
@@ -51,50 +51,46 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             // - `value` is an Expression
             // - replace every NameExpression with a ReferenceExpression
 
-            value = mapNode(value, rec => ({
+            // value = mapNode(value, rec => ({
 
-                // TODO: what is this for?
-                MemberExpression: mem => {
-                    // collect 1 reference (in specific scope)
-                    // TODO: not actually collecting the reference yet...
-                    console.log(`    REF S?.${mem.bindingName}`);
-
-
-                    // TODO: get the moduleId referred to by mem.module (must be statically resolvable)
-                    // - recursive search, based on `createDereferencer`
+            //     // TODO: what is this for?
+            //     MemberExpression: mem => {
+            //         // collect 1 reference (in specific scope)
+            //         // TODO: not actually collecting the reference yet...
+            //         console.log(`    REF S?.${mem.bindingName}`);
 
 
-                    let memᐟ = {...mem, module: rec(mem.module)};
-                    return memᐟ;
-                },
+            //         // TODO: get the moduleId referred to by mem.module (must be statically resolvable)
+            //         // - recursive search, based on `createDereferencer`
+
+
+            //         let memᐟ = {...mem, module: rec(mem.module)};
+            //         return memᐟ;
+            //     },
     
-                // Replace every NameExpression with an equivalent ReferenceExpression.
-                NameExpression: nam => {
-                    // collect 1 reference (in enclosing scope)
-                    console.log(`    REF ${nam.name}`);
+            //     // Replace every NameExpression with an equivalent ReferenceExpression.
+            //     NameExpression: nam => {
+            //         // collect 1 reference (in enclosing scope)
+            //         console.log(`    REF ${nam.name}`);
     
-                    // Create placeholder ReferenceExpression that will be backpatched later when defId is known
-                    let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: undefined!};
-                    refExprs.push({name: nam.name, moduleId, ref});
-                    return ref;
-                },
-            }));
+            //         // Create placeholder ReferenceExpression that will be backpatched later when defId is known
+            //         let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: undefined!};
+            //         refExprs.push({name: nam.name, moduleId, ref});
+            //         return ref;
+            //     },
+            // }));
 
-            // TODO: doc... what are we doing with `pattern` here?
+            // For a simple `name = value` binding, create a single binding from name to value in the current scope.
             if (pattern.kind === 'NamePattern') {
-                // - if NamePattern: collect 1 definition
                 define(pattern.name, moduleId, value);
             }
+
+            // For a destructured `{a, b} = module` binding, for each name in the LHS pattern,
+            // create a binding from the name to a synthesized MemberExpression referencing `module.member`
             else /* pattern.kind === 'ModulePattern' */ {
-                // - if ModulePattern: collect 1 definition (alias) and 1 reference (in specific scope)
                 for (let {name, alias} of pattern.names) {
-                    alias ??= name;
-
-                    // TODO: fix this...
-                    let expr: Expression = null!;
-
-                    define(alias, moduleId, expr);
-                    console.log(`    REF S?.${name}`);
+                    let expr: MemberExpression = {kind: 'MemberExpression', module: value, bindingName: name};
+                    define(alias ?? name, moduleId, expr);
                 }
             }
         }

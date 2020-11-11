@@ -12,6 +12,7 @@ export interface DefinitionMap {
 export const definitionMapKinds = allNodeKinds.without(
     'Binding',
     'Module',
+    'MemberExpression',
     'ModuleExpression',
     'ModulePattern',
     'NameExpression',
