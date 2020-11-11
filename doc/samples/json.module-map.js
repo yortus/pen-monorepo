@@ -1,7 +1,7 @@
 // This is the ModuleMap representation (intermediate AST form) of the json.pen program.
 // TODO: put this in an actual test to programatically test for regressions/ast changes.
-// - would need to make the module IDs not machine-specific for that to work
-let moduleMap = {
+// - would need to make the module IDs not machine-specific for that to work (may make moduleids rel/norm to some root )
+const moduleMap = {
     modulesById: {
         "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\json.pen": {
             kind: "Module",

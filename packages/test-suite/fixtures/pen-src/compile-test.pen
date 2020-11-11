@@ -1,14 +1,31 @@
-{char, f64} = import 'std'
-
-start = f64 x a b c
-
-x = {
-    x1 = x.x1? "rest"
+digits = {
+    one = 1
+    two = 2
 }
 
-a = "aaa"
-b = "pre" c
-c = "pre" b
-//e = f   // NB: illegal circular def
-//f = e   // NB: illegal circular def
-//g = g   // NB: illegal circular def
+{one as des} = digits
+ref = des
+mem = digits.two
+
+
+
+
+
+
+
+// ================================================================================
+// TODO: was...
+// {char, f64} = import 'std'
+// 
+// start = f64 x a b c
+// 
+// x = {
+//     x1 = x.x1? "rest"
+// }
+// 
+// a = "aaa"
+// b = "pre" c
+// c = "pre" b
+// //e = f   // NB: illegal circular def
+// //f = e   // NB: illegal circular def
+// //g = g   // NB: illegal circular def
