@@ -57,7 +57,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             //     MemberExpression: mem => {
             //         // collect 1 reference (in specific scope)
             //         // TODO: not actually collecting the reference yet...
-            //         console.log(`    REF S?.${mem.member}`);
+            //         console.log(`    REF S?.${mem.member.name}`);
 
 
             //         // TODO: get the moduleId referred to by mem.module (must be statically resolvable)
@@ -89,7 +89,11 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             // create a binding from the name to a synthesized MemberExpression referencing `module.member`
             else /* pattern.kind === 'ModulePattern' */ {
                 for (let {name, alias} of pattern.names) {
-                    let expr: MemberExpression = {kind: 'MemberExpression', module: value, member: name};
+                    let expr: MemberExpression = {
+                        kind: 'MemberExpression',
+                        module: value,
+                        member: {kind: 'Identifier', name},
+                    };
                     define(alias ?? name, moduleId, expr);
                 }
             }

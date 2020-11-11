@@ -95,7 +95,7 @@
 //             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
 //             case 'ImportExpression': assert(false); // Should never see an ImportExpression here
 //             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
-//             case 'MemberExpression': return setX(e, {module: ref(e.module), member: e.member});
+//             case 'MemberExpression': return setX(e, {module: ref(e.module), member: e.member.name});
 //             case 'ModuleExpression': {
 //                 const bindings = e.module.bindings.map(binding => ({...binding, value: ref(binding.value)}));
 //                 return setX(e, {module: {kind: 'Module', bindings}});
