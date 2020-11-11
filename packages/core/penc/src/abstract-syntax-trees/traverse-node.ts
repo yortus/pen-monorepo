@@ -9,7 +9,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
     function rec(n: Node): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
-            case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
+            case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'Definition': return rec(n.expression), cb(n);
             case 'ExtensionExpression': return cb(n);

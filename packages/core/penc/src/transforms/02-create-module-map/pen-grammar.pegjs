@@ -15,7 +15,7 @@ FileModule
     { return {kind: 'Module', moduleId, bindings}; }
 
 
-// ====================   Bindings and patterns   ====================
+// ====================   Bindings   ====================
 BindingList
     = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
@@ -25,12 +25,12 @@ Binding
     / ModuleBinding
 
 NameBinding
-    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   value:Expression
-    { return {kind: 'Binding', pattern: {kind: 'NamePattern', name}, value, exported: !!ex}; }
+    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   right:Expression
+    { return {kind: 'Binding', left: {kind: 'NamePattern', name}, right, exported: !!ex}; }
 
 ModuleBinding
-    = ex:(EXPORT   __)?   names:ModuleBindingNameList   __   "="   __   value:Expression
-    { return {kind: 'Binding', pattern: {kind: 'ModulePattern', names}, value, exported: !!ex}; }
+    = ex:(EXPORT   __)?   names:ModuleBindingNameList   __   "="   __   right:Expression
+    { return {kind: 'Binding', left: {kind: 'ModulePattern', names}, right, exported: !!ex}; }
 
 ModuleBindingNameList
     = "{"   __   !","   head:ModuleBindingName?   tail:((__   ",")?   __   ModuleBindingName)*   (__   ",")?   __   "}"

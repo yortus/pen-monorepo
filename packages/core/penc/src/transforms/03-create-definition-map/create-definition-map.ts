@@ -45,13 +45,13 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
         scopesByModuleId.set(moduleId, scope);
 
         // TODO: for each binding...
-        for (let {pattern, value} of bindings) {
+        for (let {left, right} of bindings) {
 
-            // TODO: doc... what are we doing with `value` here?
-            // - `value` is an Expression
+            // TODO: doc... what are we doing with `right` here?
+            // - `right` is an Expression
             // - replace every Identifier with a ReferenceExpression
 
-            // value = mapNode(value, rec => ({
+            // right = mapNode(right, rec => ({
 
             //     // TODO: what is this for?
             //     MemberExpression: mem => {
@@ -81,17 +81,17 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             // }));
 
             // For a simple `name = value` binding, create a single binding from name to value in the current scope.
-            if (pattern.kind === 'NamePattern') {
-                define(pattern.name, moduleId, value);
+            if (left.kind === 'NamePattern') {
+                define(left.name, moduleId, right);
             }
 
-            // For a destructured `{a, b} = module` binding, for each name in the LHS pattern,
+            // For a destructured `{a, b} = module` binding, for each name in `left`,
             // create a binding from the name to a synthesized MemberExpression referencing `module.member`
-            else /* pattern.kind === 'ModulePattern' */ {
-                for (let {name, alias} of pattern.names) {
+            else /* left.kind === 'ModulePattern' */ {
+                for (let {name, alias} of left.names) {
                     let expr: MemberExpression = {
                         kind: 'MemberExpression',
-                        module: value,
+                        module: right,
                         member: {kind: 'Identifier', name},
                     };
                     define(alias ?? name, moduleId, expr);

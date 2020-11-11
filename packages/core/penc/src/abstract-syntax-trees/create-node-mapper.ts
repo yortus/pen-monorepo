@@ -47,7 +47,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'BooleanLiteral': return n;
-            case 'Binding': return {...n, pattern: rec(n.pattern), value: rec(n.value)};
+            case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'Definition': return {...n, expression: rec(n.expression)};
             case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
