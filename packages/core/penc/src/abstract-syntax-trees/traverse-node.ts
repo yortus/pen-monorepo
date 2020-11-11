@@ -14,6 +14,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Definition': return rec(n.expression), cb(n);
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
+            case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
@@ -21,7 +22,6 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return rec(n.module), cb(n);
             case 'ModulePattern': return cb(n);
-            case 'NameExpression': return cb(n);
             case 'NamePattern': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteral': return cb(n);

@@ -38,6 +38,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Definition': return {...n, expression: rec(n.expression)};
             case 'ExtensionExpression': return n;
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
+            case 'Identifier': return n;
             case 'ImportExpression': return n;
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
@@ -45,7 +46,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
             case 'ModulePattern': return n;
-            case 'NameExpression': return n;
             case 'NamePattern': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteral': return n;

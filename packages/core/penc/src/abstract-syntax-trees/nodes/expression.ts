@@ -8,12 +8,12 @@ export type Expression =
     | BooleanLiteral
     | ExtensionExpression
     | FieldExpression
+    | Identifier
     | ImportExpression
     // | LambdaExpression
     | ListExpression
     | MemberExpression
     | ModuleExpression
-    | NameExpression
     | NotExpression
     | NullLiteral
     | NumericLiteral
@@ -54,6 +54,12 @@ export interface FieldExpression {
 }
 
 
+export interface Identifier {
+    readonly kind: 'Identifier';
+    readonly name: string;
+}
+
+
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
@@ -84,12 +90,6 @@ export interface MemberExpression {
 export interface ModuleExpression {
     readonly kind: 'ModuleExpression';
     readonly module: Module;
-}
-
-
-export interface NameExpression {
-    readonly kind: 'NameExpression';
-    readonly name: string;
 }
 
 

@@ -49,7 +49,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
             // TODO: doc... what are we doing with `value` here?
             // - `value` is an Expression
-            // - replace every NameExpression with a ReferenceExpression
+            // - replace every Identifier with a ReferenceExpression
 
             // value = mapNode(value, rec => ({
 
@@ -68,8 +68,8 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             //         return memᐟ;
             //     },
     
-            //     // Replace every NameExpression with an equivalent ReferenceExpression.
-            //     NameExpression: nam => {
+            //     // Replace every Identifier with an equivalent ReferenceExpression.
+            //     Identifier: nam => {
             //         // collect 1 reference (in enclosing scope)
             //         console.log(`    REF ${nam.name}`);
     

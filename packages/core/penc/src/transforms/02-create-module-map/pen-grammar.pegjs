@@ -70,7 +70,7 @@ ModuleBindingName
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'   `a`
         NumericLiteral                  123   3.14   -0.1   5.7e-53
-        NameExpression                  a   Rule1   MY_FOO_45   x32   __bar
+        Identifier                      a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
 
@@ -107,7 +107,7 @@ PrimaryExpression
     / BooleanLiteral
     / StringLiteral
     / NumericLiteral
-    / NameExpression
+    / Identifier
     / ImportExpression
 
 SelectionExpression
@@ -216,9 +216,9 @@ NumericLiteral
 
     // TODO: HexIntegerLiteral
 
-NameExpression
+Identifier
     = name:IDENTIFIER
-    { return {kind: 'NameExpression', name}; }
+    { return {kind: 'Identifier', name}; }
 
 
 // ====================   Record/List Parts   ====================
