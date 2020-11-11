@@ -53,7 +53,7 @@ import type {Expression} from './nodes';
 //             // If the target expression is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
 //             if (seen.includes(tgt)) {
 //                 // TODO: improve diagnostic message, eg line/col ref
-//                 const name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.bindingName : '(?)'; // TODO: fix par case!
+//                 const name = tgt.kind === 'GlobalReferenceExpression' ? tgt.globalName : tgt.kind === 'MemberExpression' ? tgt.member : '(?)'; // TODO: fix par case!
 //                 throw new Error(`'${name}' is circularly defined`);
 //             }
 //             seen.push(tgt);
@@ -69,7 +69,7 @@ import type {Expression} from './nodes';
 //     }
 
 //     /**
-//      * Find the value expression referenced by `module.bindingName` if possible, otherwise return `undefined`. Some
+//      * Find the value expression referenced by `module.member` if possible, otherwise return `undefined`. Some
 //      * lookups always succeed, such as when `module` is a module expression or import expression. Other lookups always
 //      * fail, such as when `module` is an application expression.
 //      */
@@ -90,10 +90,10 @@ import type {Expression} from './nodes';
 //                 return undefined;
 //         }
 
-//         // Do a static lookup of the expression bound to the name `bindingName` in the module `module`.
+//         // Do a static lookup of the expression bound to the name `member` in the module `module`.
 //         let binding = module.bindings.find(b => {
 //             assert(b.kind === 'GlobalBinding');
-//             return b.localName === mem.bindingName;
+//             return b.localName === mem.member;
 //         });
 //         assert(binding);
 //         return binding.value;

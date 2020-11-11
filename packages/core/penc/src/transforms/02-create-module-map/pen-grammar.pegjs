@@ -140,8 +140,8 @@ ApplicationOrMemberExpression
     {
         if (tail.length === 0) return head;
         return tail.reduce(
-            (lhs, rhs) => (rhs.name
-                ? {kind: 'MemberExpression', module: lhs, bindingName: rhs.name}
+            (lhs, rhs) => (rhs.id
+                ? {kind: 'MemberExpression', module: lhs, member: rhs.id}
                 : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
             ),
             head
@@ -149,8 +149,8 @@ ApplicationOrMemberExpression
     }
 
 MemberLookup
-    = "."   /* NO WHITESPACE */   name:IDENTIFIER
-    { return {name}; }
+    = "."   /* NO WHITESPACE */   id:Identifier
+    { return {id}; }
 
 ApplicationArgument
     = arg:Precedence6OrHigher

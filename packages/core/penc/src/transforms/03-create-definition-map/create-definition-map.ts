@@ -57,7 +57,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             //     MemberExpression: mem => {
             //         // collect 1 reference (in specific scope)
             //         // TODO: not actually collecting the reference yet...
-            //         console.log(`    REF S?.${mem.bindingName}`);
+            //         console.log(`    REF S?.${mem.member}`);
 
 
             //         // TODO: get the moduleId referred to by mem.module (must be statically resolvable)
@@ -89,7 +89,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             // create a binding from the name to a synthesized MemberExpression referencing `module.member`
             else /* pattern.kind === 'ModulePattern' */ {
                 for (let {name, alias} of pattern.names) {
-                    let expr: MemberExpression = {kind: 'MemberExpression', module: value, bindingName: name};
+                    let expr: MemberExpression = {kind: 'MemberExpression', module: value, member: name};
                     define(alias ?? name, moduleId, expr);
                 }
             }
@@ -144,14 +144,14 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     //         //             });
 
     //         //             // Introduce a local binding for each name in the LHS
-    //         //             for (let {name: bindingName, alias} of names) {
+    //         //             for (let {name: member, alias} of names) {
     //         //                 let ref: LocalReferenceExpression;
     //         //                 let mem: MemberExpression;
     //         //                 ref = {kind: 'LocalReferenceExpression', localName};
-    //         //                 mem = {kind: 'MemberExpression', module: ref, bindingName};
+    //         //                 mem = {kind: 'MemberExpression', module: ref, member};
     //         //                 bindings.push({
     //         //                     kind: 'LocalBinding',
-    //         //                     localName: alias ?? bindingName,
+    //         //                     localName: alias ?? member,
     //         //                     value: mem,
     //         //                     exported
     //         //                 });

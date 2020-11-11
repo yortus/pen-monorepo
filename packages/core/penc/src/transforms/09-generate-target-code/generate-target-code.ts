@@ -175,8 +175,8 @@
 //         }
 
 //         case 'ModuleExpression': {
-//             emit.down(1).text(`function ${name}(bindingName) {`).indent();
-//             emit.down(1).text(`switch (bindingName) {`).indent();
+//             emit.down(1).text(`function ${name}(member) {`).indent();
+//             emit.down(1).text(`switch (member) {`).indent();
 //             for (const binding of expr.module.bindings) {
 //                 assert(binding.kind === 'GlobalBinding');
 //                 assert(binding.value.kind === 'GlobalReferenceExpression');

@@ -31,14 +31,14 @@
 //                     });
 
 //                     // Introduce a local binding for each name in the LHS
-//                     for (const {name: bindingName, alias} of names) {
+//                     for (const {name: member, alias} of names) {
 //                         let ref: LocalReferenceExpression;
 //                         let mem: MemberExpression;
 //                         ref = {kind: 'LocalReferenceExpression', localName};
-//                         mem = {kind: 'MemberExpression', module: ref, bindingName};
+//                         mem = {kind: 'MemberExpression', module: ref, member};
 //                         bindings.push({
 //                             kind: 'LocalBinding',
-//                             localName: alias ?? bindingName,
+//                             localName: alias ?? member,
 //                             value: mem,
 //                             exported
 //                         });

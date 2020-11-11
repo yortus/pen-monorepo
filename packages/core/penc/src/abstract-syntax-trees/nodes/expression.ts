@@ -83,7 +83,7 @@ export interface ListExpression {
 export interface MemberExpression {
     readonly kind: 'MemberExpression';
     readonly module: Expression;
-    readonly bindingName: string;
+    readonly member: string;
 }
 
 
