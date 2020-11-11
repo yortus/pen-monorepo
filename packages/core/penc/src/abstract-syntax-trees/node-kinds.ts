@@ -3,7 +3,6 @@ import {createNodeKinds} from './utils';
 
 /** Array of all node kinds which are patterns. */
 export const patternNodeKinds = createNodeKinds(
-    'NamePattern',
     'ModulePattern',
 );
 

@@ -11,7 +11,7 @@ FileModule
     {
         let bindings = exportedNames.map(name => ({
             kind: 'Binding',
-            left: {kind: 'NamePattern', name},
+            left: {kind: 'Identifier', name},
             right: {kind: 'ExtensionExpression', extensionPath, bindingName: name},
             exported: true,
         }));

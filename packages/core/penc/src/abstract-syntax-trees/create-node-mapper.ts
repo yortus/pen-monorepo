@@ -59,7 +59,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Module': return {...n, bindings: n.bindings.map(rec)};
             case 'ModuleExpression': return {...n, module: rec(n.module)};
             case 'ModulePattern': return n;
-            case 'NamePattern': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteral': return n;
             case 'NumericLiteral': return n;

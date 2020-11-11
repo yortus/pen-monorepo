@@ -93,4 +93,4 @@ type HashableNodeKind = typeof hashableNodeKinds[any];
 
 // TODO: fix decl and jsdoc here - basically can only hash expressions, and not other node kinds...
 // Helper array of all node kinds that support hashing. Includes all expression node kinds except 'Identifier'. 
-const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'Module', 'ModulePattern', 'Identifier', 'NamePattern');
+const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'Module', 'ModulePattern', 'Identifier');

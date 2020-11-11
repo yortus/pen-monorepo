@@ -81,7 +81,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             // }));
 
             // For a simple `name = value` binding, create a single binding from name to value in the current scope.
-            if (left.kind === 'NamePattern') {
+            if (left.kind === 'Identifier') {
                 define(left.name, moduleId, right);
             }
 

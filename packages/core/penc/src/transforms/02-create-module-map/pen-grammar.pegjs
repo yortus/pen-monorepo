@@ -15,28 +15,20 @@ FileModule
     { return {kind: 'Module', moduleId, bindings}; }
 
 
-// ====================   Bindings   ====================
+// ====================   Bindings and patterns   ====================
 BindingList
     = !","   head:Binding?   tail:((__   ",")?   __   Binding)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = NameBinding
-    / ModuleBinding
+    = ex:(EXPORT   __)?   left:(Identifier / ModulePattern)   __   "="   __   right:Expression
+    { return {kind: 'Binding', left, right, exported: !!ex}; }
 
-NameBinding
-    = ex:(EXPORT   __)?   name:IDENTIFIER   __   "="   __   right:Expression
-    { return {kind: 'Binding', left: {kind: 'NamePattern', name}, right, exported: !!ex}; }
+ModulePattern
+    = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
+    { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
-ModuleBinding
-    = ex:(EXPORT   __)?   names:ModuleBindingNameList   __   "="   __   right:Expression
-    { return {kind: 'Binding', left: {kind: 'ModulePattern', names}, right, exported: !!ex}; }
-
-ModuleBindingNameList
-    = "{"   __   !","   head:ModuleBindingName?   tail:((__   ",")?   __   ModuleBindingName)*   (__   ",")?   __   "}"
-    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
-
-ModuleBindingName
+ModulePatternName
     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
     { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
 

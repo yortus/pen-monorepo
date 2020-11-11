@@ -8,11 +8,11 @@ const moduleMap =
       bindings: [
         {
           kind: "Binding",
-          pattern: {
-            kind: "NamePattern",
+          left: {
+            kind: "Identifier",
             name: "digits",
           },
-          value: {
+          right: {
             kind: "ImportExpression",
             moduleSpecifier: "internal://1",
             moduleId: "internal://1",
@@ -21,7 +21,7 @@ const moduleMap =
         },
         {
           kind: "Binding",
-          pattern: {
+          left: {
             kind: "ModulePattern",
             names: [
               {
@@ -30,7 +30,7 @@ const moduleMap =
               },
             ],
           },
-          value: {
+          right: {
             kind: "Identifier",
             name: "digits",
           },
@@ -38,11 +38,11 @@ const moduleMap =
         },
         {
           kind: "Binding",
-          pattern: {
-            kind: "NamePattern",
+          left: {
+            kind: "Identifier",
             name: "ref",
           },
-          value: {
+          right: {
             kind: "Identifier",
             name: "des",
           },
@@ -50,11 +50,11 @@ const moduleMap =
         },
         {
           kind: "Binding",
-          pattern: {
-            kind: "NamePattern",
+          left: {
+            kind: "Identifier",
             name: "mem",
           },
-          value: {
+          right: {
             kind: "MemberExpression",
             module: {
               kind: "Identifier",
@@ -76,11 +76,11 @@ const moduleMap =
       bindings: [
         {
           kind: "Binding",
-          pattern: {
-            kind: "NamePattern",
+          left: {
+            kind: "Identifier",
             name: "one",
           },
-          value: {
+          right: {
             kind: "NumericLiteral",
             value: 1,
           },
@@ -88,11 +88,11 @@ const moduleMap =
         },
         {
           kind: "Binding",
-          pattern: {
-            kind: "NamePattern",
+          left: {
+            kind: "Identifier",
             name: "two",
           },
-          value: {
+          right: {
             kind: "NumericLiteral",
             value: 2,
           },

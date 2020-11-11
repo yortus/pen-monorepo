@@ -16,5 +16,4 @@ export const definitionMapKinds = allNodeKinds.without(
     'MemberExpression',
     'ModuleExpression',
     'ModulePattern',
-    'NamePattern',
 );
