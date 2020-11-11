@@ -1,6 +1,7 @@
 export {SourceFileGraph, SourceFileInfo} from './01-source-file-graph';
-export {ModuleMap, moduleMapKinds} from './02-module-map';
-export {DefinitionMap, definitionMapKinds} from './03-definition-map';
+export {FileMap, fileMapKinds} from './02-file-map';
+export {ModuleMap, moduleMapKinds} from './03-module-map';
+export {DefinitionMap, definitionMapKinds} from './04-definition-map';
 
 // TODO: address these...
 // export {desugaredNodeKinds, DesugaredProgram} from './03-desugared-program';

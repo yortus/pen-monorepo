@@ -1,15 +1,15 @@
 import type {AbsPath} from '../../utils';
-import type {Module} from './module';
+import type {Binding} from './binding';
 
 
 /** Union of all node types that represent PEN expressions. */
 export type Expression =
     | ApplicationExpression
     | BooleanLiteral
-    | ExtensionExpression
     | FieldExpression
     | Identifier
     | ImportExpression
+    | Intrinsic
     // | LambdaExpression
     | ListExpression
     | MemberExpression
@@ -40,10 +40,10 @@ export interface BooleanLiteral {
 }
 
 
-export interface ExtensionExpression { // TODO: remove this node kind?
-    readonly kind: 'ExtensionExpression';
-    readonly extensionPath: AbsPath;
-    readonly bindingName: string;
+export interface Intrinsic {
+    readonly kind: 'Intrinsic';
+    readonly name: string;
+    readonly path: AbsPath;
 }
 
 
@@ -62,8 +62,7 @@ export interface Identifier {
 
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
-    readonly moduleSpecifier: string;
-    readonly moduleId: string;
+    readonly path: AbsPath;
 }
 
 
@@ -89,7 +88,7 @@ export interface MemberExpression {
 
 export interface ModuleExpression {
     readonly kind: 'ModuleExpression';
-    readonly module: Module;
+    readonly bindings: ReadonlyArray<Binding>;
 }
 
 

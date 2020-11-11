@@ -2,10 +2,22 @@
 const moduleMap = 
 {
   modulesById: {
-    "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen": {
+    "@compile_test": {
       kind: "Module",
-      moduleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
+      moduleId: "@compile_test",
       bindings: [
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "std",
+          },
+          right: {
+            kind: "Identifier",
+            name: "@std",
+          },
+          exported: false,
+        },
         {
           kind: "Binding",
           left: {
@@ -13,9 +25,8 @@ const moduleMap =
             name: "digits",
           },
           right: {
-            kind: "ImportExpression",
-            moduleSpecifier: "internal://1",
-            moduleId: "internal://1",
+            kind: "Identifier",
+            name: "@compile_test_modexpr",
           },
           exported: false,
         },
@@ -69,10 +80,10 @@ const moduleMap =
         },
       ],
     },
-    "internal://1": {
+    "@compile_test_modexpr": {
       kind: "Module",
-      moduleId: "internal://1",
-      parentModuleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
+      moduleId: "@compile_test_modexpr",
+      parentModuleId: "@compile_test",
       bindings: [
         {
           kind: "Binding",
@@ -112,6 +123,64 @@ const moduleMap =
         },
       ],
     },
+    "@std": {
+      kind: "Module",
+      moduleId: "@std",
+      bindings: [
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "char",
+          },
+          right: {
+            kind: "Intrinsic",
+            name: "char",
+            path: "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js",
+          },
+          exported: true,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "f64",
+          },
+          right: {
+            kind: "Intrinsic",
+            name: "f64",
+            path: "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js",
+          },
+          exported: true,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "i32",
+          },
+          right: {
+            kind: "Intrinsic",
+            name: "i32",
+            path: "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js",
+          },
+          exported: true,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "memoise",
+          },
+          right: {
+            kind: "Intrinsic",
+            name: "memoise",
+            path: "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js",
+          },
+          exported: true,
+        },
+      ],
+    },
   },
-  startModuleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
+  startModuleId: "@compile_test",
 };

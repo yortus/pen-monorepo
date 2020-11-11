@@ -1,18 +1,13 @@
 {
-    const nextId = options.nextId || (() => ++counter);
-    const genModuleId = () => `internal://${nextId()}`;
-    let counter = 0;
-
     const sourceFile = options.sourceFile || {};
-    const moduleId = sourceFile.path ? `file://${sourceFile.path}` : genModuleId();
     sourceFile.imports = sourceFile.imports || {};
 }
 
 
-// ====================   Top-level file module   ====================
-FileModule
+// ====================   Files   ====================
+File
     = __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'Module', moduleId, bindings}; }
+    { return {kind: 'File', path: sourceFile.path || '???', bindings}; }
 
 
 // ====================   Bindings and patterns   ====================
@@ -161,8 +156,8 @@ FieldExpression
     { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
-    = "{"   __   moduleId:(!{} {return genModuleId()})   bindings:BindingList   __   "}"
-    { return {kind: 'ModuleExpression', module: {kind: 'Module', moduleId, bindings}}; }
+    = "{"   __   bindings:BindingList   __   "}"
+    { return {kind: 'ModuleExpression', bindings}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"
@@ -176,9 +171,8 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let absPath = sourceFile.imports[moduleSpecifier] || '???';
-        let moduleId = `file://${absPath}`;
-        return {kind: 'ImportExpression', moduleSpecifier, moduleId};
+        let path = sourceFile.imports[moduleSpecifier] || '???';
+        return {kind: 'ImportExpression', path};
     }
 
 NullLiteral

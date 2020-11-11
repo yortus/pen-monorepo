@@ -1,5 +1,5 @@
 // import * as fs from 'fs';
-// import type {Expression, ExtensionExpression} from '../../abstract-syntax-trees';
+// import type {Expression, Intrinsic} from '../../abstract-syntax-trees';
 // import {SingleExpressionProgram} from '../../representations';
 // import {assert} from '../../utils';
 // import {Emitter, makeEmitter} from './emitter';
@@ -43,7 +43,7 @@
 //     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
 //     // TODO: Emit extensions...
-//     emitExtensions(emit, program);
+//     emitIntrinsics(emit, program);
 
 //     // TODO: Emit parse() and print() fns
 //     emitProgram(emit, program, PARSE);
@@ -54,17 +54,17 @@
 // }
 
 
-// function emitExtensions(emit: Emitter, {il: {subexpressions}}: Program) {
-//     const isExtensionExpression = (e: Expression): e is ExtensionExpression => e.kind === 'ExtensionExpression';
-//     const extExprs = Object.keys(subexpressions).map(id => subexpressions[id]).filter(isExtensionExpression);
-//     const extPaths = extExprs.reduce((set, {extensionPath: p}) => set.add(p), new Set<string>());
+// function emitIntrinsics(emit: Emitter, {il: {subexpressions}}: Program) {
+//     const isIntrinsic = (e: Expression): e is Intrinsic => e.kind === 'Intrinsic';
+//     const extExprs = Object.keys(subexpressions).map(id => subexpressions[id]).filter(isIntrinsic);
+//     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
 //     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
 //     emit.down(1).text(`const extensions = {`).indent();
 //     for (const extPath of extPaths.values()) {
 //         const content = fs.readFileSync(extPath, 'utf8') + '\n';
 //         emit.down(1).text(`${JSON.stringify(extPath)}: (() => {`).indent();
 //         content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
-//         const refdNames = extExprs.filter(expr => expr.extensionPath === extPath).map(expr => expr.bindingName);
+//         const refdNames = extExprs.filter(expr => expr.path === extPath).map(expr => expr.name);
 //         emit.down(1).text(`return {${refdNames.join(', ')}};`);
 //         emit.dedent().down(1).text(`})(),`);
 //     }
@@ -81,11 +81,11 @@
 //     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
 //     // Emit extension exports before anything else
-//     const extExprIds = Object.keys(subexpressions).filter(name => subexpressions[name].kind === 'ExtensionExpression');
-//     if (extExprIds.length > 0) emit.down(2).text(`// ExtensionExpressions`);
+//     const extExprIds = Object.keys(subexpressions).filter(name => subexpressions[name].kind === 'Intrinsic');
+//     if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
 //     for (const id of extExprIds) {
-//         const extExpr = subexpressions[id] as ExtensionExpression;
-//         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.extensionPath)}].${extExpr.bindingName}({mode: ${mode}});`);
+//         const extExpr = subexpressions[id] as Intrinsic;
+//         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: ${mode}});`);
 //     }
 
 //     // TODO: emit each expression...
@@ -109,8 +109,8 @@
 //     emit.down(2).text(`// ${expr.kind}`);
 //     switch (expr.kind) {
 //         // TODO: No-op cases... explain why for each
-//         case 'ExtensionExpression': // already handled by emitProgram
-//         case 'ImportExpression': // TODO: old comment... revise... already handled by emitExtensions
+//         case 'ImportExpression': // TODO: old comment... revise... already handled by emitIntrinsics
+//         case 'Intrinsic': // already handled by emitProgram
 //         case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
 //             break;
 

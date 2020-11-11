@@ -91,9 +91,9 @@
 //         switch (e.kind) {
 //             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
 //             case 'BooleanLiteral': return setX(e);
-//             case 'ExtensionExpression': return setX(e);
 //             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
 //             case 'ImportExpression': assert(false); // Should never see an ImportExpression here
+//             case 'Intrinsic': return setX(e);
 //             case 'ListExpression': return setX(e, {elements: e.elements.map(ref)});
 //             case 'MemberExpression': return setX(e, {module: ref(e.module), member: e.member.name});
 //             case 'ModuleExpression': {

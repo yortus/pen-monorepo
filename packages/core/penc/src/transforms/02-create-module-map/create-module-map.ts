@@ -1,47 +1,122 @@
 import * as fs from 'fs';
-import {ImportExpression, mapNode, Module} from '../../abstract-syntax-trees';
-import type {SourceFileGraph, ModuleMap} from '../../representations';
+import {Binding, File, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
+import type {FileMap, SourceFileGraph, ModuleMap} from '../../representations';
 import {isExtension} from '../../utils';
-import {parse as parseExtension} from './extension-grammar';
-import {parse as parsePenSource} from './pen-grammar';
+import {parse as parseExtFile} from './ext-file-grammar';
+import {parse as parsePenFile} from './pen-file-grammar';
 
 
 // TODO: jsdoc...
-export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
-    const modulesById: Record<string, Module> = {};
-    const nextId = (() => { let counter = 0; return () => ++counter; })();
-    for (let sourceFile of sourceFileGraph.sourceFiles.values()) {
-        let sourceText = fs.readFileSync(sourceFile.path, 'utf8');
-        if (isExtension(sourceFile.path)) {
-            // The file is an extension (.pen.js) file. Parse it into a Module node and add it to the module map.
-            let module = parseExtension(sourceText, {sourceFile});
-            modulesById[module.moduleId] = module;
-        }
-        else {
-            // The file is a PEN source file. Parse it to generate a Module AST node.
-            let module = parsePenSource(sourceText, {sourceFile, nextId});
-            let parentModuleIds = [module.moduleId];
-            modulesById[module.moduleId] = null!; // set placeholder now to keep map entries in depth-first preorder
+export function createFileMap(sourceFileGraph: SourceFileGraph): FileMap {
+    const filesByPath: Record<string, File> = {};
+    for (const sourceFile of sourceFileGraph.sourceFiles.values()) {
+        const sourceText = fs.readFileSync(sourceFile.path, 'utf8');
+        const parse = isExtension(sourceFile.path) ? parseExtFile : parsePenFile;
+        const file = parse(sourceText, {sourceFile});
+        filesByPath[file.path] = file;
+    }
+    return {
+        filesByPath,
+        startPath: sourceFileGraph.mainPath,
+    };
+}
 
-            // Hoist any inline module expressions out of the AST and into the top-level module map.
-            // This is done by replacing each ModuleExpression node with an equivalent ImportExpression node.
-            module = mapNode(module, rec => ({
-                ModuleExpression: (mex): ImportExpression => {
-                    modulesById[mex.module.moduleId] = null!; // set placeholder now to keep map entries in depth-first preorder
-                    let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                    parentModuleIds.push(mex.module.moduleId);
-                    let {moduleId, bindings} = rec(mex.module);
-                    parentModuleIds.pop();
-                    let module: Module = {kind: 'Module', moduleId, parentModuleId, bindings};
-                    modulesById[moduleId] = module; // update placeholder to proper value
-                    return {kind: 'ImportExpression', moduleSpecifier: moduleId, moduleId};
-                },
-            }));
-            modulesById[module.moduleId] = module; // update placeholder to proper value
-        }
+
+
+
+// TODO: wip...
+// - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
+export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
+
+    // TODO: temp testing...
+    const fileMap = createFileMap(sourceFileGraph);
+
+    // TODO: temp testing...
+    const genModuleId = createModuleIdGenerator();
+
+    // TODO: temp testing... generate the moduleIds for each file in the program
+    const moduleIdsByFilePath: Record<string, string> = {};
+    for (let {path} of Object.values(fileMap.filesByPath)) {
+        moduleIdsByFilePath[path] = genModuleId(path);
+    }
+
+    const modulesById: Record<string, Module> = {};
+    for (let file of Object.values(fileMap.filesByPath)) {
+
+        // Add a module to the module map for this file.
+        let module: Module = {
+            kind: 'Module',
+            moduleId: moduleIdsByFilePath[file.path],
+            bindings: file.bindings,
+        };
+        modulesById[module.moduleId] = module;
+
+        // Hoist any inline module expressions out of the AST and into the module map.
+        // In this process, each ModuleExpression node is replaced with an equivalent Identifier node.
+        let parentModuleIds = [module.moduleId];
+        let {bindings} = mapNode(module, rec => ({
+            ModuleExpression: (modExpr): Identifier => {
+                let moduleId = genModuleId(file.path, 'modexpr');
+                let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
+                let bindings: Binding[] = [];
+                let nestedModule: Module = {kind: 'Module', moduleId, parentModuleId, bindings};
+                modulesById[nestedModule.moduleId] = nestedModule;
+
+                // TODO: recurse...
+                parentModuleIds.push(nestedModule.moduleId);
+                for (let binding of modExpr.bindings) bindings.push(rec(binding));
+                parentModuleIds.pop();
+
+                return {
+                    kind: 'Identifier',
+                    name: moduleId,
+                };
+            },
+
+            // TODO: ImportExpression...
+            ImportExpression: (impExpr): Identifier => {
+                return {
+                    kind: 'Identifier',
+                    name: moduleIdsByFilePath[impExpr.path],
+                };
+            },
+
+        }));
+
+        // TODO: what a mess... fix
+        Object.assign(module, {bindings});
     }
     return {
         modulesById,
-        startModuleId: `file://${sourceFileGraph.mainPath}`,
+        startModuleId: moduleIdsByFilePath[sourceFileGraph.mainPath],
     };
+
+
+    // TODO: temp testing...
+    function createModuleIdGenerator() {
+        const moduleIds: string[] = [];
+        return function generateModuleId(modulePath = '', suffix?: string) {
+            let name = modulePath
+                .split(/\/+|\\+/) // split on segment delimiters / and \
+                .map(s => s.substring(0, s.indexOf('.')) || s) // remove extensions
+                .reverse() // reverse the order of the segments
+                .concat('module') // add a fallback name to guarantee the result is not undefined
+                .filter(seg => seg && seg !== 'index') // remove empty and 'index' segments
+                .shift()! // take the first segment
+                .replace(/^[0-9]+/g, '') // remove leading digits, if any
+                .replace(/[^a-zA-Z0-9𝕊]/g, '_'); // replace all non-alphanumeric chars with '_'
+        
+            // Prefix moduleId with '@' to ensure it cannot clash with program identifiers.
+            // Also add the suffix if one was supplied.
+            name = `@${name}`;
+            if (suffix) name = `${name}_${suffix}`;
+
+            // Ensure no duplicate moduleIds are generated by adding a numeric suffix where necessary.
+            let result = name;
+            let counter = 1;
+            while (moduleIds.includes(result)) result = `${name}${++counter}`;
+            moduleIds.push(result);
+            return result;
+        }
+    }
 }

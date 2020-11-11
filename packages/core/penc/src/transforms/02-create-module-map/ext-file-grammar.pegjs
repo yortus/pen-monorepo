@@ -1,21 +1,20 @@
 {
     let sourceFile = options.sourceFile || {};
-    let extensionPath = sourceFile.path || '???';
-    let moduleId = `file://${extensionPath}`;
+    let path = sourceFile.path || '???';
 }
 
 
-// ====================   Top-level file module   ====================
-FileModule
+// ====================   Top-level file node   ====================
+File
     = exportedNames:ExportedNames
     {
         let bindings = exportedNames.map(name => ({
             kind: 'Binding',
             left: {kind: 'Identifier', name},
-            right: {kind: 'ExtensionExpression', extensionPath, bindingName: name},
+            right: {kind: 'Intrinsic', name, path},
             exported: true,
         }));
-        return {kind: 'Module', moduleId, bindings}
+        return {kind: 'File', path, bindings}
     }
 
 

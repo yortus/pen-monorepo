@@ -11,10 +11,10 @@ export const patternNodeKinds = createNodeKinds(
 export const expressionNodeKinds = createNodeKinds(
     'ApplicationExpression',
     'BooleanLiteral',
-    'ExtensionExpression',
     'FieldExpression',
     'Identifier',
     'ImportExpression',
+    'Intrinsic',
     // 'LambdaExpression',
     'ListExpression',
     'MemberExpression',
@@ -36,6 +36,7 @@ export const expressionNodeKinds = createNodeKinds(
 export const allNodeKinds = createNodeKinds(
     'Binding',
     'Definition',
+    'File',
     'Module',
     ...patternNodeKinds,
     ...expressionNodeKinds,

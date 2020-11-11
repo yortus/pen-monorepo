@@ -1,3 +1,5 @@
+std = import 'std'
+
 digits = {
     one = 1
     two = 2
