@@ -90,7 +90,7 @@
 //         // Set `entry.expr` to a new shallow expr, and return `entry`.
 //         switch (e.kind) {
 //             case 'ApplicationExpression': return setX(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
-//             case 'BooleanLiteralExpression': return setX(e);
+//             case 'BooleanLiteral': return setX(e);
 //             case 'ExtensionExpression': return setX(e);
 //             case 'FieldExpression': return setX(e, {name: ref(e.name), value: ref(e.value)});
 //             case 'ImportExpression': assert(false); // Should never see an ImportExpression here
@@ -101,13 +101,13 @@
 //                 return setX(e, {module: {kind: 'Module', bindings}});
 //             }
 //             case 'NotExpression': return setX(e, {expression: ref(e.expression)});
-//             case 'NullLiteralExpression': return setX(e);
-//             case 'NumericLiteralExpression': return setX(e);
+//             case 'NullLiteral': return setX(e);
+//             case 'NumericLiteral': return setX(e);
 //             case 'QuantifiedExpression': return setX(e, {expression: ref(e.expression), quantifier: e.quantifier});
 //             case 'RecordExpression': return setX(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
 //             case 'SelectionExpression': return setX(e, {expressions: e.expressions.map(ref)});
 //             case 'SequenceExpression': return setX(e, {expressions: e.expressions.map(ref)});
-//             case 'StringLiteralExpression': return setX(e);
+//             case 'StringLiteral': return setX(e);
 //             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
 //         }
 

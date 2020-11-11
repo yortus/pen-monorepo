@@ -10,7 +10,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'Binding': return rec(n.pattern), rec(n.value), cb(n);
-            case 'BooleanLiteralExpression': return cb(n);
+            case 'BooleanLiteral': return cb(n);
             case 'Definition': return rec(n.expression), cb(n);
             case 'ExtensionExpression': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
@@ -24,15 +24,15 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'NameExpression': return cb(n);
             case 'NamePattern': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
-            case 'NullLiteralExpression': return cb(n);
-            case 'NumericLiteralExpression': return cb(n);
+            case 'NullLiteral': return cb(n);
+            case 'NumericLiteral': return cb(n);
             case 'ParenthesisedExpression': return rec(n.expression), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
             case 'ReferenceExpression': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
-            case 'StringLiteralExpression': return cb(n);
+            case 'StringLiteral': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

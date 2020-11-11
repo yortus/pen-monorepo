@@ -11,7 +11,7 @@ export const patternNodeKinds = createNodeKinds(
 /** Array of all node kinds which are expressions. */
 export const expressionNodeKinds = createNodeKinds(
     'ApplicationExpression',
-    'BooleanLiteralExpression',
+    'BooleanLiteral',
     'ExtensionExpression',
     'FieldExpression',
     'ImportExpression',
@@ -21,15 +21,15 @@ export const expressionNodeKinds = createNodeKinds(
     'ModuleExpression',
     'NameExpression',
     'NotExpression',
-    'NullLiteralExpression',
-    'NumericLiteralExpression',
+    'NullLiteral',
+    'NumericLiteral',
     'ParenthesisedExpression',
     'QuantifiedExpression',
     'RecordExpression',
     'ReferenceExpression',
     'SelectionExpression',
     'SequenceExpression',
-    'StringLiteralExpression',
+    'StringLiteral',
 );
 
 

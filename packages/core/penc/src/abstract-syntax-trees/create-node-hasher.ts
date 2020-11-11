@@ -62,7 +62,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
-            case 'BooleanLiteralExpression': return setSig('LIT', n.value);
+            case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'ExtensionExpression': return setSig('EXT', n.extensionPath, n.bindingName);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'ImportExpression': return setSig('IMP', n.moduleId);
@@ -70,13 +70,13 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.bindingName);
             case 'ModuleExpression': return setSig('MEX', getSig(n.module));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
-            case 'NullLiteralExpression': return setSig('LIT', n.value);
-            case 'NumericLiteralExpression': return setSig('LIT', n.value);
+            case 'NullLiteral': return setSig('LIT', n.value);
+            case 'NumericLiteral': return setSig('LIT', n.value);
             case 'QuantifiedExpression': return setSig('QUA', getSig(n.expression), n.quantifier);
             case 'RecordExpression': return setSig('REC', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
-            case 'StringLiteralExpression': return setSig('STR', n.value, n.abstract, n.concrete);
+            case 'StringLiteral': return setSig('STR', n.value, n.abstract, n.concrete);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

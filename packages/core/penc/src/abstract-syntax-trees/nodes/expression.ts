@@ -5,7 +5,7 @@ import type {Module} from './module';
 /** Union of all node types that represent PEN expressions. */
 export type Expression =
     | ApplicationExpression
-    | BooleanLiteralExpression
+    | BooleanLiteral
     | ExtensionExpression
     | FieldExpression
     | ImportExpression
@@ -15,15 +15,15 @@ export type Expression =
     | ModuleExpression
     | NameExpression
     | NotExpression
-    | NullLiteralExpression
-    | NumericLiteralExpression
+    | NullLiteral
+    | NumericLiteral
     | ParenthesisedExpression
     | QuantifiedExpression
     | RecordExpression
     | ReferenceExpression
     | SelectionExpression
     | SequenceExpression
-    | StringLiteralExpression
+    | StringLiteral
 ;
 
 
@@ -34,8 +34,8 @@ export interface ApplicationExpression {
 }
 
 
-export interface BooleanLiteralExpression {
-    readonly kind: 'BooleanLiteralExpression';
+export interface BooleanLiteral {
+    readonly kind: 'BooleanLiteral';
     readonly value: boolean;
 }
 
@@ -99,14 +99,14 @@ export interface NotExpression {
 }
 
 
-export interface NullLiteralExpression {
-    readonly kind: 'NullLiteralExpression';
+export interface NullLiteral {
+    readonly kind: 'NullLiteral';
     readonly value: null;
 }
 
 
-export interface NumericLiteralExpression {
-    readonly kind: 'NumericLiteralExpression';
+export interface NumericLiteral {
+    readonly kind: 'NumericLiteral';
     readonly value: number;
 }
 
@@ -151,8 +151,8 @@ export interface SequenceExpression {
 }
 
 
-export interface StringLiteralExpression {
-    readonly kind: 'StringLiteralExpression';
+export interface StringLiteral {
+    readonly kind: 'StringLiteral';
     readonly value: string;
     readonly concrete: boolean;
     readonly abstract: boolean;

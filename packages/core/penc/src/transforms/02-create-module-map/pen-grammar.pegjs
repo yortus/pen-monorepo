@@ -66,10 +66,10 @@ ModuleBindingName
         ModuleExpression                {export a=b c=d e=f}   {a=b}
         ListExpression                  [a, b, c]   [a]   []
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
-        NullLiteralExpression           null
-        BooleanLiteralExpression        false   true
-        StringLiteralExpression         "foo"   'a string!'   `a`
-        NumericLiteralExpression        123   3.14   -0.1   5.7e-53
+        NullLiteral                     null
+        BooleanLiteral                  false   true
+        StringLiteral                   "foo"   'a string!'   `a`
+        NumericLiteral                  123   3.14   -0.1   5.7e-53
         NameExpression                  a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
@@ -103,10 +103,10 @@ PrimaryExpression
     / ModuleExpression
     / ListExpression
     / ParenthesisedExpression
-    / NullLiteralExpression
-    / BooleanLiteralExpression
-    / StringLiteralExpression
-    / NumericLiteralExpression
+    / NullLiteral
+    / BooleanLiteral
+    / StringLiteral
+    / NumericLiteral
     / NameExpression
     / ImportExpression
 
@@ -189,29 +189,29 @@ ImportExpression
         return {kind: 'ImportExpression', moduleSpecifier, moduleId};
     }
 
-NullLiteralExpression
-    = NULL   { return {kind: 'NullLiteralExpression', value: null}; }
+NullLiteral
+    = NULL   { return {kind: 'NullLiteral', value: null}; }
 
-BooleanLiteralExpression
-    = TRUE   { return {kind: 'BooleanLiteralExpression', value: true}; }
-    / FALSE   { return {kind: 'BooleanLiteralExpression', value: false}; }
+BooleanLiteral
+    = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
+    / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
 
-StringLiteralExpression
+StringLiteral
     = "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
+    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
 
     / '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
+    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
 
     / "`"   chars:(!"`"   CHARACTER)*   "`"
-    { return {kind: 'StringLiteralExpression', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
+    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
 
-NumericLiteralExpression
+NumericLiteral
     = DecimalLiteral
     {
         let n = parseFloat(text());
         if (!Number.isFinite(n)) error('cannot represent numeric literal'); // TODO: also ensure exact representation, aka safenum?
-        return {kind: 'NumericLiteralExpression', value: n}
+        return {kind: 'NumericLiteral', value: n}
     }
 
     // TODO: HexIntegerLiteral

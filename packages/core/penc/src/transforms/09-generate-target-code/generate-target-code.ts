@@ -134,9 +134,9 @@
 //             break;
 //         }
 
-//         case 'BooleanLiteralExpression':
-//         case 'NullLiteralExpression':
-//         case 'NumericLiteralExpression': {
+//         case 'BooleanLiteral':
+//         case 'NullLiteral':
+//         case 'NumericLiteral': {
 //             const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
 //             emit.down(1).text(`function ${name}() {`).indent();
 //             if (modes.isPrint(mode) && modes.hasInput(mode)) {
@@ -265,7 +265,7 @@
 //             break;
 //         }
 
-//         case 'StringLiteralExpression': {
+//         case 'StringLiteral': {
 //             const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
 //             emit.down(1).text(`function ${name}() {`).indent();
 //             if (modes.hasInput(localMode)) {
