@@ -12,5 +12,5 @@ export interface ModuleMap {
 export const moduleMapKinds = allNodeKinds.without(
     'Definition',
     'ModuleExpression',
-    'ReferenceExpression',
+    'Reference',
 );

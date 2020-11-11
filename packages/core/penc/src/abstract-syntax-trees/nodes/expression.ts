@@ -20,7 +20,7 @@ export type Expression =
     | ParenthesisedExpression
     | QuantifiedExpression
     | RecordExpression
-    | ReferenceExpression
+    | Reference
     | SelectionExpression
     | SequenceExpression
     | StringLiteral
@@ -40,7 +40,7 @@ export interface BooleanLiteral {
 }
 
 
-export interface ExtensionExpression {
+export interface ExtensionExpression { // TODO: remove this node kind?
     readonly kind: 'ExtensionExpression';
     readonly extensionPath: AbsPath;
     readonly bindingName: string;
@@ -133,8 +133,8 @@ export interface RecordExpression {
 }
 
 
-export interface ReferenceExpression {
-    readonly kind: 'ReferenceExpression';
+export interface Reference {
+    readonly kind: 'Reference';
     readonly definitionId: number;
 }
 

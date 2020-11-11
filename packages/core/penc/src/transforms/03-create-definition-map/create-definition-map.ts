@@ -1,4 +1,4 @@
-import {Definition, Expression, /*mapNode,*/ MemberExpression, ReferenceExpression, traverseNode} from '../../abstract-syntax-trees';
+import {Definition, Expression, /*mapNode,*/ MemberExpression, Reference, traverseNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
 
@@ -9,8 +9,8 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     type Scope = Record<string, Definition | undefined>;
     let scopesByModuleId = new Map<string, Scope>();
     let globalScope = Object.create(null) as Scope;
-    let refExprs = [] as {name: string, moduleId: string, ref: ReferenceExpression}[];
     let definitions = [] as Definition[];
+    let references = [] as {name: string, moduleId: string, ref: Reference}[];
 
 
     function define(name: string, moduleId: string, expression: Expression) {
@@ -49,7 +49,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
             // TODO: doc... what are we doing with `right` here?
             // - `right` is an Expression
-            // - replace every Identifier with a ReferenceExpression
+            // - replace every Identifier with a Reference
 
             // right = mapNode(right, rec => ({
 
@@ -68,13 +68,13 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             //         return memᐟ;
             //     },
     
-            //     // Replace every Identifier with an equivalent ReferenceExpression.
+            //     // Replace every Identifier with an equivalent Reference.
             //     Identifier: nam => {
             //         // collect 1 reference (in enclosing scope)
             //         console.log(`    REF ${nam.name}`);
     
-            //         // Create placeholder ReferenceExpression that will be backpatched later when defId is known
-            //         let ref: ReferenceExpression = {kind: 'ReferenceExpression', definitionId: undefined!};
+            //         // Create placeholder Reference that will be backpatched later when defId is known
+            //         let ref: Reference = {kind: 'Reference', definitionId: undefined!};
             //         refExprs.push({name: nam.name, moduleId, ref});
             //         return ref;
             //     },
@@ -108,8 +108,8 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
         traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
     }
 
-    // TODO: backpatch each ReferenceExpression
-    for (let {name, moduleId, ref} of refExprs) {
+    // TODO: backpatch each Reference
+    for (let {name, moduleId, ref} of references) {
         let scope = scopesByModuleId.get(moduleId);
         assert(scope); // TODO: ...
         let definition = scope[name];
