@@ -98,8 +98,20 @@ const moduleMap =
           },
           exported: false,
         },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "outer",
+          },
+          right: {
+            kind: "Identifier",
+            name: "mem",
+          },
+          exported: false,
+        },
       ],
     },
   },
   startModuleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
-}
+};

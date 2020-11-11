@@ -75,6 +75,16 @@ const definitions =
       value: 2,
     },
   },
+  {
+    kind: "Definition",
+    definitionId: 6,
+    localName: "outer",
+    globalName: undefined,
+    expression: {
+      kind: "Identifier",
+      name: "mem",
+    },
+  },
 ];
 
 const refExprs =

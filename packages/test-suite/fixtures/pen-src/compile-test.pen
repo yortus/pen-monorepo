@@ -1,6 +1,7 @@
 digits = {
     one = 1
     two = 2
+    outer = mem
 }
 
 {one as des} = digits

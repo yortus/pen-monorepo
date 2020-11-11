@@ -12,7 +12,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     let definitions = [] as Definition[];
     let references = [] as {name: string, moduleId: string, ref: Reference}[];
 
-
+    // Helper function to add a definition for `name` into the given module's scope.
     function define(name: string, moduleId: string, expression: Expression) {
         console.log(`    DEF ${name}`);
         let scope = scopesByModuleId.get(moduleId);
@@ -31,6 +31,37 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
         scope[name] = definition;
     }
 
+    // Traverse all modules, creating a scope for each module, and a definition (or several) for each binding.
+    for (let {moduleId, parentModuleId, bindings} of Object.values(moduleMap.modulesById)) {
+        let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
+        assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
+
+        // Create a scope for the module.
+        let scope = Object.create(parentScope);
+        scopesByModuleId.set(moduleId, scope);
+
+        // Create a definition for each local name in the module.
+        for (let {left, right} of bindings) {
+            // For a simple `name = value` binding, create a single definition.
+            if (left.kind === 'Identifier') {
+                define(left.name, moduleId, right);
+            }
+
+            // For a destructured `{a, b} = module` binding, create a definition for each name in the lhs.
+            else /* left.kind === 'ModulePattern' */ {
+                for (let {name, alias} of left.names) {
+                    let expr: MemberExpression = {
+                        kind: 'MemberExpression',
+                        module: right,
+                        member: {kind: 'Identifier', name},
+                    };
+                    define(alias ?? name, moduleId, expr);
+                }
+            }
+        }
+    }
+
+
 
 
 
@@ -46,6 +77,9 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
         // TODO: for each binding...
         for (let {left, right} of bindings) {
+            // TODO: ...
+            [] = [left, right];
+
 
             // TODO: doc... what are we doing with `right` here?
             // - `right` is an Expression
@@ -79,27 +113,13 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
             //         return ref;
             //     },
             // }));
-
-            // For a simple `name = value` binding, create a single binding from name to value in the current scope.
-            if (left.kind === 'Identifier') {
-                define(left.name, moduleId, right);
-            }
-
-            // For a destructured `{a, b} = module` binding, for each name in `left`,
-            // create a binding from the name to a synthesized MemberExpression referencing `module.member`
-            else /* left.kind === 'ModulePattern' */ {
-                for (let {name, alias} of left.names) {
-                    let expr: MemberExpression = {
-                        kind: 'MemberExpression',
-                        module: right,
-                        member: {kind: 'Identifier', name},
-                    };
-                    define(alias ?? name, moduleId, expr);
-                }
-            }
         }
         console.log(`END MODULE ${moduleId}`);
     }
+
+
+
+
 
 
 
