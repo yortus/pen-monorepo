@@ -7,6 +7,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileGraph} from './transforms';
+import {createFileMap} from './transforms';
 import {createModuleMap} from './transforms';
 import {createDefinitionMap} from './transforms';
 // import {desugarSyntax} from './transforms';
@@ -28,7 +29,8 @@ export function compile(options: CompilerOptions) {
     const sourceFiles = createSourceFileGraph({main});
 
     // Proceed through all stages in the compiler pipeline.
-    const moduleMap = createModuleMap(sourceFiles);
+    const fileMap = createFileMap(sourceFiles);
+    const moduleMap = createModuleMap(fileMap);
     // const ast02 = desugarSyntax(ast01);
     // const ast03 = resolveSymbols(ast02);
     // checkSemantics(ast03);

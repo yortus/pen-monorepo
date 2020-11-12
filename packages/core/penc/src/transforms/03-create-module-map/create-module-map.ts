@@ -1,35 +1,10 @@
-import * as fs from 'fs';
-import {Binding, File, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
-import type {FileMap, SourceFileGraph, ModuleMap} from '../../representations';
-import {isExtension} from '../../utils';
-import {parse as parseExtFile} from './ext-file-grammar';
-import {parse as parsePenFile} from './pen-file-grammar';
-
-
-// TODO: jsdoc...
-export function createFileMap(sourceFileGraph: SourceFileGraph): FileMap {
-    const filesByPath: Record<string, File> = {};
-    for (const sourceFile of sourceFileGraph.sourceFiles.values()) {
-        const sourceText = fs.readFileSync(sourceFile.path, 'utf8');
-        const parse = isExtension(sourceFile.path) ? parseExtFile : parsePenFile;
-        const file = parse(sourceText, {sourceFile});
-        filesByPath[file.path] = file;
-    }
-    return {
-        filesByPath,
-        startPath: sourceFileGraph.mainPath,
-    };
-}
-
-
+import {Binding, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
+import type {FileMap, ModuleMap} from '../../representations';
 
 
 // TODO: wip...
 // - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
-export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
-
-    // TODO: temp testing...
-    const fileMap = createFileMap(sourceFileGraph);
+export function createModuleMap(fileMap: FileMap): ModuleMap {
 
     // TODO: temp testing...
     const genModuleId = createModuleIdGenerator();
@@ -88,7 +63,7 @@ export function createModuleMap(sourceFileGraph: SourceFileGraph): ModuleMap {
     }
     return {
         modulesById,
-        startModuleId: moduleIdsByFilePath[sourceFileGraph.mainPath],
+        startModuleId: moduleIdsByFilePath[fileMap.startPath],
     };
 
 
