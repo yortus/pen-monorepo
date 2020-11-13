@@ -1,7 +1,6 @@
-export {createSourceFileGraph} from './01-create-source-file-graph';
-export {createFileMap} from './02-create-file-map';
-export {createModuleMap} from './03-create-module-map';
-export {createDefinitionMap} from './04-create-definition-map';
+export {createSourceFileMap} from './01-create-source-file-map';
+export {createModuleMap} from './02-create-module-map';
+export {createDefinitionMap} from './03-create-definition-map';
 
 // TODO: fix...
 // export {desugarSyntax} from './03-desugar-syntax';

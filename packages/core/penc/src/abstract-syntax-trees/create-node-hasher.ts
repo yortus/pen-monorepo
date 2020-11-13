@@ -64,7 +64,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'ImportExpression': return setSig('IMP', n.path);
+            case 'ImportExpression': return setSig('IMP', n.moduleSpecifier); // TODO: BUG - was n.path. Sig could make diff things same / vice-versa
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.member.name);
@@ -92,4 +92,4 @@ type HashableNodeKind = typeof hashableNodeKinds[any];
 
 // TODO: fix decl and jsdoc here - basically can only hash expressions, and not other node kinds...
 // Helper array of all node kinds that support hashing. Includes all expression node kinds except 'Identifier'. 
-const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'File', 'Module', 'ModuleExpression', 'ModulePattern', 'Identifier');
+const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'SourceFile', 'Module', 'ModuleExpression', 'ModulePattern', 'Identifier');

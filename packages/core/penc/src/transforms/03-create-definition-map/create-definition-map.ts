@@ -5,7 +5,7 @@ import {assert} from '../../utils';
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
-export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
+export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     type Scope = Record<string, Definition | undefined>;
     let scopesByModuleId = new Map<string, Scope>();
     let globalScope = Object.create(null) as Scope;
@@ -32,7 +32,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
     }
 
     // Traverse all modules, creating a scope for each module, and a definition (or several) for each binding.
-    for (let {moduleId, parentModuleId, bindings} of Object.values(moduleMap.modulesById)) {
+    for (let {moduleId, parentModuleId, bindings} of Object.values(modulesById)) {
         let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
         assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
 
@@ -66,7 +66,7 @@ export function createDefinitionMap(moduleMap: ModuleMap): DefinitionMap {
 
 
     // TODO: for each module...
-    for (let {moduleId, parentModuleId, bindings} of Object.values(moduleMap.modulesById)) {
+    for (let {moduleId, parentModuleId, bindings} of Object.values(modulesById)) {
         console.log(`MODULE ${moduleId}`);
         let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : globalScope;
         assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this

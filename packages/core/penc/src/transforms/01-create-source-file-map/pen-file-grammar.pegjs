@@ -1,13 +1,7 @@
-{
-    const sourceFile = options.sourceFile || {};
-    sourceFile.imports = sourceFile.imports || {};
-}
-
-
-// ====================   Files   ====================
-File
+// ====================   Top-level SourceFile node   ====================
+SourceFile
     = __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'File', path: sourceFile.path || '???', bindings}; }
+    { return {kind: 'SourceFile', path: options.path, bindings}; }
 
 
 // ====================   Bindings and patterns   ====================
@@ -171,8 +165,7 @@ ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
         let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        let path = sourceFile.imports[moduleSpecifier] || '???';
-        return {kind: 'ImportExpression', path};
+        return {kind: 'ImportExpression', moduleSpecifier};
     }
 
 NullLiteral

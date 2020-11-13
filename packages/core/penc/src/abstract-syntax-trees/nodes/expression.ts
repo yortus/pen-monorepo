@@ -62,7 +62,7 @@ export interface Identifier {
 
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
-    readonly path: AbsPath;
+    readonly moduleSpecifier: string;
 }
 
 

@@ -1,27 +1,28 @@
 import {Binding, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
-import type {FileMap, ModuleMap} from '../../representations';
+import type {SourceFileMap, ModuleMap} from '../../representations';
+import {resolveModuleSpecifier} from '../../utils';
 
 
 // TODO: wip...
 // - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
-export function createModuleMap(fileMap: FileMap): ModuleMap {
+export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
     // TODO: temp testing...
     const genModuleId = createModuleIdGenerator();
 
     // TODO: temp testing... generate the moduleIds for each file in the program
-    const moduleIdsByFilePath: Record<string, string> = {};
-    for (let {path} of Object.values(fileMap.filesByPath)) {
-        moduleIdsByFilePath[path] = genModuleId(path);
+    const moduleIdsBySourceFilePath: Record<string, string> = {};
+    for (let path of Object.keys(sourceFilesByPath)) {
+        moduleIdsBySourceFilePath[path] = genModuleId(path);
     }
 
     const modulesById: Record<string, Module> = {};
-    for (let file of Object.values(fileMap.filesByPath)) {
+    for (let file of Object.values(sourceFilesByPath)) {
 
         // Add a module to the module map for this file.
         let module: Module = {
             kind: 'Module',
-            moduleId: moduleIdsByFilePath[file.path],
+            moduleId: moduleIdsBySourceFilePath[file.path],
             bindings: file.bindings,
         };
         modulesById[module.moduleId] = module;
@@ -49,10 +50,11 @@ export function createModuleMap(fileMap: FileMap): ModuleMap {
             },
 
             // TODO: ImportExpression...
-            ImportExpression: (impExpr): Identifier => {
+            ImportExpression: ({moduleSpecifier}): Identifier => {
+                const path = resolveModuleSpecifier(moduleSpecifier, file.path);
                 return {
                     kind: 'Identifier',
-                    name: moduleIdsByFilePath[impExpr.path],
+                    name: moduleIdsBySourceFilePath[path],
                 };
             },
 
@@ -63,7 +65,7 @@ export function createModuleMap(fileMap: FileMap): ModuleMap {
     }
     return {
         modulesById,
-        startModuleId: moduleIdsByFilePath[fileMap.startPath],
+        startModuleId: moduleIdsBySourceFilePath[startPath],
     };
 }
 

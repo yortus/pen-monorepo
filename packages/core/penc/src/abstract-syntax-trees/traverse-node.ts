@@ -13,7 +13,6 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'BooleanLiteral': return cb(n);
             case 'Definition': return rec(n.expression), cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
-            case 'File': return n.bindings.forEach(rec), cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
             case 'Intrinsic': return cb(n);
@@ -32,6 +31,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Reference': return cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
+            case 'SourceFile': return n.bindings.forEach(rec), cb(n);
             case 'StringLiteral': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

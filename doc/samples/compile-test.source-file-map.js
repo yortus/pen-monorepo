@@ -1,10 +1,9 @@
-// This is the ModuleMap representation (intermediate AST form) of the compile-test.pen program.
-const moduleMap = 
+const sourceFileMap =
 {
-  modulesById: {
-    "@compile_test": {
-      kind: "Module",
-      moduleId: "@compile_test",
+  sourceFilesByPath: {
+    "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/compile-test.pen": {
+      kind: "SourceFile",
+      path: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/compile-test.pen",
       bindings: [
         {
           kind: "Binding",
@@ -13,8 +12,8 @@ const moduleMap =
             name: "std",
           },
           right: {
-            kind: "Identifier",
-            name: "@std",
+            kind: "ImportExpression",
+            moduleSpecifier: "std",
           },
           exported: false,
         },
@@ -25,8 +24,45 @@ const moduleMap =
             name: "digits",
           },
           right: {
-            kind: "Identifier",
-            name: "@compile_test_modexpr",
+            kind: "ModuleExpression",
+            bindings: [
+              {
+                kind: "Binding",
+                left: {
+                  kind: "Identifier",
+                  name: "one",
+                },
+                right: {
+                  kind: "NumericLiteral",
+                  value: 1,
+                },
+                exported: false,
+              },
+              {
+                kind: "Binding",
+                left: {
+                  kind: "Identifier",
+                  name: "two",
+                },
+                right: {
+                  kind: "NumericLiteral",
+                  value: 2,
+                },
+                exported: false,
+              },
+              {
+                kind: "Binding",
+                left: {
+                  kind: "Identifier",
+                  name: "outer",
+                },
+                right: {
+                  kind: "Identifier",
+                  name: "mem",
+                },
+                exported: false,
+              },
+            ],
           },
           exported: false,
         },
@@ -80,52 +116,9 @@ const moduleMap =
         },
       ],
     },
-    "@compile_test_modexpr": {
-      kind: "Module",
-      moduleId: "@compile_test_modexpr",
-      parentModuleId: "@compile_test",
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "one",
-          },
-          right: {
-            kind: "NumericLiteral",
-            value: 1,
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "two",
-          },
-          right: {
-            kind: "NumericLiteral",
-            value: 2,
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "outer",
-          },
-          right: {
-            kind: "Identifier",
-            name: "mem",
-          },
-          exported: false,
-        },
-      ],
-    },
-    "@std": {
-      kind: "Module",
-      moduleId: "@std",
+    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": {
+      kind: "SourceFile",
+      path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
       bindings: [
         {
           kind: "Binding",
@@ -182,5 +175,5 @@ const moduleMap =
       ],
     },
   },
-  startModuleId: "@compile_test",
+  startPath: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/compile-test.pen",
 };

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {AbsPath} from '../../utils';
+import {AbsPath} from './abs-path';
 
 
 // TODO: doc... returns an absolute normalised file path
@@ -51,5 +51,5 @@ function fail(modSpec: string): never {
 
 
 // These are copied into the dist/ dir as part of the postbuild script
-const STD_PATH = require.resolve('../../deps/std.pen.js');
-const EXPERIMENTS_PATH = require.resolve('../../deps/experiments.pen.js');
+const STD_PATH = require.resolve('../deps/std.pen.js');
+const EXPERIMENTS_PATH = require.resolve('../deps/experiments.pen.js');

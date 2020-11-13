@@ -1,20 +1,14 @@
-{
-    let sourceFile = options.sourceFile || {};
-    let path = sourceFile.path || '???';
-}
-
-
-// ====================   Top-level file node   ====================
-File
+// ====================   Top-level SourceFile node   ====================
+SourceFile
     = exportedNames:ExportedNames
     {
         let bindings = exportedNames.map(name => ({
             kind: 'Binding',
             left: {kind: 'Identifier', name},
-            right: {kind: 'Intrinsic', name, path},
+            right: {kind: 'Intrinsic', name, path: options.path},
             exported: true,
         }));
-        return {kind: 'File', path, bindings}
+        return {kind: 'SourceFile', path: options.path, bindings};
     }
 
 
