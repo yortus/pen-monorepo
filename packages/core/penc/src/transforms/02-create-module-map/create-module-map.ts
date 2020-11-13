@@ -5,6 +5,7 @@ import {resolveModuleSpecifier} from '../../utils';
 
 // TODO: wip...
 // - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
+// TODO: assert moduleMapKinds before returning
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
     // TODO: temp testing...

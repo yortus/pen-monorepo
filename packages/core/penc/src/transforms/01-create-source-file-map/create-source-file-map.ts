@@ -8,6 +8,7 @@ import {parse as parsePenFile} from './pen-file-grammar';
 
 // TODO: jsdoc...
 // TODO: doc/spec Options type properly
+// TODO: assert sourceFileMapKinds before returning
 export function createSourceFileMap(options: {main: string}): SourceFileMap {
     const sourceFilesByPath: Record<string, SourceFile> = {};
     const startPath = resolveModuleSpecifier(options.main);

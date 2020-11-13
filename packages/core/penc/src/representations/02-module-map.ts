@@ -14,5 +14,4 @@ export const moduleMapKinds = allNodeKinds.without(
     'ModuleExpression',
     'Reference',
     'SourceFile',
-    // TODO: others? check...
 );
