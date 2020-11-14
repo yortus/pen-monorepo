@@ -33,8 +33,11 @@ const sourceFileMap =
                   name: "one",
                 },
                 right: {
-                  kind: "NumericLiteral",
-                  value: 1,
+                  kind: "ParenthesisedExpression",
+                  expression: {
+                    kind: "NumericLiteral",
+                    value: 1,
+                  },
                 },
                 exported: false,
               },
