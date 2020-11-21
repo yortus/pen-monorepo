@@ -67,7 +67,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'ImportExpression': return setSig('IMP', n.moduleSpecifier); // TODO: BUG - was n.path. Sig could make diff things same / vice-versa
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
-            case 'MemberExpression': return setSig('MEM', getSig(n.module), n.member.name);
+            case 'MemberExpression': return setSig('MEM', getSig(n.module), getSig(n.member), n.member.name);
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
             case 'NumericLiteral': return setSig('LIT', n.value);

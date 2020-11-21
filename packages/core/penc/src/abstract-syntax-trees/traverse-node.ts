@@ -11,14 +11,14 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
-            case 'Definition': return rec(n.expression), cb(n);
+            case 'Definition': return rec(n.value), cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
             case 'Intrinsic': return cb(n);
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
-            case 'MemberExpression': return rec(n.module), cb(n);
+            case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return n.bindings.forEach(rec), cb(n);
             case 'ModulePattern': return cb(n);
