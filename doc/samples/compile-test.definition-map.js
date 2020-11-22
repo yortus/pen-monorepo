@@ -390,32 +390,3 @@ const definitions =
     },
   },
 ];
-
-const refExprs =
-[
-    {
-      name: "digits",
-      moduleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
-      ref: {
-        kind: "Reference",
-        definitionId: 0,
-      },
-    },
-    {
-      name: "des",
-      moduleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
-      ref: {
-        kind: "Reference",
-        definitionId: 1,
-      },
-    },
-    {
-      name: "digits",
-      moduleId: "file://V:\\projects\\oss\\pen-monorepo\\packages\\test-suite\\fixtures\\pen-src\\compile-test.pen",
-      ref: {
-        kind: "Reference",
-        definitionId: 0,
-      },
-    },
-  ];
-

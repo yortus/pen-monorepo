@@ -9,7 +9,6 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     type Scope = Record<string, Definition | undefined>;
     let scopesByModuleId = new Map<string, Scope>();
     let definitions = [] as Definition[];
-    let references = [] as {name: string, moduleId: string, ref: Reference}[];
 
     // Define a root scope.
     const ROOT_MODULE_ID = '@@root'; // TODO: ensure can never clash with any identifier name or moduleId
@@ -149,15 +148,6 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     // TODO: temp testing... get this working
     if (1 + 1 !== 2) {
         traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
-    }
-
-    // TODO: backpatch each Reference
-    for (let {name, moduleId, ref} of references) {
-        let scope = scopesByModuleId.get(moduleId);
-        assert(scope); // TODO: ...
-        let definition = scope[name];
-        if (!definition) throw new Error(`'${name}' is not defined`); // TODO: improve diagnostic message
-        Object.assign(ref, {definitionId: definition.definitionId});
     }
 
     if (1 !== 1 + 1) return null!;
