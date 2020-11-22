@@ -1,62 +1,25 @@
-import {Binding, Definition, Expression, mapNode, MemberExpression, Module, Reference, traverseNode} from '../../abstract-syntax-trees';
+import type {Binding, Expression, MemberExpression, Module, Reference} from '../../abstract-syntax-trees';
+import {mapNode, traverseNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
+import {createSymbolTable} from './symbol-table';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
 // - LocalMultiBinding
 export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
-    type Scope = Record<string, Definition | undefined>;
-    let scopesByModuleId = new Map<string, Scope>();
-    let definitions = [] as Definition[];
+    const {createScope, define, definitions, lookup} = createSymbolTable();
 
     // Define a root scope.
     const ROOT_MODULE_ID = '@@root'; // TODO: ensure can never clash with any identifier name or moduleId
-    const rootScope: Scope = Object.create(null);
-    scopesByModuleId.set(ROOT_MODULE_ID, rootScope);
-
-    // Helper function to add a definition for `name` into the given module's scope.
-    function define(name: string, moduleId: string, value: Expression | Module): Definition {
-        console.log(`    DEF ${name}`);
-        let scope = scopesByModuleId.get(moduleId);
-        assert(scope); // sanity check
-        if (Object.keys(scope).includes(name)) {
-            throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message eg line+col
-        }
-        let definition: Definition = {
-            kind: 'Definition',
-            definitionId: definitions.length,
-            moduleId,
-            localName: name,
-            // TODO: ...globalName: undefined!, // TODO
-            value,
-        };
-        definitions.push(definition);
-        scope[name] = definition;
-        return definition;
-    }
-
-    // TODO: doc...
-    function lookup(name: string, moduleId: string): Definition {
-        const scope = scopesByModuleId.get(moduleId);
-        assert(scope); // sanity check
-        let definition = scope[name];
-        if (!definition) {
-            throw new Error(`'${name}' is not defined`); // TODO: improve diagnostic message eg line+col
-        }
-        return definition;
-    }
+    createScope(ROOT_MODULE_ID);
 
     // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
     for (let {moduleId, parentModuleId, bindings} of Object.values(modulesById)) {
-        let parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId) : rootScope;
-        assert(parentScope); // TODO: sanity check - relies on specific order of modules in module map - fix this
-
         // Create a scope for the module.
-        let scope = Object.create(parentScope);
-        scopesByModuleId.set(moduleId, scope);
+        createScope(moduleId, parentModuleId ?? ROOT_MODULE_ID);
 
         // Create a definition for each local name in the module.
         let newBindings: Binding[] = [];
