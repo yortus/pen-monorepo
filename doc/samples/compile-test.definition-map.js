@@ -390,3 +390,47 @@ const definitions =
     },
   },
 ];
+
+
+// TODO: temp remove...
+const defnHashes = {
+  "9eeb0a22bc1793fe61a2e6553aef5a548f9a4138": [
+    "std",
+    "@std",
+  ],
+  "96ba69e232c3b3518eb4b5246c37870bee24efd4": [
+    "digits",
+    "@compile_test_modexpr",
+    "d",
+  ],
+  "4f911e886363de62f853438ffe7551a126468882": [
+    "des",
+    "ref",
+    "one",
+  ],
+  "4376da220fd08caa2922f520bf8c1c2ecc56ecc5": [
+    "mem",
+    "yyy",
+    "two",
+    "outer",
+  ],
+  dfa05b427b12ebe725cde0a214119f3fe7b8a76a: [
+    "xxx",
+    "@compile_test_modexpr2",
+  ],
+  a661c7361426a28f4c978f86af76f6be8138fc4d: [
+    "@compile_test",
+  ],
+  "353ab31c8ba4571c3aa4c1a4c92889020d9a4a5d": [
+    "char",
+  ],
+  e89816a08be7d42be68caa8e5e41915c4f27faf2: [
+    "f64",
+  ],
+  fe5f68877af329d3ff0e9ebe28aa79f34576a9b3: [
+    "i32",
+  ],
+  f54d9c8d8a9f21c83f6c539160d735eec86e8e85: [
+    "memoise",
+  ],
+};

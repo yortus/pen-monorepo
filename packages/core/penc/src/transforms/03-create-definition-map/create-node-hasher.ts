@@ -1,10 +1,11 @@
 import * as objectHash from 'object-hash';
-import {assert} from '../utils';
+import {allNodeKinds, expressionNodeKinds, Node} from '../../abstract-syntax-trees';
+import {assert} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
-import {allNodeKinds, expressionNodeKinds} from './node-kinds';
-import {Node} from './nodes';
 
 
+// TODO: review this outdated jsdoc comment...
+// TODO: review hashable node kinds too... should be all Expression subkinds plus Module?
 /**
  * Returns a function that returns a hash value for any given node. Any node kind may be hashed except the Local* kinds.
  * The same hash value is returned for most logically equivalent nodes, that is, nodes that may be substituted for one
@@ -68,6 +69,17 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), getSig(n.member), n.member.name);
+            case 'Module': {
+                let sig = n.bindings.reduce(
+                    (obj, b) => {
+                        assert(b.left.kind === 'Identifier');
+                        obj[b.left.name] = getSig(b.right);
+                        return obj;
+                    },
+                    {} as Record<string, Signature>
+                );
+                return setSig('MOD', sig);
+            }
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
             case 'NumericLiteral': return setSig('LIT', n.value);
@@ -76,7 +88,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
             case 'StringLiteral': return setSig('STR', n.value, n.abstract, n.concrete);
-            default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
+            default: ((n: never) => { throw new Error(`Unhandled node kind ${(n as any).kind}`); })(n);
         }
     }
 }
@@ -92,4 +104,4 @@ type HashableNodeKind = typeof hashableNodeKinds[any];
 
 // TODO: fix decl and jsdoc here - basically can only hash expressions, and not other node kinds...
 // Helper array of all node kinds that support hashing. Includes all expression node kinds except 'Identifier'. 
-const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'SourceFile', 'Module', 'ModuleExpression', 'ModulePattern', 'Identifier');
+const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'SourceFile', 'ModuleExpression', 'ModulePattern', 'Identifier');

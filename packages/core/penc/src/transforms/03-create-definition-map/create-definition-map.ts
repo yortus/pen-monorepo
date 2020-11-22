@@ -1,6 +1,8 @@
 import {Binding, Definition, Expression, mapNode, MemberExpression, Module, Reference, traverseNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
+import {createDereferencer} from './create-dereferencer';
+import {createNodeHasher} from './create-node-hasher';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
@@ -135,12 +137,31 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
         Object.assign(def, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
+
+    // CHECKPOINT:
+    // - there are no more Identifier* or MemberExpression nodes in definitions (* EXCEPT... see next comment)
+    // - some references may point to Module nodes. Eg as arg of ApplicationExpression
+
+
     // TODO: allowed node kinds says there should be no Module or Identifier node kinds in the definitionMap.
     // - we still have Module nodes, and they can be referenced from expressions (eg std, xxx in compile-test)
     // - we still have Identifier nodes, but only in the Binding#left within Module nodes
 
 
+    const deref = createDereferencer(definitions);
+    const hashNode = createNodeHasher(deref);
 
+    const defnHashes = definitions.reduce((obj, def) => {
+        // TODO: temp testing...
+        const node = def.value;
+        assert(node.kind !== 'Identifier');
+        assert(node.kind !== 'ModuleExpression');
+        const hash = hashNode(node);
+        obj[hash] ??= [];
+        obj[hash].push(def.localName);
+        return obj;
+    }, {} as Record<string, string[]>);
+    [] = [defnHashes];
 
 
 

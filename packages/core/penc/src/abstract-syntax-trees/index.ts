@@ -1,5 +1,3 @@
-// export {createDereferencer} from './create-dereferencer';
-export {createNodeHasher} from './create-node-hasher';
 export {createNodeMapper} from './create-node-mapper';
 export {mapNode} from './map-node';
 export {allNodeKinds, expressionNodeKinds, patternNodeKinds} from './node-kinds';
