@@ -1,78 +1,77 @@
-const definitions =
-[
-  {
+const definitions = {
+  std: {
     kind: "Definition",
-    definitionId: 0,
+    definitionId: "std",
     moduleId: "@compile_test",
     localName: "std",
     value: {
       kind: "Reference",
-      definitionId: 18,
+      definitionId: "@std",
     },
   },
-  {
+  digits: {
     kind: "Definition",
-    definitionId: 1,
+    definitionId: "digits",
     moduleId: "@compile_test",
     localName: "digits",
     value: {
       kind: "Reference",
-      definitionId: 11,
+      definitionId: "@compile_test_modexpr",
     },
   },
-  {
+  des: {
     kind: "Definition",
-    definitionId: 2,
+    definitionId: "des",
     moduleId: "@compile_test",
     localName: "des",
     value: {
       kind: "Reference",
-      definitionId: 8,
+      definitionId: "one",
     },
   },
-  {
+  ref: {
     kind: "Definition",
-    definitionId: 3,
+    definitionId: "ref",
     moduleId: "@compile_test",
     localName: "ref",
     value: {
       kind: "Reference",
-      definitionId: 2,
+      definitionId: "des",
     },
   },
-  {
+  mem: {
     kind: "Definition",
-    definitionId: 4,
+    definitionId: "mem",
     moduleId: "@compile_test",
     localName: "mem",
     value: {
       kind: "Reference",
-      definitionId: 9,
+      definitionId: "two",
     },
   },
-  {
+  xxx: {
     kind: "Definition",
-    definitionId: 5,
+    definitionId: "xxx",
     moduleId: "@compile_test",
     localName: "xxx",
     value: {
       kind: "Reference",
-      definitionId: 13,
+      definitionId: "@compile_test_modexpr2",
     },
   },
-  {
+  yyy: {
     kind: "Definition",
-    definitionId: 6,
+    definitionId: "yyy",
     moduleId: "@compile_test",
     localName: "yyy",
     value: {
       kind: "Reference",
-      definitionId: 9,
+      definitionId: "two",
     },
   },
-  {
+  "@compile_test": {
     kind: "Definition",
-    definitionId: 7,
+    definitionId: "@compile_test",
     moduleId: "@@root",
     localName: "@compile_test",
     value: {
@@ -88,7 +87,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 0,
+            definitionId: "std",
           },
           exported: false,
         },
@@ -100,7 +99,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 1,
+            definitionId: "digits",
           },
           exported: false,
         },
@@ -112,7 +111,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 2,
+            definitionId: "des",
           },
           exported: false,
         },
@@ -124,7 +123,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 3,
+            definitionId: "ref",
           },
           exported: false,
         },
@@ -136,7 +135,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 4,
+            definitionId: "mem",
           },
           exported: false,
         },
@@ -148,7 +147,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 5,
+            definitionId: "xxx",
           },
           exported: false,
         },
@@ -160,16 +159,16 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 6,
+            definitionId: "yyy",
           },
           exported: false,
         },
       ],
     },
   },
-  {
+  one: {
     kind: "Definition",
-    definitionId: 8,
+    definitionId: "one",
     moduleId: "@compile_test_modexpr",
     localName: "one",
     value: {
@@ -180,9 +179,9 @@ const definitions =
       },
     },
   },
-  {
+  two: {
     kind: "Definition",
-    definitionId: 9,
+    definitionId: "two",
     moduleId: "@compile_test_modexpr",
     localName: "two",
     value: {
@@ -190,19 +189,19 @@ const definitions =
       value: 2,
     },
   },
-  {
+  outer: {
     kind: "Definition",
-    definitionId: 10,
+    definitionId: "outer",
     moduleId: "@compile_test_modexpr",
     localName: "outer",
     value: {
       kind: "Reference",
-      definitionId: 4,
+      definitionId: "mem",
     },
   },
-  {
+  "@compile_test_modexpr": {
     kind: "Definition",
-    definitionId: 11,
+    definitionId: "@compile_test_modexpr",
     moduleId: "@@root",
     localName: "@compile_test_modexpr",
     value: {
@@ -218,7 +217,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 8,
+            definitionId: "one",
           },
           exported: false,
         },
@@ -230,7 +229,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 9,
+            definitionId: "two",
           },
           exported: false,
         },
@@ -242,26 +241,26 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 10,
+            definitionId: "outer",
           },
           exported: false,
         },
       ],
     },
   },
-  {
+  d: {
     kind: "Definition",
-    definitionId: 12,
+    definitionId: "d",
     moduleId: "@compile_test_modexpr2",
     localName: "d",
     value: {
       kind: "Reference",
-      definitionId: 1,
+      definitionId: "digits",
     },
   },
-  {
+  "@compile_test_modexpr2": {
     kind: "Definition",
-    definitionId: 13,
+    definitionId: "@compile_test_modexpr2",
     moduleId: "@@root",
     localName: "@compile_test_modexpr2",
     value: {
@@ -277,16 +276,16 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 12,
+            definitionId: "d",
           },
           exported: false,
         },
       ],
     },
   },
-  {
+  char: {
     kind: "Definition",
-    definitionId: 14,
+    definitionId: "char",
     moduleId: "@std",
     localName: "char",
     value: {
@@ -295,9 +294,9 @@ const definitions =
       path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
     },
   },
-  {
+  f64: {
     kind: "Definition",
-    definitionId: 15,
+    definitionId: "f64",
     moduleId: "@std",
     localName: "f64",
     value: {
@@ -306,9 +305,9 @@ const definitions =
       path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
     },
   },
-  {
+  i32: {
     kind: "Definition",
-    definitionId: 16,
+    definitionId: "i32",
     moduleId: "@std",
     localName: "i32",
     value: {
@@ -317,9 +316,9 @@ const definitions =
       path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
     },
   },
-  {
+  memoise: {
     kind: "Definition",
-    definitionId: 17,
+    definitionId: "memoise",
     moduleId: "@std",
     localName: "memoise",
     value: {
@@ -328,9 +327,9 @@ const definitions =
       path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
     },
   },
-  {
+  "@std": {
     kind: "Definition",
-    definitionId: 18,
+    definitionId: "@std",
     moduleId: "@@root",
     localName: "@std",
     value: {
@@ -346,7 +345,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 14,
+            definitionId: "char",
           },
           exported: true,
         },
@@ -358,7 +357,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 15,
+            definitionId: "f64",
           },
           exported: true,
         },
@@ -370,7 +369,7 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 16,
+            definitionId: "i32",
           },
           exported: true,
         },
@@ -382,14 +381,14 @@ const definitions =
           },
           right: {
             kind: "Reference",
-            definitionId: 17,
+            definitionId: "memoise",
           },
           exported: true,
         },
       ],
     },
   },
-];
+};
 
 
 // TODO: temp remove...

@@ -45,14 +45,14 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
             }
         }
 
-        // Create a definition for the module itself.
+        // Create a definition for the module itself, since it can also be a referenced directly.
         // TODO: better to make this appear *before* its bindings defns in the defns array?
         // - or just use a map (eg with string keys) instead of ints for defnIds? Why use ints? No reason really except easily unique
         define(ROOT_MODULE_ID, moduleId, {kind: 'Module', moduleId, parentModuleId, bindings: newBindings});
     }
 
     // Resolve all Identifier nodes (except MemberExpression#member - that is resolved next)
-    for (let def of definitions) {
+    for (let def of Object.values(definitions)) {
         // TODO: messy special treatment of 'module' defns... cleaner way?
         if (def.value.kind === 'Module') continue;
 
@@ -70,7 +70,7 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     }
 
     // Resolve all MemberExpression nodes
-    for (let def of definitions) {
+    for (let def of Object.values(definitions)) {
         // TODO: messy special treatment of 'module' defns... cleaner way?
         if (def.value.kind === 'Module') continue;
 
@@ -110,7 +110,26 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     const deref = createDereferencer(definitions);
     const hashNode = createNodeHasher(deref);
 
-    const defnHashes = definitions.reduce((obj, def) => {
+
+    // TODO: make a new list of definitions, such that:
+    // - each definition has a shallow expression - no nested exprs
+    // - common expressions appear only once
+    // const definitionsByHash = new Map<string, Definition>();
+    // for (const def of definitions) {
+    //     // TODO: temp testing...
+    //     const node = def.value;
+    //     assert(node.kind !== 'Identifier');
+    //     assert(node.kind !== 'ModuleExpression');
+    //     const hash = hashNode(node);
+
+    // }
+
+
+
+
+
+
+    const defnHashes = Object.values(definitions).reduce((obj, def) => {
         // TODO: temp testing...
         const node = def.value;
         assert(node.kind !== 'Identifier');

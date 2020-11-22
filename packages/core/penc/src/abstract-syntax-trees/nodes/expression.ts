@@ -134,7 +134,7 @@ export interface RecordExpression {
 
 export interface Reference {
     readonly kind: 'Reference';
-    readonly definitionId: number;
+    readonly definitionId: string;
 }
 
 

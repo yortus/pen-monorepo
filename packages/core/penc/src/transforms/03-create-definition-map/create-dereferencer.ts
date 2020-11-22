@@ -12,7 +12,7 @@ import type {Definition, Expression, Module} from '../../abstract-syntax-trees';
  * NB: Some reference/member expressions cannot be statically dereferenced. This is a current implementation limitation.
  * @param ast the AST containing all possible nodes that may be dereferencing targets.
  */
-export function createDereferencer(definitions: Definition[]) {
+export function createDereferencer(definitions: Record<string, Definition>) {
 
     // Return the dereference function closed over the given AST.
     return deref as DereferenceFunction;
