@@ -3,10 +3,19 @@ import {assert} from '../../utils';
 
 
 // TODO: jsdoc...
+// TODO: ensure can never clash with any identifier name or moduleId
+export const ROOT_MODULE_ID = '@@root';
+
+
+// TODO: jsdoc...
 export function createSymbolTable() {
     type Scope = Record<string, Definition | undefined>;
     let scopesByModuleId = new Map<string, Scope>();
     let definitions = [] as Definition[];
+
+    // Define a root scope.
+    const rootScope = Object.create(null);
+    scopesByModuleId.set(ROOT_MODULE_ID, rootScope);
 
     return {
         // TODO: jsdoc...
@@ -14,7 +23,7 @@ export function createSymbolTable() {
 
         // TODO: jsdoc...
         createScope(moduleId: string, parentModuleId?: string) {
-            const parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId)! : null;
+            const parentScope = parentModuleId ? scopesByModuleId.get(parentModuleId)! : rootScope;
             assert(parentModuleId === undefined || parentScope);
             const scope = Object.create(parentScope);
             scopesByModuleId.set(moduleId, scope);
@@ -22,8 +31,7 @@ export function createSymbolTable() {
 
         // TODO: jsdoc...
         // Helper function to add a definition for `name` into the given module's scope.
-        define(name: string, moduleId: string, value: Expression | Module): Definition {
-            console.log(`    DEF ${name}`);
+        define(moduleId: string, name: string, value: Expression | Module): Definition {
             let scope = scopesByModuleId.get(moduleId);
             assert(scope); // sanity check
             if (Object.keys(scope).includes(name)) {
@@ -43,7 +51,7 @@ export function createSymbolTable() {
         },
 
         // TODO: jsdoc...
-        lookup(name: string, moduleId: string): Definition {
+        lookup(moduleId: string, name: string): Definition {
             const scope = scopesByModuleId.get(moduleId);
             assert(scope); // sanity check
             let definition = scope[name];

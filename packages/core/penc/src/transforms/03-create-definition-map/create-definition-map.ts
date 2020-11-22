@@ -4,7 +4,7 @@ import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representation
 import {assert} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
-import {createSymbolTable} from './symbol-table';
+import {createSymbolTable, ROOT_MODULE_ID} from './symbol-table';
 
 
 // TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
@@ -12,21 +12,17 @@ import {createSymbolTable} from './symbol-table';
 export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
     const {createScope, define, definitions, lookup} = createSymbolTable();
 
-    // Define a root scope.
-    const ROOT_MODULE_ID = '@@root'; // TODO: ensure can never clash with any identifier name or moduleId
-    createScope(ROOT_MODULE_ID);
-
     // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
     for (let {moduleId, parentModuleId, bindings} of Object.values(modulesById)) {
         // Create a scope for the module.
-        createScope(moduleId, parentModuleId ?? ROOT_MODULE_ID);
+        createScope(moduleId, parentModuleId);
 
         // Create a definition for each local name in the module.
         let newBindings: Binding[] = [];
         for (let {left, right, exported} of bindings) {
             // For a simple `name = value` binding, create a single definition.
             if (left.kind === 'Identifier') {
-                const {definitionId} = define(left.name, moduleId, right);
+                const {definitionId} = define(moduleId, left.name, right);
                 newBindings.push({kind: 'Binding', left, right: {kind: 'Reference', definitionId}, exported});
             }
 
@@ -38,7 +34,7 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
                         module: right,
                         member: {kind: 'Identifier', name},
                     };
-                    const {definitionId} = define(alias ?? name, moduleId, expr);
+                    const {definitionId} = define(moduleId, alias ?? name, expr);
                     newBindings.push({
                         kind: 'Binding',
                         left: {kind: 'Identifier', name},
@@ -52,7 +48,7 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
         // Create a definition for the module itself.
         // TODO: better to make this appear *before* its bindings defns in the defns array?
         // - or just use a map (eg with string keys) instead of ints for defnIds? Why use ints? No reason really except easily unique
-        define(moduleId, ROOT_MODULE_ID, {kind: 'Module', moduleId, parentModuleId, bindings: newBindings});
+        define(ROOT_MODULE_ID, moduleId, {kind: 'Module', moduleId, parentModuleId, bindings: newBindings});
     }
 
     // Resolve all Identifier nodes (except MemberExpression#member - that is resolved next)
@@ -62,7 +58,7 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
 
         const newValue = mapNode(def.value, rec => ({
             Identifier: ({name}): Reference => {
-                const {definitionId} = lookup(name, def.moduleId);
+                const {definitionId} = lookup(def.moduleId, name);
                 return {kind: 'Reference', definitionId};
             },
             MemberExpression: mem => {
@@ -93,7 +89,7 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
                     }
                 }
                 assert(lhs.kind === 'Module');
-                const {definitionId} = lookup(member.name, lhs.moduleId);
+                const {definitionId} = lookup(lhs.moduleId, member.name);
                 return {kind: 'Reference', definitionId};
             },
         }));
