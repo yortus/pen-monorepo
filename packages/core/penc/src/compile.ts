@@ -9,6 +9,7 @@ import {CompilerOptions} from './compiler-options';
 import {createSourceFileMap} from './transforms';
 import {createModuleMap} from './transforms';
 import {createDefinitionMap} from './transforms';
+import {simplifyDefinitionMap} from './transforms';
 // import {desugarSyntax} from './transforms';
 // import {resolveSymbols} from './transforms';
 // import {checkSemantics} from './transforms';
@@ -39,7 +40,8 @@ export function compile(options: CompilerOptions) {
 
     // TODO: temp testing...
     const definitionMap = createDefinitionMap(moduleMap);
-    [] = [moduleMap, definitionMap];
+    const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
+    [] = [moduleMap, definitionMap, simplifiedDefinitionMap];
     const targetCode = `console.log('Hello, World!');\n`;
 
     // write the target code to the output file path. Creating containing dirs if necessary.

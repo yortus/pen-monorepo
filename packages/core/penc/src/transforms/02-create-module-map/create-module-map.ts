@@ -1,11 +1,11 @@
 import {Binding, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
-import type {SourceFileMap, ModuleMap} from '../../representations';
+import {SourceFileMap, ModuleMap,} from '../../representations';
 import {resolveModuleSpecifier} from '../../utils';
 
 
 // TODO: wip...
 // - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
-// TODO: assert moduleMapKinds before returning
+// TODO: assert moduleMapKibefore returning
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
     // TODO: temp testing...
@@ -64,6 +64,10 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
         // TODO: what a mess... fix
         Object.assign(module, {bindings});
     }
+
+    // TODO: in debug mode, ensure only allowed node kinds are present in the representation
+    // traverseNode(null!, n => assert(moduleMapKinds.matches(n)));
+
     return {
         modulesById,
         startModuleId: moduleIdsBySourceFilePath[startPath],

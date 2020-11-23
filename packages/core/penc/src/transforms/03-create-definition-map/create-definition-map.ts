@@ -1,15 +1,12 @@
 import type {Binding, Expression, MemberExpression, Module, Reference} from '../../abstract-syntax-trees';
-import {mapNode, traverseNode} from '../../abstract-syntax-trees';
-import {DefinitionMap, definitionMapKinds, ModuleMap} from '../../representations';
+import {mapNode} from '../../abstract-syntax-trees';
+import {DefinitionMap, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
-import {createDereferencer} from './create-dereferencer';
-import {createNodeHasher} from './create-node-hasher';
 import {createSymbolTable, ROOT_MODULE_ID} from './symbol-table';
 
 
-// TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
-// - LocalMultiBinding
-export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
+// TODO: jsdoc...
+export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): DefinitionMap {
     const {createScope, define, definitions, lookup} = createSymbolTable();
 
     // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
@@ -96,63 +93,20 @@ export function createDefinitionMap({modulesById}: ModuleMap): DefinitionMap {
         Object.assign(def, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
-
     // CHECKPOINT:
     // - there are no more Identifier* or MemberExpression nodes in definitions (* EXCEPT... see next comment)
     // - some references may point to Module nodes. Eg as arg of ApplicationExpression
 
-
-    // TODO: allowed node kinds says there should be no Module or Identifier node kinds in the definitionMap.
-    // - we still have Module nodes, and they can be referenced from expressions (eg std, xxx in compile-test)
+    // TODO: allowed node kinds says there should be no Module/Binding/Identifier node kinds in the definitionMap.
+    // - we still have Module+Binding nodes, since they can be referenced from expressions (eg std, xxx in compile-test)
     // - we still have Identifier nodes, but only in the Binding#left within Module nodes
 
+    // TODO: in debug mode, ensure only allowed node kinds are present in the representation
+    // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    const deref = createDereferencer(definitions);
-    const hashNode = createNodeHasher(deref);
-
-
-    // TODO: make a new list of definitions, such that:
-    // - each definition has a shallow expression - no nested exprs
-    // - common expressions appear only once
-    // const definitionsByHash = new Map<string, Definition>();
-    // for (const def of definitions) {
-    //     // TODO: temp testing...
-    //     const node = def.value;
-    //     assert(node.kind !== 'Identifier');
-    //     assert(node.kind !== 'ModuleExpression');
-    //     const hash = hashNode(node);
-
-    // }
-
-
-
-
-
-
-    const defnHashes = Object.values(definitions).reduce((obj, def) => {
-        // TODO: temp testing...
-        const node = def.value;
-        assert(node.kind !== 'Identifier');
-        assert(node.kind !== 'ModuleExpression');
-        const hash = hashNode(node);
-        obj[hash] ??= [];
-        obj[hash].push(def.localName);
-        return obj;
-    }, {} as Record<string, string[]>);
-    [] = [defnHashes];
-
-
-
-
-    // TODO: temp testing... get this working
-    if (1 + 1 !== 2) {
-        traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
-    }
-
-    if (1 !== 1 + 1) return null!;
-
-    return null!; /*{
-        definitions,
-        startSomething: '????',
-    };*/
+    const startDefinition = lookup(startModuleId, 'start'); // TODO: want different error message if this fails?
+    return {
+        definitionsById: definitions,
+        startDefinitionId: startDefinition.definitionId,
+    };
 }

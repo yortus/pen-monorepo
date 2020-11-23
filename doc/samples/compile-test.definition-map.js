@@ -59,11 +59,11 @@ const definitions = {
       definitionId: "@compile_test_modexpr2",
     },
   },
-  yyy: {
+  start: {
     kind: "Definition",
-    definitionId: "yyy",
+    definitionId: "start",
     moduleId: "@compile_test",
-    localName: "yyy",
+    localName: "start",
     value: {
       kind: "Reference",
       definitionId: "two",
@@ -155,11 +155,11 @@ const definitions = {
           kind: "Binding",
           left: {
             kind: "Identifier",
-            name: "yyy",
+            name: "start",
           },
           right: {
             kind: "Reference",
-            definitionId: "yyy",
+            definitionId: "start",
           },
           exported: false,
         },
@@ -409,7 +409,7 @@ const defnHashes = {
   ],
   "4376da220fd08caa2922f520bf8c1c2ecc56ecc5": [
     "mem",
-    "yyy",
+    "start",
     "two",
     "outer",
   ],
@@ -417,7 +417,7 @@ const defnHashes = {
     "xxx",
     "@compile_test_modexpr2",
   ],
-  a661c7361426a28f4c978f86af76f6be8138fc4d: [
+  dd96b72499b2760742a97ca679a3f818981aaae7: [
     "@compile_test",
   ],
   "353ab31c8ba4571c3aa4c1a4c92889020d9a4a5d": [

@@ -11,7 +11,7 @@ ref = des
 mem = digits.two
 
 xxx = {d = digits}
-yyy = xxx.d.two
+start = xxx.d.two
 
 
 
