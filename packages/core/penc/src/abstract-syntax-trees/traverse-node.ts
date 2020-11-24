@@ -22,6 +22,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Module': return n.bindings.forEach(rec), cb(n);
             case 'ModuleExpression': return n.bindings.forEach(rec), cb(n);
             case 'ModulePattern': return cb(n);
+            case 'ModuleStub': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteral': return cb(n);
             case 'NumericLiteral': return cb(n);

@@ -12,6 +12,9 @@ export interface DefinitionMap {
 
 /** List of node kinds that may be present in a DefinitionMap program representation. */
 export const definitionMapKinds = allNodeKinds.without(
+    'Binding',
+    'Identifier',
+    'Module',
     'MemberExpression',
     'ModuleExpression',
     'ModulePattern',

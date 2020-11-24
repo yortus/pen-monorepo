@@ -1,4 +1,4 @@
-import type {Binding, Expression, MemberExpression, Module, Reference} from '../../abstract-syntax-trees';
+import type {Expression, MemberExpression, ModuleStub, Reference} from '../../abstract-syntax-trees';
 import {mapNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
@@ -15,12 +15,12 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
         createScope(moduleId, parentModuleId);
 
         // Create a definition for each local name in the module.
-        let newBindings: Binding[] = [];
-        for (let {left, right, exported} of bindings) {
+        let bindingDefinitionIds = {} as Record<string, string>;
+        for (let {left, right} of bindings) {
             // For a simple `name = value` binding, create a single definition.
             if (left.kind === 'Identifier') {
                 const {definitionId} = define(moduleId, left.name, right);
-                newBindings.push({kind: 'Binding', left, right: {kind: 'Reference', definitionId}, exported});
+                bindingDefinitionIds[left.name] = definitionId;
             }
 
             // For a destructured `{a, b} = module` binding, create a definition for each name in the lhs.
@@ -32,12 +32,7 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
                         member: {kind: 'Identifier', name},
                     };
                     const {definitionId} = define(moduleId, alias ?? name, expr);
-                    newBindings.push({
-                        kind: 'Binding',
-                        left: {kind: 'Identifier', name},
-                        right: {kind: 'Reference', definitionId},
-                        exported,
-                    });
+                    bindingDefinitionIds[alias ?? name] = definitionId;
                 }
             }
         }
@@ -45,13 +40,13 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
         // Create a definition for the module itself, since it can also be a referenced directly.
         // TODO: better to make this appear *before* its bindings defns in the defns array?
         // - or just use a map (eg with string keys) instead of ints for defnIds? Why use ints? No reason really except easily unique
-        define(ROOT_MODULE_ID, moduleId, {kind: 'Module', moduleId, parentModuleId, bindings: newBindings});
+        define(ROOT_MODULE_ID, moduleId, {kind: 'ModuleStub', moduleId, bindingDefinitionIds});
     }
 
     // Resolve all Identifier nodes (except MemberExpression#member - that is resolved next)
     for (let def of Object.values(definitions)) {
         // TODO: messy special treatment of 'module' defns... cleaner way?
-        if (def.value.kind === 'Module') continue;
+        if (def.value.kind === 'ModuleStub') continue;
 
         const newValue = mapNode(def.value, rec => ({
             Identifier: ({name}): Reference => {
@@ -69,11 +64,11 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
     // Resolve all MemberExpression nodes
     for (let def of Object.values(definitions)) {
         // TODO: messy special treatment of 'module' defns... cleaner way?
-        if (def.value.kind === 'Module') continue;
+        if (def.value.kind === 'ModuleStub') continue;
 
         const newValue = mapNode(def.value, rec => ({
             MemberExpression: ({module, member}): Reference => {
-                let lhs: Expression | Module = module;
+                let lhs: Expression | ModuleStub = module;
                 while (true) {
                     if (lhs.kind === 'Reference') {
                         lhs = definitions[lhs.definitionId].value;
@@ -85,7 +80,7 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
                         break;
                     }
                 }
-                assert(lhs.kind === 'Module');
+                assert(lhs.kind === 'ModuleStub');
                 const {definitionId} = lookup(lhs.moduleId, member.name);
                 return {kind: 'Reference', definitionId};
             },

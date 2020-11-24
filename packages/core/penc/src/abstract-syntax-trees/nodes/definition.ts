@@ -1,5 +1,5 @@
 import type {Expression} from './expression';
-import type {Module} from './module';
+import type {ModuleStub} from './module';
 
 
 // TODO: jsdoc...
@@ -9,5 +9,5 @@ export interface Definition {
     readonly moduleId: string;
     readonly localName: string; // maybe???
     // TODO: ...readonly globalName: string; // maybe???
-    readonly value: Expression | Module;
+    readonly value: Expression | ModuleStub;
 }

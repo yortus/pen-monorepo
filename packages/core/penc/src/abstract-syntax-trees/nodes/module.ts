@@ -8,3 +8,12 @@ export interface Module {
     readonly parentModuleId?: string; // lexically surrounding module. Only defined for module expressions.
     readonly bindings: ReadonlyArray<Binding>;
 }
+
+
+// TODO: jsdoc...
+// TODO: what about exported?
+export interface ModuleStub {
+    readonly kind: 'ModuleStub';
+    readonly moduleId: string;
+    readonly bindingDefinitionIds: Record<string, string>;
+}

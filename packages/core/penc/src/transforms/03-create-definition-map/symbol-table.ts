@@ -1,4 +1,4 @@
-import type {Definition, Expression, Module} from '../../abstract-syntax-trees';
+import type {Definition, Expression, ModuleStub} from '../../abstract-syntax-trees';
 import {assert} from '../../utils';
 
 
@@ -32,7 +32,7 @@ export function createSymbolTable() {
 
         // TODO: jsdoc...
         // Helper function to add a definition for `name` into the given module's scope.
-        define(moduleId: string, name: string, value: Expression | Module): Definition {
+        define(moduleId: string, name: string, value: Expression | ModuleStub): Definition {
             const scope = scopesByModuleId.get(moduleId);
             assert(scope); // sanity check
             if (Object.keys(scope).includes(name)) {

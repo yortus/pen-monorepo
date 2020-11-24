@@ -37,6 +37,7 @@ export const allNodeKinds = createNodeKinds(
     'Binding',
     'Definition',
     'Module',
+    'ModuleStub',
     'SourceFile',
     ...patternNodeKinds,
     ...expressionNodeKinds,

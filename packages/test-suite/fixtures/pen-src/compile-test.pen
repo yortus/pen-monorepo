@@ -12,7 +12,7 @@ mem = digits.two
 
 xxx = {d = digits}
 start = xxx.d.two
-
+one = 1
 
 
 

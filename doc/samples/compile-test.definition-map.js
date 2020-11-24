@@ -26,7 +26,7 @@ const definitions = {
     localName: "des",
     value: {
       kind: "Reference",
-      definitionId: "one",
+      definitionId: "one2",
     },
   },
   ref: {
@@ -69,106 +69,39 @@ const definitions = {
       definitionId: "two",
     },
   },
+  one: {
+    kind: "Definition",
+    definitionId: "one",
+    moduleId: "@compile_test",
+    localName: "one",
+    value: {
+      kind: "NumericLiteral",
+      value: 1,
+    },
+  },
   "@compile_test": {
     kind: "Definition",
     definitionId: "@compile_test",
     moduleId: "@@root",
     localName: "@compile_test",
     value: {
-      kind: "Module",
+      kind: "ModuleStub",
       moduleId: "@compile_test",
-      parentModuleId: undefined,
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "std",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "std",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "digits",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "digits",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "one",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "des",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "ref",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "ref",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "mem",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "mem",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "xxx",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "xxx",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "start",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "start",
-          },
-          exported: false,
-        },
-      ],
+      bindingDefinitionIds: {
+        std: "std",
+        digits: "digits",
+        des: "des",
+        ref: "ref",
+        mem: "mem",
+        xxx: "xxx",
+        start: "start",
+        one: "one",
+      },
     },
   },
-  one: {
+  one2: {
     kind: "Definition",
-    definitionId: "one",
+    definitionId: "one2",
     moduleId: "@compile_test_modexpr",
     localName: "one",
     value: {
@@ -205,47 +138,13 @@ const definitions = {
     moduleId: "@@root",
     localName: "@compile_test_modexpr",
     value: {
-      kind: "Module",
+      kind: "ModuleStub",
       moduleId: "@compile_test_modexpr",
-      parentModuleId: "@compile_test",
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "one",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "one",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "two",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "two",
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "outer",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "outer",
-          },
-          exported: false,
-        },
-      ],
+      bindingDefinitionIds: {
+        one: "one2",
+        two: "two",
+        outer: "outer",
+      },
     },
   },
   d: {
@@ -264,23 +163,11 @@ const definitions = {
     moduleId: "@@root",
     localName: "@compile_test_modexpr2",
     value: {
-      kind: "Module",
+      kind: "ModuleStub",
       moduleId: "@compile_test_modexpr2",
-      parentModuleId: "@compile_test",
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "d",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "d",
-          },
-          exported: false,
-        },
-      ],
+      bindingDefinitionIds: {
+        d: "d",
+      },
     },
   },
   char: {
@@ -333,59 +220,14 @@ const definitions = {
     moduleId: "@@root",
     localName: "@std",
     value: {
-      kind: "Module",
+      kind: "ModuleStub",
       moduleId: "@std",
-      parentModuleId: undefined,
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "char",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "char",
-          },
-          exported: true,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "f64",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "f64",
-          },
-          exported: true,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "i32",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "i32",
-          },
-          exported: true,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "memoise",
-          },
-          right: {
-            kind: "Reference",
-            definitionId: "memoise",
-          },
-          exported: true,
-        },
-      ],
+      bindingDefinitionIds: {
+        char: "char",
+        f64: "f64",
+        i32: "i32",
+        memoise: "memoise",
+      },
     },
   },
 };

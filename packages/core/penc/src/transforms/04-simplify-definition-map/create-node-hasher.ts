@@ -80,6 +80,10 @@ export function createNodeHasher(deref: DereferenceFunction) {
                 );
                 return setSig('MOD', sig);
             }
+            case 'ModuleStub': {
+                // TODO: impl!
+                throw new Error('Not implemented');
+            }
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
             case 'NumericLiteral': return setSig('LIT', n.value);
