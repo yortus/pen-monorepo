@@ -32,14 +32,14 @@ const simplifiedDefinitionMap = {
         kind: "QuantifiedExpression",
         expression: {
           kind: "Reference",
-          definitionId: "e",
+          definitionId: "WS_e",
         },
         quantifier: "*",
       },
     },
-    e: {
+    WS_e: {
       kind: "Definition",
-      definitionId: "e",
+      definitionId: "WS_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -47,26 +47,26 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e2",
+            definitionId: "WS_e2",
           },
           {
             kind: "Reference",
-            definitionId: "e3",
+            definitionId: "WS_e3",
           },
           {
             kind: "Reference",
-            definitionId: "e4",
+            definitionId: "WS_e4",
           },
           {
             kind: "Reference",
-            definitionId: "e5",
+            definitionId: "WS_e5",
           },
         ],
       },
     },
-    e2: {
+    WS_e2: {
       kind: "Definition",
-      definitionId: "e2",
+      definitionId: "WS_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -76,9 +76,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e3: {
+    WS_e3: {
       kind: "Definition",
-      definitionId: "e3",
+      definitionId: "WS_e3",
       moduleId: "-",
       localName: "-",
       value: {
@@ -88,9 +88,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e4: {
+    WS_e4: {
       kind: "Definition",
-      definitionId: "e4",
+      definitionId: "WS_e4",
       moduleId: "-",
       localName: "-",
       value: {
@@ -100,9 +100,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e5: {
+    WS_e5: {
       kind: "Definition",
-      definitionId: "e5",
+      definitionId: "WS_e5",
       moduleId: "-",
       localName: "-",
       value: {
@@ -161,18 +161,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e6",
+            definitionId: "False_e",
           },
           {
             kind: "Reference",
-            definitionId: "e7",
+            definitionId: "False_e2",
           },
         ],
       },
     },
-    e6: {
+    False_e: {
       kind: "Definition",
-      definitionId: "e6",
+      definitionId: "False_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -182,9 +182,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e7: {
+    False_e2: {
       kind: "Definition",
-      definitionId: "e7",
+      definitionId: "False_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -202,18 +202,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e8",
+            definitionId: "Null_e",
           },
           {
             kind: "Reference",
-            definitionId: "e9",
+            definitionId: "Null_e2",
           },
         ],
       },
     },
-    e8: {
+    Null_e: {
       kind: "Definition",
-      definitionId: "e8",
+      definitionId: "Null_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -223,9 +223,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e9: {
+    Null_e2: {
       kind: "Definition",
-      definitionId: "e9",
+      definitionId: "Null_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -243,18 +243,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e10",
+            definitionId: "True_e",
           },
           {
             kind: "Reference",
-            definitionId: "e11",
+            definitionId: "True_e2",
           },
         ],
       },
     },
-    e10: {
+    True_e: {
       kind: "Definition",
-      definitionId: "e10",
+      definitionId: "True_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -264,9 +264,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e11: {
+    True_e2: {
       kind: "Definition",
-      definitionId: "e11",
+      definitionId: "True_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -288,7 +288,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e13",
+            definitionId: "Object_e",
           },
           {
             kind: "Reference",
@@ -311,7 +311,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e12",
+            definitionId: "LBRACE_e",
           },
           {
             kind: "Reference",
@@ -320,9 +320,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e12: {
+    LBRACE_e: {
       kind: "Definition",
-      definitionId: "e12",
+      definitionId: "LBRACE_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -332,9 +332,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e13: {
+    Object_e: {
       kind: "Definition",
-      definitionId: "e13",
+      definitionId: "Object_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -342,18 +342,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e14",
+            definitionId: "Object_e2",
           },
           {
             kind: "Reference",
-            definitionId: "e54",
+            definitionId: "Object_e5",
           },
         ],
       },
     },
-    e14: {
+    Object_e2: {
       kind: "Definition",
-      definitionId: "e14",
+      definitionId: "Object_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -365,7 +365,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e51",
+            definitionId: "Object_e3",
           },
         ],
       },
@@ -383,7 +383,7 @@ const simplifiedDefinitionMap = {
         },
         value: {
           kind: "Reference",
-          definitionId: "e49",
+          definitionId: "Property_e",
         },
       },
     },
@@ -401,7 +401,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e15",
+            definitionId: "String_e",
           },
           {
             kind: "Reference",
@@ -422,9 +422,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e15: {
+    String_e: {
       kind: "Definition",
-      definitionId: "e15",
+      definitionId: "String_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -446,50 +446,50 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e16",
+            definitionId: "CHAR_e",
           },
           {
             kind: "Reference",
-            definitionId: "e22",
+            definitionId: "CHAR_e7",
           },
           {
             kind: "Reference",
-            definitionId: "e25",
+            definitionId: "CHAR_e10",
           },
           {
             kind: "Reference",
-            definitionId: "e28",
+            definitionId: "CHAR_e13",
           },
           {
             kind: "Reference",
-            definitionId: "e31",
+            definitionId: "CHAR_e16",
           },
           {
             kind: "Reference",
-            definitionId: "e34",
+            definitionId: "CHAR_e19",
           },
           {
             kind: "Reference",
-            definitionId: "e37",
+            definitionId: "CHAR_e22",
           },
           {
             kind: "Reference",
-            definitionId: "e40",
+            definitionId: "CHAR_e25",
           },
           {
             kind: "Reference",
-            definitionId: "e43",
+            definitionId: "CHAR_e28",
           },
           {
             kind: "Reference",
-            definitionId: "e46",
+            definitionId: "CHAR_e31",
           },
         ],
       },
     },
-    e16: {
+    CHAR_e: {
       kind: "Definition",
-      definitionId: "e16",
+      definitionId: "CHAR_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -497,35 +497,35 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e17",
+            definitionId: "CHAR_e2",
           },
           {
             kind: "Reference",
-            definitionId: "e19",
+            definitionId: "CHAR_e4",
           },
           {
             kind: "Reference",
-            definitionId: "e21",
+            definitionId: "CHAR_e6",
           },
         ],
       },
     },
-    e17: {
+    CHAR_e2: {
       kind: "Definition",
-      definitionId: "e17",
+      definitionId: "CHAR_e2",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "NotExpression",
         expression: {
           kind: "Reference",
-          definitionId: "e18",
+          definitionId: "CHAR_e3",
         },
       },
     },
-    e18: {
+    CHAR_e3: {
       kind: "Definition",
-      definitionId: "e18",
+      definitionId: "CHAR_e3",
       moduleId: "-",
       localName: "-",
       value: {
@@ -535,22 +535,22 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e19: {
+    CHAR_e4: {
       kind: "Definition",
-      definitionId: "e19",
+      definitionId: "CHAR_e4",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "NotExpression",
         expression: {
           kind: "Reference",
-          definitionId: "e20",
+          definitionId: "CHAR_e5",
         },
       },
     },
-    e20: {
+    CHAR_e5: {
       kind: "Definition",
-      definitionId: "e20",
+      definitionId: "CHAR_e5",
       moduleId: "-",
       localName: "-",
       value: {
@@ -560,9 +560,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e21: {
+    CHAR_e6: {
       kind: "Definition",
-      definitionId: "e21",
+      definitionId: "CHAR_e6",
       moduleId: "-",
       localName: "-",
       value: {
@@ -626,9 +626,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e22: {
+    CHAR_e7: {
       kind: "Definition",
-      definitionId: "e22",
+      definitionId: "CHAR_e7",
       moduleId: "-",
       localName: "-",
       value: {
@@ -636,18 +636,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e23",
+            definitionId: "CHAR_e8",
           },
           {
             kind: "Reference",
-            definitionId: "e24",
+            definitionId: "CHAR_e9",
           },
         ],
       },
     },
-    e23: {
+    CHAR_e8: {
       kind: "Definition",
-      definitionId: "e23",
+      definitionId: "CHAR_e8",
       moduleId: "-",
       localName: "-",
       value: {
@@ -657,9 +657,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e24: {
+    CHAR_e9: {
       kind: "Definition",
-      definitionId: "e24",
+      definitionId: "CHAR_e9",
       moduleId: "-",
       localName: "-",
       value: {
@@ -669,9 +669,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e25: {
+    CHAR_e10: {
       kind: "Definition",
-      definitionId: "e25",
+      definitionId: "CHAR_e10",
       moduleId: "-",
       localName: "-",
       value: {
@@ -679,18 +679,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e26",
+            definitionId: "CHAR_e11",
           },
           {
             kind: "Reference",
-            definitionId: "e27",
+            definitionId: "CHAR_e12",
           },
         ],
       },
     },
-    e26: {
+    CHAR_e11: {
       kind: "Definition",
-      definitionId: "e26",
+      definitionId: "CHAR_e11",
       moduleId: "-",
       localName: "-",
       value: {
@@ -700,9 +700,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e27: {
+    CHAR_e12: {
       kind: "Definition",
-      definitionId: "e27",
+      definitionId: "CHAR_e12",
       moduleId: "-",
       localName: "-",
       value: {
@@ -712,9 +712,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e28: {
+    CHAR_e13: {
       kind: "Definition",
-      definitionId: "e28",
+      definitionId: "CHAR_e13",
       moduleId: "-",
       localName: "-",
       value: {
@@ -722,18 +722,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e29",
+            definitionId: "CHAR_e14",
           },
           {
             kind: "Reference",
-            definitionId: "e30",
+            definitionId: "CHAR_e15",
           },
         ],
       },
     },
-    e29: {
+    CHAR_e14: {
       kind: "Definition",
-      definitionId: "e29",
+      definitionId: "CHAR_e14",
       moduleId: "-",
       localName: "-",
       value: {
@@ -743,9 +743,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e30: {
+    CHAR_e15: {
       kind: "Definition",
-      definitionId: "e30",
+      definitionId: "CHAR_e15",
       moduleId: "-",
       localName: "-",
       value: {
@@ -755,9 +755,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e31: {
+    CHAR_e16: {
       kind: "Definition",
-      definitionId: "e31",
+      definitionId: "CHAR_e16",
       moduleId: "-",
       localName: "-",
       value: {
@@ -765,18 +765,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e32",
+            definitionId: "CHAR_e17",
           },
           {
             kind: "Reference",
-            definitionId: "e33",
+            definitionId: "CHAR_e18",
           },
         ],
       },
     },
-    e32: {
+    CHAR_e17: {
       kind: "Definition",
-      definitionId: "e32",
+      definitionId: "CHAR_e17",
       moduleId: "-",
       localName: "-",
       value: {
@@ -786,9 +786,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e33: {
+    CHAR_e18: {
       kind: "Definition",
-      definitionId: "e33",
+      definitionId: "CHAR_e18",
       moduleId: "-",
       localName: "-",
       value: {
@@ -798,9 +798,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e34: {
+    CHAR_e19: {
       kind: "Definition",
-      definitionId: "e34",
+      definitionId: "CHAR_e19",
       moduleId: "-",
       localName: "-",
       value: {
@@ -808,18 +808,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e35",
+            definitionId: "CHAR_e20",
           },
           {
             kind: "Reference",
-            definitionId: "e36",
+            definitionId: "CHAR_e21",
           },
         ],
       },
     },
-    e35: {
+    CHAR_e20: {
       kind: "Definition",
-      definitionId: "e35",
+      definitionId: "CHAR_e20",
       moduleId: "-",
       localName: "-",
       value: {
@@ -829,9 +829,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e36: {
+    CHAR_e21: {
       kind: "Definition",
-      definitionId: "e36",
+      definitionId: "CHAR_e21",
       moduleId: "-",
       localName: "-",
       value: {
@@ -841,9 +841,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e37: {
+    CHAR_e22: {
       kind: "Definition",
-      definitionId: "e37",
+      definitionId: "CHAR_e22",
       moduleId: "-",
       localName: "-",
       value: {
@@ -851,18 +851,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e38",
+            definitionId: "CHAR_e23",
           },
           {
             kind: "Reference",
-            definitionId: "e39",
+            definitionId: "CHAR_e24",
           },
         ],
       },
     },
-    e38: {
+    CHAR_e23: {
       kind: "Definition",
-      definitionId: "e38",
+      definitionId: "CHAR_e23",
       moduleId: "-",
       localName: "-",
       value: {
@@ -872,9 +872,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e39: {
+    CHAR_e24: {
       kind: "Definition",
-      definitionId: "e39",
+      definitionId: "CHAR_e24",
       moduleId: "-",
       localName: "-",
       value: {
@@ -884,9 +884,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e40: {
+    CHAR_e25: {
       kind: "Definition",
-      definitionId: "e40",
+      definitionId: "CHAR_e25",
       moduleId: "-",
       localName: "-",
       value: {
@@ -894,18 +894,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e41",
+            definitionId: "CHAR_e26",
           },
           {
             kind: "Reference",
-            definitionId: "e42",
+            definitionId: "CHAR_e27",
           },
         ],
       },
     },
-    e41: {
+    CHAR_e26: {
       kind: "Definition",
-      definitionId: "e41",
+      definitionId: "CHAR_e26",
       moduleId: "-",
       localName: "-",
       value: {
@@ -915,9 +915,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e42: {
+    CHAR_e27: {
       kind: "Definition",
-      definitionId: "e42",
+      definitionId: "CHAR_e27",
       moduleId: "-",
       localName: "-",
       value: {
@@ -927,9 +927,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e43: {
+    CHAR_e28: {
       kind: "Definition",
-      definitionId: "e43",
+      definitionId: "CHAR_e28",
       moduleId: "-",
       localName: "-",
       value: {
@@ -937,18 +937,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e44",
+            definitionId: "CHAR_e29",
           },
           {
             kind: "Reference",
-            definitionId: "e45",
+            definitionId: "CHAR_e30",
           },
         ],
       },
     },
-    e44: {
+    CHAR_e29: {
       kind: "Definition",
-      definitionId: "e44",
+      definitionId: "CHAR_e29",
       moduleId: "-",
       localName: "-",
       value: {
@@ -958,9 +958,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e45: {
+    CHAR_e30: {
       kind: "Definition",
-      definitionId: "e45",
+      definitionId: "CHAR_e30",
       moduleId: "-",
       localName: "-",
       value: {
@@ -970,9 +970,9 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    e46: {
+    CHAR_e31: {
       kind: "Definition",
-      definitionId: "e46",
+      definitionId: "CHAR_e31",
       moduleId: "-",
       localName: "-",
       value: {
@@ -980,18 +980,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e47",
+            definitionId: "CHAR_e32",
           },
           {
             kind: "Reference",
-            definitionId: "e48",
+            definitionId: "CHAR_e33",
           },
         ],
       },
     },
-    e47: {
+    CHAR_e32: {
       kind: "Definition",
-      definitionId: "e47",
+      definitionId: "CHAR_e32",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1001,9 +1001,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e48: {
+    CHAR_e33: {
       kind: "Definition",
-      definitionId: "e48",
+      definitionId: "CHAR_e33",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1064,9 +1064,9 @@ const simplifiedDefinitionMap = {
         value: 4,
       },
     },
-    e49: {
+    Property_e: {
       kind: "Definition",
-      definitionId: "e49",
+      definitionId: "Property_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1097,7 +1097,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e50",
+            definitionId: "COLON_e",
           },
           {
             kind: "Reference",
@@ -1106,9 +1106,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e50: {
+    COLON_e: {
       kind: "Definition",
-      definitionId: "e50",
+      definitionId: "COLON_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1118,23 +1118,23 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e51: {
+    Object_e3: {
       kind: "Definition",
-      definitionId: "e51",
+      definitionId: "Object_e3",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
         expression: {
           kind: "Reference",
-          definitionId: "e52",
+          definitionId: "Object_e4",
         },
         quantifier: "*",
       },
     },
-    e52: {
+    Object_e4: {
       kind: "Definition",
-      definitionId: "e52",
+      definitionId: "Object_e4",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1165,7 +1165,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e53",
+            definitionId: "COMMA_e",
           },
           {
             kind: "Reference",
@@ -1174,9 +1174,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e53: {
+    COMMA_e: {
       kind: "Definition",
-      definitionId: "e53",
+      definitionId: "COMMA_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1186,9 +1186,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e54: {
+    Object_e5: {
       kind: "Definition",
-      definitionId: "e54",
+      definitionId: "Object_e5",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1211,7 +1211,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e55",
+            definitionId: "RBRACE_e",
           },
           {
             kind: "Reference",
@@ -1220,9 +1220,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e55: {
+    RBRACE_e: {
       kind: "Definition",
-      definitionId: "e55",
+      definitionId: "RBRACE_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1246,7 +1246,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e57",
+            definitionId: "Array_e",
           },
           {
             kind: "Reference",
@@ -1269,7 +1269,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e56",
+            definitionId: "LBRACKET_e",
           },
           {
             kind: "Reference",
@@ -1278,9 +1278,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e56: {
+    LBRACKET_e: {
       kind: "Definition",
-      definitionId: "e56",
+      definitionId: "LBRACKET_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1290,9 +1290,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    e57: {
+    Array_e: {
       kind: "Definition",
-      definitionId: "e57",
+      definitionId: "Array_e",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1300,18 +1300,18 @@ const simplifiedDefinitionMap = {
         expressions: [
           {
             kind: "Reference",
-            definitionId: "e58",
+            definitionId: "Array_e2",
           },
           {
             kind: "Reference",
-            definitionId: "e61",
+            definitionId: "Array_e5",
           },
         ],
       },
     },
-    e58: {
+    Array_e2: {
       kind: "Definition",
-      definitionId: "e58",
+      definitionId: "Array_e2",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1323,7 +1323,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e59",
+            definitionId: "Array_e3",
           },
         ],
       },
@@ -1343,23 +1343,23 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e59: {
+    Array_e3: {
       kind: "Definition",
-      definitionId: "e59",
+      definitionId: "Array_e3",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
         expression: {
           kind: "Reference",
-          definitionId: "e60",
+          definitionId: "Array_e4",
         },
         quantifier: "*",
       },
     },
-    e60: {
+    Array_e4: {
       kind: "Definition",
-      definitionId: "e60",
+      definitionId: "Array_e4",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1376,9 +1376,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e61: {
+    Array_e5: {
       kind: "Definition",
-      definitionId: "e61",
+      definitionId: "Array_e5",
       moduleId: "-",
       localName: "-",
       value: {
@@ -1401,7 +1401,7 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "e62",
+            definitionId: "RBRACKET_e",
           },
           {
             kind: "Reference",
@@ -1410,9 +1410,9 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    e62: {
+    RBRACKET_e: {
       kind: "Definition",
-      definitionId: "e62",
+      definitionId: "RBRACKET_e",
       moduleId: "-",
       localName: "-",
       value: {

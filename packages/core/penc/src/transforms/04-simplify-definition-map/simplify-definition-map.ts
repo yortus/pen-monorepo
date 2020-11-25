@@ -5,25 +5,12 @@ import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
 
 
-// TODO: doc... after this transform, the following node kinds will no longer be present anywhere in the AST:
-// - LocalMultiBinding
+// TODO: doc...
 export function simplifyDefinitionMap({definitionsById, startDefinitionId}: DefinitionMap): DefinitionMap {
 
+    // TODO: doc...
     const deref = createDereferencer(definitionsById);
     const getHashFor = createNodeHasher(deref);
-
-    // TODO: make a new list of definitions, such that:
-    // - each definition has a shallow expression - no nested exprs
-    // - common expressions appear only once
-    // const definitionsByHash = new Map<string, Definition>();
-    // for (const def of definitions) {
-    //     // TODO: temp testing...
-    //     const node = def.value;
-    //     assert(node.kind !== 'Identifier');
-    //     assert(node.kind !== 'ModuleExpression');
-    //     const hash = hashNode(node);
-
-
 
     // TODO: work out names to associate with each hash code
     const namesByHash = Object.values(definitionsById).reduce((obj, def) => {
@@ -56,7 +43,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
     };
 
     // TODO: recursive...
-    function getNewDefinitionFor(expr: Expression | ModuleStub): Definition {
+    function getNewDefinitionFor(expr: Expression | ModuleStub, parentDefnName?: string): Definition {
         assert(definitionMapKinds.matches(expr));
 
         // TODO: doc...
@@ -65,12 +52,12 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
         if (newDefinitionsByHash.has(hash)) return newDefinitionsByHash.get(hash)!;
 
         // TODO: make up a name for the new defn. Use a name from the matching old defn if available
-        const name = namesByHash[hash]?.[0] || 'e'; // TODO: use the first name... better heuristic?
+        const ownName = namesByHash[hash]?.[0];
 
         // TODO: doc... create a defn, register it in the map, then fill it in below
         const newDefinition: Definition = {
             kind: 'Definition',
-            definitionId: createDefinitionId(name),
+            definitionId: createDefinitionId(ownName || `${parentDefnName ?? ''}_e`),
             moduleId: '-', // TODO: fix...
             localName: '-', // TODO: fix...
             value: undefined!,
@@ -107,22 +94,12 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
         }
 
         function ref(expr: Expression | ModuleStub): Reference {
-            // TODO: fix this - need a real defnId...
-            // TODO: comment was... doc/fix the temporary use of 'hash' here - it gets patched up later (see L64 above)
-            const {definitionId} = getNewDefinitionFor(expr); // recurse
+            const {definitionId} = getNewDefinitionFor(expr, ownName || parentDefnName); // recurse
             return {kind: 'Reference', definitionId};
         }
 
         function setV<E extends Expression | ModuleStub>(expr: E, vals?: Omit<E, 'kind'>) {
-            Object.assign(
-                newDefinition,
-                {
-                    value: {
-                        kind: expr.kind,
-                        ...(vals || expr)
-                    }
-                }
-            );
+            Object.assign(newDefinition, {value: {kind: expr.kind, ...(vals || expr)}});
             return newDefinition;
         }
     }
