@@ -6,6 +6,10 @@ import {createSymbolTable, ROOT_MODULE_ID} from './symbol-table';
 
 
 // TODO: jsdoc...
+// - takes a collection of modules/bindings
+// - resolves all identifiers and member lookups
+// - outputs a collection of definitions, with References and ModuleStubs
+// - output contains *no*: Module, Binding, Identifier, MemberExpression
 export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): DefinitionMap {
     const {createScope, define, definitions, lookup} = createSymbolTable();
 
@@ -87,14 +91,6 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
         }));
         Object.assign(def, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
-
-    // CHECKPOINT:
-    // - there are no more Identifier* or MemberExpression nodes in definitions (* EXCEPT... see next comment)
-    // - some references may point to Module nodes. Eg as arg of ApplicationExpression
-
-    // TODO: allowed node kinds says there should be no Module/Binding/Identifier node kinds in the definitionMap.
-    // - we still have Module+Binding nodes, since they can be referenced from expressions (eg std, xxx in compile-test)
-    // - we still have Identifier nodes, but only in the Binding#left within Module nodes
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));

@@ -3,9 +3,10 @@ import {SourceFileMap, ModuleMap,} from '../../representations';
 import {resolveModuleSpecifier} from '../../utils';
 
 
-// TODO: wip...
-// - replace each ModuleExpression and ImportExpression with a synthesized Identifier to a module in root scope
-// TODO: assert moduleMapKibefore returning
+// TODO: jsdoc...
+// - takes a collection of source files
+// - converts all ModuleExpressions and ImportExpressions to Identifiers
+// - outputs a collection of modules
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
     // TODO: temp testing...
