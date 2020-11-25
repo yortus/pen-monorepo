@@ -673,6 +673,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    WS_e2.constant = {value: " "};
 
     // StringLiteral
     function WS_e3() {
@@ -682,6 +683,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    WS_e3.constant = {value: "\t"};
 
     // StringLiteral
     function WS_e4() {
@@ -691,6 +693,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    WS_e4.constant = {value: "\n"};
 
     // StringLiteral
     function WS_e5() {
@@ -700,6 +703,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    WS_e5.constant = {value: "\r"};
 
     // SelectionExpression
     function Value() {
@@ -735,12 +739,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    False_e.constant = {value: "false"};
 
     // BooleanLiteral
     function False_e2() {
         OUT = false;
         return true;
     }
+    False_e2.constant = {value: false};
 
     // SequenceExpression
     function Null() {
@@ -763,12 +769,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    Null_e.constant = {value: "null"};
 
     // NullLiteral
     function Null_e2() {
         OUT = null;
         return true;
     }
+    Null_e2.constant = {value: null};
 
     // SequenceExpression
     function True() {
@@ -791,12 +799,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    True_e.constant = {value: "true"};
 
     // BooleanLiteral
     function True_e2() {
         OUT = true;
         return true;
     }
+    True_e2.constant = {value: true};
 
     // SequenceExpression
     function Object() {
@@ -828,6 +838,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    LBRACE_e.constant = {value: "{"};
 
     // SelectionExpression
     function Object_e() {
@@ -870,6 +881,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
     function String_e() {
@@ -927,6 +939,7 @@ const parse = (() => {
         OUT = "\\";
         return true;
     }
+    CHAR_e3.constant = {value: "\\"};
 
     // NotExpression
     function CHAR_e4() {
@@ -945,6 +958,7 @@ const parse = (() => {
         OUT = "\"";
         return true;
     }
+    CHAR_e5.constant = {value: "\""};
 
     // ApplicationExpression
     let CHAR_e6ₘ;
@@ -978,6 +992,7 @@ const parse = (() => {
         OUT = " ";
         return true;
     }
+    min.constant = {value: " "};
 
     // StringLiteral
     function max() {
@@ -987,6 +1002,7 @@ const parse = (() => {
         OUT = "￿";
         return true;
     }
+    max.constant = {value: "￿"};
 
     // SequenceExpression
     function CHAR_e7() {
@@ -1007,12 +1023,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e8.constant = {value: "\\\""};
 
     // StringLiteral
     function CHAR_e9() {
         OUT = "\"";
         return true;
     }
+    CHAR_e9.constant = {value: "\""};
 
     // SequenceExpression
     function CHAR_e10() {
@@ -1033,12 +1051,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e11.constant = {value: "\\\\"};
 
     // StringLiteral
     function CHAR_e12() {
         OUT = "\\";
         return true;
     }
+    CHAR_e12.constant = {value: "\\"};
 
     // SequenceExpression
     function CHAR_e13() {
@@ -1059,12 +1079,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e14.constant = {value: "\\/"};
 
     // StringLiteral
     function CHAR_e15() {
         OUT = "/";
         return true;
     }
+    CHAR_e15.constant = {value: "/"};
 
     // SequenceExpression
     function CHAR_e16() {
@@ -1085,12 +1107,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e17.constant = {value: "\\b"};
 
     // StringLiteral
     function CHAR_e18() {
         OUT = "\b";
         return true;
     }
+    CHAR_e18.constant = {value: "\b"};
 
     // SequenceExpression
     function CHAR_e19() {
@@ -1111,12 +1135,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e20.constant = {value: "\\f"};
 
     // StringLiteral
     function CHAR_e21() {
         OUT = "\f";
         return true;
     }
+    CHAR_e21.constant = {value: "\f"};
 
     // SequenceExpression
     function CHAR_e22() {
@@ -1137,12 +1163,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e23.constant = {value: "\\n"};
 
     // StringLiteral
     function CHAR_e24() {
         OUT = "\n";
         return true;
     }
+    CHAR_e24.constant = {value: "\n"};
 
     // SequenceExpression
     function CHAR_e25() {
@@ -1163,12 +1191,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e26.constant = {value: "\\r"};
 
     // StringLiteral
     function CHAR_e27() {
         OUT = "\r";
         return true;
     }
+    CHAR_e27.constant = {value: "\r"};
 
     // SequenceExpression
     function CHAR_e28() {
@@ -1189,12 +1219,14 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e29.constant = {value: "\\t"};
 
     // StringLiteral
     function CHAR_e30() {
         OUT = "\t";
         return true;
     }
+    CHAR_e30.constant = {value: "\t"};
 
     // SequenceExpression
     function CHAR_e31() {
@@ -1215,6 +1247,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e32.constant = {value: "\\u"};
 
     // ApplicationExpression
     let CHAR_e33ₘ;
@@ -1246,12 +1279,14 @@ const parse = (() => {
         OUT = 16;
         return true;
     }
+    base.constant = {value: 16};
 
     // NumericLiteral
     function minDigits() {
         OUT = 4;
         return true;
     }
+    minDigits.constant = {value: 4};
 
     // SequenceExpression
     function Property_e() {
@@ -1282,6 +1317,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    COLON_e.constant = {value: ":"};
 
     // QuantifiedExpression
     function Object_e3() {
@@ -1325,6 +1361,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    COMMA_e.constant = {value: ","};
 
     // RecordExpression
     function Object_e5() {
@@ -1350,6 +1387,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    RBRACE_e.constant = {value: "}"};
 
     // SequenceExpression
     function Array() {
@@ -1381,6 +1419,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    LBRACKET_e.constant = {value: "["};
 
     // SelectionExpression
     function Array_e() {
@@ -1451,6 +1490,7 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
+    RBRACKET_e.constant = {value: "]"};
 
     // Intrinsic
 
@@ -1506,24 +1546,28 @@ const print = (() => {
         OUT = " ";
         return true;
     }
+    WS_e2.constant = {value: " "};
 
     // StringLiteral
     function WS_e3() {
         OUT = "\t";
         return true;
     }
+    WS_e3.constant = {value: "\t"};
 
     // StringLiteral
     function WS_e4() {
         OUT = "\n";
         return true;
     }
+    WS_e4.constant = {value: "\n"};
 
     // StringLiteral
     function WS_e5() {
         OUT = "\r";
         return true;
     }
+    WS_e5.constant = {value: "\r"};
 
     // SelectionExpression
     function Value() {
@@ -1552,6 +1596,7 @@ const print = (() => {
         OUT = "false";
         return true;
     }
+    False_e.constant = {value: "false"};
 
     // BooleanLiteral
     function False_e2() {
@@ -1560,6 +1605,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    False_e2.constant = {value: false};
 
     // SequenceExpression
     function Null() {
@@ -1576,6 +1622,7 @@ const print = (() => {
         OUT = "null";
         return true;
     }
+    Null_e.constant = {value: "null"};
 
     // NullLiteral
     function Null_e2() {
@@ -1584,6 +1631,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    Null_e2.constant = {value: null};
 
     // SequenceExpression
     function True() {
@@ -1600,6 +1648,7 @@ const print = (() => {
         OUT = "true";
         return true;
     }
+    True_e.constant = {value: "true"};
 
     // BooleanLiteral
     function True_e2() {
@@ -1608,6 +1657,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    True_e2.constant = {value: true};
 
     // SequenceExpression
     function Object() {
@@ -1636,6 +1686,7 @@ const print = (() => {
         OUT = "{";
         return true;
     }
+    LBRACE_e.constant = {value: "{"};
 
     // SelectionExpression
     function Object_e() {
@@ -1675,6 +1726,7 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
+    DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
     function String_e() {
@@ -1733,6 +1785,7 @@ const print = (() => {
         OUT = "\\";
         return true;
     }
+    CHAR_e3.constant = {value: "\\"};
 
     // NotExpression
     function CHAR_e4() {
@@ -1752,6 +1805,7 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
+    CHAR_e5.constant = {value: "\""};
 
     // ApplicationExpression
     let CHAR_e6ₘ;
@@ -1786,6 +1840,7 @@ const print = (() => {
         OUT = " ";
         return true;
     }
+    min.constant = {value: " "};
 
     // StringLiteral
     function max() {
@@ -1796,6 +1851,7 @@ const print = (() => {
         OUT = "￿";
         return true;
     }
+    max.constant = {value: "￿"};
 
     // SequenceExpression
     function CHAR_e7() {
@@ -1812,6 +1868,7 @@ const print = (() => {
         OUT = "\\\"";
         return true;
     }
+    CHAR_e8.constant = {value: "\\\""};
 
     // StringLiteral
     function CHAR_e9() {
@@ -1822,6 +1879,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e9.constant = {value: "\""};
 
     // SequenceExpression
     function CHAR_e10() {
@@ -1838,6 +1896,7 @@ const print = (() => {
         OUT = "\\\\";
         return true;
     }
+    CHAR_e11.constant = {value: "\\\\"};
 
     // StringLiteral
     function CHAR_e12() {
@@ -1848,6 +1907,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e12.constant = {value: "\\"};
 
     // SequenceExpression
     function CHAR_e13() {
@@ -1864,6 +1924,7 @@ const print = (() => {
         OUT = "\\/";
         return true;
     }
+    CHAR_e14.constant = {value: "\\/"};
 
     // StringLiteral
     function CHAR_e15() {
@@ -1874,6 +1935,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e15.constant = {value: "/"};
 
     // SequenceExpression
     function CHAR_e16() {
@@ -1890,6 +1952,7 @@ const print = (() => {
         OUT = "\\b";
         return true;
     }
+    CHAR_e17.constant = {value: "\\b"};
 
     // StringLiteral
     function CHAR_e18() {
@@ -1900,6 +1963,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e18.constant = {value: "\b"};
 
     // SequenceExpression
     function CHAR_e19() {
@@ -1916,6 +1980,7 @@ const print = (() => {
         OUT = "\\f";
         return true;
     }
+    CHAR_e20.constant = {value: "\\f"};
 
     // StringLiteral
     function CHAR_e21() {
@@ -1926,6 +1991,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e21.constant = {value: "\f"};
 
     // SequenceExpression
     function CHAR_e22() {
@@ -1942,6 +2008,7 @@ const print = (() => {
         OUT = "\\n";
         return true;
     }
+    CHAR_e23.constant = {value: "\\n"};
 
     // StringLiteral
     function CHAR_e24() {
@@ -1952,6 +2019,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e24.constant = {value: "\n"};
 
     // SequenceExpression
     function CHAR_e25() {
@@ -1968,6 +2036,7 @@ const print = (() => {
         OUT = "\\r";
         return true;
     }
+    CHAR_e26.constant = {value: "\\r"};
 
     // StringLiteral
     function CHAR_e27() {
@@ -1978,6 +2047,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e27.constant = {value: "\r"};
 
     // SequenceExpression
     function CHAR_e28() {
@@ -1994,6 +2064,7 @@ const print = (() => {
         OUT = "\\t";
         return true;
     }
+    CHAR_e29.constant = {value: "\\t"};
 
     // StringLiteral
     function CHAR_e30() {
@@ -2004,6 +2075,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    CHAR_e30.constant = {value: "\t"};
 
     // SequenceExpression
     function CHAR_e31() {
@@ -2020,6 +2092,7 @@ const print = (() => {
         OUT = "\\u";
         return true;
     }
+    CHAR_e32.constant = {value: "\\u"};
 
     // ApplicationExpression
     let CHAR_e33ₘ;
@@ -2053,6 +2126,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    base.constant = {value: 16};
 
     // NumericLiteral
     function minDigits() {
@@ -2061,6 +2135,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    minDigits.constant = {value: 4};
 
     // SequenceExpression
     function Property_e() {
@@ -2088,6 +2163,7 @@ const print = (() => {
         OUT = ":";
         return true;
     }
+    COLON_e.constant = {value: ":"};
 
     // QuantifiedExpression
     function Object_e3() {
@@ -2128,6 +2204,7 @@ const print = (() => {
         OUT = ",";
         return true;
     }
+    COMMA_e.constant = {value: ","};
 
     // RecordExpression
     function Object_e5() {
@@ -2150,6 +2227,7 @@ const print = (() => {
         OUT = "}";
         return true;
     }
+    RBRACE_e.constant = {value: "}"};
 
     // SequenceExpression
     function Array() {
@@ -2178,6 +2256,7 @@ const print = (() => {
         OUT = "[";
         return true;
     }
+    LBRACKET_e.constant = {value: "["};
 
     // SelectionExpression
     function Array_e() {
@@ -2245,6 +2324,7 @@ const print = (() => {
         OUT = "]";
         return true;
     }
+    RBRACKET_e.constant = {value: "]"};
 
     // Intrinsic
 
