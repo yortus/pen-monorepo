@@ -11,7 +11,7 @@ import {createModuleMap} from './transforms';
 import {createDefinitionMap} from './transforms';
 import {simplifyDefinitionMap} from './transforms';
 // import {resolveConstantValues} from './transforms';
-// import {generateTargetCode} from './transforms';
+import {generateTargetCode} from './transforms';
 
 
 export function compile(options: CompilerOptions) {
@@ -33,8 +33,8 @@ export function compile(options: CompilerOptions) {
     // TODO: temp testing...
     const definitionMap = createDefinitionMap(moduleMap);
     const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
-    [] = [moduleMap, definitionMap, simplifiedDefinitionMap];
-    const targetCode = `console.log('Hello, World!');\n`;
+    const targetCode = generateTargetCode({defs: simplifiedDefinitionMap, consts: {/* TODO */}});
+    [] = [moduleMap, definitionMap, simplifiedDefinitionMap, targetCode];
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     const outFilePath = path.resolve(outFile);
