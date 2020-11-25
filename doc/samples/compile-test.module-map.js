@@ -1,6 +1,4 @@
-// This is the ModuleMap representation (intermediate AST form) of the compile-test.pen program.
-const moduleMap = 
-{
+const moduleMap = {
   modulesById: {
     "@compile_test": {
       kind: "Module",
@@ -78,6 +76,77 @@ const moduleMap =
           },
           exported: false,
         },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "xxx",
+          },
+          right: {
+            kind: "Identifier",
+            name: "@compile_test_modexpr2",
+          },
+          exported: false,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "one",
+          },
+          right: {
+            kind: "NumericLiteral",
+            value: 1,
+          },
+          exported: false,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "start",
+          },
+          right: {
+            kind: "SelectionExpression",
+            expressions: [
+              {
+                kind: "Identifier",
+                name: "one",
+              },
+              {
+                kind: "Identifier",
+                name: "ref",
+              },
+              {
+                kind: "Identifier",
+                name: "mem",
+              },
+              {
+                kind: "MemberExpression",
+                module: {
+                  kind: "MemberExpression",
+                  module: {
+                    kind: "Identifier",
+                    name: "xxx",
+                  },
+                  member: {
+                    kind: "Identifier",
+                    name: "d",
+                  },
+                },
+                member: {
+                  kind: "Identifier",
+                  name: "two",
+                },
+              },
+              {
+                kind: "Identifier",
+                name: "digits",
+              },
+            ],
+          },
+          exported: false,
+        },
       ],
     },
     "@compile_test_modexpr": {
@@ -121,6 +190,25 @@ const moduleMap =
           right: {
             kind: "Identifier",
             name: "mem",
+          },
+          exported: false,
+        },
+      ],
+    },
+    "@compile_test_modexpr2": {
+      kind: "Module",
+      moduleId: "@compile_test_modexpr2",
+      parentModuleId: "@compile_test",
+      bindings: [
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "d",
+          },
+          right: {
+            kind: "Identifier",
+            name: "digits",
           },
           exported: false,
         },
@@ -186,4 +274,4 @@ const moduleMap =
     },
   },
   startModuleId: "@compile_test",
-};
+}

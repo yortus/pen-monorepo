@@ -1,5 +1,4 @@
-const sourceFileMap =
-{
+const sourceFileMap = {
   sourceFilesByPath: {
     "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/compile-test.pen": {
       kind: "SourceFile",
@@ -179,4 +178,4 @@ const sourceFileMap =
     },
   },
   startPath: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/compile-test.pen",
-};
+}

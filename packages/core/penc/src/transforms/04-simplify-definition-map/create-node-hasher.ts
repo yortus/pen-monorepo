@@ -1,5 +1,6 @@
 import * as objectHash from 'object-hash';
-import {allNodeKinds, expressionNodeKinds, Node} from '../../abstract-syntax-trees';
+import {expressionNodeKinds, Node} from '../../abstract-syntax-trees';
+import {definitionMapKinds} from '../../representations';
 import {assert} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
@@ -65,24 +66,14 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'ImportExpression': return setSig('IMP', n.moduleSpecifier); // TODO: BUG - was n.path. Sig could make diff things same / vice-versa
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
-            case 'MemberExpression': return setSig('MEM', getSig(n.module), getSig(n.member), n.member.name);
-            case 'Module': {
-                let sig = n.bindings.reduce(
-                    (obj, b) => {
-                        assert(b.left.kind === 'Identifier');
-                        obj[b.left.name] = getSig(b.right);
-                        return obj;
-                    },
-                    {} as Record<string, Signature>
-                );
-                return setSig('MOD', sig);
-            }
             case 'ModuleStub': {
-                // TODO: impl!
-                throw new Error('Not implemented');
+                let sig = Object.keys(n.bindingDefinitionIds).reduce((obj, name) => {
+                    obj[name] = getSig({kind: 'Reference', definitionId: n.bindingDefinitionIds[name]});
+                    return obj;
+                }, {} as Record<string, Signature>);
+                return setSig('MOD', sig);
             }
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
@@ -106,6 +97,5 @@ type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ?
 type HashableNodeKind = typeof hashableNodeKinds[any];
 
 
-// TODO: fix decl and jsdoc here - basically can only hash expressions, and not other node kinds...
-// Helper array of all node kinds that support hashing. Includes all expression node kinds except 'Identifier'. 
-const hashableNodeKinds = allNodeKinds.without('Binding', 'Definition', 'SourceFile', 'ModuleExpression', 'ModulePattern', 'Identifier');
+// Helper array of all node kinds that support hashing.
+const hashableNodeKinds = definitionMapKinds.without('Definition');

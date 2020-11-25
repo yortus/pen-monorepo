@@ -1,8 +1,8 @@
-const moduleMap = {
-  modulesById: {
-    "@json": {
-      kind: "Module",
-      moduleId: "@json",
+const sourceFileMap = {
+  sourceFilesByPath: {
+    "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/json.pen": {
+      kind: "SourceFile",
+      path: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/json.pen",
       bindings: [
         {
           kind: "Binding",
@@ -18,8 +18,8 @@ const moduleMap = {
             ],
           },
           right: {
-            kind: "Identifier",
-            name: "@std",
+            kind: "ImportExpression",
+            moduleSpecifier: "std",
           },
           exported: false,
         },
@@ -34,8 +34,8 @@ const moduleMap = {
             ],
           },
           right: {
-            kind: "Identifier",
-            name: "@experiments",
+            kind: "ImportExpression",
+            moduleSpecifier: "experiments",
           },
           exported: false,
         },
@@ -423,8 +423,37 @@ const moduleMap = {
                       name: "char",
                     },
                     argument: {
-                      kind: "Identifier",
-                      name: "@json_modexpr",
+                      kind: "ModuleExpression",
+                      bindings: [
+                        {
+                          kind: "Binding",
+                          left: {
+                            kind: "Identifier",
+                            name: "min",
+                          },
+                          right: {
+                            kind: "StringLiteral",
+                            value: " ",
+                            concrete: false,
+                            abstract: false,
+                          },
+                          exported: false,
+                        },
+                        {
+                          kind: "Binding",
+                          left: {
+                            kind: "Identifier",
+                            name: "max",
+                          },
+                          right: {
+                            kind: "StringLiteral",
+                            value: "￿",
+                            concrete: false,
+                            abstract: false,
+                          },
+                          exported: false,
+                        },
+                      ],
                     },
                   },
                 ],
@@ -581,8 +610,45 @@ const moduleMap = {
                       name: "unicode",
                     },
                     argument: {
-                      kind: "Identifier",
-                      name: "@json_modexpr2",
+                      kind: "ModuleExpression",
+                      bindings: [
+                        {
+                          kind: "Binding",
+                          left: {
+                            kind: "Identifier",
+                            name: "base",
+                          },
+                          right: {
+                            kind: "NumericLiteral",
+                            value: 16,
+                          },
+                          exported: false,
+                        },
+                        {
+                          kind: "Binding",
+                          left: {
+                            kind: "Identifier",
+                            name: "minDigits",
+                          },
+                          right: {
+                            kind: "NumericLiteral",
+                            value: 4,
+                          },
+                          exported: false,
+                        },
+                        {
+                          kind: "Binding",
+                          left: {
+                            kind: "Identifier",
+                            name: "maxDigits",
+                          },
+                          right: {
+                            kind: "NumericLiteral",
+                            value: 4,
+                          },
+                          exported: false,
+                        },
+                      ],
                     },
                   },
                 ],
@@ -813,87 +879,9 @@ const moduleMap = {
         },
       ],
     },
-    "@json_modexpr": {
-      kind: "Module",
-      moduleId: "@json_modexpr",
-      parentModuleId: "@json",
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "min",
-          },
-          right: {
-            kind: "StringLiteral",
-            value: " ",
-            concrete: false,
-            abstract: false,
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "max",
-          },
-          right: {
-            kind: "StringLiteral",
-            value: "￿",
-            concrete: false,
-            abstract: false,
-          },
-          exported: false,
-        },
-      ],
-    },
-    "@json_modexpr2": {
-      kind: "Module",
-      moduleId: "@json_modexpr2",
-      parentModuleId: "@json",
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "base",
-          },
-          right: {
-            kind: "NumericLiteral",
-            value: 16,
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "minDigits",
-          },
-          right: {
-            kind: "NumericLiteral",
-            value: 4,
-          },
-          exported: false,
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "maxDigits",
-          },
-          right: {
-            kind: "NumericLiteral",
-            value: 4,
-          },
-          exported: false,
-        },
-      ],
-    },
-    "@std": {
-      kind: "Module",
-      moduleId: "@std",
+    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": {
+      kind: "SourceFile",
+      path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
       bindings: [
         {
           kind: "Binding",
@@ -949,9 +937,9 @@ const moduleMap = {
         },
       ],
     },
-    "@experiments": {
-      kind: "Module",
-      moduleId: "@experiments",
+    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js": {
+      kind: "SourceFile",
+      path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
       bindings: [
         {
           kind: "Binding",
@@ -969,5 +957,5 @@ const moduleMap = {
       ],
     },
   },
-  startModuleId: "@json",
+  startPath: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/json.pen",
 }
