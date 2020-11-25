@@ -221,7 +221,7 @@ const objectToString = Object.prototype.toString;
 
 // ------------------------------ Extensions ------------------------------
 const extensions = {
-    "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js": (() => {
+    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": (() => {
         "use strict";
         /* @pen exports = {
             char,
@@ -564,7 +564,7 @@ const extensions = {
         }
         return {char, f64};
     })(),
-    "V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js": (() => {
+    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js": (() => {
         "use strict";
         /* @pen exports = {
             unicode
@@ -627,28 +627,28 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // ExtensionExpressions
-    const std_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 6});
-    const experiments_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 6});
-    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 6});
+    // Intrinsic
+    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 6});
+    const unicode = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 6});
+    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function json_start() {
+    function start() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function json_WS() {
+    function WS() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e1()) break;
+            if (!WS_e()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -657,78 +657,74 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function e1() {
-        if (e2()) return true;
-        if (e3()) return true;
-        if (e4()) return true;
-        if (e5()) return true;
+    function WS_e() {
+        if (WS_e2()) return true;
+        if (WS_e3()) return true;
+        if (WS_e4()) return true;
+        if (WS_e5()) return true;
         return false;
     }
 
-    // StringLiteralExpression
-    function e2() {
+    // StringLiteral
+    function WS_e2() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e2.constant = {value: " "};
 
-    // StringLiteralExpression
-    function e3() {
+    // StringLiteral
+    function WS_e3() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e3.constant = {value: "\t"};
 
-    // StringLiteralExpression
-    function e4() {
+    // StringLiteral
+    function WS_e4() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e4.constant = {value: "\n"};
 
-    // StringLiteralExpression
-    function e5() {
+    // StringLiteral
+    function WS_e5() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function json_Value() {
-        if (json_False()) return true;
-        if (json_Null()) return true;
-        if (json_True()) return true;
-        if (json_Object()) return true;
-        if (json_Array()) return true;
-        if (std_f64()) return true;
-        if (json_String()) return true;
+    function Value() {
+        if (False()) return true;
+        if (Null()) return true;
+        if (True()) return true;
+        if (Object()) return true;
+        if (Array()) return true;
+        if (f64()) return true;
+        if (String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function json_False() {
+    function False() {
         const stateₒ = getState();
         let out;
-        if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e6() {
+    // StringLiteral
+    function False_e() {
         if (IP + 5 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -739,27 +735,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e6.constant = {value: "false"};
 
-    // BooleanLiteralExpression
-    function e7() {
+    // BooleanLiteral
+    function False_e2() {
         OUT = false;
         return true;
     }
-    e7.constant = {value: false};
 
     // SequenceExpression
-    function json_Null() {
+    function Null() {
         const stateₒ = getState();
         let out;
-        if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e8() {
+    // StringLiteral
+    function Null_e() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 110) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -769,27 +763,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e8.constant = {value: "null"};
 
-    // NullLiteralExpression
-    function e9() {
+    // NullLiteral
+    function Null_e2() {
         OUT = null;
         return true;
     }
-    e9.constant = {value: null};
 
     // SequenceExpression
-    function json_True() {
+    function True() {
         const stateₒ = getState();
         let out;
-        if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e10() {
+    // StringLiteral
+    function True_e() {
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 116) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -799,96 +791,92 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e10.constant = {value: "true"};
 
-    // BooleanLiteralExpression
-    function e11() {
+    // BooleanLiteral
+    function True_e2() {
         OUT = true;
         return true;
     }
-    e11.constant = {value: true};
 
     // SequenceExpression
-    function json_Object() {
+    function Object() {
         const stateₒ = getState();
         let out;
-        if (json_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Object_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_LBRACE() {
+    function LBRACE() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACE_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e12() {
+    // StringLiteral
+    function LBRACE_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 123) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e12.constant = {value: "{"};
 
     // SelectionExpression
-    function e13() {
-        if (e14()) return true;
-        if (e56()) return true;
+    function Object_e() {
+        if (Object_e2()) return true;
+        if (Object_e5()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e14() {
+    function Object_e2() {
         const stateₒ = getState();
         let out;
-        if (json_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Object_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function json_Property() {
-        return parseField(json_String, e51);
+    function Property() {
+        return parseField(String, Property_e);
     }
 
     // SequenceExpression
-    function json_String() {
+    function String() {
         const stateₒ = getState();
         let out;
-        if (json_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (String_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function json_DOUBLE_QUOTE() {
+    // StringLiteral
+    function DOUBLE_QUOTE() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    json_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
-    function e15() {
+    function String_e() {
         const IPₒ = IP;
         let out;
         do {
-            if (!json_CHAR()) break;
+            if (!CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -897,125 +885,121 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function json_CHAR() {
-        if (e16()) return true;
-        if (e23()) return true;
-        if (e26()) return true;
-        if (e29()) return true;
-        if (e32()) return true;
-        if (e35()) return true;
-        if (e38()) return true;
-        if (e41()) return true;
-        if (e44()) return true;
-        if (e47()) return true;
+    function CHAR() {
+        if (CHAR_e()) return true;
+        if (CHAR_e7()) return true;
+        if (CHAR_e10()) return true;
+        if (CHAR_e13()) return true;
+        if (CHAR_e16()) return true;
+        if (CHAR_e19()) return true;
+        if (CHAR_e22()) return true;
+        if (CHAR_e25()) return true;
+        if (CHAR_e28()) return true;
+        if (CHAR_e31()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e16() {
+    function CHAR_e() {
         const stateₒ = getState();
         let out;
-        if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e21()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e6()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // NotExpression
-    function e17() {
+    function CHAR_e2() {
         const stateₒ = getState();
-        const result = !e18();
+        const result = !CHAR_e3();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
-    // StringLiteralExpression
-    function e18() {
+    // StringLiteral
+    function CHAR_e3() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         IP += 1;
         OUT = "\\";
         return true;
     }
-    e18.constant = {value: "\\"};
 
     // NotExpression
-    function e19() {
+    function CHAR_e4() {
         const stateₒ = getState();
-        const result = !e20();
+        const result = !CHAR_e5();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
-    // StringLiteralExpression
-    function e20() {
+    // StringLiteral
+    function CHAR_e5() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
         IP += 1;
         OUT = "\"";
         return true;
     }
-    e20.constant = {value: "\""};
 
     // ApplicationExpression
-    let e21ₘ;
-    function e21(arg) {
+    let CHAR_e6ₘ;
+    function CHAR_e6(arg) {
         try {
-            return e21ₘ(arg);
+            return CHAR_e6ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
-            e21ₘ = std_char(e22);
-            return e21ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_e6ₘ is not a function')) throw err;
+            CHAR_e6ₘ = char(Ɱ_json_modexpr);
+            return CHAR_e6ₘ(arg);
         }
     }
 
-    // ExtensionExpression
+    // Intrinsic
 
-    // ModuleExpression
-    function e22(bindingName) {
-        switch (bindingName) {
-            case 'min': return 𝕊1_min;
-            case 'max': return 𝕊1_max;
+    // ModuleStub
+    function Ɱ_json_modexpr(member) {
+        switch (member) {
+            case 'min': return min;
+            case 'max': return max;
             default: return undefined;
         }
     }
 
-    // StringLiteralExpression
-    function 𝕊1_min() {
+    // StringLiteral
+    function min() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
         IP += 1;
         OUT = " ";
         return true;
     }
-    𝕊1_min.constant = {value: " "};
 
-    // StringLiteralExpression
-    function 𝕊1_max() {
+    // StringLiteral
+    function max() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
         IP += 1;
         OUT = "￿";
         return true;
     }
-    𝕊1_max.constant = {value: "￿"};
 
     // SequenceExpression
-    function e23() {
+    function CHAR_e7() {
         const stateₒ = getState();
         let out;
-        if (e24()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e24() {
+    // StringLiteral
+    function CHAR_e8() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 34) return false;
@@ -1023,27 +1007,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e24.constant = {value: "\\\""};
 
-    // StringLiteralExpression
-    function e25() {
+    // StringLiteral
+    function CHAR_e9() {
         OUT = "\"";
         return true;
     }
-    e25.constant = {value: "\""};
 
     // SequenceExpression
-    function e26() {
+    function CHAR_e10() {
         const stateₒ = getState();
         let out;
-        if (e27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e28()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e27() {
+    // StringLiteral
+    function CHAR_e11() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 92) return false;
@@ -1051,27 +1033,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e27.constant = {value: "\\\\"};
 
-    // StringLiteralExpression
-    function e28() {
+    // StringLiteral
+    function CHAR_e12() {
         OUT = "\\";
         return true;
     }
-    e28.constant = {value: "\\"};
 
     // SequenceExpression
-    function e29() {
+    function CHAR_e13() {
         const stateₒ = getState();
         let out;
-        if (e30()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e31()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e30() {
+    // StringLiteral
+    function CHAR_e14() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 47) return false;
@@ -1079,27 +1059,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e30.constant = {value: "\\/"};
 
-    // StringLiteralExpression
-    function e31() {
+    // StringLiteral
+    function CHAR_e15() {
         OUT = "/";
         return true;
     }
-    e31.constant = {value: "/"};
 
     // SequenceExpression
-    function e32() {
+    function CHAR_e16() {
         const stateₒ = getState();
         let out;
-        if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e34()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e18()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e33() {
+    // StringLiteral
+    function CHAR_e17() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -1107,27 +1085,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e33.constant = {value: "\\b"};
 
-    // StringLiteralExpression
-    function e34() {
+    // StringLiteral
+    function CHAR_e18() {
         OUT = "\b";
         return true;
     }
-    e34.constant = {value: "\b"};
 
     // SequenceExpression
-    function e35() {
+    function CHAR_e19() {
         const stateₒ = getState();
         let out;
-        if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e37()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e21()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e36() {
+    // StringLiteral
+    function CHAR_e20() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 102) return false;
@@ -1135,27 +1111,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e36.constant = {value: "\\f"};
 
-    // StringLiteralExpression
-    function e37() {
+    // StringLiteral
+    function CHAR_e21() {
         OUT = "\f";
         return true;
     }
-    e37.constant = {value: "\f"};
 
     // SequenceExpression
-    function e38() {
+    function CHAR_e22() {
         const stateₒ = getState();
         let out;
-        if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e24()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e39() {
+    // StringLiteral
+    function CHAR_e23() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -1163,27 +1137,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e39.constant = {value: "\\n"};
 
-    // StringLiteralExpression
-    function e40() {
+    // StringLiteral
+    function CHAR_e24() {
         OUT = "\n";
         return true;
     }
-    e40.constant = {value: "\n"};
 
     // SequenceExpression
-    function e41() {
+    function CHAR_e25() {
         const stateₒ = getState();
         let out;
-        if (e42()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e27()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e42() {
+    // StringLiteral
+    function CHAR_e26() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 114) return false;
@@ -1191,27 +1163,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e42.constant = {value: "\\r"};
 
-    // StringLiteralExpression
-    function e43() {
+    // StringLiteral
+    function CHAR_e27() {
         OUT = "\r";
         return true;
     }
-    e43.constant = {value: "\r"};
 
     // SequenceExpression
-    function e44() {
+    function CHAR_e28() {
         const stateₒ = getState();
         let out;
-        if (e45()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e30()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e45() {
+    // StringLiteral
+    function CHAR_e29() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 116) return false;
@@ -1219,27 +1189,25 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e45.constant = {value: "\\t"};
 
-    // StringLiteralExpression
-    function e46() {
+    // StringLiteral
+    function CHAR_e30() {
         OUT = "\t";
         return true;
     }
-    e46.constant = {value: "\t"};
 
     // SequenceExpression
-    function e47() {
+    function CHAR_e31() {
         const stateₒ = getState();
         let out;
-        if (e48()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e32()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e33()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e48() {
+    // StringLiteral
+    function CHAR_e32() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
         if (IN.charCodeAt(IP + 1) !== 117) return false;
@@ -1247,84 +1215,80 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    let e49ₘ;
-    function e49(arg) {
+    let CHAR_e33ₘ;
+    function CHAR_e33(arg) {
         try {
-            return e49ₘ(arg);
+            return CHAR_e33ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('e49ₘ is not a function')) throw err;
-            e49ₘ = experiments_unicode(e50);
-            return e49ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_e33ₘ is not a function')) throw err;
+            CHAR_e33ₘ = unicode(Ɱ_json_modexpr2);
+            return CHAR_e33ₘ(arg);
         }
     }
 
-    // ExtensionExpression
+    // Intrinsic
 
-    // ModuleExpression
-    function e50(bindingName) {
-        switch (bindingName) {
-            case 'base': return 𝕊2_base;
-            case 'minDigits': return 𝕊2_maxDigits;
-            case 'maxDigits': return 𝕊2_maxDigits;
+    // ModuleStub
+    function Ɱ_json_modexpr2(member) {
+        switch (member) {
+            case 'base': return base;
+            case 'minDigits': return minDigits;
+            case 'maxDigits': return minDigits;
             default: return undefined;
         }
     }
 
-    // NumericLiteralExpression
-    function 𝕊2_base() {
+    // NumericLiteral
+    function base() {
         OUT = 16;
         return true;
     }
-    𝕊2_base.constant = {value: 16};
 
-    // NumericLiteralExpression
-    function 𝕊2_maxDigits() {
+    // NumericLiteral
+    function minDigits() {
         OUT = 4;
         return true;
     }
-    𝕊2_maxDigits.constant = {value: 4};
 
     // SequenceExpression
-    function e51() {
+    function Property_e() {
         const stateₒ = getState();
         let out;
-        if (json_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_COLON() {
+    function COLON() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COLON_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e52() {
+    // StringLiteral
+    function COLON_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 58) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e52.constant = {value: ":"};
 
     // QuantifiedExpression
-    function e53() {
+    function Object_e3() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e54()) break;
+            if (!Object_e4()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1333,122 +1297,119 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function e54() {
+    function Object_e4() {
         const stateₒ = getState();
         let out;
-        if (json_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_COMMA() {
+    function COMMA() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e55() {
+    // StringLiteral
+    function COMMA_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 44) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e55.constant = {value: ","};
 
     // RecordExpression
-    function e56() {
+    function Object_e5() {
         return parseRecord([]);
     }
 
     // SequenceExpression
-    function json_RBRACE() {
+    function RBRACE() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACE_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e57() {
+    // StringLiteral
+    function RBRACE_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 125) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e57.constant = {value: "}"};
 
     // SequenceExpression
-    function json_Array() {
+    function Array() {
         const stateₒ = getState();
         let out;
-        if (json_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Array_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_LBRACKET() {
+    function LBRACKET() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACKET_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e58() {
+    // StringLiteral
+    function LBRACKET_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 91) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e58.constant = {value: "["};
 
     // SelectionExpression
-    function e59() {
-        if (e60()) return true;
-        if (e63()) return true;
+    function Array_e() {
+        if (Array_e2()) return true;
+        if (Array_e5()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e60() {
+    function Array_e2() {
         const stateₒ = getState();
         let out;
-        if (json_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Array_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function json_Element() {
-        return parseList([json_Value]);
+    function Element() {
+        return parseList([Value]);
     }
 
     // QuantifiedExpression
-    function e61() {
+    function Array_e3() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e62()) break;
+            if (!Array_e4()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1457,44 +1418,43 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function e62() {
+    function Array_e4() {
         const stateₒ = getState();
         let out;
-        if (json_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function e63() {
+    function Array_e5() {
         return parseList([]);
     }
 
     // SequenceExpression
-    function json_RBRACKET() {
+    function RBRACKET() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACKET_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e64() {
+    // StringLiteral
+    function RBRACKET_e() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 93) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e64.constant = {value: "]"};
 
-    // ExtensionExpression
+    // Intrinsic
 
-    return json_start;
+    return start;
 })();
 
 
@@ -1503,28 +1463,28 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // ExtensionExpressions
-    const std_char = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].char({mode: 7});
-    const experiments_unicode = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\experiments.pen.js"].unicode({mode: 7});
-    const std_f64 = extensions["V:\\projects\\oss\\pen-monorepo\\packages\\core\\penc\\dist\\deps\\std.pen.js"].f64({mode: 7});
+    // Intrinsic
+    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 7});
+    const unicode = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 7});
+    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function json_start() {
+    function start() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // QuantifiedExpression
-    function json_WS() {
+    function WS() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e1()) break;
+            if (!WS_e()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1533,207 +1493,195 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function e1() {
-        if (e2()) return true;
-        if (e3()) return true;
-        if (e4()) return true;
-        if (e5()) return true;
+    function WS_e() {
+        if (WS_e2()) return true;
+        if (WS_e3()) return true;
+        if (WS_e4()) return true;
+        if (WS_e5()) return true;
         return false;
     }
 
-    // StringLiteralExpression
-    function e2() {
+    // StringLiteral
+    function WS_e2() {
         OUT = " ";
         return true;
     }
-    e2.constant = {value: " "};
 
-    // StringLiteralExpression
-    function e3() {
+    // StringLiteral
+    function WS_e3() {
         OUT = "\t";
         return true;
     }
-    e3.constant = {value: "\t"};
 
-    // StringLiteralExpression
-    function e4() {
+    // StringLiteral
+    function WS_e4() {
         OUT = "\n";
         return true;
     }
-    e4.constant = {value: "\n"};
 
-    // StringLiteralExpression
-    function e5() {
+    // StringLiteral
+    function WS_e5() {
         OUT = "\r";
         return true;
     }
-    e5.constant = {value: "\r"};
 
     // SelectionExpression
-    function json_Value() {
-        if (json_False()) return true;
-        if (json_Null()) return true;
-        if (json_True()) return true;
-        if (json_Object()) return true;
-        if (json_Array()) return true;
-        if (std_f64()) return true;
-        if (json_String()) return true;
+    function Value() {
+        if (False()) return true;
+        if (Null()) return true;
+        if (True()) return true;
+        if (Object()) return true;
+        if (Array()) return true;
+        if (f64()) return true;
+        if (String()) return true;
         return false;
     }
 
     // SequenceExpression
-    function json_False() {
+    function False() {
         const stateₒ = getState();
         let out;
-        if (e6()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e6() {
+    // StringLiteral
+    function False_e() {
         OUT = "false";
         return true;
     }
-    e6.constant = {value: "false"};
 
-    // BooleanLiteralExpression
-    function e7() {
+    // BooleanLiteral
+    function False_e2() {
         if (IN !== false || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e7.constant = {value: false};
 
     // SequenceExpression
-    function json_Null() {
+    function Null() {
         const stateₒ = getState();
         let out;
-        if (e8()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e9()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e8() {
+    // StringLiteral
+    function Null_e() {
         OUT = "null";
         return true;
     }
-    e8.constant = {value: "null"};
 
-    // NullLiteralExpression
-    function e9() {
+    // NullLiteral
+    function Null_e2() {
         if (IN !== null || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e9.constant = {value: null};
 
     // SequenceExpression
-    function json_True() {
+    function True() {
         const stateₒ = getState();
         let out;
-        if (e10()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e10() {
+    // StringLiteral
+    function True_e() {
         OUT = "true";
         return true;
     }
-    e10.constant = {value: "true"};
 
-    // BooleanLiteralExpression
-    function e11() {
+    // BooleanLiteral
+    function True_e2() {
         if (IN !== true || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    e11.constant = {value: true};
 
     // SequenceExpression
-    function json_Object() {
+    function Object() {
         const stateₒ = getState();
         let out;
-        if (json_LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Object_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_LBRACE() {
+    function LBRACE() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACE_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e12() {
+    // StringLiteral
+    function LBRACE_e() {
         OUT = "{";
         return true;
     }
-    e12.constant = {value: "{"};
 
     // SelectionExpression
-    function e13() {
-        if (e14()) return true;
-        if (e56()) return true;
+    function Object_e() {
+        if (Object_e2()) return true;
+        if (Object_e5()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e14() {
+    function Object_e2() {
         const stateₒ = getState();
         let out;
-        if (json_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e53()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Object_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function json_Property() {
-        return printField(json_String, e51);
+    function Property() {
+        return printField(String, Property_e);
     }
 
     // SequenceExpression
-    function json_String() {
+    function String() {
         const stateₒ = getState();
         let out;
-        if (json_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (String_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function json_DOUBLE_QUOTE() {
+    // StringLiteral
+    function DOUBLE_QUOTE() {
         OUT = "\"";
         return true;
     }
-    json_DOUBLE_QUOTE.constant = {value: "\""};
 
     // QuantifiedExpression
-    function e15() {
+    function String_e() {
         const IPₒ = IP;
         let out;
         do {
-            if (!json_CHAR()) break;
+            if (!CHAR()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1742,42 +1690,42 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function json_CHAR() {
-        if (e16()) return true;
-        if (e23()) return true;
-        if (e26()) return true;
-        if (e29()) return true;
-        if (e32()) return true;
-        if (e35()) return true;
-        if (e38()) return true;
-        if (e41()) return true;
-        if (e44()) return true;
-        if (e47()) return true;
+    function CHAR() {
+        if (CHAR_e()) return true;
+        if (CHAR_e7()) return true;
+        if (CHAR_e10()) return true;
+        if (CHAR_e13()) return true;
+        if (CHAR_e16()) return true;
+        if (CHAR_e19()) return true;
+        if (CHAR_e22()) return true;
+        if (CHAR_e25()) return true;
+        if (CHAR_e28()) return true;
+        if (CHAR_e31()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e16() {
+    function CHAR_e() {
         const stateₒ = getState();
         let out;
-        if (e17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e21()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e6()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // NotExpression
-    function e17() {
+    function CHAR_e2() {
         const stateₒ = getState();
-        const result = !e18();
+        const result = !CHAR_e3();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
-    // StringLiteralExpression
-    function e18() {
+    // StringLiteral
+    function CHAR_e3() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1785,19 +1733,18 @@ const print = (() => {
         OUT = "\\";
         return true;
     }
-    e18.constant = {value: "\\"};
 
     // NotExpression
-    function e19() {
+    function CHAR_e4() {
         const stateₒ = getState();
-        const result = !e20();
+        const result = !CHAR_e5();
         setState(stateₒ);
         OUT = undefined;
         return result;
     }
 
-    // StringLiteralExpression
-    function e20() {
+    // StringLiteral
+    function CHAR_e5() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1805,34 +1752,33 @@ const print = (() => {
         OUT = "\"";
         return true;
     }
-    e20.constant = {value: "\""};
 
     // ApplicationExpression
-    let e21ₘ;
-    function e21(arg) {
+    let CHAR_e6ₘ;
+    function CHAR_e6(arg) {
         try {
-            return e21ₘ(arg);
+            return CHAR_e6ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('e21ₘ is not a function')) throw err;
-            e21ₘ = std_char(e22);
-            return e21ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_e6ₘ is not a function')) throw err;
+            CHAR_e6ₘ = char(Ɱ_json_modexpr);
+            return CHAR_e6ₘ(arg);
         }
     }
 
-    // ExtensionExpression
+    // Intrinsic
 
-    // ModuleExpression
-    function e22(bindingName) {
-        switch (bindingName) {
-            case 'min': return 𝕊1_min;
-            case 'max': return 𝕊1_max;
+    // ModuleStub
+    function Ɱ_json_modexpr(member) {
+        switch (member) {
+            case 'min': return min;
+            case 'max': return max;
             default: return undefined;
         }
     }
 
-    // StringLiteralExpression
-    function 𝕊1_min() {
+    // StringLiteral
+    function min() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 32) return false;
@@ -1840,10 +1786,9 @@ const print = (() => {
         OUT = " ";
         return true;
     }
-    𝕊1_min.constant = {value: " "};
 
-    // StringLiteralExpression
-    function 𝕊1_max() {
+    // StringLiteral
+    function max() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 65535) return false;
@@ -1851,27 +1796,25 @@ const print = (() => {
         OUT = "￿";
         return true;
     }
-    𝕊1_max.constant = {value: "￿"};
 
     // SequenceExpression
-    function e23() {
+    function CHAR_e7() {
         const stateₒ = getState();
         let out;
-        if (e24()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e25()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e9()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e24() {
+    // StringLiteral
+    function CHAR_e8() {
         OUT = "\\\"";
         return true;
     }
-    e24.constant = {value: "\\\""};
 
-    // StringLiteralExpression
-    function e25() {
+    // StringLiteral
+    function CHAR_e9() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 34) return false;
@@ -1879,27 +1822,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e25.constant = {value: "\""};
 
     // SequenceExpression
-    function e26() {
+    function CHAR_e10() {
         const stateₒ = getState();
         let out;
-        if (e27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e28()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e27() {
+    // StringLiteral
+    function CHAR_e11() {
         OUT = "\\\\";
         return true;
     }
-    e27.constant = {value: "\\\\"};
 
-    // StringLiteralExpression
-    function e28() {
+    // StringLiteral
+    function CHAR_e12() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 92) return false;
@@ -1907,27 +1848,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e28.constant = {value: "\\"};
 
     // SequenceExpression
-    function e29() {
+    function CHAR_e13() {
         const stateₒ = getState();
         let out;
-        if (e30()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e31()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e30() {
+    // StringLiteral
+    function CHAR_e14() {
         OUT = "\\/";
         return true;
     }
-    e30.constant = {value: "\\/"};
 
-    // StringLiteralExpression
-    function e31() {
+    // StringLiteral
+    function CHAR_e15() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 47) return false;
@@ -1935,27 +1874,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e31.constant = {value: "/"};
 
     // SequenceExpression
-    function e32() {
+    function CHAR_e16() {
         const stateₒ = getState();
         let out;
-        if (e33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e34()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e18()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e33() {
+    // StringLiteral
+    function CHAR_e17() {
         OUT = "\\b";
         return true;
     }
-    e33.constant = {value: "\\b"};
 
-    // StringLiteralExpression
-    function e34() {
+    // StringLiteral
+    function CHAR_e18() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 8) return false;
@@ -1963,27 +1900,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e34.constant = {value: "\b"};
 
     // SequenceExpression
-    function e35() {
+    function CHAR_e19() {
         const stateₒ = getState();
         let out;
-        if (e36()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e37()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e21()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e36() {
+    // StringLiteral
+    function CHAR_e20() {
         OUT = "\\f";
         return true;
     }
-    e36.constant = {value: "\\f"};
 
-    // StringLiteralExpression
-    function e37() {
+    // StringLiteral
+    function CHAR_e21() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 12) return false;
@@ -1991,27 +1926,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e37.constant = {value: "\f"};
 
     // SequenceExpression
-    function e38() {
+    function CHAR_e22() {
         const stateₒ = getState();
         let out;
-        if (e39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e40()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e23()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e24()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e39() {
+    // StringLiteral
+    function CHAR_e23() {
         OUT = "\\n";
         return true;
     }
-    e39.constant = {value: "\\n"};
 
-    // StringLiteralExpression
-    function e40() {
+    // StringLiteral
+    function CHAR_e24() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 10) return false;
@@ -2019,27 +1952,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e40.constant = {value: "\n"};
 
     // SequenceExpression
-    function e41() {
+    function CHAR_e25() {
         const stateₒ = getState();
         let out;
-        if (e42()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e26()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e27()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e42() {
+    // StringLiteral
+    function CHAR_e26() {
         OUT = "\\r";
         return true;
     }
-    e42.constant = {value: "\\r"};
 
-    // StringLiteralExpression
-    function e43() {
+    // StringLiteral
+    function CHAR_e27() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 13) return false;
@@ -2047,27 +1978,25 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e43.constant = {value: "\r"};
 
     // SequenceExpression
-    function e44() {
+    function CHAR_e28() {
         const stateₒ = getState();
         let out;
-        if (e45()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e46()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e29()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e30()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e45() {
+    // StringLiteral
+    function CHAR_e29() {
         OUT = "\\t";
         return true;
     }
-    e45.constant = {value: "\\t"};
 
-    // StringLiteralExpression
-    function e46() {
+    // StringLiteral
+    function CHAR_e30() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 9) return false;
@@ -2075,102 +2004,97 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    e46.constant = {value: "\t"};
 
     // SequenceExpression
-    function e47() {
+    function CHAR_e31() {
         const stateₒ = getState();
         let out;
-        if (e48()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e49()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e32()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_e33()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e48() {
+    // StringLiteral
+    function CHAR_e32() {
         OUT = "\\u";
         return true;
     }
-    e48.constant = {value: "\\u"};
 
     // ApplicationExpression
-    let e49ₘ;
-    function e49(arg) {
+    let CHAR_e33ₘ;
+    function CHAR_e33(arg) {
         try {
-            return e49ₘ(arg);
+            return CHAR_e33ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('e49ₘ is not a function')) throw err;
-            e49ₘ = experiments_unicode(e50);
-            return e49ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_e33ₘ is not a function')) throw err;
+            CHAR_e33ₘ = unicode(Ɱ_json_modexpr2);
+            return CHAR_e33ₘ(arg);
         }
     }
 
-    // ExtensionExpression
+    // Intrinsic
 
-    // ModuleExpression
-    function e50(bindingName) {
-        switch (bindingName) {
-            case 'base': return 𝕊2_base;
-            case 'minDigits': return 𝕊2_maxDigits;
-            case 'maxDigits': return 𝕊2_maxDigits;
+    // ModuleStub
+    function Ɱ_json_modexpr2(member) {
+        switch (member) {
+            case 'base': return base;
+            case 'minDigits': return minDigits;
+            case 'maxDigits': return minDigits;
             default: return undefined;
         }
     }
 
-    // NumericLiteralExpression
-    function 𝕊2_base() {
+    // NumericLiteral
+    function base() {
         if (IN !== 16 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    𝕊2_base.constant = {value: 16};
 
-    // NumericLiteralExpression
-    function 𝕊2_maxDigits() {
+    // NumericLiteral
+    function minDigits() {
         if (IN !== 4 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    𝕊2_maxDigits.constant = {value: 4};
 
     // SequenceExpression
-    function e51() {
+    function Property_e() {
         const stateₒ = getState();
         let out;
-        if (json_COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Value()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_COLON() {
+    function COLON() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e52()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COLON_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e52() {
+    // StringLiteral
+    function COLON_e() {
         OUT = ":";
         return true;
     }
-    e52.constant = {value: ":"};
 
     // QuantifiedExpression
-    function e53() {
+    function Object_e3() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e54()) break;
+            if (!Object_e4()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -2179,113 +2103,110 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function e54() {
+    function Object_e4() {
         const stateₒ = getState();
         let out;
-        if (json_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Property()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_COMMA() {
+    function COMMA() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e55()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e55() {
+    // StringLiteral
+    function COMMA_e() {
         OUT = ",";
         return true;
     }
-    e55.constant = {value: ","};
 
     // RecordExpression
-    function e56() {
+    function Object_e5() {
         return printRecord([]);
     }
 
     // SequenceExpression
-    function json_RBRACE() {
+    function RBRACE() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e57()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACE_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e57() {
+    // StringLiteral
+    function RBRACE_e() {
         OUT = "}";
         return true;
     }
-    e57.constant = {value: "}"};
 
     // SequenceExpression
-    function json_Array() {
+    function Array() {
         const stateₒ = getState();
         let out;
-        if (json_LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e59()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Array_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // SequenceExpression
-    function json_LBRACKET() {
+    function LBRACKET() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e58()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (LBRACKET_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e58() {
+    // StringLiteral
+    function LBRACKET_e() {
         OUT = "[";
         return true;
     }
-    e58.constant = {value: "["};
 
     // SelectionExpression
-    function e59() {
-        if (e60()) return true;
-        if (e63()) return true;
+    function Array_e() {
+        if (Array_e2()) return true;
+        if (Array_e5()) return true;
         return false;
     }
 
     // SequenceExpression
-    function e60() {
+    function Array_e2() {
         const stateₒ = getState();
         let out;
-        if (json_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e61()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Array_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function json_Element() {
-        return printList([json_Value]);
+    function Element() {
+        return printList([Value]);
     }
 
     // QuantifiedExpression
-    function e61() {
+    function Array_e3() {
         const IPₒ = IP;
         let out;
         do {
-            if (!e62()) break;
+            if (!Array_e4()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -2294,39 +2215,38 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function e62() {
+    function Array_e4() {
         const stateₒ = getState();
         let out;
-        if (json_COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_Element()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // ListExpression
-    function e63() {
+    function Array_e5() {
         return printList([]);
     }
 
     // SequenceExpression
-    function json_RBRACKET() {
+    function RBRACKET() {
         const stateₒ = getState();
         let out;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (e64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (json_WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (RBRACKET_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function e64() {
+    // StringLiteral
+    function RBRACKET_e() {
         OUT = "]";
         return true;
     }
-    e64.constant = {value: "]"};
 
-    // ExtensionExpression
+    // Intrinsic
 
-    return json_start;
+    return start;
 })();

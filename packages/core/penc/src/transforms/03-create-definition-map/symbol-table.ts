@@ -4,7 +4,7 @@ import {assert} from '../../utils';
 
 // TODO: jsdoc...
 // TODO: ensure can never clash with any identifier name or moduleId
-export const ROOT_MODULE_ID = '@@root';
+export const ROOT_MODULE_ID = 'Ɱ__root';
 
 
 // TODO: jsdoc...
