@@ -10,10 +10,6 @@ import {createSourceFileMap} from './transforms';
 import {createModuleMap} from './transforms';
 import {createDefinitionMap} from './transforms';
 import {simplifyDefinitionMap} from './transforms';
-// import {desugarSyntax} from './transforms';
-// import {resolveSymbols} from './transforms';
-// import {checkSemantics} from './transforms';
-// import {generateSingleExpression} from './transforms';
 // import {resolveConstantValues} from './transforms';
 // import {generateTargetCode} from './transforms';
 
@@ -30,11 +26,7 @@ export function compile(options: CompilerOptions) {
 
     // Proceed through all stages in the compiler pipeline.
     const moduleMap = createModuleMap(sourceFileMap);
-    // const ast02 = desugarSyntax(ast01);
-    // const ast03 = resolveSymbols(ast02);
-    // checkSemantics(ast03);
 
-    // const il = generateSingleExpression(ast03);
     // const consts = resolveConstantValues(il);
     // const targetCode = generateTargetCode({il, consts});
 

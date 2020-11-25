@@ -143,7 +143,11 @@ ApplicationArgument
 
 RecordExpression
     = "{"   __   fields:RecordFieldList   __   "}"
-    { return {kind: 'RecordExpression', fields}; }
+    {
+        const names = new Set();
+        for (const {name} of fields) if (names.has(name)) error(`Duplicate field name '${name}'`); else names.add(name);
+        return {kind: 'RecordExpression', fields};
+    }
 
 FieldExpression
     = "{"   __   "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression   __   "}"
