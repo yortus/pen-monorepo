@@ -11,7 +11,6 @@ export interface Module {
 
 
 // TODO: jsdoc...
-// TODO: what about exported?
 export interface ModuleStub {
     readonly kind: 'ModuleStub';
     readonly moduleId: string;

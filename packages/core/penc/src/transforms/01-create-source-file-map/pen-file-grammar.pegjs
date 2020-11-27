@@ -10,8 +10,8 @@ BindingList
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 Binding
-    = ex:(EXPORT   __)?   left:(Identifier / ModulePattern)   __   "="   __   right:Expression
-    { return {kind: 'Binding', left, right, exported: !!ex}; }
+    = left:(Identifier / ModulePattern)   __   "="   __   right:Expression
+    { return {kind: 'Binding', left, right}; }
 
 ModulePattern
     = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
@@ -44,7 +44,7 @@ ModulePatternName
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
-        ModuleExpression                {export a=b c=d e=f}   {a=b}
+        ModuleExpression                {a=b c=d e=f}   {a=b}
         ListExpression                  [a, b, c]   [a]   []
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         NullLiteral                     null
@@ -242,9 +242,8 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / EXPORT / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
+RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
-EXPORT                  = "export"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }

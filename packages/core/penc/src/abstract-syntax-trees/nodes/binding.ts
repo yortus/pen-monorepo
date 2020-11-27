@@ -7,5 +7,4 @@ export interface Binding {
     readonly kind: 'Binding';
     readonly left: Identifier | Pattern;
     readonly right: Expression;
-    readonly exported: boolean;
 }
