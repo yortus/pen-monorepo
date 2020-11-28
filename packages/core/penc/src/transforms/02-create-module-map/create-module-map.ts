@@ -1,5 +1,5 @@
-import {Binding, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
-import {SourceFileMap, ModuleMap,} from '../../representations';
+import {Identifier, mapNode, Module, ModulePattern} from '../../abstract-syntax-trees';
+import {SourceFileMap, ModuleMap} from '../../representations';
 import {resolveModuleSpecifier} from '../../utils';
 
 
@@ -36,13 +36,18 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
             ModuleExpression: (modExpr): Identifier => {
                 let moduleId = genModuleId(file.path, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                let bindings: Binding[] = [];
+                let bindings: Module['bindings'][0][] = [];
                 let nestedModule: Module = {kind: 'Module', moduleId, parentModuleId, bindings};
                 modulesById[nestedModule.moduleId] = nestedModule;
 
                 // TODO: recurse...
                 parentModuleIds.push(nestedModule.moduleId);
-                for (let binding of modExpr.bindings) bindings.push(rec(binding));
+                for (let binding of modExpr.bindings) {
+                    bindings.push({
+                        left: rec(binding.left) as Identifier | ModulePattern,
+                        right: rec(binding.right),
+                    });
+                }
                 parentModuleIds.pop();
 
                 return {

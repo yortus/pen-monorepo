@@ -1,5 +1,5 @@
 import type {AbsPath} from '../../utils';
-import type {Binding} from './binding';
+import type {Pattern} from './pattern';
 
 
 /** Union of all node types that represent PEN expressions. */
@@ -88,7 +88,10 @@ export interface MemberExpression {
 
 export interface ModuleExpression {
     readonly kind: 'ModuleExpression';
-    readonly bindings: ReadonlyArray<Binding>;
+    readonly bindings: ReadonlyArray<{
+        readonly left: Identifier | Pattern;
+        readonly right: Expression;
+    }>;
 }
 
 

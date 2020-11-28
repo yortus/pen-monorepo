@@ -34,7 +34,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'BooleanLiteral': return n;
-            case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'Definition': return {...n, value: rec(n.value)};
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'Identifier': return n;
@@ -43,8 +42,8 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module), member: rec(n.member)};
-            case 'Module': return {...n, bindings: n.bindings.map(rec)};
-            case 'ModuleExpression': return {...n, bindings: n.bindings.map(rec)};
+            case 'Module': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
+            case 'ModuleExpression': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
             case 'ModulePattern': return n;
             case 'ModuleStub': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
@@ -56,7 +55,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Reference': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'SourceFile': return {...n, bindings: n.bindings.map(rec)};
+            case 'SourceFile': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
             case 'StringLiteral': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
