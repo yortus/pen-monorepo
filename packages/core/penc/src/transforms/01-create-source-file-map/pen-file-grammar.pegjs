@@ -14,7 +14,7 @@ Binding
     { return {kind: 'Binding', left, right}; }
 
 ModulePattern
-    = "{"   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   "}"
+    = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
     { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
 ModulePatternName
@@ -37,14 +37,14 @@ ModulePatternName
         QuantifiedExpression            a?   a(b)?   a.b?   {a: b}?
 
     PRECEDENCE 5
-        ApplicationExpression           a(b)   (a)b   a'blah'   a{b=c}                                                  NB: no whitespace between terms, else is sequence
-        MemberExpression                a.b   a.b   (a b).e   {foo=f}.foo                                               NB: no whitespace between terms, may relax later
+        ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+        MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
-        ModuleExpression                {a=b c=d e=f}   {a=b}
+        ModuleExpression                (a=b c=d e=f)   (a=b)
         ListExpression                  [a, b, c]   [a]   []
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         NullLiteral                     null
@@ -154,8 +154,11 @@ FieldExpression
     { return {kind: 'FieldExpression', name, value}; }
 
 ModuleExpression
-    = "{"   __   bindings:BindingList   __   "}"
-    { return {kind: 'ModuleExpression', bindings}; }
+    = "("   __   bindings:BindingList   __   ")"
+    {
+        // TODO: only accept 1..M bindings (not zero)?
+        return {kind: 'ModuleExpression', bindings};
+    }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"

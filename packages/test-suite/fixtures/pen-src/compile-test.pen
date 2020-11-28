@@ -1,16 +1,16 @@
 std = import 'std'
 
-digits = {
+digits = (
     one = (1)
     two = 2
     outer = mem
-}
+)
 
-{one as des} = digits
+(one as des) = digits
 ref = des
 mem = digits.two
 
-xxx = {d = digits}
+xxx = (d = digits)
 one = 1
 
 start = one | ref | mem | xxx.d.two | digits
@@ -20,13 +20,13 @@ start = one | ref | mem | xxx.d.two | digits
 
 // ================================================================================
 // TODO: was...
-// {char, f64} = import 'std'
+// (char, f64) = import 'std'
 // 
 // start = f64 x a b c
 // 
-// x = {
+// x = (
 //     x1 = x.x1? "rest"
-// }
+// )
 // 
 // a = "aaa"
 // b = "pre" c
