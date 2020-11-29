@@ -244,12 +244,14 @@ const parse = (() => {
         OUT = 1;
         return true;
     }
+    des.constant = {value: 1};
 
     // NumericLiteral
     function mem() {
         OUT = 2;
         return true;
     }
+    mem.constant = {value: 2};
 
     // ModuleStub
     function digits(member) {
@@ -287,6 +289,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    des.constant = {value: 1};
 
     // NumericLiteral
     function mem() {
@@ -295,6 +298,7 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
+    mem.constant = {value: 2};
 
     // ModuleStub
     function digits(member) {

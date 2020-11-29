@@ -1,6 +1,6 @@
-import {Identifier, mapNode, Module, ModulePattern} from '../../abstract-syntax-trees';
+import {Expression, Identifier, mapNode, Module, SourceFile} from '../../abstract-syntax-trees';
 import {SourceFileMap, ModuleMap} from '../../representations';
-import {resolveModuleSpecifier} from '../../utils';
+import {mapObj, resolveModuleSpecifier} from '../../utils';
 
 
 // TODO: jsdoc...
@@ -25,7 +25,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
         let module: Module = {
             kind: 'Module',
             moduleId: moduleIdsBySourceFilePath[file.path],
-            bindings: file.bindings,
+            bindings: convertBindings(file.bindings),
         };
         modulesById[module.moduleId] = module;
 
@@ -36,18 +36,13 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
             ModuleExpression: (modExpr): Identifier => {
                 let moduleId = genModuleId(file.path, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                let bindings: Module['bindings'][0][] = [];
-                let nestedModule: Module = {kind: 'Module', moduleId, parentModuleId, bindings};
+                let nestedModule: Module = {kind: 'Module', moduleId, parentModuleId, bindings: {}};
                 modulesById[nestedModule.moduleId] = nestedModule;
 
                 // TODO: recurse...
                 parentModuleIds.push(nestedModule.moduleId);
-                for (let binding of modExpr.bindings) {
-                    bindings.push({
-                        left: rec(binding.left) as Identifier | ModulePattern,
-                        right: rec(binding.right),
-                    });
-                }
+                const bindings = mapObj(convertBindings(modExpr.bindings), rec);
+                Object.assign(nestedModule, {bindings}); // TODO: nasty rewrite of readonly, fix
                 parentModuleIds.pop();
 
                 return {
@@ -108,4 +103,33 @@ function createModuleIdGenerator() {
         moduleIds.push(result);
         return result;
     }
+}
+
+
+// TODO: temp testing...
+function convertBindings(bindings: SourceFile['bindings']): Module['bindings'] {
+    const result = {} as {[name: string]: Expression};
+    for (let {left, right} of bindings) {
+        if (left.kind === 'Identifier') {
+            if (result.hasOwnProperty(left.name)) {
+                // TODO: improve diagnostic message eg line+col
+                new Error(`'${left.name}' is already defined`);
+            }
+            result[left.name] = right;
+        }
+        else /* left.kind === 'ModulePattern */ {
+            for (let {name, alias} of left.names) {
+                if (result.hasOwnProperty(alias || name)) {
+                    // TODO: improve diagnostic message eg line+col
+                    new Error(`'${alias || name}' is already defined`);
+                }
+                result[alias || name] = {
+                    kind: 'MemberExpression',
+                    module: right,
+                    member: {kind: 'Identifier', name},
+                };
+            }
+        }
+    }
+    return result;
 }

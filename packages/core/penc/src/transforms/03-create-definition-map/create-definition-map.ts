@@ -1,4 +1,4 @@
-import type {Expression, MemberExpression, ModuleStub, Reference} from '../../abstract-syntax-trees';
+import type {Expression, ModuleStub, Reference} from '../../abstract-syntax-trees';
 import {mapNode} from '../../abstract-syntax-trees';
 import {DefinitionMap, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
@@ -20,25 +20,9 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
 
         // Create a definition for each local name in the module.
         let bindingDefinitionIds = {} as Record<string, string>;
-        for (let {left, right} of bindings) {
-            // For a simple `name = value` binding, create a single definition.
-            if (left.kind === 'Identifier') {
-                const {definitionId} = define(moduleId, left.name, right);
-                bindingDefinitionIds[left.name] = definitionId;
-            }
-
-            // For a destructured `{a, b} = module` binding, create a definition for each name in the lhs.
-            else /* left.kind === 'ModulePattern' */ {
-                for (let {name, alias} of left.names) {
-                    let expr: MemberExpression = {
-                        kind: 'MemberExpression',
-                        module: right,
-                        member: {kind: 'Identifier', name},
-                    };
-                    const {definitionId} = define(moduleId, alias ?? name, expr);
-                    bindingDefinitionIds[alias ?? name] = definitionId;
-                }
-            }
+        for (let name of Object.keys(bindings)) {
+            const {definitionId} = define(moduleId, name, bindings[name]);
+            bindingDefinitionIds[name] = definitionId;
         }
 
         // Create a definition for the module itself, since it can also be a referenced directly.
