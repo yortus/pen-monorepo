@@ -1,5 +1,5 @@
 import {mapObj} from '../utils';
-import type {Expression, Node, Pattern} from './nodes';
+import type {Expression, Module, Node, Pattern} from './nodes';
 
 
 // TODO: revise/fix jsdoc...
@@ -87,6 +87,7 @@ type Mappings<MapObj> =
 
 // Helper type for widening specific node kinds to general node kind categories.
 type WidenKind<K extends Node['kind']> =
+    K extends Module['kind'] ? Module['kind'] : 
     K extends Expression['kind'] ? Expression['kind'] :
     K extends Pattern['kind'] ? Pattern['kind'] :
     K extends Node['kind'] ? K :

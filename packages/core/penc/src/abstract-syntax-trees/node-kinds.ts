@@ -18,6 +18,7 @@ export const expressionNodeKinds = createNodeKinds(
     // 'LambdaExpression',
     'ListExpression',
     'MemberExpression',
+    'Module',
     'ModuleExpression',
     'NotExpression',
     'NullLiteral',
@@ -36,7 +37,6 @@ export const expressionNodeKinds = createNodeKinds(
 export const allNodeKinds = createNodeKinds(
     'Binding',
     'Definition',
-    'Module',
     'ModuleStub',
     'SourceFile',
     ...patternNodeKinds,
