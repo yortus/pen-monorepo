@@ -20,6 +20,7 @@ export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): De
 
         // Create a definition for each local name in the module.
         let bindingDefinitionIds = {} as Record<string, string>;
+        assert(!Array.isArray(bindings)); // TODO: can remove this check? Should always be the Record form here
         for (let name of Object.keys(bindings)) {
             const {definitionId} = define(moduleId, name, bindings[name]);
             bindingDefinitionIds[name] = definitionId;

@@ -19,7 +19,15 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
-            case 'Module': return mapObj(n.bindings, rec), cb(n);
+            case 'Module': {
+                // TODO: shorten / tidy up...
+                if (Array.isArray(n.bindings)) {
+                    return n.bindings.forEach(b => (rec(b.left), rec(b.right))), cb(n);
+                }
+                else {
+                    return mapObj(n.bindings, rec), cb(n);
+                }
+            }
             case 'ModuleExpression': return n.bindings.forEach(b => (rec(b.left), rec(b.right))), cb(n);
             case 'ModulePattern': return cb(n);
             case 'ModuleStub': return cb(n);

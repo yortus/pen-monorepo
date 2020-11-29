@@ -41,7 +41,8 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
                 // TODO: recurse...
                 parentModuleIds.push(nestedModule.moduleId);
-                const bindings = mapObj(convertBindings(modExpr.bindings), rec);
+                let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
+                bindings = mapObj(bindings, rec);
                 Object.assign(nestedModule, {bindings}); // TODO: nasty rewrite of readonly, fix
                 parentModuleIds.pop();
 
@@ -107,7 +108,7 @@ function createModuleIdGenerator() {
 
 
 // TODO: temp testing...
-function convertBindings(bindings: SourceFile['bindings']): Module['bindings'] {
+function convertBindings(bindings: SourceFile['bindings']): {readonly [name: string]: Expression} {
     const result = {} as {[name: string]: Expression};
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {

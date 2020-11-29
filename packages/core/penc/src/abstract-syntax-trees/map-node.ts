@@ -43,7 +43,15 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             // case 'LambdaExpression': TODO: ...
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module), member: rec(n.member)};
-            case 'Module': return {...n, bindings: mapObj(n.bindings, rec)};
+            case 'Module': {
+                // TODO: shorten / tidy up...
+                if (Array.isArray(n.bindings)) {
+                    return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
+                }
+                else {
+                    return {...n, bindings: mapObj(n.bindings, rec)};
+                }
+            }
             case 'ModuleExpression': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
             case 'ModulePattern': return n;
             case 'ModuleStub': return n;
