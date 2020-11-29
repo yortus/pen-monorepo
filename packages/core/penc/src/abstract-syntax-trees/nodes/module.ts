@@ -1,5 +1,5 @@
-import type {Expression, Identifier} from './expression';
-import type {Pattern} from './pattern';
+import type {Binding} from './binding';
+import type {Expression} from './expression';
 
 
 /** An AST node type representing a PEN module. */
@@ -7,10 +7,7 @@ export interface Module {
     readonly kind: 'Module';
     readonly moduleId: string;
     readonly parentModuleId?: string; // lexically surrounding module. Only defined for module expressions.
-    readonly bindings:
-        | ReadonlyArray<{readonly left: Identifier | Pattern, readonly right: Expression}>
-        | {readonly [name: string]: Expression};
-    
+    readonly bindings: ReadonlyArray<Binding> | {readonly [name: string]: Expression};
 }
 
 

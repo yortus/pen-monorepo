@@ -34,6 +34,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
+            case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'Definition': return {...n, value: rec(n.value)};
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
@@ -46,13 +47,13 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Module': {
                 // TODO: shorten / tidy up...
                 if (Array.isArray(n.bindings)) {
-                    return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
+                    return {...n, bindings: n.bindings.map(rec)};
                 }
                 else {
                     return {...n, bindings: mapObj(n.bindings, rec)};
                 }
             }
-            case 'ModuleExpression': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
+            case 'ModuleExpression': return {...n, bindings: n.bindings.map(rec)};
             case 'ModulePattern': return n;
             case 'ModuleStub': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
@@ -64,7 +65,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Reference': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'SourceFile': return {...n, bindings: n.bindings.map(b => ({left: rec(b.left), right: rec(b.right)}))};
+            case 'SourceFile': return {...n, bindings: n.bindings.map(rec)};
             case 'StringLiteral': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

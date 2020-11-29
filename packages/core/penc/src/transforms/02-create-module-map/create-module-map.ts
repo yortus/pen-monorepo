@@ -1,4 +1,4 @@
-import {Expression, Identifier, mapNode, Module, SourceFile} from '../../abstract-syntax-trees';
+import {Binding, Expression, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
 import {SourceFileMap, ModuleMap} from '../../representations';
 import {mapObj, resolveModuleSpecifier} from '../../utils';
 
@@ -108,7 +108,7 @@ function createModuleIdGenerator() {
 
 
 // TODO: temp testing...
-function convertBindings(bindings: SourceFile['bindings']): {readonly [name: string]: Expression} {
+function convertBindings(bindings: readonly Binding[]): {readonly [name: string]: Expression} {
     const result = {} as {[name: string]: Expression};
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {

@@ -34,6 +34,7 @@ export const expressionNodeKinds = createNodeKinds(
 
 /** Array of all node kinds. */
 export const allNodeKinds = createNodeKinds(
+    'Binding',
     'Definition',
     'Module',
     'ModuleStub',

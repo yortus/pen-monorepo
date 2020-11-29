@@ -11,7 +11,7 @@ BindingList
 
 Binding
     = left:(Identifier / ModulePattern)   __   "="   __   right:Expression
-    { return {left, right}; }
+    { return {kind: 'Binding', left, right}; }
 
 ModulePattern
     = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
