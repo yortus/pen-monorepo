@@ -14,7 +14,7 @@ export function createDefinitionMap({modulesById, parentModuleIdsByModuleId, sta
     const {createScope, define, definitions, lookup} = createSymbolTable();
 
     // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
-    for (const {moduleId, bindings} of Object.values(modulesById)) {
+    for (const [moduleId, {bindings}] of Object.entries(modulesById)) {
         const parentModuleId = parentModuleIdsByModuleId[moduleId];
 
         // Create a scope for the module.

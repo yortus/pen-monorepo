@@ -2,7 +2,6 @@ const moduleMap = {
   modulesById: {
     "Ɱ_compile_test": {
       kind: "Module",
-      moduleId: "Ɱ_compile_test",
       bindings: {
         std: {
           kind: "Identifier",
@@ -89,7 +88,6 @@ const moduleMap = {
     },
     "Ɱ_compile_test_modexpr": {
       kind: "Module",
-      moduleId: "Ɱ_compile_test_modexpr",
       bindings: {
         one: {
           kind: "ParenthesisedExpression",
@@ -110,7 +108,6 @@ const moduleMap = {
     },
     "Ɱ_compile_test_modexpr2": {
       kind: "Module",
-      moduleId: "Ɱ_compile_test_modexpr2",
       bindings: {
         d: {
           kind: "Identifier",
@@ -120,7 +117,6 @@ const moduleMap = {
     },
     "Ɱ_std": {
       kind: "Module",
-      moduleId: "Ɱ_std",
       bindings: {
         char: {
           kind: "Intrinsic",

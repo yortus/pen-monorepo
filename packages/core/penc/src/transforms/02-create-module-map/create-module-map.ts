@@ -23,26 +23,26 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
     for (let file of Object.values(sourceFilesByPath)) {
 
         // Add a module to the module map for this file.
-        let module: Module = {
+        const moduleId = moduleIdsBySourceFilePath[file.path];
+        const module: Module = {
             kind: 'Module',
-            moduleId: moduleIdsBySourceFilePath[file.path],
             bindings: convertBindings(file.bindings),
         };
-        modulesById[module.moduleId] = module;
+        modulesById[moduleId] = module;
 
         // Hoist any inline module expressions out of the AST and into the module map.
         // In this process, each ModuleExpression node is replaced with an equivalent Identifier node.
-        let parentModuleIds = [module.moduleId];
+        let parentModuleIds = [moduleId];
         let {bindings} = mapNode(module, rec => ({
             ModuleExpression: (modExpr): Identifier => {
-                let moduleId = genModuleId(file.path, 'modexpr');
+                let exprModuleId = genModuleId(file.path, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                parentModuleIdsByModuleId[moduleId] = parentModuleId;
-                let nestedModule: Module = {kind: 'Module', moduleId, bindings: {}};
-                modulesById[nestedModule.moduleId] = nestedModule;
+                parentModuleIdsByModuleId[exprModuleId] = parentModuleId;
+                let nestedModule: Module = {kind: 'Module', bindings: {}};
+                modulesById[exprModuleId] = nestedModule;
 
                 // TODO: recurse...
-                parentModuleIds.push(nestedModule.moduleId);
+                parentModuleIds.push(exprModuleId);
                 let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
                 bindings = mapObj(bindings, rec);
                 Object.assign(nestedModule, {bindings}); // TODO: nasty rewrite of readonly, fix
@@ -50,7 +50,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
                 return {
                     kind: 'Identifier',
-                    name: moduleId,
+                    name: exprModuleId,
                 };
             },
 

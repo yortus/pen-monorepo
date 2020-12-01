@@ -89,7 +89,6 @@ export interface MemberExpression {
 
 export interface Module {
     readonly kind: 'Module';
-    readonly moduleId: string;
     readonly bindings: ReadonlyArray<Binding> | {readonly [name: string]: Expression};
 }
 

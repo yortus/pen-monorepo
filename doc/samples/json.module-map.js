@@ -2,7 +2,6 @@ const moduleMap = {
   modulesById: {
     "Ɱ_json": {
       kind: "Module",
-      moduleId: "Ɱ_json",
       bindings: {
         char: {
           kind: "MemberExpression",
@@ -653,7 +652,6 @@ const moduleMap = {
     },
     "Ɱ_json_modexpr": {
       kind: "Module",
-      moduleId: "Ɱ_json_modexpr",
       bindings: {
         min: {
           kind: "StringLiteral",
@@ -671,7 +669,6 @@ const moduleMap = {
     },
     "Ɱ_json_modexpr2": {
       kind: "Module",
-      moduleId: "Ɱ_json_modexpr2",
       bindings: {
         base: {
           kind: "NumericLiteral",
@@ -689,7 +686,6 @@ const moduleMap = {
     },
     "Ɱ_std": {
       kind: "Module",
-      moduleId: "Ɱ_std",
       bindings: {
         char: {
           kind: "Intrinsic",
@@ -715,7 +711,6 @@ const moduleMap = {
     },
     "Ɱ_experiments": {
       kind: "Module",
-      moduleId: "Ɱ_experiments",
       bindings: {
         unicode: {
           kind: "Intrinsic",
