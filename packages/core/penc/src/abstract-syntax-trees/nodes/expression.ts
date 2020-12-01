@@ -14,7 +14,6 @@ export type Expression =
     | ListExpression
     | MemberExpression
     | Module
-    | ModuleExpression
     | NotExpression
     | NullLiteral
     | NumericLiteral
@@ -90,13 +89,6 @@ export interface MemberExpression {
 export interface Module {
     readonly kind: 'Module';
     readonly bindings: ReadonlyArray<Binding> | {readonly [name: string]: Expression};
-}
-
-
-// TODO: remove...
-export interface ModuleExpression {
-    readonly kind: 'ModuleExpression';
-    readonly bindings: ReadonlyArray<Binding>;
 }
 
 

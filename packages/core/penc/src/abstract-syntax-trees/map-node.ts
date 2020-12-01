@@ -1,5 +1,5 @@
 import {mapObj} from '../utils';
-import type {Expression, Module, Node, Pattern} from './nodes';
+import type {Binding, Expression, Node, Pattern} from './nodes';
 
 
 // TODO: revise/fix jsdoc...
@@ -53,7 +53,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
                     return {...n, bindings: mapObj(n.bindings, rec)};
                 }
             }
-            case 'ModuleExpression': return {...n, bindings: n.bindings.map(rec)};
             case 'ModulePattern': return n;
             case 'ModuleStub': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
@@ -87,8 +86,8 @@ type Mappings<MapObj> =
 
 // Helper type for widening specific node kinds to general node kind categories.
 type WidenKind<K extends Node['kind']> =
-    K extends Module['kind'] ? Module['kind'] : 
     K extends Expression['kind'] ? Expression['kind'] :
+    K extends Binding['kind'] ? Binding['kind'] :
     K extends Pattern['kind'] ? Pattern['kind'] :
     K extends Node['kind'] ? K :
     never;

@@ -19,7 +19,6 @@ export const expressionNodeKinds = createNodeKinds(
     'ListExpression',
     'MemberExpression',
     'Module',
-    'ModuleExpression',
     'NotExpression',
     'NullLiteral',
     'NumericLiteral',

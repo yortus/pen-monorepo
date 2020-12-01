@@ -44,7 +44,7 @@ ModulePatternName
         ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
-        ModuleExpression                (a=b c=d e=f)   (a=b)
+        Module                          (a=b c=d e=f)   (a=b)
         ListExpression                  [a, b, c]   [a]   []
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         NullLiteral                     null
@@ -81,7 +81,7 @@ PrimaryExpression
     // = LambdaExpression
     = RecordExpression
     / FieldExpression
-    / ModuleExpression
+    / Module
     / ListExpression
     / ParenthesisedExpression
     / NullLiteral
@@ -153,12 +153,9 @@ FieldExpression
     = "{"   __   "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression   __   "}"
     { return {kind: 'FieldExpression', name, value}; }
 
-ModuleExpression
+Module
     = "("   __   bindings:BindingList   __   ")"
-    {
-        // TODO: only accept 1..M bindings (not zero)?
-        return {kind: 'ModuleExpression', bindings};
-    }
+    { return {kind: 'Module', bindings}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"

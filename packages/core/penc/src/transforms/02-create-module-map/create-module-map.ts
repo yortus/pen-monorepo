@@ -5,7 +5,7 @@ import {mapObj, resolveModuleSpecifier} from '../../utils';
 
 // TODO: jsdoc...
 // - takes a collection of source files
-// - converts all ModuleExpressions and ImportExpressions to Identifiers
+// - converts all nested Modules and ImportExpressions to Identifiers
 // - outputs a collection of modules
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
@@ -22,27 +22,24 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
     const parentModuleIdsByModuleId: Record<string, string> = {};
     for (let file of Object.values(sourceFilesByPath)) {
 
-        // Add a module to the module map for this file.
-        const moduleId = moduleIdsBySourceFilePath[file.path];
-        const module: Module = {
-            kind: 'Module',
-            bindings: convertBindings(file.bindings),
-        };
-        modulesById[moduleId] = module;
+        // TODO: temp fix this... next transform depends on parent modules coming before their nested modules
+        // when iterating over the KVPs in modulesById... this placeholder guarantees that iteration order.
+        // Better to fix transforms to not depend on ordering - should build an order using the parentModuleIdsByModuleId data.
+        modulesById[moduleIdsBySourceFilePath[file.path]] = {} as never;
 
         // Hoist any inline module expressions out of the AST and into the module map.
-        // In this process, each ModuleExpression node is replaced with an equivalent Identifier node.
-        let parentModuleIds = [moduleId];
-        let {bindings} = mapNode(module, rec => ({
-            ModuleExpression: (modExpr): Identifier => {
-                let exprModuleId = genModuleId(file.path, 'modexpr');
+        // In this process, each nested Module node is replaced with an equivalent Identifier node.
+        let parentModuleIds = [moduleIdsBySourceFilePath[file.path]];
+        let bindings = file.bindings.map(binding => mapNode(binding, rec => ({
+            Module: (modExpr): Identifier => {
+                let nestedModuleId = genModuleId(file.path, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                parentModuleIdsByModuleId[exprModuleId] = parentModuleId;
+                parentModuleIdsByModuleId[nestedModuleId] = parentModuleId;
                 let nestedModule: Module = {kind: 'Module', bindings: {}};
-                modulesById[exprModuleId] = nestedModule;
+                modulesById[nestedModuleId] = nestedModule;
 
                 // TODO: recurse...
-                parentModuleIds.push(exprModuleId);
+                parentModuleIds.push(nestedModuleId);
                 let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
                 bindings = mapObj(bindings, rec);
                 Object.assign(nestedModule, {bindings}); // TODO: nasty rewrite of readonly, fix
@@ -50,7 +47,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
                 return {
                     kind: 'Identifier',
-                    name: exprModuleId,
+                    name: nestedModuleId,
                 };
             },
 
@@ -62,11 +59,11 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
                     name: moduleIdsBySourceFilePath[path],
                 };
             },
+        })));
 
-        }));
-
-        // TODO: what a mess... fix
-        Object.assign(module, {bindings});
+        // Add a module to the module map for the source file itself.
+        const module: Module = {kind: 'Module', bindings: convertBindings(bindings)};
+        modulesById[moduleIdsBySourceFilePath[file.path]] = module;
     }
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
