@@ -1,2 +1,2 @@
-{} = import './c'
-{} = import './b' // NB: self ref
+() = import './c'
+() = import './b' // NB: self ref

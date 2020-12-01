@@ -1,20 +1,20 @@
-{f as foo, b as bar, baz} = import './a'
-{} = import './b.pen'
-{char} = import 'std'
+(f as foo, b as bar, baz) = import './a'
+() = import './b.pen'
+(char) = import 'std'
 
 start = result
 
-digit = char{min="0" max="9"}
-alpha = char{min="a" max="z"} | char{min="A" max="Z"}
+digit = char(min="0" max="9")
+alpha = char(min="a" max="z") | char(min="A" max="Z")
 
 result = foo(bar baz)
 
 myList = [digit, digit digit, digit digit digit]
 
-rec = {
+rec = (
     b = 'b thing'
     d = 'd thing'
-}
+)
 
 r2 = rec
 r2d = rec.d

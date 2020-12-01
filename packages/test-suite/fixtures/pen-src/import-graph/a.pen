@@ -1,5 +1,5 @@
-{} = import './c'
-{} = import './b.pen'
+() = import './c'
+() = import './b.pen'
 
 
 f = "foo"

@@ -230,20 +230,20 @@ const extensions = {
 const parse = (() => {
 
     // ApplicationExpression
-    let import_graph_resultₘ;
-    function import_graph_result(arg) {
+    let startₘ;
+    function start(arg) {
         try {
-            return import_graph_resultₘ(arg);
+            return startₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('import_graph_resultₘ is not a function')) throw err;
-            import_graph_resultₘ = a_f(e1);
-            return import_graph_resultₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
+            startₘ = foo(start_e);
+            return startₘ(arg);
         }
     }
 
-    // StringLiteralExpression
-    function a_f() {
+    // StringLiteral
+    function foo() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -252,20 +252,20 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    a_f.constant = {value: "foo"};
+    foo.constant = {value: "foo"};
 
     // SequenceExpression
-    function e1() {
+    function start_e() {
         const stateₒ = getState();
         let out;
-        if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (baz()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function a_b() {
+    // StringLiteral
+    function bar() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -274,10 +274,10 @@ const parse = (() => {
         OUT = "bar";
         return true;
     }
-    a_b.constant = {value: "bar"};
+    bar.constant = {value: "bar"};
 
-    // StringLiteralExpression
-    function a_baz() {
+    // StringLiteral
+    function baz() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
         if (IN.charCodeAt(IP + 1) !== 97) return false;
@@ -286,9 +286,9 @@ const parse = (() => {
         OUT = "baz";
         return true;
     }
-    a_baz.constant = {value: "baz"};
+    baz.constant = {value: "baz"};
 
-    return import_graph_result;
+    return start;
 })();
 
 
@@ -298,20 +298,20 @@ const parse = (() => {
 const print = (() => {
 
     // ApplicationExpression
-    let import_graph_resultₘ;
-    function import_graph_result(arg) {
+    let startₘ;
+    function start(arg) {
         try {
-            return import_graph_resultₘ(arg);
+            return startₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('import_graph_resultₘ is not a function')) throw err;
-            import_graph_resultₘ = a_f(e1);
-            return import_graph_resultₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
+            startₘ = foo(start_e);
+            return startₘ(arg);
         }
     }
 
-    // StringLiteralExpression
-    function a_f() {
+    // StringLiteral
+    function foo() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -321,20 +321,20 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    a_f.constant = {value: "foo"};
+    foo.constant = {value: "foo"};
 
     // SequenceExpression
-    function e1() {
+    function start_e() {
         const stateₒ = getState();
         let out;
-        if (a_b()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (a_baz()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (baz()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteralExpression
-    function a_b() {
+    // StringLiteral
+    function bar() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -344,10 +344,10 @@ const print = (() => {
         OUT = "bar";
         return true;
     }
-    a_b.constant = {value: "bar"};
+    bar.constant = {value: "bar"};
 
-    // StringLiteralExpression
-    function a_baz() {
+    // StringLiteral
+    function baz() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 98) return false;
@@ -357,7 +357,7 @@ const print = (() => {
         OUT = "baz";
         return true;
     }
-    a_baz.constant = {value: "baz"};
+    baz.constant = {value: "baz"};
 
-    return import_graph_result;
+    return start;
 })();
