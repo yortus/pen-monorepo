@@ -410,7 +410,7 @@ const sourceFileMap = {
                       name: "char",
                     },
                     argument: {
-                      kind: "ModuleExpression",
+                      kind: "Module",
                       bindings: [
                         {
                           kind: "Binding",
@@ -595,7 +595,7 @@ const sourceFileMap = {
                       name: "unicode",
                     },
                     argument: {
-                      kind: "ModuleExpression",
+                      kind: "Module",
                       bindings: [
                         {
                           kind: "Binding",

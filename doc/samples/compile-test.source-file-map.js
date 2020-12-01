@@ -22,7 +22,7 @@ const sourceFileMap = {
             name: "digits",
           },
           right: {
-            kind: "ModuleExpression",
+            kind: "Module",
             bindings: [
               {
                 kind: "Binding",
@@ -115,7 +115,7 @@ const sourceFileMap = {
             name: "xxx",
           },
           right: {
-            kind: "ModuleExpression",
+            kind: "Module",
             bindings: [
               {
                 kind: "Binding",
