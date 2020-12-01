@@ -3,7 +3,7 @@ const definitionMap = {
     char: {
       kind: "Definition",
       definitionId: "char",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "char",
       value: {
         kind: "Reference",
@@ -13,7 +13,7 @@ const definitionMap = {
     f64: {
       kind: "Definition",
       definitionId: "f64",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "f64",
       value: {
         kind: "Reference",
@@ -23,7 +23,7 @@ const definitionMap = {
     unicode: {
       kind: "Definition",
       definitionId: "unicode",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "unicode",
       value: {
         kind: "Reference",
@@ -33,7 +33,7 @@ const definitionMap = {
     start: {
       kind: "Definition",
       definitionId: "start",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "start",
       value: {
         kind: "SequenceExpression",
@@ -56,7 +56,7 @@ const definitionMap = {
     Value: {
       kind: "Definition",
       definitionId: "Value",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Value",
       value: {
         kind: "SelectionExpression",
@@ -95,7 +95,7 @@ const definitionMap = {
     False: {
       kind: "Definition",
       definitionId: "False",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "False",
       value: {
         kind: "SequenceExpression",
@@ -116,7 +116,7 @@ const definitionMap = {
     Null: {
       kind: "Definition",
       definitionId: "Null",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Null",
       value: {
         kind: "SequenceExpression",
@@ -137,7 +137,7 @@ const definitionMap = {
     True: {
       kind: "Definition",
       definitionId: "True",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "True",
       value: {
         kind: "SequenceExpression",
@@ -158,7 +158,7 @@ const definitionMap = {
     Object: {
       kind: "Definition",
       definitionId: "Object",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Object",
       value: {
         kind: "SequenceExpression",
@@ -219,7 +219,7 @@ const definitionMap = {
     Property: {
       kind: "Definition",
       definitionId: "Property",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Property",
       value: {
         kind: "FieldExpression",
@@ -245,7 +245,7 @@ const definitionMap = {
     Array: {
       kind: "Definition",
       definitionId: "Array",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Array",
       value: {
         kind: "SequenceExpression",
@@ -306,7 +306,7 @@ const definitionMap = {
     Element: {
       kind: "Definition",
       definitionId: "Element",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Element",
       value: {
         kind: "ListExpression",
@@ -321,7 +321,7 @@ const definitionMap = {
     Number: {
       kind: "Definition",
       definitionId: "Number",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "Number",
       value: {
         kind: "Reference",
@@ -331,7 +331,7 @@ const definitionMap = {
     String: {
       kind: "Definition",
       definitionId: "String",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "String",
       value: {
         kind: "SequenceExpression",
@@ -358,7 +358,7 @@ const definitionMap = {
     CHAR: {
       kind: "Definition",
       definitionId: "CHAR",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "CHAR",
       value: {
         kind: "SelectionExpression",
@@ -392,7 +392,7 @@ const definitionMap = {
                 },
                 argument: {
                   kind: "Reference",
-                  definitionId: "@json_modexpr",
+                  definitionId: "Ɱ_json_modexpr",
                 },
               },
             ],
@@ -550,7 +550,7 @@ const definitionMap = {
                 },
                 argument: {
                   kind: "Reference",
-                  definitionId: "@json_modexpr2",
+                  definitionId: "Ɱ_json_modexpr2",
                 },
               },
             ],
@@ -561,7 +561,7 @@ const definitionMap = {
     LBRACE: {
       kind: "Definition",
       definitionId: "LBRACE",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "LBRACE",
       value: {
         kind: "SequenceExpression",
@@ -586,7 +586,7 @@ const definitionMap = {
     RBRACE: {
       kind: "Definition",
       definitionId: "RBRACE",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "RBRACE",
       value: {
         kind: "SequenceExpression",
@@ -611,7 +611,7 @@ const definitionMap = {
     LBRACKET: {
       kind: "Definition",
       definitionId: "LBRACKET",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "LBRACKET",
       value: {
         kind: "SequenceExpression",
@@ -636,7 +636,7 @@ const definitionMap = {
     RBRACKET: {
       kind: "Definition",
       definitionId: "RBRACKET",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "RBRACKET",
       value: {
         kind: "SequenceExpression",
@@ -661,7 +661,7 @@ const definitionMap = {
     COLON: {
       kind: "Definition",
       definitionId: "COLON",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "COLON",
       value: {
         kind: "SequenceExpression",
@@ -686,7 +686,7 @@ const definitionMap = {
     COMMA: {
       kind: "Definition",
       definitionId: "COMMA",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "COMMA",
       value: {
         kind: "SequenceExpression",
@@ -711,7 +711,7 @@ const definitionMap = {
     DOUBLE_QUOTE: {
       kind: "Definition",
       definitionId: "DOUBLE_QUOTE",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "DOUBLE_QUOTE",
       value: {
         kind: "StringLiteral",
@@ -723,7 +723,7 @@ const definitionMap = {
     WS: {
       kind: "Definition",
       definitionId: "WS",
-      moduleId: "@json",
+      moduleId: "Ɱ_json",
       localName: "WS",
       value: {
         kind: "QuantifiedExpression",
@@ -762,14 +762,14 @@ const definitionMap = {
         quantifier: "*",
       },
     },
-    "@json": {
+    "Ɱ_json": {
       kind: "Definition",
-      definitionId: "@json",
-      moduleId: "@@root",
-      localName: "@json",
+      definitionId: "Ɱ_json",
+      moduleId: "Ɱ__root",
+      localName: "Ɱ_json",
       value: {
         kind: "ModuleStub",
-        moduleId: "@json",
+        moduleId: "Ɱ_json",
         bindingDefinitionIds: {
           char: "char",
           f64: "f64",
@@ -800,7 +800,7 @@ const definitionMap = {
     min: {
       kind: "Definition",
       definitionId: "min",
-      moduleId: "@json_modexpr",
+      moduleId: "Ɱ_json_modexpr",
       localName: "min",
       value: {
         kind: "StringLiteral",
@@ -812,7 +812,7 @@ const definitionMap = {
     max: {
       kind: "Definition",
       definitionId: "max",
-      moduleId: "@json_modexpr",
+      moduleId: "Ɱ_json_modexpr",
       localName: "max",
       value: {
         kind: "StringLiteral",
@@ -821,14 +821,14 @@ const definitionMap = {
         abstract: false,
       },
     },
-    "@json_modexpr": {
+    "Ɱ_json_modexpr": {
       kind: "Definition",
-      definitionId: "@json_modexpr",
-      moduleId: "@@root",
-      localName: "@json_modexpr",
+      definitionId: "Ɱ_json_modexpr",
+      moduleId: "Ɱ__root",
+      localName: "Ɱ_json_modexpr",
       value: {
         kind: "ModuleStub",
-        moduleId: "@json_modexpr",
+        moduleId: "Ɱ_json_modexpr",
         bindingDefinitionIds: {
           min: "min",
           max: "max",
@@ -838,7 +838,7 @@ const definitionMap = {
     base: {
       kind: "Definition",
       definitionId: "base",
-      moduleId: "@json_modexpr2",
+      moduleId: "Ɱ_json_modexpr2",
       localName: "base",
       value: {
         kind: "NumericLiteral",
@@ -848,7 +848,7 @@ const definitionMap = {
     minDigits: {
       kind: "Definition",
       definitionId: "minDigits",
-      moduleId: "@json_modexpr2",
+      moduleId: "Ɱ_json_modexpr2",
       localName: "minDigits",
       value: {
         kind: "NumericLiteral",
@@ -858,21 +858,21 @@ const definitionMap = {
     maxDigits: {
       kind: "Definition",
       definitionId: "maxDigits",
-      moduleId: "@json_modexpr2",
+      moduleId: "Ɱ_json_modexpr2",
       localName: "maxDigits",
       value: {
         kind: "NumericLiteral",
         value: 4,
       },
     },
-    "@json_modexpr2": {
+    "Ɱ_json_modexpr2": {
       kind: "Definition",
-      definitionId: "@json_modexpr2",
-      moduleId: "@@root",
-      localName: "@json_modexpr2",
+      definitionId: "Ɱ_json_modexpr2",
+      moduleId: "Ɱ__root",
+      localName: "Ɱ_json_modexpr2",
       value: {
         kind: "ModuleStub",
-        moduleId: "@json_modexpr2",
+        moduleId: "Ɱ_json_modexpr2",
         bindingDefinitionIds: {
           base: "base",
           minDigits: "minDigits",
@@ -883,7 +883,7 @@ const definitionMap = {
     char2: {
       kind: "Definition",
       definitionId: "char2",
-      moduleId: "@std",
+      moduleId: "Ɱ_std",
       localName: "char",
       value: {
         kind: "Intrinsic",
@@ -894,7 +894,7 @@ const definitionMap = {
     f642: {
       kind: "Definition",
       definitionId: "f642",
-      moduleId: "@std",
+      moduleId: "Ɱ_std",
       localName: "f64",
       value: {
         kind: "Intrinsic",
@@ -905,7 +905,7 @@ const definitionMap = {
     i32: {
       kind: "Definition",
       definitionId: "i32",
-      moduleId: "@std",
+      moduleId: "Ɱ_std",
       localName: "i32",
       value: {
         kind: "Intrinsic",
@@ -916,7 +916,7 @@ const definitionMap = {
     memoise: {
       kind: "Definition",
       definitionId: "memoise",
-      moduleId: "@std",
+      moduleId: "Ɱ_std",
       localName: "memoise",
       value: {
         kind: "Intrinsic",
@@ -924,14 +924,14 @@ const definitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
       },
     },
-    "@std": {
+    "Ɱ_std": {
       kind: "Definition",
-      definitionId: "@std",
-      moduleId: "@@root",
-      localName: "@std",
+      definitionId: "Ɱ_std",
+      moduleId: "Ɱ__root",
+      localName: "Ɱ_std",
       value: {
         kind: "ModuleStub",
-        moduleId: "@std",
+        moduleId: "Ɱ_std",
         bindingDefinitionIds: {
           char: "char2",
           f64: "f642",
@@ -943,7 +943,7 @@ const definitionMap = {
     unicode2: {
       kind: "Definition",
       definitionId: "unicode2",
-      moduleId: "@experiments",
+      moduleId: "Ɱ_experiments",
       localName: "unicode",
       value: {
         kind: "Intrinsic",
@@ -951,14 +951,14 @@ const definitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
       },
     },
-    "@experiments": {
+    "Ɱ_experiments": {
       kind: "Definition",
-      definitionId: "@experiments",
-      moduleId: "@@root",
-      localName: "@experiments",
+      definitionId: "Ɱ_experiments",
+      moduleId: "Ɱ__root",
+      localName: "Ɱ_experiments",
       value: {
         kind: "ModuleStub",
-        moduleId: "@experiments",
+        moduleId: "Ɱ_experiments",
         bindingDefinitionIds: {
           unicode: "unicode2",
         },

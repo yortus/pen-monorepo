@@ -573,7 +573,7 @@ const simplifiedDefinitionMap = {
         },
         argument: {
           kind: "Reference",
-          definitionId: "@json_modexpr",
+          definitionId: "Ɱ_json_modexpr",
         },
       },
     },
@@ -588,14 +588,14 @@ const simplifiedDefinitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
       },
     },
-    "@json_modexpr": {
+    "Ɱ_json_modexpr": {
       kind: "Definition",
-      definitionId: "@json_modexpr",
+      definitionId: "Ɱ_json_modexpr",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "ModuleStub",
-        moduleId: "@json_modexpr",
+        moduleId: "Ɱ_json_modexpr",
         bindingDefinitionIds: {
           min: "min",
           max: "max",
@@ -1014,7 +1014,7 @@ const simplifiedDefinitionMap = {
         },
         argument: {
           kind: "Reference",
-          definitionId: "@json_modexpr2",
+          definitionId: "Ɱ_json_modexpr2",
         },
       },
     },
@@ -1029,14 +1029,14 @@ const simplifiedDefinitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
       },
     },
-    "@json_modexpr2": {
+    "Ɱ_json_modexpr2": {
       kind: "Definition",
-      definitionId: "@json_modexpr2",
+      definitionId: "Ɱ_json_modexpr2",
       moduleId: "-",
       localName: "-",
       value: {
         kind: "ModuleStub",
-        moduleId: "@json_modexpr2",
+        moduleId: "Ɱ_json_modexpr2",
         bindingDefinitionIds: {
           base: "base",
           minDigits: "minDigits",

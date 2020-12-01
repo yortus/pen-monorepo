@@ -19,6 +19,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
     }
 
     const modulesById: Record<string, Module> = {};
+    const parentModuleIdsByModuleId: Record<string, string> = {};
     for (let file of Object.values(sourceFilesByPath)) {
 
         // Add a module to the module map for this file.
@@ -36,7 +37,8 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
             ModuleExpression: (modExpr): Identifier => {
                 let moduleId = genModuleId(file.path, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
-                let nestedModule: Module = {kind: 'Module', moduleId, parentModuleId, bindings: {}};
+                parentModuleIdsByModuleId[moduleId] = parentModuleId;
+                let nestedModule: Module = {kind: 'Module', moduleId, bindings: {}};
                 modulesById[nestedModule.moduleId] = nestedModule;
 
                 // TODO: recurse...
@@ -72,6 +74,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
     return {
         modulesById,
+        parentModuleIdsByModuleId,
         startModuleId: moduleIdsBySourceFilePath[startPath],
     };
 }

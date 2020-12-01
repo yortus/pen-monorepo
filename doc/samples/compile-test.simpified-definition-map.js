@@ -58,7 +58,7 @@ const simplifiedDefinitionMap = {
       localName: "-",
       value: {
         kind: "ModuleStub",
-        moduleId: "@compile_test_modexpr",
+        moduleId: "Ɱ_compile_test_modexpr",
         bindingDefinitionIds: {
           one: "des",
           two: "mem",

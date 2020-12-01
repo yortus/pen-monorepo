@@ -10,11 +10,13 @@ import {createSymbolTable, ROOT_MODULE_ID} from './symbol-table';
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References and ModuleStubs
 // - output contains *no*: Module, Binding, Identifier, MemberExpression
-export function createDefinitionMap({modulesById, startModuleId}: ModuleMap): DefinitionMap {
+export function createDefinitionMap({modulesById, parentModuleIdsByModuleId, startModuleId}: ModuleMap): DefinitionMap {
     const {createScope, define, definitions, lookup} = createSymbolTable();
 
     // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
-    for (let {moduleId, parentModuleId, bindings} of Object.values(modulesById)) {
+    for (const {moduleId, bindings} of Object.values(modulesById)) {
+        const parentModuleId = parentModuleIdsByModuleId[moduleId];
+
         // Create a scope for the module.
         createScope(moduleId, parentModuleId);
 

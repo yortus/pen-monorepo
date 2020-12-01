@@ -14,7 +14,6 @@ const sourceFileMap = {
             kind: "ImportExpression",
             moduleSpecifier: "std",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -38,7 +37,6 @@ const sourceFileMap = {
                     value: 1,
                   },
                 },
-                exported: false,
               },
               {
                 kind: "Binding",
@@ -50,7 +48,6 @@ const sourceFileMap = {
                   kind: "NumericLiteral",
                   value: 2,
                 },
-                exported: false,
               },
               {
                 kind: "Binding",
@@ -62,11 +59,9 @@ const sourceFileMap = {
                   kind: "Identifier",
                   name: "mem",
                 },
-                exported: false,
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -83,7 +78,6 @@ const sourceFileMap = {
             kind: "Identifier",
             name: "digits",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -95,7 +89,6 @@ const sourceFileMap = {
             kind: "Identifier",
             name: "des",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -114,7 +107,86 @@ const sourceFileMap = {
               name: "two",
             },
           },
-          exported: false,
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "xxx",
+          },
+          right: {
+            kind: "ModuleExpression",
+            bindings: [
+              {
+                kind: "Binding",
+                left: {
+                  kind: "Identifier",
+                  name: "d",
+                },
+                right: {
+                  kind: "Identifier",
+                  name: "digits",
+                },
+              },
+            ],
+          },
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "one",
+          },
+          right: {
+            kind: "NumericLiteral",
+            value: 1,
+          },
+        },
+        {
+          kind: "Binding",
+          left: {
+            kind: "Identifier",
+            name: "start",
+          },
+          right: {
+            kind: "SelectionExpression",
+            expressions: [
+              {
+                kind: "Identifier",
+                name: "one",
+              },
+              {
+                kind: "Identifier",
+                name: "ref",
+              },
+              {
+                kind: "Identifier",
+                name: "mem",
+              },
+              {
+                kind: "MemberExpression",
+                module: {
+                  kind: "MemberExpression",
+                  module: {
+                    kind: "Identifier",
+                    name: "xxx",
+                  },
+                  member: {
+                    kind: "Identifier",
+                    name: "d",
+                  },
+                },
+                member: {
+                  kind: "Identifier",
+                  name: "two",
+                },
+              },
+              {
+                kind: "Identifier",
+                name: "digits",
+              },
+            ],
+          },
         },
       ],
     },
@@ -133,7 +205,6 @@ const sourceFileMap = {
             name: "char",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -146,7 +217,6 @@ const sourceFileMap = {
             name: "f64",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -159,7 +229,6 @@ const sourceFileMap = {
             name: "i32",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -172,7 +241,6 @@ const sourceFileMap = {
             name: "memoise",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
       ],
     },

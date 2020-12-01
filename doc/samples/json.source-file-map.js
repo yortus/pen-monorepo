@@ -21,7 +21,6 @@ const sourceFileMap = {
             kind: "ImportExpression",
             moduleSpecifier: "std",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -37,7 +36,6 @@ const sourceFileMap = {
             kind: "ImportExpression",
             moduleSpecifier: "experiments",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -62,7 +60,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -103,7 +100,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -126,7 +122,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -149,7 +144,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -172,7 +166,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -235,7 +228,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -263,7 +255,6 @@ const sourceFileMap = {
               ],
             },
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -326,7 +317,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -343,7 +333,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -355,7 +344,6 @@ const sourceFileMap = {
             kind: "Identifier",
             name: "f64",
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -384,7 +372,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -437,7 +424,6 @@ const sourceFileMap = {
                             concrete: false,
                             abstract: false,
                           },
-                          exported: false,
                         },
                         {
                           kind: "Binding",
@@ -451,7 +437,6 @@ const sourceFileMap = {
                             concrete: false,
                             abstract: false,
                           },
-                          exported: false,
                         },
                       ],
                     },
@@ -622,7 +607,6 @@ const sourceFileMap = {
                             kind: "NumericLiteral",
                             value: 16,
                           },
-                          exported: false,
                         },
                         {
                           kind: "Binding",
@@ -634,7 +618,6 @@ const sourceFileMap = {
                             kind: "NumericLiteral",
                             value: 4,
                           },
-                          exported: false,
                         },
                         {
                           kind: "Binding",
@@ -646,7 +629,6 @@ const sourceFileMap = {
                             kind: "NumericLiteral",
                             value: 4,
                           },
-                          exported: false,
                         },
                       ],
                     },
@@ -655,7 +637,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -682,7 +663,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -709,7 +689,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -736,7 +715,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -763,7 +741,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -790,7 +767,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -817,7 +793,6 @@ const sourceFileMap = {
               },
             ],
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -831,7 +806,6 @@ const sourceFileMap = {
             concrete: true,
             abstract: false,
           },
-          exported: false,
         },
         {
           kind: "Binding",
@@ -875,7 +849,6 @@ const sourceFileMap = {
             },
             quantifier: "*",
           },
-          exported: false,
         },
       ],
     },
@@ -894,7 +867,6 @@ const sourceFileMap = {
             name: "char",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -907,7 +879,6 @@ const sourceFileMap = {
             name: "f64",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -920,7 +891,6 @@ const sourceFileMap = {
             name: "i32",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
         {
           kind: "Binding",
@@ -933,7 +903,6 @@ const sourceFileMap = {
             name: "memoise",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-          exported: true,
         },
       ],
     },
@@ -952,7 +921,6 @@ const sourceFileMap = {
             name: "unicode",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
           },
-          exported: true,
         },
       ],
     },

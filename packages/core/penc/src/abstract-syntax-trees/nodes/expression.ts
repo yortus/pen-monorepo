@@ -90,7 +90,6 @@ export interface MemberExpression {
 export interface Module {
     readonly kind: 'Module';
     readonly moduleId: string;
-    readonly parentModuleId?: string; // lexically surrounding module. Only defined for lexically nested modules.
     readonly bindings: ReadonlyArray<Binding> | {readonly [name: string]: Expression};
 }
 
