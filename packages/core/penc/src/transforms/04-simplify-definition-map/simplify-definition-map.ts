@@ -71,6 +71,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
             case 'BooleanLiteral': return setV(e);
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
             case 'Intrinsic': return setV(e);
+            case 'LambdaExpression': throw new Error('Not implemented'); // TODO temp testing fix this...
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
             case 'Module': return assert(!Array.isArray(e.bindings)), setV(e, {bindings: mapObj(e.bindings, ref)});
             case 'NotExpression': return setV(e, {expression: ref(e.expression)});

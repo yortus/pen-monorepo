@@ -41,7 +41,7 @@ ModulePatternName
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
-        ---DISABLED FOR NOW--> LambdaExpression          a => a a   (a, b) => a b   () => "blah"                        NB: lhs is just a Pattern!
+        LambdaExpression                a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
         Module                          (a=b c=d e=f)   (a=b)
@@ -78,8 +78,8 @@ Precedence6OrHigher
     = PrimaryExpression
 
 PrimaryExpression
-    // = LambdaExpression
-    = RecordExpression
+    = LambdaExpression
+    / RecordExpression
     / FieldExpression
     / Module
     / ListExpression
@@ -137,9 +137,9 @@ ApplicationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 
-// LambdaExpression
-//     = pattern:Pattern   __   "=>"   __   body:Expression
-//     { return {kind: 'LambdaExpression', pattern, body}; }
+LambdaExpression
+    = param:(Identifier / ModulePattern)   __   "=>"   __   body:Expression
+    { return {kind: 'LambdaExpression', param, body}; }
 
 RecordExpression
     = "{"   __   fields:RecordFieldList   __   "}"

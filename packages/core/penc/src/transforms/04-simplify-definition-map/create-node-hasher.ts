@@ -67,6 +67,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
+            case 'LambdaExpression': throw new Error('Not implemented'); // TODO: temp testing fix this...
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'Module': return assert(!Array.isArray(n.bindings)), setSig('MOD', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));

@@ -1,5 +1,10 @@
 std = import 'std'
 
+f1 = a => a a
+f2 = (a) => a a
+f3 = (a, b) => a b
+f4 = () => ()
+
 digits = (
     one = (1)
     two = 2

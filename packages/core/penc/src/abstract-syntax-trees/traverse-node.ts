@@ -17,7 +17,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
             case 'Intrinsic': return cb(n);
-            // case 'LambdaExpression': TODO: ...
+            case 'LambdaExpression': return rec(n.param), rec(n.body), cb(n);
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
             case 'Module': {

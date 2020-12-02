@@ -15,7 +15,7 @@ export const expressionNodeKinds = createNodeKinds(
     'Identifier',
     'ImportExpression',
     'Intrinsic',
-    // 'LambdaExpression',
+    'LambdaExpression',
     'ListExpression',
     'MemberExpression',
     'Module',

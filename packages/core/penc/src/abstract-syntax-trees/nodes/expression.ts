@@ -1,5 +1,6 @@
 import type {AbsPath} from '../../utils';
 import type {Binding} from './binding';
+import type {Pattern} from './pattern';
 
 
 /** Union of all node types that represent PEN expressions. */
@@ -10,7 +11,7 @@ export type Expression =
     | Identifier
     | ImportExpression
     | Intrinsic
-    // | LambdaExpression
+    | LambdaExpression
     | ListExpression
     | MemberExpression
     | Module
@@ -66,11 +67,11 @@ export interface ImportExpression {
 }
 
 
-// export interface LambdaExpression {
-//     readonly kind: 'LambdaExpression';
-//     readonly pattern: Pattern;
-//     readonly body: Expression;
-// }
+export interface LambdaExpression {
+    readonly kind: 'LambdaExpression';
+    readonly param: Identifier | Pattern;
+    readonly body: Expression;
+}
 
 
 export interface ListExpression {

@@ -6,7 +6,8 @@ import {mapObj, resolveModuleSpecifier} from '../../utils';
 // TODO: jsdoc...
 // - takes a collection of source files
 // - converts all nested Modules and ImportExpressions to Identifiers
-// - outputs a collection of modules
+// - outputs a flat map of all modules, both from SourceFiles and from nested modules
+// - output no longer containes _nested_ modules (all modules are top-level in the ModuleMap)
 // - output contains _no_ bindings (ie all Modules use the Record<> form of bindings)
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
