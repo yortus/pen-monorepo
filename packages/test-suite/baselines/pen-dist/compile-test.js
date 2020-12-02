@@ -253,7 +253,7 @@ const parse = (() => {
     }
     mem.constant = {value: 2};
 
-    // ModuleStub
+    // Module
     function digits(member) {
         switch (member) {
             case 'one': return des;
@@ -300,7 +300,7 @@ const print = (() => {
     }
     mem.constant = {value: 2};
 
-    // ModuleStub
+    // Module
     function digits(member) {
         switch (member) {
             case 'one': return des;

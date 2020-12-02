@@ -768,32 +768,100 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_json",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_json",
-        bindingDefinitionIds: {
-          char: "char",
-          f64: "f64",
-          unicode: "unicode",
-          start: "start",
-          Value: "Value",
-          False: "False",
-          Null: "Null",
-          True: "True",
-          Object: "Object",
-          Property: "Property",
-          Array: "Array",
-          Element: "Element",
-          Number: "Number",
-          String: "String",
-          CHAR: "CHAR",
-          LBRACE: "LBRACE",
-          RBRACE: "RBRACE",
-          LBRACKET: "LBRACKET",
-          RBRACKET: "RBRACKET",
-          COLON: "COLON",
-          COMMA: "COMMA",
-          DOUBLE_QUOTE: "DOUBLE_QUOTE",
-          WS: "WS",
+        kind: "Module",
+        bindings: {
+          char: {
+            kind: "Reference",
+            definitionId: "char",
+          },
+          f64: {
+            kind: "Reference",
+            definitionId: "f64",
+          },
+          unicode: {
+            kind: "Reference",
+            definitionId: "unicode",
+          },
+          start: {
+            kind: "Reference",
+            definitionId: "start",
+          },
+          Value: {
+            kind: "Reference",
+            definitionId: "Value",
+          },
+          False: {
+            kind: "Reference",
+            definitionId: "False",
+          },
+          Null: {
+            kind: "Reference",
+            definitionId: "Null",
+          },
+          True: {
+            kind: "Reference",
+            definitionId: "True",
+          },
+          Object: {
+            kind: "Reference",
+            definitionId: "Object",
+          },
+          Property: {
+            kind: "Reference",
+            definitionId: "Property",
+          },
+          Array: {
+            kind: "Reference",
+            definitionId: "Array",
+          },
+          Element: {
+            kind: "Reference",
+            definitionId: "Element",
+          },
+          Number: {
+            kind: "Reference",
+            definitionId: "Number",
+          },
+          String: {
+            kind: "Reference",
+            definitionId: "String",
+          },
+          CHAR: {
+            kind: "Reference",
+            definitionId: "CHAR",
+          },
+          LBRACE: {
+            kind: "Reference",
+            definitionId: "LBRACE",
+          },
+          RBRACE: {
+            kind: "Reference",
+            definitionId: "RBRACE",
+          },
+          LBRACKET: {
+            kind: "Reference",
+            definitionId: "LBRACKET",
+          },
+          RBRACKET: {
+            kind: "Reference",
+            definitionId: "RBRACKET",
+          },
+          COLON: {
+            kind: "Reference",
+            definitionId: "COLON",
+          },
+          COMMA: {
+            kind: "Reference",
+            definitionId: "COMMA",
+          },
+          DOUBLE_QUOTE: {
+            kind: "Reference",
+            definitionId: "DOUBLE_QUOTE",
+          },
+          WS: {
+            kind: "Reference",
+            definitionId: "WS",
+          },
         },
       },
     },
@@ -827,11 +895,16 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_json_modexpr",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_json_modexpr",
-        bindingDefinitionIds: {
-          min: "min",
-          max: "max",
+        kind: "Module",
+        bindings: {
+          min: {
+            kind: "Reference",
+            definitionId: "min",
+          },
+          max: {
+            kind: "Reference",
+            definitionId: "max",
+          },
         },
       },
     },
@@ -871,12 +944,20 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_json_modexpr2",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_json_modexpr2",
-        bindingDefinitionIds: {
-          base: "base",
-          minDigits: "minDigits",
-          maxDigits: "maxDigits",
+        kind: "Module",
+        bindings: {
+          base: {
+            kind: "Reference",
+            definitionId: "base",
+          },
+          minDigits: {
+            kind: "Reference",
+            definitionId: "minDigits",
+          },
+          maxDigits: {
+            kind: "Reference",
+            definitionId: "maxDigits",
+          },
         },
       },
     },
@@ -930,13 +1011,24 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_std",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_std",
-        bindingDefinitionIds: {
-          char: "char2",
-          f64: "f642",
-          i32: "i32",
-          memoise: "memoise",
+        kind: "Module",
+        bindings: {
+          char: {
+            kind: "Reference",
+            definitionId: "char2",
+          },
+          f64: {
+            kind: "Reference",
+            definitionId: "f642",
+          },
+          i32: {
+            kind: "Reference",
+            definitionId: "i32",
+          },
+          memoise: {
+            kind: "Reference",
+            definitionId: "memoise",
+          },
         },
       },
     },
@@ -957,10 +1049,12 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_experiments",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_experiments",
-        bindingDefinitionIds: {
-          unicode: "unicode2",
+        kind: "Module",
+        bindings: {
+          unicode: {
+            kind: "Reference",
+            definitionId: "unicode2",
+          },
         },
       },
     },

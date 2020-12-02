@@ -1,7 +1,7 @@
 import * as objectHash from 'object-hash';
 import {expressionNodeKinds, Node} from '../../abstract-syntax-trees';
 import {definitionMapKinds} from '../../representations';
-import {assert} from '../../utils';
+import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
 
@@ -68,13 +68,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
-            case 'ModuleStub': {
-                let sig = Object.keys(n.bindingDefinitionIds).reduce((obj, name) => {
-                    obj[name] = getSig({kind: 'Reference', definitionId: n.bindingDefinitionIds[name]});
-                    return obj;
-                }, {} as Record<string, Signature>);
-                return setSig('MOD', sig);
-            }
+            case 'Module': return assert(!Array.isArray(n.bindings)), setSig('MOD', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
             case 'NumericLiteral': return setSig('LIT', n.value);

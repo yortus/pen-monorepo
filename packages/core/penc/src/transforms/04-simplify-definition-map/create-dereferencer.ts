@@ -1,4 +1,4 @@
-import type {Definition, Expression, ModuleStub} from '../../abstract-syntax-trees';
+import type {Definition, Expression} from '../../abstract-syntax-trees';
 
 
 // TODO: review this outdated jsdoc comment...
@@ -18,7 +18,7 @@ export function createDereferencer(definitions: Record<string, Definition>) {
     return deref as DereferenceFunction;
 
     // The dereference function, closed over the given AST.
-    function deref(expr: Expression | ModuleStub): Expression | ModuleStub {
+    function deref(expr: Expression): Expression {
         const seen = [expr];
         while (true) {
             // If `expr` is a par|ref|mem expression, resolve to its target expression.
@@ -53,5 +53,5 @@ export function createDereferencer(definitions: Record<string, Definition>) {
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends Expression | ModuleStub>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'Reference'} ? never : E;
+    <E extends Expression>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'Reference'} ? never : E;
 }

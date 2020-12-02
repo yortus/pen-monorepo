@@ -975,7 +975,7 @@ const parse = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_json_recursive_modexpr(member) {
         switch (member) {
             case 'min': return min;
@@ -1264,7 +1264,7 @@ const parse = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_json_recursive_modexpr2(member) {
         switch (member) {
             case 'base': return base;
@@ -1808,7 +1808,7 @@ const print = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_json_recursive_modexpr(member) {
         switch (member) {
             case 'min': return min;
@@ -2095,7 +2095,7 @@ const print = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_json_recursive_modexpr2(member) {
         switch (member) {
             case 'base': return base;

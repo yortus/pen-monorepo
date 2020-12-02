@@ -1,5 +1,5 @@
 import {Binding, Expression, Identifier, mapNode, Module} from '../../abstract-syntax-trees';
-import {SourceFileMap, ModuleMap} from '../../representations';
+import type {SourceFileMap, ModuleMap} from '../../representations';
 import {mapObj, resolveModuleSpecifier} from '../../utils';
 
 
@@ -7,6 +7,7 @@ import {mapObj, resolveModuleSpecifier} from '../../utils';
 // - takes a collection of source files
 // - converts all nested Modules and ImportExpressions to Identifiers
 // - outputs a collection of modules
+// - output contains _no_ bindings (ie all Modules use the Record<> form of bindings)
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
     // TODO: temp testing...

@@ -825,7 +825,7 @@ const parse = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr(member) {
         switch (member) {
             case 'base': return base;
@@ -882,7 +882,7 @@ const parse = (() => {
         }
     }
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr2(member) {
         switch (member) {
             case 'base': return base2;
@@ -931,7 +931,7 @@ const parse = (() => {
         }
     }
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr3(member) {
         switch (member) {
             case 'signed': return signed;
@@ -1321,7 +1321,7 @@ const print = (() => {
 
     // Intrinsic
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr(member) {
         switch (member) {
             case 'base': return base;
@@ -1378,7 +1378,7 @@ const print = (() => {
         }
     }
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr2(member) {
         switch (member) {
             case 'base': return base2;
@@ -1426,7 +1426,7 @@ const print = (() => {
         }
     }
 
-    // ModuleStub
+    // Module
     function Ɱ_math_modexpr3(member) {
         switch (member) {
             case 'signed': return signed;

@@ -12,7 +12,6 @@ export interface SourceFileMap {
 export const sourceFileMapKinds = allNodeKinds.without(
     'Definition',
     'Module',
-    'ModuleStub',
     'Reference',
     // TODO: others? check...
 );

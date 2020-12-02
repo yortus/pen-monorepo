@@ -1,4 +1,4 @@
-import {DefinitionMap} from '../../representations';
+import type {DefinitionMap} from '../../representations';
 
 
 // TODO: jsdoc...

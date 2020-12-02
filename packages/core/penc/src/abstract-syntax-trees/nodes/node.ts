@@ -1,7 +1,6 @@
 import type {Binding} from './binding';
 import type {Definition} from './definition';
 import type {Expression} from './expression';
-import type {ModuleStub} from './module';
 import type {Pattern} from './pattern';
 import type {SourceFile} from './source-file';
 
@@ -11,7 +10,6 @@ export type Node =
     | Binding
     | Definition
     | Expression
-    | ModuleStub
     | Pattern
     | SourceFile
 ;

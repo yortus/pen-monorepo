@@ -1,6 +1,6 @@
-import {Definition, Expression, ModuleStub, Reference} from '../../abstract-syntax-trees';
+import type {Definition, Expression, Reference} from '../../abstract-syntax-trees';
 import {DefinitionMap, definitionMapKinds} from '../../representations';
-import {assert} from '../../utils';
+import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
 
@@ -12,7 +12,8 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
     const deref = createDereferencer(definitionsById);
     const getHashFor = createNodeHasher(deref);
 
-    // TODO: work out names to associate with each hash code
+    // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
+    // This will be used later to choose a reasonable name for each distinct definition in the program.
     const namesByHash = Object.values(definitionsById).reduce((obj, def) => {
         // TODO: temp testing...
         const node = def.value;
@@ -25,7 +26,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
 
     // Find the `start` value, and make sure it is an expression.
     const start = definitionsById[startDefinitionId]?.value;
-    assert(start && start.kind !== 'ModuleStub');
+    assert(start && start.kind !== 'Module'); // TODO: better error message here - `start` must be a Rule or something?
 
     // Populate the `newDefinitionsByHash` map.
     const newDefinitionsByHash = new Map<string, Definition>();
@@ -43,7 +44,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
     };
 
     // TODO: recursive...
-    function getNewDefinitionFor(expr: Expression | ModuleStub, parentDefnName?: string): Definition {
+    function getNewDefinitionFor(expr: Expression, parentDefnName?: string): Definition {
         assert(definitionMapKinds.matches(expr));
 
         // TODO: doc...
@@ -71,17 +72,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
             case 'Intrinsic': return setV(e);
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
-            case 'ModuleStub': {
-                const bindingDefinitionIds = Object.keys(e.bindingDefinitionIds).reduce(
-                    (obj, name) => {
-                        const newDefId = ref(definitionsById[e.bindingDefinitionIds[name]].value).definitionId;
-                        obj[name] = newDefId;
-                        return obj;
-                    },
-                    {} as Record<string, string>
-                );
-                return setV(e, {moduleId: e.moduleId, bindingDefinitionIds})
-            }
+            case 'Module': return assert(!Array.isArray(e.bindings)), setV(e, {bindings: mapObj(e.bindings, ref)});
             case 'NotExpression': return setV(e, {expression: ref(e.expression)});
             case 'NullLiteral': return setV(e);
             case 'NumericLiteral': return setV(e);
@@ -93,12 +84,12 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: Expression | ModuleStub): Reference {
+        function ref(expr: Expression): Reference {
             const {definitionId} = getNewDefinitionFor(expr, ownName || parentDefnName); // recurse
             return {kind: 'Reference', definitionId};
         }
 
-        function setV<E extends Expression | ModuleStub>(expr: E, vals?: Omit<E, 'kind'>) {
+        function setV<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
             Object.assign(newDefinition, {value: {kind: expr.kind, ...(vals || expr)}});
             return newDefinition;
         }

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import {SourceFile, traverseNode} from '../../abstract-syntax-trees';
-import {SourceFileMap} from '../../representations';
+import type {SourceFileMap} from '../../representations';
 import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
 import {parse as parseExtFile} from './ext-file-grammar';
 import {parse as parsePenFile} from './pen-file-grammar';

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import type {Expression, Intrinsic, ModuleStub} from '../../abstract-syntax-trees';
-import {DefinitionMap} from '../../representations';
+import type {Expression, Intrinsic} from '../../abstract-syntax-trees';
+import type {DefinitionMap} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
@@ -55,7 +55,7 @@ export function generateTargetCode(program: Program) {
 
 
 function emitIntrinsics(emit: Emitter, {defs: {definitionsById}}: Program) {
-    const isIntrinsic = (e: Expression | ModuleStub): e is Intrinsic => e.kind === 'Intrinsic';
+    const isIntrinsic = (e: Expression): e is Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(definitionsById).map(id => definitionsById[id].value).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
@@ -101,7 +101,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 }
 
 
-function emitExpression(emit: Emitter, name: string, expr: Expression | ModuleStub, mode: Mode) {
+function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
     // Should never see a GlobalReferenceExpression here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
     assert(expr.kind !== 'Reference');
@@ -174,11 +174,13 @@ function emitExpression(emit: Emitter, name: string, expr: Expression | ModuleSt
             break;
         }
 
-        case 'ModuleStub': {
+        case 'Module': {
+            assert(!Array.isArray(expr.bindings));
             emit.down(1).text(`function ${name}(member) {`).indent();
             emit.down(1).text(`switch (member) {`).indent();
-            for (const [name, defnId] of Object.entries(expr.bindingDefinitionIds)) {
-                emit.down(1).text(`case '${name}': return ${defnId};`);
+            for (const [name, ref] of Object.entries(expr.bindings)) {
+                assert(ref.kind === 'Reference');
+                emit.down(1).text(`case '${name}': return ${ref.definitionId};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);

@@ -54,7 +54,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
                 }
             }
             case 'ModulePattern': return n;
-            case 'ModuleStub': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteral': return n;
             case 'NumericLiteral': return n;

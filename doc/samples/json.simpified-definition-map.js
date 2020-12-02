@@ -594,11 +594,16 @@ const simplifiedDefinitionMap = {
       moduleId: "-",
       localName: "-",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_json_modexpr",
-        bindingDefinitionIds: {
-          min: "min",
-          max: "max",
+        kind: "Module",
+        bindings: {
+          min: {
+            kind: "Reference",
+            definitionId: "min",
+          },
+          max: {
+            kind: "Reference",
+            definitionId: "max",
+          },
         },
       },
     },
@@ -1035,12 +1040,20 @@ const simplifiedDefinitionMap = {
       moduleId: "-",
       localName: "-",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_json_modexpr2",
-        bindingDefinitionIds: {
-          base: "base",
-          minDigits: "minDigits",
-          maxDigits: "minDigits",
+        kind: "Module",
+        bindings: {
+          base: {
+            kind: "Reference",
+            definitionId: "base",
+          },
+          minDigits: {
+            kind: "Reference",
+            definitionId: "minDigits",
+          },
+          maxDigits: {
+            kind: "Reference",
+            definitionId: "minDigits",
+          },
         },
       },
     },

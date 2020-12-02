@@ -107,17 +107,40 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_compile_test",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_compile_test",
-        bindingDefinitionIds: {
-          std: "std",
-          digits: "digits",
-          des: "des",
-          ref: "ref",
-          mem: "mem",
-          xxx: "xxx",
-          one: "one",
-          start: "start",
+        kind: "Module",
+        bindings: {
+          std: {
+            kind: "Reference",
+            definitionId: "std",
+          },
+          digits: {
+            kind: "Reference",
+            definitionId: "digits",
+          },
+          des: {
+            kind: "Reference",
+            definitionId: "des",
+          },
+          ref: {
+            kind: "Reference",
+            definitionId: "ref",
+          },
+          mem: {
+            kind: "Reference",
+            definitionId: "mem",
+          },
+          xxx: {
+            kind: "Reference",
+            definitionId: "xxx",
+          },
+          one: {
+            kind: "Reference",
+            definitionId: "one",
+          },
+          start: {
+            kind: "Reference",
+            definitionId: "start",
+          },
         },
       },
     },
@@ -160,12 +183,20 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_compile_test_modexpr",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_compile_test_modexpr",
-        bindingDefinitionIds: {
-          one: "one2",
-          two: "two",
-          outer: "outer",
+        kind: "Module",
+        bindings: {
+          one: {
+            kind: "Reference",
+            definitionId: "one2",
+          },
+          two: {
+            kind: "Reference",
+            definitionId: "two",
+          },
+          outer: {
+            kind: "Reference",
+            definitionId: "outer",
+          },
         },
       },
     },
@@ -185,10 +216,12 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_compile_test_modexpr2",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_compile_test_modexpr2",
-        bindingDefinitionIds: {
-          d: "d",
+        kind: "Module",
+        bindings: {
+          d: {
+            kind: "Reference",
+            definitionId: "d",
+          },
         },
       },
     },
@@ -242,13 +275,24 @@ const definitionMap = {
       moduleId: "Ɱ__root",
       localName: "Ɱ_std",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_std",
-        bindingDefinitionIds: {
-          char: "char",
-          f64: "f64",
-          i32: "i32",
-          memoise: "memoise",
+        kind: "Module",
+        bindings: {
+          char: {
+            kind: "Reference",
+            definitionId: "char",
+          },
+          f64: {
+            kind: "Reference",
+            definitionId: "f64",
+          },
+          i32: {
+            kind: "Reference",
+            definitionId: "i32",
+          },
+          memoise: {
+            kind: "Reference",
+            definitionId: "memoise",
+          },
         },
       },
     },

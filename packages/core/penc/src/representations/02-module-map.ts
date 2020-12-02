@@ -14,7 +14,6 @@ export const moduleMapKinds = allNodeKinds.without(
     'Binding',
     'Definition',
     'ImportExpression',
-    'ModuleStub',
     'Reference',
     'SourceFile',
 );

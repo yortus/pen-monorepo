@@ -57,12 +57,20 @@ const simplifiedDefinitionMap = {
       moduleId: "-",
       localName: "-",
       value: {
-        kind: "ModuleStub",
-        moduleId: "Ɱ_compile_test_modexpr",
-        bindingDefinitionIds: {
-          one: "des",
-          two: "mem",
-          outer: "mem",
+        kind: "Module",
+        bindings: {
+          one: {
+            kind: "Reference",
+            definitionId: "des",
+          },
+          two: {
+            kind: "Reference",
+            definitionId: "mem",
+          },
+          outer: {
+            kind: "Reference",
+            definitionId: "mem",
+          },
         },
       },
     },
