@@ -59,7 +59,6 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
         const newDefinition: Definition = {
             kind: 'Definition',
             definitionId: createDefinitionId(ownName || `${parentDefnName ?? ''}_e`),
-            moduleId: '-', // TODO: fix...
             localName: '-', // TODO: fix...
             value: undefined!,
         };

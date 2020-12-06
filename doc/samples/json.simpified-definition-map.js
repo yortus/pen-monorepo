@@ -3,7 +3,6 @@ const simplifiedDefinitionMap = {
     start: {
       kind: "Definition",
       definitionId: "start",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -26,7 +25,6 @@ const simplifiedDefinitionMap = {
     WS: {
       kind: "Definition",
       definitionId: "WS",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
@@ -40,7 +38,6 @@ const simplifiedDefinitionMap = {
     WS_e: {
       kind: "Definition",
       definitionId: "WS_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
@@ -67,7 +64,6 @@ const simplifiedDefinitionMap = {
     WS_e2: {
       kind: "Definition",
       definitionId: "WS_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -79,7 +75,6 @@ const simplifiedDefinitionMap = {
     WS_e3: {
       kind: "Definition",
       definitionId: "WS_e3",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -91,7 +86,6 @@ const simplifiedDefinitionMap = {
     WS_e4: {
       kind: "Definition",
       definitionId: "WS_e4",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -103,7 +97,6 @@ const simplifiedDefinitionMap = {
     WS_e5: {
       kind: "Definition",
       definitionId: "WS_e5",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -115,7 +108,6 @@ const simplifiedDefinitionMap = {
     Value: {
       kind: "Definition",
       definitionId: "Value",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
@@ -154,7 +146,6 @@ const simplifiedDefinitionMap = {
     False: {
       kind: "Definition",
       definitionId: "False",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -173,7 +164,6 @@ const simplifiedDefinitionMap = {
     False_e: {
       kind: "Definition",
       definitionId: "False_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -185,7 +175,6 @@ const simplifiedDefinitionMap = {
     False_e2: {
       kind: "Definition",
       definitionId: "False_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "BooleanLiteral",
@@ -195,7 +184,6 @@ const simplifiedDefinitionMap = {
     Null: {
       kind: "Definition",
       definitionId: "Null",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -214,7 +202,6 @@ const simplifiedDefinitionMap = {
     Null_e: {
       kind: "Definition",
       definitionId: "Null_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -226,7 +213,6 @@ const simplifiedDefinitionMap = {
     Null_e2: {
       kind: "Definition",
       definitionId: "Null_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "NullLiteral",
@@ -236,7 +222,6 @@ const simplifiedDefinitionMap = {
     True: {
       kind: "Definition",
       definitionId: "True",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -255,7 +240,6 @@ const simplifiedDefinitionMap = {
     True_e: {
       kind: "Definition",
       definitionId: "True_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -267,7 +251,6 @@ const simplifiedDefinitionMap = {
     True_e2: {
       kind: "Definition",
       definitionId: "True_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "BooleanLiteral",
@@ -277,7 +260,6 @@ const simplifiedDefinitionMap = {
     Object: {
       kind: "Definition",
       definitionId: "Object",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -300,7 +282,6 @@ const simplifiedDefinitionMap = {
     LBRACE: {
       kind: "Definition",
       definitionId: "LBRACE",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -323,7 +304,6 @@ const simplifiedDefinitionMap = {
     LBRACE_e: {
       kind: "Definition",
       definitionId: "LBRACE_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -335,7 +315,6 @@ const simplifiedDefinitionMap = {
     Object_e: {
       kind: "Definition",
       definitionId: "Object_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
@@ -354,7 +333,6 @@ const simplifiedDefinitionMap = {
     Object_e2: {
       kind: "Definition",
       definitionId: "Object_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -373,7 +351,6 @@ const simplifiedDefinitionMap = {
     Property: {
       kind: "Definition",
       definitionId: "Property",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "FieldExpression",
@@ -390,7 +367,6 @@ const simplifiedDefinitionMap = {
     String: {
       kind: "Definition",
       definitionId: "String",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -413,7 +389,6 @@ const simplifiedDefinitionMap = {
     DOUBLE_QUOTE: {
       kind: "Definition",
       definitionId: "DOUBLE_QUOTE",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -425,7 +400,6 @@ const simplifiedDefinitionMap = {
     String_e: {
       kind: "Definition",
       definitionId: "String_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
@@ -439,7 +413,6 @@ const simplifiedDefinitionMap = {
     CHAR: {
       kind: "Definition",
       definitionId: "CHAR",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
@@ -450,39 +423,39 @@ const simplifiedDefinitionMap = {
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e7",
+            definitionId: "CHAR_e8",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e10",
+            definitionId: "CHAR_e11",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e13",
+            definitionId: "CHAR_e14",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e16",
+            definitionId: "CHAR_e17",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e19",
+            definitionId: "CHAR_e20",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e22",
+            definitionId: "CHAR_e23",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e25",
+            definitionId: "CHAR_e26",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e28",
+            definitionId: "CHAR_e29",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e31",
+            definitionId: "CHAR_e32",
           },
         ],
       },
@@ -490,7 +463,6 @@ const simplifiedDefinitionMap = {
     CHAR_e: {
       kind: "Definition",
       definitionId: "CHAR_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -513,7 +485,6 @@ const simplifiedDefinitionMap = {
     CHAR_e2: {
       kind: "Definition",
       definitionId: "CHAR_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "NotExpression",
@@ -526,7 +497,6 @@ const simplifiedDefinitionMap = {
     CHAR_e3: {
       kind: "Definition",
       definitionId: "CHAR_e3",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -538,7 +508,6 @@ const simplifiedDefinitionMap = {
     CHAR_e4: {
       kind: "Definition",
       definitionId: "CHAR_e4",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "NotExpression",
@@ -551,7 +520,6 @@ const simplifiedDefinitionMap = {
     CHAR_e5: {
       kind: "Definition",
       definitionId: "CHAR_e5",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -563,7 +531,6 @@ const simplifiedDefinitionMap = {
     CHAR_e6: {
       kind: "Definition",
       definitionId: "CHAR_e6",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "ApplicationExpression",
@@ -573,14 +540,13 @@ const simplifiedDefinitionMap = {
         },
         argument: {
           kind: "Reference",
-          definitionId: "Ɱ_json_modexpr",
+          definitionId: "CHAR_e7",
         },
       },
     },
     char: {
       kind: "Definition",
       definitionId: "char",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "Intrinsic",
@@ -588,10 +554,9 @@ const simplifiedDefinitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
       },
     },
-    "Ɱ_json_modexpr": {
+    CHAR_e7: {
       kind: "Definition",
-      definitionId: "Ɱ_json_modexpr",
-      moduleId: "-",
+      definitionId: "CHAR_e7",
       localName: "-",
       value: {
         kind: "Module",
@@ -610,7 +575,6 @@ const simplifiedDefinitionMap = {
     min: {
       kind: "Definition",
       definitionId: "min",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -622,7 +586,6 @@ const simplifiedDefinitionMap = {
     max: {
       kind: "Definition",
       definitionId: "max",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -631,29 +594,27 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e7: {
+    CHAR_e8: {
       kind: "Definition",
-      definitionId: "CHAR_e7",
-      moduleId: "-",
+      definitionId: "CHAR_e8",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e8",
+            definitionId: "CHAR_e9",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e9",
+            definitionId: "CHAR_e10",
           },
         ],
       },
     },
-    CHAR_e8: {
+    CHAR_e9: {
       kind: "Definition",
-      definitionId: "CHAR_e8",
-      moduleId: "-",
+      definitionId: "CHAR_e9",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -662,10 +623,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e9: {
+    CHAR_e10: {
       kind: "Definition",
-      definitionId: "CHAR_e9",
-      moduleId: "-",
+      definitionId: "CHAR_e10",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -674,29 +634,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e10: {
+    CHAR_e11: {
       kind: "Definition",
-      definitionId: "CHAR_e10",
-      moduleId: "-",
+      definitionId: "CHAR_e11",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e11",
+            definitionId: "CHAR_e12",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e12",
+            definitionId: "CHAR_e13",
           },
         ],
       },
     },
-    CHAR_e11: {
+    CHAR_e12: {
       kind: "Definition",
-      definitionId: "CHAR_e11",
-      moduleId: "-",
+      definitionId: "CHAR_e12",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -705,10 +663,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e12: {
+    CHAR_e13: {
       kind: "Definition",
-      definitionId: "CHAR_e12",
-      moduleId: "-",
+      definitionId: "CHAR_e13",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -717,29 +674,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e13: {
+    CHAR_e14: {
       kind: "Definition",
-      definitionId: "CHAR_e13",
-      moduleId: "-",
+      definitionId: "CHAR_e14",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e14",
+            definitionId: "CHAR_e15",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e15",
+            definitionId: "CHAR_e16",
           },
         ],
       },
     },
-    CHAR_e14: {
+    CHAR_e15: {
       kind: "Definition",
-      definitionId: "CHAR_e14",
-      moduleId: "-",
+      definitionId: "CHAR_e15",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -748,10 +703,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e15: {
+    CHAR_e16: {
       kind: "Definition",
-      definitionId: "CHAR_e15",
-      moduleId: "-",
+      definitionId: "CHAR_e16",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -760,29 +714,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e16: {
+    CHAR_e17: {
       kind: "Definition",
-      definitionId: "CHAR_e16",
-      moduleId: "-",
+      definitionId: "CHAR_e17",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e17",
+            definitionId: "CHAR_e18",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e18",
+            definitionId: "CHAR_e19",
           },
         ],
       },
     },
-    CHAR_e17: {
+    CHAR_e18: {
       kind: "Definition",
-      definitionId: "CHAR_e17",
-      moduleId: "-",
+      definitionId: "CHAR_e18",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -791,10 +743,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e18: {
+    CHAR_e19: {
       kind: "Definition",
-      definitionId: "CHAR_e18",
-      moduleId: "-",
+      definitionId: "CHAR_e19",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -803,29 +754,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e19: {
+    CHAR_e20: {
       kind: "Definition",
-      definitionId: "CHAR_e19",
-      moduleId: "-",
+      definitionId: "CHAR_e20",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e20",
+            definitionId: "CHAR_e21",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e21",
+            definitionId: "CHAR_e22",
           },
         ],
       },
     },
-    CHAR_e20: {
+    CHAR_e21: {
       kind: "Definition",
-      definitionId: "CHAR_e20",
-      moduleId: "-",
+      definitionId: "CHAR_e21",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -834,10 +783,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e21: {
+    CHAR_e22: {
       kind: "Definition",
-      definitionId: "CHAR_e21",
-      moduleId: "-",
+      definitionId: "CHAR_e22",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -846,29 +794,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e22: {
+    CHAR_e23: {
       kind: "Definition",
-      definitionId: "CHAR_e22",
-      moduleId: "-",
+      definitionId: "CHAR_e23",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e23",
+            definitionId: "CHAR_e24",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e24",
+            definitionId: "CHAR_e25",
           },
         ],
       },
     },
-    CHAR_e23: {
+    CHAR_e24: {
       kind: "Definition",
-      definitionId: "CHAR_e23",
-      moduleId: "-",
+      definitionId: "CHAR_e24",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -877,10 +823,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e24: {
+    CHAR_e25: {
       kind: "Definition",
-      definitionId: "CHAR_e24",
-      moduleId: "-",
+      definitionId: "CHAR_e25",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -889,29 +834,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e25: {
+    CHAR_e26: {
       kind: "Definition",
-      definitionId: "CHAR_e25",
-      moduleId: "-",
+      definitionId: "CHAR_e26",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e26",
+            definitionId: "CHAR_e27",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e27",
+            definitionId: "CHAR_e28",
           },
         ],
       },
     },
-    CHAR_e26: {
+    CHAR_e27: {
       kind: "Definition",
-      definitionId: "CHAR_e26",
-      moduleId: "-",
+      definitionId: "CHAR_e27",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -920,10 +863,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e27: {
+    CHAR_e28: {
       kind: "Definition",
-      definitionId: "CHAR_e27",
-      moduleId: "-",
+      definitionId: "CHAR_e28",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -932,29 +874,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e28: {
+    CHAR_e29: {
       kind: "Definition",
-      definitionId: "CHAR_e28",
-      moduleId: "-",
+      definitionId: "CHAR_e29",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e29",
+            definitionId: "CHAR_e30",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e30",
+            definitionId: "CHAR_e31",
           },
         ],
       },
     },
-    CHAR_e29: {
+    CHAR_e30: {
       kind: "Definition",
-      definitionId: "CHAR_e29",
-      moduleId: "-",
+      definitionId: "CHAR_e30",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -963,10 +903,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e30: {
+    CHAR_e31: {
       kind: "Definition",
-      definitionId: "CHAR_e30",
-      moduleId: "-",
+      definitionId: "CHAR_e31",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -975,29 +914,27 @@ const simplifiedDefinitionMap = {
         abstract: true,
       },
     },
-    CHAR_e31: {
+    CHAR_e32: {
       kind: "Definition",
-      definitionId: "CHAR_e31",
-      moduleId: "-",
+      definitionId: "CHAR_e32",
       localName: "-",
       value: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "CHAR_e32",
+            definitionId: "CHAR_e33",
           },
           {
             kind: "Reference",
-            definitionId: "CHAR_e33",
+            definitionId: "CHAR_e34",
           },
         ],
       },
     },
-    CHAR_e32: {
+    CHAR_e33: {
       kind: "Definition",
-      definitionId: "CHAR_e32",
-      moduleId: "-",
+      definitionId: "CHAR_e33",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1006,10 +943,9 @@ const simplifiedDefinitionMap = {
         abstract: false,
       },
     },
-    CHAR_e33: {
+    CHAR_e34: {
       kind: "Definition",
-      definitionId: "CHAR_e33",
-      moduleId: "-",
+      definitionId: "CHAR_e34",
       localName: "-",
       value: {
         kind: "ApplicationExpression",
@@ -1019,14 +955,13 @@ const simplifiedDefinitionMap = {
         },
         argument: {
           kind: "Reference",
-          definitionId: "Ɱ_json_modexpr2",
+          definitionId: "CHAR_e35",
         },
       },
     },
     unicode: {
       kind: "Definition",
       definitionId: "unicode",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "Intrinsic",
@@ -1034,10 +969,9 @@ const simplifiedDefinitionMap = {
         path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
       },
     },
-    "Ɱ_json_modexpr2": {
+    CHAR_e35: {
       kind: "Definition",
-      definitionId: "Ɱ_json_modexpr2",
-      moduleId: "-",
+      definitionId: "CHAR_e35",
       localName: "-",
       value: {
         kind: "Module",
@@ -1060,7 +994,6 @@ const simplifiedDefinitionMap = {
     base: {
       kind: "Definition",
       definitionId: "base",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "NumericLiteral",
@@ -1070,7 +1003,6 @@ const simplifiedDefinitionMap = {
     minDigits: {
       kind: "Definition",
       definitionId: "minDigits",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "NumericLiteral",
@@ -1080,7 +1012,6 @@ const simplifiedDefinitionMap = {
     Property_e: {
       kind: "Definition",
       definitionId: "Property_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1099,7 +1030,6 @@ const simplifiedDefinitionMap = {
     COLON: {
       kind: "Definition",
       definitionId: "COLON",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1122,7 +1052,6 @@ const simplifiedDefinitionMap = {
     COLON_e: {
       kind: "Definition",
       definitionId: "COLON_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1134,7 +1063,6 @@ const simplifiedDefinitionMap = {
     Object_e3: {
       kind: "Definition",
       definitionId: "Object_e3",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
@@ -1148,7 +1076,6 @@ const simplifiedDefinitionMap = {
     Object_e4: {
       kind: "Definition",
       definitionId: "Object_e4",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1167,7 +1094,6 @@ const simplifiedDefinitionMap = {
     COMMA: {
       kind: "Definition",
       definitionId: "COMMA",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1190,7 +1116,6 @@ const simplifiedDefinitionMap = {
     COMMA_e: {
       kind: "Definition",
       definitionId: "COMMA_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1202,7 +1127,6 @@ const simplifiedDefinitionMap = {
     Object_e5: {
       kind: "Definition",
       definitionId: "Object_e5",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "RecordExpression",
@@ -1213,7 +1137,6 @@ const simplifiedDefinitionMap = {
     RBRACE: {
       kind: "Definition",
       definitionId: "RBRACE",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1236,7 +1159,6 @@ const simplifiedDefinitionMap = {
     RBRACE_e: {
       kind: "Definition",
       definitionId: "RBRACE_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1248,7 +1170,6 @@ const simplifiedDefinitionMap = {
     Array: {
       kind: "Definition",
       definitionId: "Array",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1271,7 +1192,6 @@ const simplifiedDefinitionMap = {
     LBRACKET: {
       kind: "Definition",
       definitionId: "LBRACKET",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1294,7 +1214,6 @@ const simplifiedDefinitionMap = {
     LBRACKET_e: {
       kind: "Definition",
       definitionId: "LBRACKET_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1306,7 +1225,6 @@ const simplifiedDefinitionMap = {
     Array_e: {
       kind: "Definition",
       definitionId: "Array_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
@@ -1325,7 +1243,6 @@ const simplifiedDefinitionMap = {
     Array_e2: {
       kind: "Definition",
       definitionId: "Array_e2",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1344,7 +1261,6 @@ const simplifiedDefinitionMap = {
     Element: {
       kind: "Definition",
       definitionId: "Element",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "ListExpression",
@@ -1359,7 +1275,6 @@ const simplifiedDefinitionMap = {
     Array_e3: {
       kind: "Definition",
       definitionId: "Array_e3",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "QuantifiedExpression",
@@ -1373,7 +1288,6 @@ const simplifiedDefinitionMap = {
     Array_e4: {
       kind: "Definition",
       definitionId: "Array_e4",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1392,7 +1306,6 @@ const simplifiedDefinitionMap = {
     Array_e5: {
       kind: "Definition",
       definitionId: "Array_e5",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "ListExpression",
@@ -1403,7 +1316,6 @@ const simplifiedDefinitionMap = {
     RBRACKET: {
       kind: "Definition",
       definitionId: "RBRACKET",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SequenceExpression",
@@ -1426,7 +1338,6 @@ const simplifiedDefinitionMap = {
     RBRACKET_e: {
       kind: "Definition",
       definitionId: "RBRACKET_e",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "StringLiteral",
@@ -1438,7 +1349,6 @@ const simplifiedDefinitionMap = {
     f64: {
       kind: "Definition",
       definitionId: "f64",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "Intrinsic",

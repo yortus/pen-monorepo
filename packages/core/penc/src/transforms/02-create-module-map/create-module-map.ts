@@ -6,7 +6,7 @@ import {assert, mapObj, resolveModuleSpecifier} from '../../utils';
 // TODO: jsdoc...
 // - takes a collection of source files
 // - converts all ImportExpressions to Identifiers, so there are no ImportExpression nodes in the output
-// - converts all bindings to the Record (not array) form, so there are no Binding nodes in the output
+// - converts all bindings to the Record (not array) form, so there are no Binding or ModulePattern nodes in the output
 // - makes a single expression for the program synthesizing a root module and member expressions
 export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): ModuleMap {
 
@@ -41,8 +41,8 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
         ),
     };
 
-    // TODO: temp testing...
-    let startExpression: Expression = {
+    // TODO: temp testing... this is pretty awkward here, and in the type decl, and in the next transform
+    let startExpression: ModuleMap['startExpression'] = {
         kind: 'MemberExpression',
         module: {
             kind: 'MemberExpression',

@@ -231,34 +231,34 @@ const parse = (() => {
 
     // SelectionExpression
     function start() {
-        if (des()) return true;
-        if (des()) return true;
-        if (mem()) return true;
-        if (mem()) return true;
+        if (one()) return true;
+        if (one()) return true;
+        if (two()) return true;
+        if (two()) return true;
         if (digits()) return true;
         return false;
     }
 
     // NumericLiteral
-    function des() {
+    function one() {
         OUT = 1;
         return true;
     }
-    des.constant = {value: 1};
+    one.constant = {value: 1};
 
     // NumericLiteral
-    function mem() {
+    function two() {
         OUT = 2;
         return true;
     }
-    mem.constant = {value: 2};
+    two.constant = {value: 2};
 
     // Module
     function digits(member) {
         switch (member) {
-            case 'one': return des;
-            case 'two': return mem;
-            case 'outer': return mem;
+            case 'one': return one;
+            case 'two': return two;
+            case 'outer': return two;
             default: return undefined;
         }
     }
@@ -274,38 +274,38 @@ const print = (() => {
 
     // SelectionExpression
     function start() {
-        if (des()) return true;
-        if (des()) return true;
-        if (mem()) return true;
-        if (mem()) return true;
+        if (one()) return true;
+        if (one()) return true;
+        if (two()) return true;
+        if (two()) return true;
         if (digits()) return true;
         return false;
     }
 
     // NumericLiteral
-    function des() {
+    function one() {
         if (IN !== 1 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    des.constant = {value: 1};
+    one.constant = {value: 1};
 
     // NumericLiteral
-    function mem() {
+    function two() {
         if (IN !== 2 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    mem.constant = {value: 2};
+    two.constant = {value: 2};
 
     // Module
     function digits(member) {
         switch (member) {
-            case 'one': return des;
-            case 'two': return mem;
-            case 'outer': return mem;
+            case 'one': return one;
+            case 'two': return two;
+            case 'outer': return two;
             default: return undefined;
         }
     }

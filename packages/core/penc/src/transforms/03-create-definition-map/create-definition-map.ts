@@ -2,43 +2,46 @@ import type {Reference} from '../../abstract-syntax-trees';
 import {mapNode} from '../../abstract-syntax-trees';
 import type {DefinitionMap, ModuleMap} from '../../representations';
 import {assert} from '../../utils';
-import {createSymbolTable, ROOT_MODULE_ID} from './symbol-table';
+import {createSymbolTable, Scope} from './symbol-table';
 
 
 // TODO: jsdoc...
-// - takes a collection of modules
+// - takes a single startExpression
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References
 // - output contains *no* Identifiers or MemberExpressions
-export function createDefinitionMap({modulesById, parentModuleIdsByModuleId, startModuleId}: ModuleMap): DefinitionMap {
-    const {createScope, define, definitions, lookup} = createSymbolTable();
+export function createDefinitionMap({startExpression}: ModuleMap): DefinitionMap {
+    const {createScope, define, definitions, getScopeFor, lookup} = createSymbolTable();
 
-    // Traverse each module, creating a scope for the module, and one or more definitions for each binding.
-    for (const [moduleId, {bindings}] of Object.entries(modulesById)) {
-        const parentModuleId = parentModuleIdsByModuleId[moduleId];
+    // Traverse the AST, creating a scope for each module, and a definition for each binding name/value pair.
+    const rootScope = createScope();
+    const surroundingScopes: Scope[] = [];
+    const rootModule = mapNode(startExpression.module.module, rec => ({
+        Module: module => {
+            // Create a scope for the module.
+            const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
+            const scope = surroundingScope ? createScope(surroundingScope) : rootScope;
 
-        // Create a scope for the module.
-        createScope(moduleId, parentModuleId);
-
-        // Create a definition for each local name in the module.
-        let bindingReferences = {} as Record<string, Reference>;
-        assert(!Array.isArray(bindings)); // TODO: can remove this check? Should always be the Record form here
-        for (let name of Object.keys(bindings)) {
-            const {definitionId} = define(moduleId, name, bindings[name]);
-            bindingReferences[name] = {kind: 'Reference', definitionId};
-        }
-
-        // Create a definition for the module itself, since it can also be a referenced directly.
-        // TODO: better to make this appear *before* its bindings defns in the defns array?
-        // - or just use a map (eg with string keys) instead of ints for defnIds? Why use ints? No reason really except easily unique
-        define(ROOT_MODULE_ID, moduleId, {kind: 'Module', bindings: bindingReferences});
-    }
+            // Create a definition for each local name in the module.
+            assert(!Array.isArray(module.bindings));
+            let bindings = {} as Record<string, Reference>;
+            surroundingScopes.push(scope);
+            for (const [name, expr] of Object.entries(module.bindings)) {
+                const {definitionId} = define(scope, name, rec(expr));
+                bindings[name] = {kind: 'Reference', definitionId};
+            }
+            surroundingScopes.pop();
+            return {kind: 'Module', bindings};
+        },
+    }));
+    assert(rootModule.kind === 'Module'); // TODO: need this? remove?
 
     // Resolve all Identifier nodes (except MemberExpression#member - that is resolved next)
     for (let def of Object.values(definitions)) {
+        const scope = getScopeFor(def);
         const newValue = mapNode(def.value, rec => ({
             Identifier: ({name}): Reference => {
-                const {definitionId} = lookup(def.moduleId, name);
+                const {definitionId} = lookup(scope, name);
                 return {kind: 'Reference', definitionId};
             },
             MemberExpression: mem => {
@@ -81,9 +84,16 @@ export function createDefinitionMap({modulesById, parentModuleIdsByModuleId, sta
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    const startDefinition = lookup(startModuleId, 'start'); // TODO: want different error message if this fails?
+    // TODO: this is mega awkward unclear extra work due to the ModuleMap type - would be better if that just returned something that made this simpler?
+    const startModuleDefn = lookup(rootScope, startExpression.module.member.name);
+    assert(startModuleDefn.value.kind === 'Module');
+    assert(!Array.isArray(startModuleDefn.value.bindings));
+    const startRef = startModuleDefn.value.bindings[startExpression.member.name];
+    assert(startRef.kind === 'Reference');
+    const startDefinitionId = startRef.definitionId;
+
     return {
         definitionsById: definitions,
-        startDefinitionId: startDefinition.definitionId,
+        startDefinitionId,
     };
 }

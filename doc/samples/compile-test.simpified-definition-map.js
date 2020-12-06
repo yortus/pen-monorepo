@@ -3,26 +3,25 @@ const simplifiedDefinitionMap = {
     start: {
       kind: "Definition",
       definitionId: "start",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "SelectionExpression",
         expressions: [
           {
             kind: "Reference",
-            definitionId: "des",
+            definitionId: "one",
           },
           {
             kind: "Reference",
-            definitionId: "des",
+            definitionId: "one",
           },
           {
             kind: "Reference",
-            definitionId: "mem",
+            definitionId: "two",
           },
           {
             kind: "Reference",
-            definitionId: "mem",
+            definitionId: "two",
           },
           {
             kind: "Reference",
@@ -31,20 +30,18 @@ const simplifiedDefinitionMap = {
         ],
       },
     },
-    des: {
+    one: {
       kind: "Definition",
-      definitionId: "des",
-      moduleId: "-",
+      definitionId: "one",
       localName: "-",
       value: {
         kind: "NumericLiteral",
         value: 1,
       },
     },
-    mem: {
+    two: {
       kind: "Definition",
-      definitionId: "mem",
-      moduleId: "-",
+      definitionId: "two",
       localName: "-",
       value: {
         kind: "NumericLiteral",
@@ -54,22 +51,21 @@ const simplifiedDefinitionMap = {
     digits: {
       kind: "Definition",
       definitionId: "digits",
-      moduleId: "-",
       localName: "-",
       value: {
         kind: "Module",
         bindings: {
           one: {
             kind: "Reference",
-            definitionId: "des",
+            definitionId: "one",
           },
           two: {
             kind: "Reference",
-            definitionId: "mem",
+            definitionId: "two",
           },
           outer: {
             kind: "Reference",
-            definitionId: "mem",
+            definitionId: "two",
           },
         },
       },

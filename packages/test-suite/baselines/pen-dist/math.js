@@ -730,9 +730,9 @@ const parse = (() => {
     function factor() {
         if (factor_e()) return true;
         if (factor_e6()) return true;
-        if (factor_e9()) return true;
-        if (factor_e12()) return true;
-        if (factor_e15()) return true;
+        if (factor_e10()) return true;
+        if (factor_e14()) return true;
+        if (factor_e18()) return true;
         return false;
     }
 
@@ -818,7 +818,7 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_e8ₘ is not a function')) throw err;
-            factor_e8ₘ = i32(Ɱ_math_modexpr);
+            factor_e8ₘ = i32(factor_e9);
             return factor_e8ₘ(arg);
         }
     }
@@ -826,7 +826,7 @@ const parse = (() => {
     // Intrinsic
 
     // Module
-    function Ɱ_math_modexpr(member) {
+    function factor_e9(member) {
         switch (member) {
             case 'base': return base;
             case 'signed': return signed;
@@ -849,17 +849,17 @@ const parse = (() => {
     signed.constant = {value: false};
 
     // SequenceExpression
-    function factor_e9() {
+    function factor_e10() {
         const stateₒ = getState();
         let out;
-        if (factor_e10()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e10() {
+    function factor_e11() {
         if (IP + 2 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 48) return false;
         if (IN.charCodeAt(IP + 1) !== 98) return false;
@@ -867,23 +867,23 @@ const parse = (() => {
         OUT = undefined;
         return true;
     }
-    factor_e10.constant = {value: "0b"};
+    factor_e11.constant = {value: "0b"};
 
     // ApplicationExpression
-    let factor_e11ₘ;
-    function factor_e11(arg) {
+    let factor_e12ₘ;
+    function factor_e12(arg) {
         try {
-            return factor_e11ₘ(arg);
+            return factor_e12ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e11ₘ is not a function')) throw err;
-            factor_e11ₘ = i32(Ɱ_math_modexpr2);
-            return factor_e11ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_e12ₘ is not a function')) throw err;
+            factor_e12ₘ = i32(factor_e13);
+            return factor_e12ₘ(arg);
         }
     }
 
     // Module
-    function Ɱ_math_modexpr2(member) {
+    function factor_e13(member) {
         switch (member) {
             case 'base': return base2;
             case 'signed': return signed;
@@ -899,40 +899,40 @@ const parse = (() => {
     base2.constant = {value: 2};
 
     // SequenceExpression
-    function factor_e12() {
+    function factor_e14() {
         const stateₒ = getState();
         let out;
-        if (factor_e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e13() {
+    function factor_e15() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 105) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e13.constant = {value: "i"};
+    factor_e15.constant = {value: "i"};
 
     // ApplicationExpression
-    let factor_e14ₘ;
-    function factor_e14(arg) {
+    let factor_e16ₘ;
+    function factor_e16(arg) {
         try {
-            return factor_e14ₘ(arg);
+            return factor_e16ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e14ₘ is not a function')) throw err;
-            factor_e14ₘ = i32(Ɱ_math_modexpr3);
-            return factor_e14ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_e16ₘ is not a function')) throw err;
+            factor_e16ₘ = i32(factor_e17);
+            return factor_e16ₘ(arg);
         }
     }
 
     // Module
-    function Ɱ_math_modexpr3(member) {
+    function factor_e17(member) {
         switch (member) {
             case 'signed': return signed;
             default: return undefined;
@@ -940,35 +940,35 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function factor_e15() {
+    function factor_e18() {
         const stateₒ = getState();
         let out;
-        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (start()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e16() {
+    function factor_e19() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 40) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e16.constant = {value: "("};
+    factor_e19.constant = {value: "("};
 
     // StringLiteral
-    function factor_e17() {
+    function factor_e20() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 41) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e17.constant = {value: ")"};
+    factor_e20.constant = {value: ")"};
 
     // RecordExpression
     function div() {
@@ -1228,9 +1228,9 @@ const print = (() => {
     function factor() {
         if (factor_e()) return true;
         if (factor_e6()) return true;
-        if (factor_e9()) return true;
-        if (factor_e12()) return true;
-        if (factor_e15()) return true;
+        if (factor_e10()) return true;
+        if (factor_e14()) return true;
+        if (factor_e18()) return true;
         return false;
     }
 
@@ -1314,7 +1314,7 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_e8ₘ is not a function')) throw err;
-            factor_e8ₘ = i32(Ɱ_math_modexpr);
+            factor_e8ₘ = i32(factor_e9);
             return factor_e8ₘ(arg);
         }
     }
@@ -1322,7 +1322,7 @@ const print = (() => {
     // Intrinsic
 
     // Module
-    function Ɱ_math_modexpr(member) {
+    function factor_e9(member) {
         switch (member) {
             case 'base': return base;
             case 'signed': return signed;
@@ -1349,37 +1349,37 @@ const print = (() => {
     signed.constant = {value: false};
 
     // SequenceExpression
-    function factor_e9() {
+    function factor_e10() {
         const stateₒ = getState();
         let out;
-        if (factor_e10()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e10() {
+    function factor_e11() {
         OUT = "0b";
         return true;
     }
-    factor_e10.constant = {value: "0b"};
+    factor_e11.constant = {value: "0b"};
 
     // ApplicationExpression
-    let factor_e11ₘ;
-    function factor_e11(arg) {
+    let factor_e12ₘ;
+    function factor_e12(arg) {
         try {
-            return factor_e11ₘ(arg);
+            return factor_e12ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e11ₘ is not a function')) throw err;
-            factor_e11ₘ = i32(Ɱ_math_modexpr2);
-            return factor_e11ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_e12ₘ is not a function')) throw err;
+            factor_e12ₘ = i32(factor_e13);
+            return factor_e12ₘ(arg);
         }
     }
 
     // Module
-    function Ɱ_math_modexpr2(member) {
+    function factor_e13(member) {
         switch (member) {
             case 'base': return base2;
             case 'signed': return signed;
@@ -1397,37 +1397,37 @@ const print = (() => {
     base2.constant = {value: 2};
 
     // SequenceExpression
-    function factor_e12() {
+    function factor_e14() {
         const stateₒ = getState();
         let out;
-        if (factor_e13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e14()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e13() {
+    function factor_e15() {
         OUT = "i";
         return true;
     }
-    factor_e13.constant = {value: "i"};
+    factor_e15.constant = {value: "i"};
 
     // ApplicationExpression
-    let factor_e14ₘ;
-    function factor_e14(arg) {
+    let factor_e16ₘ;
+    function factor_e16(arg) {
         try {
-            return factor_e14ₘ(arg);
+            return factor_e16ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e14ₘ is not a function')) throw err;
-            factor_e14ₘ = i32(Ɱ_math_modexpr3);
-            return factor_e14ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_e16ₘ is not a function')) throw err;
+            factor_e16ₘ = i32(factor_e17);
+            return factor_e16ₘ(arg);
         }
     }
 
     // Module
-    function Ɱ_math_modexpr3(member) {
+    function factor_e17(member) {
         switch (member) {
             case 'signed': return signed;
             default: return undefined;
@@ -1435,29 +1435,29 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function factor_e15() {
+    function factor_e18() {
         const stateₒ = getState();
         let out;
-        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (start()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e17()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e16() {
+    function factor_e19() {
         OUT = "(";
         return true;
     }
-    factor_e16.constant = {value: "("};
+    factor_e19.constant = {value: "("};
 
     // StringLiteral
-    function factor_e17() {
+    function factor_e20() {
         OUT = ")";
         return true;
     }
-    factor_e17.constant = {value: ")"};
+    factor_e20.constant = {value: ")"};
 
     // RecordExpression
     function div() {
