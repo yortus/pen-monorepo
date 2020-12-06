@@ -1,11 +1,9 @@
-import {allNodeKinds, Module} from '../abstract-syntax-trees';
+import {allNodeKinds, Expression} from '../abstract-syntax-trees';
 
 
 /** A PEN program expressed as a mapping from module IDs to `Module` AST nodes. */
 export interface ModuleMap {
-    readonly modulesById: Record<string, Module>; // TODO: should be modulesByModuleId?
-    readonly parentModuleIdsByModuleId: Record<string, string>; // parent = lexically surrounding module. Only defined for lexically nested modules.
-    readonly startModuleId: string;
+    readonly startExpression: Expression;
 }
 
 
