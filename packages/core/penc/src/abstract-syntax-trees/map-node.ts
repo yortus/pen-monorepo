@@ -63,7 +63,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Reference': return n;
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
-            case 'SourceFile': return {...n, bindings: n.bindings.map(rec)};
             case 'StringLiteral': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

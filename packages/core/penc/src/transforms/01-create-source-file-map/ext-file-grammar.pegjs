@@ -2,12 +2,11 @@
 SourceFile
     = exportedNames:ExportedNames
     {
-        let bindings = exportedNames.map(name => ({
+        return exportedNames.map(name => ({
             kind: 'Binding',
             left: {kind: 'Identifier', name},
             right: {kind: 'Intrinsic', name, path: options.path},
         }));
-        return {kind: 'SourceFile', path: options.path, bindings};
     }
 
 

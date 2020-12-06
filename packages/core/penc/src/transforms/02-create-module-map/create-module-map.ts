@@ -3,6 +3,16 @@ import type {SourceFileMap, ModuleMap} from '../../representations';
 import {mapObj, resolveModuleSpecifier} from '../../utils';
 
 
+// TODO CHANGES:
+// - synthesize a single 'root' module
+// - give it a 'start' binding
+// - add each SourceFile to it as a binding, with names from createModuleIdGenerator
+//   - so no more SourceFile nodes in output
+// - traverse whole ast and replace each ImportExpression with an Identifier to a binding in the root module
+//   - so no more ImportExpression nodes in output
+// - return a single MemberExpression representing the whole program (ie rootModule.start)
+
+
 // TODO: jsdoc...
 // - takes a collection of source files
 // - converts all nested Modules and ImportExpressions to Identifiers
@@ -13,28 +23,49 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
     // TODO: temp testing...
     const genModuleId = createModuleIdGenerator();
-
-    // TODO: temp testing... generate the moduleIds for each file in the program
     const moduleIdsBySourceFilePath: Record<string, string> = {};
     for (let path of Object.keys(sourceFilesByPath)) {
         moduleIdsBySourceFilePath[path] = genModuleId(path);
     }
+    // const rootModule: Module = {
+    //     kind: 'Module',
+    //     bindings: Object.keys(sourceFilesByPath).map(path => ({
+    //         kind: 'Binding',
+    //         left: {kind: 'Identifier', name: moduleIdsBySourceFilePath[path]},
+    //         right: {kind: 'Module', ...sourceFilesByPath[path]},
+    //     })),
+    // };
+    // const startExpression: Expression = {
+    //     kind: 'MemberExpression',
+    //     module: {
+    //         kind: 'MemberExpression',
+    //         module: rootModule,
+    //         member: {kind: 'Identifier', name: moduleIdsBySourceFilePath[startPath]},
+    //     },
+    //     member: {kind: 'Identifier', name: 'start'},
+    // };
+    
+
+
+
+
+
 
     const modulesById: Record<string, Module> = {};
     const parentModuleIdsByModuleId: Record<string, string> = {};
-    for (let file of Object.values(sourceFilesByPath)) {
+    for (let [filePath, file] of Object.entries(sourceFilesByPath)) {
 
         // TODO: temp fix this... next transform depends on parent modules coming before their nested modules
         // when iterating over the KVPs in modulesById... this placeholder guarantees that iteration order.
         // Better to fix transforms to not depend on ordering - should build an order using the parentModuleIdsByModuleId data.
-        modulesById[moduleIdsBySourceFilePath[file.path]] = {} as never;
+        modulesById[moduleIdsBySourceFilePath[filePath]] = {} as never;
 
         // Hoist any inline module expressions out of the AST and into the module map.
         // In this process, each nested Module node is replaced with an equivalent Identifier node.
-        let parentModuleIds = [moduleIdsBySourceFilePath[file.path]];
+        let parentModuleIds = [moduleIdsBySourceFilePath[filePath]];
         let bindings = file.bindings.map(binding => mapNode(binding, rec => ({
             Module: (modExpr): Identifier => {
-                let nestedModuleId = genModuleId(file.path, 'modexpr');
+                let nestedModuleId = genModuleId(filePath, 'modexpr');
                 let parentModuleId = parentModuleIds[parentModuleIds.length - 1];
                 parentModuleIdsByModuleId[nestedModuleId] = parentModuleId;
                 let nestedModule: Module = {kind: 'Module', bindings: {}};
@@ -55,7 +86,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
             // TODO: ImportExpression...
             ImportExpression: ({moduleSpecifier}): Identifier => {
-                const path = resolveModuleSpecifier(moduleSpecifier, file.path);
+                const path = resolveModuleSpecifier(moduleSpecifier, filePath);
                 return {
                     kind: 'Identifier',
                     name: moduleIdsBySourceFilePath[path],
@@ -65,7 +96,7 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
 
         // Add a module to the module map for the source file itself.
         const module: Module = {kind: 'Module', bindings: convertBindings(bindings)};
-        modulesById[moduleIdsBySourceFilePath[file.path]] = module;
+        modulesById[moduleIdsBySourceFilePath[filePath]] = module;
     }
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation

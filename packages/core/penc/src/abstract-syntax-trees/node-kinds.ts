@@ -36,7 +36,6 @@ export const expressionNodeKinds = createNodeKinds(
 export const allNodeKinds = createNodeKinds(
     'Binding',
     'Definition',
-    'SourceFile',
     ...patternNodeKinds,
     ...expressionNodeKinds,
 );

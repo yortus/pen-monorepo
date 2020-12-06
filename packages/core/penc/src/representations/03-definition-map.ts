@@ -17,5 +17,4 @@ export const definitionMapKinds = allNodeKinds.without(
     'ImportExpression',
     'MemberExpression',
     'ModulePattern',
-    'SourceFile',
 );
