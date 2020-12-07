@@ -10,13 +10,13 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References
 // - output contains *no* Identifiers or MemberExpressions
-export function createDefinitionMap({startExpression}: ModuleMap): DefinitionMap {
+export function createDefinitionMap({rootModule, startName}: ModuleMap): DefinitionMap {
     const {createScope, define, definitions, getScopeFor, lookup} = createSymbolTable();
 
     // Traverse the AST, creating a scope for each module, and a definition for each binding name/value pair.
     const rootScope = createScope();
     const surroundingScopes: Scope[] = [];
-    const rootModule = mapNode(startExpression.module.module, rec => ({
+    mapNode(rootModule, rec => ({ // NB: top-level return value isn't needed, since everything has a definition by then.
         Module: module => {
             // Create a scope for the module.
             const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
@@ -34,7 +34,6 @@ export function createDefinitionMap({startExpression}: ModuleMap): DefinitionMap
             return {kind: 'Module', bindings};
         },
     }));
-    assert(rootModule.kind === 'Module'); // TODO: need this? remove?
 
     // Resolve all Identifier nodes (except MemberExpression#member - that is resolved next)
     for (let def of Object.values(definitions)) {
@@ -84,16 +83,8 @@ export function createDefinitionMap({startExpression}: ModuleMap): DefinitionMap
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    // TODO: this is mega awkward unclear extra work due to the ModuleMap type - would be better if that just returned something that made this simpler?
-    const startModuleDefn = lookup(rootScope, startExpression.module.member.name);
-    assert(startModuleDefn.value.kind === 'Module');
-    assert(!Array.isArray(startModuleDefn.value.bindings));
-    const startRef = startModuleDefn.value.bindings[startExpression.member.name];
-    assert(startRef.kind === 'Reference');
-    const startDefinitionId = startRef.definitionId;
-
     return {
         definitionsById: definitions,
-        startDefinitionId,
+        startDefinitionId: lookup(rootScope, startName).definitionId,
     };
 }

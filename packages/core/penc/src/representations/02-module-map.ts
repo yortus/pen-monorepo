@@ -1,18 +1,11 @@
-import {allNodeKinds, Identifier, Module} from '../abstract-syntax-trees';
+import {allNodeKinds, Module} from '../abstract-syntax-trees';
 
 
+// TODO: revise outdated jsdoc...
 /** A PEN program expressed as a mapping from module IDs to `Module` AST nodes. */
 export interface ModuleMap {
-    // TODO: temp testing... this is pretty awkward here, and the two transforms that produce/consume it...
-    readonly startExpression: {
-        kind: 'MemberExpression',
-        module: {
-            kind: 'MemberExpression',
-            module: Module,
-            member: Identifier,
-        },
-        member: Identifier,
-    };
+    readonly rootModule: Module;
+    readonly startName: string;
 }
 
 

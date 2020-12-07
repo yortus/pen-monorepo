@@ -18,50 +18,39 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
     }
 
     // TODO: temp testing...
-    const rootModule: Module = {
-        kind: 'Module',
-        bindings: Object.entries(sourceFilesByPath).reduce(
-            (rootModuleBindings, [sourceFilePath, {bindings}]) => {
-                const moduleId = moduleIdsBySourceFilePath[sourceFilePath];
-                const bindingsArray = bindings.map(binding => mapNode(binding, rec => ({
-                    Module: (modExpr): Module => {
-                        let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
-                        bindings = mapObj(bindings, rec);
-                        return {kind: 'Module', bindings};
-                    },
-                    ImportExpression: ({moduleSpecifier}): Identifier => {
-                        const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
-                        return {kind: 'Identifier', name: moduleIdsBySourceFilePath[path]};
-                    },
-                })));
-                rootModuleBindings[moduleId] = {kind: 'Module', bindings: convertBindings(bindingsArray)};
-                return rootModuleBindings;
-            },
-            {} as Record<string, Expression>
-        ),
-    };
+    const rootModuleBindings = Object.entries(sourceFilesByPath).reduce(
+        (rootModuleBindings, [sourceFilePath, {bindings}]) => {
+            const moduleId = moduleIdsBySourceFilePath[sourceFilePath];
+            const bindingsArray = bindings.map(binding => mapNode(binding, rec => ({
+                Module: (modExpr): Module => {
+                    let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
+                    bindings = mapObj(bindings, rec);
+                    return {kind: 'Module', bindings};
+                },
+                ImportExpression: ({moduleSpecifier}): Identifier => {
+                    const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
+                    return {kind: 'Identifier', name: moduleIdsBySourceFilePath[path]};
+                },
+            })));
+            rootModuleBindings[moduleId] = {kind: 'Module', bindings: convertBindings(bindingsArray)};
+            return rootModuleBindings;
+        },
+        {} as Record<string, Expression>
+    );
 
-    // TODO: temp testing... this is pretty awkward here, and in the type decl, and in the next transform
-    let startExpression: ModuleMap['startExpression'] = {
+    // TODO: temp testing...
+    const rootModule: Module = {kind: 'Module', bindings: rootModuleBindings};
+    const startName = '𝕊tart'; // TODO: ensure no name clashes with other program identifiers
+    rootModuleBindings[startName] = {
         kind: 'MemberExpression',
-        module: {
-            kind: 'MemberExpression',
-            module: rootModule,
-            member: {
-                kind: 'Identifier',
-                name: moduleIdsBySourceFilePath[startPath],
-            },
-        },
-        member: {
-            kind: 'Identifier',
-            name: 'start',
-        },
+        module: {kind: 'Identifier', name: moduleIdsBySourceFilePath[startPath]},
+        member: {kind: 'Identifier', name: 'start'},
     };
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
-    traverseNode(startExpression, n => assert(moduleMapKinds.matches(n)));
+    traverseNode(rootModule, n => assert(moduleMapKinds.matches(n)));
 
-    return {startExpression};
+    return {rootModule, startName};
 }
 
 
