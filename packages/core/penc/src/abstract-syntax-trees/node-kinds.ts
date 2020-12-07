@@ -11,6 +11,7 @@ export const patternNodeKinds = createNodeKinds(
 export const expressionNodeKinds = createNodeKinds(
     'ApplicationExpression',
     'BooleanLiteral',
+    'BindingList',
     'FieldExpression',
     'Identifier',
     'ImportExpression',

@@ -22,8 +22,8 @@ export function createModuleMap({sourceFilesByPath, startPath}: SourceFileMap): 
         (rootModuleBindings, [sourceFilePath, {bindings}]) => {
             const moduleId = moduleIdsBySourceFilePath[sourceFilePath];
             const bindingsArray = bindings.map(binding => mapNode(binding, rec => ({
-                Module: (modExpr): Module => {
-                    let bindings = Array.isArray(modExpr.bindings) ? convertBindings(modExpr.bindings) : modExpr.bindings;
+                BindingList: ({bindings: bindingsArray}): Module => {
+                    let bindings = convertBindings(bindingsArray);
                     bindings = mapObj(bindings, rec);
                     return {kind: 'Module', bindings};
                 },
@@ -84,9 +84,9 @@ function createModuleIdGenerator() {
 
 
 // TODO: temp testing...
-function convertBindings(bindings: readonly Binding[]): {readonly [name: string]: Expression} {
+function convertBindings(bindingsArray: readonly Binding[]): {readonly [name: string]: Expression} {
     const result = {} as {[name: string]: Expression};
-    for (let {left, right} of bindings) {
+    for (let {left, right} of bindingsArray) {
         if (left.kind === 'Identifier') {
             if (result.hasOwnProperty(left.name)) {
                 // TODO: improve diagnostic message eg line+col

@@ -175,7 +175,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'Module': {
-            assert(!Array.isArray(expr.bindings));
             emit.down(1).text(`function ${name}(member) {`).indent();
             emit.down(1).text(`switch (member) {`).indent();
             for (const [name, ref] of Object.entries(expr.bindings)) {

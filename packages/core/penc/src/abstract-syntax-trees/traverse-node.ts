@@ -11,6 +11,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
         switch (n.kind) {
             case 'ApplicationExpression': return rec(n.lambda), rec(n.argument), cb(n);
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
+            case 'BindingList': return n.bindings.forEach(rec), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'Definition': return rec(n.value), cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
@@ -20,15 +21,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'LambdaExpression': return rec(n.param), rec(n.body), cb(n);
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
-            case 'Module': {
-                // TODO: shorten / tidy up...
-                if (Array.isArray(n.bindings)) {
-                    return n.bindings.forEach(rec), cb(n);
-                }
-                else {
-                    return mapObj(n.bindings, rec), cb(n);
-                }
-            }
+            case 'Module': return mapObj(n.bindings, rec), cb(n);
             case 'ModulePattern': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteral': return cb(n);

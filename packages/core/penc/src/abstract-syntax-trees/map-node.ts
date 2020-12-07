@@ -35,6 +35,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
         switch (n.kind) {
             case 'ApplicationExpression': return {...n, lambda: rec(n.lambda), argument: rec(n.argument)};
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
+            case 'BindingList': return {...n, bindings: n.bindings.map(rec)};
             case 'BooleanLiteral': return n;
             case 'Definition': return {...n, value: rec(n.value)};
             case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
@@ -44,15 +45,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'LambdaExpression': return {...n, param: rec(n.param), body: rec(n.body)};
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module), member: rec(n.member)};
-            case 'Module': {
-                // TODO: shorten / tidy up...
-                if (Array.isArray(n.bindings)) {
-                    return {...n, bindings: n.bindings.map(rec)};
-                }
-                else {
-                    return {...n, bindings: mapObj(n.bindings, rec)};
-                }
-            }
+            case 'Module': return {...n, bindings: mapObj(n.bindings, rec)};
             case 'ModulePattern': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteral': return n;

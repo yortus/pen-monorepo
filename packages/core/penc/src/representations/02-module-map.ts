@@ -12,6 +12,7 @@ export interface ModuleMap {
 /** List of node kinds that may be present in a ModuleMap program representation. */
 export const moduleMapKinds = allNodeKinds.without(
     'Binding',
+    'BindingList',
     'Definition',
     'ImportExpression',
     'ModulePattern',

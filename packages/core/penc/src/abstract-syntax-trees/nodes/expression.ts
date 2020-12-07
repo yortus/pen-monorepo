@@ -6,6 +6,7 @@ import type {Pattern} from './pattern';
 /** Union of all node types that represent PEN expressions. */
 export type Expression =
     | ApplicationExpression
+    | BindingList
     | BooleanLiteral
     | FieldExpression
     | Identifier
@@ -32,6 +33,12 @@ export interface ApplicationExpression {
     readonly kind: 'ApplicationExpression';
     readonly lambda: Expression;
     readonly argument: Expression;
+}
+
+
+export interface BindingList {
+    readonly kind: 'BindingList';
+    readonly bindings: ReadonlyArray<Binding>;
 }
 
 
@@ -89,7 +96,7 @@ export interface MemberExpression {
 
 export interface Module {
     readonly kind: 'Module';
-    readonly bindings: ReadonlyArray<Binding> | {readonly [name: string]: Expression};
+    readonly bindings: {readonly [name: string]: Expression};
 }
 
 

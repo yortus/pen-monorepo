@@ -2,11 +2,14 @@
 SourceFile
     = exportedNames:ExportedNames
     {
-        return exportedNames.map(name => ({
-            kind: 'Binding',
-            left: {kind: 'Identifier', name},
-            right: {kind: 'Intrinsic', name, path: options.path},
-        }));
+        return {
+            kind: 'BindingList',
+            bindings: exportedNames.map(name => ({
+                kind: 'Binding',
+                left: {kind: 'Identifier', name},
+                right: {kind: 'Intrinsic', name, path: options.path},
+            })),
+        };
     }
 
 

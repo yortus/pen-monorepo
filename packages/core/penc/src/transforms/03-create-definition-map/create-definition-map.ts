@@ -23,7 +23,6 @@ export function createDefinitionMap({rootModule, startName}: ModuleMap): Definit
             const scope = surroundingScope ? createScope(surroundingScope) : rootScope;
 
             // Create a definition for each local name in the module.
-            assert(!Array.isArray(module.bindings));
             let bindings = {} as Record<string, Reference>;
             surroundingScopes.push(scope);
             for (const [name, expr] of Object.entries(module.bindings)) {
@@ -70,7 +69,6 @@ export function createDefinitionMap({rootModule, startName}: ModuleMap): Definit
                 // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
                 // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
                 assert(lhs.kind === 'Module');
-                assert(!Array.isArray(lhs.bindings));
                 const ref = lhs.bindings[member.name];
                 if (!ref) throw new Error(`'${member.name}' is not defined`); // TODO: improve diagnostic message eg line+col
                 assert(ref.kind === 'Reference');
