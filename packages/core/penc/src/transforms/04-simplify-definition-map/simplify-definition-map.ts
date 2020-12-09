@@ -1,5 +1,5 @@
 import type {Definition, Expression, Reference} from '../../abstract-syntax-trees';
-import {DefinitionMap, definitionMapKinds} from '../../representations';
+import {DefinitionMap, definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
@@ -17,7 +17,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
     const namesByHash = Object.values(definitionsById).reduce((obj, def) => {
         // TODO: temp testing...
         const node = def.value;
-        assert(definitionMapKinds.matches(node));
+        assert(definitionMapNodeKinds.matches(node));
         const hash = getHashFor(node);
         obj[hash] ??= [];
         obj[hash].push(def.localName);
@@ -45,7 +45,7 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
 
     // TODO: recursive...
     function getNewDefinitionFor(expr: Expression, parentDefnName?: string): Definition {
-        assert(definitionMapKinds.matches(expr));
+        assert(definitionMapNodeKinds.matches(expr));
 
         // TODO: doc...
         const e = deref(expr);

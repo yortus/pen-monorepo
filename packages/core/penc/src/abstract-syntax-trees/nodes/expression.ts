@@ -96,7 +96,7 @@ export interface MemberExpression {
 
 export interface Module {
     readonly kind: 'Module';
-    readonly bindings: {readonly [name: string]: Expression};
+    readonly bindings: Readonly<Record<string, Expression>>; // TODO: doc special optional 'start' binding
 }
 
 

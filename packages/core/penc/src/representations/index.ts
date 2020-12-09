@@ -1,3 +1,3 @@
-export {SourceFileMap, sourceFileMapKinds} from './01-source-file-map';
-export {ModuleMap, moduleMapKinds} from './02-module-map';
-export {DefinitionMap, definitionMapKinds} from './03-definition-map';
+export {SourceFileMap, sourceFileMapNodeKinds} from './01-source-file-map';
+export {ProgramModule, programModuleNodeKinds} from './02-program-module';
+export {DefinitionMap, definitionMapNodeKinds} from './03-definition-map';

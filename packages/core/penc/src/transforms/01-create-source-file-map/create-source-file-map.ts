@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import {BindingList, traverseNode} from '../../abstract-syntax-trees';
-import {SourceFileMap, sourceFileMapKinds} from '../../representations';
+import {SourceFileMap, sourceFileMapNodeKinds} from '../../representations';
 import {AbsPath, assert, isDebugMode, isExtension, resolveModuleSpecifier} from '../../utils';
-import {parse as parseExtFile} from './ext-file-grammar';
-import {parse as parsePenFile} from './pen-file-grammar';
+import {parseExtFile, parsePenFile} from './grammars';
 
 
 /**
@@ -38,7 +37,7 @@ export function createSourceFileMap(options: {main: AbsPath}): SourceFileMap {
 
     // In debug mode, ensure only allowed node kinds are present in the representation.
     if (isDebugMode()) {
-        for (let n of Object.values(sourceFilesByPath)) traverseNode(n, n => assert(sourceFileMapKinds.matches(n)));
+        for (let n of Object.values(sourceFilesByPath)) traverseNode(n, n => assert(sourceFileMapNodeKinds.matches(n)));
     }
 
     return {sourceFilesByPath, startPath};

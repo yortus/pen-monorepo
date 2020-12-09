@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {createSourceFileMap} from './transforms';
-import {createModuleMap} from './transforms';
+import {createProgramModule} from './transforms';
 import {createDefinitionMap} from './transforms';
 import {simplifyDefinitionMap} from './transforms';
 import {resolveConstantValues} from './transforms';
@@ -26,7 +26,7 @@ export function compile(options: CompilerOptions) {
     const sourceFileMap = createSourceFileMap({main});
 
     // Proceed through all stages in the compiler pipeline.
-    const moduleMap = createModuleMap(sourceFileMap);
+    const moduleMap = createProgramModule(sourceFileMap);
     const definitionMap = createDefinitionMap(moduleMap);
     const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
     const consts = resolveConstantValues(simplifiedDefinitionMap);

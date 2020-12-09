@@ -1,6 +1,6 @@
 import * as objectHash from 'object-hash';
 import {expressionNodeKinds, Node} from '../../abstract-syntax-trees';
-import {definitionMapKinds} from '../../representations';
+import {definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
@@ -93,4 +93,4 @@ type HashableNodeKind = typeof hashableNodeKinds[any];
 
 
 // Helper array of all node kinds that support hashing.
-const hashableNodeKinds = definitionMapKinds.without('Definition');
+const hashableNodeKinds = definitionMapNodeKinds.without('Definition');

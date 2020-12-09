@@ -1,6 +1,6 @@
 import type {Reference} from '../../abstract-syntax-trees';
 import {mapNode} from '../../abstract-syntax-trees';
-import type {DefinitionMap, ModuleMap} from '../../representations';
+import type {DefinitionMap, ProgramModule} from '../../representations';
 import {assert} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -10,13 +10,13 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References
 // - output contains *no* Identifiers or MemberExpressions
-export function createDefinitionMap({rootModule, startName}: ModuleMap): DefinitionMap {
+export function createDefinitionMap(programModule: ProgramModule): DefinitionMap {
     const {createScope, define, definitions, getScopeFor, lookup} = createSymbolTable();
 
     // Traverse the AST, creating a scope for each module, and a definition for each binding name/value pair.
     const rootScope = createScope();
     const surroundingScopes: Scope[] = [];
-    mapNode(rootModule, rec => ({ // NB: top-level return value isn't needed, since everything has a definition by then.
+    mapNode({kind: 'Module', ...programModule}, rec => ({ // NB: top-level return value isn't needed, since everything has a definition by then.
         Module: module => {
             // Create a scope for the module.
             const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
@@ -83,6 +83,6 @@ export function createDefinitionMap({rootModule, startName}: ModuleMap): Definit
 
     return {
         definitionsById: definitions,
-        startDefinitionId: lookup(rootScope, startName).definitionId,
+        startDefinitionId: lookup(rootScope, 'start').definitionId,
     };
 }
