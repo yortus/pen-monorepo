@@ -6,8 +6,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
-import {createSourceFileMap} from './transforms';
-import {createProgramModule} from './transforms';
+import {parseSourceFiles} from './transforms';
 import {createDefinitionMap} from './transforms';
 import {simplifyDefinitionMap} from './transforms';
 import {resolveConstantValues} from './transforms';
@@ -22,11 +21,8 @@ export function compile(options: CompilerOptions) {
     const outFile = options.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
     if (main === outFile) throw new Error(`output would overwrite input`);
 
-    // Collect all source files in the compilation.
-    const sourceFileMap = createSourceFileMap({main});
-
     // Proceed through all stages in the compiler pipeline.
-    const moduleMap = createProgramModule(sourceFileMap);
+    const moduleMap = parseSourceFiles({main});
     const definitionMap = createDefinitionMap(moduleMap);
     const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
     const consts = resolveConstantValues(simplifiedDefinitionMap);

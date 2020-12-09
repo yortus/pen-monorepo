@@ -1,5 +1,5 @@
 import * as objectHash from 'object-hash';
-import {expressionNodeKinds, Node} from '../../abstract-syntax-trees';
+import {expressionNodeKinds, Node} from '../../ast-nodes';
 import {definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';

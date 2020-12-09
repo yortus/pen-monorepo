@@ -1,4 +1,4 @@
-import type {Definition, Expression, Reference} from '../../abstract-syntax-trees';
+import type {Definition, Expression, Reference} from '../../ast-nodes';
 import {DefinitionMap, definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';

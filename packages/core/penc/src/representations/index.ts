@@ -1,3 +1,2 @@
-export {SourceFileMap, sourceFileMapNodeKinds} from './01-source-file-map';
-export {ProgramModule, programModuleNodeKinds} from './02-program-module';
-export {DefinitionMap, definitionMapNodeKinds} from './03-definition-map';
+export {AbstractSyntaxTree, abstractSyntaxTreeNodeKinds} from './01-abstract-syntax-tree';
+export {DefinitionMap, definitionMapNodeKinds} from './02-definition-map';

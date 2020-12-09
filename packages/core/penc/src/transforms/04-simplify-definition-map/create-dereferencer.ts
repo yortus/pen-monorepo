@@ -1,4 +1,4 @@
-import type {Definition, Expression} from '../../abstract-syntax-trees';
+import type {Definition, Expression} from '../../ast-nodes';
 
 
 // TODO: review this outdated jsdoc comment...
@@ -23,7 +23,8 @@ export function createDereferencer(definitions: Record<string, Definition>) {
         while (true) {
             // If `expr` is a par|ref|mem expression, resolve to its target expression.
             if (expr.kind === 'ParenthesisedExpression') {
-                expr = expr.expression;
+                throw new Error('NEVER!!!');
+                //expr = expr.expression;
             }
             else if (expr.kind === 'Reference') {
                 expr = definitions[expr.definitionId].value;

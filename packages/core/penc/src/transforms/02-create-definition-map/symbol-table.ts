@@ -1,4 +1,4 @@
-import type {Definition, Expression} from '../../abstract-syntax-trees';
+import type {Definition, Expression} from '../../ast-nodes';
 import {assert} from '../../utils';
 
 

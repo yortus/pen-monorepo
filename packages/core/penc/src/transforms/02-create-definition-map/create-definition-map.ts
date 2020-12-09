@@ -1,6 +1,6 @@
-import type {Reference} from '../../abstract-syntax-trees';
-import {mapNode} from '../../abstract-syntax-trees';
-import type {DefinitionMap, ProgramModule} from '../../representations';
+import type {Reference} from '../../ast-nodes';
+import {mapNode} from '../../ast-nodes';
+import type {DefinitionMap, AbstractSyntaxTree} from '../../representations';
 import {assert} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -10,7 +10,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References
 // - output contains *no* Identifiers or MemberExpressions
-export function createDefinitionMap(programModule: ProgramModule): DefinitionMap {
+export function createDefinitionMap(programModule: AbstractSyntaxTree): DefinitionMap {
     const {createScope, define, definitions, getScopeFor, lookup} = createSymbolTable();
 
     // Traverse the AST, creating a scope for each module, and a definition for each binding name/value pair.

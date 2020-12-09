@@ -1,4 +1,4 @@
-import type {BindingList} from '../../../abstract-syntax-trees';
+import type {BindingList} from '../../../ast-nodes';
 import type {AbsPath} from '../../../utils';
 
 

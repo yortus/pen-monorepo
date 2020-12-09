@@ -1,4 +1,4 @@
-import {allNodeKinds, Definition} from '../abstract-syntax-trees';
+import {allNodeKinds, Definition} from '../ast-nodes';
 
 
 // TODO: doc that Modules/Bindings are still present in this form and why, and that Identifier nodes are present only as
@@ -18,4 +18,5 @@ export const definitionMapNodeKinds = allNodeKinds.without(
     'ImportExpression',
     'MemberExpression',
     'ModulePattern',
+    'ParenthesisedExpression',
 );

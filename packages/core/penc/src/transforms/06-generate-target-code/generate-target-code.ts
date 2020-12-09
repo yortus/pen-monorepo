@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import type {Expression, Intrinsic} from '../../abstract-syntax-trees';
+import type {Expression, Intrinsic} from '../../ast-nodes';
 import type {DefinitionMap} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
