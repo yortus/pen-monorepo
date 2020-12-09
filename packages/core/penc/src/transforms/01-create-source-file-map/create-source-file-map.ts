@@ -1,16 +1,18 @@
 import * as fs from 'fs';
 import {BindingList, traverseNode} from '../../abstract-syntax-trees';
-import type {SourceFileMap} from '../../representations';
-import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
+import {SourceFileMap, sourceFileMapKinds} from '../../representations';
+import {AbsPath, assert, isDebugMode, isExtension, resolveModuleSpecifier} from '../../utils';
 import {parse as parseExtFile} from './ext-file-grammar';
 import {parse as parsePenFile} from './pen-file-grammar';
 
 
-// TODO: jsdoc...
-// - follows ImportExpressions to find transitive closure of source files, and parses them all
-// - parses both pen source (.pen files) and pen extensions (.pen.js files)
-// TODO: doc/spec Options type properly
-export function createSourceFileMap(options: {main: string}): SourceFileMap {
+/**
+ * Creates the SourceFileMap representation for the PEN program specified by `options.main`. Finds the transitive
+ * closure of all source files comprising the program by parsing each source file and analysing each encountered
+ * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
+ * @param options.main absolute file path to the main source file for the PEN program.
+ */
+export function createSourceFileMap(options: {main: AbsPath}): SourceFileMap {
     const sourceFilesByPath: Record<string, BindingList> = {};
     const startPath = resolveModuleSpecifier(options.main);
     const unprocessedPaths = [startPath];
@@ -34,11 +36,10 @@ export function createSourceFileMap(options: {main: string}): SourceFileMap {
         });
     }
 
-    // TODO: in debug mode, ensure only allowed node kinds are present in the representation
-    // traverseNode(null!, n => assert(sourceFileMapKinds.matches(n)));
+    // In debug mode, ensure only allowed node kinds are present in the representation.
+    if (isDebugMode()) {
+        for (let n of Object.values(sourceFilesByPath)) traverseNode(n, n => assert(sourceFileMapKinds.matches(n)));
+    }
 
-    return {
-        sourceFilesByPath,
-        startPath,
-    };
+    return {sourceFilesByPath, startPath};
 }

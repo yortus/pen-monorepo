@@ -12,12 +12,13 @@ import {createDefinitionMap} from './transforms';
 import {simplifyDefinitionMap} from './transforms';
 import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
+import {AbsPath} from './utils';
 
 
 export function compile(options: CompilerOptions) {
 
     // Parse and validate compiler options
-    const main = path.resolve(options.main);
+    const main = AbsPath(path.resolve(options.main));
     const outFile = options.outFile || main.substr(0, main.length - path.extname(main).length) + '.js';
     if (main === outFile) throw new Error(`output would overwrite input`);
 
