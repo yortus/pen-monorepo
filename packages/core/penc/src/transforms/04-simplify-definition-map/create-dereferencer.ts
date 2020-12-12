@@ -5,7 +5,6 @@ import type {Definition, Expression} from '../../ast-nodes';
 /**
  * Returns a function that can follow references from a given node to the node it refers to within the same AST.
  * The result of dereferencing a node is computed as follows:
- * - ParenthesisedExpression: deref of the inner expression 
  * - GlobalReferenceExpression: deref of the value of the binding with the same globalName as the reference.
  * - MemberExpression: deref of the value of the binding refered to (TODO: clearer wording?)
  * - any other node kind: the node itself, unchanged.
@@ -21,12 +20,8 @@ export function createDereferencer(definitions: Record<string, Definition>) {
     function deref(expr: Expression): Expression {
         const seen = [expr];
         while (true) {
-            // If `expr` is a par|ref|mem expression, resolve to its target expression.
-            if (expr.kind === 'ParenthesisedExpression') {
-                throw new Error('NEVER!!!');
-                //expr = expr.expression;
-            }
-            else if (expr.kind === 'Reference') {
+            // If `expr` is a ref|mem expression, resolve to its target expression.
+            if (expr.kind === 'Reference') {
                 expr = definitions[expr.definitionId].value;
             }
             else {
@@ -46,6 +41,7 @@ export function createDereferencer(definitions: Record<string, Definition>) {
 }
 
 
+// TODO: review outdated jsdoc...
 /**
  * A function that returns the result of _dereferencing_ the expression node `expr`. If `expr` is a parenthesised,
  * global reference, or member expression, then the returned node will be the node `expr` refers to in the same AST, if

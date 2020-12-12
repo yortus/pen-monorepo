@@ -3,9 +3,9 @@ import type {DefinitionMap} from '../../representations';
 
 // TODO: jsdoc...
 // TODO: this isn't a transform in its current form... revise this...
-export function resolveConstantValues({definitionsById}: DefinitionMap): Record<string, {value: unknown}> {
+export function resolveConstantValues({definitions}: DefinitionMap): Record<string, {value: unknown}> {
     const result = {} as Record<string, {value: unknown}>;
-    for (const [defnId, defn] of Object.entries(definitionsById)) {
+    for (const [defnId, defn] of Object.entries(definitions)) {
         switch (defn.value.kind) {
             case 'BooleanLiteral': result[defnId] = {value: defn.value.value}; break;
             case 'NullLiteral': result[defnId] = {value: defn.value.value}; break;

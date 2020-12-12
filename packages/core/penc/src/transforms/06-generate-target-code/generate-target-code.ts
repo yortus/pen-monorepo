@@ -54,9 +54,9 @@ export function generateTargetCode(program: Program) {
 }
 
 
-function emitIntrinsics(emit: Emitter, {defs: {definitionsById}}: Program) {
+function emitIntrinsics(emit: Emitter, {defs: {definitions}}: Program) {
     const isIntrinsic = (e: Expression): e is Intrinsic => e.kind === 'Intrinsic';
-    const extExprs = Object.keys(definitionsById).map(id => definitionsById[id].value).filter(isIntrinsic);
+    const extExprs = Object.keys(definitions).map(id => definitions[id].value).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
     emit.down(1).text(`const extensions = {`).indent();
@@ -73,7 +73,7 @@ function emitIntrinsics(emit: Emitter, {defs: {definitionsById}}: Program) {
 
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-    const {consts, defs: {definitionsById, startDefinitionId}} = program;
+    const {consts, defs: {definitions}} = program;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';
@@ -81,22 +81,22 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
     // Emit extension exports before anything else
-    const extExprIds = Object.keys(definitionsById).filter(name => definitionsById[name].value.kind === 'Intrinsic');
+    const extExprIds = Object.keys(definitions).filter(name => definitions[name].value.kind === 'Intrinsic');
     if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
     for (const id of extExprIds) {
-        const extExpr = definitionsById[id].value as Intrinsic;
+        const extExpr = definitions[id].value as Intrinsic;
         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: ${mode}});`);
     }
 
     // TODO: emit each expression...
-    for (const [name, defn] of Object.entries(definitionsById)) {
+    for (const [name, defn] of Object.entries(definitions)) {
         emitExpression(emit, name, defn.value, mode);
         if (consts[name] === undefined) continue;
         emitConstant(emit, name, consts[name].value);
     }
 
     // TODO: emit epilog...
-    emit.down(2).text(`return ${startDefinitionId};`);
+    emit.down(2).text(`return start;`);
     emit.dedent().down(1).text('})();');
 }
 

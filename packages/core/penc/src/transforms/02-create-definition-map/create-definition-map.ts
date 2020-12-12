@@ -10,13 +10,13 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - resolves all identifiers and member lookups
 // - outputs a collection of definitions, with References
 // - output contains *no* Identifiers or MemberExpressions
-export function createDefinitionMap(programModule: AbstractSyntaxTree): DefinitionMap {
+export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
     const {createScope, define, definitions, getScopeFor, lookup} = createSymbolTable();
 
     // Traverse the AST, creating a scope for each module, and a definition for each binding name/value pair.
     const rootScope = createScope();
     const surroundingScopes: Scope[] = [];
-    mapNode({kind: 'Module', ...programModule}, rec => ({ // NB: top-level return value isn't needed, since everything has a definition by then.
+    mapNode({kind: 'Module', ...ast}, rec => ({ // NB: top-level return value isn't needed, since everything has a definition by then.
         Module: module => {
             // Create a scope for the module.
             const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
@@ -78,11 +78,16 @@ export function createDefinitionMap(programModule: AbstractSyntaxTree): Definiti
         Object.assign(def, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
+    // TODO: add the special 'start' definition
+    definitions['start'] = {
+        kind: 'Definition',
+        definitionId: 'start',
+        localName: 'start',
+        value: {kind: 'Reference', definitionId: lookup(rootScope, 'start').definitionId}
+    };
+
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    return {
-        definitionsById: definitions,
-        startDefinitionId: lookup(rootScope, 'start').definitionId,
-    };
+    return {definitions};
 }

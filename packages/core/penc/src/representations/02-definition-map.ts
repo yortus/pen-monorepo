@@ -5,8 +5,8 @@ import {allNodeKinds, Definition} from '../ast-nodes';
 //   lhs of Binding nodes inside modules
 /** A PEN program expressed as a map from definition IDs to `Definition` AST nodes. */
 export interface DefinitionMap {
-    readonly definitionsById: Record<string, Definition>; // TODO: should be definitionsByDefinitionId?
-    readonly startDefinitionId: string;
+    // TODO: doc... keyed by defnId, special 'start' defnId is entry point
+    readonly definitions: Record<string, Definition>;
 }
 
 

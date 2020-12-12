@@ -22,8 +22,8 @@ export function compile(options: CompilerOptions) {
     if (main === outFile) throw new Error(`output would overwrite input`);
 
     // Proceed through all stages in the compiler pipeline.
-    const moduleMap = parseSourceFiles({main});
-    const definitionMap = createDefinitionMap(moduleMap);
+    const ast = parseSourceFiles({main});
+    const definitionMap = createDefinitionMap(ast);
     const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
     const consts = resolveConstantValues(simplifiedDefinitionMap);
     const targetCode = generateTargetCode({defs: simplifiedDefinitionMap, consts});

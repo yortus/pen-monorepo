@@ -6,15 +6,15 @@ import {createNodeHasher} from './create-node-hasher';
 
 
 // TODO: doc...
-export function simplifyDefinitionMap({definitionsById, startDefinitionId}: DefinitionMap): DefinitionMap {
+export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionMap {
 
     // TODO: doc...
-    const deref = createDereferencer(definitionsById);
+    const deref = createDereferencer(definitions);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
-    const namesByHash = Object.values(definitionsById).reduce((obj, def) => {
+    const namesByHash = Object.values(definitions).reduce((obj, def) => {
         // TODO: temp testing...
         const node = def.value;
         assert(definitionMapNodeKinds.matches(node));
@@ -25,23 +25,20 @@ export function simplifyDefinitionMap({definitionsById, startDefinitionId}: Defi
     }, {} as Record<string, string[]>);
 
     // Find the `start` value, and make sure it is an expression.
-    const start = definitionsById[startDefinitionId]?.value;
+    const start = definitions['start'].value;
     assert(start && start.kind !== 'Module'); // TODO: better error message here - `start` must be a Rule or something?
 
     // Populate the `newDefinitionsByHash` map.
     const newDefinitionsByHash = new Map<string, Definition>();
     const newDefinitionIds = new Set<string>();
-    const startDefn = getNewDefinitionFor(start); // NB: called for side-effect of populating `newDefinitionsByHash` map.
+    getNewDefinitionFor(start); // NB: called for side-effect of populating `newDefinitionsByHash` map.
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     //traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    definitionsById = {};
-    for (const [_, defn] of newDefinitionsByHash) definitionsById[defn.definitionId] = defn;
-    return {
-        definitionsById,
-        startDefinitionId: startDefn.definitionId,
-    };
+    definitions = {};
+    for (const [_, defn] of newDefinitionsByHash) definitions[defn.definitionId] = defn;
+    return {definitions};
 
     // TODO: recursive...
     function getNewDefinitionFor(expr: Expression, parentDefnName?: string): Definition {
