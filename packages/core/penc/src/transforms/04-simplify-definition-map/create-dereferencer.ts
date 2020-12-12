@@ -1,4 +1,5 @@
-import type {Definition, Expression} from '../../ast-nodes';
+import type {Expression} from '../../ast-nodes';
+import type {Definition} from '../../representations';
 
 
 // TODO: review this outdated jsdoc comment...

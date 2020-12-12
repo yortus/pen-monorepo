@@ -13,7 +13,6 @@ export type AbstractSyntaxTree = Omit<Module, 'kind'> & {readonly bindings: {sta
 export const abstractSyntaxTreeNodeKinds = allNodeKinds.without(
     'Binding',
     'BindingList',
-    'Definition',
     'ImportExpression',
     'ModulePattern',
     'ParenthesisedExpression',

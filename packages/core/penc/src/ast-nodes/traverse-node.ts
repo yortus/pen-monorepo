@@ -13,7 +13,6 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BindingList': return n.bindings.forEach(rec), cb(n);
             case 'BooleanLiteral': return cb(n);
-            case 'Definition': return rec(n.value), cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);

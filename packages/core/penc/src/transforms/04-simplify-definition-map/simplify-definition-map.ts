@@ -1,5 +1,5 @@
-import type {Definition, Expression, Reference} from '../../ast-nodes';
-import {DefinitionMap, definitionMapNodeKinds} from '../../representations';
+import type {Expression, Reference} from '../../ast-nodes';
+import {Definition, DefinitionMap, definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
@@ -54,7 +54,6 @@ export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionM
 
         // TODO: doc... create a defn, register it in the map, then fill it in below
         const newDefinition: Definition = {
-            kind: 'Definition',
             definitionId: createDefinitionId(ownName || `${parentDefnName ?? ''}_e`),
             localName: '-', // TODO: fix...
             value: undefined!,

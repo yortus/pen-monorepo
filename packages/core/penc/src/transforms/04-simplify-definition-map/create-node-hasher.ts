@@ -56,7 +56,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assert(hashableNodeKinds.matches(n));
+            assert(definitionMapNodeKinds.matches(n));
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
@@ -85,12 +85,8 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = Node extends infer N ? (N extends {kind: HashableNodeKind} ? N : never) : never;
+type HashableNode = Node extends infer N ? (N extends {kind: DefinitionMapNodeKind} ? N : never) : never;
 
 
-// Helper type: union of all node kinds that support hashing. Includes all node kinds except 'Local*'.
-type HashableNodeKind = typeof hashableNodeKinds[any];
-
-
-// Helper array of all node kinds that support hashing.
-const hashableNodeKinds = definitionMapNodeKinds.without('Definition');
+// Helper type: union of all node kinds that support hashing.
+type DefinitionMapNodeKind = typeof definitionMapNodeKinds[any];

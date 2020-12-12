@@ -1,4 +1,12 @@
-import {allNodeKinds, Definition} from '../ast-nodes';
+import {allNodeKinds, Expression} from '../ast-nodes';
+
+
+// TODO: jsdoc...
+export interface Definition {
+    readonly definitionId: string; // TODO: doc... can be used as an identifier; unique across program
+    readonly localName: string;
+    readonly value: Expression;
+}
 
 
 // TODO: doc that Modules/Bindings are still present in this form and why, and that Identifier nodes are present only as

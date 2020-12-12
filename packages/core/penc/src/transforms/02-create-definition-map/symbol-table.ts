@@ -1,4 +1,5 @@
-import type {Definition, Expression} from '../../ast-nodes';
+import type {Expression} from '../../ast-nodes';
+import type {Definition} from '../../representations';
 import {assert} from '../../utils';
 
 
@@ -34,7 +35,7 @@ export function createSymbolTable() {
                 throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message eg line+col
             }
             const definitionId = createDefinitionId(name);
-            const definition: Definition = {kind: 'Definition', definitionId, localName: name, value};
+            const definition: Definition = {definitionId, localName: name, value};
             definitions[definitionId] = definition;
             scope[name] = definition;
             scopesByDefinitionId.set(definitionId, scope);
