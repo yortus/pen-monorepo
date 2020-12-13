@@ -4,7 +4,7 @@ import {allNodeKinds, Expression} from '../ast-nodes';
 // TODO: jsdoc...
 export interface Definition {
     readonly globalName: string; // TODO: doc... can be used as an identifier; unique across program
-    readonly localName: string;
+    readonly localName?: string;
     readonly value: Expression;
 }
 

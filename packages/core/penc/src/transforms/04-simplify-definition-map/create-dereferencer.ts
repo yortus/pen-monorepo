@@ -33,7 +33,7 @@ export function createDereferencer(definitions: Record<string, Definition>) {
             // If `expr` is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(expr)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                const name = expr.kind === 'Identifier' ? definitions[expr.name].localName : '(?)'; // TODO: fix non-ref case!
+                const name = expr.kind === 'Identifier' ? definitions[expr.name].localName ?? '(?)' : '(?)'; // TODO: fix non-ref case!
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(expr);

@@ -19,8 +19,10 @@ export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionM
         const node = def.value;
         assert(definitionMapNodeKinds.matches(node));
         const hash = getHashFor(node);
-        obj[hash] ??= [];
-        obj[hash].push(def.localName);
+        if (def.localName) {
+            obj[hash] ??= [];
+            obj[hash].push(def.localName);
+        }
         return obj;
     }, {} as Record<string, string[]>);
 
@@ -55,7 +57,6 @@ export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionM
         // TODO: doc... create a defn, register it in the map, then fill it in below
         const newDefinition: Definition = {
             globalName: createGlobalName(ownName || `${parentDefnName ?? ''}_e`),
-            localName: '-', // TODO: fix...
             value: undefined!,
         };
         newDefinitionsByHash.set(hash, newDefinition);

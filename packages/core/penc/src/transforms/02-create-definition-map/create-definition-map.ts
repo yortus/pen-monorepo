@@ -84,7 +84,6 @@ export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
     // TODO: add the special 'start' definition
     definitions['start'] = {
         globalName: 'start',
-        localName: 'start',
         value: {kind: 'Identifier', name: lookup(rootScope, 'start').globalName}
     };
 
