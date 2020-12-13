@@ -26,8 +26,8 @@ export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
             let bindings = {} as Record<string, Identifier>;
             surroundingScopes.push(scope);
             for (const [name, expr] of Object.entries(module.bindings)) {
-                const {definitionId} = define(scope, name, rec(expr));
-                bindings[name] = {kind: 'Identifier', name: definitionId};
+                const {globalName} = define(scope, name, rec(expr));
+                bindings[name] = {kind: 'Identifier', name: globalName};
             }
             surroundingScopes.pop();
             return {kind: 'Module', bindings};
@@ -41,14 +41,14 @@ export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
         const scope = getScopeFor(def);
         const newValue = mapNode(def.value, rec => ({
             Identifier: ({name}): Identifier => {
-                const {definitionId} = lookup(scope, name);
-                return {kind: 'Identifier', name: definitionId};
+                const {globalName} = lookup(scope, name);
+                return {kind: 'Identifier', name: globalName};
             },
             MemberExpression: mem => {
                 const memᐟ = {...mem, module: rec(mem.module)};
                 return memᐟ;
             },
-            Module: mod => mod, // TODO: explain why skip modules - they are already processed in STEP 1 (all binding vals are Ids whose names are defnIds)
+            Module: mod => mod, // TODO: explain why skip modules - they are already processed in STEP 1 (all binding vals are Ids whose names are globalNames)
         }));
         Object.assign(def, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
@@ -83,9 +83,9 @@ export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
 
     // TODO: add the special 'start' definition
     definitions['start'] = {
-        definitionId: 'start',
+        globalName: 'start',
         localName: 'start',
-        value: {kind: 'Identifier', name: lookup(rootScope, 'start').definitionId}
+        value: {kind: 'Identifier', name: lookup(rootScope, 'start').globalName}
     };
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
