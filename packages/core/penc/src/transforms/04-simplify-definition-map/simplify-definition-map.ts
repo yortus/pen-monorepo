@@ -1,4 +1,4 @@
-import type {Expression, Reference} from '../../ast-nodes';
+import type {Expression, Identifier} from '../../ast-nodes';
 import {Definition, DefinitionMap, definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
@@ -80,9 +80,9 @@ export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionM
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: Expression): Reference {
+        function ref(expr: Expression): Identifier {
             const {definitionId} = getNewDefinitionFor(expr, ownName || parentDefnName); // recurse
-            return {kind: 'Reference', definitionId};
+            return {kind: 'Identifier', name: definitionId};
         }
 
         function setV<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {

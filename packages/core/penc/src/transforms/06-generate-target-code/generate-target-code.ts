@@ -104,7 +104,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
     // Should never see a GlobalReferenceExpression here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
-    assert(expr.kind !== 'Reference');
+    assert(expr.kind !== 'Identifier');
 
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
@@ -119,15 +119,15 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
             const MEMO_SUFFIX = 'ₘ';
 
-            assert(expr.lambda.kind === 'Reference');
-            assert(expr.argument.kind === 'Reference');
+            assert(expr.lambda.kind === 'Identifier');
+            assert(expr.argument.kind === 'Identifier');
             emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text('try {').indent();
             emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
             emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
             emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.lambda.definitionId}(${expr.argument.definitionId});`);
+            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.lambda.name}(${expr.argument.name});`);
             emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
             emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
@@ -150,11 +150,11 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'FieldExpression': {
-            assert(expr.name.kind === 'Reference');
-            assert(expr.value.kind === 'Reference');
+            assert(expr.name.kind === 'Identifier');
+            assert(expr.value.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${modes.isParse(mode) ? 'parseField' : 'printField'}`);
-            emit.text(`(${expr.name.definitionId}, ${expr.value.definitionId});`);
+            emit.text(`(${expr.name.name}, ${expr.value.name});`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -165,8 +165,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'ListExpression': {
             const elements = expr.elements.map(element => {
-                assert(element.kind === 'Reference');
-                return element.definitionId;
+                assert(element.kind === 'Identifier');
+                return element.name;
             });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${modes.isParse(mode) ? 'parseList' : 'printList'}([${elements.join(', ')}]);`);
@@ -178,8 +178,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
             emit.down(1).text(`function ${name}(member) {`).indent();
             emit.down(1).text(`switch (member) {`).indent();
             for (const [name, ref] of Object.entries(expr.bindings)) {
-                assert(ref.kind === 'Reference');
-                emit.down(1).text(`case '${name}': return ${ref.definitionId};`);
+                assert(ref.kind === 'Identifier');
+                emit.down(1).text(`case '${name}': return ${ref.name};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);
@@ -188,10 +188,10 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'NotExpression': {
-            assert(expr.expression.kind === 'Reference');
+            assert(expr.expression.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`const stateₒ = getState();`);
-            emit.down(1).text(`const result = !${expr.expression.definitionId}();`);
+            emit.down(1).text(`const result = !${expr.expression.name}();`);
             emit.down(1).text(`setState(stateₒ);`);
             emit.down(1).text(`OUT = undefined;`);
             emit.down(1).text(`return result;`);
@@ -200,16 +200,16 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         }
 
         case 'QuantifiedExpression': {
-            assert(expr.expression.kind === 'Reference');
+            assert(expr.expression.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
-                emit.down(1).text(`if (!${expr.expression.definitionId}()) OUT = undefined;`);
+                emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
             }
             else /* expr.quantifier === '*' */ {
                 emit.down(1).text(`const IPₒ = IP;`);
                 emit.down(1).text(`let out;`);
                 emit.down(1).text(`do {`).indent();
-                emit.down(1).text(`if (!${expr.expression.definitionId}()) break;`);
+                emit.down(1).text(`if (!${expr.expression.name}()) break;`);
                 emit.down(1).text(`if (IP === IPₒ) break;`);
                 emit.down(1).text(`out = concat(out, OUT);`);
                 emit.dedent().down(1).text(`} while (true);`);
@@ -222,8 +222,8 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'RecordExpression': {
             const fields = expr.fields.map(field => {
-                assert(field.value.kind === 'Reference');
-                return `{name: '${field.name}', value: ${field.value.definitionId}},`;
+                assert(field.value.kind === 'Identifier');
+                return `{name: '${field.name}', value: ${field.value.name}},`;
             });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${modes.isParse(mode) ? 'parseRecord' : 'printRecord'}([`);
@@ -239,7 +239,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Reference'); return e.definitionId; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Identifier'); return e.name; });
             emit.down(1).text(`function ${name}() {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
@@ -251,7 +251,7 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Reference'); return e.definitionId; });
+            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Identifier'); return e.name; });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('const stateₒ = getState();');
             emit.down(1).text('let out;');

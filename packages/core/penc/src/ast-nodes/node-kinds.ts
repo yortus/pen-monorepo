@@ -26,7 +26,6 @@ export const expressionNodeKinds = createNodeKinds(
     'ParenthesisedExpression',
     'QuantifiedExpression',
     'RecordExpression',
-    'Reference',
     'SelectionExpression',
     'SequenceExpression',
     'StringLiteral',

@@ -16,5 +16,4 @@ export const abstractSyntaxTreeNodeKinds = allNodeKinds.without(
     'ImportExpression',
     'ModulePattern',
     'ParenthesisedExpression',
-    'Reference',
 );

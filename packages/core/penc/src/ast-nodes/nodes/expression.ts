@@ -22,7 +22,6 @@ export type Expression =
     | ParenthesisedExpression
     | QuantifiedExpression
     | RecordExpression
-    | Reference
     | SelectionExpression
     | SequenceExpression
     | StringLiteral
@@ -137,12 +136,6 @@ export interface RecordExpression {
         readonly name: string;
         readonly value: Expression;
     }>;
-}
-
-
-export interface Reference {
-    readonly kind: 'Reference';
-    readonly definitionId: string;
 }
 
 
