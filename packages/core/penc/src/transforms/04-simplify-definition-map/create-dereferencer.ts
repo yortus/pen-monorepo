@@ -1,5 +1,4 @@
 import type {Expression} from '../../ast-nodes';
-import type {Definition} from '../../representations';
 
 
 // TODO: review this outdated jsdoc comment...
@@ -12,7 +11,7 @@ import type {Definition} from '../../representations';
  * NB: Some reference/member expressions cannot be statically dereferenced. This is a current implementation limitation.
  * @param ast the AST containing all possible nodes that may be dereferencing targets.
  */
-export function createDereferencer(definitions: Record<string, Definition>) {
+export function createDereferencer(bindings: Readonly<Record<string, Expression>>) {
 
     // Return the dereference function closed over the given AST.
     return deref as DereferenceFunction;
@@ -23,17 +22,17 @@ export function createDereferencer(definitions: Record<string, Definition>) {
         while (true) {
             // If `expr` is a ref|mem expression, resolve to its target expression.
             if (expr.kind === 'Identifier') {
-                expr = definitions[expr.name].value;
+                expr = bindings[expr.name];
             }
             else {
                 // If `expr` resolved to an expression that isn't a par|ref|mem expression, return it as-is.
                 return expr;
             }
 
-            // If `expr` is still a par|ref|mem expression, keep iterating, but prevent an infinite loop.
+            // If `expr` is still a ref|mem expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(expr)) {
                 // TODO: improve diagnostic message, eg line/col ref
-                const name = expr.kind === 'Identifier' ? definitions[expr.name].localName ?? '(?)' : '(?)'; // TODO: fix non-ref case!
+                const name = expr.kind === 'Identifier' ? expr.name : '(?)'; // TODO: fix non-ref case!
                 throw new Error(`'${name}' is circularly defined`);
             }
             seen.push(expr);

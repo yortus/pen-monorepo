@@ -1,21 +1,11 @@
-import {allNodeKinds, Expression} from '../ast-nodes';
+import {allNodeKinds, Expression, Module} from '../ast-nodes';
 
 
-// TODO: jsdoc...
-export interface Definition {
-    readonly globalName: string; // TODO: doc... can be used as an identifier; unique across program
-    readonly localName?: string;
-    readonly value: Expression;
-}
-
-
+// TODO: revise old comments here
 // TODO: doc that Modules/Bindings are still present in this form and why, and that Identifier nodes are present only as
 //   lhs of Binding nodes inside modules
 /** A PEN program expressed as a map from definition IDs to `Definition` AST nodes. */
-export interface DefinitionMap {
-    // TODO: doc... keyed by globalName, special 'start' globalName is entry point
-    readonly definitions: Record<string, Definition>;
-}
+export type DefinitionMap = Omit<Module, 'kind'> & {readonly bindings: {start: Expression}};
 
 
 /** List of node kinds that may be present in a DefinitionMap program representation. */

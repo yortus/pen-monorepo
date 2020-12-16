@@ -1,67 +1,64 @@
 import type {Expression, Identifier} from '../../ast-nodes';
-import {Definition, DefinitionMap, definitionMapNodeKinds} from '../../representations';
+import {DefinitionMap, definitionMapNodeKinds} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
 
 
 // TODO: doc...
-export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionMap {
+export function simplifyDefinitionMap({bindings}: DefinitionMap): DefinitionMap {
 
     // TODO: doc...
-    const deref = createDereferencer(definitions);
+    const deref = createDereferencer(bindings);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
-    const namesByHash = Object.values(definitions).reduce((obj, def) => {
+    const namesByHash = Object.entries(bindings).reduce((obj, [name, value]) => {
         // TODO: temp testing...
-        const node = def.value;
-        assert(definitionMapNodeKinds.matches(node));
-        const hash = getHashFor(node);
-        if (def.localName) {
-            obj[hash] ??= [];
-            obj[hash].push(def.localName);
-        }
+        assert(definitionMapNodeKinds.matches(value));
+        const hash = getHashFor(value);
+        obj[hash] ??= [];
+        obj[hash].push(name);
         return obj;
     }, {} as Record<string, string[]>);
 
     // Find the `start` value, and make sure it is an expression.
-    const start = definitions['start'].value;
+    const start = bindings['start'];
     assert(start && start.kind !== 'Module'); // TODO: better error message here - `start` must be a Rule or something?
 
-    // Populate the `newDefinitionsByHash` map.
-    const newDefinitionsByHash = new Map<string, Definition>();
-    const newDefinitionIds = new Set<string>();
-    getNewDefinitionFor(start); // NB: called for side-effect of populating `newDefinitionsByHash` map.
+    // Populate the `newBindingsByHash` map.
+    const newBindingsByHash = new Map<string, {name: string, value: Expression}>();
+    const newGlobalNames = new Set<string>();
+    getNewBindingFor(start); // NB: called for side-effect of populating `newBindingsByHash` map.
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     //traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    definitions = {};
-    for (const [_, defn] of newDefinitionsByHash) definitions[defn.globalName] = defn;
-    return {definitions};
+    const newBindings = {} as Record<string, Expression>;
+    for (const [_, {name, value}] of newBindingsByHash) newBindings[name] = value;
+    return {bindings: newBindings} as DefinitionMap;
 
     // TODO: recursive...
-    function getNewDefinitionFor(expr: Expression, parentDefnName?: string): Definition {
+    function getNewBindingFor(expr: Expression, parentName?: string): {name: string, value: Expression} {
         assert(definitionMapNodeKinds.matches(expr));
 
         // TODO: doc...
         const e = deref(expr);
         const hash = getHashFor(e);
-        if (newDefinitionsByHash.has(hash)) return newDefinitionsByHash.get(hash)!;
+        if (newBindingsByHash.has(hash)) return newBindingsByHash.get(hash)!;
 
-        // TODO: make up a name for the new defn. Use a name from the matching old defn if available
-        const ownName = namesByHash[hash]?.[0];
+        // TODO: make up a name for the new binding. Use a name from the matching old binding if available.
+        const ownName = namesByHash[hash]?.includes('start') ? 'start' : namesByHash[hash]?.[0];
 
         // TODO: doc... create a defn, register it in the map, then fill it in below
-        const newDefinition: Definition = {
-            globalName: createGlobalName(ownName || `${parentDefnName ?? ''}_e`),
+        const newBinding = {
+            name: createGlobalName(ownName || `${parentName ?? ''}_e`),
             value: undefined!,
         };
-        newDefinitionsByHash.set(hash, newDefinition);
+        newBindingsByHash.set(hash, newBinding);
 
-        // Set `newDefinition.value` to a new shallow expr, and return `newDefinition`.
+        // Set `newBinding.value` to a new shallow expr, and return `newBinding`.
         switch (e.kind) {
             case 'ApplicationExpression': return setV(e, {lambda: ref(e.lambda), argument: ref(e.argument)});
             case 'BooleanLiteral': return setV(e);
@@ -82,23 +79,23 @@ export function simplifyDefinitionMap({definitions}: DefinitionMap): DefinitionM
         }
 
         function ref(expr: Expression): Identifier {
-            const {globalName} = getNewDefinitionFor(expr, ownName || parentDefnName); // recurse
-            return {kind: 'Identifier', name: globalName};
+            const {name} = getNewBindingFor(expr, ownName || parentName); // recurse
+            return {kind: 'Identifier', name};
         }
 
         function setV<E extends Expression>(expr: E, vals?: Omit<E, 'kind'>) {
-            Object.assign(newDefinition, {value: {kind: expr.kind, ...(vals || expr)}});
-            return newDefinition;
+            Object.assign(newBinding, {value: {kind: expr.kind, ...(vals || expr)}});
+            return newBinding;
         }
     }
 
     // TODO: dedupe this... copypasta from SymbolTable (previous transform)
     function createGlobalName(name: string): string {
-        // Ensure no duplicate definitionIds are generated by adding a numeric suffix where necessary.
+        // Ensure no duplicate globalNames are generated by adding a numeric suffix where necessary.
         let result = name;
         let counter = 1;
-        while (newDefinitionIds.has(result)) result = `${name}${++counter}`;
-        newDefinitionIds.add(result);
+        while (newGlobalNames.has(result)) result = `${name}${++counter}`;
+        newGlobalNames.add(result);
         return result;
     }
 }
