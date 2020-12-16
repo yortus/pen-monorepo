@@ -1,6 +1,6 @@
-import type {Identifier} from '../../ast-nodes';
+import {allNodeKinds, Identifier} from '../../ast-nodes';
 import {mapNode} from '../../ast-nodes';
-import type {DefinitionMap, AbstractSyntaxTree} from '../../representations';
+import {AST, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -11,13 +11,15 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - outputs a collection of bindings
 // - all Identifiers refer to binding names
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
-export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
+export function createDefinitionMap(ast: AST): AST {
+    validateAST(ast, inputNodeKinds);
+
     const {createScope, define, allSymbols, getScopeFor, lookup} = createSymbolTable();
 
     // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
     const rootScope = createScope();
     const surroundingScopes: Scope[] = [];
-    mapNode({kind: 'Module', ...ast}, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
+    mapNode(ast.module, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
         Module: module => {
             // Create a scope for the module.
             const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
@@ -88,9 +90,33 @@ export function createDefinitionMap(ast: AbstractSyntaxTree): DefinitionMap {
         value: {kind: 'Identifier', name: lookup(rootScope, 'start').globalName}
     };
 
-    // TODO: in debug mode, ensure only allowed node kinds are present in the representation
-    // traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
-
-    const bindings = mapObj(allSymbols, symbol => symbol.value);
-    return {bindings} as DefinitionMap;
+    ast = {
+        module: {
+            kind: 'Module',
+            bindings: mapObj(allSymbols, symbol => symbol.value),
+        },
+    };
+    validateAST(ast, outputNodeKinds);
+    return ast;
 }
+
+
+/** List of node kinds that may be present in the input AST. */
+const inputNodeKinds = allNodeKinds.without(
+    'Binding',
+    'BindingList',
+    'ImportExpression',
+    'ModulePattern',
+    'ParenthesisedExpression',
+);
+
+
+/** List of node kinds that may be present in the output AST. */
+const outputNodeKinds = allNodeKinds.without(
+    'Binding',
+    'BindingList',
+    'ImportExpression',
+    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
+    'ModulePattern',
+    'ParenthesisedExpression',
+);

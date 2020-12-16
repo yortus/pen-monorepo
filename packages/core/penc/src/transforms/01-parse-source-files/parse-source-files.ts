@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import {BindingList, Identifier, mapNode, Module, traverseNode} from '../../ast-nodes';
-import {AbstractSyntaxTree, abstractSyntaxTreeNodeKinds} from '../../representations';
-import {AbsPath, assert, isDebugMode, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
+import {allNodeKinds, BindingList, Identifier, mapNode, Module, traverseNode} from '../../ast-nodes';
+import {AST, validateAST} from '../../representations';
+import {AbsPath, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
 import {parseExtFile, parsePenFile} from './grammars';
 import {convertBindingListToModule, createModuleNameGenerator} from './utils';
 
@@ -12,7 +12,7 @@ import {convertBindingListToModule, createModuleNameGenerator} from './utils';
  * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
  * @param options.main absolute file path to the main source file for the PEN program.
  */
-export function parseSourceFiles(options: {main: AbsPath}): AbstractSyntaxTree {
+export function parseSourceFiles(options: {main: AbsPath}): AST {
 
     // TODO: temp testing... explain each of these
     const sourceFilesByPath: Record<string, BindingList> = {};
@@ -68,23 +68,29 @@ export function parseSourceFiles(options: {main: AbsPath}): AbstractSyntaxTree {
     );
 
     // TODO: temp testing...
-    const ast: AbstractSyntaxTree = {
-        bindings: {
-            ...sourceFileModules,
-            start: {
-                kind: 'MemberExpression',
-                module: {kind: 'Identifier', name: moduleNamesBySourceFilePath[startPath]},
-                member: {kind: 'Identifier', name: 'start'},
+    const ast: AST = {
+        module: {
+            kind: 'Module',
+            bindings: {
+                ...sourceFileModules,
+                start: {
+                    kind: 'MemberExpression',
+                    module: {kind: 'Identifier', name: moduleNamesBySourceFilePath[startPath]},
+                    member: {kind: 'Identifier', name: 'start'},
+                },
             },
         },
     };
-
-    // In debug mode, ensure only allowed node kinds are present in the representation.
-    if (isDebugMode()) {
-        for (let n of Object.values(ast.bindings)) {
-            traverseNode(n, n => assert(abstractSyntaxTreeNodeKinds.matches(n)));
-        }
-    }
-
+    validateAST(ast, outputNodeKinds);
     return ast;
 }
+
+
+/** List of node kinds that may be present in the output AST. */
+const outputNodeKinds = allNodeKinds.without(
+    'Binding',
+    'BindingList',
+    'ImportExpression',
+    'ModulePattern',
+    'ParenthesisedExpression',
+);

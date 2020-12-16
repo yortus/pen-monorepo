@@ -1,6 +1,5 @@
 import * as objectHash from 'object-hash';
-import {expressionNodeKinds, Node} from '../../ast-nodes';
-import {definitionMapNodeKinds} from '../../representations';
+import {allNodeKinds, expressionNodeKinds, Node} from '../../ast-nodes';
 import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
@@ -56,7 +55,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
         const getSig = (n: Node) => {
-            assert(definitionMapNodeKinds.matches(n));
+            assert(hashableNodeKinds.matches(n));
             return getSignatureFor(n);
         };
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
@@ -85,8 +84,15 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = Node extends infer N ? (N extends {kind: DefinitionMapNodeKind} ? N : never) : never;
+type HashableNode = Node extends infer N ? (N extends {kind: typeof hashableNodeKinds[any]} ? N : never) : never;
 
 
 // Helper type: union of all node kinds that support hashing.
-type DefinitionMapNodeKind = typeof definitionMapNodeKinds[any];
+const hashableNodeKinds = allNodeKinds.without(
+    'Binding',
+    'BindingList',
+    'ImportExpression',
+    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
+    'ModulePattern',
+    'ParenthesisedExpression',
+);

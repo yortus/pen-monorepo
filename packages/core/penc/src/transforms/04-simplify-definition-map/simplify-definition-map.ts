@@ -1,22 +1,23 @@
-import type {Expression, Identifier} from '../../ast-nodes';
-import {DefinitionMap, definitionMapNodeKinds} from '../../representations';
+import {allNodeKinds, Expression, Identifier} from '../../ast-nodes';
+import {AST, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
 
 
 // TODO: doc...
-export function simplifyDefinitionMap({bindings}: DefinitionMap): DefinitionMap {
+export function simplifyDefinitionMap(ast: AST): AST {
+    validateAST(ast, inputNodeKinds);
 
     // TODO: doc...
+    const {bindings} = ast.module;
     const deref = createDereferencer(bindings);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
     const namesByHash = Object.entries(bindings).reduce((obj, [name, value]) => {
-        // TODO: temp testing...
-        assert(definitionMapNodeKinds.matches(value));
+        assert(inputNodeKinds.matches(value));
         const hash = getHashFor(value);
         obj[hash] ??= [];
         obj[hash].push(name);
@@ -37,11 +38,18 @@ export function simplifyDefinitionMap({bindings}: DefinitionMap): DefinitionMap 
 
     const newBindings = {} as Record<string, Expression>;
     for (const [_, {name, value}] of newBindingsByHash) newBindings[name] = value;
-    return {bindings: newBindings} as DefinitionMap;
+    ast = {
+        module: {
+            kind: 'Module',
+            bindings: newBindings,
+        },
+    };
+    validateAST(ast, outputNodeKinds);
+    return ast;
 
     // TODO: recursive...
     function getNewBindingFor(expr: Expression, parentName?: string): {name: string, value: Expression} {
-        assert(definitionMapNodeKinds.matches(expr));
+        assert(inputNodeKinds.matches(expr));
 
         // TODO: doc...
         const e = deref(expr);
@@ -99,3 +107,18 @@ export function simplifyDefinitionMap({bindings}: DefinitionMap): DefinitionMap 
         return result;
     }
 }
+
+
+/** List of node kinds that may be present in the input AST. */
+const inputNodeKinds = allNodeKinds.without(
+    'Binding',
+    'BindingList',
+    'ImportExpression',
+    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
+    'ModulePattern',
+    'ParenthesisedExpression',
+);
+
+
+/** List of node kinds that may be present in the output AST. */
+const outputNodeKinds = inputNodeKinds;

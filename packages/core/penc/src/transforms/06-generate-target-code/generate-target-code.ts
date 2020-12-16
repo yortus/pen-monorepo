@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import type {Expression, Intrinsic} from '../../ast-nodes';
-import type {DefinitionMap} from '../../representations';
+import type {AST} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
@@ -11,7 +11,7 @@ import * as modes from './modes';
 
 // TODO: is this a representation? Move out...
 export interface Program {
-    defs: DefinitionMap;
+    ast: AST;
     consts: Record<string, {value: unknown}>;
 }
 
@@ -54,7 +54,8 @@ export function generateTargetCode(program: Program) {
 }
 
 
-function emitIntrinsics(emit: Emitter, {defs: {bindings}}: Program) {
+function emitIntrinsics(emit: Emitter, {ast}: Program) {
+    const {bindings} = ast.module;
     const isIntrinsic = (e: Expression): e is Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
@@ -73,7 +74,8 @@ function emitIntrinsics(emit: Emitter, {defs: {bindings}}: Program) {
 
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
-    const {consts, defs: {bindings}} = program;
+    const {consts, ast} = program;
+    const {bindings} = ast.module;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';

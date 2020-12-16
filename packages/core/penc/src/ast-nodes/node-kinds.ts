@@ -1,4 +1,7 @@
-import {createNodeKinds} from './utils';
+import {createNodeKinds, NodeKinds} from './utils';
+
+
+export {NodeKinds};
 
 
 /** Array of all node kinds which are patterns. */

@@ -26,7 +26,7 @@ export function compile(options: CompilerOptions) {
     const definitionMap = createDefinitionMap(ast);
     const simplifiedDefinitionMap = simplifyDefinitionMap(definitionMap);
     const consts = resolveConstantValues(simplifiedDefinitionMap);
-    const targetCode = generateTargetCode({defs: simplifiedDefinitionMap, consts});
+    const targetCode = generateTargetCode({ast: simplifiedDefinitionMap, consts});
 
     // write the target code to the output file path. Creating containing dirs if necessary.
     const outFilePath = path.resolve(outFile);
