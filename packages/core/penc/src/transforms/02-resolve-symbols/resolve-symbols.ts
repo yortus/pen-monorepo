@@ -6,12 +6,11 @@ import {createSymbolTable, Scope} from './symbol-table';
 
 
 // TODO: jsdoc...
-// - takes a single startExpression
 // - resolves all identifiers and member lookups
-// - outputs a collection of bindings
-// - all Identifiers refer to binding names
+// - outputs the program as a single module (ie flat list of bindings)
+// - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
-export function createDefinitionMap(ast: AST): AST {
+export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
 
     const {createScope, define, allSymbols, getScopeFor, lookup} = createSymbolTable();

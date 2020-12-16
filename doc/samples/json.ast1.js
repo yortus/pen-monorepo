@@ -1,47 +1,44 @@
-const sourceFileMap = {
-  sourceFilesByPath: {
-    "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/json.pen": {
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "ModulePattern",
-            names: [
-              {
-                name: "char",
-              },
-              {
-                name: "f64",
-              },
-            ],
+const ast1 = {
+  module: {
+    kind: "Module",
+    bindings: {
+      "Ɱ_json": {
+        kind: "Module",
+        bindings: {
+          char: {
+            kind: "MemberExpression",
+            module: {
+              kind: "Identifier",
+              name: "Ɱ_std",
+            },
+            member: {
+              kind: "Identifier",
+              name: "char",
+            },
           },
-          right: {
-            kind: "ImportExpression",
-            moduleSpecifier: "std",
+          f64: {
+            kind: "MemberExpression",
+            module: {
+              kind: "Identifier",
+              name: "Ɱ_std",
+            },
+            member: {
+              kind: "Identifier",
+              name: "f64",
+            },
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "ModulePattern",
-            names: [
-              {
-                name: "unicode",
-              },
-            ],
+          unicode: {
+            kind: "MemberExpression",
+            module: {
+              kind: "Identifier",
+              name: "Ɱ_experiments",
+            },
+            member: {
+              kind: "Identifier",
+              name: "unicode",
+            },
           },
-          right: {
-            kind: "ImportExpression",
-            moduleSpecifier: "experiments",
-          },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "start",
-          },
-          right: {
+          start: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -58,14 +55,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Value",
-          },
-          right: {
+          Value: {
             kind: "SelectionExpression",
             expressions: [
               {
@@ -98,14 +88,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "False",
-          },
-          right: {
+          False: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -120,14 +103,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Null",
-          },
-          right: {
+          Null: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -142,14 +118,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "True",
-          },
-          right: {
+          True: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -164,14 +133,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Object",
-          },
-          right: {
+          Object: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -179,46 +141,40 @@ const sourceFileMap = {
                 name: "LBRACE",
               },
               {
-                kind: "ParenthesisedExpression",
-                expression: {
-                  kind: "SelectionExpression",
-                  expressions: [
-                    {
-                      kind: "SequenceExpression",
-                      expressions: [
-                        {
-                          kind: "Identifier",
-                          name: "Property",
-                        },
-                        {
-                          kind: "QuantifiedExpression",
-                          expression: {
-                            kind: "ParenthesisedExpression",
-                            expression: {
-                              kind: "SequenceExpression",
-                              expressions: [
-                                {
-                                  kind: "Identifier",
-                                  name: "COMMA",
-                                },
-                                {
-                                  kind: "Identifier",
-                                  name: "Property",
-                                },
-                              ],
+                kind: "SelectionExpression",
+                expressions: [
+                  {
+                    kind: "SequenceExpression",
+                    expressions: [
+                      {
+                        kind: "Identifier",
+                        name: "Property",
+                      },
+                      {
+                        kind: "QuantifiedExpression",
+                        expression: {
+                          kind: "SequenceExpression",
+                          expressions: [
+                            {
+                              kind: "Identifier",
+                              name: "COMMA",
                             },
-                          },
-                          quantifier: "*",
+                            {
+                              kind: "Identifier",
+                              name: "Property",
+                            },
+                          ],
                         },
-                      ],
-                    },
-                    {
-                      kind: "RecordExpression",
-                      fields: [
-                      ],
-                    },
-                  ],
-                },
+                        quantifier: "*",
+                      },
+                    ],
+                  },
+                  {
+                    kind: "RecordExpression",
+                    fields: [
+                    ],
+                  },
+                ],
               },
               {
                 kind: "Identifier",
@@ -226,14 +182,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Property",
-          },
-          right: {
+          Property: {
             kind: "FieldExpression",
             name: {
               kind: "Identifier",
@@ -253,14 +202,7 @@ const sourceFileMap = {
               ],
             },
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Array",
-          },
-          right: {
+          Array: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -268,46 +210,40 @@ const sourceFileMap = {
                 name: "LBRACKET",
               },
               {
-                kind: "ParenthesisedExpression",
-                expression: {
-                  kind: "SelectionExpression",
-                  expressions: [
-                    {
-                      kind: "SequenceExpression",
-                      expressions: [
-                        {
-                          kind: "Identifier",
-                          name: "Element",
-                        },
-                        {
-                          kind: "QuantifiedExpression",
-                          expression: {
-                            kind: "ParenthesisedExpression",
-                            expression: {
-                              kind: "SequenceExpression",
-                              expressions: [
-                                {
-                                  kind: "Identifier",
-                                  name: "COMMA",
-                                },
-                                {
-                                  kind: "Identifier",
-                                  name: "Element",
-                                },
-                              ],
+                kind: "SelectionExpression",
+                expressions: [
+                  {
+                    kind: "SequenceExpression",
+                    expressions: [
+                      {
+                        kind: "Identifier",
+                        name: "Element",
+                      },
+                      {
+                        kind: "QuantifiedExpression",
+                        expression: {
+                          kind: "SequenceExpression",
+                          expressions: [
+                            {
+                              kind: "Identifier",
+                              name: "COMMA",
                             },
-                          },
-                          quantifier: "*",
+                            {
+                              kind: "Identifier",
+                              name: "Element",
+                            },
+                          ],
                         },
-                      ],
-                    },
-                    {
-                      kind: "ListExpression",
-                      elements: [
-                      ],
-                    },
-                  ],
-                },
+                        quantifier: "*",
+                      },
+                    ],
+                  },
+                  {
+                    kind: "ListExpression",
+                    elements: [
+                    ],
+                  },
+                ],
               },
               {
                 kind: "Identifier",
@@ -315,14 +251,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Element",
-          },
-          right: {
+          Element: {
             kind: "ListExpression",
             elements: [
               {
@@ -331,25 +260,11 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "Number",
-          },
-          right: {
+          Number: {
             kind: "Identifier",
             name: "f64",
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "String",
-          },
-          right: {
+          String: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -370,14 +285,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "CHAR",
-          },
-          right: {
+          CHAR: {
             kind: "SelectionExpression",
             expressions: [
               {
@@ -409,34 +317,20 @@ const sourceFileMap = {
                     },
                     argument: {
                       kind: "Module",
-                      bindings: [
-                        {
-                          kind: "Binding",
-                          left: {
-                            kind: "Identifier",
-                            name: "min",
-                          },
-                          right: {
-                            kind: "StringLiteral",
-                            value: " ",
-                            concrete: false,
-                            abstract: false,
-                          },
+                      bindings: {
+                        min: {
+                          kind: "StringLiteral",
+                          value: " ",
+                          concrete: false,
+                          abstract: false,
                         },
-                        {
-                          kind: "Binding",
-                          left: {
-                            kind: "Identifier",
-                            name: "max",
-                          },
-                          right: {
-                            kind: "StringLiteral",
-                            value: "￿",
-                            concrete: false,
-                            abstract: false,
-                          },
+                        max: {
+                          kind: "StringLiteral",
+                          value: "￿",
+                          concrete: false,
+                          abstract: false,
                         },
-                      ],
+                      },
                     },
                   },
                 ],
@@ -594,55 +488,27 @@ const sourceFileMap = {
                     },
                     argument: {
                       kind: "Module",
-                      bindings: [
-                        {
-                          kind: "Binding",
-                          left: {
-                            kind: "Identifier",
-                            name: "base",
-                          },
-                          right: {
-                            kind: "NumericLiteral",
-                            value: 16,
-                          },
+                      bindings: {
+                        base: {
+                          kind: "NumericLiteral",
+                          value: 16,
                         },
-                        {
-                          kind: "Binding",
-                          left: {
-                            kind: "Identifier",
-                            name: "minDigits",
-                          },
-                          right: {
-                            kind: "NumericLiteral",
-                            value: 4,
-                          },
+                        minDigits: {
+                          kind: "NumericLiteral",
+                          value: 4,
                         },
-                        {
-                          kind: "Binding",
-                          left: {
-                            kind: "Identifier",
-                            name: "maxDigits",
-                          },
-                          right: {
-                            kind: "NumericLiteral",
-                            value: 4,
-                          },
+                        maxDigits: {
+                          kind: "NumericLiteral",
+                          value: 4,
                         },
-                      ],
+                      },
                     },
                   },
                 ],
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "LBRACE",
-          },
-          right: {
+          LBRACE: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -661,14 +527,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "RBRACE",
-          },
-          right: {
+          RBRACE: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -687,14 +546,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "LBRACKET",
-          },
-          right: {
+          LBRACKET: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -713,14 +565,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "RBRACKET",
-          },
-          right: {
+          RBRACKET: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -739,14 +584,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "COLON",
-          },
-          right: {
+          COLON: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -765,14 +603,7 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "COMMA",
-          },
-          right: {
+          COMMA: {
             kind: "SequenceExpression",
             expressions: [
               {
@@ -791,133 +622,93 @@ const sourceFileMap = {
               },
             ],
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "DOUBLE_QUOTE",
-          },
-          right: {
+          DOUBLE_QUOTE: {
             kind: "StringLiteral",
             value: "\"",
             concrete: true,
             abstract: false,
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "WS",
-          },
-          right: {
+          WS: {
             kind: "QuantifiedExpression",
             expression: {
-              kind: "ParenthesisedExpression",
-              expression: {
-                kind: "SelectionExpression",
-                expressions: [
-                  {
-                    kind: "StringLiteral",
-                    value: " ",
-                    concrete: true,
-                    abstract: false,
-                  },
-                  {
-                    kind: "StringLiteral",
-                    value: "\t",
-                    concrete: true,
-                    abstract: false,
-                  },
-                  {
-                    kind: "StringLiteral",
-                    value: "\n",
-                    concrete: true,
-                    abstract: false,
-                  },
-                  {
-                    kind: "StringLiteral",
-                    value: "\r",
-                    concrete: true,
-                    abstract: false,
-                  },
-                ],
-              },
+              kind: "SelectionExpression",
+              expressions: [
+                {
+                  kind: "StringLiteral",
+                  value: " ",
+                  concrete: true,
+                  abstract: false,
+                },
+                {
+                  kind: "StringLiteral",
+                  value: "\t",
+                  concrete: true,
+                  abstract: false,
+                },
+                {
+                  kind: "StringLiteral",
+                  value: "\n",
+                  concrete: true,
+                  abstract: false,
+                },
+                {
+                  kind: "StringLiteral",
+                  value: "\r",
+                  concrete: true,
+                  abstract: false,
+                },
+              ],
             },
             quantifier: "*",
           },
         },
-      ],
-    },
-    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": {
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "char",
-          },
-          right: {
+      },
+      "Ɱ_std": {
+        kind: "Module",
+        bindings: {
+          char: {
             kind: "Intrinsic",
             name: "char",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "f64",
-          },
-          right: {
+          f64: {
             kind: "Intrinsic",
             name: "f64",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "i32",
-          },
-          right: {
+          i32: {
             kind: "Intrinsic",
             name: "i32",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
-        },
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "memoise",
-          },
-          right: {
+          memoise: {
             kind: "Intrinsic",
             name: "memoise",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
           },
         },
-      ],
-    },
-    "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js": {
-      bindings: [
-        {
-          kind: "Binding",
-          left: {
-            kind: "Identifier",
-            name: "unicode",
-          },
-          right: {
+      },
+      "Ɱ_experiments": {
+        kind: "Module",
+        bindings: {
+          unicode: {
             kind: "Intrinsic",
             name: "unicode",
             path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js",
           },
         },
-      ],
+      },
+      start: {
+        kind: "MemberExpression",
+        module: {
+          kind: "Identifier",
+          name: "Ɱ_json",
+        },
+        member: {
+          kind: "Identifier",
+          name: "start",
+        },
+      },
     },
   },
-  startPath: "V:/projects/oss/pen-monorepo/packages/test-suite/fixtures/pen-src/json.pen",
 }

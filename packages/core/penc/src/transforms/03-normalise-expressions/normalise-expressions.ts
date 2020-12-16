@@ -5,8 +5,10 @@ import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
 
 
-// TODO: doc...
-export function simplifyDefinitionMap(ast: AST): AST {
+// TODO: jsdoc...
+// - turns every subexpression into a separate name/value binding in the single module
+// - deduplicates all expressions/subexpressions
+export function normaliseExpressions(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
 
     // TODO: doc...
