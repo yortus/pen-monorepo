@@ -9,5 +9,5 @@ export function validateAST<K extends Node['kind']>(ast: AST, nodeKinds: NodeKin
     if (!isDebugMode()) return;
 
     // Ensure only allowed node kinds are present in the representation.
-    traverseNode(ast.module, n => assert(nodeKinds.matches(n)));
+    traverseNode(ast.module, n => assert(nodeKinds.matches(n), `Unexpected node kind '${n.kind}'`));
 }
