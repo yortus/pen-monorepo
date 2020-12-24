@@ -1,8 +1,8 @@
-import type {Binding, Expression, Module} from '../../../ast-nodes';
+import type {BindingList, Expression, Module} from './nodes';
 
 
 // TODO: jsdoc...
-export function convertBindingListToModule(bindings: ReadonlyArray<Binding>): Module {
+export function moduleFromBindingList({bindings}: BindingList): Module {
     const bindingsObject = {} as {[name: string]: Expression};
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {

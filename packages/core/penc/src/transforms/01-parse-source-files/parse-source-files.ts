@@ -1,9 +1,9 @@
 import * as fs from 'fs';
-import {allNodeKinds, BindingList, Identifier, mapNode, Module, traverseNode} from '../../ast-nodes';
+import {allNodeKinds, BindingList, Identifier, mapNode, Module, moduleFromBindingList, traverseNode} from '../../ast-nodes';
 import {AST, validateAST} from '../../representations';
-import {AbsPath, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
+import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
+import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
-import {convertBindingListToModule, createModuleNameGenerator} from './utils';
 
 
 /**
@@ -46,12 +46,13 @@ export function parseSourceFiles(options: {main: AbsPath}): AST {
         });
     }
 
-    // TODO: temp testing... traverse AST again, converting BindingLists-->Modules, and ImportExprs-->Indetifiers + remove ParenthesisedExprs
+    // TODO: temp testing... traverse AST again, converting BindingLists-->Modules, and ImportExprs-->Identifiers + remove ParenthesisedExprs
     const sourceFileModules = Object.entries(sourceFilesByPath).reduce(
-        (program, [sourceFilePath, {bindings: sourceFileBindings}]) => {
-            const bindings = sourceFileBindings.map(binding => mapNode(binding, rec => ({
-                BindingList: (bindingList): Module => {
-                    let module = convertBindingListToModule(bindingList.bindings);
+        (program, [sourceFilePath, sourceFileBindings]) => {
+            const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
+            const module = mapNode(sourceFileBindings, rec => ({
+                BindingList: (bl): Module => {
+                    let module = moduleFromBindingList(bl);
                     return {...module, bindings: mapObj(module.bindings, rec)};
                 },
                 ImportExpression: ({moduleSpecifier}): Identifier => {
@@ -59,9 +60,9 @@ export function parseSourceFiles(options: {main: AbsPath}): AST {
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
                 ParenthesisedExpression: par => rec(par.expression),
-            })));
-            const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
-            program[moduleName] = convertBindingListToModule(bindings);
+            }));
+            assert(module.kind === 'Module');
+            program[moduleName] = module;
             return program;
         },
         {} as Record<string, Module>
