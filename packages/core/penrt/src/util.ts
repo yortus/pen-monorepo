@@ -17,13 +17,13 @@ interface StaticOptions {mode: Mode; }
 
 
 
-type PenVal = Rule | Lambda | Module;
+type PenVal = Rule | Generic | Module;
 interface Rule {
     (): boolean; // rule
     constant?: {value: unknown}; // compile-time constant
 }
-interface Lambda {
-    (arg: PenVal): PenVal; // lambda
+interface Generic {
+    (arg: PenVal): PenVal; // generic
     constant?: {value: unknown}; // compile-time constant
 }
 interface Module {
@@ -33,7 +33,7 @@ interface Module {
 function isRule(_x: PenVal): _x is Rule {
     return true; // TODO: implement runtime check
 }
-function isLambda(_x: PenVal): _x is Lambda {
+function isGeneric(_x: PenVal): _x is Generic {
     return true; // TODO: implement runtime check
 }
 function isModule(_x: PenVal): _x is Module {

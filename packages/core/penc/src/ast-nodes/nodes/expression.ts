@@ -12,7 +12,7 @@ export type Expression =
     | Identifier
     | ImportExpression
     | Intrinsic
-    | LambdaExpression
+    | GenericExpression
     | ListExpression
     | MemberExpression
     | Module
@@ -30,7 +30,7 @@ export type Expression =
 
 export interface ApplicationExpression {
     readonly kind: 'ApplicationExpression';
-    readonly lambda: Expression;
+    readonly generic: Expression;
     readonly argument: Expression;
 }
 
@@ -44,13 +44,6 @@ export interface BindingList {
 export interface BooleanLiteral {
     readonly kind: 'BooleanLiteral';
     readonly value: boolean;
-}
-
-
-export interface Intrinsic {
-    readonly kind: 'Intrinsic';
-    readonly name: string;
-    readonly path: AbsPath;
 }
 
 
@@ -73,8 +66,15 @@ export interface ImportExpression {
 }
 
 
-export interface LambdaExpression {
-    readonly kind: 'LambdaExpression';
+export interface Intrinsic {
+    readonly kind: 'Intrinsic';
+    readonly name: string;
+    readonly path: AbsPath;
+}
+
+
+export interface GenericExpression {
+    readonly kind: 'GenericExpression';
     readonly param: Identifier | Pattern;
     readonly body: Expression;
 }

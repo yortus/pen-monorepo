@@ -372,7 +372,7 @@ const ast3 = {
       },
       CHAR_e6: {
         kind: "ApplicationExpression",
-        lambda: {
+        generic: {
           kind: "Identifier",
           name: "char",
         },
@@ -632,7 +632,7 @@ const ast3 = {
       },
       CHAR_e34: {
         kind: "ApplicationExpression",
-        lambda: {
+        generic: {
           kind: "Identifier",
           name: "unicode",
         },

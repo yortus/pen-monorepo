@@ -2,8 +2,8 @@
 // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
 // TODO: optimise 'any char' case better
 // TODO: optimise all cases better
-function char({mode}: StaticOptions): Lambda {
-    return function CHA_lambda(expr) {
+function char({mode}: StaticOptions): Generic {
+    return function CHA_generic(expr) {
         assert(isModule(expr));
         const min = expr('min')?.constant?.value as string | undefined ?? '\u0000';
         const max = expr('max')?.constant?.value as string | undefined ?? '\uFFFF';

@@ -62,11 +62,11 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
-            case 'ApplicationExpression': return setSig('APP', getSig(n.lambda), getSig(n.argument));
+            case 'ApplicationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
+            case 'GenericExpression': throw new Error('Not implemented'); // TODO: temp testing fix this...
             case 'Intrinsic': return setSig('INT', n.name, n.path);
-            case 'LambdaExpression': throw new Error('Not implemented'); // TODO: temp testing fix this...
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));

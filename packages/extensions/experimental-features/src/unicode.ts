@@ -1,5 +1,5 @@
-function unicode({mode}: StaticOptions): Lambda {
-    return function UNI_lambda(expr) {
+function unicode({mode}: StaticOptions): Generic {
+    return function UNI_generic(expr) {
         assert(isModule(expr));
         const base = expr('base')?.constant?.value as number;
         const minDigits = expr('minDigits')?.constant?.value as number;

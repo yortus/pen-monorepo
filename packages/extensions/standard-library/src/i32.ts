@@ -1,6 +1,6 @@
 // TODO: doc... has both 'txt' and 'ast' representation
-function i32({mode}: StaticOptions): Lambda {
-    return function I32_lambda(expr) {
+function i32({mode}: StaticOptions): Generic {
+    return function I32_generic(expr) {
         assert(isModule(expr));
         const base = expr('base')?.constant?.value as number | undefined ?? 10;
         const signed = expr('signed')?.constant?.value as boolean | undefined ?? true;

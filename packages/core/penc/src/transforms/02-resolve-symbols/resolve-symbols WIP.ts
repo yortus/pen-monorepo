@@ -1,4 +1,4 @@
-import {allNodeKinds, Expression, Identifier, LambdaExpression, moduleFromBindingList} from '../../ast-nodes';
+import {allNodeKinds, Expression, Identifier, GenericExpression, moduleFromBindingList} from '../../ast-nodes';
 import {mapNode} from '../../ast-nodes';
 import {AST, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
@@ -19,7 +19,7 @@ export function resolveSymbols(ast: AST): AST {
     // TODO: temp testing...
     internalResolve({
         fn: {
-            kind: 'LambdaExpression',
+            kind: 'GenericExpression',
             param: {kind: 'ModulePattern', names: []},
             body: {kind: 'MemberExpression', module: ast.module, member: {kind: 'Identifier', name: 'start'}},
         },
@@ -47,7 +47,7 @@ export function resolveSymbols(ast: AST): AST {
 
 
     // TODO: temp testing...
-    function internalResolve({fn, arg, env}: {fn: LambdaExpression, arg: Expression, env?: Scope}) {
+    function internalResolve({fn, arg, env}: {fn: GenericExpression, arg: Expression, env?: Scope}) {
 
         // TODO: step 0 - synthesize a module expression
         const topMod = moduleFromBindingList({
@@ -71,9 +71,9 @@ export function resolveSymbols(ast: AST): AST {
             ApplicationExpression: call => {
                 // TODO: leave the ApplicationExpression in place until the next step...
                 console.log(`CALL!`);
-                return {...call, lambda: rec(call.lambda), argument: rec(call.argument)};
+                return {...call, generic: rec(call.generic), argument: rec(call.argument)};
             },
-            LambdaExpression: func => {
+            GenericExpression: func => {
                 // TODO: ...
                 console.log(`FUNC!`);
                 return func; // NB: don't recurse inside
@@ -117,7 +117,7 @@ export function resolveSymbols(ast: AST): AST {
             if (symbol.value.kind === 'Module') continue;
 
             // TODO: temp testing...
-            if (symbol.value.kind === 'LambdaExpression') continue;
+            if (symbol.value.kind === 'GenericExpression') continue;
 
             const scope = getScopeFor(symbol);
             const newValue = mapNode(symbol.value, rec => ({
@@ -138,7 +138,7 @@ export function resolveSymbols(ast: AST): AST {
         for (let symbol of Object.values(allSymbols)) {
 
             // TODO: temp testing...
-            if (symbol.value.kind === 'LambdaExpression') continue;
+            if (symbol.value.kind === 'GenericExpression') continue;
 
             const newValue = mapNode(symbol.value, rec => ({
                 MemberExpression: ({module, member}): Identifier => {
@@ -170,23 +170,23 @@ export function resolveSymbols(ast: AST): AST {
         // // TODO: temp testing...
         // for (let symbol of Object.values(allSymbols)) {
         //     // TODO: temp testing...
-        //     if (symbol.value.kind === 'LambdaExpression') continue;
+        //     if (symbol.value.kind === 'GenericExpression') continue;
 
         //     const newValue = mapNode(symbol.value, rec => ({
-        //         ApplicationExpression: ({lambda, argument}) => {
-        //             lambda = rec(lambda);
+        //         ApplicationExpression: ({generic, argument}) => {
+        //             generic = rec(generic);
         //             const arg = rec(argument);
-        //             assert(lambda.kind === 'Identifier');
-        //             const {value: fn} = allSymbols[lambda.name];
-        //             assert(fn.kind === 'LambdaExpression');
+        //             assert(generic.kind === 'Identifier');
+        //             const {value: fn} = allSymbols[generic.name];
+        //             assert(fn.kind === 'GenericExpression');
 
         //             // TODO: recurse...
         //             internalResolve({fn, arg, env});
 
-        //             console.log(`CALL2!   func=ID ${lambda.name}   arg=${argument.kind}`);
-        //             return {kind: 'ApplicationExpression', lambda, argument};
+        //             console.log(`CALL2!   func=ID ${generic.name}   arg=${argument.kind}`);
+        //             return {kind: 'ApplicationExpression', generic, argument};
         //         },
-        //         LambdaExpression: func => {
+        //         GenericExpression: func => {
         //             // TODO: ...
         //             console.log(`FUNC!`);
         //             return func; // NB: don't recurse inside
@@ -207,7 +207,7 @@ const inputNodeKinds = allNodeKinds.without(
     'Binding',
     'BindingList',
     'ImportExpression',
-    // TODO: was... but LambdaExpr#param may be this kind... 'ModulePattern',
+    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
     'ParenthesisedExpression',
 );
 

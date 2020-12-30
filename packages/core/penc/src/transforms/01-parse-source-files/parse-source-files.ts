@@ -92,6 +92,6 @@ const outputNodeKinds = allNodeKinds.without(
     'Binding',
     'BindingList',
     'ImportExpression',
-    // TODO: was... but LambdaExpr#param may be this kind... 'ModulePattern',
+    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
     'ParenthesisedExpression',
 );

@@ -163,7 +163,7 @@ const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteF
 function isRule(_x) {
     return true;
 }
-function isLambda(_x) {
+function isGeneric(_x) {
     return true;
 }
 function isModule(_x) {

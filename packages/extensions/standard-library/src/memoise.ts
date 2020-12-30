@@ -1,5 +1,5 @@
-function memoise({}: StaticOptions): Lambda {
-    return function MEM_lambda(expr) {
+function memoise({}: StaticOptions): Generic {
+    return function MEM_generic(expr) {
 
         // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
 

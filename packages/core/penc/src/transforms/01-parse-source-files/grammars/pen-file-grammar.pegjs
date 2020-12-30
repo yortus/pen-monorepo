@@ -41,7 +41,7 @@ ModulePatternName
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
-        LambdaExpression                a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
+        GenericExpression                a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
         Module                          (a=b c=d e=f)   (a=b)
@@ -78,7 +78,7 @@ Precedence6OrHigher
     = PrimaryExpression
 
 PrimaryExpression
-    = LambdaExpression
+    = GenericExpression
     / RecordExpression
     / FieldExpression
     / Module
@@ -123,7 +123,7 @@ ApplicationOrMemberExpression
         return tail.reduce(
             (lhs, rhs) => (rhs.id
                 ? {kind: 'MemberExpression', module: lhs, member: rhs.id}
-                : {kind: 'ApplicationExpression', lambda: lhs, argument: rhs.arg}
+                : {kind: 'ApplicationExpression', generic: lhs, argument: rhs.arg}
             ),
             head
         );
@@ -137,9 +137,9 @@ ApplicationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 
-LambdaExpression
+GenericExpression
     = param:(Identifier / ModulePattern)   __   "=>"   __   body:Expression
-    { return {kind: 'LambdaExpression', param, body}; }
+    { return {kind: 'GenericExpression', param, body}; }
 
 RecordExpression
     = "{"   __   fields:RecordFieldList   __   "}"

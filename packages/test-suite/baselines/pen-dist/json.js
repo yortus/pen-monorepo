@@ -163,7 +163,7 @@ const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteF
 function isRule(_x) {
     return true;
 }
-function isLambda(_x) {
+function isGeneric(_x) {
     return true;
 }
 function isModule(_x) {
@@ -234,7 +234,7 @@ const extensions = {
         // TODO: optimise 'any char' case better
         // TODO: optimise all cases better
         function char({ mode }) {
-            return function CHA_lambda(expr) {
+            return function CHA_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
@@ -360,7 +360,7 @@ const extensions = {
         const UPPERCASE_E = 'E'.charCodeAt(0);
         // TODO: doc... has both 'txt' and 'ast' representation
         function i32({ mode }) {
-            return function I32_lambda(expr) {
+            return function I32_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
@@ -484,7 +484,7 @@ const extensions = {
             0x57, 0x58, 0x59, 0x5a,
         ];
         function memoise({}) {
-            return function MEM_lambda(expr) {
+            return function MEM_generic(expr) {
                 // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
                 const memos = new Map();
                 return function MEM() {
@@ -570,7 +570,7 @@ const extensions = {
             unicode
         } */
         function unicode({ mode }) {
-            return function UNI_lambda(expr) {
+            return function UNI_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;

@@ -311,7 +311,7 @@ const ast1 = {
                   },
                   {
                     kind: "ApplicationExpression",
-                    lambda: {
+                    generic: {
                       kind: "Identifier",
                       name: "char",
                     },
@@ -482,7 +482,7 @@ const ast1 = {
                   },
                   {
                     kind: "ApplicationExpression",
-                    lambda: {
+                    generic: {
                       kind: "Identifier",
                       name: "unicode",
                     },
