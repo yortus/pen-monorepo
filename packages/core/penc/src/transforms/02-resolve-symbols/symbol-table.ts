@@ -29,7 +29,7 @@ export function createSymbolTable() {
         allSymbols,
 
         // TODO: jsdoc...
-        createScope(surroundingScope?: Scope) {
+        createScope(surroundingScope?: Scope): Scope {
             surroundingScope ??= rootScope;
             const scope = Object.create(surroundingScope);
             return scope;
@@ -63,6 +63,12 @@ export function createSymbolTable() {
             const scope = scopesByGlobalName.get(symbol.globalName);
             assert(scope);
             return scope;
+        },
+
+        // TODO: jsdoc...
+        getSurroundingScope(scope: Scope): Scope | undefined {
+            const proto = Object.getPrototypeOf(scope);
+            return proto ?? undefined;
         }
     };
 

@@ -1,1 +1,1 @@
-export {resolveSymbols} from './resolve-symbols';
+export {resolveSymbols} from './resolve-symbols OLD';
