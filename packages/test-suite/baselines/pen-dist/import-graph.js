@@ -229,7 +229,7 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // ApplicationExpression
+    // InstantiationExpression
     let startₘ;
     function start(arg) {
         try {
@@ -297,7 +297,7 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // ApplicationExpression
+    // InstantiationExpression
     let startₘ;
     function start(arg) {
         try {

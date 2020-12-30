@@ -12,13 +12,13 @@ export const patternNodeKinds = createNodeKinds(
 
 /** Array of all node kinds which are expressions. */
 export const expressionNodeKinds = createNodeKinds(
-    'ApplicationExpression',
     'BooleanLiteral',
     'BindingList',
     'FieldExpression',
     'GenericExpression',
     'Identifier',
     'ImportExpression',
+    'InstantiationExpression',
     'Intrinsic',
     'ListExpression',
     'MemberExpression',

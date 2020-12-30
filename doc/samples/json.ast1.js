@@ -310,7 +310,7 @@ const ast1 = {
                     },
                   },
                   {
-                    kind: "ApplicationExpression",
+                    kind: "InstantiationExpression",
                     generic: {
                       kind: "Identifier",
                       name: "char",
@@ -481,7 +481,7 @@ const ast1 = {
                     abstract: false,
                   },
                   {
-                    kind: "ApplicationExpression",
+                    kind: "InstantiationExpression",
                     generic: {
                       kind: "Identifier",
                       name: "unicode",

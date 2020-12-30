@@ -9,7 +9,6 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
 
     function rec(n: Node): void {
         switch (n.kind) {
-            case 'ApplicationExpression': return rec(n.generic), rec(n.argument), cb(n);
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BindingList': return n.bindings.forEach(rec), cb(n);
             case 'BooleanLiteral': return cb(n);
@@ -17,6 +16,7 @@ export function traverseNode(node: Node, callback: (n: Node) => void): void {
             case 'GenericExpression': return rec(n.param), rec(n.body), cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
+            case 'InstantiationExpression': return rec(n.generic), rec(n.argument), cb(n);
             case 'Intrinsic': return cb(n);
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);

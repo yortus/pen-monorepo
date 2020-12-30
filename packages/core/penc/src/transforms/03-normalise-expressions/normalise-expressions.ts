@@ -70,10 +70,10 @@ export function normaliseExpressions(ast: AST): AST {
 
         // Set `newBinding.value` to a new shallow expr, and return `newBinding`.
         switch (e.kind) {
-            case 'ApplicationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'BooleanLiteral': return setV(e);
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
             case 'GenericExpression': throw new Error('Not implemented'); // TODO temp testing fix this...
+            case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
             case 'Module': return setV(e, {bindings: mapObj(e.bindings, ref)});

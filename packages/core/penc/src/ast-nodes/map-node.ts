@@ -33,7 +33,6 @@ export function mapNode<MapObj, N extends Node>(node: N, mappings: Mappings<MapO
 function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
-            case 'ApplicationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BindingList': return {...n, bindings: n.bindings.map(rec)};
             case 'BooleanLiteral': return n;
@@ -41,6 +40,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'GenericExpression': return {...n, param: rec(n.param), body: rec(n.body)};
             case 'Identifier': return n;
             case 'ImportExpression': return n;
+            case 'InstantiationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Intrinsic': return n;
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module), member: rec(n.member)};

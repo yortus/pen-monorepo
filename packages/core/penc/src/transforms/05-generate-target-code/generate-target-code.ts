@@ -116,26 +116,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
             break;
 
-        case 'ApplicationExpression': {
-            // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
-            // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
-            const MEMO_SUFFIX = 'ₘ';
-
-            assert(expr.generic.kind === 'Identifier');
-            assert(expr.argument.kind === 'Identifier');
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
-            emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text('try {').indent();
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
-            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
-            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.generic.name}(${expr.argument.name});`);
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
-            emit.dedent().down(1).text(`}`);
-            emit.dedent().down(1).text(`}`);
-            break;
-        }
-
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
@@ -164,6 +144,26 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
         // TODO: implement...
         // case 'GenericExpression':
         //     break;
+
+        case 'InstantiationExpression': {
+            // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
+            // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
+            const MEMO_SUFFIX = 'ₘ';
+
+            assert(expr.generic.kind === 'Identifier');
+            assert(expr.argument.kind === 'Identifier');
+            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text('try {').indent();
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
+            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
+            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.generic.name}(${expr.argument.name});`);
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
 
         case 'ListExpression': {
             const elements = expr.elements.map(element => {

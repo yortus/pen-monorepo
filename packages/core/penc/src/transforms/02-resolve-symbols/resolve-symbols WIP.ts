@@ -68,15 +68,15 @@ export function resolveSymbols(ast: AST): AST {
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
         /*const topMod2 =*/ mapNode(topMod, rec => ({
-            ApplicationExpression: call => {
-                // TODO: leave the ApplicationExpression in place until the next step...
-                console.log(`CALL!`);
-                return {...call, generic: rec(call.generic), argument: rec(call.argument)};
-            },
-            GenericExpression: func => {
+            GenericExpression: gen => {
                 // TODO: ...
-                console.log(`FUNC!`);
-                return func; // NB: don't recurse inside
+                console.log(`GENERIC!`);
+                return gen; // NB: don't recurse inside
+            },
+            InstantiationExpression: inst => {
+                // TODO: leave the InstantiationExpression in place until the next step...
+                console.log(`INSTANTIATION!`);
+                return {...inst, generic: rec(inst.generic), argument: rec(inst.argument)};
             },
             Module: module => {
                 // Create a scope for the module, or use `rootScope` if this is the top-level module.
@@ -173,7 +173,7 @@ export function resolveSymbols(ast: AST): AST {
         //     if (symbol.value.kind === 'GenericExpression') continue;
 
         //     const newValue = mapNode(symbol.value, rec => ({
-        //         ApplicationExpression: ({generic, argument}) => {
+        //         InstantiationExpression: ({generic, argument}) => {
         //             generic = rec(generic);
         //             const arg = rec(argument);
         //             assert(generic.kind === 'Identifier');
@@ -184,7 +184,7 @@ export function resolveSymbols(ast: AST): AST {
         //             internalResolve({fn, arg, env});
 
         //             console.log(`CALL2!   func=ID ${generic.name}   arg=${argument.kind}`);
-        //             return {kind: 'ApplicationExpression', generic, argument};
+        //             return {kind: 'InstantiationExpression', generic, argument};
         //         },
         //         GenericExpression: func => {
         //             // TODO: ...

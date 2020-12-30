@@ -371,7 +371,7 @@ const ast3 = {
         abstract: false,
       },
       CHAR_e6: {
-        kind: "ApplicationExpression",
+        kind: "InstantiationExpression",
         generic: {
           kind: "Identifier",
           name: "char",
@@ -631,7 +631,7 @@ const ast3 = {
         abstract: false,
       },
       CHAR_e34: {
-        kind: "ApplicationExpression",
+        kind: "InstantiationExpression",
         generic: {
           kind: "Identifier",
           name: "unicode",

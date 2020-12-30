@@ -960,7 +960,7 @@ const parse = (() => {
     }
     CHAR_e5.constant = {value: "\""};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let CHAR_e6ₘ;
     function CHAR_e6(arg) {
         try {
@@ -1249,7 +1249,7 @@ const parse = (() => {
     }
     CHAR_e33.constant = {value: "\\u"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let CHAR_e34ₘ;
     function CHAR_e34(arg) {
         try {
@@ -1793,7 +1793,7 @@ const print = (() => {
     }
     CHAR_e5.constant = {value: "\""};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let CHAR_e6ₘ;
     function CHAR_e6(arg) {
         try {
@@ -2080,7 +2080,7 @@ const print = (() => {
     }
     CHAR_e33.constant = {value: "\\u"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let CHAR_e34ₘ;
     function CHAR_e34(arg) {
         try {

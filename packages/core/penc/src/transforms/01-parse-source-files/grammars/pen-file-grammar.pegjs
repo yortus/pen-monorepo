@@ -37,11 +37,11 @@ ModulePatternName
         QuantifiedExpression            a?   a(b)?   a.b?   {a: b}?
 
     PRECEDENCE 5
-        ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+        InstantiationExpression         a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
-        GenericExpression                a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
+        GenericExpression               a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
         Module                          (a=b c=d e=f)   (a=b)
@@ -123,7 +123,7 @@ ApplicationOrMemberExpression
         return tail.reduce(
             (lhs, rhs) => (rhs.id
                 ? {kind: 'MemberExpression', module: lhs, member: rhs.id}
-                : {kind: 'ApplicationExpression', generic: lhs, argument: rhs.arg}
+                : {kind: 'InstantiationExpression', generic: lhs, argument: rhs.arg}
             ),
             head
         );

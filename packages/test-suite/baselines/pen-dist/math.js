@@ -577,7 +577,7 @@ const parse = (() => {
     const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
     const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
 
-    // ApplicationExpression
+    // InstantiationExpression
     let startₘ;
     function start(arg) {
         try {
@@ -636,7 +636,7 @@ const parse = (() => {
     }
     add_e3.constant = {value: "+"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let termₘ;
     function term(arg) {
         try {
@@ -810,7 +810,7 @@ const parse = (() => {
     }
     factor_e7.constant = {value: "0x"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e8ₘ;
     function factor_e8(arg) {
         try {
@@ -869,7 +869,7 @@ const parse = (() => {
     }
     factor_e11.constant = {value: "0b"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e12ₘ;
     function factor_e12(arg) {
         try {
@@ -918,7 +918,7 @@ const parse = (() => {
     }
     factor_e15.constant = {value: "i"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e16ₘ;
     function factor_e16(arg) {
         try {
@@ -1056,7 +1056,7 @@ const print = (() => {
     const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
     const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
 
-    // ApplicationExpression
+    // InstantiationExpression
     let startₘ;
     function start(arg) {
         try {
@@ -1118,7 +1118,7 @@ const print = (() => {
     }
     add_e3.constant = {value: "+"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let termₘ;
     function term(arg) {
         try {
@@ -1306,7 +1306,7 @@ const print = (() => {
     }
     factor_e7.constant = {value: "0x"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e8ₘ;
     function factor_e8(arg) {
         try {
@@ -1365,7 +1365,7 @@ const print = (() => {
     }
     factor_e11.constant = {value: "0b"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e12ₘ;
     function factor_e12(arg) {
         try {
@@ -1413,7 +1413,7 @@ const print = (() => {
     }
     factor_e15.constant = {value: "i"};
 
-    // ApplicationExpression
+    // InstantiationExpression
     let factor_e16ₘ;
     function factor_e16(arg) {
         try {

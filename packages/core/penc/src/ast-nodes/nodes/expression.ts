@@ -5,12 +5,12 @@ import type {Pattern} from './pattern';
 
 /** Union of all node types that represent PEN expressions. */
 export type Expression =
-    | ApplicationExpression
     | BindingList
     | BooleanLiteral
     | FieldExpression
     | Identifier
     | ImportExpression
+    | InstantiationExpression
     | Intrinsic
     | GenericExpression
     | ListExpression
@@ -26,13 +26,6 @@ export type Expression =
     | SequenceExpression
     | StringLiteral
 ;
-
-
-export interface ApplicationExpression {
-    readonly kind: 'ApplicationExpression';
-    readonly generic: Expression;
-    readonly argument: Expression;
-}
 
 
 export interface BindingList {
@@ -63,6 +56,13 @@ export interface Identifier {
 export interface ImportExpression {
     readonly kind: 'ImportExpression';
     readonly moduleSpecifier: string;
+}
+
+
+export interface InstantiationExpression {
+    readonly kind: 'InstantiationExpression';
+    readonly generic: Expression;
+    readonly argument: Expression;
 }
 
 
