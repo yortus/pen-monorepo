@@ -13,25 +13,25 @@ import {createSymbolTable, Scope} from './symbol-table';
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
 
-    const {createScope, define, allSymbols, getScopeFor, lookup} = createSymbolTable();
+    const {createScope, define, allSymbols, getScopeFor, getSurroundingScope, lookup} = createSymbolTable();
 
     // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
     const rootScope = createScope();
-    const surroundingScopes: Scope[] = [];
+    let env: Scope | undefined;
     mapNode(ast.module, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
         Module: module => {
-            // Create a scope for the module.
-            const surroundingScope: Scope | undefined = surroundingScopes[surroundingScopes.length - 1];
-            const scope = surroundingScope ? createScope(surroundingScope) : rootScope;
+            // Create a scope for the module, or use `rootScope` if this is _the_ top-level module.
+            env = env ? createScope(env) : rootScope;
 
             // Create a symbol for each local name in the module.
             let bindings = {} as Record<string, Identifier>;
-            surroundingScopes.push(scope);
             for (const [name, expr] of Object.entries(module.bindings)) {
-                const {globalName} = define(scope, name, rec(expr));
+                const {globalName} = define(env, name, rec(expr));
                 bindings[name] = {kind: 'Identifier', name: globalName};
             }
-            surroundingScopes.pop();
+
+            // Pop back out to the surrounding scope before returning.
+            env = getSurroundingScope(env);
             return {kind: 'Module', bindings};
         },
     }));

@@ -79,7 +79,7 @@ export function resolveSymbols(ast: AST): AST {
                 return {...inst, generic: rec(inst.generic), argument: rec(inst.argument)};
             },
             Module: module => {
-                // Create a scope for the module, or use `rootScope` if this is the top-level module.
+                // Create a scope for the module, or use `rootScope` if this is _the_ top-level module.
                 env = env ? createScope(env) : rootScope;
 
                 // Create a symbol for each local name in the module.
@@ -90,7 +90,7 @@ export function resolveSymbols(ast: AST): AST {
                 }
 
                 // Pop back out to the surrounding scope before returning.
-                env = getSurroundingScope(env)!;
+                env = getSurroundingScope(env);
                 return {kind: 'Module', bindings};
             },
         }));
