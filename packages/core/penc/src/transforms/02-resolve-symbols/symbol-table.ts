@@ -1,5 +1,4 @@
 import type {Expression} from '../../ast-nodes';
-import {assert} from '../../utils';
 
 
 // TODO: jsdoc...
@@ -11,6 +10,9 @@ export interface Symbol {
     readonly globalName: string; // TODO: doc... can be used as an identifier; unique across program
     readonly localName?: string;
     readonly value: Expression;
+
+    // TODO: temp testing...
+    readonly scope: Scope;
 }
 
 
@@ -19,7 +21,6 @@ export function createSymbolTable() {
     const allSymbols = {} as Record<string, Symbol>;
     const RESERVED_GLOBAL_NAMES = ['start'];
     const existingGlobalNames = new Set<string>(RESERVED_GLOBAL_NAMES);
-    const scopesByGlobalName = new Map<string, Scope>();
 
     // Define a root scope.
     const rootScope: Scope = Object.create(null);
@@ -42,10 +43,9 @@ export function createSymbolTable() {
                 throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message eg line+col
             }
             const globalName = createGlobalName(name);
-            const symbol: Symbol = {globalName, localName: name, value};
+            const symbol: Symbol = {globalName, localName: name, value, scope};
             allSymbols[globalName] = symbol;
             scope[name] = symbol;
-            scopesByGlobalName.set(globalName, scope);
             return symbol;
         },
 
@@ -56,13 +56,6 @@ export function createSymbolTable() {
                 throw new Error(`'${name}' is not defined`); // TODO: improve diagnostic message eg line+col
             }
             return symbol;
-        },
-
-        // TODO: jsdoc...
-        getScopeFor(symbol: Symbol): Scope {
-            const scope = scopesByGlobalName.get(symbol.globalName);
-            assert(scope);
-            return scope;
         },
 
         // TODO: jsdoc...

@@ -12,7 +12,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
-    const {createScope, define, allSymbols, getScopeFor, getSurroundingScope, lookup} = createSymbolTable();
+    const {createScope, define, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
     const rootScope = createScope();
 
 
@@ -33,7 +33,8 @@ export function resolveSymbols(ast: AST): AST {
         value: {
             kind: 'Identifier',
             name: lookup(rootScope, 'ENTRYPOINT').globalName, // TODO: fix magic string ENTRYPOINT
-        }
+        },
+        scope: rootScope,
     };
 
     ast = {
@@ -119,10 +120,9 @@ export function resolveSymbols(ast: AST): AST {
             // TODO: temp testing...
             if (symbol.value.kind === 'GenericExpression') continue;
 
-            const scope = getScopeFor(symbol);
             const newValue = mapNode(symbol.value, rec => ({
                 Identifier: ({name}): Identifier => {
-                    const {globalName} = lookup(scope, name);
+                    const {globalName} = lookup(symbol.scope, name);
                     return {kind: 'Identifier', name: globalName};
                 },
                 MemberExpression: mem => {

@@ -13,7 +13,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
 
-    const {createScope, define, allSymbols, getScopeFor, getSurroundingScope, lookup} = createSymbolTable();
+    const {createScope, define, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
 
     // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
     const rootScope = createScope();
@@ -40,10 +40,9 @@ export function resolveSymbols(ast: AST): AST {
     for (let symbol of Object.values(allSymbols)) {
         if (symbol.value.kind === 'Module') continue;
 
-        const scope = getScopeFor(symbol);
         const newValue = mapNode(symbol.value, rec => ({
             Identifier: ({name}): Identifier => {
-                const {globalName} = lookup(scope, name);
+                const {globalName} = lookup(symbol.scope, name);
                 return {kind: 'Identifier', name: globalName};
             },
             MemberExpression: mem => {
@@ -86,7 +85,8 @@ export function resolveSymbols(ast: AST): AST {
     // TODO: add the special 'start' symbol
     allSymbols['start'] = {
         globalName: 'start',
-        value: {kind: 'Identifier', name: lookup(rootScope, 'start').globalName}
+        value: {kind: 'Identifier', name: lookup(rootScope, 'start').globalName},
+        scope: rootScope,
     };
 
     ast = {
