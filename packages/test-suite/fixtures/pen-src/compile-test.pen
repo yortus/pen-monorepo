@@ -1,7 +1,6 @@
 std = import 'std'
 
-
-
+//a = (test=1).test
 
 /*
 c1 = funcs.f1(1)

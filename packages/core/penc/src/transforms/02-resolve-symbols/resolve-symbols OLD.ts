@@ -1,4 +1,4 @@
-import {allNodeKinds, Identifier} from '../../ast-nodes';
+import {allNodeKinds, Identifier, MemberExpression} from '../../ast-nodes';
 import {mapNode} from '../../ast-nodes';
 import {AST, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
@@ -18,7 +18,20 @@ export function resolveSymbols(ast: AST): AST {
     // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
     const rootScope = createScope();
     let env: Scope | undefined;
+    // TODO: temp testing...
+    const identifiers = new Map<Identifier, Scope>();
+    const memberExprs = [] as MemberExpression[]; 
     mapNode(ast.module, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
+        Identifier: id => {
+            assert(env);
+            identifiers.set(id, env);
+            return id;
+        },
+        MemberExpression: mem => {
+            const memᐟ = {...mem, module: rec(mem.module)}; // TODO: explain why: don't visit `member` for now
+            memberExprs.push(memᐟ);
+            return memᐟ;
+        },
         Module: module => {
             // Create a scope for the module, or use `rootScope` if this is _the_ top-level module.
             env = env ? createScope(env) : rootScope;
@@ -37,49 +50,24 @@ export function resolveSymbols(ast: AST): AST {
     }));
 
     // STEP 2: Resolve all Identifier nodes (except MemberExpression#member - that is resolved in STEP 3)
-    for (let symbol of Object.values(allSymbols)) {
-        if (symbol.value.kind === 'Module') continue;
-
-        const newValue = mapNode(symbol.value, rec => ({
-            Identifier: ({name}): Identifier => {
-                const {globalName} = lookup(symbol.scope, name);
-                return {kind: 'Identifier', name: globalName};
-            },
-            MemberExpression: mem => {
-                const memᐟ = {...mem, module: rec(mem.module)};
-                return memᐟ;
-            },
-            Module: mod => mod, // TODO: explain why skip modules - they are already processed in STEP 1 (all binding vals are Ids whose names are globalNames)
-        }));
-        Object.assign(symbol, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+    for (let [id, scope] of identifiers) {
+        const {globalName} = lookup(scope, id.name);
+        Object.assign(id, {name: globalName}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
     // STEP 3: Resolve all MemberExpression nodes
-    for (let symbol of Object.values(allSymbols)) {
-        const newValue = mapNode(symbol.value, rec => ({
-            MemberExpression: ({module, member}): Identifier => {
-                let lhs = module;
-                while (true) {
-                    if (lhs.kind === 'Identifier') {
-                        lhs = allSymbols[lhs.name].value;
-                    }
-                    else if (lhs.kind === 'MemberExpression') {
-                        lhs = rec(lhs);
-                    }
-                    else {
-                        break;
-                    }
-                }
-                // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
-                // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
-                assert(lhs.kind === 'Module');
-                const id = lhs.bindings[member.name];
-                if (!id) throw new Error(`'${member.name}' is not defined`); // TODO: improve diagnostic message eg line+col
-                assert(id.kind === 'Identifier');
-                return {...id};
-            },
-        }));
-        Object.assign(symbol, {value: newValue}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+    for (let mem of memberExprs) {
+        let lhs = mem.module;
+        while (lhs.kind === 'Identifier') lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
+        assert(lhs.kind !== 'MemberExpression'); // TODO: explain... Since nested MemExprs are always resolved before outer ones due to them being added to the array depth-first
+
+        // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
+        // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
+        assert(lhs.kind === 'Module');
+        const id = lhs.bindings[mem.member.name];
+        if (!id) throw new Error(`'${mem.member.name}' is not defined`); // TODO: improve diagnostic message eg line+col
+        assert(id.kind === 'Identifier');
+        Object.assign(mem, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
     // TODO: add the special 'start' symbol
