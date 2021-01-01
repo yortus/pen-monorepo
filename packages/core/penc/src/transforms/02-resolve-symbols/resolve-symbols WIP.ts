@@ -18,7 +18,7 @@ export function resolveSymbols(ast: AST): AST {
 
     // TODO: temp testing...
     internalResolve({
-        fn: {
+        gen: {
             kind: 'GenericExpression',
             param: {kind: 'ModulePattern', names: []},
             body: {kind: 'MemberExpression', module: ast.module, member: {kind: 'Identifier', name: 'start'}},
@@ -48,7 +48,7 @@ export function resolveSymbols(ast: AST): AST {
 
 
     // TODO: temp testing...
-    function internalResolve({fn, arg, env}: {fn: GenericExpression, arg: Expression, env?: Scope}) {
+    function internalResolve({gen, arg, env}: {gen: GenericExpression, arg: Expression, env?: Scope}) {
 
         // TODO: step 0 - synthesize a module expression
         const topMod = moduleFromBindingList({
@@ -56,13 +56,13 @@ export function resolveSymbols(ast: AST): AST {
             bindings: [
                 {
                     kind: 'Binding',
-                    left: fn.param,
+                    left: gen.param,
                     right: arg,
                 },
                 {
                     kind: 'Binding',
                     left: {kind: 'Identifier', name: 'ENTRYPOINT'}, // TODO: make&use namegen util to ensure no clashes with names in other binding
-                    right: fn.body,
+                    right: gen.body,
                 },
             ],
         });

@@ -12,22 +12,23 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
-
     const {createScope, define, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
+    const rootScope = createScope();
 
     // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
-    const rootScope = createScope();
     let env: Scope | undefined;
     // TODO: temp testing...
     const identifiers = new Map<Identifier, Scope>();
     const memberExprs = [] as MemberExpression[]; 
     mapNode(ast.module, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
         Identifier: id => {
+            // TODO: explain tracking...
             assert(env);
             identifiers.set(id, env);
             return id;
         },
         MemberExpression: mem => {
+            // TODO: explain tracking...
             const memᐟ = {...mem, module: rec(mem.module)}; // TODO: explain why: don't visit `member` for now
             memberExprs.push(memᐟ);
             return memᐟ;
