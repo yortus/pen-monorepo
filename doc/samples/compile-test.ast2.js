@@ -2,178 +2,147 @@ const ast2 = {
   module: {
     kind: "Module",
     bindings: {
-      std: {
-        kind: "Identifier",
-        name: "Ɱ_std",
+      x: {
+        kind: "StringLiteral",
+        value: "outer x",
+        concrete: false,
+        abstract: false,
       },
-      one: {
-        kind: "NumericLiteral",
-        value: 1,
+      REP: {
+        kind: "GenericExpression",
+        param: {
+          kind: "ModulePattern",
+          names: [
+            {
+              name: "a",
+            },
+          ],
+        },
+        body: {
+          kind: "SequenceExpression",
+          expressions: [
+            {
+              kind: "Identifier",
+              name: "a",
+            },
+            {
+              kind: "Identifier",
+              name: "x",
+            },
+            {
+              kind: "Identifier",
+              name: "a",
+            },
+          ],
+        },
       },
-      two: {
-        kind: "NumericLiteral",
-        value: 2,
+      x2: {
+        kind: "StringLiteral",
+        value: "inner x",
+        concrete: false,
+        abstract: false,
       },
-      outer: {
-        kind: "Identifier",
-        name: "mem",
-      },
-      digits: {
+      nested: {
         kind: "Module",
         bindings: {
-          one: {
+          REP: {
             kind: "Identifier",
-            name: "one",
+            name: "REP",
+            resolved: true,
           },
-          two: {
+          x: {
             kind: "Identifier",
-            name: "two",
-          },
-          outer: {
-            kind: "Identifier",
-            name: "outer",
+            name: "x2",
+            resolved: true,
           },
         },
       },
-      des: {
+      a: {
         kind: "Identifier",
-        name: "one",
-      },
-      ref: {
-        kind: "Identifier",
-        name: "des",
-      },
-      mem: {
-        kind: "Identifier",
-        name: "two",
-      },
-      d: {
-        kind: "Identifier",
-        name: "digits",
-      },
-      xxx: {
-        kind: "Module",
-        bindings: {
-          d: {
-            kind: "Identifier",
-            name: "d",
-          },
-        },
-      },
-      one2: {
-        kind: "NumericLiteral",
-        value: 1,
+        name: "x",
+        resolved: true,
       },
       start2: {
-        kind: "SelectionExpression",
-        expressions: [
-          {
-            kind: "Identifier",
-            name: "one2",
-          },
-          {
-            kind: "Identifier",
-            name: "ref",
-          },
-          {
-            kind: "Identifier",
-            name: "mem",
-          },
-          {
-            kind: "Identifier",
-            name: "two",
-          },
-          {
-            kind: "Identifier",
-            name: "digits",
-          },
-        ],
+        kind: "Identifier",
+        generic: null,
+        argument: null,
+        module: null,
+        member: null,
+        name: "ENTRYPOINT2",
+        resolved: true,
       },
       "Ɱ_compile_test": {
         kind: "Module",
         bindings: {
-          std: {
+          x: {
             kind: "Identifier",
-            name: "std",
+            name: "x",
+            resolved: true,
           },
-          digits: {
+          nested: {
             kind: "Identifier",
-            name: "digits",
-          },
-          des: {
-            kind: "Identifier",
-            name: "des",
-          },
-          ref: {
-            kind: "Identifier",
-            name: "ref",
-          },
-          mem: {
-            kind: "Identifier",
-            name: "mem",
-          },
-          xxx: {
-            kind: "Identifier",
-            name: "xxx",
-          },
-          one: {
-            kind: "Identifier",
-            name: "one2",
+            name: "nested",
+            resolved: true,
           },
           start: {
             kind: "Identifier",
             name: "start2",
-          },
-        },
-      },
-      char: {
-        kind: "Intrinsic",
-        name: "char",
-        path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-      },
-      f64: {
-        kind: "Intrinsic",
-        name: "f64",
-        path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-      },
-      i32: {
-        kind: "Intrinsic",
-        name: "i32",
-        path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-      },
-      memoise: {
-        kind: "Intrinsic",
-        name: "memoise",
-        path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-      },
-      "Ɱ_std": {
-        kind: "Module",
-        bindings: {
-          char: {
-            kind: "Identifier",
-            name: "char",
-          },
-          f64: {
-            kind: "Identifier",
-            name: "f64",
-          },
-          i32: {
-            kind: "Identifier",
-            name: "i32",
-          },
-          memoise: {
-            kind: "Identifier",
-            name: "memoise",
+            resolved: true,
           },
         },
       },
       start3: {
         kind: "Identifier",
+        module: null,
+        member: null,
         name: "start2",
+        resolved: true,
+      },
+      ENTRYPOINT: {
+        kind: "Identifier",
+        module: null,
+        member: null,
+        name: "start3",
+        resolved: true,
+      },
+      a2: {
+        kind: "Identifier",
+        name: "a",
+        resolved: true,
+      },
+      a3: {
+        kind: "Identifier",
+        module: null,
+        member: null,
+        name: "a2",
+        resolved: true,
+      },
+      ENTRYPOINT2: {
+        kind: "SequenceExpression",
+        expressions: [
+          {
+            kind: "Identifier",
+            name: "a3",
+            resolved: true,
+          },
+          {
+            kind: "Identifier",
+            name: "x2",
+            resolved: true,
+          },
+          {
+            kind: "Identifier",
+            name: "a3",
+            resolved: true,
+          },
+        ],
       },
       start: {
         kind: "Identifier",
-        name: "start3",
+        module: null,
+        member: null,
+        name: "ENTRYPOINT",
+        resolved: true,
       },
     },
   },

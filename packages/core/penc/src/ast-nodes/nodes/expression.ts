@@ -50,6 +50,7 @@ export interface FieldExpression {
 export interface Identifier {
     readonly kind: 'Identifier';
     readonly name: string;
+    readonly resolved?: boolean;
 }
 
 

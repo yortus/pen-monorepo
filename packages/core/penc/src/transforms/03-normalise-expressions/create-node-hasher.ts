@@ -1,3 +1,4 @@
+import {randomBytes} from 'crypto';
 import * as objectHash from 'object-hash';
 import {allNodeKinds, expressionNodeKinds, Node} from '../../ast-nodes';
 import {assert, mapObj} from '../../utils';
@@ -64,7 +65,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         switch (n.kind) {
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'GenericExpression': throw new Error('Not implemented'); // TODO: temp testing fix this...
+            case 'GenericExpression': return setSig('GEN', randomBytes(32).toString('base64')); // TODO: always unique. Is this correct? Test scenario where it matters?
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));

@@ -72,7 +72,7 @@ export function normaliseExpressions(ast: AST): AST {
         switch (e.kind) {
             case 'BooleanLiteral': return setV(e);
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
-            case 'GenericExpression': throw new Error('Not implemented'); // TODO temp testing fix this...
+            case 'GenericExpression': return setV(e); // TODO: correct?
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
@@ -117,7 +117,7 @@ const inputNodeKinds = allNodeKinds.without(
     'BindingList',
     'ImportExpression',
     'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
-    'ModulePattern',
+    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
     'ParenthesisedExpression',
 );
 

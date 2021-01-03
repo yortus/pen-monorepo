@@ -7,7 +7,7 @@ start = result
 digit = char(min="0" max="9")
 alpha = char(min="a" max="z") | char(min="A" max="Z")
 
-result = foo(bar baz)
+result = foo (bar baz)
 
 myList = [digit, digit digit, digit digit digit]
 

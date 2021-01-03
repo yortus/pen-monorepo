@@ -229,17 +229,14 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // InstantiationExpression
-    let startₘ;
-    function start(arg) {
-        try {
-            return startₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
-            startₘ = foo(start_e);
-            return startₘ(arg);
-        }
+    // SequenceExpression
+    function start() {
+        const stateₒ = getState();
+        let out;
+        if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
     }
 
     // StringLiteral
@@ -297,17 +294,14 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // InstantiationExpression
-    let startₘ;
-    function start(arg) {
-        try {
-            return startₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
-            startₘ = foo(start_e);
-            return startₘ(arg);
-        }
+    // SequenceExpression
+    function start() {
+        const stateₒ = getState();
+        let out;
+        if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
     }
 
     // StringLiteral

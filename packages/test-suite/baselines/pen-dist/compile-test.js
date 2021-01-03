@@ -229,39 +229,48 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // SelectionExpression
+    // SequenceExpression
     function start() {
-        if (one()) return true;
-        if (one()) return true;
-        if (two()) return true;
-        if (two()) return true;
-        if (digits()) return true;
-        return false;
-    }
-
-    // NumericLiteral
-    function one() {
-        OUT = 1;
+        const stateₒ = getState();
+        let out;
+        if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
         return true;
     }
-    one.constant = {value: 1};
 
-    // NumericLiteral
-    function two() {
-        OUT = 2;
+    // StringLiteral
+    function x() {
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 111) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "outer x";
         return true;
     }
-    two.constant = {value: 2};
+    x.constant = {value: "outer x"};
 
-    // Module
-    function digits(member) {
-        switch (member) {
-            case 'one': return one;
-            case 'two': return two;
-            case 'outer': return two;
-            default: return undefined;
-        }
+    // StringLiteral
+    function x2() {
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "inner x";
+        return true;
     }
+    x2.constant = {value: "inner x"};
 
     return start;
 })();
@@ -272,43 +281,50 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // SelectionExpression
+    // SequenceExpression
     function start() {
-        if (one()) return true;
-        if (one()) return true;
-        if (two()) return true;
-        if (two()) return true;
-        if (digits()) return true;
-        return false;
-    }
-
-    // NumericLiteral
-    function one() {
-        if (IN !== 1 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+        const stateₒ = getState();
+        let out;
+        if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
         return true;
     }
-    one.constant = {value: 1};
 
-    // NumericLiteral
-    function two() {
-        if (IN !== 2 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringLiteral
+    function x() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 111) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "outer x";
         return true;
     }
-    two.constant = {value: 2};
+    x.constant = {value: "outer x"};
 
-    // Module
-    function digits(member) {
-        switch (member) {
-            case 'one': return one;
-            case 'two': return two;
-            case 'outer': return two;
-            default: return undefined;
-        }
+    // StringLiteral
+    function x2() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "inner x";
+        return true;
     }
+    x2.constant = {value: "inner x"};
 
     return start;
 })();

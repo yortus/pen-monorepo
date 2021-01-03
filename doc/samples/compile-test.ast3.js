@@ -3,54 +3,33 @@ const ast3 = {
     kind: "Module",
     bindings: {
       start: {
-        kind: "SelectionExpression",
+        kind: "SequenceExpression",
         expressions: [
           {
             kind: "Identifier",
-            name: "one",
+            name: "x",
           },
           {
             kind: "Identifier",
-            name: "one",
+            name: "x2",
           },
           {
             kind: "Identifier",
-            name: "two",
-          },
-          {
-            kind: "Identifier",
-            name: "two",
-          },
-          {
-            kind: "Identifier",
-            name: "digits",
+            name: "x",
           },
         ],
       },
-      one: {
-        kind: "NumericLiteral",
-        value: 1,
+      x: {
+        kind: "StringLiteral",
+        value: "outer x",
+        concrete: false,
+        abstract: false,
       },
-      two: {
-        kind: "NumericLiteral",
-        value: 2,
-      },
-      digits: {
-        kind: "Module",
-        bindings: {
-          one: {
-            kind: "Identifier",
-            name: "one",
-          },
-          two: {
-            kind: "Identifier",
-            name: "two",
-          },
-          outer: {
-            kind: "Identifier",
-            name: "two",
-          },
-        },
+      x2: {
+        kind: "StringLiteral",
+        value: "inner x",
+        concrete: false,
+        abstract: false,
       },
     },
   },

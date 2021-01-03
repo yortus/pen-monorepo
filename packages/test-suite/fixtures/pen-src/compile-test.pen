@@ -1,38 +1,54 @@
-std = import 'std'
+x = "outer x"
 
-//a = (test=1).test
-
-/*
-c1 = funcs.f1(1)
-c2 = f2(a=2)
-
-(f2) = funcs
-
-funcs = (
-    f1 = a => a a
-    f2 = (a) => a a
-    //f3 = (a, b) => a b
-    //f4 = () => ()
-)
-*/
-
-
-
-
-digits = (
-    one = (1)
-    two = 2
-    outer = mem
+nested = (
+    REP = (a) => a x a
+    x = "inner x"
 )
 
-(one as des) = digits
-ref = des
-mem = digits.two
+start = nested.REP(a = x)
 
-xxx = (d = digits)
-one = 1
 
-start = one | ref | mem | xxx.d.two | digits
+
+
+// ================================================================================
+// TODO: was...
+// std = import 'std'
+// 
+// //a = (test=1).test
+// 
+// 
+// //c1 = funcs.f1(33)
+// c2 = f2(a = 44, test = one)
+// 
+// (f2) = funcs
+// 
+// funcs = (
+//     //f1 = a => a a
+//     f2 = (a) => a a
+//     //f3 = (a, b) => a b
+//     //f4 = () => ()
+// 
+//     one = "=== ONE ==="
+// )
+// 
+// 
+// 
+// 
+// 
+// digits = (
+//     one = (1)
+//     two = 2
+//     outer = mem
+// )
+// 
+// (one as des) = digits
+// ref = des
+// mem = digits.two
+// 
+// xxx = (d = digits)
+// one = 1
+// 
+// start = one | ref | mem | xxx.d.two | digits
 
 
 
