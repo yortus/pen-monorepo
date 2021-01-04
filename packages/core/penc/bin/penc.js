@@ -24,4 +24,4 @@ if (program.args.length !== 1) program.help();
 const {compile} = require('..');
 const main = program.args[0];
 const outFile = program.outFile;
-compile({main, outFile});
+compile({main}).save(outFile);
