@@ -23,10 +23,7 @@ for (let i = 0; i < inputFiles.length; ++i) {
         process.stdout.write('SKIPPED (already up-to-date)\n');
     }
     else {
-        compile({
-            main: inputFile,
-            outFile: outputFile,
-        });
+        compile({main: inputFile}).save(outputFile);
         process.stdout.write('DONE\n');
     }
 }
