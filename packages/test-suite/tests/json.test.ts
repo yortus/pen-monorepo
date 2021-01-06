@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {parse, print} from '../baselines/pen-dist/json.js';
 
 
-describe(`Compiling and executing the 'json.pen' program`, async () => {
+describe(`Compiling and executing the 'json.pen' program`, () => {
 
     const tests = [
         {text: '{}', ast: {}},

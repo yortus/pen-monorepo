@@ -8,7 +8,7 @@ import {parse, print} from '../baselines/pen-dist/json.js';
 const jsonDocPath = path.join(__dirname, '../fixtures/documents/1mb.json');
 
 
-describe(`Procesing a large JSON document`, async () => {
+describe(`Procesing a large JSON document`, () => {
 
     it('parses', () => {
         const text = fs.readFileSync(jsonDocPath, 'utf8');

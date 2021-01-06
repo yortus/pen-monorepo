@@ -2,35 +2,52 @@ import {expect} from 'chai';
 import {compile} from 'penc';
 
 
-describe(`Language features: generics`, async () => {
-    const {parse, print} = compile({source: `
+describe(`Language features: generics`, () => {
+    const L1 = compile({source: `
         x = "OUTER"
-
-        nested = (
-            REP = (a) => [a, x, a]
+        ns = (
+            gen = (a) => [a, x, a]
             x = "INNER"
             a = "FURPHY"
         )
-        
-        start = nested.REP(a = x)
+        start = ns.gen(a = x)
+    `}).eval();
+
+    const L2 = compile({source: `
+        start = gen("hi")
+        gen = r => (
+            // TODO: temp next line just so L2 compiles
+            start = r
+
+// TODO: uncomment lines below to reveal pen compile error (but program should be valid)
+//            start = rDash rDash
+//            rDash = enclose(r)
+//            enclose = makeEncloser(
+//                lp="("
+//                rp=")"
+//            )
+//            makeEncloser = (lp, rp) => (x => lp x rp)
+        )
     `}).eval();
 
     const tests = [
-        {text: 'abc', ast: Error, textᐟ: ''},
-        {text: 'OUTERINNEROUTER', ast: ['OUTER', 'INNER', 'OUTER']},
+        {lang: L1, text: 'abc', ast: Error, textᐟ: ''},
+        {lang: L1, text: 'OUTERINNEROUTER', ast: ['OUTER', 'INNER', 'OUTER']},
+        {lang: L2, text: 'hihi', ast: Error},
+        {lang: L2, text: '(hi)(hi)', ast: '(hi)(hi)'},
     ];
 
-    for (const test of tests) {
-        it(test.text, () => {
-            let ast: unknown;
-            try { ast = parse(test.text); } catch (err) {
+    for (const {lang, text, ast, textᐟ} of tests) {
+        it(text, () => {
+            let actualAst: unknown;
+            try { actualAst = lang.parse(text); } catch (err) {
                 [] = [err];
-                ast = Error;
+                actualAst = Error;
             }
-            expect(ast).to.deep.equal(test.ast);
+            expect(actualAst).to.deep.equal(ast);
             if (ast === Error) return;
-            const textᐟ = print(ast);
-            expect(textᐟ).to.equal(test.textᐟ || test.text);
+            const actualTextᐟ = lang.print(ast);
+            expect(actualTextᐟ).to.equal(textᐟ || text);
         });
     }
 });

@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {compile} from 'penc';
 
 
-describe(`Language features: basics`, async () => {
+describe(`Language features: basics`, () => {
     const {parse, print} = compile({source: `
         start = a (a b)* b
         a = "a"
