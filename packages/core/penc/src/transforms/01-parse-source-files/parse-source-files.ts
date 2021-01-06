@@ -12,11 +12,14 @@ import {parseExtFile, parsePenFile} from './grammars';
  * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
  * @param options.main absolute file path to the main source file for the PEN program.
  */
-export function parseSourceFiles(options: {main: AbsPath}): AST {
+export function parseSourceFiles(options: {main: AbsPath} | {text: string}): AST {
+    const INLINE_MAIN = AbsPath('text://inline');
+    const main = 'main' in options ? options.main : INLINE_MAIN;
+    const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
     const sourceFilesByPath: Record<string, BindingList> = {};
-    const startPath = resolveModuleSpecifier(options.main);
+    const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
 
@@ -33,7 +36,7 @@ export function parseSourceFiles(options: {main: AbsPath}): AST {
         moduleNamesBySourceFilePath[sourceFilePath] = moduleName;
 
         // Parse this source file.
-        const sourceText = fs.readFileSync(sourceFilePath, 'utf8');
+        const sourceText = sourceFilePath === INLINE_MAIN ? mainText : fs.readFileSync(sourceFilePath, 'utf8');
         const parse = isExtension(sourceFilePath) ? parseExtFile : parsePenFile;
         const sourceFile = parse(sourceText, {path: sourceFilePath});
         sourceFilesByPath[sourceFilePath] = sourceFile;

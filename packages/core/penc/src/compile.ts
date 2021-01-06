@@ -38,25 +38,33 @@ export interface CompilerResult {
 export function compile(options: CompilerOptions): CompilerResult {
 
     // Parse and validate compiler options
-    const main = AbsPath(path.resolve(options.main));
+    const main = options.main ? AbsPath(path.resolve(options.main)) : undefined;
+    const source = options.source || '';
+    if ((!main && !source) ||  (main && source)) {
+        // TODO: improve diagnostic message
+        throw new Error(`Must specify either main or source, but not both`);
+    }
 
     // Proceed through all stages in the compiler pipeline.
-    const ast1 = parseSourceFiles({main});
+    const ast1 = parseSourceFiles(main ? {main} : {text: source});
     const ast2 = resolveSymbols(ast1);
     const ast3 = normaliseExpressions(ast2);
     const consts = resolveConstantValues(ast3);
     const targetCode = generateTargetCode({ast: ast3, consts});
     return {
         eval() {
-            let result = {} as ReturnType<CompilerResult['eval']>;
-            eval(`(function (module) {\n${targetCode}\n})(result)`);
-            return result;
+            let module = {} as {exports: ReturnType<CompilerResult['eval']>};
+            eval(`(function (module) {\n${targetCode}\n})(module)`);
+            return module.exports;
         },
         save(filename) {
             // write the target code to the output file path. Creating containing dirs if necessary.
-            const outFile = filename || main.substr(0, main.length - path.extname(main).length) + '.js';
-            if (main === outFile) throw new Error(`output would overwrite input`);
-            const outFilePath = path.resolve(outFile);
+            if (!filename) {
+                if (!main) throw new Error(`Must specify a filename for the output file.`);
+                filename = main.substr(0, main.length - path.extname(main).length) + '.js';
+            }
+            if (main === filename) throw new Error(`output would overwrite input`);
+            const outFilePath = path.resolve(filename);
             fs.ensureDirSync(path.dirname(outFilePath));
             fs.writeFileSync(outFilePath, targetCode);
         },
