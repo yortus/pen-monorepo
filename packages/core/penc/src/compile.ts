@@ -18,20 +18,20 @@ import {AbsPath} from './utils';
 export interface CompilerResult {
 
     // TODO: doc...
-    parse(text: string): unknown;
-
-    // TODO: doc...
-    print(ast: unknown): string;
-
-    // TODO: doc better...
-    /** Returns the target code as source. */
-    toString(): void;
+    eval(): {
+        parse(text: string): unknown;
+        print(ast: unknown): string;
+    };
 
     // TODO: doc...
     // Path where the output file will be generated. If the file already exists, it will be overwritten.
     // If relative, will be resolved against the CWD.
     // If omitted, will be same as main path but with extension changed to '.js'
     save(filename?: string): void;
+
+    // TODO: doc better...
+    /** Returns the target code as source. */
+    toString(): void;
 }
 
 
@@ -46,12 +46,12 @@ export function compile(options: CompilerOptions): CompilerResult {
     const ast3 = normaliseExpressions(ast2);
     const consts = resolveConstantValues(ast3);
     const targetCode = generateTargetCode({ast: ast3, consts});
-    const evalTarget = (): typeof target => target = eval(`(function (module) {\n${targetCode}\n})()`);
-    let target: {parse(text: string): unknown, print(ast: unknown): string};
     return {
-        parse: text => (target || evalTarget()).parse(text),
-        print: ast => (target || evalTarget()).print(ast),
-        toString: () => targetCode,
+        eval() {
+            let result = {} as ReturnType<CompilerResult['eval']>;
+            eval(`(function (module) {\n${targetCode}\n})(result)`);
+            return result;
+        },
         save(filename) {
             // write the target code to the output file path. Creating containing dirs if necessary.
             const outFile = filename || main.substr(0, main.length - path.extname(main).length) + '.js';
@@ -60,5 +60,6 @@ export function compile(options: CompilerOptions): CompilerResult {
             fs.ensureDirSync(path.dirname(outFilePath));
             fs.writeFileSync(outFilePath, targetCode);
         },
+        toString: () => targetCode,
     };
 }
