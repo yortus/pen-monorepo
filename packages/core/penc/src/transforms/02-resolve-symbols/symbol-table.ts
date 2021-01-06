@@ -2,7 +2,13 @@ import type {Expression} from '../../ast-nodes';
 
 
 // TODO: jsdoc...
-export type Scope = Record<string, Symbol | undefined>;
+export interface Scope {
+    insert(name: string, value: Expression): Symbol;
+    lookup(name: string): Symbol;
+    createNestedScope(): Scope;
+    surroundingScope: Scope;
+    symbols: Record<string, Symbol | undefined>;
+}
 
 
 // TODO: jsdoc...
@@ -21,49 +27,45 @@ export function createSymbolTable() {
     const allSymbols = {} as Record<string, Symbol>;
     const RESERVED_GLOBAL_NAMES = ['start'];
     const existingGlobalNames = new Set<string>(RESERVED_GLOBAL_NAMES);
+    const rootScope = createNestedScope(undefined);
+    return {allSymbols, rootScope};
 
-    // Define a root scope.
-    const rootScope: Scope = Object.create(null);
+    // TODO: temp testing...
+    function createNestedScope(surroundingScope?: Scope): Scope {
+        const symbols: Record<string, Symbol | undefined> = Object.create(surroundingScope?.symbols ?? null);
+        const scope: Scope = {
+            insert(name, value) {
+                if (Object.keys(symbols).includes(name)) {
+                    // TODO: improve diagnostic message eg line+col
+                    throw new Error(`'${name}' is already defined`);
+                }
+                const globalName = createGlobalName(name);
+                const symbol: Symbol = {globalName, localName: name, value, scope};
+                allSymbols[globalName] = symbol;
+                symbols[name] = symbol;
+                return symbol;
+            },
 
-    return {
-        // TODO: jsdoc...
-        allSymbols,
+            lookup(name) {
+                const symbol = symbols[name];
+                if (symbol) return symbol;
+                // TODO: improve diagnostic message eg line+col
+                throw new Error(`'${name}' is not defined`);
+            },
 
-        // TODO: jsdoc...
-        createScope(surroundingScope?: Scope): Scope {
-            surroundingScope ??= rootScope;
-            const scope = Object.create(surroundingScope);
-            return scope;
-        },
+            createNestedScope() {
+                return createNestedScope(scope);
+            },
 
-        // TODO: jsdoc...
-        // Helper function to add a definition for `name` into the given module's scope.
-        insert(scope: Scope, name: string, value: Expression): Symbol {
-            if (Object.keys(scope).includes(name)) {
-                throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message eg line+col
-            }
-            const globalName = createGlobalName(name);
-            const symbol: Symbol = {globalName, localName: name, value, scope};
-            allSymbols[globalName] = symbol;
-            scope[name] = symbol;
-            return symbol;
-        },
+            get surroundingScope() {
+                if (surroundingScope) return surroundingScope;
+                throw new Error(`Cannot get surrounding scope of root scope`);
+            },
 
-        // TODO: jsdoc...
-        lookup(scope: Scope, name: string): Symbol {
-            const symbol = scope[name];
-            if (!symbol) {
-                throw new Error(`'${name}' is not defined`); // TODO: improve diagnostic message eg line+col
-            }
-            return symbol;
-        },
-
-        // TODO: jsdoc...
-        getSurroundingScope(scope: Scope): Scope | undefined {
-            const proto = Object.getPrototypeOf(scope);
-            return proto ?? undefined;
-        }
-    };
+            symbols,
+        };
+        return scope;
+    }
 
     // TODO: doc... helper
     function createGlobalName(name: string): string {

@@ -42,6 +42,10 @@ const ast2 = {
         concrete: false,
         abstract: false,
       },
+      a: {
+        kind: "NumericLiteral",
+        value: 42,
+      },
       nested: {
         kind: "Module",
         bindings: {
@@ -55,9 +59,14 @@ const ast2 = {
             name: "x2",
             resolved: true,
           },
+          a: {
+            kind: "Identifier",
+            name: "a",
+            resolved: true,
+          },
         },
       },
-      a: {
+      a2: {
         kind: "Identifier",
         name: "x",
         resolved: true,
@@ -105,16 +114,16 @@ const ast2 = {
         name: "start3",
         resolved: true,
       },
-      a2: {
+      a3: {
         kind: "Identifier",
-        name: "a",
+        name: "a2",
         resolved: true,
       },
-      a3: {
+      a4: {
         kind: "Identifier",
         module: null,
         member: null,
-        name: "a2",
+        name: "a3",
         resolved: true,
       },
       ENTRYPOINT2: {
@@ -122,7 +131,7 @@ const ast2 = {
         expressions: [
           {
             kind: "Identifier",
-            name: "a3",
+            name: "a4",
             resolved: true,
           },
           {
@@ -132,7 +141,7 @@ const ast2 = {
           },
           {
             kind: "Identifier",
-            name: "a3",
+            name: "a4",
             resolved: true,
           },
         ],

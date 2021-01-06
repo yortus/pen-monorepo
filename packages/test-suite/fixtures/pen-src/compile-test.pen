@@ -3,6 +3,7 @@ x = "outer x"
 nested = (
     REP = (a) => a x a
     x = "inner x"
+    a = 42
 )
 
 start = nested.REP(a = x)

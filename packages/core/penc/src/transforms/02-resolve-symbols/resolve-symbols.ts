@@ -13,8 +13,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
-    const {createScope, insert, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
-    const rootScope = createScope();
+    const {allSymbols, rootScope} = createSymbolTable();
 
     // TODO: temp testing...
     const resolvedAst = internalResolve({
@@ -24,7 +23,7 @@ export function resolveSymbols(ast: AST): AST {
             body: {kind: 'MemberExpression', module: ast.module, member: {kind: 'Identifier', name: 'start'}},
         },
         arg: {kind: 'Module', bindings: {}},
-        env: undefined,
+        env: rootScope,
     });
 
     // TODO: add the special 'start' symbol
@@ -38,9 +37,9 @@ export function resolveSymbols(ast: AST): AST {
     return ast;
 
     // TODO: temp testing...
-    function internalResolve({gen, arg, env}: {gen: GenericExpression, arg: Expression, env?: Scope}) {
+    function internalResolve({gen, arg, env}: {gen: GenericExpression, arg: Expression, env: Scope}) {
 
-        // TODO: step 0 - synthesize a module expression
+        // TODO: step 0 - synthesize a MemberExpression and a module
         const startName = 'ENTRYPOINT'; // TODO: make&use namegen util to ensure no clashes with names in other binding
         const top: MemberExpression = {
             kind: 'MemberExpression',
@@ -64,17 +63,14 @@ export function resolveSymbols(ast: AST): AST {
             },
             Identifier: id => {
                 if (id.resolved) return id;
-
                 // TODO: explain tracking...
                 const idᐟ = {...id};
-                assert(env);
                 identifiers.set(idᐟ, env);
                 return idᐟ;
             },
             InstantiationExpression: inst => {
                 // TODO: leave the InstantiationExpression in place until the next step...
                 const instᐟ = {...inst, generic: rec(inst.generic), argument: rec(inst.argument)};
-                assert(env);
                 instantiations.set(instᐟ, env);
                 return instᐟ;
             },
@@ -85,25 +81,25 @@ export function resolveSymbols(ast: AST): AST {
                 return memᐟ;
             },
             Module: module => {
-                // Create a scope for the module, or use `rootScope` if this is _the_ top-level module.
-                env = env ? createScope(env) : rootScope;
+                // Create a nested scope for this module.
+                env = env.createNestedScope();
 
                 // Create a symbol for each local name in the module.
                 let bindings = {} as Record<string, Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
-                    const {globalName} = insert(env, name, rec(expr));
+                    const {globalName} = env.insert(name, rec(expr));
                     bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
                 }
 
                 // Pop back out to the surrounding scope before returning.
-                env = getSurroundingScope(env);
+                env = env.surroundingScope;
                 return {kind: 'Module', bindings};
             },
         }));
 
         // STEP 2: Resolve all Identifier nodes (except MemberExpression#member - that is resolved in STEP 3)
         for (let [id, scope] of identifiers) {
-            const {globalName} = lookup(scope, id.name);
+            const {globalName} = scope.lookup(id.name);
             Object.assign(id, {name: globalName, resolved: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
 
