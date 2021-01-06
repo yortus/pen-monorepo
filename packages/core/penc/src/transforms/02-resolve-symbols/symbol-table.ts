@@ -38,7 +38,7 @@ export function createSymbolTable() {
 
         // TODO: jsdoc...
         // Helper function to add a definition for `name` into the given module's scope.
-        define(scope: Scope, name: string, value: Expression): Symbol {
+        insert(scope: Scope, name: string, value: Expression): Symbol {
             if (Object.keys(scope).includes(name)) {
                 throw new Error(`'${name}' is already defined`); // TODO: improve diagnostic message eg line+col
             }

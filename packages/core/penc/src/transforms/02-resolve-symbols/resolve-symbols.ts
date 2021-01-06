@@ -13,7 +13,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: AST): AST {
     validateAST(ast, inputNodeKinds);
-    const {createScope, define, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
+    const {createScope, insert, allSymbols, getSurroundingScope, lookup} = createSymbolTable();
     const rootScope = createScope();
 
     // TODO: temp testing...
@@ -91,7 +91,7 @@ export function resolveSymbols(ast: AST): AST {
                 // Create a symbol for each local name in the module.
                 let bindings = {} as Record<string, Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
-                    const {globalName} = define(env, name, rec(expr));
+                    const {globalName} = insert(env, name, rec(expr));
                     bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
                 }
 
