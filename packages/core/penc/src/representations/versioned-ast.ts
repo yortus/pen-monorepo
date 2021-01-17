@@ -2,7 +2,11 @@ import type {AbsPath} from '../utils';
 
 
 // TODO: versions...
-export const UNKNOWN = 'UNKNOWN';
+// - UNKNOWN = widest possible type (all nodes kinds, least-specific node prop types)
+// - RAW = as written in the source code (no TODO???)
+// - V1/NORMAL (no ImportExpression, ParenthesisedExpression, TODO Binding stuff?)
+// - TODO: resolved? flat?
+export const UNKNOWN = 'UNKNOWN'; // TODO: rename EVERY,ANY,ALL?
 export const NORMAL = 'N1';
 export type UNKNOWN = typeof UNKNOWN;
 export type NORMAL = typeof NORMAL;
