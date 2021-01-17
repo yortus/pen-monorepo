@@ -11,13 +11,13 @@ import {parseExtFile, parsePenFile} from './grammars';
  * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
  * @param options.main absolute file path to the main source file for the PEN program.
  */
-export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.AST<1> {
+export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.AST<V.NORMAL> {
     const INLINE_MAIN = AbsPath('text://inline');
     const main = 'main' in options ? options.main : INLINE_MAIN;
     const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
-    const sourceFilesByPath: Record<string, V.BindingList<0>> = {};
+    const sourceFilesByPath: Record<string, V.BindingList<V.UNKNOWN>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
@@ -53,7 +53,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
-                BindingList: (bl): V.Module<1> => {
+                BindingList: (bl): V.Module<V.NORMAL> => {
                     let module = moduleFromBindingList(bl);
                     return {...module, bindings: mapObj(module.bindings, rec)};
                 },
@@ -67,11 +67,11 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             program[moduleName] = module;
             return program;
         },
-        {} as Record<string, V.Module<1>>
+        {} as Record<string, V.Module<V.NORMAL>>
     );
 
     // TODO: temp testing...
-    const ast: V.AST<1> = {
+    const ast: V.AST<V.NORMAL> = {
         module: {
             kind: 'Module',
             bindings: {
@@ -84,10 +84,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             },
         },
     };
-    validateAST(1, ast);
+    validateAST(V.NORMAL, ast);
     return ast;
 }
 
 
 // TODO: temp testing...
-const mapNode = makeNodeMapper<0, 1>();
+const mapNode = makeNodeMapper<V.UNKNOWN, V.NORMAL>();

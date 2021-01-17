@@ -1,7 +1,13 @@
 import type {AbsPath} from '../utils';
 
 
-export type Version = 0 | 1;
+// TODO: versions...
+export const UNKNOWN = 'UNKNOWN';
+export const NORMAL = 'N1';
+export type UNKNOWN = typeof UNKNOWN;
+export type NORMAL = typeof NORMAL;
+export type Version = UNKNOWN | NORMAL;
+
 
 
 export interface AST<V extends Version> {
@@ -11,8 +17,8 @@ export interface AST<V extends Version> {
 
 
 /** Union of all possible node types that may occur in a PEN AST. */
-export type Node<V extends Version> =
-    | (V extends 0 ? Binding<V> : never)
+export type Node<V extends Version = UNKNOWN> =
+    | (V extends UNKNOWN ? Binding<V> : never)
     | Expression<V>
     | Pattern<V>
 ;
@@ -25,12 +31,12 @@ export type Pattern<V extends Version> =
 
 
 /** Union of all node types that represent PEN expressions. */
-export type Expression<V extends Version> =
-    | (V extends 0 ? BindingList<V> : never)
+export type Expression<V extends Version = UNKNOWN> =
+    | (V extends UNKNOWN ? BindingList<V> : never)
     | BooleanLiteral
     | FieldExpression<V>
     | Identifier
-    | (V extends 0 ? ImportExpression : never)
+    | (V extends UNKNOWN ? ImportExpression : never)
     | InstantiationExpression<V>
     | Intrinsic
     | GenericExpression<V>
@@ -40,7 +46,7 @@ export type Expression<V extends Version> =
     | NotExpression<V>
     | NullLiteral
     | NumericLiteral
-    | (V extends 0 ? ParenthesisedExpression<V> : never)
+    | (V extends UNKNOWN ? ParenthesisedExpression<V> : never)
     | QuantifiedExpression<V>
     | RecordExpression<V>
     | SelectionExpression<V>

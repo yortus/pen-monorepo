@@ -7,8 +7,8 @@ import {createNodeHasher} from './create-node-hasher';
 // TODO: jsdoc...
 // - turns every subexpression into a separate name/value binding in the single module
 // - deduplicates all expressions/subexpressions
-export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
-    validateAST(0, ast);
+export function normaliseExpressions(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
+    validateAST(V.NORMAL, ast);
 
     // TODO: doc...
     const {bindings} = ast.module;
@@ -29,14 +29,14 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
     assert(start && start.kind !== 'Module'); // TODO: better error message here - `start` must be a Rule or something?
 
     // Populate the `newBindingsByHash` map.
-    const newBindingsByHash = new Map<string, {name: string, value: V.Expression<1>}>();
+    const newBindingsByHash = new Map<string, {name: string, value: V.Expression<V.NORMAL>}>();
     const newGlobalNames = new Set<string>();
     getNewBindingFor(start); // NB: called for side-effect of populating `newBindingsByHash` map.
 
     // TODO: in debug mode, ensure only allowed node kinds are present in the representation
     //traverseNode(null!, n => assert(definitionMapKinds.matches(n)));
 
-    const newBindings = {} as Record<string, V.Expression<1>>;
+    const newBindings = {} as Record<string, V.Expression<V.NORMAL>>;
     for (const [_, {name, value}] of newBindingsByHash) newBindings[name] = value;
     ast = {
         module: {
@@ -44,11 +44,11 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
             bindings: newBindings,
         },
     };
-    validateAST(1, ast);
+    validateAST(V.NORMAL, ast);
     return ast;
 
     // TODO: recursive...
-    function getNewBindingFor(expr: V.Expression<1>, parentName?: string): {name: string, value: V.Expression<1>} {
+    function getNewBindingFor(expr: V.Expression<V.NORMAL>, parentName?: string): {name: string, value: V.Expression<V.NORMAL>} {
         // TODO: doc...
         const e = deref(expr);
         const hash = getHashFor(e);
@@ -85,12 +85,12 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);
         }
 
-        function ref(expr: V.Expression<1>): V.Identifier {
+        function ref(expr: V.Expression<V.NORMAL>): V.Identifier {
             const {name} = getNewBindingFor(expr, ownName || parentName); // recurse
             return {kind: 'Identifier', name};
         }
 
-        function setV<E extends V.Expression<1>>(expr: E, vals?: Omit<E, 'kind'>) {
+        function setV<E extends V.Expression<V.NORMAL>>(expr: E, vals?: Omit<E, 'kind'>) {
             Object.assign(newBinding, {value: {kind: expr.kind, ...(vals || expr)}});
             return newBinding;
         }

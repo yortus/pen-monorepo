@@ -1,6 +1,6 @@
 import {assert, isDebugMode} from '../utils';
 import {traverseNode} from './traverse-node';
-import {AST, Node, Version} from './versioned-ast';
+import {UNKNOWN, AST, Node, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
@@ -8,11 +8,11 @@ export function validateAST<V extends Version>(v: V, ast: AST<V>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 
-    const excludedNodeKinds = [] as Array<Node<0>['kind']>;
-    if (v === 0) {
+    const excludedNodeKinds = [] as Array<Node['kind']>;
+    if (v === UNKNOWN) {
         // no-op
     }
-    else /* v === 1 */ {
+    else /* v === NORMAL */ {
         excludedNodeKinds.push(
             'Binding',
             'BindingList',

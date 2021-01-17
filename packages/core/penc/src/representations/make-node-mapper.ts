@@ -31,8 +31,8 @@ export function makeNodeMapper<V extends Version, Vᐟ extends Version>() {
 
 
 // TODO: ...
-function makeDefaultMappers(rec: <N extends Node<0>>(n: N) => N) {
-    return (n: Node<0>): Node<0> => {
+function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
+    return (n: Node): Node => {
         switch (n.kind) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BindingList': return {...n, bindings: n.bindings.map(rec)};
@@ -81,4 +81,4 @@ type MappedNode<N extends Node<V>, V extends Version, Vᐟ extends Version> =
     never;
 
 // Helper type returning the union of nodes corresponding to the given union of node kinds.
-type NodeOfKind<V extends Version, K extends Node<0>['kind'], N = Node<V>> = N extends {kind: K} ? N : never;
+type NodeOfKind<V extends Version, K extends Node['kind'], N = Node<V>> = N extends {kind: K} ? N : never;

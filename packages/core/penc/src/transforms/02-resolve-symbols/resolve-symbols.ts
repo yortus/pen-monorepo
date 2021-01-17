@@ -8,8 +8,8 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - outputs the program as a single module (ie flat list of bindings)
 // - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
-export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
-    validateAST(1, ast);
+export function resolveSymbols(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
+    validateAST(V.NORMAL, ast);
     const {allSymbols, rootScope} = createSymbolTable();
 
     // TODO: temp testing...
@@ -30,15 +30,15 @@ export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
     ast = {
         module: {kind: 'Module', bindings: mapObj(allSymbols, symbol => symbol.value)},
     };
-    validateAST(1, ast);
+    validateAST(V.NORMAL, ast);
     return ast;
 
     // TODO: temp testing...
-    function internalResolve({gen, arg, env}: {gen: V.GenericExpression<1>, arg: V.Expression<1>, env: Scope}) {
+    function internalResolve({gen, arg, env}: {gen: V.GenericExpression<V.NORMAL>, arg: V.Expression<V.NORMAL>, env: Scope}) {
 
         // TODO: step 0 - synthesize a MemberExpression and a module
         const startName = 'ENTRYPOINT'; // TODO: make&use namegen util to ensure no clashes with names in other binding
-        const top: V.MemberExpression<1> = {
+        const top: V.MemberExpression<V.NORMAL> = {
             kind: 'MemberExpression',
             module: moduleFromBindingList({
                 kind: 'BindingList',
@@ -52,8 +52,8 @@ export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
         const identifiers = new Map<V.Identifier, Scope>();
-        const memberExprs = [] as V.MemberExpression<1>[];
-        const instantiations = new Map<V.InstantiationExpression<1>, Scope>();
+        const memberExprs = [] as V.MemberExpression<V.NORMAL>[];
+        const instantiations = new Map<V.InstantiationExpression<V.NORMAL>, Scope>();
         const result = mapNode(top, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
             GenericExpression: gen => {
                 return gen; // NB: don't recurse inside
@@ -141,4 +141,4 @@ export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
 
 
 // TODO: temp testing...
-const mapNode = makeNodeMapper<1, 1>();
+const mapNode = makeNodeMapper<V.NORMAL, V.NORMAL>();

@@ -1,10 +1,10 @@
-import type {BindingList, Expression, Module} from './versioned-ast';
+import type {UNKNOWN, BindingList, Expression, Module, NORMAL} from './versioned-ast';
 
 
 // TODO: jsdoc...
 // TODO: fix hacky typing of in/out node versions
-export function moduleFromBindingList({bindings}: BindingList<0>): Module<1> {
-    const bindingsObject = {} as {[name: string]: Expression<0>};
+export function moduleFromBindingList({bindings}: BindingList<UNKNOWN>): Module<NORMAL> {
+    const bindingsObject = {} as {[name: string]: Expression};
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {
             if (bindingsObject.hasOwnProperty(left.name)) {

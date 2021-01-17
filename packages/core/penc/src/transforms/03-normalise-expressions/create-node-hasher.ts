@@ -32,7 +32,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
      * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
      * Logically equivalent nodes will end up with signatures that produce the same hash. 
      */
-    function getSignatureFor(n: V.Expression<1>): Signature {
+    function getSignatureFor(n: V.Expression<V.NORMAL>): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
@@ -55,7 +55,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = (n: V.Expression<1>) => getSignatureFor(n)
+        const getSig = (n: V.Expression<V.NORMAL>) => getSignatureFor(n)
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
         // Recursively compute the signature according to the node type.
@@ -83,7 +83,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = V.Node<1> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
+type HashableNode = V.Node<V.NORMAL> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
 
 
 // Helper type: union of all node kinds that support hashing.
