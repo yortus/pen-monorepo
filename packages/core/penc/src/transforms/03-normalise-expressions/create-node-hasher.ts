@@ -1,8 +1,7 @@
 import {randomBytes} from 'crypto';
 import * as objectHash from 'object-hash';
-import {allNodeKinds, expressionNodeKinds} from '../../ast-nodes';
 import {V} from '../../representations';
-import {assert, mapObj} from '../../utils';
+import {mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
 
@@ -33,14 +32,14 @@ export function createNodeHasher(deref: DereferenceFunction) {
      * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
      * Logically equivalent nodes will end up with signatures that produce the same hash. 
      */
-    function getSignatureFor(n: HashableNode): Signature {
+    function getSignatureFor(n: V.Expression<1>): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
 
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
-        const derefdNode = expressionNodeKinds.matches(n) ? deref(n) : n; // TODO: fix type...
+        const derefdNode = deref(n);
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             const derefdSig = getSignatureFor(derefdNode as HashableNode);
@@ -56,10 +55,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = (n: V.Node<1>) => {
-            assert(hashableNodeKinds.matches(n));
-            return getSignatureFor(n);
-        };
+        const getSig = (n: V.Expression<1>) => getSignatureFor(n)
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
         // Recursively compute the signature according to the node type.
@@ -87,15 +83,15 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = V.Node<1> extends infer N ? (N extends {kind: typeof hashableNodeKinds[any]} ? N : never) : never;
+type HashableNode = V.Node<1> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
 
 
 // Helper type: union of all node kinds that support hashing.
-const hashableNodeKinds = allNodeKinds.without(
+const excludedNodeKinds = [
     'Binding',
     'BindingList',
     'ImportExpression',
 //TODO: fix...    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
     'ModulePattern',
     'ParenthesisedExpression',
-);
+] as const;

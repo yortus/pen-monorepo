@@ -1,7 +1,6 @@
-import {allNodeKinds, NodeKinds} from '../ast-nodes';
 import {assert, isDebugMode} from '../utils';
 import {traverseNode} from './traverse-node';
-import {AST, Version} from './versioned-ast';
+import {AST, Node, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
@@ -9,12 +8,12 @@ export function validateAST<V extends Version>(v: V, ast: AST<V>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 
-    let nodeKinds: NodeKinds<any>; // TODO: don't use any type
+    const excludedNodeKinds = [] as Array<Node<0>['kind']>;
     if (v === 0) {
-        nodeKinds = allNodeKinds;
+        // no-op
     }
     else /* v === 1 */ {
-        nodeKinds = allNodeKinds.without(
+        excludedNodeKinds.push(
             'Binding',
             'BindingList',
             'ImportExpression',
@@ -26,5 +25,5 @@ export function validateAST<V extends Version>(v: V, ast: AST<V>) {
     }
 
     // Ensure only allowed node kinds are present in the representation.
-    traverseNode(ast.module, n => assert(nodeKinds.matches(n), `Unexpected node kind '${n.kind}'`));
+    traverseNode(ast.module, n => assert(!excludedNodeKinds.includes(n.kind), `Unexpected node kind '${n.kind}'`));
 }
