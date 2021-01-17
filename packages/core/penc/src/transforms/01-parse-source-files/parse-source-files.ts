@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import {allNodeKinds} from '../../ast-nodes';
 import {makeNodeMapper, moduleFromBindingList, traverseNode, V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
@@ -85,20 +84,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             },
         },
     };
-    validateAST(ast, outputNodeKinds);
+    validateAST(1, ast);
     return ast;
 }
 
 
 // TODO: temp testing...
 const mapNode = makeNodeMapper<0, 1>();
-
-
-/** List of node kinds that may be present in the output AST. */
-const outputNodeKinds = allNodeKinds.without(
-    'Binding',
-    'BindingList',
-    'ImportExpression',
-    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
-    'ParenthesisedExpression',
-);

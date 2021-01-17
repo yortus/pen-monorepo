@@ -1,4 +1,3 @@
-import {allNodeKinds} from '../../ast-nodes';
 import {makeNodeMapper, moduleFromBindingList, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
@@ -10,7 +9,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
-    validateAST(ast, inputNodeKinds);
+    validateAST(1, ast);
     const {allSymbols, rootScope} = createSymbolTable();
 
     // TODO: temp testing...
@@ -31,7 +30,7 @@ export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
     ast = {
         module: {kind: 'Module', bindings: mapObj(allSymbols, symbol => symbol.value)},
     };
-    validateAST(ast, outputNodeKinds);
+    validateAST(1, ast);
     return ast;
 
     // TODO: temp testing...
@@ -143,24 +142,3 @@ export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
 
 // TODO: temp testing...
 const mapNode = makeNodeMapper<1, 1>();
-
-
-/** List of node kinds that may be present in the input AST. */
-const inputNodeKinds = allNodeKinds.without(
-    'Binding',
-    'BindingList',
-    'ImportExpression',
-    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
-    'ParenthesisedExpression',
-);
-
-
-/** List of node kinds that may be present in the output AST. */
-const outputNodeKinds = allNodeKinds.without(
-    'Binding',
-    'BindingList',
-    'ImportExpression',
-    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
-    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
-    'ParenthesisedExpression',
-);

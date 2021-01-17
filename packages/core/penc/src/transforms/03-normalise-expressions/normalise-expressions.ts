@@ -1,4 +1,3 @@
-import {allNodeKinds} from '../../ast-nodes';
 import {V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
@@ -9,7 +8,7 @@ import {createNodeHasher} from './create-node-hasher';
 // - turns every subexpression into a separate name/value binding in the single module
 // - deduplicates all expressions/subexpressions
 export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
-    validateAST(ast, inputNodeKinds);
+    validateAST(0, ast);
 
     // TODO: doc...
     const {bindings} = ast.module;
@@ -19,7 +18,6 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
     const namesByHash = Object.entries(bindings).reduce((obj, [name, value]) => {
-        assert(inputNodeKinds.matches(value));
         const hash = getHashFor(value);
         obj[hash] ??= [];
         obj[hash].push(name);
@@ -46,13 +44,11 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
             bindings: newBindings,
         },
     };
-    validateAST(ast, outputNodeKinds);
+    validateAST(1, ast);
     return ast;
 
     // TODO: recursive...
     function getNewBindingFor(expr: V.Expression<1>, parentName?: string): {name: string, value: V.Expression<1>} {
-        assert(inputNodeKinds.matches(expr));
-
         // TODO: doc...
         const e = deref(expr);
         const hash = getHashFor(e);
@@ -76,6 +72,7 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
+            case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
             case 'Module': return setV(e, {bindings: mapObj(e.bindings, ref)});
             case 'NotExpression': return setV(e, {expression: ref(e.expression)});
             case 'NullLiteral': return setV(e);
@@ -109,18 +106,3 @@ export function normaliseExpressions(ast: V.AST<1>): V.AST<1> {
         return result;
     }
 }
-
-
-/** List of node kinds that may be present in the input AST. */
-const inputNodeKinds = allNodeKinds.without(
-    'Binding',
-    'BindingList',
-    'ImportExpression',
-    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
-    // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
-    'ParenthesisedExpression',
-);
-
-
-/** List of node kinds that may be present in the output AST. */
-const outputNodeKinds = inputNodeKinds;

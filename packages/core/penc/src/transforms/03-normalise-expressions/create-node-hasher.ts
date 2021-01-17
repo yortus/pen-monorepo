@@ -70,6 +70,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
+            case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
             case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);
@@ -94,7 +95,7 @@ const hashableNodeKinds = allNodeKinds.without(
     'Binding',
     'BindingList',
     'ImportExpression',
-    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
+//TODO: fix...    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
     'ModulePattern',
     'ParenthesisedExpression',
 );
