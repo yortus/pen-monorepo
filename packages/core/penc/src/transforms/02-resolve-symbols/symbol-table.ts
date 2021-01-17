@@ -1,9 +1,9 @@
-import type {Expression} from '../../ast-nodes';
+import type {V} from '../../representations';
 
 
 // TODO: jsdoc...
 export interface Scope {
-    insert(name: string, value: Expression): Symbol;
+    insert(name: string, value: V.Expression<1>): Symbol;
     lookup(name: string): Symbol;
     createNestedScope(): Scope;
     surroundingScope: Scope;
@@ -15,7 +15,7 @@ export interface Scope {
 export interface Symbol {
     readonly globalName: string; // TODO: doc... can be used as an identifier; unique across program
     readonly localName?: string;
-    readonly value: Expression;
+    readonly value: V.Expression<1>;
 
     // TODO: temp testing...
     readonly scope: Scope;

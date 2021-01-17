@@ -1,9 +1,10 @@
-import type {BindingList, Expression, Module} from './nodes';
+import type {BindingList, Expression, Module} from './versioned-ast';
 
 
 // TODO: jsdoc...
-export function moduleFromBindingList({bindings}: BindingList): Module {
-    const bindingsObject = {} as {[name: string]: Expression};
+// TODO: fix hacky typing of in/out node versions
+export function moduleFromBindingList({bindings}: BindingList<0>): Module<1> {
+    const bindingsObject = {} as {[name: string]: Expression<0>};
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {
             if (bindingsObject.hasOwnProperty(left.name)) {
@@ -26,5 +27,6 @@ export function moduleFromBindingList({bindings}: BindingList): Module {
             }
         }
     }
-    return {kind: 'Module', bindings: bindingsObject};
+    // TODO: remove cast after fixing typing
+    return {kind: 'Module', bindings: bindingsObject as any};
 }

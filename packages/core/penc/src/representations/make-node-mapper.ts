@@ -1,8 +1,7 @@
 import {mapObj} from '../utils';
-import type {Binding, Expression, Node, Pattern} from './nodes';
+import type {Binding, Expression, Node, Pattern, Version} from './versioned-ast';
 
-
-// TODO: revise/fix jsdoc...
+// TODO: revise/fix outdated jsdoc...
 /**
  * Returns a recursive node mapping function that maps from one type of AST to another. The returned mapping function
  * creates and returns a new node graph derived from the node graph rooted at `node`. By default, each node is
@@ -11,27 +10,29 @@ import type {Binding, Expression, Node, Pattern} from './nodes';
  * kinds from the graph rooted at `node`. The source and target ASTs must satisfy the node kind constraints given by
  * `inNodeKinds` and `outNodeKinds`.
  */
-export function mapNode<MapObj, N extends Node>(node: N, mappings: Mappings<MapObj>): NodeOfKind<WidenKind<N['kind']>> {
-    const rec: any = (n: any) => {
-        try {
-            let mapFn = mappers[n.kind];
-            let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
-            return result;
-        }
-        catch (err) {
-            // TODO: how to handle? May be better to let caller handle it?
-            throw err;
-        }
-    };
-    const defaultMappers: any = makeDefaultMappers(rec);
-    const mappers: any = mappings(rec);
-    return rec(node);
+export function makeNodeMapper<V extends Version, Vᐟ extends Version>() {
+    return function mapNode<MapObj, N extends Node<V>>(node: N, mappings: Mappings<MapObj, V, Vᐟ>): MappedNode<N, V, Vᐟ> {
+        const rec: any = (n: any) => {
+            try {
+                let mapFn = mappers[n.kind];
+                let result = mapFn && mapFn !== 'default' ? mapFn(n) : defaultMappers(n);
+                return result;
+            }
+            catch (err) {
+                // TODO: how to handle? May be better to let caller handle it?
+                throw err;
+            }
+        };
+        const defaultMappers: any = makeDefaultMappers(rec);
+        const mappers: any = mappings(rec);
+        return rec(node);
+    }
 }
 
 
 // TODO: ...
-function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
-    return (n: Node): Node => {
+function makeDefaultMappers(rec: <N extends Node<0>>(n: N) => N) {
+    return (n: Node<0>): Node<0> => {
         switch (n.kind) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BindingList': return {...n, bindings: n.bindings.map(rec)};
@@ -62,25 +63,22 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
 
 
 // Helper type for constraining and contextually typing the node mapping functions.
-type Mappings<MapObj> =
-    (rec: <N extends Node>(n: N) => NodeOfKind<WidenKind<N['kind']>>) =>
+type Mappings<MapObj, V extends Version, Vᐟ extends Version> =
+    (rec: <N extends Node<V>>(n: N) => MappedNode<N, V, Vᐟ>) =>
         & MapObj
 
         // All keys must be NodeKinds
-        & {[K in keyof MapObj]: K extends Node['kind'] ? unknown : never}
+        & {[K in keyof MapObj]: K extends Node<V>['kind'] ? unknown : never}
 
         // All handled node kinds must be a mapping function
-        & {[K in Node['kind']]?: ((n: NodeOfKind<K>) => NodeOfKind<WidenKind<K>>)};
+        & {[K in Node<V>['kind']]?: ((n: NodeOfKind<V, K>) => MappedNode<NodeOfKind<V, K>, V, Vᐟ>)};
 
-
-// Helper type for widening specific node kinds to general node kind categories.
-type WidenKind<K extends Node['kind']> =
-    K extends Expression['kind'] ? Expression['kind'] :
-    K extends Binding['kind'] ? Binding['kind'] :
-    K extends Pattern['kind'] ? Pattern['kind'] :
-    K extends Node['kind'] ? K :
+// TODO: doc...
+type MappedNode<N extends Node<V>, V extends Version, Vᐟ extends Version> =
+    N extends Expression<V> ? Expression<Vᐟ> :
+    N extends Binding<V> ? Binding<Vᐟ> :
+    N extends Pattern<V> ? Pattern<Vᐟ> :
     never;
 
-
 // Helper type returning the union of nodes corresponding to the given union of node kinds.
-type NodeOfKind<K extends Node['kind'], N = Node> = N extends {kind: K} ? N : never;
+type NodeOfKind<V extends Version, K extends Node<0>['kind'], N = Node<V>> = N extends {kind: K} ? N : never;

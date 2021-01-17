@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import {allNodeKinds, mapNode, moduleFromBindingList, traverseNode} from '../../ast-nodes';
-import {V, validateAST} from '../../representations';
+import {allNodeKinds, traverseNode} from '../../ast-nodes';
+import {makeNodeMapper, moduleFromBindingList, V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
@@ -54,7 +54,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
-                BindingList: (bl): V.Module<0> => {
+                BindingList: (bl): V.Module<1> => {
                     let module = moduleFromBindingList(bl);
                     return {...module, bindings: mapObj(module.bindings, rec)};
                 },
@@ -65,7 +65,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 ParenthesisedExpression: par => rec(par.expression),
             }));
             assert(module.kind === 'Module');
-            program[moduleName] = module as V.Module<1>; // TODO: remove cast after fixing mapNode typing
+            program[moduleName] = module;
             return program;
         },
         {} as Record<string, V.Module<1>>
@@ -88,6 +88,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     validateAST(ast, outputNodeKinds);
     return ast;
 }
+
+
+// TODO: temp testing...
+const mapNode = makeNodeMapper<0, 1>();
 
 
 /** List of node kinds that may be present in the output AST. */

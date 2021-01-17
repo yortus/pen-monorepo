@@ -1,7 +1,5 @@
-import {allNodeKinds, moduleFromBindingList} from '../../ast-nodes';
-import type {Expression, GenericExpression, Identifier, InstantiationExpression, MemberExpression} from '../../ast-nodes';
-import {mapNode} from '../../ast-nodes';
-import {AST, validateAST} from '../../representations';
+import {allNodeKinds} from '../../ast-nodes';
+import {makeNodeMapper, moduleFromBindingList, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -11,7 +9,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - outputs the program as a single module (ie flat list of bindings)
 // - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
-export function resolveSymbols(ast: AST): AST {
+export function resolveSymbols(ast: V.AST<1>): V.AST<1> {
     validateAST(ast, inputNodeKinds);
     const {allSymbols, rootScope} = createSymbolTable();
 
@@ -37,11 +35,11 @@ export function resolveSymbols(ast: AST): AST {
     return ast;
 
     // TODO: temp testing...
-    function internalResolve({gen, arg, env}: {gen: GenericExpression, arg: Expression, env: Scope}) {
+    function internalResolve({gen, arg, env}: {gen: V.GenericExpression<1>, arg: V.Expression<1>, env: Scope}) {
 
         // TODO: step 0 - synthesize a MemberExpression and a module
         const startName = 'ENTRYPOINT'; // TODO: make&use namegen util to ensure no clashes with names in other binding
-        const top: MemberExpression = {
+        const top: V.MemberExpression<1> = {
             kind: 'MemberExpression',
             module: moduleFromBindingList({
                 kind: 'BindingList',
@@ -54,9 +52,9 @@ export function resolveSymbols(ast: AST): AST {
         };
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
-        const identifiers = new Map<Identifier, Scope>();
-        const memberExprs = [] as MemberExpression[];
-        const instantiations = new Map<InstantiationExpression, Scope>();
+        const identifiers = new Map<V.Identifier, Scope>();
+        const memberExprs = [] as V.MemberExpression<1>[];
+        const instantiations = new Map<V.InstantiationExpression<1>, Scope>();
         const result = mapNode(top, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
             GenericExpression: gen => {
                 return gen; // NB: don't recurse inside
@@ -85,7 +83,7 @@ export function resolveSymbols(ast: AST): AST {
                 env = env.createNestedScope();
 
                 // Create a symbol for each local name in the module.
-                let bindings = {} as Record<string, Identifier>;
+                let bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
                     const {globalName} = env.insert(name, rec(expr));
                     bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
@@ -141,6 +139,10 @@ export function resolveSymbols(ast: AST): AST {
         return result;
     }
 }
+
+
+// TODO: temp testing...
+const mapNode = makeNodeMapper<1, 1>();
 
 
 /** List of node kinds that may be present in the input AST. */
