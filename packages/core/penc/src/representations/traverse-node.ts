@@ -1,13 +1,13 @@
 import {mapObj} from '../utils';
-import type {Node} from './nodes';
+import type {Node, Version} from './versioned-ast';
 
 
 /** Performs a depth-first traversal with `node` as root, calling `cb` on each node encountered in the traversal. */
-export function traverseNode(node: Node, callback: (n: Node) => void): void {
-    const cb = callback as (n: Node) => void;
+export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Node<V>) => void): void {
+    const cb = callback as (n: Node<0>) => void;
     return rec(node);
 
-    function rec(n: Node): void {
+    function rec(n: Node<0>): void {
         switch (n.kind) {
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BindingList': return n.bindings.forEach(rec), cb(n);

@@ -1,5 +1,6 @@
-import {NodeKinds, traverseNode} from '../ast-nodes';
+import {NodeKinds} from '../ast-nodes';
 import {assert, isDebugMode} from '../utils';
+import {traverseNode} from './traverse-node';
 import {AST, Node, Version} from './versioned-ast';
 
 

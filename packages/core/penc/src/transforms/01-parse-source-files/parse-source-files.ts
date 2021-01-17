@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import {allNodeKinds, traverseNode} from '../../ast-nodes';
-import {makeNodeMapper, moduleFromBindingList, V, validateAST} from '../../representations';
+import {allNodeKinds} from '../../ast-nodes';
+import {makeNodeMapper, moduleFromBindingList, traverseNode, V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
