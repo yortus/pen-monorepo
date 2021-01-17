@@ -1,4 +1,4 @@
-import type {BindingList} from '../../../ast-nodes';
+import type {V} from '../../../representations';
 
 
-export declare function parse(source: string): BindingList;
+export declare function parse(source: string): V.BindingList<0>;

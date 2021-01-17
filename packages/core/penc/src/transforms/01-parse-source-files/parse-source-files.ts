@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import {allNodeKinds, BindingList, Identifier, mapNode, Module, moduleFromBindingList, traverseNode} from '../../ast-nodes';
-import {AST, validateAST} from '../../representations';
+import {allNodeKinds, mapNode, moduleFromBindingList, traverseNode} from '../../ast-nodes';
+import {V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
@@ -12,13 +12,13 @@ import {parseExtFile, parsePenFile} from './grammars';
  * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
  * @param options.main absolute file path to the main source file for the PEN program.
  */
-export function parseSourceFiles(options: {main: AbsPath} | {text: string}): AST {
+export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.AST<1> {
     const INLINE_MAIN = AbsPath('text://inline');
     const main = 'main' in options ? options.main : INLINE_MAIN;
     const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
-    const sourceFilesByPath: Record<string, BindingList> = {};
+    const sourceFilesByPath: Record<string, V.BindingList<0>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
@@ -54,25 +54,25 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): AST
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
-                BindingList: (bl): Module => {
+                BindingList: (bl): V.Module<0> => {
                     let module = moduleFromBindingList(bl);
                     return {...module, bindings: mapObj(module.bindings, rec)};
                 },
-                ImportExpression: ({moduleSpecifier}): Identifier => {
+                ImportExpression: ({moduleSpecifier}): V.Identifier => {
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
                 ParenthesisedExpression: par => rec(par.expression),
             }));
             assert(module.kind === 'Module');
-            program[moduleName] = module;
+            program[moduleName] = module as V.Module<1>; // TODO: remove cast after fixing mapNode typing
             return program;
         },
-        {} as Record<string, Module>
+        {} as Record<string, V.Module<1>>
     );
 
     // TODO: temp testing...
-    const ast: AST = {
+    const ast: V.AST<1> = {
         module: {
             kind: 'Module',
             bindings: {
