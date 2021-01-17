@@ -1,6 +1,7 @@
 import {randomBytes} from 'crypto';
 import * as objectHash from 'object-hash';
-import {allNodeKinds, expressionNodeKinds, Node} from '../../ast-nodes';
+import {allNodeKinds, expressionNodeKinds} from '../../ast-nodes';
+import {V} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
@@ -55,7 +56,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = (n: Node) => {
+        const getSig = (n: V.Node<1>) => {
             assert(hashableNodeKinds.matches(n));
             return getSignatureFor(n);
         };
@@ -85,7 +86,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = Node extends infer N ? (N extends {kind: typeof hashableNodeKinds[any]} ? N : never) : never;
+type HashableNode = V.Node<1> extends infer N ? (N extends {kind: typeof hashableNodeKinds[any]} ? N : never) : never;
 
 
 // Helper type: union of all node kinds that support hashing.

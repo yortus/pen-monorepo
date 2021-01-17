@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import type {Expression, Intrinsic} from '../../ast-nodes';
 import type {V} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
@@ -56,7 +55,7 @@ export function generateTargetCode(program: Program) {
 
 function emitIntrinsics(emit: Emitter, {ast}: Program) {
     const {bindings} = ast.module;
-    const isIntrinsic = (e: Expression): e is Intrinsic => e.kind === 'Intrinsic';
+    const isIntrinsic = (e: V.Expression<1>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
@@ -86,7 +85,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     const extExprIds = Object.keys(bindings).filter(name => bindings[name].kind === 'Intrinsic');
     if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
     for (const id of extExprIds) {
-        const extExpr = bindings[id] as Intrinsic;
+        const extExpr = bindings[id] as V.Intrinsic;
         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: ${mode}});`);
     }
 
@@ -103,7 +102,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 }
 
 
-function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mode) {
+function emitExpression(emit: Emitter, name: string, expr: V.Expression<1>, mode: Mode) {
     // Should never see a GlobalReferenceExpression here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
     assert(expr.kind !== 'Identifier');
@@ -111,7 +110,6 @@ function emitExpression(emit: Emitter, name: string, expr: Expression, mode: Mod
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
         // TODO: No-op cases... explain why for each
-        case 'ImportExpression': // TODO: old comment... revise... already handled by emitIntrinsics
         case 'Intrinsic': // already handled by emitProgram
         case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
             break;

@@ -1,4 +1,4 @@
-import type {Expression} from '../../ast-nodes';
+import type {V} from '../../representations';
 
 
 // TODO: review this outdated jsdoc comment...
@@ -11,13 +11,13 @@ import type {Expression} from '../../ast-nodes';
  * NB: Some reference/member expressions cannot be statically dereferenced. This is a current implementation limitation.
  * @param ast the AST containing all possible nodes that may be dereferencing targets.
  */
-export function createDereferencer(bindings: Readonly<Record<string, Expression>>) {
+export function createDereferencer(bindings: Readonly<Record<string, V.Expression<1>>>) {
 
     // Return the dereference function closed over the given AST.
     return deref as DereferenceFunction;
 
     // The dereference function, closed over the given AST.
-    function deref(expr: Expression): Expression {
+    function deref(expr: V.Expression<1>): V.Expression<1> {
         const seen = [expr];
         while (true) {
             // If `expr` is a ref|mem expression, resolve to its target expression.
@@ -50,5 +50,5 @@ export function createDereferencer(bindings: Readonly<Record<string, Expression>
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends Expression>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'Identifier'} ? never : E;
+    <E extends V.Expression<1>>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'Identifier'} ? never : E;
 }
