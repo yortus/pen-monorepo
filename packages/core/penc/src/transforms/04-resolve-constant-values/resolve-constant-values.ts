@@ -1,9 +1,9 @@
-import type {AST} from '../../representations';
+import type {V} from '../../representations';
 
 
 // TODO: jsdoc...
 // TODO: this isn't a transform in its current form... revise this...
-export function resolveConstantValues(ast: AST): Record<string, {value: unknown}> {
+export function resolveConstantValues(ast: V.AST<1>): Record<string, {value: unknown}> {
     const result = {} as Record<string, {value: unknown}>;
     for (const [name, value] of Object.entries(ast.module.bindings)) {
         switch (value.kind) {

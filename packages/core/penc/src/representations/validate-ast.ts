@@ -1,10 +1,10 @@
-import {Node, NodeKinds, traverseNode} from '../ast-nodes';
+import {NodeKinds, traverseNode} from '../ast-nodes';
 import {assert, isDebugMode} from '../utils';
-import {AST} from './ast';
+import {AST, Node, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
-export function validateAST<K extends Node['kind']>(ast: AST, nodeKinds: NodeKinds<K>) {
+export function validateAST<K extends Node<V>['kind'], V extends Version>(ast: AST<V>, nodeKinds: NodeKinds<K>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 

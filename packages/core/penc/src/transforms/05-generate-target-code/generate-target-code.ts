@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import type {Expression, Intrinsic} from '../../ast-nodes';
-import type {AST} from '../../representations';
+import type {V} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
 import {Mode, PARSE, PRINT} from './modes';
@@ -11,7 +11,7 @@ import * as modes from './modes';
 
 // TODO: is this a representation? Move out...
 export interface Program {
-    ast: AST;
+    ast: V.AST<1>;
     consts: Record<string, {value: unknown}>;
 }
 
