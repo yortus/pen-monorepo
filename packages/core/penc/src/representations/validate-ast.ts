@@ -4,15 +4,15 @@ import {UNKNOWN, AST, Node, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
-export function validateAST<V extends Version>(v: V, ast: AST<V>) {
+export function validateAST<V extends Version>(ast: AST<V>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 
     const excludedNodeKinds = [] as Array<Node['kind']>;
-    if (v === UNKNOWN) {
+    if (ast.version === UNKNOWN) {
         // no-op
     }
-    else /* v === NORMAL */ {
+    else /* ast.version === NORMAL */ {
         excludedNodeKinds.push(
             'Binding',
             'BindingList',

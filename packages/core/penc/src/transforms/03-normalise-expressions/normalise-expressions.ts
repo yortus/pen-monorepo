@@ -8,7 +8,7 @@ import {createNodeHasher} from './create-node-hasher';
 // - turns every subexpression into a separate name/value binding in the single module
 // - deduplicates all expressions/subexpressions
 export function normaliseExpressions(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
-    validateAST(V.NORMAL, ast);
+    validateAST(ast);
 
     // TODO: doc...
     const {bindings} = ast.module;
@@ -39,12 +39,13 @@ export function normaliseExpressions(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
     const newBindings = {} as Record<string, V.Expression<V.NORMAL>>;
     for (const [_, {name, value}] of newBindingsByHash) newBindings[name] = value;
     ast = {
+        version: V.NORMAL,
         module: {
             kind: 'Module',
             bindings: newBindings,
         },
     };
-    validateAST(V.NORMAL, ast);
+    validateAST(ast);
     return ast;
 
     // TODO: recursive...

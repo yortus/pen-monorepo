@@ -9,7 +9,7 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
-    validateAST(V.NORMAL, ast);
+    validateAST(ast);
     const {allSymbols, rootScope} = createSymbolTable();
 
     // TODO: temp testing...
@@ -28,9 +28,10 @@ export function resolveSymbols(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
     assert(resolvedAst.kind === 'Identifier' && resolvedAst.resolved);
     allSymbols['start'] = {globalName: 'start', value: resolvedAst, scope: rootScope};
     ast = {
+        version: V.NORMAL,
         module: {kind: 'Module', bindings: mapObj(allSymbols, symbol => symbol.value)},
     };
-    validateAST(V.NORMAL, ast);
+    validateAST(ast);
     return ast;
 
     // TODO: temp testing...

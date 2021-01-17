@@ -72,6 +72,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
     // TODO: temp testing...
     const ast: V.AST<V.NORMAL> = {
+        version: V.NORMAL,
         module: {
             kind: 'Module',
             bindings: {
@@ -84,7 +85,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             },
         },
     };
-    validateAST(V.NORMAL, ast);
+    validateAST(ast);
     return ast;
 }
 

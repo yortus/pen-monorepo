@@ -15,6 +15,7 @@ export type Version = UNKNOWN | NORMAL;
 
 
 export interface AST<V extends Version> {
+    version: V;
     // TODO: jsdoc... has a special 'start' binding
     module: Module<V>;
 }
