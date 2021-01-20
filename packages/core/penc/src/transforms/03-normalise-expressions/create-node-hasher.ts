@@ -89,7 +89,6 @@ type HashableNode = V.Node<V.NORMAL> extends infer N ? (N extends {kind: typeof 
 // Helper type: union of all node kinds that support hashing.
 const excludedNodeKinds = [
     'Binding',
-    'BindingList',
     'ImportExpression',
 //TODO: fix...    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
     'ModulePattern',
