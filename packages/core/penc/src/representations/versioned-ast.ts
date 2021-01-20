@@ -6,15 +6,14 @@ import type {AbsPath} from '../utils';
 // - RAW = as written in the source code (no TODO???)
 // - V1/NORMAL (no ImportExpression, ParenthesisedExpression, TODO Binding stuff?)
 // - TODO: resolved? flat?
-export const UNKNOWN = 'UNKNOWN'; // TODO: rename EVERY,ANY,ALL?
+export const RAW = 'RAW';
 export const NORMAL = 'N1';
-export type UNKNOWN = typeof UNKNOWN;
+export type RAW = typeof RAW;
 export type NORMAL = typeof NORMAL;
-export type Version = UNKNOWN | NORMAL;
+export type Version = RAW | NORMAL;
 
 
-
-export interface AST<V extends Version> {
+export interface AST<V extends Version = Version> {
     version: V;
     // TODO: jsdoc... has a special 'start' binding
     module: Module<V>;
@@ -22,26 +21,26 @@ export interface AST<V extends Version> {
 
 
 /** Union of all possible node types that may occur in a PEN AST. */
-export type Node<V extends Version = UNKNOWN> =
-    | (V extends UNKNOWN ? Binding<V> : never)
+export type Node<V extends Version = Version> =
+    | Binding<V>
     | Expression<V>
     | Pattern<V>
 ;
 
 
 /** Union of all node types that bind names to expressions. */
-export type Pattern<V extends Version> =
-    | ModulePattern<V>
+export type Pattern<V extends Version = Version> =
+    ModulePattern<V>
 ;
 
 
 /** Union of all node types that represent PEN expressions. */
-export type Expression<V extends Version = UNKNOWN> =
-    | (V extends UNKNOWN ? BindingList<V> : never)
+export type Expression<V extends Version = Version> =
+    | BindingList<V>
     | BooleanLiteral
     | FieldExpression<V>
     | Identifier
-    | (V extends UNKNOWN ? ImportExpression : never)
+    | ImportExpression<V>
     | InstantiationExpression<V>
     | Intrinsic
     | GenericExpression<V>
@@ -51,7 +50,7 @@ export type Expression<V extends Version = UNKNOWN> =
     | NotExpression<V>
     | NullLiteral
     | NumericLiteral
-    | (V extends UNKNOWN ? ParenthesisedExpression<V> : never)
+    | ParenthesisedExpression<V>
     | QuantifiedExpression<V>
     | RecordExpression<V>
     | SelectionExpression<V>
@@ -60,17 +59,23 @@ export type Expression<V extends Version = UNKNOWN> =
 ;
 
 
-export interface Binding<V extends Version> {
-    readonly kind: 'Binding';
-    readonly left: Identifier | Pattern<V>;
-    readonly right: Expression<V>;
-}
+export type Binding<V extends Version> = {
+    RAW: {
+        readonly kind: 'Binding';
+        readonly left: Identifier | Pattern<V>;
+        readonly right: Expression<V>;
+    };
+    N1: never;
+}[V];
 
 
-export interface BindingList<V extends Version> {
-    readonly kind: 'BindingList';
-    readonly bindings: ReadonlyArray<Binding<V>>;
-}
+export type BindingList<V extends Version> = {
+    RAW: {
+        readonly kind: 'BindingList';
+        readonly bindings: ReadonlyArray<Binding<V>>;
+    };
+    N1: never;
+}[V];
 
 
 export interface BooleanLiteral {
@@ -93,10 +98,13 @@ export interface Identifier {
 }
 
 
-export interface ImportExpression {
-    readonly kind: 'ImportExpression';
-    readonly moduleSpecifier: string;
-}
+export type ImportExpression<V extends Version> = {
+    RAW: {
+        readonly kind: 'ImportExpression';
+        readonly moduleSpecifier: string;
+    };
+    N1: never;
+}[V];
 
 
 export interface InstantiationExpression<V extends Version> {
@@ -133,10 +141,13 @@ export interface MemberExpression<V extends Version> {
 }
 
 
-export interface Module<V extends Version> {
-    readonly kind: 'Module';
-    readonly bindings: Readonly<Record<string, Expression<V>>>; // TODO: doc special optional 'start' binding
-}
+export type Module<V extends Version> = {
+    RAW: never;
+    N1: {
+        readonly kind: 'Module';
+        readonly bindings: Readonly<Record<string, Expression<V>>>; // TODO: doc special optional 'start' binding
+    };
+}[V];
 
 
 export interface ModulePattern<_V> {
@@ -166,10 +177,13 @@ export interface NumericLiteral {
 }
 
 
-export interface ParenthesisedExpression<V extends Version> {
-    readonly kind: 'ParenthesisedExpression';
-    readonly expression: Expression<V>;
-}
+export type ParenthesisedExpression<V extends Version> = {
+    RAW: {
+        readonly kind: 'ParenthesisedExpression';
+        readonly expression: Expression<V>;
+    };
+    N1: never;
+}[V];
 
 
 export interface QuantifiedExpression<V extends Version> {

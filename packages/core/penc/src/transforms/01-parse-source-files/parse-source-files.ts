@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import {makeNodeMapper, moduleFromBindingList, traverseNode, V, validateAST} from '../../representations';
-import {AbsPath, assert, isExtension, mapObj, resolveModuleSpecifier} from '../../utils';
+import {AbsPath, assert, isExtension, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
 
@@ -17,7 +17,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
-    const sourceFilesByPath: Record<string, V.BindingList<V.UNKNOWN>> = {};
+    const sourceFilesByPath: Record<string, V.BindingList<V.RAW>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
@@ -53,9 +53,9 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
-                BindingList: (bl): V.Module<V.NORMAL> => {
-                    let module = moduleFromBindingList(bl);
-                    return {...module, bindings: mapObj(module.bindings, rec)};
+                BindingList: (bl) => {
+                    let module = moduleFromBindingList(bl, rec);
+                    return module;
                 },
                 ImportExpression: ({moduleSpecifier}): V.Identifier => {
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
@@ -91,4 +91,4 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
 
 // TODO: temp testing...
-const mapNode = makeNodeMapper<V.UNKNOWN, V.NORMAL>();
+const mapNode = makeNodeMapper<V.RAW, V.NORMAL>();

@@ -44,10 +44,11 @@ export function resolveSymbols(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
             module: moduleFromBindingList({
                 kind: 'BindingList',
                 bindings: [
-                    {kind: 'Binding', left: gen.param, right: arg},
+                    // TODO: remove cast after fixing typing
+                    {kind: 'Binding', left: gen.param, right: arg as any},
                     {kind: 'Binding', left: {kind: 'Identifier', name: startName}, right: gen.body},
                 ],
-            }),
+            }, x => x as any), // TODO: remove cast after fixing typing
             member: {kind: 'Identifier', name: startName},
         };
 

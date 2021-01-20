@@ -1,6 +1,6 @@
 import {assert, isDebugMode} from '../utils';
 import {traverseNode} from './traverse-node';
-import {UNKNOWN, AST, Node, Version} from './versioned-ast';
+import {AST, Node, NORMAL, RAW, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
@@ -9,10 +9,13 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     if (!isDebugMode()) return;
 
     const excludedNodeKinds = [] as Array<Node['kind']>;
-    if (ast.version === UNKNOWN) {
-        // no-op
+    if (ast.version === RAW) {
+        excludedNodeKinds.push(
+            'Module',
+            // TODO: others?
+        );
     }
-    else /* ast.version === NORMAL */ {
+    else if (ast.version === NORMAL) {
         excludedNodeKinds.push(
             'Binding',
             'BindingList',
@@ -21,7 +24,9 @@ export function validateAST<V extends Version>(ast: AST<V>) {
             // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
             'ParenthesisedExpression',
         );
-
+    }
+    else {
+        throw new Error(`Unrecognised AST version '${ast.version}'`);
     }
 
     // Ensure only allowed node kinds are present in the representation.
