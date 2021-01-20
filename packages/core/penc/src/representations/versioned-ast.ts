@@ -1,5 +1,8 @@
 import type {AbsPath} from '../utils';
 
+// TODO next:
+// - [x] two versions of Module with different `bindings` types (RAW=Array<Binding>, N1=Record<string, Expression>)
+// - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
 
 // TODO: versions...
 // - UNKNOWN = widest possible type (all nodes kinds, least-specific node prop types)
@@ -15,7 +18,7 @@ export type Version = RAW | NORMAL;
 
 export interface AST<V extends Version = Version> {
     version: V;
-    // TODO: jsdoc... has a special 'start' binding
+    // TODO: jsdoc... special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
     module: Module<V>;
 }
 
@@ -36,7 +39,6 @@ export type Pattern<V extends Version = Version> =
 
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
-    | BindingList<V>
     | BooleanLiteral
     | FieldExpression<V>
     | Identifier
@@ -61,162 +63,154 @@ export type Expression<V extends Version = Version> =
 
 export type Binding<V extends Version> = {
     RAW: {
-        readonly kind: 'Binding';
-        readonly left: Identifier | Pattern<V>;
-        readonly right: Expression<V>;
-    };
-    N1: never;
-}[V];
-
-
-export type BindingList<V extends Version> = {
-    RAW: {
-        readonly kind: 'BindingList';
-        readonly bindings: ReadonlyArray<Binding<V>>;
+        kind: 'Binding';
+        left: Identifier | Pattern<V>;
+        right: Expression<V>;
     };
     N1: never;
 }[V];
 
 
 export interface BooleanLiteral {
-    readonly kind: 'BooleanLiteral';
-    readonly value: boolean;
+    kind: 'BooleanLiteral';
+    value: boolean;
 }
 
 
 export interface FieldExpression<V extends Version> {
-    readonly kind: 'FieldExpression';
-    readonly name: Expression<V>;
-    readonly value: Expression<V>;
+    kind: 'FieldExpression';
+    name: Expression<V>;
+    value: Expression<V>;
 }
 
 
 export interface Identifier {
-    readonly kind: 'Identifier';
-    readonly name: string;
-    readonly resolved?: boolean;
+    kind: 'Identifier';
+    name: string;
+    resolved?: boolean;
 }
 
 
 export type ImportExpression<V extends Version> = {
     RAW: {
-        readonly kind: 'ImportExpression';
-        readonly moduleSpecifier: string;
+        kind: 'ImportExpression';
+        moduleSpecifier: string;
     };
     N1: never;
 }[V];
 
 
 export interface InstantiationExpression<V extends Version> {
-    readonly kind: 'InstantiationExpression';
-    readonly generic: Expression<V>;
-    readonly argument: Expression<V>;
+    kind: 'InstantiationExpression';
+    generic: Expression<V>;
+    argument: Expression<V>;
 }
 
 
 export interface Intrinsic {
-    readonly kind: 'Intrinsic';
-    readonly name: string;
-    readonly path: AbsPath;
+    kind: 'Intrinsic';
+    name: string;
+    path: AbsPath;
 }
 
 
 export interface GenericExpression<V extends Version> {
-    readonly kind: 'GenericExpression';
-    readonly param: Identifier | Pattern<V>;
-    readonly body: Expression<V>;
+    kind: 'GenericExpression';
+    param: Identifier | Pattern<V>;
+    body: Expression<V>;
 }
 
 
 export interface ListExpression<V extends Version> {
-    readonly kind: 'ListExpression';
-    readonly elements: ReadonlyArray<Expression<V>>;
+    kind: 'ListExpression';
+    elements: Array<Expression<V>>;
 }
 
 
 export interface MemberExpression<V extends Version> {
-    readonly kind: 'MemberExpression';
-    readonly module: Expression<V>;
-    readonly member: Identifier;
+    kind: 'MemberExpression';
+    module: Expression<V>;
+    member: Identifier;
 }
 
 
-export type Module<V extends Version> = {
-    RAW: never;
-    N1: {
-        readonly kind: 'Module';
-        readonly bindings: Readonly<Record<string, Expression<V>>>; // TODO: doc special optional 'start' binding
-    };
-}[V];
+// TODO: doc special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
+export interface Module<V extends Version> {
+    kind: 'Module';
+    bindings: {
+        RAW: Array<Binding<V>>;
+        N1: Record<string, Expression<V>>;
+    }[V];
+}
 
 
 export interface ModulePattern<_V> {
-    readonly kind: 'ModulePattern';
-    readonly names: ReadonlyArray<{
-        readonly name: string;
-        readonly alias?: string;
+    kind: 'ModulePattern';
+    names: Array<{
+        name: string;
+        alias?: string;
     }>;
 }
 
 
 export interface NotExpression<V extends Version> {
-    readonly kind: 'NotExpression';
-    readonly expression: Expression<V>;
+    kind: 'NotExpression';
+    expression: Expression<V>;
 }
 
 
 export interface NullLiteral {
-    readonly kind: 'NullLiteral';
-    readonly value: null;
+    kind: 'NullLiteral';
+    value: null;
 }
 
 
 export interface NumericLiteral {
-    readonly kind: 'NumericLiteral';
-    readonly value: number;
+    kind: 'NumericLiteral';
+    value: number;
 }
 
 
 export type ParenthesisedExpression<V extends Version> = {
     RAW: {
-        readonly kind: 'ParenthesisedExpression';
-        readonly expression: Expression<V>;
+        kind: 'ParenthesisedExpression';
+        expression: Expression<V>;
     };
     N1: never;
 }[V];
 
 
 export interface QuantifiedExpression<V extends Version> {
-    readonly kind: 'QuantifiedExpression';
-    readonly expression: Expression<V>;
-    readonly quantifier: '?' | '*';
+    kind: 'QuantifiedExpression';
+    expression: Expression<V>;
+    quantifier: '?' | '*';
 }
 
 
 export interface RecordExpression<V extends Version> {
-    readonly kind: 'RecordExpression';
-    readonly fields: ReadonlyArray<{
-        readonly name: string;
-        readonly value: Expression<V>;
+    kind: 'RecordExpression';
+    fields: Array<{
+        name: string;
+        value: Expression<V>;
     }>;
 }
 
 
 export interface SelectionExpression<V extends Version> {
-    readonly kind: 'SelectionExpression';
-    readonly expressions: ReadonlyArray<Expression<V>>;
+    kind: 'SelectionExpression';
+    expressions: Array<Expression<V>>;
 }
 
 
 export interface SequenceExpression<V extends Version> {
-    readonly kind: 'SequenceExpression';
-    readonly expressions: ReadonlyArray<Expression<V>>;
+    kind: 'SequenceExpression';
+    expressions: Array<Expression<V>>;
 }
 
 
 export interface StringLiteral {
-    readonly kind: 'StringLiteral';
-    readonly value: string;
-    readonly concrete: boolean;
-    readonly abstract: boolean;
+    kind: 'StringLiteral';
+    value: string;
+    concrete: boolean;
+    abstract: boolean;
 }

@@ -18,7 +18,6 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     else if (ast.version === NORMAL) {
         excludedNodeKinds.push(
             'Binding',
-            'BindingList',
             'ImportExpression',
             // TODO: was... 'MemberExpression', but this _could_ still be present given extensions, right? Then input===output kinds
             // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',

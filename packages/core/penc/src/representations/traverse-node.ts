@@ -10,7 +10,6 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
     function rec(n: Node): void {
         switch (n.kind) {
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
-            case 'BindingList': return n.bindings.forEach(rec), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GenericExpression': return rec(n.param), rec(n.body), cb(n);
@@ -20,7 +19,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'Intrinsic': return cb(n);
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
             case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
-            case 'Module': return mapObj(n.bindings, rec), cb(n);
+            case 'Module': return Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec), cb(n);
             case 'ModulePattern': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);
             case 'NullLiteral': return cb(n);

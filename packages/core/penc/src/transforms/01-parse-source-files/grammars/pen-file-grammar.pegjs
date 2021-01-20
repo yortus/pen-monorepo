@@ -1,7 +1,7 @@
 // ====================   Top-level SourceFile node   ====================
 SourceFile
     = __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'BindingList', bindings}; }
+    { return {kind: 'Module', bindings}; }
 
 
 // ====================   Bindings and patterns   ====================
@@ -155,7 +155,7 @@ FieldExpression
 
 Module
     = "("   __   bindings:BindingList   __   ")"
-    { return {kind: 'BindingList', bindings}; }
+    { return {kind: 'Module', bindings}; }
 
 ListExpression
     = "["   __   elements:ElementList   __   "]"

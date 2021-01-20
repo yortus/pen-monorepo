@@ -5,6 +5,6 @@ export {validateAST} from './validate-ast';
 import * as V from './versioned-ast';
 export {V};
 export {makeNodeMapper} from './make-node-mapper';
-export {moduleFromBindingList} from './module-from-binding-list';
+export {normaliseModule} from './normalise-module';
 export {traverseNode} from './traverse-node';
 

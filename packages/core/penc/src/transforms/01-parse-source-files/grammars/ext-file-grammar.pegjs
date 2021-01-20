@@ -3,7 +3,7 @@ SourceFile
     = exportedNames:ExportedNames
     {
         return {
-            kind: 'BindingList',
+            kind: 'Module',
             bindings: exportedNames.map(name => ({
                 kind: 'Binding',
                 left: {kind: 'Identifier', name},
