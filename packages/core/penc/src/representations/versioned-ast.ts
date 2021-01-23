@@ -2,10 +2,10 @@ import type {AbsPath} from '../utils';
 
 // TODO next:
 // - [x] two versions of Module with different `bindings` types (RAW=Array<Binding>, N1=Record<string, Expression>)
+// - [x] WONTFIX (no need) Module --> File (for RAW files), Namespace (for nested modules)
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
-
+// - [ ] more AST versions? Rename versions?
 // TODO: versions...
-// - UNKNOWN = widest possible type (all nodes kinds, least-specific node prop types)
 // - RAW = as written in the source code (no TODO???)
 // - V1/NORMAL (no ImportExpression, ParenthesisedExpression, TODO Binding stuff?)
 // - TODO: resolved? flat?
@@ -33,7 +33,7 @@ export type Node<V extends Version = Version> =
 
 /** Union of all node types that bind names to expressions. */
 export type Pattern<V extends Version = Version> =
-    ModulePattern<V>
+    | ModulePattern<V>
 ;
 
 
