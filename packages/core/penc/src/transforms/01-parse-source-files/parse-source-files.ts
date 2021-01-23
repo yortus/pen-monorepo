@@ -38,10 +38,11 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         const sourceText = sourceFilePath === INLINE_MAIN ? mainText : fs.readFileSync(sourceFilePath, 'utf8');
         const parse = isExtension(sourceFilePath) ? parseExtFile : parsePenFile;
         const sourceFile = parse(sourceText, {path: sourceFilePath});
-        sourceFilesByPath[sourceFilePath] = sourceFile;
+        validateAST(sourceFile);
+        sourceFilesByPath[sourceFilePath] = sourceFile.module;
 
         // Visit every ImportExpression, adding the imported path to `unprocessedPaths`.
-        traverseNode(sourceFile, n => {
+        traverseNode(sourceFile.module, n => {
             if (n.kind !== 'ImportExpression') return;
             const importPath = resolveModuleSpecifier(n.moduleSpecifier, sourceFilePath);
             unprocessedPaths.push(importPath);

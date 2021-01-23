@@ -3,12 +3,15 @@ SourceFile
     = exportedNames:ExportedNames
     {
         return {
-            kind: 'Module',
-            bindings: exportedNames.map(name => ({
-                kind: 'Binding',
-                left: {kind: 'Identifier', name},
-                right: {kind: 'Intrinsic', name, path: options.path},
-            })),
+            version: 'RAW',
+            module: {
+                kind: 'Module',
+                bindings: exportedNames.map(name => ({
+                    kind: 'Binding',
+                    left: {kind: 'Identifier', name},
+                    right: {kind: 'Intrinsic', name, path: options.path},
+                })),
+            },
         };
     }
 

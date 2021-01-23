@@ -3,6 +3,7 @@ import type {AbsPath} from '../utils';
 // TODO next:
 // - [x] two versions of Module with different `bindings` types (RAW=Array<Binding>, N1=Record<string, Expression>)
 // - [x] WONTFIX (no need) Module --> File (for RAW files), Namespace (for nested modules)
+// - [ ] Module --> Namespace
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
 // - [ ] more AST versions? Rename versions?
 // TODO: versions...

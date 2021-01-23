@@ -11,7 +11,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     const excludedNodeKinds = [] as Array<Node['kind']>;
     if (ast.version === RAW) {
         excludedNodeKinds.push(
-            'Module',
+            //'Module',
             // TODO: others?
         );
     }
@@ -29,5 +29,31 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     }
 
     // Ensure only allowed node kinds are present in the representation.
-    traverseNode(ast.module, n => assert(!excludedNodeKinds.includes(n.kind), `Unexpected node kind '${n.kind}'`));
+    const allowedNodeKinds = allNodeKinds.filter(k => !excludedNodeKinds.includes(k));
+    traverseNode(ast.module, n => assert(allowedNodeKinds.includes(n.kind), `Unexpected node kind '${n.kind}'`));
 }
+
+
+const allNodeKinds = [
+    'Binding',
+    'BooleanLiteral',
+    'FieldExpression',
+    'Identifier',
+    'ImportExpression',
+    'InstantiationExpression',
+    'Intrinsic',
+    'GenericExpression',
+    'ListExpression',
+    'MemberExpression',
+    'Module',
+    'ModulePattern',
+    'NotExpression',
+    'NullLiteral',
+    'NumericLiteral',
+    'ParenthesisedExpression',
+    'QuantifiedExpression',
+    'RecordExpression',
+    'SelectionExpression',
+    'SequenceExpression',
+    'StringLiteral',
+] as const;
