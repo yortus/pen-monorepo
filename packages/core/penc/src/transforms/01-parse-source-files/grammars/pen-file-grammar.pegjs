@@ -45,8 +45,9 @@ ModulePatternName
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
         FieldExpression                 {[a]: b}
         Module                          (a=b c=d e=f)   (a=b)
-        ListExpression                  [a, b, c]   [a]   []
+        LetExpression                   (a b where a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
+        ListExpression                  [a, b, c]   [a]   []
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'   `a`
@@ -82,8 +83,9 @@ PrimaryExpression
     / RecordExpression
     / FieldExpression
     / Module
-    / ListExpression
+    / LetExpression
     / ParenthesisedExpression
+    / ListExpression
     / NullLiteral
     / BooleanLiteral
     / StringLiteral
@@ -157,20 +159,17 @@ Module
     = "("   __   bindings:BindingList   __   ")"
     { return {kind: 'Module', bindings}; }
 
-ListExpression
-    = "["   __   elements:ElementList   __   "]"
-    { return {kind: 'ListExpression', elements}; }
+LetExpression
+    = "("   __   expression:Expression   __   WHERE   __   bindings:BindingList   __   ")"
+    { return {kind: 'LetExpression', expression, bindings}; }
 
 ParenthesisedExpression
     = "("   __   expression:Expression   __   ")"
     { return {kind: 'ParenthesisedExpression', expression}; }
 
-ImportExpression
-    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    {
-        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        return {kind: 'ImportExpression', moduleSpecifier};
-    }
+ListExpression
+    = "["   __   elements:ElementList   __   "]"
+    { return {kind: 'ListExpression', elements}; }
 
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }
@@ -202,6 +201,13 @@ NumericLiteral
 Identifier
     = name:IDENTIFIER
     { return {kind: 'Identifier', name}; }
+
+ImportExpression
+    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
+    {
+        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        return {kind: 'ImportExpression', moduleSpecifier};
+    }
 
 
 // ====================   Record/List Parts   ====================
@@ -242,13 +248,14 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
+RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE / WHERE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
 TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
+WHERE                   = "where"   !IDENTIFIER_PART   { return text(); }
 
 
 // ====================   Whitespace and lexical markers   ====================
