@@ -229,8 +229,15 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // SequenceExpression
+    // SelectionExpression
     function start() {
+        if (ENTRYPOINT2()) return true;
+        if (letexpr()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function ENTRYPOINT2() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -271,6 +278,27 @@ const parse = (() => {
         return true;
     }
     x2.constant = {value: "inner x"};
+
+    // SequenceExpression
+    function letexpr() {
+        const stateₒ = getState();
+        let out;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function letexpr_e() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 45) return false;
+        IP += 1;
+        OUT = "-";
+        return true;
+    }
+    letexpr_e.constant = {value: "-"};
 
     return start;
 })();
@@ -281,8 +309,15 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // SequenceExpression
+    // SelectionExpression
     function start() {
+        if (ENTRYPOINT2()) return true;
+        if (letexpr()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function ENTRYPOINT2() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -325,6 +360,28 @@ const print = (() => {
         return true;
     }
     x2.constant = {value: "inner x"};
+
+    // SequenceExpression
+    function letexpr() {
+        const stateₒ = getState();
+        let out;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function letexpr_e() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 45) return false;
+        IP += 1;
+        OUT = "-";
+        return true;
+    }
+    letexpr_e.constant = {value: "-"};
 
     return start;
 })();

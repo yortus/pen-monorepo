@@ -73,6 +73,24 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<200> {
                 instantiations.set(instᐟ, env);
                 return instᐟ;
             },
+            LetExpression: le => {
+                // Create a nested scope for this let expression.
+                env = env.createNestedScope();
+
+                // Create a symbol for each local name in the let expression.
+                const bindings = {} as Record<string, V.Identifier>;
+                for (const [name, expr] of Object.entries(le.bindings)) {
+                    const {globalName} = env.insert(name, rec(expr));
+                    bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
+                }
+
+                // Recursively resolve the main expression in the nested scope.
+                const expression = rec(le.expression);
+
+                // Pop back out to the surrounding scope before returning.
+                env = env.surroundingScope;
+                return expression;
+            },
             MemberExpression: mem => {
                 // TODO: explain tracking...
                 const memᐟ = {...mem, module: rec(mem.module)}; // TODO: explain why: don't visit `member` for now
@@ -84,7 +102,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<200> {
                 env = env.createNestedScope();
 
                 // Create a symbol for each local name in the module.
-                let bindings = {} as Record<string, V.Identifier>;
+                const bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
                     const {globalName} = env.insert(name, rec(expr));
                     bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};

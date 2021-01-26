@@ -62,7 +62,7 @@ const ast1 = {
               expressions: [
                 {
                   kind: "Identifier",
-                  name: "x",
+                  name: "lx",
                 },
                 {
                   kind: "StringLiteral",
@@ -72,18 +72,18 @@ const ast1 = {
                 },
                 {
                   kind: "Identifier",
-                  name: "x",
+                  name: "lx",
                 },
               ],
             },
             bindings: {
-              x: {
+              lx: {
                 kind: "StringLiteral",
-                value: "+++",
+                value: "inner x",
                 concrete: false,
                 abstract: false,
               },
-              y: {
+              ly: {
                 kind: "StringLiteral",
                 value: "***",
                 concrete: false,
@@ -92,27 +92,36 @@ const ast1 = {
             },
           },
           start: {
-            kind: "InstantiationExpression",
-            generic: {
-              kind: "MemberExpression",
-              module: {
-                kind: "Identifier",
-                name: "nested",
-              },
-              member: {
-                kind: "Identifier",
-                name: "REP",
-              },
-            },
-            argument: {
-              kind: "Module",
-              bindings: {
-                a: {
-                  kind: "Identifier",
-                  name: "x",
+            kind: "SelectionExpression",
+            expressions: [
+              {
+                kind: "InstantiationExpression",
+                generic: {
+                  kind: "MemberExpression",
+                  module: {
+                    kind: "Identifier",
+                    name: "nested",
+                  },
+                  member: {
+                    kind: "Identifier",
+                    name: "REP",
+                  },
+                },
+                argument: {
+                  kind: "Module",
+                  bindings: {
+                    a: {
+                      kind: "Identifier",
+                      name: "x",
+                    },
+                  },
                 },
               },
-            },
+              {
+                kind: "Identifier",
+                name: "letexpr",
+              },
+            ],
           },
         },
       },

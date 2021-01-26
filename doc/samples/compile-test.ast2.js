@@ -67,43 +67,38 @@ const ast2 = {
           },
         },
       },
+      lx: {
+        kind: "StringLiteral",
+        value: "inner x",
+        concrete: false,
+        abstract: false,
+      },
+      ly: {
+        kind: "StringLiteral",
+        value: "***",
+        concrete: false,
+        abstract: false,
+      },
       letexpr: {
-        kind: "LetExpression",
-        expression: {
-          kind: "SequenceExpression",
-          expressions: [
-            {
-              kind: "Identifier",
-              name: "x",
-              resolved: true,
-            },
-            {
-              kind: "StringLiteral",
-              value: "-",
-              concrete: false,
-              abstract: false,
-            },
-            {
-              kind: "Identifier",
-              name: "x",
-              resolved: true,
-            },
-          ],
-        },
-        bindings: {
-          x: {
+        kind: "SequenceExpression",
+        expressions: [
+          {
+            kind: "Identifier",
+            name: "lx",
+            resolved: true,
+          },
+          {
             kind: "StringLiteral",
-            value: "+++",
+            value: "-",
             concrete: false,
             abstract: false,
           },
-          y: {
-            kind: "StringLiteral",
-            value: "***",
-            concrete: false,
-            abstract: false,
+          {
+            kind: "Identifier",
+            name: "lx",
+            resolved: true,
           },
-        },
+        ],
       },
       a2: {
         kind: "Identifier",
@@ -111,13 +106,23 @@ const ast2 = {
         resolved: true,
       },
       start2: {
-        kind: "Identifier",
-        generic: null,
-        argument: null,
-        module: null,
-        member: null,
-        name: "ENTRYPOINT2",
-        resolved: true,
+        kind: "SelectionExpression",
+        expressions: [
+          {
+            kind: "Identifier",
+            generic: null,
+            argument: null,
+            module: null,
+            member: null,
+            name: "ENTRYPOINT2",
+            resolved: true,
+          },
+          {
+            kind: "Identifier",
+            name: "letexpr",
+            resolved: true,
+          },
+        ],
       },
       "Ɱ_compile_test": {
         kind: "Module",

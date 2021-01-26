@@ -7,13 +7,15 @@ nested = (
 )
 
 letexpr = (
-    x "-" x where
-    x = "+++"
-    y = "***"
+    lx "-" lx 
+
+    where
+    lx = "inner x"
+    ly = "***"
 )
 
 start = nested.REP(a = x)
-
+      | letexpr
 
 
 

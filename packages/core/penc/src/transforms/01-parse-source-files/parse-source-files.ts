@@ -58,10 +58,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
-                LetExpression: (letExpr): V.LetExpression<200> => ({
+                LetExpression: (le): V.LetExpression<200> => ({
                     kind: 'LetExpression',
-                    expression: rec(letExpr.expression),
-                    bindings: bindingListToBindingMap(letExpr.bindings, rec),
+                    expression: rec(le.expression),
+                    bindings: bindingListToBindingMap(le.bindings, rec),
                 }),
                 Module: (mod): V.Module<200> => ({
                     kind: 'Module',
