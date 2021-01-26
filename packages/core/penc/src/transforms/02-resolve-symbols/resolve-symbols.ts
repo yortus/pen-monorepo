@@ -8,12 +8,12 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - outputs the program as a single module (ie flat list of bindings)
 // - all Identifiers refer to binding names in the single module
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
-export function resolveSymbols(ast: V.AST<200>): V.AST<200> {
+export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     validateAST(ast);
     const {allSymbols, rootScope} = createSymbolTable();
 
     // TODO: temp testing...
-    const resolvedAst = internalResolve({
+    let resolved = internalResolve({
         gen: {
             kind: 'GenericExpression',
             param: {kind: 'ModulePattern', names: []},
@@ -23,16 +23,25 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<200> {
         env: rootScope,
     });
 
+    // Replace all GenericExpressions with a dummy expression
+    for (const symbol of Object.values(allSymbols)) {
+        if (symbol.value.kind !== 'GenericExpression') continue;
+        Object.assign(symbol, {value: {kind: 'Module', bindings: {}}}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+    }
+
     // TODO: add the special 'start' symbol
     // TODO: temp testing...
-    assert(resolvedAst.kind === 'Identifier' && resolvedAst.resolved);
-    allSymbols['start'] = {globalName: 'start', value: resolvedAst, scope: rootScope};
-    ast = {
-        version: 200,
-        module: {kind: 'Module', bindings: mapObj(allSymbols, symbol => symbol.value)},
+    assert(resolved.kind === 'Identifier' && resolved.resolved);
+    allSymbols['start'] = {globalName: 'start', value: resolved, scope: rootScope};
+    const astᐟ: V.AST<300> = {
+        version: 300,
+        module: {
+            kind: 'Module',
+            bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>,
+        },
     };
-    validateAST(ast);
-    return ast;
+    validateAST(astᐟ);
+    return astᐟ;
 
     // TODO: temp testing...
     function internalResolve({gen, arg, env}: {gen: V.GenericExpression<200>, arg: V.Expression<200>, env: Scope}) {

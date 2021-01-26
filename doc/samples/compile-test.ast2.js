@@ -1,5 +1,5 @@
 const ast2 = {
-  version: 200,
+  version: 300,
   module: {
     kind: "Module",
     bindings: {
@@ -10,31 +10,8 @@ const ast2 = {
         abstract: false,
       },
       REP: {
-        kind: "GenericExpression",
-        param: {
-          kind: "ModulePattern",
-          names: [
-            {
-              name: "a",
-            },
-          ],
-        },
-        body: {
-          kind: "SequenceExpression",
-          expressions: [
-            {
-              kind: "Identifier",
-              name: "a",
-            },
-            {
-              kind: "Identifier",
-              name: "x",
-            },
-            {
-              kind: "Identifier",
-              name: "a",
-            },
-          ],
+        kind: "Module",
+        bindings: {
         },
       },
       x2: {

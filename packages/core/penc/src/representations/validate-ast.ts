@@ -9,7 +9,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     if (!isDebugMode()) return;
 
     // Validate AST version.
-    if (![100, 200].includes(ast.version)) throw new Error(`Unrecognised AST version '${ast.version}'`);
+    if (!allAstVersions.includes(ast.version)) throw new Error(`Unrecognised AST version '${ast.version}'`);
 
     // Validate each node in the AST.
     traverseNode(ast.module, n => {
@@ -19,7 +19,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
                 assert(Array.isArray(n.bindings), `Expected bindings property to be an array`);
             }
         }
-        else /* ast.version === 200 */ {
+        else if (ast.version === 200) {
             if (['Binding', 'ImportExpression', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
@@ -27,8 +27,19 @@ export function validateAST<V extends Version>(ast: AST<V>) {
                 assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
             }
         }
+        else if (ast.version === 300) {
+            if (['Binding', 'ImportExpression', 'ParenthesisedExpression, LetExpression', 'GenericExpression'].includes(n.kind)) {
+                throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
+            }
+            if (n.kind === 'Module') {
+                assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
+            }
+        }
     });
 }
+
+
+const allAstVersions = [100, 200, 300];
 
 
 const allNodeKinds = [

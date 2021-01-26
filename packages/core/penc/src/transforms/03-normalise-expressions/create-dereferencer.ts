@@ -11,13 +11,13 @@ import type {V} from '../../representations';
  * NB: Some reference/member expressions cannot be statically dereferenced. This is a current implementation limitation.
  * @param ast the AST containing all possible nodes that may be dereferencing targets.
  */
-export function createDereferencer(bindings: Readonly<Record<string, V.Expression<200>>>) {
+export function createDereferencer(bindings: Readonly<Record<string, V.Expression<300>>>) {
 
     // Return the dereference function closed over the given AST.
     return deref as DereferenceFunction;
 
     // The dereference function, closed over the given AST.
-    function deref(expr: V.Expression<200>): V.Expression<200> {
+    function deref(expr: V.Expression<300>): V.Expression<300> {
         const seen = [expr];
         while (true) {
             // If `expr` is a ref|mem expression, resolve to its target expression.
@@ -50,5 +50,5 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends V.Expression<200>>(expr: E): E extends {kind: 'ParenthesisedExpression' | 'Identifier'} ? never : E;
+    <E extends V.Expression<300>>(expr: E): E extends {kind: 'Identifier'} ? never : E;
 }

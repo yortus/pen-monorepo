@@ -10,7 +10,7 @@ import * as modes from './modes';
 
 // TODO: is this a representation? Move out...
 export interface Program {
-    ast: V.AST<200>;
+    ast: V.AST<300>;
     consts: Record<string, {value: unknown}>;
 }
 
@@ -55,7 +55,7 @@ export function generateTargetCode(program: Program) {
 
 function emitIntrinsics(emit: Emitter, {ast}: Program) {
     const {bindings} = ast.module;
-    const isIntrinsic = (e: V.Expression<200>): e is V.Intrinsic => e.kind === 'Intrinsic';
+    const isIntrinsic = (e: V.Expression<300>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
@@ -102,7 +102,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 }
 
 
-function emitExpression(emit: Emitter, name: string, expr: V.Expression<200>, mode: Mode) {
+function emitExpression(emit: Emitter, name: string, expr: V.Expression<300>, mode: Mode) {
     // Should never see a GlobalReferenceExpression here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
     assert(expr.kind !== 'Identifier');

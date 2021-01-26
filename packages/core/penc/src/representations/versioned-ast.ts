@@ -4,15 +4,19 @@ import type {AbsPath} from '../utils';
 // - [x] two versions of Module with different `bindings` types (RAW=Array<Binding>, N1=Record<string, Expression>)
 // - [x] WONTFIX (no need) Module --> File (for RAW files), Namespace (for nested modules)
 // - [x] clarify Module/Namespace/Binding terminology
-// - [ ] support LetExpressions
-// - [ ] new AST version - after resolution transform, no: LetExpression, GenericExpression, ???
+// - [x] support LetExpressions
+// - [x] new AST version 300 - after resolution transform, no: LetExpression, GenericExpression
+// - [ ] impl/doc necessary extra rules for v300/post-resolution:
+//       - intrinsic generics: cannot take generics as arg(s)    TODO: what would it take to lift this restriction?
+// - [ ] simplify special handling/synthesis of 'start' and 'ENTRYPOINT' ids
+// - [ ] different node for resolved Identifiers?
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
 // - [ ] more AST versions? Rename versions?
 // TODO: versions...
 // - 100 = as written in the source code; all bindings are BindingLists
 // - 200 = no Binding, ImportExpression, ParenthesisedExpression; all bindings are BindingMaps
 // - TODO: resolved? flat?
-export type Version = 100 | 200;
+export type Version = 100 | 200 | 300;
 
 
 export interface AST<V extends Version = Version> {
@@ -68,6 +72,7 @@ export type Binding<V extends Version> = {
         right: Expression<V>;
     };
     200: never;
+    300: never;
 }[V];
 
 
@@ -97,6 +102,7 @@ export type ImportExpression<V extends Version> = {
         moduleSpecifier: string;
     };
     200: never;
+    300: never;
 }[V];
 
 
@@ -114,21 +120,28 @@ export interface Intrinsic {
 }
 
 
-export interface GenericExpression<V extends Version> {
-    kind: 'GenericExpression';
-    param: Identifier | Pattern<V>;
-    body: Expression<V>;
-}
+export type GenericExpression<V extends Version> = {
+    [x: string]: {
+        kind: 'GenericExpression';
+        param: Identifier | Pattern<V>;
+        body: Expression<V>;
+    };
+    300: never;
+}[V];
 
 
-export interface LetExpression<V extends Version> {
-    kind: 'LetExpression';
-    expression: Expression<V>;
-    bindings: {
-        100: BindingList<V>;
-        200: BindingMap<V>;
-    }[V];
-}
+export type LetExpression<V extends Version> = {
+    [x: string]: {
+        kind: 'LetExpression';
+        expression: Expression<V>;
+        bindings: {
+            100: BindingList<V>;
+            200: BindingMap<V>;
+            300: never;
+        }[V];
+    };
+    300: never;
+}[V];
 
 
 export interface ListExpression<V extends Version> {
@@ -149,6 +162,7 @@ export interface Module<V extends Version> {
     bindings: {
         100: BindingList<V>;
         200: BindingMap<V>;
+        300: BindingMap<V>;
     }[V];
 }
 
@@ -186,6 +200,7 @@ export type ParenthesisedExpression<V extends Version> = {
         expression: Expression<V>;
     };
     200: never;
+    300: never;
 }[V];
 
 
