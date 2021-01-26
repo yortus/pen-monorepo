@@ -42,6 +42,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ImportExpression': return n;
             case 'InstantiationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Intrinsic': return n;
+            case 'LetExpression': return {...n, expression: rec(n.expression), bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
             case 'ListExpression': return {...n, elements: n.elements.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module), member: rec(n.member)};
             case 'Module': return {...n, bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};

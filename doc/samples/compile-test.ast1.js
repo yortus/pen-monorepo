@@ -1,133 +1,118 @@
 const ast1 = {
+  version: 200,
   module: {
     kind: "Module",
     bindings: {
       "Ɱ_compile_test": {
         kind: "Module",
         bindings: {
-          std: {
-            kind: "Identifier",
-            name: "Ɱ_std",
+          x: {
+            kind: "StringLiteral",
+            value: "outer x",
+            concrete: false,
+            abstract: false,
           },
-          digits: {
+          nested: {
             kind: "Module",
             bindings: {
-              one: {
+              REP: {
+                kind: "GenericExpression",
+                param: {
+                  kind: "ModulePattern",
+                  names: [
+                    {
+                      name: "a",
+                    },
+                  ],
+                },
+                body: {
+                  kind: "SequenceExpression",
+                  expressions: [
+                    {
+                      kind: "Identifier",
+                      name: "a",
+                    },
+                    {
+                      kind: "Identifier",
+                      name: "x",
+                    },
+                    {
+                      kind: "Identifier",
+                      name: "a",
+                    },
+                  ],
+                },
+              },
+              x: {
+                kind: "StringLiteral",
+                value: "inner x",
+                concrete: false,
+                abstract: false,
+              },
+              a: {
                 kind: "NumericLiteral",
-                value: 1,
-              },
-              two: {
-                kind: "NumericLiteral",
-                value: 2,
-              },
-              outer: {
-                kind: "Identifier",
-                name: "mem",
+                value: 42,
               },
             },
           },
-          des: {
-            kind: "MemberExpression",
-            module: {
-              kind: "Identifier",
-              name: "digits",
+          letexpr: {
+            kind: "LetExpression",
+            expression: {
+              kind: "SequenceExpression",
+              expressions: [
+                {
+                  kind: "Identifier",
+                  name: "x",
+                },
+                {
+                  kind: "StringLiteral",
+                  value: "-",
+                  concrete: false,
+                  abstract: false,
+                },
+                {
+                  kind: "Identifier",
+                  name: "x",
+                },
+              ],
             },
-            member: {
-              kind: "Identifier",
-              name: "one",
-            },
-          },
-          ref: {
-            kind: "Identifier",
-            name: "des",
-          },
-          mem: {
-            kind: "MemberExpression",
-            module: {
-              kind: "Identifier",
-              name: "digits",
-            },
-            member: {
-              kind: "Identifier",
-              name: "two",
-            },
-          },
-          xxx: {
-            kind: "Module",
             bindings: {
-              d: {
-                kind: "Identifier",
-                name: "digits",
+              x: {
+                kind: "StringLiteral",
+                value: "+++",
+                concrete: false,
+                abstract: false,
+              },
+              y: {
+                kind: "StringLiteral",
+                value: "***",
+                concrete: false,
+                abstract: false,
               },
             },
-          },
-          one: {
-            kind: "NumericLiteral",
-            value: 1,
           },
           start: {
-            kind: "SelectionExpression",
-            expressions: [
-              {
+            kind: "InstantiationExpression",
+            generic: {
+              kind: "MemberExpression",
+              module: {
                 kind: "Identifier",
-                name: "one",
+                name: "nested",
               },
-              {
+              member: {
                 kind: "Identifier",
-                name: "ref",
+                name: "REP",
               },
-              {
-                kind: "Identifier",
-                name: "mem",
-              },
-              {
-                kind: "MemberExpression",
-                module: {
-                  kind: "MemberExpression",
-                  module: {
-                    kind: "Identifier",
-                    name: "xxx",
-                  },
-                  member: {
-                    kind: "Identifier",
-                    name: "d",
-                  },
-                },
-                member: {
+            },
+            argument: {
+              kind: "Module",
+              bindings: {
+                a: {
                   kind: "Identifier",
-                  name: "two",
+                  name: "x",
                 },
               },
-              {
-                kind: "Identifier",
-                name: "digits",
-              },
-            ],
-          },
-        },
-      },
-      "Ɱ_std": {
-        kind: "Module",
-        bindings: {
-          char: {
-            kind: "Intrinsic",
-            name: "char",
-            path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-          },
-          f64: {
-            kind: "Intrinsic",
-            name: "f64",
-            path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-          },
-          i32: {
-            kind: "Intrinsic",
-            name: "i32",
-            path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
-          },
-          memoise: {
-            kind: "Intrinsic",
-            name: "memoise",
-            path: "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js",
+            },
           },
         },
       },

@@ -15,14 +15,10 @@ import type {AbsPath} from '../utils';
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
 // - [ ] more AST versions? Rename versions?
 // TODO: versions...
-// - RAW = as written in the source code (no TODO???)
-// - V1/NORMAL (no ImportExpression, ParenthesisedExpression, TODO Binding stuff?)
+// - 100 = as written in the source code; all bindings are BindingLists
+// - 200 = no Binding, ImportExpression, ParenthesisedExpression; all bindings are BindingMaps
 // - TODO: resolved? flat?
-export const RAW = 'RAW';
-export const NORMAL = 'N1';
-export type RAW = typeof RAW;
-export type NORMAL = typeof NORMAL;
-export type Version = RAW | NORMAL;
+export type Version = 100 | 200;
 
 
 export interface AST<V extends Version = Version> {
@@ -49,6 +45,7 @@ export type Expression<V extends Version = Version> =
     | InstantiationExpression<V>
     | Intrinsic
     | GenericExpression<V>
+    | LetExpression<V>
     | ListExpression<V>
     | MemberExpression<V>
     | Module<V>
@@ -71,12 +68,12 @@ export type Pattern<V extends Version = Version> =
 
 
 export type Binding<V extends Version> = {
-    RAW: {
+    100: {
         kind: 'Binding';
         left: Identifier | Pattern<V>;
         right: Expression<V>;
     };
-    N1: never;
+    200: never;
 }[V];
 
 
@@ -101,11 +98,11 @@ export interface Identifier {
 
 
 export type ImportExpression<V extends Version> = {
-    RAW: {
+    100: {
         kind: 'ImportExpression';
         moduleSpecifier: string;
     };
-    N1: never;
+    200: never;
 }[V];
 
 
@@ -134,8 +131,8 @@ export interface LetExpression<V extends Version> {
     kind: 'LetExpression';
     expression: Expression<V>;
     bindings: {
-        RAW: BindingList<V>;
-        N1: BindingMap<V>;
+        100: BindingList<V>;
+        200: BindingMap<V>;
     }[V];
 }
 
@@ -156,8 +153,8 @@ export interface MemberExpression<V extends Version> {
 export interface Module<V extends Version> {
     kind: 'Module';
     bindings: {
-        RAW: BindingList<V>;
-        N1: BindingMap<V>;
+        100: BindingList<V>;
+        200: BindingMap<V>;
     }[V];
 }
 
@@ -190,11 +187,11 @@ export interface NumericLiteral {
 
 
 export type ParenthesisedExpression<V extends Version> = {
-    RAW: {
+    100: {
         kind: 'ParenthesisedExpression';
         expression: Expression<V>;
     };
-    N1: never;
+    200: never;
 }[V];
 
 

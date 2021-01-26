@@ -1,6 +1,6 @@
 import {assert, isDebugMode} from '../utils';
 import {traverseNode} from './traverse-node';
-import {AST, Node, NORMAL, RAW, Version} from './versioned-ast';
+import {AST, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
@@ -8,29 +8,26 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 
-    const excludedNodeKinds = [] as Array<Node['kind']>;
-    if (ast.version === RAW) {
-        excludedNodeKinds.push(
-            //'Module',
-            // TODO: others?
-        );
-    }
-    else if (ast.version === NORMAL) {
-        excludedNodeKinds.push(
-            'Binding',
-            'ImportExpression',
-            // TODO: was... 'MemberExpression', but this _could_ still be present given extensions, right? Then input===output kinds
-            // TODO: was... but GenericExpr#param may be this kind... 'ModulePattern',
-            'ParenthesisedExpression',
-        );
-    }
-    else {
-        throw new Error(`Unrecognised AST version '${ast.version}'`);
-    }
+    // Validate AST version.
+    if (![100, 200].includes(ast.version)) throw new Error(`Unrecognised AST version '${ast.version}'`);
 
-    // Ensure only allowed node kinds are present in the representation.
-    const allowedNodeKinds = allNodeKinds.filter(k => !excludedNodeKinds.includes(k));
-    traverseNode(ast.module, n => assert(allowedNodeKinds.includes(n.kind), `Unexpected node kind '${n.kind}'`));
+    // Validate each node in the AST.
+    traverseNode(ast.module, n => {
+        assert(allNodeKinds.includes(n.kind), `Unrecognised node kind '${n.kind}'`)
+        if (ast.version === 100) {
+            if (n.kind === 'Module' || n.kind === 'LetExpression') {
+                assert(Array.isArray(n.bindings), `Expected bindings property to be an array`);
+            }
+        }
+        else /* ast.version === 200 */ {
+            if (['Binding', 'ImportExpression', 'ParenthesisedExpression'].includes(n.kind)) {
+                throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
+            }
+            if (n.kind === 'Module' || n.kind === 'LetExpression') {
+                assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
+            }
+        }
+    });
 }
 
 
@@ -43,6 +40,7 @@ const allNodeKinds = [
     'InstantiationExpression',
     'Intrinsic',
     'GenericExpression',
+    'LetExpression',
     'ListExpression',
     'MemberExpression',
     'Module',

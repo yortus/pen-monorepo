@@ -1,4 +1,5 @@
 const ast3 = {
+  version: 200,
   module: {
     kind: "Module",
     bindings: {

@@ -1,4 +1,5 @@
 const ast2 = {
+  version: 200,
   module: {
     kind: "Module",
     bindings: {
@@ -66,6 +67,44 @@ const ast2 = {
           },
         },
       },
+      letexpr: {
+        kind: "LetExpression",
+        expression: {
+          kind: "SequenceExpression",
+          expressions: [
+            {
+              kind: "Identifier",
+              name: "x",
+              resolved: true,
+            },
+            {
+              kind: "StringLiteral",
+              value: "-",
+              concrete: false,
+              abstract: false,
+            },
+            {
+              kind: "Identifier",
+              name: "x",
+              resolved: true,
+            },
+          ],
+        },
+        bindings: {
+          x: {
+            kind: "StringLiteral",
+            value: "+++",
+            concrete: false,
+            abstract: false,
+          },
+          y: {
+            kind: "StringLiteral",
+            value: "***",
+            concrete: false,
+            abstract: false,
+          },
+        },
+      },
       a2: {
         kind: "Identifier",
         name: "x",
@@ -91,6 +130,11 @@ const ast2 = {
           nested: {
             kind: "Identifier",
             name: "nested",
+            resolved: true,
+          },
+          letexpr: {
+            kind: "Identifier",
+            name: "letexpr",
             resolved: true,
           },
           start: {

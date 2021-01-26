@@ -6,6 +6,12 @@ nested = (
     a = 42
 )
 
+letexpr = (
+    x "-" x where
+    x = "+++"
+    y = "***"
+)
+
 start = nested.REP(a = x)
 
 

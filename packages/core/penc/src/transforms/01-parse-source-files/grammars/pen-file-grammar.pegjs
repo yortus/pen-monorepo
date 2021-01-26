@@ -1,7 +1,7 @@
 // ====================   Top-level SourceFile node   ====================
 SourceFile
     = __   bindings:BindingList   __   END_OF_FILE
-    { return {version: 'RAW', module: {kind: 'Module', bindings}}; }
+    { return {version: 100, module: {kind: 'Module', bindings}}; }
 
 
 // ====================   Bindings and patterns   ====================

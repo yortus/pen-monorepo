@@ -32,7 +32,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
      * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
      * Logically equivalent nodes will end up with signatures that produce the same hash. 
      */
-    function getSignatureFor(n: V.Expression<V.NORMAL>): Signature {
+    function getSignatureFor(n: V.Expression<200>): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
@@ -55,7 +55,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = (n: V.Expression<V.NORMAL>) => getSignatureFor(n)
+        const getSig = (n: V.Expression<200>) => getSignatureFor(n)
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
         // Recursively compute the signature according to the node type.
@@ -65,6 +65,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'GenericExpression': return setSig('GEN', randomBytes(32).toString('base64')); // TODO: always unique. Is this correct? Test scenario where it matters?
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
+            case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
             case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));
@@ -83,7 +84,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
 
 // Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = V.Node<V.NORMAL> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
+type HashableNode = V.Node<200> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
 
 
 // Helper type: union of all node kinds that support hashing.

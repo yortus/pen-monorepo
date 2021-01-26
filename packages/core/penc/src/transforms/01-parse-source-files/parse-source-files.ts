@@ -11,13 +11,13 @@ import {parseExtFile, parsePenFile} from './grammars';
  * `ImportExpression` to determine whether more source files need to be included in the SourceFileMap representation.
  * @param options.main absolute file path to the main source file for the PEN program.
  */
-export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.AST<V.NORMAL> {
+export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.AST<200> {
     const INLINE_MAIN = AbsPath('text://inline');
     const main = 'main' in options ? options.main : INLINE_MAIN;
     const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
-    const sourceFilesByPath: Record<string, V.Module<V.RAW>> = {};
+    const sourceFilesByPath: Record<string, V.Module<100>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
@@ -58,22 +58,27 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
-                Module: mod => {
-                    let modᐟ: V.Module<V.NORMAL> = {...mod, bindings: bindingListToBindingMap(mod.bindings, rec)};
-                    return modᐟ;
-                },
+                LetExpression: (letExpr): V.LetExpression<200> => ({
+                    kind: 'LetExpression',
+                    expression: rec(letExpr.expression),
+                    bindings: bindingListToBindingMap(letExpr.bindings, rec),
+                }),
+                Module: (mod): V.Module<200> => ({
+                    kind: 'Module',
+                    bindings: bindingListToBindingMap(mod.bindings, rec),
+                }),
                 ParenthesisedExpression: par => rec(par.expression),
             }));
             assert(module.kind === 'Module');
             program[moduleName] = module;
             return program;
         },
-        {} as Record<string, V.Module<V.NORMAL>>
+        {} as Record<string, V.Module<200>>
     );
 
     // TODO: temp testing...
-    const ast: V.AST<V.NORMAL> = {
-        version: V.NORMAL,
+    const ast: V.AST<200> = {
+        version: 200,
         module: {
             kind: 'Module',
             bindings: {
@@ -92,4 +97,4 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
 
 // TODO: temp testing...
-const mapNode = makeNodeMapper<V.RAW, V.NORMAL>();
+const mapNode = makeNodeMapper<100, 200>();

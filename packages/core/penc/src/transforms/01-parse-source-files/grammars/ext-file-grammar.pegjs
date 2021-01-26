@@ -3,7 +3,7 @@ SourceFile
     = exportedNames:ExportedNames
     {
         return {
-            version: 'RAW',
+            version: 100,
             module: {
                 kind: 'Module',
                 bindings: exportedNames.map(name => ({
