@@ -3,7 +3,15 @@ import type {AbsPath} from '../utils';
 // TODO next:
 // - [x] two versions of Module with different `bindings` types (RAW=Array<Binding>, N1=Record<string, Expression>)
 // - [x] WONTFIX (no need) Module --> File (for RAW files), Namespace (for nested modules)
-// - [ ] Module --> Namespace
+// - [ ] clarify Module/Namespace/Binding terminology
+//   - a source file is a module
+//   - there is also syntax to write nested modules
+//   - each module defines a namespace
+//   - a namespace is a collection of name:value bindings
+//   - namespaces nest lexically
+//   - a namespace can be either an array of NameValueBinding nodes, or a map of names/values keyed by name
+//   - modules can be destructured using ModulePattern to extract particular name/value bindings
+//   - Let expressions also define a namespace
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
 // - [ ] more AST versions? Rename versions?
 // TODO: versions...
@@ -26,15 +34,9 @@ export interface AST<V extends Version = Version> {
 
 /** Union of all possible node types that may occur in a PEN AST. */
 export type Node<V extends Version = Version> =
-    | Binding<V>
     | Expression<V>
     | Pattern<V>
-;
-
-
-/** Union of all node types that bind names to expressions. */
-export type Pattern<V extends Version = Version> =
-    | ModulePattern<V>
+    | Binding<V>
 ;
 
 
@@ -59,6 +61,12 @@ export type Expression<V extends Version = Version> =
     | SelectionExpression<V>
     | SequenceExpression<V>
     | StringLiteral
+;
+
+
+/** Union of all node types that bind names to expressions. */
+export type Pattern<V extends Version = Version> =
+    | ModulePattern<V>
 ;
 
 
@@ -122,6 +130,16 @@ export interface GenericExpression<V extends Version> {
 }
 
 
+export interface LetExpression<V extends Version> {
+    kind: 'LetExpression';
+    expression: Expression<V>;
+    bindings: {
+        RAW: BindingList<V>;
+        N1: BindingMap<V>;
+    }[V];
+}
+
+
 export interface ListExpression<V extends Version> {
     kind: 'ListExpression';
     elements: Array<Expression<V>>;
@@ -135,12 +153,11 @@ export interface MemberExpression<V extends Version> {
 }
 
 
-// TODO: doc special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
 export interface Module<V extends Version> {
     kind: 'Module';
     bindings: {
-        RAW: Array<Binding<V>>;
-        N1: Record<string, Expression<V>>;
+        RAW: BindingList<V>;
+        N1: BindingMap<V>;
     }[V];
 }
 
@@ -215,3 +232,7 @@ export interface StringLiteral {
     concrete: boolean;
     abstract: boolean;
 }
+
+
+export type BindingList<V extends Version> = Array<Binding<V>>;
+export type BindingMap<V extends Version> = Record<string, Expression<V>>;

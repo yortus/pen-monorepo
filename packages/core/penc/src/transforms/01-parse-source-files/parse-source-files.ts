@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import {makeNodeMapper, normaliseModule, traverseNode, V, validateAST} from '../../representations';
+import {bindingListToBindingMap, makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
@@ -59,7 +59,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
                 Module: mod => {
-                    let modᐟ = normaliseModule(mod, rec);
+                    let modᐟ: V.Module<V.NORMAL> = {...mod, bindings: bindingListToBindingMap(mod.bindings, rec)};
                     return modᐟ;
                 },
                 ParenthesisedExpression: par => rec(par.expression),

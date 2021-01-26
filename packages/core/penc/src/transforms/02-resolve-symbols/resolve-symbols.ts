@@ -1,4 +1,4 @@
-import {makeNodeMapper, normaliseModule, V, validateAST} from '../../representations';
+import {bindingListToBindingMap, makeNodeMapper, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -41,14 +41,14 @@ export function resolveSymbols(ast: V.AST<V.NORMAL>): V.AST<V.NORMAL> {
         const startName = 'ENTRYPOINT'; // TODO: make&use namegen util to ensure no clashes with names in other binding
         const top: V.MemberExpression<V.NORMAL> = {
             kind: 'MemberExpression',
-            module: normaliseModule({
+            module: {
                 kind: 'Module',
-                bindings: [
+                bindings: bindingListToBindingMap([
                     // TODO: remove cast after fixing typing
                     {kind: 'Binding', left: gen.param, right: arg as any},
                     {kind: 'Binding', left: {kind: 'Identifier', name: startName}, right: gen.body},
-                ],
-            }, x => x as any), // TODO: remove cast after fixing typing
+                ], x => x as any), // TODO: remove cast after fixing typing
+            },
             member: {kind: 'Identifier', name: startName},
         };
 
