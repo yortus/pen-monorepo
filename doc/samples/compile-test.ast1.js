@@ -18,29 +18,41 @@ const ast1 = {
               REP: {
                 kind: "GenericExpression",
                 param: {
-                  kind: "ModulePattern",
-                  names: [
-                    {
-                      name: "a",
-                    },
-                  ],
+                  kind: "Identifier",
+                  name: "ℙ1",
                 },
                 body: {
-                  kind: "SequenceExpression",
-                  expressions: [
-                    {
-                      kind: "Identifier",
-                      name: "a",
+                  kind: "LetExpression",
+                  expression: {
+                    kind: "SequenceExpression",
+                    expressions: [
+                      {
+                        kind: "Identifier",
+                        name: "a",
+                      },
+                      {
+                        kind: "Identifier",
+                        name: "x",
+                      },
+                      {
+                        kind: "Identifier",
+                        name: "a",
+                      },
+                    ],
+                  },
+                  bindings: {
+                    a: {
+                      kind: "MemberExpression",
+                      module: {
+                        kind: "Identifier",
+                        name: "ℙ1",
+                      },
+                      member: {
+                        kind: "Identifier",
+                        name: "a",
+                      },
                     },
-                    {
-                      kind: "Identifier",
-                      name: "x",
-                    },
-                    {
-                      kind: "Identifier",
-                      name: "a",
-                    },
-                  ],
+                  },
                 },
               },
               x: {

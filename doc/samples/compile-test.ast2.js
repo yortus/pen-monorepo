@@ -145,6 +145,16 @@ const ast2 = {
         name: "a_2",
         resolved: true,
       },
+      "ℙ1": {
+        kind: "Module",
+        bindings: {
+          a: {
+            kind: "Identifier",
+            name: "a_3",
+            resolved: true,
+          },
+        },
+      },
       a_4: {
         kind: "Identifier",
         module: null,
