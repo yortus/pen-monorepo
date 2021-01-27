@@ -19,7 +19,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'Intrinsic': return cb(n);
             case 'LetExpression': return cb(n.expression), Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec), cb(n);
             case 'ListExpression': return n.elements.forEach(rec), cb(n);
-            case 'MemberExpression': return rec(n.module), rec(n.member), cb(n);
+            case 'MemberExpression': return rec(n.module), cb(n);
             case 'Module': return Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec), cb(n);
             case 'ModulePattern': return cb(n);
             case 'NotExpression': return rec(n.expression), cb(n);

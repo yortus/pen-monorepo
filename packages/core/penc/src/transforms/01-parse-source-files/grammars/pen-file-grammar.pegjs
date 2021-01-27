@@ -73,7 +73,7 @@ Precedence4OrHigher
     = QuantifiedExpression
 
 Precedence5OrHigher
-    = ApplicationOrMemberExpression
+    = InstantiationOrMemberExpression
 
 Precedence6OrHigher
     = PrimaryExpression
@@ -118,13 +118,13 @@ QuantifiedExpression
         return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};
     }
 
-ApplicationOrMemberExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)*
+InstantiationOrMemberExpression
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / InstantiationArgument)*
     {
         if (tail.length === 0) return head;
         return tail.reduce(
-            (lhs, rhs) => (rhs.id
-                ? {kind: 'MemberExpression', module: lhs, member: rhs.id}
+            (lhs, rhs) => (rhs.name
+                ? {kind: 'MemberExpression', module: lhs, member: rhs.name}
                 : {kind: 'InstantiationExpression', generic: lhs, argument: rhs.arg}
             ),
             head
@@ -132,10 +132,10 @@ ApplicationOrMemberExpression
     }
 
 MemberLookup
-    = "."   /* NO WHITESPACE */   id:Identifier
-    { return {id}; }
+    = "."   /* NO WHITESPACE */   name:IDENTIFIER
+    { return {name}; }
 
-ApplicationArgument
+InstantiationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 

@@ -17,7 +17,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         gen: {
             kind: 'GenericExpression',
             param: ({kind: 'ModulePattern', names: []}) as any, // TODO: remove cast after fixing code
-            body: {kind: 'MemberExpression', module: ast.module, member: {kind: 'Identifier', name: 'start'}},
+            body: {kind: 'MemberExpression', module: ast.module, member: 'start'},
         },
         arg: {kind: 'Module', bindings: {}},
         env: rootScope,
@@ -58,7 +58,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                     {kind: 'Binding', left: {kind: 'Identifier', name: startName}, right: gen.body},
                 ], x => x as any), // TODO: remove cast after fixing typing
             },
-            member: {kind: 'Identifier', name: startName},
+            member: startName,
         };
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
@@ -102,7 +102,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             },
             MemberExpression: mem => {
                 // TODO: explain tracking...
-                const memᐟ = {...mem, module: rec(mem.module)}; // TODO: explain why: don't visit `member` for now
+                const memᐟ = {...mem, module: rec(mem.module)};
                 memberExprs.push(memᐟ);
                 return memᐟ;
             },
@@ -123,7 +123,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             },
         }));
 
-        // STEP 2: Resolve all Identifier nodes (except MemberExpression#member - that is resolved in STEP 3)
+        // STEP 2: Resolve all Identifier nodes
         for (let [id, scope] of identifiers) {
             const {globalName} = scope.lookup(id.name);
             Object.assign(id, {name: globalName, resolved: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
@@ -138,8 +138,8 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
             // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
             assert(lhs.kind === 'Module');
-            const id = lhs.bindings[mem.member.name];
-            if (!id) throw new Error(`'${mem.member.name}' is not defined`); // TODO: improve diagnostic message eg line+col
+            const id = lhs.bindings[mem.member];
+            if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
             assert(id.kind === 'Identifier' && id.resolved);
             Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }

@@ -102,7 +102,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 start: {
                     kind: 'MemberExpression',
                     module: {kind: 'Identifier', name: moduleNamesBySourceFilePath[startPath]},
-                    member: {kind: 'Identifier', name: 'start'},
+                    member: 'start',
                 },
             },
         },

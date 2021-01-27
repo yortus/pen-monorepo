@@ -22,7 +22,7 @@ export function bindingListToBindingMap(bindings: BindingList<100>, mapFn: (e: E
                 bindingsᐟ[alias || name] = {
                     kind: 'MemberExpression',
                     module: mapFn(right),
-                    member: {kind: 'Identifier', name},
+                    member: name,
                 };
             }
         }

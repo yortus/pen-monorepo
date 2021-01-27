@@ -153,7 +153,7 @@ export interface ListExpression<V extends Version> {
 export interface MemberExpression<V extends Version> {
     kind: 'MemberExpression';
     module: Expression<V>;
-    member: Identifier;
+    member: string;
 }
 
 
