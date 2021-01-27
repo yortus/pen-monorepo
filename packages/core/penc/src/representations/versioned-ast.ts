@@ -167,13 +167,17 @@ export interface Module<V extends Version> {
 }
 
 
-export interface ModulePattern<_V> {
-    kind: 'ModulePattern';
-    names: Array<{
-        name: string;
-        alias?: string;
-    }>;
-}
+export type ModulePattern<V extends Version> = {
+    100: {
+        kind: 'ModulePattern';
+        names: Array<{
+            name: string;
+            alias?: string;
+        }>;
+    };
+    200: never;
+    300: never;
+}[V];
 
 
 export interface NotExpression<V extends Version> {

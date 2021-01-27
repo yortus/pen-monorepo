@@ -16,7 +16,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     let resolved = internalResolve({
         gen: {
             kind: 'GenericExpression',
-            param: {kind: 'ModulePattern', names: []},
+            param: ({kind: 'ModulePattern', names: []}) as any, // TODO: remove cast after fixing code
             body: {kind: 'MemberExpression', module: ast.module, member: {kind: 'Identifier', name: 'start'}},
         },
         arg: {kind: 'Module', bindings: {}},

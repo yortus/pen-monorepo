@@ -20,7 +20,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
             }
         }
         else if (ast.version === 200) {
-            if (['Binding', 'ImportExpression', 'ParenthesisedExpression'].includes(n.kind)) {
+            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
             if (n.kind === 'Module' || n.kind === 'LetExpression') {
@@ -28,7 +28,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
             }
         }
         else if (ast.version === 300) {
-            if (['Binding', 'ImportExpression', 'ParenthesisedExpression, LetExpression', 'GenericExpression'].includes(n.kind)) {
+            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression, LetExpression', 'GenericExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
             if (n.kind === 'Module') {

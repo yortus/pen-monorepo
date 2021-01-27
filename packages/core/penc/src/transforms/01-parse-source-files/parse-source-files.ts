@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import {bindingListToBindingMap, makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
 import {AbsPath, assert, isExtension, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
+import {createParamNameGenerator} from './create-param-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
 
 
@@ -20,6 +21,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     const sourceFilesByPath: Record<string, V.Module<100>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
+    const generateParamName = createParamNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
 
     // TODO: temp testing... do basic parse over transitive closure of source files
@@ -54,6 +56,20 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
+                GenericExpression: ({param, body}): V.GenericExpression<200> => {
+                    if (param.kind === 'Identifier') return {kind: 'GenericExpression', param, body: rec(body)};
+                    const paramᐟ: V.Identifier = {kind: 'Identifier', name: generateParamName()};
+                    const binding: V.Binding<100> = {kind: 'Binding', left: param, right: paramᐟ};
+                    return {
+                        kind: 'GenericExpression',
+                        param: paramᐟ,
+                        body: {
+                            kind: 'LetExpression',
+                            expression: rec(body),
+                            bindings: bindingListToBindingMap([binding], rec),
+                        },
+                    };
+                },
                 ImportExpression: ({moduleSpecifier}): V.Identifier => {
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
