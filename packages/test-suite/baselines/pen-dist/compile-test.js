@@ -231,17 +231,17 @@ const parse = (() => {
 
     // SelectionExpression
     function start() {
-        if (ENTRYPOINT2()) return true;
+        if (ENTRYPOINT_2()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // SequenceExpression
-    function ENTRYPOINT2() {
+    function ENTRYPOINT_2() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -264,7 +264,7 @@ const parse = (() => {
     x.constant = {value: "outer x"};
 
     // StringLiteral
-    function x2() {
+    function x_2() {
         if (IP + 7 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 105) return false;
         if (IN.charCodeAt(IP + 1) !== 110) return false;
@@ -277,15 +277,15 @@ const parse = (() => {
         OUT = "inner x";
         return true;
     }
-    x2.constant = {value: "inner x"};
+    x_2.constant = {value: "inner x"};
 
     // SequenceExpression
     function letexpr() {
         const stateₒ = getState();
         let out;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -311,17 +311,17 @@ const print = (() => {
 
     // SelectionExpression
     function start() {
-        if (ENTRYPOINT2()) return true;
+        if (ENTRYPOINT_2()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // SequenceExpression
-    function ENTRYPOINT2() {
+    function ENTRYPOINT_2() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -345,7 +345,7 @@ const print = (() => {
     x.constant = {value: "outer x"};
 
     // StringLiteral
-    function x2() {
+    function x_2() {
         if (typeof IN !== 'string') return false;
         if (IP + 7 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 105) return false;
@@ -359,15 +359,15 @@ const print = (() => {
         OUT = "inner x";
         return true;
     }
-    x2.constant = {value: "inner x"};
+    x_2.constant = {value: "inner x"};
 
     // SequenceExpression
     function letexpr() {
         const stateₒ = getState();
         let out;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }

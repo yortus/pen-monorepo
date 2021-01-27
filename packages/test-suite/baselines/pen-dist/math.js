@@ -885,18 +885,18 @@ const parse = (() => {
     // Module
     function factor_e13(member) {
         switch (member) {
-            case 'base': return base2;
+            case 'base': return base_2;
             case 'signed': return signed;
             default: return undefined;
         }
     }
 
     // NumericLiteral
-    function base2() {
+    function base_2() {
         OUT = 2;
         return true;
     }
-    base2.constant = {value: 2};
+    base_2.constant = {value: 2};
 
     // SequenceExpression
     function factor_e14() {
@@ -1381,20 +1381,20 @@ const print = (() => {
     // Module
     function factor_e13(member) {
         switch (member) {
-            case 'base': return base2;
+            case 'base': return base_2;
             case 'signed': return signed;
             default: return undefined;
         }
     }
 
     // NumericLiteral
-    function base2() {
+    function base_2() {
         if (IN !== 2 || IP !== 0) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    base2.constant = {value: 2};
+    base_2.constant = {value: 2};
 
     // SequenceExpression
     function factor_e14() {

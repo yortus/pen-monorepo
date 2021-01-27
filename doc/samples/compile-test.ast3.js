@@ -8,7 +8,7 @@ const ast3 = {
         expressions: [
           {
             kind: "Identifier",
-            name: "ENTRYPOINT2",
+            name: "ENTRYPOINT_2",
           },
           {
             kind: "Identifier",
@@ -16,7 +16,7 @@ const ast3 = {
           },
         ],
       },
-      ENTRYPOINT2: {
+      ENTRYPOINT_2: {
         kind: "SequenceExpression",
         expressions: [
           {
@@ -25,7 +25,7 @@ const ast3 = {
           },
           {
             kind: "Identifier",
-            name: "x2",
+            name: "x_2",
           },
           {
             kind: "Identifier",
@@ -39,7 +39,7 @@ const ast3 = {
         concrete: false,
         abstract: false,
       },
-      x2: {
+      x_2: {
         kind: "StringLiteral",
         value: "inner x",
         concrete: false,
@@ -50,7 +50,7 @@ const ast3 = {
         expressions: [
           {
             kind: "Identifier",
-            name: "x2",
+            name: "x_2",
           },
           {
             kind: "Identifier",
@@ -58,7 +58,7 @@ const ast3 = {
           },
           {
             kind: "Identifier",
-            name: "x2",
+            name: "x_2",
           },
         ],
       },

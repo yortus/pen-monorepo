@@ -14,7 +14,7 @@ const ast2 = {
         bindings: {
         },
       },
-      x2: {
+      x_2: {
         kind: "StringLiteral",
         value: "inner x",
         concrete: false,
@@ -34,7 +34,7 @@ const ast2 = {
           },
           x: {
             kind: "Identifier",
-            name: "x2",
+            name: "x_2",
             resolved: true,
           },
           a: {
@@ -77,12 +77,12 @@ const ast2 = {
           },
         ],
       },
-      a2: {
+      a_2: {
         kind: "Identifier",
         name: "x",
         resolved: true,
       },
-      start2: {
+      start_2: {
         kind: "SelectionExpression",
         expressions: [
           {
@@ -91,7 +91,7 @@ const ast2 = {
             argument: null,
             module: null,
             member: null,
-            name: "ENTRYPOINT2",
+            name: "ENTRYPOINT_2",
             resolved: true,
           },
           {
@@ -121,53 +121,53 @@ const ast2 = {
           },
           start: {
             kind: "Identifier",
-            name: "start2",
+            name: "start_2",
             resolved: true,
           },
         },
       },
-      start3: {
+      start_3: {
         kind: "Identifier",
         module: null,
         member: null,
-        name: "start2",
+        name: "start_2",
         resolved: true,
       },
       ENTRYPOINT: {
         kind: "Identifier",
         module: null,
         member: null,
-        name: "start3",
+        name: "start_3",
         resolved: true,
       },
-      a3: {
+      a_3: {
         kind: "Identifier",
-        name: "a2",
+        name: "a_2",
         resolved: true,
       },
-      a4: {
+      a_4: {
         kind: "Identifier",
         module: null,
         member: null,
-        name: "a3",
+        name: "a_3",
         resolved: true,
       },
-      ENTRYPOINT2: {
+      ENTRYPOINT_2: {
         kind: "SequenceExpression",
         expressions: [
           {
             kind: "Identifier",
-            name: "a4",
+            name: "a_4",
             resolved: true,
           },
           {
             kind: "Identifier",
-            name: "x2",
+            name: "x_2",
             resolved: true,
           },
           {
             kind: "Identifier",
-            name: "a4",
+            name: "a_4",
             resolved: true,
           },
         ],
