@@ -23,7 +23,7 @@ export interface AST<V extends Version = Version> {
     version: V;
     // TODO: jsdoc... special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
     start: {
-        100: Module<V>;
+        100: Module<V>; // for a single source file (for V100, each source file is a separate AST)
         200: {
             kind: 'MemberExpression';
             module: {
