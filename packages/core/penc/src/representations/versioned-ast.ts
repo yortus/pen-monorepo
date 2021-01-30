@@ -93,6 +93,11 @@ export interface Identifier {
     kind: 'Identifier';
     name: string;
     resolved?: boolean;
+    // TODO:
+    // unbound?: boolean; // or isParam?: boolean
+    // - affects hashing - these are hashed by name not value (nominal)
+    //   - this supports hoisting expressions out of genbody scopes where possible
+    //   - this ensures expressions that differ only by this identifier don't get the same hash code
 }
 
 

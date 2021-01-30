@@ -56,6 +56,8 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         (program, [sourceFilePath, sourceFileBindings]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const module = mapNode(sourceFileBindings, rec => ({
+
+                // for all GenericExpression#param: replace Pattern --> Identifier
                 GenericExpression: ({param, body}): V.GenericExpression<200> => {
                     if (param.kind === 'Identifier') return {kind: 'GenericExpression', param, body: rec(body)};
                     const paramᐟ: V.Identifier = {kind: 'Identifier', name: generateParamName()};
@@ -70,19 +72,27 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                         },
                     };
                 },
+
+                // for all ImportExpression: replace ImportExpression --> Identifier
                 ImportExpression: ({moduleSpecifier}): V.Identifier => {
                     const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
                     return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
                 },
+
+                // for all LetExpression#bindings: replace BindingList --> BindingMap
                 LetExpression: (le): V.LetExpression<200> => ({
                     kind: 'LetExpression',
                     expression: rec(le.expression),
                     bindings: bindingListToBindingMap(le.bindings, rec),
                 }),
+
+                // for all Module#bindings: replace BindingList --> BindingMap
                 Module: (mod): V.Module<200> => ({
                     kind: 'Module',
                     bindings: bindingListToBindingMap(mod.bindings, rec),
                 }),
+
+                // for all ParenthesisedExpression: remove parens
                 ParenthesisedExpression: par => rec(par.expression),
             }));
             assert(module.kind === 'Module');
