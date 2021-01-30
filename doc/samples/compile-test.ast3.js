@@ -10,7 +10,7 @@ const ast3 = {
           expressions: [
             {
               kind: "Identifier",
-              name: "ENTRYPOINT_2",
+              name: "start_e",
             },
             {
               kind: "Identifier",
@@ -18,7 +18,7 @@ const ast3 = {
             },
           ],
         },
-        ENTRYPOINT_2: {
+        start_e: {
           kind: "SequenceExpression",
           expressions: [
             {

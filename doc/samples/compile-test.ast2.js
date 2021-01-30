@@ -5,6 +5,11 @@ const ast2 = {
     module: {
       kind: "Module",
       bindings: {
+        DUMMY: {
+          kind: "Module",
+          bindings: {
+          },
+        },
         x: {
           kind: "StringLiteral",
           value: "outer x",
@@ -88,13 +93,26 @@ const ast2 = {
           kind: "SelectionExpression",
           expressions: [
             {
-              kind: "Identifier",
+              kind: "SequenceExpression",
               generic: null,
               argument: null,
-              module: null,
-              member: null,
-              name: "ENTRYPOINT_2",
-              resolved: true,
+              expressions: [
+                {
+                  kind: "Identifier",
+                  name: "a_4",
+                  resolved: true,
+                },
+                {
+                  kind: "Identifier",
+                  name: "x_2",
+                  resolved: true,
+                },
+                {
+                  kind: "Identifier",
+                  name: "a_4",
+                  resolved: true,
+                },
+              ],
             },
             {
               kind: "Identifier",
@@ -128,13 +146,6 @@ const ast2 = {
             },
           },
         },
-        ENTRYPOINT: {
-          kind: "Identifier",
-          module: null,
-          member: null,
-          name: "start_2",
-          resolved: true,
-        },
         a_3: {
           kind: "Identifier",
           name: "a_2",
@@ -157,31 +168,11 @@ const ast2 = {
           name: "a_3",
           resolved: true,
         },
-        ENTRYPOINT_2: {
-          kind: "SequenceExpression",
-          expressions: [
-            {
-              kind: "Identifier",
-              name: "a_4",
-              resolved: true,
-            },
-            {
-              kind: "Identifier",
-              name: "x_2",
-              resolved: true,
-            },
-            {
-              kind: "Identifier",
-              name: "a_4",
-              resolved: true,
-            },
-          ],
-        },
         start: {
           kind: "Identifier",
           module: null,
           member: null,
-          name: "ENTRYPOINT",
+          name: "start_2",
           resolved: true,
         },
       },

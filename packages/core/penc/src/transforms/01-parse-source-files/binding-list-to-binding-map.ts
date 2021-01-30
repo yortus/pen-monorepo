@@ -1,10 +1,9 @@
-import type {BindingList, BindingMap, Expression} from './versioned-ast';
+import type {V} from '../../representations';
 
 
 // TODO: jsdoc...
-// TODO: fix hacky typing of in/out node versions
-export function bindingListToBindingMap(bindings: BindingList<100>, mapFn: (e: Expression<100>) => Expression<200>): BindingMap<200> {
-    const bindingsᐟ = {} as BindingMap<200>;
+export function bindingListToBindingMap(bindings: V.BindingList<100>, mapFn: (e: V.Expression<100>) => V.Expression<200>): V.BindingMap<200> {
+    const bindingsᐟ = {} as V.BindingMap<200>;
     for (let {left, right} of bindings) {
         if (left.kind === 'Identifier') {
             if (bindingsᐟ.hasOwnProperty(left.name)) {

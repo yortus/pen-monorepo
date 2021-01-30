@@ -5,6 +5,11 @@ const ast2 = {
     module: {
       kind: "Module",
       bindings: {
+        DUMMY: {
+          kind: "Module",
+          bindings: {
+          },
+        },
         char: {
           kind: "Identifier",
           module: null,
@@ -896,18 +901,11 @@ const ast2 = {
             },
           },
         },
-        ENTRYPOINT: {
-          kind: "Identifier",
-          module: null,
-          member: null,
-          name: "start_2",
-          resolved: true,
-        },
         start: {
           kind: "Identifier",
           module: null,
           member: null,
-          name: "ENTRYPOINT",
+          name: "start_2",
           resolved: true,
         },
       },

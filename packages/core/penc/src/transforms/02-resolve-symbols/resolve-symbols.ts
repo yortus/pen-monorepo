@@ -1,4 +1,4 @@
-import {bindingListToBindingMap, makeNodeMapper, V, validateAST} from '../../representations';
+import {makeNodeMapper, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createSymbolTable, Scope} from './symbol-table';
 
@@ -16,7 +16,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     let resolved = internalResolve({
         gen: {
             kind: 'GenericExpression',
-            param: ({kind: 'ModulePattern', names: []}) as any, // TODO: remove cast after fixing code
+            param: {kind: 'Identifier', name: 'DUMMY'}, // TODO: this id is never referenced, so name doesn't matter. Remove it somehow?
             body: ast.start,
         },
         arg: {kind: 'Module', bindings: {}},
@@ -50,19 +50,11 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     // TODO: temp testing...
     function internalResolve({gen, arg, env}: {gen: V.GenericExpression<200>, arg: V.Expression<200>, env: Scope}) {
 
-        // TODO: step 0 - synthesize a MemberExpression and a module
-        const startName = 'ENTRYPOINT'; // TODO: make&use namegen util to ensure no clashes with names in other binding
-        const top: V.MemberExpression<200> = {
-            kind: 'MemberExpression',
-            module: {
-                kind: 'Module',
-                bindings: bindingListToBindingMap([
-                    // TODO: remove cast after fixing typing
-                    {kind: 'Binding', left: gen.param, right: arg as any},
-                    {kind: 'Binding', left: {kind: 'Identifier', name: startName}, right: gen.body},
-                ], x => x as any), // TODO: remove cast after fixing typing
-            },
-            member: startName,
+        // TODO: step 0 - synthesize a LetExpression
+        const top: V.LetExpression<200> = {
+            kind: 'LetExpression',
+            expression: gen.body,
+            bindings: {[gen.param.name]: arg},
         };
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.

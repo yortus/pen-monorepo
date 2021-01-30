@@ -1,6 +1,7 @@
 import * as fs from 'fs';
-import {bindingListToBindingMap, makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
+import {makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
 import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
+import {bindingListToBindingMap} from './binding-list-to-binding-map';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {createParamNameGenerator} from './create-param-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';

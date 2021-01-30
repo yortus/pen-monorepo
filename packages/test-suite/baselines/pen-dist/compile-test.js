@@ -231,13 +231,13 @@ const parse = (() => {
 
     // SelectionExpression
     function start() {
-        if (ENTRYPOINT_2()) return true;
+        if (start_e()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // SequenceExpression
-    function ENTRYPOINT_2() {
+    function start_e() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -311,13 +311,13 @@ const print = (() => {
 
     // SelectionExpression
     function start() {
-        if (ENTRYPOINT_2()) return true;
+        if (start_e()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // SequenceExpression
-    function ENTRYPOINT_2() {
+    function start_e() {
         const stateₒ = getState();
         let out;
         if (x()) out = concat(out, OUT); else return setState(stateₒ), false;
