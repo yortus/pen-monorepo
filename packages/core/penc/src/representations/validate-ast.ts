@@ -12,7 +12,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
     if (!allAstVersions.includes(ast.version)) throw new Error(`Unrecognised AST version '${ast.version}'`);
 
     // Validate each node in the AST.
-    traverseNode(ast.module, n => {
+    traverseNode(ast.start, n => {
         assert(allNodeKinds.includes(n.kind), `Unrecognised node kind '${n.kind}'`)
         if (ast.version === 100) {
             if (n.kind === 'Module' || n.kind === 'LetExpression') {

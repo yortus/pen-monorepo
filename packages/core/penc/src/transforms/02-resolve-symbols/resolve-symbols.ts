@@ -17,7 +17,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         gen: {
             kind: 'GenericExpression',
             param: ({kind: 'ModulePattern', names: []}) as any, // TODO: remove cast after fixing code
-            body: {kind: 'MemberExpression', module: ast.module, member: 'start'},
+            body: ast.start,
         },
         arg: {kind: 'Module', bindings: {}},
         env: rootScope,
@@ -35,9 +35,13 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     allSymbols['start'] = {globalName: 'start', value: resolved, scope: rootScope};
     const astᐟ: V.AST<300> = {
         version: 300,
-        module: {
-            kind: 'Module',
-            bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>,
+        start: {
+            kind: 'MemberExpression',
+            module: {
+                kind: 'Module',
+                bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>,
+            },
+            member: 'start',
         },
     };
     validateAST(astᐟ);

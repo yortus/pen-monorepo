@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import {bindingListToBindingMap, makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
-import {AbsPath, assert, isExtension, resolveModuleSpecifier} from '../../utils';
+import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {createParamNameGenerator} from './create-param-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
@@ -18,7 +18,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     const mainText = 'text' in options ? options.text : '';
 
     // TODO: temp testing... explain each of these
-    const sourceFilesByPath: Record<string, V.Module<100>> = {};
+    const sourceFileModulesByPath: Record<string, V.Module<100>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
     const generateParamName = createParamNameGenerator();
@@ -39,23 +39,23 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         // Parse this source file.
         const sourceText = sourceFilePath === INLINE_MAIN ? mainText : fs.readFileSync(sourceFilePath, 'utf8');
         const parse = isExtension(sourceFilePath) ? parseExtFile : parsePenFile;
-        const sourceFile = parse(sourceText, {path: sourceFilePath});
-        validateAST(sourceFile);
-        sourceFilesByPath[sourceFilePath] = sourceFile.module;
+        const sourceFileModule = parse(sourceText, {path: sourceFilePath});
+        validateAST({version: 100, start: sourceFileModule});
+        sourceFileModulesByPath[sourceFilePath] = sourceFileModule;
 
         // Visit every ImportExpression, adding the imported path to `unprocessedPaths`.
-        traverseNode(sourceFile.module, n => {
+        traverseNode(sourceFileModule, n => {
             if (n.kind !== 'ImportExpression') return;
             const importPath = resolveModuleSpecifier(n.moduleSpecifier, sourceFilePath);
             unprocessedPaths.push(importPath);
         });
     }
 
-    // TODO: temp testing... traverse AST again, converting BindingLists-->Modules, and ImportExprs-->Identifiers + remove ParenthesisedExprs
-    const sourceFileModules = Object.entries(sourceFilesByPath).reduce(
-        (program, [sourceFilePath, sourceFileBindings]) => {
+    // TODO: temp testing... traverse AST again...
+    const sourceFileNodesByModuleName = Object.entries(sourceFileModulesByPath).reduce(
+        (acc, [sourceFilePath, sourceFileModule]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
-            const module = mapNode(sourceFileBindings, rec => ({
+            const moduleNode = mapNode(sourceFileModule, rec => ({
 
                 // for all GenericExpression#param: replace Pattern --> Identifier
                 GenericExpression: ({param, body}): V.GenericExpression<200> => {
@@ -95,26 +95,27 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 // for all ParenthesisedExpression: remove parens
                 ParenthesisedExpression: par => rec(par.expression),
             }));
-            assert(module.kind === 'Module');
-            program[moduleName] = module;
-            return program;
+            acc[moduleName] = moduleNode;
+            return acc;
         },
-        {} as Record<string, V.Module<200>>
+        {} as Record<string, V.Expression<200>>
     );
 
     // TODO: temp testing...
+    const mainModuleName = moduleNamesBySourceFilePath[startPath];
     const ast: V.AST<200> = {
         version: 200,
-        module: {
-            kind: 'Module',
-            bindings: {
-                ...sourceFileModules,
-                start: {
-                    kind: 'MemberExpression',
-                    module: {kind: 'Identifier', name: moduleNamesBySourceFilePath[startPath]},
-                    member: 'start',
+        start: {
+            kind: 'MemberExpression',
+            module: {
+                kind: 'MemberExpression',
+                module: {
+                    kind: 'Module',
+                    bindings: sourceFileNodesByModuleName,
                 },
+                member: mainModuleName,
             },
+            member: 'start',
         },
     };
     validateAST(ast);

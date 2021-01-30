@@ -22,7 +22,23 @@ export type Version = 100 | 200 | 300;
 export interface AST<V extends Version = Version> {
     version: V;
     // TODO: jsdoc... special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
-    module: Module<V>;
+    start: {
+        100: Module<V>;
+        200: {
+            kind: 'MemberExpression';
+            module: {
+                kind: 'MemberExpression';
+                module: Module<V>;
+                member: string;
+            };
+            member: 'start';
+        };
+        300: {
+            kind: 'MemberExpression';
+            module: Module<V>;
+            member: 'start';
+        };
+    }[V];
 }
 
 
@@ -168,6 +184,11 @@ export interface Module<V extends Version> {
         100: BindingList<V>;
         200: BindingMap<V>;
         300: BindingMap<V>;
+    }[V];
+    path?: {
+        100: AbsPath;
+        200: never;
+        300: never;
     }[V];
 }
 

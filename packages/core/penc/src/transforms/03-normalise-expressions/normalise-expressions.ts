@@ -11,7 +11,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     validateAST(ast);
 
     // TODO: doc...
-    const {bindings} = ast.module;
+    const {bindings} = ast.start.module;
     const deref = createDereferencer(bindings);
     const getHashFor = createNodeHasher(deref);
 
@@ -40,9 +40,13 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     for (const [_, {name, value}] of newBindingsByHash) newBindings[name] = value;
     ast = {
         version: 300,
-        module: {
-            kind: 'Module',
-            bindings: newBindings,
+        start: {
+            kind: 'MemberExpression',
+            module: {
+                kind: 'Module',
+                bindings: newBindings,
+            },
+            member: 'start',
         },
     };
     validateAST(ast);

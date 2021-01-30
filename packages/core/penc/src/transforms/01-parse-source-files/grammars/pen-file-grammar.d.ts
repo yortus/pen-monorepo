@@ -1,4 +1,4 @@
 import type {V} from '../../../representations';
 
 
-export declare function parse(source: string): V.AST<100>;
+export declare function parse(source: string): V.Module<100>;

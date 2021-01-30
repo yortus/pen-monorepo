@@ -54,7 +54,7 @@ export function generateTargetCode(program: Program) {
 
 
 function emitIntrinsics(emit: Emitter, {ast}: Program) {
-    const {bindings} = ast.module;
+    const {bindings} = ast.start.module;
     const isIntrinsic = (e: V.Expression<300>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
@@ -74,7 +74,7 @@ function emitIntrinsics(emit: Emitter, {ast}: Program) {
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     const {consts, ast} = program;
-    const {bindings} = ast.module;
+    const {bindings} = ast.start.module;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';
