@@ -1,6 +1,6 @@
 import {makeNodeMapper, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
-import {createSymbolTable, Scope} from './symbol-table';
+import {createSymbolTable, Scope, Symbol} from './symbol-table';
 
 
 // TODO: jsdoc...
@@ -10,7 +10,17 @@ import {createSymbolTable, Scope} from './symbol-table';
 // - output contains *no* MemberExpressions (well it could actually, via extensions)
 export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     validateAST(ast);
-    const {allSymbols, rootScope} = createSymbolTable();
+    const allSymbols = {} as Record<string, Symbol>;
+    let closureCounter = 0;
+    let currentClosureId = `GLOBALS`;
+    const symbolsByClosureId = {} as Record<string, Record<string, Symbol>>;
+    const {rootScope} = createSymbolTable({
+        onInsert: symbol => {
+            allSymbols[symbol.uniqueName] = symbol;
+            symbolsByClosureId[currentClosureId] ??= {};
+            symbolsByClosureId[currentClosureId][symbol.uniqueName] = symbol;
+        },
+    });
 
     // TODO: temp testing...
     let resolved = internalResolve({
@@ -56,7 +66,10 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         const instantiations = new Map<V.InstantiationExpression<200>, Scope>();
         const result = mapNode(top, rec => ({
             GenericExpression: ({param, body}): V.GenericExpression<200> => {
-                // Create a nested scope for this generic expression.
+
+                // Create a closure and nested scope for this generic expression.
+                const surroundingClosureId = currentClosureId;
+                currentClosureId = 'C' + String(++closureCounter).padStart(6, '0');
                 env = env.createNestedScope();
 
                 // Create a symbol for the generic parameter, whose value is specially marked as a 'placeholder'.
@@ -67,6 +80,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 // Traverse the body expression in the new scope, then revert to the surrounding scope before returning.
                 body = rec(body);
                 env = env.surroundingScope;
+                currentClosureId = surroundingClosureId;
                 return {kind: 'GenericExpression', param, body};
             },
             Identifier: id => {

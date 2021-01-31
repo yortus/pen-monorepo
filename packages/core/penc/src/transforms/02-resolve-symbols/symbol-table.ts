@@ -23,12 +23,18 @@ export interface Symbol {
 
 
 // TODO: jsdoc...
-export function createSymbolTable() {
-    const allSymbols = {} as Record<string, Symbol>;
+export interface SymbolTableOptions {
+    onInsert?: (symbol: Symbol) => void;
+}
+
+
+// TODO: jsdoc...
+export function createSymbolTable(options?: SymbolTableOptions) {
+    const onInsert = options?.onInsert ?? (() => {});
     const RESERVED_UNIQUE_NAMES = ['start'];
     const existingUniqueNames = new Set<string>(RESERVED_UNIQUE_NAMES);
     const rootScope = createNestedScope(undefined);
-    return {allSymbols, rootScope};
+    return {rootScope};
 
     // TODO: temp testing...
     function createNestedScope(surroundingScope?: Scope): Scope {
@@ -41,8 +47,9 @@ export function createSymbolTable() {
                 }
                 const uniqueName = createUniqueName(name);
                 const symbol: Symbol = {uniqueName, localName: name, value, scope};
-                allSymbols[uniqueName] = symbol;
                 symbols[name] = symbol;
+                //allSymbols[uniqueName] = symbol;
+                onInsert(symbol);
                 return symbol;
             },
 

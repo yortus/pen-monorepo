@@ -43,7 +43,7 @@ const ast2 = {
               },
               {
                 kind: "Identifier",
-                name: "x_2",
+                name: "x_3",
                 unique: true,
               },
               {
@@ -54,7 +54,36 @@ const ast2 = {
             ],
           },
         },
+        "ℙ_2": {
+          kind: "Identifier",
+          name: "ℙ_2",
+          placeholder: true,
+        },
         x_2: {
+          kind: "Identifier",
+          name: "ℙ_2",
+          unique: true,
+        },
+        GEN: {
+          kind: "GenericExpression",
+          param: "ℙ",
+          body: {
+            kind: "SequenceExpression",
+            expressions: [
+              {
+                kind: "Identifier",
+                name: "x_2",
+                unique: true,
+              },
+              {
+                kind: "Identifier",
+                name: "x_2",
+                unique: true,
+              },
+            ],
+          },
+        },
+        x_3: {
           kind: "StringLiteral",
           value: "inner x",
           concrete: false,
@@ -72,9 +101,14 @@ const ast2 = {
               name: "REP",
               unique: true,
             },
+            GEN: {
+              kind: "Identifier",
+              name: "GEN",
+              unique: true,
+            },
             x: {
               kind: "Identifier",
-              name: "x_2",
+              name: "x_3",
               unique: true,
             },
             a: {
