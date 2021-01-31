@@ -3,7 +3,7 @@ import type {V} from '../../representations';
 
 // TODO: jsdoc...
 export interface Scope {
-    insert(name: string, value: V.Expression<200>): Symbol;
+    insert(name: string, value: V.Expression<300>): Symbol;
     lookup(name: string): Symbol;
     createNestedScope(): Scope;
     surroundingScope: Scope;
@@ -15,7 +15,7 @@ export interface Scope {
 export interface Symbol {
     readonly uniqueName: string; // TODO: doc... can be used as an identifier; unique across program
     readonly localName?: string;
-    readonly value: V.Expression<200>;
+    readonly value: V.Expression<300>;
 
     // TODO: temp testing...
     readonly scope: Scope;

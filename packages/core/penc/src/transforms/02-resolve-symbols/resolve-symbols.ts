@@ -42,7 +42,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             kind: 'MemberExpression',
             module: {
                 kind: 'Module',
-                bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>, // TODO: fix types + remove cast
+                bindings: mapObj(allSymbols, symbol => symbol.value),
             },
             member: 'start',
         },
@@ -62,10 +62,9 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
         const identifiers = new Map<V.Identifier, Scope>();
-        const memberExprs = [] as V.MemberExpression<200>[];
-        const instantiations = new Map<V.InstantiationExpression<200>, Scope>();
+        const memberExprs = [] as V.MemberExpression<300>[];
         const result = mapNode(top, rec => ({
-            GenericExpression: ({param, body}): V.GenericExpression<200> => {
+            GenericExpression: ({param, body}): V.GenericExpression<300> => {
 
                 // Create a closure and nested scope for this generic expression.
                 const surroundingClosureId = currentClosureId;
@@ -78,10 +77,10 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 Object.assign(placeholder, {name: uniqueName}); // TODO: cleaner way than in-place update?
 
                 // Traverse the body expression in the new scope, then revert to the surrounding scope before returning.
-                body = rec(body);
+                const bodyᐟ = rec(body);
                 env = env.surroundingScope;
                 currentClosureId = surroundingClosureId;
-                return {kind: 'GenericExpression', param, body};
+                return {kind: 'GenericExpression', param, body: bodyᐟ};
             },
             Identifier: id => {
                 if (id.unique) return id;
@@ -90,12 +89,6 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 const idᐟ = {...id};
                 identifiers.set(idᐟ, env);
                 return idᐟ;
-            },
-            InstantiationExpression: inst => {
-                // TODO: leave the InstantiationExpression in place until the next step...
-                const instᐟ = {...inst, generic: rec(inst.generic), argument: rec(inst.argument)};
-                instantiations.set(instᐟ, env);
-                return instᐟ;
             },
             LetExpression: le => {
                 // Create a nested scope for this let expression.
@@ -168,4 +161,4 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
 
 // TODO: temp testing...
-const mapNode = makeNodeMapper<200, 200>();
+const mapNode = makeNodeMapper<200, 300>();
