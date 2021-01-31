@@ -29,7 +29,6 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         Object.assign(symbol, {value: {kind: 'Module', bindings: {}}}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
-    // TODO: add the special 'start' symbol
     // TODO: temp testing...
     assert(resolved.kind === 'Identifier' && resolved.resolved);
     allSymbols['start'] = {globalName: 'start', value: resolved, scope: rootScope};
@@ -68,6 +67,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             Identifier: id => {
                 if (id.resolved) return id;
                 // TODO: explain tracking...
+                // Add each Identifier to a list to be processed later
                 const idᐟ = {...id};
                 identifiers.set(idᐟ, env);
                 return idᐟ;
@@ -98,6 +98,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             },
             MemberExpression: mem => {
                 // TODO: explain tracking...
+                // Add each MemberExpression to a list to be processed later
                 const memᐟ = {...mem, module: rec(mem.module)};
                 memberExprs.push(memᐟ);
                 return memᐟ;
