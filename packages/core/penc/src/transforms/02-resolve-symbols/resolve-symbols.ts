@@ -31,7 +31,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
     // TODO: temp testing...
     assert(resolved.kind === 'Identifier' && resolved.unique);
-    allSymbols['start'] = {globalName: 'start', value: resolved, scope: rootScope};
+    allSymbols['start'] = {uniqueName: 'start', value: resolved, scope: rootScope};
     const astᐟ: V.AST<300> = {
         version: 300,
         start: {
@@ -85,8 +85,8 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 // Create a symbol for each local name in the let expression.
                 const bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(le.bindings)) {
-                    const {globalName} = env.insert(name, rec(expr));
-                    bindings[name] = {kind: 'Identifier', name: globalName, unique: true};
+                    const {uniqueName} = env.insert(name, rec(expr));
+                    bindings[name] = {kind: 'Identifier', name: uniqueName, unique: true};
                 }
 
                 // Recursively resolve the main expression in the nested scope.
@@ -110,8 +110,8 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 // Create a symbol for each local name in the module.
                 const bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
-                    const {globalName} = env.insert(name, rec(expr));
-                    bindings[name] = {kind: 'Identifier', name: globalName, unique: true};
+                    const {uniqueName} = env.insert(name, rec(expr));
+                    bindings[name] = {kind: 'Identifier', name: uniqueName, unique: true};
                 }
 
                 // Pop back out to the surrounding scope before returning.
@@ -122,8 +122,8 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
         // STEP 2: Resolve all Identifier nodes
         for (let [id, scope] of identifiers) {
-            const {globalName} = scope.lookup(id.name);
-            Object.assign(id, {name: globalName, unique: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+            const {uniqueName} = scope.lookup(id.name);
+            Object.assign(id, {name: uniqueName, unique: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
 
         // STEP 3: Resolve all MemberExpression nodes
