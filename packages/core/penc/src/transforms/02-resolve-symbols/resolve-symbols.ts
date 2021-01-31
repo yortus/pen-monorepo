@@ -42,7 +42,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             kind: 'MemberExpression',
             module: {
                 kind: 'Module',
-                bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>,
+                bindings: mapObj(allSymbols, symbol => symbol.value) as V.BindingMap<300>, // TODO: fix types + remove cast
             },
             member: 'start',
         },
