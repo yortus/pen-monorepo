@@ -16,9 +16,42 @@ const ast2 = {
           concrete: false,
           abstract: false,
         },
+        "ℙ": {
+          kind: "Identifier",
+          name: "ℙ",
+          placeholder: true,
+        },
+        a: {
+          kind: "MemberExpression",
+          module: {
+            kind: "Identifier",
+            name: "ℙ",
+            unique: true,
+          },
+          member: "a",
+        },
         REP: {
-          kind: "Module",
-          bindings: {
+          kind: "GenericExpression",
+          param: "ℙ",
+          body: {
+            kind: "SequenceExpression",
+            expressions: [
+              {
+                kind: "Identifier",
+                name: "a",
+                unique: true,
+              },
+              {
+                kind: "Identifier",
+                name: "x_2",
+                unique: true,
+              },
+              {
+                kind: "Identifier",
+                name: "a",
+                unique: true,
+              },
+            ],
           },
         },
         x_2: {
@@ -27,7 +60,7 @@ const ast2 = {
           concrete: false,
           abstract: false,
         },
-        a: {
+        a_2: {
           kind: "NumericLiteral",
           value: 42,
         },
@@ -37,17 +70,17 @@ const ast2 = {
             REP: {
               kind: "Identifier",
               name: "REP",
-              resolved: true,
+              unique: true,
             },
             x: {
               kind: "Identifier",
               name: "x_2",
-              resolved: true,
+              unique: true,
             },
             a: {
               kind: "Identifier",
-              name: "a",
-              resolved: true,
+              name: "a_2",
+              unique: true,
             },
           },
         },
@@ -69,7 +102,7 @@ const ast2 = {
             {
               kind: "Identifier",
               name: "lx",
-              resolved: true,
+              unique: true,
             },
             {
               kind: "StringLiteral",
@@ -80,44 +113,42 @@ const ast2 = {
             {
               kind: "Identifier",
               name: "lx",
-              resolved: true,
+              unique: true,
             },
           ],
         },
-        a_2: {
+        a_3: {
           kind: "Identifier",
           name: "x",
-          resolved: true,
+          unique: true,
         },
         start_2: {
           kind: "SelectionExpression",
           expressions: [
             {
-              kind: "SequenceExpression",
-              generic: null,
-              argument: null,
-              expressions: [
-                {
-                  kind: "Identifier",
-                  name: "a_4",
-                  resolved: true,
+              kind: "InstantiationExpression",
+              generic: {
+                kind: "Identifier",
+                module: null,
+                member: null,
+                name: "REP",
+                unique: true,
+              },
+              argument: {
+                kind: "Module",
+                bindings: {
+                  a: {
+                    kind: "Identifier",
+                    name: "a_3",
+                    unique: true,
+                  },
                 },
-                {
-                  kind: "Identifier",
-                  name: "x_2",
-                  resolved: true,
-                },
-                {
-                  kind: "Identifier",
-                  name: "a_4",
-                  resolved: true,
-                },
-              ],
+              },
             },
             {
               kind: "Identifier",
               name: "letexpr",
-              resolved: true,
+              unique: true,
             },
           ],
         },
@@ -127,53 +158,31 @@ const ast2 = {
             x: {
               kind: "Identifier",
               name: "x",
-              resolved: true,
+              unique: true,
             },
             nested: {
               kind: "Identifier",
               name: "nested",
-              resolved: true,
+              unique: true,
             },
             letexpr: {
               kind: "Identifier",
               name: "letexpr",
-              resolved: true,
+              unique: true,
             },
             start: {
               kind: "Identifier",
               name: "start_2",
-              resolved: true,
+              unique: true,
             },
           },
-        },
-        a_3: {
-          kind: "Identifier",
-          name: "a_2",
-          resolved: true,
-        },
-        "ℙ1": {
-          kind: "Module",
-          bindings: {
-            a: {
-              kind: "Identifier",
-              name: "a_3",
-              resolved: true,
-            },
-          },
-        },
-        a_4: {
-          kind: "Identifier",
-          module: null,
-          member: null,
-          name: "a_3",
-          resolved: true,
         },
         start: {
           kind: "Identifier",
           module: null,
           member: null,
           name: "start_2",
-          resolved: true,
+          unique: true,
         },
       },
     },

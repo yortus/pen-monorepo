@@ -3,7 +3,6 @@ import {makeNodeMapper, traverseNode, V, validateAST} from '../../representation
 import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
 import {bindingListToBindingMap} from './binding-list-to-binding-map';
 import {createModuleNameGenerator} from './create-module-name-generator';
-import {createParamNameGenerator} from './create-param-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
 
 
@@ -22,7 +21,6 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     const sourceFileModulesByPath: Record<string, V.Module<100>> = {};
     const startPath = main === INLINE_MAIN ? INLINE_MAIN : resolveModuleSpecifier(main);
     const generateModuleName = createModuleNameGenerator();
-    const generateParamName = createParamNameGenerator();
     const moduleNamesBySourceFilePath: Record<string, string> = {};
 
     // TODO: temp testing... do basic parse over transitive closure of source files
@@ -58,18 +56,22 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const moduleNode = mapNode(sourceFileModule, rec => ({
 
-                // for all GenericExpression#param: replace Pattern --> Identifier
+                // for all GenericExpression#param: replace Identifer|Pattern --> string
                 GenericExpression: ({param, body}): V.GenericExpression<200> => {
-                    if (param.kind === 'Identifier') return {kind: 'GenericExpression', param, body: rec(body)};
-                    const paramᐟ: V.Identifier = {kind: 'Identifier', name: generateParamName(), placeholder: true};
-                    const binding: V.Binding<100> = {kind: 'Binding', left: param, right: paramᐟ};
+                    // Use the parameter name 'ℙ' to ensure it cannot clash with program identifiers.
+                    // TODO: but that could be a valid id in future... ensure *can't* clash
+                    const paramName = 'ℙ';
                     return {
                         kind: 'GenericExpression',
-                        param: paramᐟ,
+                        param: paramName,
                         body: {
                             kind: 'LetExpression',
                             expression: rec(body),
-                            bindings: bindingListToBindingMap([binding], rec),
+                            bindings: bindingListToBindingMap([{
+                                kind: 'Binding',
+                                left: param,
+                                right: {kind: 'Identifier', name: paramName}
+                            }], rec),
                         },
                     };
                 },

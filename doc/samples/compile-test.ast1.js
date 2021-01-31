@@ -21,10 +21,7 @@ const ast1 = {
                 bindings: {
                   REP: {
                     kind: "GenericExpression",
-                    param: {
-                      kind: "Identifier",
-                      name: "ℙ1",
-                    },
+                    param: "ℙ",
                     body: {
                       kind: "LetExpression",
                       expression: {
@@ -49,7 +46,7 @@ const ast1 = {
                           kind: "MemberExpression",
                           module: {
                             kind: "Identifier",
-                            name: "ℙ1",
+                            name: "ℙ",
                           },
                           member: "a",
                         },

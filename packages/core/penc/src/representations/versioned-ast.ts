@@ -143,12 +143,21 @@ export interface Intrinsic {
 
 
 export type GenericExpression<V extends Version> = {
-    [x: string]: {
+    100: {
         kind: 'GenericExpression';
         param: Identifier | Pattern<V>;
         body: Expression<V>;
     };
-    300: never;
+    200: {
+        kind: 'GenericExpression';
+        param: string;
+        body: Expression<V>;
+    };
+    300: {
+        kind: 'GenericExpression';
+        param: string;
+        body: Expression<V>;
+    };
 }[V];
 
 

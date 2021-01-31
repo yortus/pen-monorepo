@@ -16,18 +16,12 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     let resolved = internalResolve({
         gen: {
             kind: 'GenericExpression',
-            param: {kind: 'Identifier', name: 'DUMMY', placeholder: true}, // TODO: this id is never referenced, so name doesn't matter. Remove it somehow?
+            param: 'DUMMY', // TODO: this param is never referenced, so name doesn't matter. Remove it somehow?
             body: ast.start,
         },
         arg: {kind: 'Module', bindings: {}},
         env: rootScope,
     });
-
-    // Replace all GenericExpressions with a dummy expression
-    for (const symbol of Object.values(allSymbols)) {
-        if (symbol.value.kind !== 'GenericExpression') continue;
-        Object.assign(symbol, {value: {kind: 'Module', bindings: {}}}); // TODO: messy overwrite of readonly prop - better/cleaner way?
-    }
 
     // TODO: temp testing...
     assert(resolved.kind === 'Identifier' && resolved.unique);
@@ -53,21 +47,32 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         const top: V.LetExpression<200> = {
             kind: 'LetExpression',
             expression: gen.body,
-            bindings: {[gen.param.name]: arg},
+            bindings: {[gen.param]: arg},
         };
 
         // STEP 1: Traverse the AST, creating a scope for each module, and a symbol for each binding name/value pair.
         const identifiers = new Map<V.Identifier, Scope>();
         const memberExprs = [] as V.MemberExpression<200>[];
         const instantiations = new Map<V.InstantiationExpression<200>, Scope>();
-        const result = mapNode(top, rec => ({ // NB: top-level return value isn't needed, since everything has a symbol by then.
-            GenericExpression: gen => {
-                return gen; // NB: don't recurse inside
+        const result = mapNode(top, rec => ({
+            GenericExpression: ({param, body}): V.GenericExpression<200> => {
+                // Create a nested scope for this generic expression.
+                env = env.createNestedScope();
+
+                // Create a symbol for the generic parameter, whose value is specially marked as a 'placeholder'.
+                let placeholder: V.Identifier = {kind: 'Identifier', name: '', placeholder: true};
+                const {uniqueName} = env.insert(param, placeholder);
+                Object.assign(placeholder, {name: uniqueName}); // TODO: cleaner way than in-place update?
+
+                // Traverse the body expression in the new scope, then revert to the surrounding scope before returning.
+                body = rec(body);
+                env = env.surroundingScope;
+                return {kind: 'GenericExpression', param, body};
             },
             Identifier: id => {
                 if (id.unique) return id;
                 // TODO: explain tracking...
-                // Add each Identifier to a list to be processed later
+                // Collect every Identifier encountered during the traversal, to be resolved in step 2.
                 const idᐟ = {...id};
                 identifiers.set(idᐟ, env);
                 return idᐟ;
@@ -98,7 +103,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             },
             MemberExpression: mem => {
                 // TODO: explain tracking...
-                // Add each MemberExpression to a list to be processed later
+                // Collect every MemberExpression encountered during the traversal, to be resolved in step 3.
                 const memᐟ = {...mem, module: rec(mem.module)};
                 memberExprs.push(memᐟ);
                 return memᐟ;
@@ -126,39 +131,21 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             Object.assign(id, {name: uniqueName, unique: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
 
-        // STEP 3: Resolve all MemberExpression nodes
+        // STEP 3: Resolve MemberExpression nodes where possible
         for (let mem of memberExprs) {
             let lhs = mem.module;
-            while (lhs.kind === 'Identifier' && lhs.unique) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
+            while (lhs.kind === 'Identifier' && lhs.unique && !lhs.placeholder) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
             assert(lhs.kind !== 'MemberExpression'); // TODO: explain... Since nested MemExprs are always resolved before outer ones due to them being added to the array depth-first
 
-            // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
-            // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
-            assert(lhs.kind === 'Module');
-            const id = lhs.bindings[mem.member];
-            if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
-            assert(id.kind === 'Identifier' && id.unique);
-            Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
-        }
-
-        // TODO doc:
-        // - for each InstantiationExpression `i` encountered in STEP 1 above:
-        //   - find the referenced GenericExpression `g`, and the scope `s` in which `g` occurred
-        //   - evaluate `g` in `s` with the arg of `i` --> `eval` (ie RECURSE here)
-        //   - replace InstantiationExpresion object in-place with `eval`
-        for (const [inst, scope] of instantiations) {
-            let gen = inst.generic;
-            let genScope = scope;
-            while (gen.kind === 'Identifier' && gen.unique) {
-                genScope = allSymbols[gen.name].scope;
-                gen = allSymbols[gen.name].value; // TODO: could this loop infinitely?
+            // If the lhs is a module, we can statically resolve the member expression. Otherwise, leave it as-is.
+            if (lhs.kind === 'Module') {
+                // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
+                // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
+                const id = lhs.bindings[mem.member];
+                if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
+                assert(id.kind === 'Identifier' && id.unique && !id.placeholder);
+                Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
             }
-            if (gen.kind === 'Intrinsic') continue; // TODO: explain... will be emitted as a call to the extension fn
-
-            // TODO: doc: `inst.argument` has already been resolved in the scope of the `inst` expression
-            assert(gen.kind === 'GenericExpression', `Unexpected node kind '${gen.kind}'`);
-            const expr = internalResolve({gen, arg: inst.argument, env: genScope}); // Recurse
-            Object.assign(inst, {generic: null, argument: null}, expr);
         }
 
         return result;

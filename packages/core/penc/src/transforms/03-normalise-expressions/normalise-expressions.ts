@@ -73,6 +73,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         switch (e.kind) {
             case 'BooleanLiteral': return setV(e);
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
+            case 'GenericExpression': throw new Error('Not implemented'); // TODO
             // TODO: was... remove? case 'GenericExpression': return setV(e); // TODO: correct?
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
