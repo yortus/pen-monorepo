@@ -61,7 +61,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 // for all GenericExpression#param: replace Pattern --> Identifier
                 GenericExpression: ({param, body}): V.GenericExpression<200> => {
                     if (param.kind === 'Identifier') return {kind: 'GenericExpression', param, body: rec(body)};
-                    const paramᐟ: V.Identifier = {kind: 'Identifier', name: generateParamName()};
+                    const paramᐟ: V.Identifier = {kind: 'Identifier', name: generateParamName(), placeholder: true};
                     const binding: V.Binding<100> = {kind: 'Binding', left: param, right: paramᐟ};
                     return {
                         kind: 'GenericExpression',

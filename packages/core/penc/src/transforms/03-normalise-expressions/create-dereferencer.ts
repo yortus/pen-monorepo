@@ -20,16 +20,16 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
     function deref(expr: V.Expression<300>): V.Expression<300> {
         const seen = [expr];
         while (true) {
-            // If `expr` is a ref|mem expression, resolve to its target expression.
+            // If `expr` is an Identifier expression, resolve to its target expression.
             if (expr.kind === 'Identifier') {
                 expr = bindings[expr.name];
             }
             else {
-                // If `expr` resolved to an expression that isn't a par|ref|mem expression, return it as-is.
+                // Otherwise return it as-is.
                 return expr;
             }
 
-            // If `expr` is still a ref|mem expression, keep iterating, but prevent an infinite loop.
+            // If `expr` is still an Identifier expression, keep iterating, but prevent an infinite loop.
             if (seen.includes(expr)) {
                 // TODO: improve diagnostic message, eg line/col ref
                 const name = expr.kind === 'Identifier' ? expr.name : '(?)'; // TODO: fix non-ref case!

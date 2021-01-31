@@ -16,7 +16,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     let resolved = internalResolve({
         gen: {
             kind: 'GenericExpression',
-            param: {kind: 'Identifier', name: 'DUMMY'}, // TODO: this id is never referenced, so name doesn't matter. Remove it somehow?
+            param: {kind: 'Identifier', name: 'DUMMY', placeholder: true}, // TODO: this id is never referenced, so name doesn't matter. Remove it somehow?
             body: ast.start,
         },
         arg: {kind: 'Module', bindings: {}},
@@ -30,7 +30,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     }
 
     // TODO: temp testing...
-    assert(resolved.kind === 'Identifier' && resolved.resolved);
+    assert(resolved.kind === 'Identifier' && resolved.unique);
     allSymbols['start'] = {globalName: 'start', value: resolved, scope: rootScope};
     const astᐟ: V.AST<300> = {
         version: 300,
@@ -65,7 +65,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 return gen; // NB: don't recurse inside
             },
             Identifier: id => {
-                if (id.resolved) return id;
+                if (id.unique) return id;
                 // TODO: explain tracking...
                 // Add each Identifier to a list to be processed later
                 const idᐟ = {...id};
@@ -86,7 +86,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 const bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(le.bindings)) {
                     const {globalName} = env.insert(name, rec(expr));
-                    bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
+                    bindings[name] = {kind: 'Identifier', name: globalName, unique: true};
                 }
 
                 // Recursively resolve the main expression in the nested scope.
@@ -111,7 +111,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
                 const bindings = {} as Record<string, V.Identifier>;
                 for (const [name, expr] of Object.entries(module.bindings)) {
                     const {globalName} = env.insert(name, rec(expr));
-                    bindings[name] = {kind: 'Identifier', name: globalName, resolved: true};
+                    bindings[name] = {kind: 'Identifier', name: globalName, unique: true};
                 }
 
                 // Pop back out to the surrounding scope before returning.
@@ -123,13 +123,13 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         // STEP 2: Resolve all Identifier nodes
         for (let [id, scope] of identifiers) {
             const {globalName} = scope.lookup(id.name);
-            Object.assign(id, {name: globalName, resolved: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+            Object.assign(id, {name: globalName, unique: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
 
         // STEP 3: Resolve all MemberExpression nodes
         for (let mem of memberExprs) {
             let lhs = mem.module;
-            while (lhs.kind === 'Identifier' && lhs.resolved) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
+            while (lhs.kind === 'Identifier' && lhs.unique) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
             assert(lhs.kind !== 'MemberExpression'); // TODO: explain... Since nested MemExprs are always resolved before outer ones due to them being added to the array depth-first
 
             // Lookup the name in the lhs Module. This lookup is different to an Identifier lookup, in that the name
@@ -137,7 +137,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             assert(lhs.kind === 'Module');
             const id = lhs.bindings[mem.member];
             if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
-            assert(id.kind === 'Identifier' && id.resolved);
+            assert(id.kind === 'Identifier' && id.unique);
             Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
 
@@ -149,7 +149,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         for (const [inst, scope] of instantiations) {
             let gen = inst.generic;
             let genScope = scope;
-            while (gen.kind === 'Identifier' && gen.resolved) {
+            while (gen.kind === 'Identifier' && gen.unique) {
                 genScope = allSymbols[gen.name].scope;
                 gen = allSymbols[gen.name].value; // TODO: could this loop infinitely?
             }
