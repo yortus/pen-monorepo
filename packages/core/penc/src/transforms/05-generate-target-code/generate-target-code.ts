@@ -120,8 +120,11 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<300>, mo
     switch (expr.kind) {
         // TODO: No-op cases... explain why for each
         case 'Intrinsic': // already handled by emitProgram
-        case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
             break;
+
+        // TODO: implement...
+        // case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
+        //     break;
 
         case 'BooleanLiteral':
         case 'NullLiteral':

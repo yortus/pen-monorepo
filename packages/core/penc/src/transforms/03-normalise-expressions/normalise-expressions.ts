@@ -79,8 +79,14 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
             
             
             // TODO: special... should not be encountered here, since each genexpr would be a separate context
-            case 'GenericExpression': return setV(e); // TODO: not correct! Fix
-
+            case 'GenericExpression': {
+                const bodyᐟ: V.LetExpression<300> = {
+                    kind: 'LetExpression',
+                    expression: ref(e.body.expression),
+                    bindings: mapObj(e.body.bindings, ref),
+                };
+                return setV(e, {param: e.param, body: bodyᐟ});
+            }
 
 
 
@@ -89,7 +95,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
             case 'Intrinsic': return setV(e);
             case 'LetExpression': return setV(e, {expression: ref(e.expression), bindings: mapObj(e.bindings, ref)});
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
-            case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
+            case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
             case 'Module': return setV(e, {bindings: mapObj(e.bindings, ref)});
             case 'NotExpression': return setV(e, {expression: ref(e.expression)});
             case 'NullLiteral': return setV(e);

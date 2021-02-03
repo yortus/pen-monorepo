@@ -49,6 +49,4 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
  * NB: Identifier nodes cannot be dereferenced, and will throw an error if encountered.
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
-export interface DereferenceFunction {
-    <E extends V.Expression<300>>(expr: E): E;
-}
+export type DereferenceFunction = (expr: V.Expression<300>) => V.Expression<300>;
