@@ -1,7 +1,6 @@
 import * as objectHash from 'object-hash';
 import {V} from '../../representations';
 import {mapObj} from '../../utils';
-import type {DereferenceFunction} from './create-dereferencer';
 
 
 // TODO: review this outdated jsdoc comment...
@@ -13,7 +12,7 @@ import type {DereferenceFunction} from './create-dereferencer';
  * refers to will have the same hash value. This allows the AST to be simplified without changing it semantically.
  * @param deref function to be used to dereference expressions (see createExpressionDereferencer).
  */
-export function createNodeHasher(deref: DereferenceFunction) {
+export function createNodeHasher(deref: (id: V.Identifier) => V.Expression<300>) {
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<V.Expression<300>, Signature>();
     const hashesByNode = new Map<V.Expression<300>, string>();

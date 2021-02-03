@@ -1,7 +1,7 @@
 import {traverseNode, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
-import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
+import {dereference} from './dereference';
 
 
 // TODO: jsdoc...
@@ -18,7 +18,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         if (n.kind !== 'LetExpression') return;
         for (let [name, value] of Object.entries(n.bindings)) allBindings[name] = value;
     });
-    const deref = createDereferencer(name => allBindings[name]);
+    const deref = (id: V.Identifier) => dereference(id, name => allBindings[name]);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
