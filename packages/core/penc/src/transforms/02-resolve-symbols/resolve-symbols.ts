@@ -70,10 +70,8 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             env = env.createNestedScope();
 
             // Create a symbol for each local name in the let expression.
-            const bindings = {} as Record<string, V.Identifier>;
             for (const [name, expr] of Object.entries(le.bindings)) {
-                const {uniqueName} = env.insert(name, rec(expr));
-                bindings[name] = {kind: 'Identifier', name: uniqueName, unique: true};
+                env.insert(name, rec(expr));
             }
 
             // Recursively resolve the main expression in the nested scope.
