@@ -19,8 +19,8 @@ export function validateAST<V extends Version>(ast: AST<V>) {
                 assert(Array.isArray(n.bindings), `Expected bindings property to be an array`);
             }
         }
-        // TODO: these checks are currently identical for V200 and V300...
-        else if (ast.version === 200 || ast.version === 300) {
+
+        if (ast.version === 200 || ast.version === 300) {
             if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }

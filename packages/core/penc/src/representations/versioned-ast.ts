@@ -105,7 +105,6 @@ export interface FieldExpression<V extends Version> {
 export interface Identifier {
     kind: 'Identifier';
     name: string;
-    unique?: boolean;
 }
 
 

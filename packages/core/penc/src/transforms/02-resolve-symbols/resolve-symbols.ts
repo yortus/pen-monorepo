@@ -45,8 +45,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             env = env.surroundingScope;
             popClosure();
 
-            // TODO: ...
-            // TODO: fails. Why even need it? assert(bodyᐟ.kind === 'Identifier'); // TODO: how is this guaranteed? From V200 GenExpr?
+            // TODO: explain...
             return {
                 kind: 'GenericExpression',
                 param,
@@ -58,8 +57,6 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             };
         },
         Identifier: id => {
-            if (id.unique) return id;
-            // TODO: explain tracking...
             // Collect every Identifier encountered during the traversal, to be resolved in step 2.
             const idᐟ = {...id};
             identifiers.set(idᐟ, env);
@@ -82,7 +79,6 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             return expression;
         },
         MemberExpression: mem => {
-            // TODO: explain tracking...
             // Collect every MemberExpression encountered during the traversal, to be resolved in step 3.
             const memᐟ = {...mem, module: rec(mem.module)};
             memberExprs.push(memᐟ);
@@ -96,7 +92,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             const bindings = {} as Record<string, V.Identifier>;
             for (const [name, expr] of Object.entries(module.bindings)) {
                 const {uniqueName} = env.insert(name, rec(expr));
-                bindings[name] = {kind: 'Identifier', name: uniqueName, unique: true};
+                bindings[name] = {kind: 'Identifier', name: uniqueName};
             }
 
             // Pop back out to the surrounding scope before returning.
@@ -114,7 +110,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     // STEP 3: Resolve MemberExpression nodes where possible
     for (let mem of memberExprs) {
         let lhs = mem.module;
-        while (lhs.kind === 'Identifier' && lhs.unique) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
+        while (lhs.kind === 'Identifier') lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
         assert(lhs.kind !== 'MemberExpression'); // TODO: explain... Since nested MemExprs are always resolved before outer ones due to them being added to the array depth-first
 
         // If the lhs is a module, we can statically resolve the member expression. Otherwise, leave it as-is.
@@ -123,13 +119,13 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
             const id = lhs.bindings[mem.member];
             if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
-            assert(id.kind === 'Identifier' && id.unique);
+            assert(id.kind === 'Identifier');
             Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
     }
 
     // TODO: temp testing...
-    assert(startᐟ.kind === 'Identifier' && startᐟ.unique);
+    assert(startᐟ.kind === 'Identifier');
     const astᐟ: V.AST<300> = {
         version: 300,
         start: {
