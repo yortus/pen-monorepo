@@ -1,10 +1,11 @@
 import * as objectHash from 'object-hash';
 import {V} from '../../representations';
 import {mapObj} from '../../utils';
+import {dereference} from './dereference';
 
 
 // TODO: review this outdated jsdoc comment...
-// TODO: review hashable node kinds too... should be all Expression subkinds plus Module?
+// TODO: doc... maintains internal cache for perf - create one hasher for an AST
 /**
  * Returns a function that returns a hash value for any given node. Any node kind may be hashed except the Local* kinds.
  * The same hash value is returned for most logically equivalent nodes, that is, nodes that may be substituted for one
@@ -12,14 +13,14 @@ import {mapObj} from '../../utils';
  * refers to will have the same hash value. This allows the AST to be simplified without changing it semantically.
  * @param deref function to be used to dereference expressions (see createExpressionDereferencer).
  */
-export function createNodeHasher(deref: (id: V.Identifier) => V.Expression<300>) {
+export function createNodeHasher() {
     type Signature = [string, ...unknown[]];
     const signaturesByNode = new Map<V.Expression<300>, Signature>();
     const hashesByNode = new Map<V.Expression<300>, string>();
 
-    return function getHashFor(node: V.Expression<300>) {
+    return function getHashFor(node: V.Expression<300>, lookup: (name: string) => V.Expression<300>) {
         if (hashesByNode.has(node)) return hashesByNode.get(node)!;
-        const sig = getSignatureFor(node);
+        const sig = getSignatureFor(node, lookup);
         const hash = objectHash(sig);
         hashesByNode.set(node, hash);
         return hash;
@@ -29,7 +30,7 @@ export function createNodeHasher(deref: (id: V.Identifier) => V.Expression<300>)
      * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
      * Logically equivalent nodes will end up with equivalent signatures that produce the same hash. 
      */
-    function getSignatureFor(n: V.Expression<300>): Signature {
+    function getSignatureFor(n: V.Expression<300>, lookup: (name: string) => V.Expression<300>): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
@@ -38,7 +39,7 @@ export function createNodeHasher(deref: (id: V.Identifier) => V.Expression<300>)
         // If the node is an Identifier, get the signature of its target expression, and set that as the signature
         // of the Identifier node. This ensures every Identifier node has the same hash as the node it refers to.
         if (n.kind === 'Identifier') {
-            const sig = getSignatureFor(deref(n));
+            const sig = getSignatureFor(dereference(n, lookup), lookup);
             signaturesByNode.set(n, sig);
             return sig;
         }
@@ -51,7 +52,7 @@ export function createNodeHasher(deref: (id: V.Identifier) => V.Expression<300>)
         signaturesByNode.set(n, sig);
 
         // Declare local shorthand helpers for getting node signatures, and for setting the signature for this node.
-        const getSig = (n: V.Expression<300>) => getSignatureFor(n)
+        const getSig = (n: V.Expression<300>) => getSignatureFor(n, lookup)
         const setSig = (...parts: Signature) => (sig.push(...parts), sig);
 
         // Recursively compute the signature according to the node type.

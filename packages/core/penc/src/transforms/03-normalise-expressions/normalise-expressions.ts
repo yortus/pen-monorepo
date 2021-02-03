@@ -18,13 +18,13 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         if (n.kind !== 'LetExpression') return;
         for (let [name, value] of Object.entries(n.bindings)) allBindings[name] = value;
     });
-    const deref = (id: V.Identifier) => dereference(id, name => allBindings[name]);
-    const getHashFor = createNodeHasher(deref);
+    const lookup = (name: string) => allBindings[name];
+    const getHashFor = createNodeHasher();
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
     const namesByHash = Object.entries(allBindings).reduce((obj, [name, value]) => {
-        const hash = getHashFor(value);
+        const hash = getHashFor(value, lookup);
         obj[hash] ??= [];
         obj[hash].push(name);
         return obj;
@@ -58,8 +58,8 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     // TODO: recursive...
     function getNewBindingFor(expr: V.Expression<300>, parentName?: string): {name: string, value: V.Expression<300>} {
         // TODO: doc...
-        const e = expr.kind === 'Identifier' ? deref(expr) : expr;
-        const hash = getHashFor(e);
+        const e = expr.kind === 'Identifier' ? dereference(expr, lookup) : expr;
+        const hash = getHashFor(e, lookup);
         if (newBindingsByHash.has(hash)) return newBindingsByHash.get(hash)!;
 
         // TODO: make up a name for the new binding. Use a name from the matching old binding if available.
