@@ -89,7 +89,7 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
         emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: ${mode}});`);
     }
 
-    // TODO: emit each expression...
+    // TODO: emit each binding...
     for (const [name, value] of Object.entries(bindings)) {
         emitExpression(emit, name, value, mode);
         if (consts[name] === undefined) continue;
@@ -139,9 +139,13 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<300>, mo
             break;
         }
 
-        // TODO: implement...
-        // case 'GenericExpression':
-        //     break;
+        // TODO: ...
+        case 'GenericExpression': {
+            emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
+            emit.down(1).text(`throw new Error('Not implemented');`);
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
 
         case 'InstantiationExpression': {
             // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of

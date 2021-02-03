@@ -20,8 +20,8 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
     function deref(expr: V.Expression<300>): V.Expression<300> {
         const seen = [expr];
         while (true) {
-            // If `expr` is an Identifier expression, resolve to its target expression.
-            if (expr.kind === 'Identifier') {
+            // If `expr` is an Identifier expression, resolve to its target expression. Leave placeholders unresolved.
+            if (expr.kind === 'Identifier' && !expr.placeholder) {
                 expr = bindings[expr.name];
             }
             else {
@@ -50,5 +50,5 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
  * NB2: the result of dereferencing an expression is guaranteed to never be a parenthesised or global reference expr.
  */
 export interface DereferenceFunction {
-    <E extends V.Expression<300>>(expr: E): E extends {kind: 'Identifier'} ? never : E;
+    <E extends V.Expression<300>>(expr: E): E;
 }

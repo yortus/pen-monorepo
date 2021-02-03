@@ -1,7 +1,6 @@
-// TODO: was... remove? import {randomBytes} from 'crypto';
 import * as objectHash from 'object-hash';
 import {V} from '../../representations';
-import {mapObj} from '../../utils';
+import {assert, mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
 
@@ -62,13 +61,13 @@ export function createNodeHasher(deref: DereferenceFunction) {
         switch (n.kind) {
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'GenericExpression': throw new Error('Not implemented'); // TODO
-            // TODO: was... remove? case 'GenericExpression': return setSig('GEN', randomBytes(32).toString('base64')); // TODO: always unique. Is this correct? Test scenario where it matters?
+            case 'GenericExpression': return setSig('GEN', getSig(n.body));
+            case 'Identifier': return assert(n.placeholder), setSig('ID', n.name); // TODO: explain... placeholders all have unique names, so unique hashes too
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             // TODO: was... remove? case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
-            case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
+            case 'MemberExpression': return setSig('MEM', getSig(n.module), n.member);
             case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LIT', n.value);

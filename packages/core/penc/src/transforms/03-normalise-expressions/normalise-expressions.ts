@@ -73,8 +73,15 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         switch (e.kind) {
             case 'BooleanLiteral': return setV(e);
             case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
-            case 'GenericExpression': throw new Error('Not implemented'); // TODO
-            // TODO: was... remove? case 'GenericExpression': return setV(e); // TODO: correct?
+            
+            
+            // TODO: special... should not be encountered here, since each genexpr would be a separate context
+            case 'GenericExpression': return setV(e); // TODO: not correct! Fix
+
+
+
+
+            case 'Identifier': return assert(e.placeholder), setV(e);
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
             // TODO: was... remove? case 'LetExpression': return setV(e, {expression: ref(e.expression), bindings: mapObj(e.bindings, ref)});
