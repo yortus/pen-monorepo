@@ -7,7 +7,6 @@ const ast2 = {
       module: null,
       member: null,
       name: "start_2",
-      unique: true,
     },
     bindings: {
       x: {
@@ -18,7 +17,7 @@ const ast2 = {
       },
       REP: {
         kind: "GenericExpression",
-        param: "ℙ",
+        param: "ℙ1",
         body: {
           kind: "LetExpression",
           expression: {
@@ -42,17 +41,11 @@ const ast2 = {
             ],
           },
           bindings: {
-            "ℙ": {
-              kind: "Identifier",
-              name: "ℙ",
-              placeholder: true,
-            },
             a: {
               kind: "MemberExpression",
               module: {
-                kind: "Identifier",
-                name: "ℙ",
-                unique: true,
+                kind: "GenericParameter",
+                name: "ℙ1",
               },
               member: "a",
             },
@@ -61,7 +54,7 @@ const ast2 = {
       },
       GEN: {
         kind: "GenericExpression",
-        param: "ℙ",
+        param: "ℙ2",
         body: {
           kind: "LetExpression",
           expression: {
@@ -80,15 +73,9 @@ const ast2 = {
             ],
           },
           bindings: {
-            "ℙ_2": {
-              kind: "Identifier",
-              name: "ℙ_2",
-              placeholder: true,
-            },
             x_2: {
-              kind: "Identifier",
-              name: "ℙ_2",
-              unique: true,
+              kind: "GenericParameter",
+              name: "ℙ2",
             },
           },
         },
@@ -109,22 +96,18 @@ const ast2 = {
           REP: {
             kind: "Identifier",
             name: "REP",
-            unique: true,
           },
           GEN: {
             kind: "Identifier",
             name: "GEN",
-            unique: true,
           },
           x: {
             kind: "Identifier",
             name: "x_3",
-            unique: true,
           },
           a: {
             kind: "Identifier",
             name: "a_2",
-            unique: true,
           },
         },
       },
@@ -176,7 +159,6 @@ const ast2 = {
               module: null,
               member: null,
               name: "REP",
-              unique: true,
             },
             argument: {
               kind: "Module",
@@ -184,7 +166,6 @@ const ast2 = {
                 a: {
                   kind: "Identifier",
                   name: "a_3",
-                  unique: true,
                 },
               },
             },
@@ -202,22 +183,18 @@ const ast2 = {
           x: {
             kind: "Identifier",
             name: "x",
-            unique: true,
           },
           nested: {
             kind: "Identifier",
             name: "nested",
-            unique: true,
           },
           letexpr: {
             kind: "Identifier",
             name: "letexpr",
-            unique: true,
           },
           start: {
             kind: "Identifier",
             name: "start_2",
-            unique: true,
           },
         },
       },

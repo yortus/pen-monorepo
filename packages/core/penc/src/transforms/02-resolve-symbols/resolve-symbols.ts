@@ -4,10 +4,8 @@ import {createSymbolTable, Scope, Symbol} from './symbol-table';
 
 
 // TODO: jsdoc...
-// - resolves all identifiers and member lookups
-// - outputs the program as a single module (ie flat list of bindings)
-// - all Identifiers refer to binding names in the single module
-// - output contains *no* MemberExpressions (well it could actually, via extensions)
+// - resolves all identifiers (output ast Identifiers all refer to globally-unique names in LetExpr bindings)
+// - resolves member lookups where possible (can't resolve member access of intrinsics or generic params)
 export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     validateAST(ast);
     const allSymbols = {} as Record<string, Symbol>;

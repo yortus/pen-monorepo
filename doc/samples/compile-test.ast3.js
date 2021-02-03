@@ -2,12 +2,11 @@ const ast3 = {
   version: 300,
   start: {
     kind: "LetExpression",
-     expression: {
+    expression: {
       kind: "Identifier",
       module: null,
       member: null,
       name: "start_2",
-      unique: true,
     },
     bindings: {
       start_2: {
@@ -36,7 +35,7 @@ const ast3 = {
       },
       REP: {
         kind: "GenericExpression",
-        param: "ℙ",
+        param: "ℙ1",
         body: {
           kind: "LetExpression",
           expression: {
@@ -44,10 +43,6 @@ const ast3 = {
             name: "REP_e",
           },
           bindings: {
-            "ℙ": {
-              kind: "Identifier",
-              name: "ℙ",
-            },
             a: {
               kind: "Identifier",
               name: "a",
@@ -76,14 +71,13 @@ const ast3 = {
         kind: "MemberExpression",
         module: {
           kind: "Identifier",
-          name: "ℙ",
+          name: "a_e",
         },
         member: "a",
       },
-      "ℙ": {
-        kind: "Identifier",
-        name: "ℙ",
-        placeholder: true,
+      a_e: {
+        kind: "GenericParameter",
+        name: "ℙ1",
       },
       x_3: {
         kind: "StringLiteral",
