@@ -11,14 +11,20 @@ import {createSymbolTable, Scope, Symbol} from './symbol-table';
 export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     validateAST(ast);
     const allSymbols = {} as Record<string, Symbol>;
-    let closureCounter = 0;
-    let currentClosureId = `GLOBALS`;
-    const symbolsByClosureId = {} as Record<string, Record<string, Symbol>>;
+    const outerClosures = [] as Array<Record<string, Symbol>>;
+    let currentClosure = {} as Record<string, Symbol>;
+    function pushClosure() {
+        outerClosures.push(currentClosure);
+        currentClosure = {};
+    }
+    function popClosure() {
+        assert(outerClosures.length > 0);
+        currentClosure = outerClosures.pop()!;
+    }
     const {rootScope} = createSymbolTable({
         onInsert: symbol => {
             allSymbols[symbol.uniqueName] = symbol;
-            symbolsByClosureId[currentClosureId] ??= {};
-            symbolsByClosureId[currentClosureId][symbol.uniqueName] = symbol;
+            currentClosure[symbol.uniqueName] = symbol;
         },
     });
 
@@ -30,8 +36,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         GenericExpression: ({param, body}): V.GenericExpression<300> => {
 
             // Create a closure and nested scope for this generic expression.
-            const surroundingClosureId = currentClosureId;
-            currentClosureId = 'C' + String(++closureCounter).padStart(6, '0');
+            pushClosure();
             env = env.createNestedScope();
 
             // Create a symbol for the generic parameter, whose value is specially marked as a 'placeholder'.
@@ -39,11 +44,23 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             const {uniqueName} = env.insert(param, placeholder);
             Object.assign(placeholder, {name: uniqueName}); // TODO: cleaner way than in-place update?
 
-            // Traverse the body expression in the new scope, then revert to the surrounding scope before returning.
+            // Traverse the body expression in the new scope, then revert to the surrounding scope and closure.
             const bodyᐟ = rec(body);
+            const allSymbolsInClosure = currentClosure;
             env = env.surroundingScope;
-            currentClosureId = surroundingClosureId;
-            return {kind: 'GenericExpression', param, body: bodyᐟ};
+            popClosure();
+
+            // TODO: ...
+            // TODO: fails. Why even need it? assert(bodyᐟ.kind === 'Identifier'); // TODO: how is this guaranteed? From V200 GenExpr?
+            return {
+                kind: 'GenericExpression',
+                param,
+                body: {
+                    kind: 'LetExpression',
+                    expression: bodyᐟ,
+                    bindings: mapObj(allSymbolsInClosure, symbol => symbol.value),
+                },
+            };
         },
         Identifier: id => {
             if (id.unique) return id;
@@ -120,13 +137,12 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
     // TODO: temp testing...
     assert(startᐟ.kind === 'Identifier' && startᐟ.unique);
-    allSymbols['start'] = {uniqueName: 'start', value: startᐟ, scope: rootScope};
     const astᐟ: V.AST<300> = {
         version: 300,
         start: {
             kind: 'LetExpression',
-            expression: {kind: 'Identifier', name: 'start'},
-            bindings: mapObj(allSymbols, symbol => symbol.value),
+            expression: startᐟ,
+            bindings: mapObj(currentClosure, symbol => symbol.value),
         },
     };
     validateAST(astᐟ);

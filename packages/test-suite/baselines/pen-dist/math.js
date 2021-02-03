@@ -578,22 +578,22 @@ const parse = (() => {
     const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
 
     // InstantiationExpression
-    let startₘ;
-    function start(arg) {
+    let start_2ₘ;
+    function start_2(arg) {
         try {
-            return startₘ(arg);
+            return start_2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
-            startₘ = memoise(start_e);
-            return startₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('start_2ₘ is not a function')) throw err;
+            start_2ₘ = memoise(start_2_e);
+            return start_2ₘ(arg);
         }
     }
 
     // Intrinsic
 
     // SelectionExpression
-    function start_e() {
+    function start_2_e() {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
@@ -604,7 +604,7 @@ const parse = (() => {
     function add() {
         return parseRecord([
             {name: 'type', value: add_e},
-            {name: 'lhs', value: start},
+            {name: 'lhs', value: start_2},
             {name: 'rhs', value: add_e2},
         ]);
     }
@@ -944,7 +944,7 @@ const parse = (() => {
         const stateₒ = getState();
         let out;
         if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -1010,7 +1010,7 @@ const parse = (() => {
     function sub() {
         return parseRecord([
             {name: 'type', value: sub_e},
-            {name: 'lhs', value: start},
+            {name: 'lhs', value: start_2},
             {name: 'rhs', value: sub_e2},
         ]);
     }
@@ -1042,7 +1042,7 @@ const parse = (() => {
     }
     sub_e3.constant = {value: "-"};
 
-    return start;
+    return start_2;
 })();
 
 
@@ -1057,22 +1057,22 @@ const print = (() => {
     const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
 
     // InstantiationExpression
-    let startₘ;
-    function start(arg) {
+    let start_2ₘ;
+    function start_2(arg) {
         try {
-            return startₘ(arg);
+            return start_2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('startₘ is not a function')) throw err;
-            startₘ = memoise(start_e);
-            return startₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('start_2ₘ is not a function')) throw err;
+            start_2ₘ = memoise(start_2_e);
+            return start_2ₘ(arg);
         }
     }
 
     // Intrinsic
 
     // SelectionExpression
-    function start_e() {
+    function start_2_e() {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
@@ -1083,7 +1083,7 @@ const print = (() => {
     function add() {
         return printRecord([
             {name: 'type', value: add_e},
-            {name: 'lhs', value: start},
+            {name: 'lhs', value: start_2},
             {name: 'rhs', value: add_e2},
         ]);
     }
@@ -1439,7 +1439,7 @@ const print = (() => {
         const stateₒ = getState();
         let out;
         if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_2()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
@@ -1502,7 +1502,7 @@ const print = (() => {
     function sub() {
         return printRecord([
             {name: 'type', value: sub_e},
-            {name: 'lhs', value: start},
+            {name: 'lhs', value: start_2},
             {name: 'rhs', value: sub_e2},
         ]);
     }
@@ -1537,5 +1537,5 @@ const print = (() => {
     }
     sub_e3.constant = {value: "-"};
 
-    return start;
+    return start_2;
 })();

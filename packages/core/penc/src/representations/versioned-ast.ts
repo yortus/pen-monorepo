@@ -28,8 +28,8 @@ export interface AST<V extends Version = Version> {
             kind: 'MemberExpression';
             module: {
                 kind: 'MemberExpression';
-                module: Module<V, Module<V>>;
-                member: string;
+                module: Module<V, Module<V>>; // TODO: doc... one binding per source file, vals are source file asts
+                member: string; // TODO: doc... always moduleName of `main` source file (Expected to define `start`)
             };
             member: 'start';
         };
@@ -147,12 +147,12 @@ export type GenericExpression<V extends Version> = {
     200: {
         kind: 'GenericExpression';
         param: string;
-        body: Expression<V>;
+        body: LetExpression<V>;
     };
     300: {
         kind: 'GenericExpression';
         param: string;
-        body: Expression<V>;
+        body: LetExpression<V>;
     };
 }[V];
 

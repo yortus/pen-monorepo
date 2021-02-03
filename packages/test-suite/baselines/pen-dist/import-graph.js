@@ -230,11 +230,11 @@ const extensions = {
 const parse = (() => {
 
     // SequenceExpression
-    function start() {
+    function start_2() {
         const stateₒ = getState();
         let out;
         if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_2_e()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -252,7 +252,7 @@ const parse = (() => {
     foo.constant = {value: "foo"};
 
     // SequenceExpression
-    function start_e() {
+    function start_2_e() {
         const stateₒ = getState();
         let out;
         if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -285,7 +285,7 @@ const parse = (() => {
     }
     baz.constant = {value: "baz"};
 
-    return start;
+    return start_2;
 })();
 
 
@@ -295,11 +295,11 @@ const parse = (() => {
 const print = (() => {
 
     // SequenceExpression
-    function start() {
+    function start_2() {
         const stateₒ = getState();
         let out;
         if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start_e()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (start_2_e()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
@@ -318,7 +318,7 @@ const print = (() => {
     foo.constant = {value: "foo"};
 
     // SequenceExpression
-    function start_e() {
+    function start_2_e() {
         const stateₒ = getState();
         let out;
         if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -353,5 +353,5 @@ const print = (() => {
     }
     baz.constant = {value: "baz"};
 
-    return start;
+    return start_2;
 })();

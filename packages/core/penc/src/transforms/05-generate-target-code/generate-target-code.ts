@@ -20,7 +20,7 @@ export function generateTargetCode(program: Program) {
 
     // TODO: validate AST... move this to validate-ast.ts
     assert(program.ast.start.expression.kind === 'Identifier');
-    assert(program.ast.start.expression.name === 'start');
+    assert(program.ast.start.expression.name.startsWith('start'));
 
 
 
@@ -105,7 +105,8 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     }
 
     // TODO: emit epilog...
-    emit.down(2).text(`return start;`);
+    assert(program.ast.start.expression.kind === 'Identifier');
+    emit.down(2).text(`return ${program.ast.start.expression.name};`);
     emit.dedent().down(1).text('})();');
 }
 

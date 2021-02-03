@@ -633,7 +633,7 @@ const parse = (() => {
     const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
 
     // SequenceExpression
-    function start() {
+    function start_2() {
         const stateₒ = getState();
         let out;
         if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -1494,7 +1494,7 @@ const parse = (() => {
 
     // Intrinsic
 
-    return start;
+    return start_2;
 })();
 
 
@@ -1509,7 +1509,7 @@ const print = (() => {
     const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
 
     // SequenceExpression
-    function start() {
+    function start_2() {
         const stateₒ = getState();
         let out;
         if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
@@ -2328,5 +2328,5 @@ const print = (() => {
 
     // Intrinsic
 
-    return start;
+    return start_2;
 })();

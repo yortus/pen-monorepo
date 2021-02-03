@@ -19,21 +19,16 @@ export function validateAST<V extends Version>(ast: AST<V>) {
                 assert(Array.isArray(n.bindings), `Expected bindings property to be an array`);
             }
         }
-        else if (ast.version === 200) {
+        // TODO: these checks are currently identical for V200 and V300...
+        else if (ast.version === 200 || ast.version === 300) {
             if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
             if (n.kind === 'Module' || n.kind === 'LetExpression') {
                 assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
             }
-        }
-        else if (ast.version === 300) {
-            // TODO: these checks are currently identical to the V200 checks. Refactor?
-            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
-                throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
-            }
-            if (n.kind === 'Module' || n.kind === 'LetExpression') {
-                assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
+            if (n.kind === 'GenericExpression') {
+                assert(n.body.kind === 'LetExpression');
             }
         }
     });

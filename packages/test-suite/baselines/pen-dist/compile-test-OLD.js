@@ -230,7 +230,7 @@ const extensions = {
 const parse = (() => {
 
     // StringLiteral
-    function start() {
+    function start_2() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -239,9 +239,9 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    start.constant = {value: "foo"};
+    start_2.constant = {value: "foo"};
 
-    return start;
+    return start_2;
 })();
 
 
@@ -251,7 +251,7 @@ const parse = (() => {
 const print = (() => {
 
     // StringLiteral
-    function start() {
+    function start_2() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -261,7 +261,7 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    start.constant = {value: "foo"};
+    start_2.constant = {value: "foo"};
 
-    return start;
+    return start_2;
 })();

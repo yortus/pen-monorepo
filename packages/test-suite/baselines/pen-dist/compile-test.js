@@ -230,22 +230,22 @@ const extensions = {
 const parse = (() => {
 
     // SelectionExpression
-    function start() {
-        if (start_e()) return true;
+    function start_2() {
+        if (start_2_e()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // InstantiationExpression
-    let start_eₘ;
-    function start_e(arg) {
+    let start_2_eₘ;
+    function start_2_e(arg) {
         try {
-            return start_eₘ(arg);
+            return start_2_eₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_eₘ is not a function')) throw err;
-            start_eₘ = REP(start_e2);
-            return start_eₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('start_2_eₘ is not a function')) throw err;
+            start_2_eₘ = REP(start_2_e2);
+            return start_2_eₘ(arg);
         }
     }
 
@@ -255,7 +255,7 @@ const parse = (() => {
     }
 
     // Module
-    function start_e2(member) {
+    function start_2_e2(member) {
         switch (member) {
             case 'a': return x;
             default: return undefined;
@@ -315,7 +315,7 @@ const parse = (() => {
     }
     letexpr_e.constant = {value: "-"};
 
-    return start;
+    return start_2;
 })();
 
 
@@ -325,22 +325,22 @@ const parse = (() => {
 const print = (() => {
 
     // SelectionExpression
-    function start() {
-        if (start_e()) return true;
+    function start_2() {
+        if (start_2_e()) return true;
         if (letexpr()) return true;
         return false;
     }
 
     // InstantiationExpression
-    let start_eₘ;
-    function start_e(arg) {
+    let start_2_eₘ;
+    function start_2_e(arg) {
         try {
-            return start_eₘ(arg);
+            return start_2_eₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_eₘ is not a function')) throw err;
-            start_eₘ = REP(start_e2);
-            return start_eₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('start_2_eₘ is not a function')) throw err;
+            start_2_eₘ = REP(start_2_e2);
+            return start_2_eₘ(arg);
         }
     }
 
@@ -350,7 +350,7 @@ const print = (() => {
     }
 
     // Module
-    function start_e2(member) {
+    function start_2_e2(member) {
         switch (member) {
             case 'a': return x;
             default: return undefined;
@@ -413,5 +413,5 @@ const print = (() => {
     }
     letexpr_e.constant = {value: "-"};
 
-    return start;
+    return start_2;
 })();

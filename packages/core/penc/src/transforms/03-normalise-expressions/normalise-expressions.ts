@@ -1,4 +1,4 @@
-import {V, validateAST} from '../../representations';
+import {traverseNode, V, validateAST} from '../../representations';
 import {assert, mapObj} from '../../utils';
 import {createDereferencer} from './create-dereferencer';
 import {createNodeHasher} from './create-node-hasher';
@@ -10,14 +10,20 @@ import {createNodeHasher} from './create-node-hasher';
 export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     validateAST(ast);
 
+    // TODO: temp workaround... get _all_ bindings in one map like before, but only for deref... need to fix this
+    // - maybe just return allBindings from previous transform, and consume it here?
     // TODO: doc...
-    const {bindings} = ast.start;
-    const deref = createDereferencer(bindings);
+    const allBindings = {} as Record<string, V.Expression<300>>;
+    traverseNode(ast.start, n => {
+        if (n.kind !== 'LetExpression') return;
+        for (let [name, value] of Object.entries(n.bindings)) allBindings[name] = value;
+    });
+    const deref = createDereferencer(allBindings);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
     // This will be used later to choose a reasonable name for each distinct definition in the program.
-    const namesByHash = Object.entries(bindings).reduce((obj, [name, value]) => {
+    const namesByHash = Object.entries(allBindings).reduce((obj, [name, value]) => {
         const hash = getHashFor(value);
         obj[hash] ??= [];
         obj[hash].push(name);
@@ -25,8 +31,8 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     }, {} as Record<string, string[]>);
 
     // Find the `start` value, and make sure it is an expression.
-    const start = bindings['start'];
-    assert(start && start.kind !== 'Module'); // TODO: better error message here - `start` must be a Rule or something?
+    const start = ast.start.expression;
+    assert(start && start.kind === 'Identifier'); // TODO: better error message here - `start` must be a Rule or something?
 
     // Populate the `newBindingsByHash` map.
     const newBindingsByHash = new Map<string, {name: string, value: V.Expression<300>}>();
@@ -42,7 +48,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         version: 300,
         start: {
             kind: 'LetExpression',
-            expression: {kind: 'Identifier', name: 'start'},
+            expression: start,
             bindings: newBindings,
         },
     };
