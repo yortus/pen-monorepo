@@ -17,6 +17,14 @@ export interface Program {
 
 // TODO: jsdoc...
 export function generateTargetCode(program: Program) {
+
+    // TODO: validate AST... move this to validate-ast.ts
+    assert(program.ast.start.expression.kind === 'Identifier');
+    assert(program.ast.start.expression.name === 'start');
+
+
+
+
     const emit = makeEmitter();
 
     // TODO: Emit main exports...
@@ -54,7 +62,7 @@ export function generateTargetCode(program: Program) {
 
 
 function emitIntrinsics(emit: Emitter, {ast}: Program) {
-    const {bindings} = ast.start.module;
+    const {bindings} = ast.start;
     const isIntrinsic = (e: V.Expression<300>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
@@ -74,7 +82,7 @@ function emitIntrinsics(emit: Emitter, {ast}: Program) {
 
 function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     const {consts, ast} = program;
-    const {bindings} = ast.start.module;
+    const {bindings} = ast.start;
 
     // TODO: emit prolog...
     const modeName = mode === PARSE ? 'parse' : 'print';

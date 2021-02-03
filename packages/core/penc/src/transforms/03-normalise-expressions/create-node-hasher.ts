@@ -65,7 +65,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'Identifier': return assert(n.placeholder), setSig('ID', n.name); // TODO: explain... placeholders all have unique names, so unique hashes too
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
-            // TODO: was... remove? case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));
+            case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));
             case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
             case 'MemberExpression': return setSig('MEM', getSig(n.module), n.member);
             case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));

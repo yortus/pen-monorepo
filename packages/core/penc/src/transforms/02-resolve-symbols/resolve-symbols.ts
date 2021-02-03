@@ -124,12 +124,9 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     const astᐟ: V.AST<300> = {
         version: 300,
         start: {
-            kind: 'MemberExpression',
-            module: {
-                kind: 'Module',
-                bindings: mapObj(allSymbols, symbol => symbol.value),
-            },
-            member: 'start',
+            kind: 'LetExpression',
+            expression: {kind: 'Identifier', name: 'start'},
+            bindings: mapObj(allSymbols, symbol => symbol.value),
         },
     };
     validateAST(astᐟ);

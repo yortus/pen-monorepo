@@ -28,10 +28,11 @@ export function validateAST<V extends Version>(ast: AST<V>) {
             }
         }
         else if (ast.version === 300) {
-            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression', 'LetExpression'].includes(n.kind)) {
+            // TODO: these checks are currently identical to the V200 checks. Refactor?
+            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
-            if (n.kind === 'Module') {
+            if (n.kind === 'Module' || n.kind === 'LetExpression') {
                 assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
             }
         }

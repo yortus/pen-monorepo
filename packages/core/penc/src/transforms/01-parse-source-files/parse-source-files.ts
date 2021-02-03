@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import {makeNodeMapper, traverseNode, V, validateAST} from '../../representations';
-import {AbsPath, isExtension, resolveModuleSpecifier} from '../../utils';
+import {AbsPath, assert, isExtension, resolveModuleSpecifier} from '../../utils';
 import {bindingListToBindingMap} from './binding-list-to-binding-map';
 import {createModuleNameGenerator} from './create-module-name-generator';
 import {parseExtFile, parsePenFile} from './grammars';
@@ -51,7 +51,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     }
 
     // TODO: temp testing... traverse AST again...
-    const sourceFileNodesByModuleName = Object.entries(sourceFileModulesByPath).reduce(
+    const sourceFileModulesByModuleName = Object.entries(sourceFileModulesByPath).reduce(
         (acc, [sourceFilePath, sourceFileModule]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const moduleNode = mapNode(sourceFileModule, rec => ({
@@ -98,10 +98,11 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 // for all ParenthesisedExpression: remove parens
                 ParenthesisedExpression: par => rec(par.expression),
             }));
+            assert(moduleNode.kind === 'Module');
             acc[moduleName] = moduleNode;
             return acc;
         },
-        {} as Record<string, V.Expression<200>>
+        {} as Record<string, V.Module<200>>
     );
 
     // TODO: temp testing...
@@ -114,7 +115,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 kind: 'MemberExpression',
                 module: {
                     kind: 'Module',
-                    bindings: sourceFileNodesByModuleName,
+                    bindings: sourceFileModulesByModuleName,
                 },
                 member: mainModuleName,
             },

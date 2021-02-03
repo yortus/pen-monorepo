@@ -11,7 +11,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     validateAST(ast);
 
     // TODO: doc...
-    const {bindings} = ast.start.module;
+    const {bindings} = ast.start;
     const deref = createDereferencer(bindings);
     const getHashFor = createNodeHasher(deref);
 
@@ -41,12 +41,9 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     ast = {
         version: 300,
         start: {
-            kind: 'MemberExpression',
-            module: {
-                kind: 'Module',
-                bindings: newBindings,
-            },
-            member: 'start',
+            kind: 'LetExpression',
+            expression: {kind: 'Identifier', name: 'start'},
+            bindings: newBindings,
         },
     };
     validateAST(ast);
@@ -84,7 +81,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
             case 'Identifier': return assert(e.placeholder), setV(e);
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
-            // TODO: was... remove? case 'LetExpression': return setV(e, {expression: ref(e.expression), bindings: mapObj(e.bindings, ref)});
+            case 'LetExpression': return setV(e, {expression: ref(e.expression), bindings: mapObj(e.bindings, ref)});
             case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
             case 'MemberExpression': throw new Error('TODO'); // TODO: fix this...
             case 'Module': return setV(e, {bindings: mapObj(e.bindings, ref)});

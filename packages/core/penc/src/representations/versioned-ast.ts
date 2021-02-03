@@ -23,21 +23,17 @@ export interface AST<V extends Version = Version> {
     version: V;
     // TODO: jsdoc... special optional 'start' binding? Not doing that now, adding LetExpr syntax instead...
     start: {
-        100: Module<V>; // for a single source file (for V100, each source file is a separate AST)
+        100: Module<V>; // for a single source file (for V100, each source file is in a separate AST)
         200: {
             kind: 'MemberExpression';
             module: {
                 kind: 'MemberExpression';
-                module: Module<V>;
+                module: Module<V, Module<V>>;
                 member: string;
             };
             member: 'start';
         };
-        300: {
-            kind: 'MemberExpression';
-            module: Module<V>;
-            member: 'start';
-        };
+        300: LetExpression<V>;
     }[V];
 }
 
@@ -161,18 +157,15 @@ export type GenericExpression<V extends Version> = {
 }[V];
 
 
-export type LetExpression<V extends Version> = {
-    [x: string]: {
-        kind: 'LetExpression';
-        expression: Expression<V>;
-        bindings: {
-            100: BindingList<V>;
-            200: BindingMap<V>;
-            300: never;
-        }[V];
-    };
-    300: never;
-}[V];
+export interface LetExpression<V extends Version> {
+    kind: 'LetExpression';
+    expression: Expression<V>;
+    bindings: {
+        100: BindingList<V>;
+        200: BindingMap<V>;
+        300: BindingMap<V>;
+    }[V];
+}
 
 
 export interface ListExpression<V extends Version> {
@@ -188,17 +181,12 @@ export interface MemberExpression<V extends Version> {
 }
 
 
-export interface Module<V extends Version> {
+export interface Module<V extends Version, Value extends Expression<V> = Expression<V>> {
     kind: 'Module';
     bindings: {
         100: BindingList<V>;
-        200: BindingMap<V>;
-        300: BindingMap<V>;
-    }[V];
-    path?: {
-        100: AbsPath;
-        200: never;
-        300: never;
+        200: BindingMap<V, Value>;
+        300: BindingMap<V, Value>;
     }[V];
 }
 
@@ -281,4 +269,4 @@ export interface StringLiteral {
 
 
 export type BindingList<V extends Version> = Array<Binding<V>>;
-export type BindingMap<V extends Version> = Record<string, Expression<V>>;
+export type BindingMap<V extends Version, Value extends Expression<V> = Expression<V>> = Record<string, Value>;
