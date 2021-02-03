@@ -1,6 +1,6 @@
 import * as objectHash from 'object-hash';
 import {V} from '../../representations';
-import {assert, mapObj} from '../../utils';
+import {mapObj} from '../../utils';
 import type {DereferenceFunction} from './create-dereferencer';
 
 
@@ -15,38 +15,34 @@ import type {DereferenceFunction} from './create-dereferencer';
  */
 export function createNodeHasher(deref: DereferenceFunction) {
     type Signature = [string, ...unknown[]];
-    const signaturesByNode = new Map<HashableNode, Signature>();
-    const hashesByNode = new Map<HashableNode, string>();
+    const signaturesByNode = new Map<V.Expression<300>, Signature>();
+    const hashesByNode = new Map<V.Expression<300>, string>();
 
-    return function getHashFor(node: HashableNode) {
-        const n = node as HashableNode;
-        if (hashesByNode.has(n)) return hashesByNode.get(n)!;
-        const sig = getSignatureFor(n);
+    return function getHashFor(node: V.Expression<300>) {
+        if (hashesByNode.has(node)) return hashesByNode.get(node)!;
+        const sig = getSignatureFor(node);
         const hash = objectHash(sig);
-        hashesByNode.set(n, hash);
+        hashesByNode.set(node, hash);
         return hash;
     }
 
     /**
      * Computes a 'signature' object for the given node, from which a hash value may be easily derived.
-     * Logically equivalent nodes will end up with signatures that produce the same hash. 
+     * Logically equivalent nodes will end up with equivalent signatures that produce the same hash. 
      */
     function getSignatureFor(n: V.Expression<300>): Signature {
 
         // Check for a memoised result for this node that was computed earlier. If found, return it immediately.
         if (signaturesByNode.has(n)) return signaturesByNode.get(n)!;
 
-        // No signature has been computed for this node yet. Try dereferencing the node so that different references
-        // to the same thing are treated as the same thing, and end up with the same signature.
-        const derefdNode = deref(n);
-        assert(derefdNode.kind !== 'Identifier');
-        if (derefdNode !== n) {
-            // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
-            const derefdSig = getSignatureFor(derefdNode as HashableNode);
-            signaturesByNode.set(n, derefdSig);
-            return derefdSig;
+        // No signature has been computed for this node yet.
+        // If the node is an Identifier, get the signature of its target expression, and set that as the signature
+        // of the Identifier node. This ensures every Identifier node has the same hash as the node it refers to.
+        if (n.kind === 'Identifier') {
+            const sig = getSignatureFor(deref(n));
+            signaturesByNode.set(n, sig);
+            return sig;
         }
-
 
         // Compute the signature of this node for the first time. This operation is recursive, and possibly cyclic (eg
         // due to dereferencing cyclic references). To avoid an infinite loop, we first store the memo for the signature
@@ -61,39 +57,25 @@ export function createNodeHasher(deref: DereferenceFunction) {
 
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
-            case 'BooleanLiteral': return setSig('LIT', n.value);
-            case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
-            case 'GenericExpression': return setSig('GEN', getSig(n.body));
-            case 'GenericParameter': return setSig('GP', n.name);
-            case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
-            case 'Intrinsic': return setSig('INT', n.name, n.path);
-            case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));
-            case 'ListExpression': return setSig('LST', n.elements.map(e => getSig(e)));
-            case 'MemberExpression': return setSig('MEM', getSig(n.module), n.member);
-            case 'Module': return setSig('MOD', mapObj(n.bindings, getSig));
+            case 'BooleanLiteral': return setSig('LITERAL', n.value);
+            case 'FieldExpression': return setSig('FIELD', getSig(n.name), getSig(n.value));
+            case 'GenericExpression': return setSig('GENEXPR', getSig(n.body));
+            case 'GenericParameter': return setSig('GENPARAM', n.name);
+            case 'InstantiationExpression': return setSig('INSTEXPR', getSig(n.generic), getSig(n.argument));
+            case 'Intrinsic': return setSig('INTRINSIC', n.name, n.path);
+            case 'LetExpression': return setSig('LETEXPR', getSig(n.expression), mapObj(n.bindings, getSig));
+            case 'ListExpression': return setSig('LIST', n.elements.map(e => getSig(e)));
+            case 'MemberExpression': return setSig('MEMBER', getSig(n.module), n.member);
+            case 'Module': return setSig('MODULE', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
-            case 'NullLiteral': return setSig('LIT', n.value);
-            case 'NumericLiteral': return setSig('LIT', n.value);
-            case 'QuantifiedExpression': return setSig('QUA', getSig(n.expression), n.quantifier);
-            case 'RecordExpression': return setSig('REC', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
+            case 'NullLiteral': return setSig('LITERAL', n.value);
+            case 'NumericLiteral': return setSig('LITERAL', n.value);
+            case 'QuantifiedExpression': return setSig('QUANT', getSig(n.expression), n.quantifier);
+            case 'RecordExpression': return setSig('RECORD', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
-            case 'StringLiteral': return setSig('STR', n.value, n.abstract, n.concrete);
+            case 'StringLiteral': return setSig('STRLIT', n.value, n.abstract, n.concrete);
             default: ((n: never) => { throw new Error(`Unhandled node kind ${(n as any).kind}`); })(n);
         }
     }
 }
-
-
-// Helper type: union of all nodes that support hashing. Includes all nodes except Local* nodes.
-type HashableNode = V.Node<300> extends infer N ? (N extends {kind: typeof excludedNodeKinds[any]} ? never : N) : never;
-
-
-// Helper type: union of all node kinds that support hashing.
-const excludedNodeKinds = [
-    'Binding',
-    'ImportExpression',
-//TODO: fix...    'MemberExpression', // TODO: but this _could_ still be present given extensions, right? Then input===output kinds
-    'ModulePattern',
-    'ParenthesisedExpression',
-] as const;

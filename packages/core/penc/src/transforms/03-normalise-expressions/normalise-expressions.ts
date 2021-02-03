@@ -18,7 +18,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
         if (n.kind !== 'LetExpression') return;
         for (let [name, value] of Object.entries(n.bindings)) allBindings[name] = value;
     });
-    const deref = createDereferencer(allBindings);
+    const deref = createDereferencer(name => allBindings[name]);
     const getHashFor = createNodeHasher(deref);
 
     // Build up a map whose keys are hash codes, and whose values are all the definition names that hash to that code.
@@ -58,8 +58,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     // TODO: recursive...
     function getNewBindingFor(expr: V.Expression<300>, parentName?: string): {name: string, value: V.Expression<300>} {
         // TODO: doc...
-        const e = deref(expr);
-        assert(e.kind !== 'Identifier');
+        const e = expr.kind === 'Identifier' ? deref(expr) : expr;
         const hash = getHashFor(e);
         if (newBindingsByHash.has(hash)) return newBindingsByHash.get(hash)!;
 
