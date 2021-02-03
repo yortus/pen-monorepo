@@ -102,7 +102,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     // STEP 2: Resolve all Identifier nodes
     for (let [id, scope] of identifiers) {
         const {uniqueName} = scope.lookup(id.name);
-        Object.assign(id, {name: uniqueName, unique: true}); // TODO: messy overwrite of readonly prop - better/cleaner way?
+        Object.assign(id, {name: uniqueName}); // TODO: messy overwrite of readonly prop - better/cleaner way?
     }
 
     // STEP 3: Resolve MemberExpression nodes where possible

@@ -26,17 +26,14 @@ const ast2 = {
               {
                 kind: "Identifier",
                 name: "a",
-                unique: true,
               },
               {
                 kind: "Identifier",
                 name: "x_3",
-                unique: true,
               },
               {
                 kind: "Identifier",
                 name: "a",
-                unique: true,
               },
             ],
           },
@@ -63,12 +60,10 @@ const ast2 = {
               {
                 kind: "Identifier",
                 name: "x_2",
-                unique: true,
               },
               {
                 kind: "Identifier",
                 name: "x_2",
-                unique: true,
               },
             ],
           },
@@ -129,7 +124,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "lx",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -140,14 +134,12 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "lx",
-            unique: true,
           },
         ],
       },
       a_3: {
         kind: "Identifier",
         name: "x",
-        unique: true,
       },
       start_2: {
         kind: "SelectionExpression",
@@ -173,7 +165,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "letexpr",
-            unique: true,
           },
         ],
       },

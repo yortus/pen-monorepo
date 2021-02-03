@@ -33,17 +33,14 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "Value",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -53,37 +50,30 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "False",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "Null",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "True",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "Object",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "Array",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "Number",
-            unique: true,
           },
           {
             kind: "Identifier",
             name: "String",
-            unique: true,
           },
         ],
       },
@@ -138,7 +128,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "LBRACE",
-            unique: true,
           },
           {
             kind: "SelectionExpression",
@@ -149,7 +138,6 @@ const ast2 = {
                   {
                     kind: "Identifier",
                     name: "Property",
-                    unique: true,
                   },
                   {
                     kind: "QuantifiedExpression",
@@ -159,12 +147,10 @@ const ast2 = {
                         {
                           kind: "Identifier",
                           name: "COMMA",
-                          unique: true,
                         },
                         {
                           kind: "Identifier",
                           name: "Property",
-                          unique: true,
                         },
                       ],
                     },
@@ -182,7 +168,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "RBRACE",
-            unique: true,
           },
         ],
       },
@@ -191,7 +176,6 @@ const ast2 = {
         name: {
           kind: "Identifier",
           name: "String",
-          unique: true,
         },
         value: {
           kind: "SequenceExpression",
@@ -199,12 +183,10 @@ const ast2 = {
             {
               kind: "Identifier",
               name: "COLON",
-              unique: true,
             },
             {
               kind: "Identifier",
               name: "Value",
-              unique: true,
             },
           ],
         },
@@ -215,7 +197,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "LBRACKET",
-            unique: true,
           },
           {
             kind: "SelectionExpression",
@@ -226,7 +207,6 @@ const ast2 = {
                   {
                     kind: "Identifier",
                     name: "Element",
-                    unique: true,
                   },
                   {
                     kind: "QuantifiedExpression",
@@ -236,12 +216,10 @@ const ast2 = {
                         {
                           kind: "Identifier",
                           name: "COMMA",
-                          unique: true,
                         },
                         {
                           kind: "Identifier",
                           name: "Element",
-                          unique: true,
                         },
                       ],
                     },
@@ -259,7 +237,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "RBRACKET",
-            unique: true,
           },
         ],
       },
@@ -269,14 +246,12 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "Value",
-            unique: true,
           },
         ],
       },
       Number: {
         kind: "Identifier",
         name: "f64",
-        unique: true,
       },
       String: {
         kind: "SequenceExpression",
@@ -284,21 +259,18 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "DOUBLE_QUOTE",
-            unique: true,
           },
           {
             kind: "QuantifiedExpression",
             expression: {
               kind: "Identifier",
               name: "CHAR",
-              unique: true,
             },
             quantifier: "*",
           },
           {
             kind: "Identifier",
             name: "DOUBLE_QUOTE",
-            unique: true,
           },
         ],
       },
@@ -355,7 +327,6 @@ const ast2 = {
                 generic: {
                   kind: "Identifier",
                   name: "char",
-                  unique: true,
                 },
                 argument: {
                   kind: "Module",
@@ -523,7 +494,6 @@ const ast2 = {
                 generic: {
                   kind: "Identifier",
                   name: "unicode",
-                  unique: true,
                 },
                 argument: {
                   kind: "Module",
@@ -553,7 +523,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -564,7 +533,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -574,7 +542,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -585,7 +552,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -595,7 +561,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -606,7 +571,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -616,7 +580,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -627,7 +590,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -637,7 +599,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -648,7 +609,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
@@ -658,7 +618,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
           {
             kind: "StringLiteral",
@@ -669,7 +628,6 @@ const ast2 = {
           {
             kind: "Identifier",
             name: "WS",
-            unique: true,
           },
         ],
       },
