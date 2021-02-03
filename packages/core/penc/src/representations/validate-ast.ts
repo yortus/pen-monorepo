@@ -47,6 +47,7 @@ const allNodeKinds = [
     'InstantiationExpression',
     'Intrinsic',
     'GenericExpression',
+    'GenericParameter',
     'LetExpression',
     'ListExpression',
     'MemberExpression',

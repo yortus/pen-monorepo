@@ -250,9 +250,42 @@ const parse = (() => {
     }
 
     // GenericExpression
-    function REP(ℙ) {
+    function REP(ℙ1) {
         throw new Error('Not implemented');
     }
+
+    // SequenceExpression
+    function REP_e() {
+        const stateₒ = getState();
+        let out;
+        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // MemberExpression
+    // NOT HANDLED: a
+
+    // GenericParameter
+    // NOT HANDLED: a_e
+
+    // StringLiteral
+    function x_3() {
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "inner x";
+        return true;
+    }
+    x_3.constant = {value: "inner x"};
 
     // Module
     function start_2_e2(member) {
@@ -288,22 +321,6 @@ const parse = (() => {
         OUT = out;
         return true;
     }
-
-    // StringLiteral
-    function x_3() {
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
-        return true;
-    }
-    x_3.constant = {value: "inner x"};
 
     // StringLiteral
     function letexpr_e() {
@@ -345,9 +362,43 @@ const print = (() => {
     }
 
     // GenericExpression
-    function REP(ℙ) {
+    function REP(ℙ1) {
         throw new Error('Not implemented');
     }
+
+    // SequenceExpression
+    function REP_e() {
+        const stateₒ = getState();
+        let out;
+        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // MemberExpression
+    // NOT HANDLED: a
+
+    // GenericParameter
+    // NOT HANDLED: a_e
+
+    // StringLiteral
+    function x_3() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "inner x";
+        return true;
+    }
+    x_3.constant = {value: "inner x"};
 
     // Module
     function start_2_e2(member) {
@@ -384,23 +435,6 @@ const print = (() => {
         OUT = out;
         return true;
     }
-
-    // StringLiteral
-    function x_3() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
-        return true;
-    }
-    x_3.constant = {value: "inner x"};
 
     // StringLiteral
     function letexpr_e() {

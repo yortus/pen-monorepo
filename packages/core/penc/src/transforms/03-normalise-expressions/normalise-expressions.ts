@@ -59,6 +59,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
     function getNewBindingFor(expr: V.Expression<300>, parentName?: string): {name: string, value: V.Expression<300>} {
         // TODO: doc...
         const e = deref(expr);
+        assert(e.kind !== 'Identifier');
         const hash = getHashFor(e);
         if (newBindingsByHash.has(hash)) return newBindingsByHash.get(hash)!;
 
@@ -90,7 +91,7 @@ export function normaliseExpressions(ast: V.AST<300>): V.AST<300> {
 
 
 
-            case 'Identifier': return assert(e.placeholder), setV(e);
+            case 'GenericParameter': return setV(e);
             case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
             case 'Intrinsic': return setV(e);
             case 'LetExpression': return setV(e, {expression: ref(e.expression), bindings: mapObj(e.bindings, ref)});

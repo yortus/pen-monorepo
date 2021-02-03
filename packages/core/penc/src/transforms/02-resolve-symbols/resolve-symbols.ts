@@ -39,11 +39,6 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             pushClosure();
             env = env.createNestedScope();
 
-            // Create a symbol for the generic parameter, whose value is specially marked as a 'placeholder'.
-            let placeholder: V.Identifier = {kind: 'Identifier', name: '', placeholder: true};
-            const {uniqueName} = env.insert(param, placeholder);
-            Object.assign(placeholder, {name: uniqueName}); // TODO: cleaner way than in-place update?
-
             // Traverse the body expression in the new scope, then revert to the surrounding scope and closure.
             const bodyᐟ = rec(body);
             const allSymbolsInClosure = currentClosure;
@@ -121,7 +116,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     // STEP 3: Resolve MemberExpression nodes where possible
     for (let mem of memberExprs) {
         let lhs = mem.module;
-        while (lhs.kind === 'Identifier' && lhs.unique && !lhs.placeholder) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
+        while (lhs.kind === 'Identifier' && lhs.unique) lhs = allSymbols[lhs.name].value; // TODO: could this loop infinitely?
         assert(lhs.kind !== 'MemberExpression'); // TODO: explain... Since nested MemExprs are always resolved before outer ones due to them being added to the array depth-first
 
         // If the lhs is a module, we can statically resolve the member expression. Otherwise, leave it as-is.
@@ -130,7 +125,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             // must be local in the lhs Module, whereas Identifier lookups also look through the outer scope chain.
             const id = lhs.bindings[mem.member];
             if (!id) throw new Error(`'${mem.member}' is not defined`); // TODO: improve diagnostic message eg line+col
-            assert(id.kind === 'Identifier' && id.unique && !id.placeholder);
+            assert(id.kind === 'Identifier' && id.unique);
             Object.assign(mem, {module: null, member: null}, id); // TODO: messy overwrite of readonly prop - better/cleaner way?
         }
     }

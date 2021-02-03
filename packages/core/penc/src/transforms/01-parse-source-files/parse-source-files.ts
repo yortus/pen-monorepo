@@ -51,6 +51,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     }
 
     // TODO: temp testing... traverse AST again...
+    let genericParameterCounter = 0;
     const sourceFileModulesByModuleName = Object.entries(sourceFileModulesByPath).reduce(
         (acc, [sourceFilePath, sourceFileModule]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
@@ -58,9 +59,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
                 // for all GenericExpression#param: replace Identifer|Pattern --> string
                 GenericExpression: ({param, body}): V.GenericExpression<200> => {
-                    // Use the parameter name 'ℙ' to ensure it cannot clash with program identifiers.
+                    // Use parameter names like 'ℙnnn' to ensure no clash with program identifiers.
                     // TODO: but that could be a valid id in future... ensure *can't* clash
-                    const paramName = 'ℙ';
+                    // TODO: doc... param name also must be unique across all genexprs in the program
+                    const paramName = `ℙ${++genericParameterCounter}`;
                     return {
                         kind: 'GenericExpression',
                         param: paramName,
@@ -70,7 +72,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                             bindings: bindingListToBindingMap([{
                                 kind: 'Binding',
                                 left: param,
-                                right: {kind: 'Identifier', name: paramName}
+                                right: {kind: 'GenericParameter', name: paramName}
                             }], rec),
                         },
                     };

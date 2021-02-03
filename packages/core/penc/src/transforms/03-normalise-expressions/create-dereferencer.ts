@@ -20,8 +20,8 @@ export function createDereferencer(bindings: Readonly<Record<string, V.Expressio
     function deref(expr: V.Expression<300>): V.Expression<300> {
         const seen = [expr];
         while (true) {
-            // If `expr` is an Identifier expression, resolve to its target expression. Leave placeholders unresolved.
-            if (expr.kind === 'Identifier' && !expr.placeholder) {
+            // If `expr` is an Identifier expression, resolve to its target expression.
+            if (expr.kind === 'Identifier') {
                 expr = bindings[expr.name];
             }
             else {

@@ -13,6 +13,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'BooleanLiteral': return cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GenericExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
+            case 'GenericParameter': return cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
             case 'InstantiationExpression': return rec(n.generic), rec(n.argument), cb(n);

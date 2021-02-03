@@ -39,12 +39,14 @@ export function createNodeHasher(deref: DereferenceFunction) {
         // No signature has been computed for this node yet. Try dereferencing the node so that different references
         // to the same thing are treated as the same thing, and end up with the same signature.
         const derefdNode = deref(n);
+        assert(derefdNode.kind !== 'Identifier');
         if (derefdNode !== n) {
             // The node dereferenced to a different node - memoise and return the signature for the dereferenced node. 
             const derefdSig = getSignatureFor(derefdNode as HashableNode);
             signaturesByNode.set(n, derefdSig);
             return derefdSig;
         }
+
 
         // Compute the signature of this node for the first time. This operation is recursive, and possibly cyclic (eg
         // due to dereferencing cyclic references). To avoid an infinite loop, we first store the memo for the signature
@@ -62,7 +64,7 @@ export function createNodeHasher(deref: DereferenceFunction) {
             case 'BooleanLiteral': return setSig('LIT', n.value);
             case 'FieldExpression': return setSig('FLD', getSig(n.name), getSig(n.value));
             case 'GenericExpression': return setSig('GEN', getSig(n.body));
-            case 'Identifier': return assert(n.placeholder), setSig('ID', n.name); // TODO: explain... placeholders all have unique names, so unique hashes too
+            case 'GenericParameter': return setSig('GP', n.name);
             case 'InstantiationExpression': return setSig('APP', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INT', n.name, n.path);
             case 'LetExpression': return setSig('LET', getSig(n.expression), mapObj(n.bindings, getSig));

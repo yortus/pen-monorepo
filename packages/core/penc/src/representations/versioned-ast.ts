@@ -55,6 +55,7 @@ export type Expression<V extends Version = Version> =
     | InstantiationExpression<V>
     | Intrinsic
     | GenericExpression<V>
+    | GenericParameter
     | LetExpression<V>
     | ListExpression<V>
     | MemberExpression<V>
@@ -105,12 +106,6 @@ export interface Identifier {
     kind: 'Identifier';
     name: string;
     unique?: boolean;
-    // TODO:
-    // unbound?: boolean; // or isParam?: boolean
-    placeholder?: boolean;
-    // - affects hashing - these are hashed by name not value (nominal)
-    //   - this supports hoisting expressions out of genbody scopes where possible
-    //   - this ensures expressions that differ only by this identifier don't get the same hash code
 }
 
 
@@ -155,6 +150,12 @@ export type GenericExpression<V extends Version> = {
         body: LetExpression<V>;
     };
 }[V];
+
+
+export interface GenericParameter {
+    kind: 'GenericParameter';
+    name: string;
+}
 
 
 export interface LetExpression<V extends Version> {
