@@ -31,6 +31,8 @@ export function validateAST<V extends Version>(ast: AST<V>) {
                 assert(n.body.kind === 'LetExpression');
             }
         }
+
+        // TODO: V300: LetExpr can only appear once at root and once per GenExpr, and nowhere else in AST
     });
 }
 

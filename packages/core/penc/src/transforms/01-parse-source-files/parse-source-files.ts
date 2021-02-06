@@ -124,6 +124,10 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
             member: 'start',
         },
     };
+
+    // TODO: doc/validate/type: important that 'main' module remains a module and not xformed into a LetExpr here, since
+    //       another source file may import it and its bindings. If it was a LetExpr, the bindings would be inaccessible
+
     validateAST(ast);
     return ast;
 }

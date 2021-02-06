@@ -132,6 +132,9 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
             bindings: mapObj(currentClosure, symbol => symbol.value),
         },
     };
+
+    // TODO: doc/validate/type: the ast now has one LetExpr at the root and one per GenExpr, and nowhere else
+
     validateAST(astᐟ);
     return astᐟ;
 }
