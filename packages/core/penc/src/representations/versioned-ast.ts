@@ -77,7 +77,7 @@ export type Subexpression<V extends Version = Version> = {
     100: Expression<V>;
     200: Expression<V>;
     300: Expression<V>; // TODO: try removing LetExpr from V300 subexpr?
-    400: Identifier;
+    400: Identifier | GenericParameter;
 }[V];
 
 
@@ -179,7 +179,7 @@ export interface LetExpression<V extends Version> {
         100: Expression<V>;
         200: Expression<V>;
         300: Expression<V>;
-        400: Identifier;
+        400: Identifier | GenericParameter;
     }[V];
     bindings: {
         100: BindingList<V>;

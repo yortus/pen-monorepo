@@ -17,9 +17,9 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
 
             // TODO: ...
             let expression = rec(le.expression);
-            if (expression.kind !== 'Identifier') {
-                const name = `𝕊${++counter}`;
-                addBinding(name, expression); // TODO: ensure name can't ever clash with program identifier
+            if (expression.kind !== 'Identifier' && expression.kind !== 'GenericParameter') {
+                let name = `𝕊${++counter}`;
+                name = addBinding(name, expression); // TODO: ensure name can't ever clash with program identifier
                 expression = {kind: 'Identifier', name};
             }
 
@@ -35,14 +35,15 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                 // TODO: explain... reserve the name so recursive calls don't claim it first
                 bindings[name] = e;
 
-                function ref(expr: V.Expression<400>): V.Identifier {
+                function ref(expr: V.Expression<400>): V.Identifier | V.GenericParameter {
+                    if (expr.kind === 'Identifier' || expr.kind === 'GenericParameter') return expr;
                     const addedName = addBinding(baseName, expr); // recurse
                     return {kind: 'Identifier', name: addedName};
                 }
         
                 function setV<E extends V.Expression<400>>(expr: E, vals?: Omit<E, 'kind'>) {
                     bindings[name] = {...expr, ...vals};
-                    return name;
+                    return name; // TODO: explain... return the actual binding name used (may differ from baseName)
                 }
         
                 switch (e.kind) {

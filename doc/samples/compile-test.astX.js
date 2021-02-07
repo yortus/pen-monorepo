@@ -28,43 +28,27 @@ const astX = {
             a: {
               kind: "MemberExpression",
               module: {
-                kind: "Identifier",
-                name: "a_sub1",
+                kind: "GenericParameter",
+                name: "ℙ1",
               },
               member: "a",
-            },
-            a_sub1: {
-              kind: "GenericParameter",
-              name: "ℙ1",
             },
             "𝕊1": {
               kind: "SequenceExpression",
               expressions: [
                 {
                   kind: "Identifier",
-                  name: "𝕊1_sub1",
+                  name: "a",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊1_sub2",
+                  name: "x_3",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊1_sub3",
+                  name: "a",
                 },
               ],
-            },
-            "𝕊1_sub1": {
-              kind: "Identifier",
-              name: "a",
-            },
-            "𝕊1_sub2": {
-              kind: "Identifier",
-              name: "x_3",
-            },
-            "𝕊1_sub3": {
-              kind: "Identifier",
-              name: "a",
             },
           },
         },
@@ -88,21 +72,13 @@ const astX = {
               expressions: [
                 {
                   kind: "Identifier",
-                  name: "𝕊2_sub1",
+                  name: "x_2",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊2_sub2",
+                  name: "x_2",
                 },
               ],
-            },
-            "𝕊2_sub1": {
-              kind: "Identifier",
-              name: "x_2",
-            },
-            "𝕊2_sub2": {
-              kind: "Identifier",
-              name: "x_2",
             },
           },
         },
@@ -155,31 +131,23 @@ const astX = {
         expressions: [
           {
             kind: "Identifier",
+            name: "lx",
+          },
+          {
+            kind: "Identifier",
             name: "letexpr_sub1",
           },
           {
             kind: "Identifier",
-            name: "letexpr_sub2",
-          },
-          {
-            kind: "Identifier",
-            name: "letexpr_sub3",
+            name: "lx",
           },
         ],
       },
       letexpr_sub1: {
-        kind: "Identifier",
-        name: "lx",
-      },
-      letexpr_sub2: {
         kind: "StringLiteral",
         value: "-",
         concrete: false,
         abstract: false,
-      },
-      letexpr_sub3: {
-        kind: "Identifier",
-        name: "lx",
       },
       a_3: {
         kind: "Identifier",
@@ -194,7 +162,7 @@ const astX = {
           },
           {
             kind: "Identifier",
-            name: "start_2_sub4",
+            name: "letexpr",
           },
         ],
       },
@@ -202,20 +170,16 @@ const astX = {
         kind: "InstantiationExpression",
         generic: {
           kind: "Identifier",
-          name: "start_2_sub2",
+          module: null,
+          member: null,
+          name: "REP",
         },
         argument: {
           kind: "Identifier",
-          name: "start_2_sub3",
+          name: "start_2_sub2",
         },
       },
       start_2_sub2: {
-        kind: "Identifier",
-        module: null,
-        member: null,
-        name: "REP",
-      },
-      start_2_sub3: {
         kind: "Module",
         bindings: {
           a: {
@@ -223,10 +187,6 @@ const astX = {
             name: "a_3",
           },
         },
-      },
-      start_2_sub4: {
-        kind: "Identifier",
-        name: "letexpr",
       },
       "Ɱ_compile_test": {
         kind: "Module",
