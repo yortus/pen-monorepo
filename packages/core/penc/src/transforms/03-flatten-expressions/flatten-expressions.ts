@@ -8,6 +8,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
     validateAST(ast);
 
     // TODO: ...
+    let counter = 0;
     const startᐟ = mapNode(ast.start, rec => ({
         LetExpression: (le): V.LetExpression<400> => {
             // TODO: ...
@@ -17,8 +18,9 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
             // TODO: ...
             let expression = rec(le.expression);
             if (expression.kind !== 'Identifier') {
-                addBinding('𝕊', expression);
-                expression = {kind: 'Identifier', name: '𝕊'}; // TODO: ensure name can't ever clash with program identifier
+                const name = `𝕊${++counter}`;
+                addBinding(name, expression); // TODO: ensure name can't ever clash with program identifier
+                expression = {kind: 'Identifier', name};
             }
 
             // TODO: ...

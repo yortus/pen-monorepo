@@ -22,7 +22,7 @@ const astX = {
           kind: "LetExpression",
           expression: {
             kind: "Identifier",
-            name: "𝕊",
+            name: "𝕊1",
           },
           bindings: {
             a: {
@@ -37,32 +37,32 @@ const astX = {
               kind: "GenericParameter",
               name: "ℙ1",
             },
-            "𝕊": {
+            "𝕊1": {
               kind: "SequenceExpression",
               expressions: [
                 {
                   kind: "Identifier",
-                  name: "𝕊_sub1",
+                  name: "𝕊1_sub1",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊_sub2",
+                  name: "𝕊1_sub2",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊_sub3",
+                  name: "𝕊1_sub3",
                 },
               ],
             },
-            "𝕊_sub1": {
+            "𝕊1_sub1": {
               kind: "Identifier",
               name: "a",
             },
-            "𝕊_sub2": {
+            "𝕊1_sub2": {
               kind: "Identifier",
               name: "x_3",
             },
-            "𝕊_sub3": {
+            "𝕊1_sub3": {
               kind: "Identifier",
               name: "a",
             },
@@ -76,31 +76,31 @@ const astX = {
           kind: "LetExpression",
           expression: {
             kind: "Identifier",
-            name: "𝕊",
+            name: "𝕊2",
           },
           bindings: {
             x_2: {
               kind: "GenericParameter",
               name: "ℙ2",
             },
-            "𝕊": {
+            "𝕊2": {
               kind: "SequenceExpression",
               expressions: [
                 {
                   kind: "Identifier",
-                  name: "𝕊_sub1",
+                  name: "𝕊2_sub1",
                 },
                 {
                   kind: "Identifier",
-                  name: "𝕊_sub2",
+                  name: "𝕊2_sub2",
                 },
               ],
             },
-            "𝕊_sub1": {
+            "𝕊2_sub1": {
               kind: "Identifier",
               name: "x_2",
             },
-            "𝕊_sub2": {
+            "𝕊2_sub2": {
               kind: "Identifier",
               name: "x_2",
             },
