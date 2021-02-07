@@ -1,0 +1,85 @@
+import {makeNodeMapper, V, validateAST} from '../../representations';
+import {assert} from '../../utils';
+
+
+// TODO: jsdoc...
+// - all subexprs of LetExpr#binding values have their own binding in the same binding map
+export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
+    validateAST(ast);
+
+    // TODO: ...
+    const startᐟ = mapNode(ast.start, rec => ({
+        LetExpression: (le): V.LetExpression<400> => {
+            // TODO: ...
+            const bindings: V.BindingMap<400> = {};
+            for (const [name, value] of Object.entries(le.bindings)) addBinding(name, rec(value));
+
+            // TODO: ...
+            let expression = rec(le.expression);
+            if (expression.kind !== 'Identifier') {
+                addBinding('𝕊', expression);
+                expression = {kind: 'Identifier', name: '𝕊'}; // TODO: ensure name can't ever clash with program identifier
+            }
+
+            // TODO: ...
+            return {...le, expression, bindings};
+
+            // TODO: flatten each binding value (recursive)
+            // TODO: inlined for now, but should be moved elsewhere
+            function addBinding(baseName: string, e: V.Expression<400>): string {
+                let [name, counter] = [baseName, 0];
+                while (bindings.hasOwnProperty(name)) name = `${baseName}_sub${++counter}`;
+
+                // TODO: explain... reserve the name so recursive calls don't claim it first
+                bindings[name] = e;
+
+                function ref(expr: V.Expression<400>): V.Identifier {
+                    const addedName = addBinding(baseName, expr); // recurse
+                    return {kind: 'Identifier', name: addedName};
+                }
+        
+                function setV<E extends V.Expression<400>>(expr: E, vals?: Omit<E, 'kind'>) {
+                    bindings[name] = {...expr, ...vals};
+                    return name;
+                }
+        
+                switch (e.kind) {
+                    case 'BooleanLiteral': return setV(e);
+                    case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
+                    // TODO: special... should not be encountered here, since each genexpr would be a separate context
+                    case 'GenericExpression': return setV(e); // TODO: explain... already in the right form
+                    case 'GenericParameter': return setV(e);
+                    case 'Identifier': return setV(e);
+                    case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
+                    case 'Intrinsic': return setV(e);
+                    case 'LetExpression': return setV(e); // TODO: doc this node was already handled in the depth-first mapNode traversal
+                    case 'ListExpression': return setV(e, {elements: e.elements.map(ref)});
+                    case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
+                    case 'Module': return setV(e); // TODO: explain... already in the right form
+                    case 'NotExpression': return setV(e, {expression: ref(e.expression)});
+                    case 'NullLiteral': return setV(e);
+                    case 'NumericLiteral': return setV(e);
+                    case 'QuantifiedExpression': return setV(e, {expression: ref(e.expression), quantifier: e.quantifier});
+                    case 'RecordExpression': return setV(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
+                    case 'SelectionExpression': return setV(e, {expressions: e.expressions.map(ref)});
+                    case 'SequenceExpression': return setV(e, {expressions: e.expressions.map(ref)});
+                    case 'StringLiteral': return setV(e);
+                    default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);    
+                }
+            }
+        },
+    }));
+
+    // TODO: ...
+    assert(startᐟ.kind === 'LetExpression');
+    const astᐟ: V.AST<400> = {
+        version: 400,
+        start: startᐟ,
+    };
+    validateAST(astᐟ);
+    return astᐟ;
+}
+
+
+// TODO: temp testing...
+const mapNode = makeNodeMapper<300, 400>();

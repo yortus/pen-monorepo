@@ -4,7 +4,7 @@ import {AST, Version} from './versioned-ast';
 
 
 // TODO: jsdoc...
-export function validateAST<V extends Version>(ast: AST<V>) {
+export function validateAST(ast: AST<Version>) {
     // Only perform these checks in debug mode, otherwise skip them.
     if (!isDebugMode()) return;
 
@@ -37,7 +37,7 @@ export function validateAST<V extends Version>(ast: AST<V>) {
 }
 
 
-const allAstVersions = [100, 200, 300];
+const allAstVersions = [100, 200, 300, 400];
 
 
 const allNodeKinds = [

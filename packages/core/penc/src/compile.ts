@@ -8,6 +8,7 @@ import * as path from 'path';
 import {CompilerOptions} from './compiler-options';
 import {parseSourceFiles} from './transforms';
 import {resolveSymbols} from './transforms';
+import {flattenExpressions} from './transforms';
 import {normaliseExpressions} from './transforms';
 import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
@@ -48,6 +49,7 @@ export function compile(options: CompilerOptions): CompilerResult {
     // Proceed through all stages in the compiler pipeline.
     const ast1 = parseSourceFiles(main ? {main} : {text: source});
     const ast2 = resolveSymbols(ast1);
+    const astX = flattenExpressions(ast2); [] = [astX];
     const ast3 = normaliseExpressions(ast2);
     const consts = resolveConstantValues(ast3);
     const targetCode = generateTargetCode({ast: ast3, consts});

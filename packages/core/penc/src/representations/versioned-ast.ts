@@ -16,7 +16,7 @@ import type {AbsPath} from '../utils';
 // - 100 = as written in the source code; all bindings are BindingLists
 // - 200 = no Binding, ImportExpression, ParenthesisedExpression; all bindings are BindingMaps
 // - TODO: resolved? flat?
-export type Version = 100 | 200 | 300;
+export type Version = 100 | 200 | 300 | 400;
 
 
 export interface AST<V extends Version = Version> {
@@ -34,6 +34,7 @@ export interface AST<V extends Version = Version> {
             member: 'start';
         };
         300: LetExpression<V>;
+        400: LetExpression<V>;
     }[V];
 }
 
@@ -72,6 +73,14 @@ export type Expression<V extends Version = Version> =
 ;
 
 
+export type Subexpression<V extends Version = Version> = {
+    100: Expression<V>;
+    200: Expression<V>;
+    300: Expression<V>; // TODO: try removing LetExpr from V300 subexpr?
+    400: Identifier;
+}[V];
+
+
 /** Union of all node types that bind names to expressions. */
 export type Pattern<V extends Version = Version> =
     | ModulePattern<V>
@@ -86,6 +95,7 @@ export type Binding<V extends Version> = {
     };
     200: never;
     300: never;
+    400: never;
 }[V];
 
 
@@ -97,8 +107,8 @@ export interface BooleanLiteral {
 
 export interface FieldExpression<V extends Version> {
     kind: 'FieldExpression';
-    name: Expression<V>;
-    value: Expression<V>;
+    name: Subexpression<V>;
+    value: Subexpression<V>;
 }
 
 
@@ -115,13 +125,14 @@ export type ImportExpression<V extends Version> = {
     };
     200: never;
     300: never;
+    400: never;
 }[V];
 
 
 export interface InstantiationExpression<V extends Version> {
     kind: 'InstantiationExpression';
-    generic: Expression<V>;
-    argument: Expression<V>;
+    generic: Subexpression<V>;
+    argument: Subexpression<V>;
 }
 
 
@@ -136,7 +147,7 @@ export type GenericExpression<V extends Version> = {
     100: {
         kind: 'GenericExpression';
         param: Identifier | Pattern<V>;
-        body: Expression<V>;
+        body: Subexpression<V>;
     };
     200: {
         kind: 'GenericExpression';
@@ -144,6 +155,11 @@ export type GenericExpression<V extends Version> = {
         body: LetExpression<V>;
     };
     300: {
+        kind: 'GenericExpression';
+        param: string;
+        body: LetExpression<V>;
+    };
+    400: {
         kind: 'GenericExpression';
         param: string;
         body: LetExpression<V>;
@@ -159,24 +175,30 @@ export interface GenericParameter {
 
 export interface LetExpression<V extends Version> {
     kind: 'LetExpression';
-    expression: Expression<V>;
+    expression: {
+        100: Expression<V>;
+        200: Expression<V>;
+        300: Expression<V>;
+        400: Identifier;
+    }[V];
     bindings: {
         100: BindingList<V>;
         200: BindingMap<V>;
         300: BindingMap<V>;
+        400: BindingMap<V>;
     }[V];
 }
 
 
 export interface ListExpression<V extends Version> {
     kind: 'ListExpression';
-    elements: Array<Expression<V>>;
+    elements: Array<Subexpression<V>>;
 }
 
 
 export interface MemberExpression<V extends Version> {
     kind: 'MemberExpression';
-    module: Expression<V>;
+    module: Subexpression<V>;
     member: string;
 }
 
@@ -186,7 +208,8 @@ export interface Module<V extends Version, Value extends Expression<V> = Express
     bindings: {
         100: BindingList<V>;
         200: BindingMap<V, Value>;
-        300: BindingMap<V, Value>;
+        300: BindingMap<V, Identifier>;
+        400: BindingMap<V, Identifier>;
     }[V];
 }
 
@@ -201,12 +224,13 @@ export type ModulePattern<V extends Version> = {
     };
     200: never;
     300: never;
+    400: never;
 }[V];
 
 
 export interface NotExpression<V extends Version> {
     kind: 'NotExpression';
-    expression: Expression<V>;
+    expression: Subexpression<V>;
 }
 
 
@@ -225,16 +249,17 @@ export interface NumericLiteral {
 export type ParenthesisedExpression<V extends Version> = {
     100: {
         kind: 'ParenthesisedExpression';
-        expression: Expression<V>;
+        expression: Subexpression<V>;
     };
     200: never;
     300: never;
+    400: never;
 }[V];
 
 
 export interface QuantifiedExpression<V extends Version> {
     kind: 'QuantifiedExpression';
-    expression: Expression<V>;
+    expression: Subexpression<V>;
     quantifier: '?' | '*';
 }
 
@@ -243,20 +268,20 @@ export interface RecordExpression<V extends Version> {
     kind: 'RecordExpression';
     fields: Array<{
         name: string;
-        value: Expression<V>;
+        value: Subexpression<V>;
     }>;
 }
 
 
 export interface SelectionExpression<V extends Version> {
     kind: 'SelectionExpression';
-    expressions: Array<Expression<V>>;
+    expressions: Array<Subexpression<V>>;
 }
 
 
 export interface SequenceExpression<V extends Version> {
     kind: 'SequenceExpression';
-    expressions: Array<Expression<V>>;
+    expressions: Array<Subexpression<V>>;
 }
 
 
