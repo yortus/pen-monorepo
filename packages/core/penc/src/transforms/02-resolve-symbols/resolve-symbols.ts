@@ -56,7 +56,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         },
         Identifier: id => {
             // Collect every Identifier encountered during the traversal, to be resolved in step 2.
-            const idᐟ = {...id};
+            const idᐟ: V.Identifier = {...id};
             identifiers.set(idᐟ, env);
             return idᐟ;
         },
@@ -78,7 +78,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         },
         MemberExpression: mem => {
             // Collect every MemberExpression encountered during the traversal, to be resolved in step 3.
-            const memᐟ = {...mem, module: rec(mem.module)};
+            const memᐟ: V.MemberExpression<300> = {...mem, module: rec(mem.module)};
             memberExprs.push(memᐟ);
             return memᐟ;
         },
