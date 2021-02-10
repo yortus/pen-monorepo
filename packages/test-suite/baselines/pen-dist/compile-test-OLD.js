@@ -229,8 +229,13 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
+    // Identifier
+    function start_2(arg) {
+        return foo(arg);
+    }
+
     // StringLiteral
-    function start_2() {
+    function foo() {
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
         if (IN.charCodeAt(IP + 1) !== 111) return false;
@@ -239,7 +244,232 @@ const parse = (() => {
         OUT = "foo";
         return true;
     }
-    start_2.constant = {value: "foo"};
+    foo.constant = {value: "foo"};
+
+    // StringLiteral
+    function bar() {
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 114) return false;
+        IP += 3;
+        OUT = "bar";
+        return true;
+    }
+    bar.constant = {value: "bar"};
+
+    // Identifier
+    function a(arg) {
+        return b(arg);
+    }
+
+    // Module
+    function expr(member) {
+        switch (member) {
+            case 'foo': return foo;
+            case 'bar': return bar;
+            case 'a': return a;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function a_2(arg) {
+        return b(arg);
+    }
+
+    // StringLiteral
+    function b() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 50) return false;
+        IP += 2;
+        OUT = "b2";
+        return true;
+    }
+    b.constant = {value: "b2"};
+
+    // StringLiteral
+    function baz() {
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 122) return false;
+        IP += 3;
+        OUT = "baz";
+        return true;
+    }
+    baz.constant = {value: "baz"};
+
+    // StringLiteral
+    function mem() {
+        if (IP + 6 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 109) return false;
+        if (IN.charCodeAt(IP + 1) !== 101) return false;
+        if (IN.charCodeAt(IP + 2) !== 109) return false;
+        if (IN.charCodeAt(IP + 3) !== 98) return false;
+        if (IN.charCodeAt(IP + 4) !== 101) return false;
+        if (IN.charCodeAt(IP + 5) !== 114) return false;
+        IP += 6;
+        OUT = "member";
+        return true;
+    }
+    mem.constant = {value: "member"};
+
+    // SelectionExpression
+    function modExprMem() {
+        if (foo()) return true;
+        if (mem()) return true;
+        if (baz()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function a_3() {
+        const stateₒ = getState();
+        let out;
+        if (a_3_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (b_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function a_3_sub1() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 97) return false;
+        IP += 1;
+        OUT = "a";
+        return true;
+    }
+    a_3_sub1.constant = {value: "a"};
+
+    // Module
+    function recA(member) {
+        switch (member) {
+            case 'a': return a_3;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function b_2() {
+        const stateₒ = getState();
+        let out;
+        if (b_2_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function b_2_sub1() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        IP += 1;
+        OUT = "b";
+        return true;
+    }
+    b_2_sub1.constant = {value: "b"};
+
+    // Module
+    function recB(member) {
+        switch (member) {
+            case 'b': return b_2;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function refC(arg) {
+        return c1(arg);
+    }
+
+    // StringLiteral
+    function c1() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 99) return false;
+        if (IN.charCodeAt(IP + 1) !== 49) return false;
+        IP += 2;
+        OUT = "c1";
+        return true;
+    }
+    c1.constant = {value: "c1"};
+
+    // StringLiteral
+    function c2() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 99) return false;
+        if (IN.charCodeAt(IP + 1) !== 50) return false;
+        IP += 2;
+        OUT = "c2";
+        return true;
+    }
+    c2.constant = {value: "c2"};
+
+    // Identifier
+    function ref1(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref2(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref3(arg) {
+        return c1(arg);
+    }
+
+    // Module
+    function c(member) {
+        switch (member) {
+            case 'c1': return c1;
+            case 'c2': return c2;
+            case 'ref1': return ref1;
+            case 'ref2': return ref2;
+            case 'ref3': return ref3;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function ref5(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref6(arg) {
+        return c1(arg);
+    }
+
+    // Module
+    function defC(member) {
+        switch (member) {
+            case 'c': return c;
+            case 'ref5': return ref5;
+            case 'ref6': return ref6;
+            default: return undefined;
+        }
+    }
+
+    // Module
+    function Ɱ_compile_test_OLD(member) {
+        switch (member) {
+            case 'start': return start_2;
+            case 'expr': return expr;
+            case 'a': return a_2;
+            case 'b': return b;
+            case 'baz': return baz;
+            case 'modExprMem': return modExprMem;
+            case 'recA': return recA;
+            case 'recB': return recB;
+            case 'refC': return refC;
+            case 'defC': return defC;
+            default: return undefined;
+        }
+    }
 
     return start_2;
 })();
@@ -250,8 +480,13 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
+    // Identifier
+    function start_2(arg) {
+        return foo(arg);
+    }
+
     // StringLiteral
-    function start_2() {
+    function foo() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 102) return false;
@@ -261,7 +496,240 @@ const print = (() => {
         OUT = "foo";
         return true;
     }
-    start_2.constant = {value: "foo"};
+    foo.constant = {value: "foo"};
+
+    // StringLiteral
+    function bar() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 114) return false;
+        IP += 3;
+        OUT = "bar";
+        return true;
+    }
+    bar.constant = {value: "bar"};
+
+    // Identifier
+    function a(arg) {
+        return b(arg);
+    }
+
+    // Module
+    function expr(member) {
+        switch (member) {
+            case 'foo': return foo;
+            case 'bar': return bar;
+            case 'a': return a;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function a_2(arg) {
+        return b(arg);
+    }
+
+    // StringLiteral
+    function b() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 50) return false;
+        IP += 2;
+        OUT = "b2";
+        return true;
+    }
+    b.constant = {value: "b2"};
+
+    // StringLiteral
+    function baz() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        if (IN.charCodeAt(IP + 1) !== 97) return false;
+        if (IN.charCodeAt(IP + 2) !== 122) return false;
+        IP += 3;
+        OUT = "baz";
+        return true;
+    }
+    baz.constant = {value: "baz"};
+
+    // StringLiteral
+    function mem() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 6 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 109) return false;
+        if (IN.charCodeAt(IP + 1) !== 101) return false;
+        if (IN.charCodeAt(IP + 2) !== 109) return false;
+        if (IN.charCodeAt(IP + 3) !== 98) return false;
+        if (IN.charCodeAt(IP + 4) !== 101) return false;
+        if (IN.charCodeAt(IP + 5) !== 114) return false;
+        IP += 6;
+        OUT = "member";
+        return true;
+    }
+    mem.constant = {value: "member"};
+
+    // SelectionExpression
+    function modExprMem() {
+        if (foo()) return true;
+        if (mem()) return true;
+        if (baz()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function a_3() {
+        const stateₒ = getState();
+        let out;
+        if (a_3_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (b_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function a_3_sub1() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 97) return false;
+        IP += 1;
+        OUT = "a";
+        return true;
+    }
+    a_3_sub1.constant = {value: "a"};
+
+    // Module
+    function recA(member) {
+        switch (member) {
+            case 'a': return a_3;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function b_2() {
+        const stateₒ = getState();
+        let out;
+        if (b_2_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (a_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function b_2_sub1() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 98) return false;
+        IP += 1;
+        OUT = "b";
+        return true;
+    }
+    b_2_sub1.constant = {value: "b"};
+
+    // Module
+    function recB(member) {
+        switch (member) {
+            case 'b': return b_2;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function refC(arg) {
+        return c1(arg);
+    }
+
+    // StringLiteral
+    function c1() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 99) return false;
+        if (IN.charCodeAt(IP + 1) !== 49) return false;
+        IP += 2;
+        OUT = "c1";
+        return true;
+    }
+    c1.constant = {value: "c1"};
+
+    // StringLiteral
+    function c2() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 99) return false;
+        if (IN.charCodeAt(IP + 1) !== 50) return false;
+        IP += 2;
+        OUT = "c2";
+        return true;
+    }
+    c2.constant = {value: "c2"};
+
+    // Identifier
+    function ref1(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref2(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref3(arg) {
+        return c1(arg);
+    }
+
+    // Module
+    function c(member) {
+        switch (member) {
+            case 'c1': return c1;
+            case 'c2': return c2;
+            case 'ref1': return ref1;
+            case 'ref2': return ref2;
+            case 'ref3': return ref3;
+            default: return undefined;
+        }
+    }
+
+    // Identifier
+    function ref5(arg) {
+        return c1(arg);
+    }
+
+    // Identifier
+    function ref6(arg) {
+        return c1(arg);
+    }
+
+    // Module
+    function defC(member) {
+        switch (member) {
+            case 'c': return c;
+            case 'ref5': return ref5;
+            case 'ref6': return ref6;
+            default: return undefined;
+        }
+    }
+
+    // Module
+    function Ɱ_compile_test_OLD(member) {
+        switch (member) {
+            case 'start': return start_2;
+            case 'expr': return expr;
+            case 'a': return a_2;
+            case 'b': return b;
+            case 'baz': return baz;
+            case 'modExprMem': return modExprMem;
+            case 'recA': return recA;
+            case 'recB': return recB;
+            case 'refC': return refC;
+            case 'defC': return defC;
+            default: return undefined;
+        }
+    }
 
     return start_2;
 })();

@@ -562,7 +562,7 @@ const extensions = {
                 };
             };
         }
-        return {memoise, f64, i32};
+        return {char, f64, i32, memoise};
     })(),
 };
 
@@ -573,27 +573,46 @@ const extensions = {
 const parse = (() => {
 
     // Intrinsic
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 6});
-    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
+    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 6});
+    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
+    const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
+    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 6});
+
+    // Identifier
+    function memoise(arg) {
+        return memoise_2(arg);
+    }
+
+    // Identifier
+    function f64(arg) {
+        return f64_2(arg);
+    }
+
+    // Identifier
+    function i32(arg) {
+        return i32_2(arg);
+    }
+
+    // Identifier
+    function start_2(arg) {
+        return expr(arg);
+    }
 
     // InstantiationExpression
-    let start_2ₘ;
-    function start_2(arg) {
+    let exprₘ;
+    function expr(arg) {
         try {
-            return start_2ₘ(arg);
+            return exprₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2ₘ is not a function')) throw err;
-            start_2ₘ = memoise(start_2_e);
-            return start_2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('exprₘ is not a function')) throw err;
+            exprₘ = memoise(expr_sub1);
+            return exprₘ(arg);
         }
     }
 
-    // Intrinsic
-
     // SelectionExpression
-    function start_2_e() {
+    function expr_sub1() {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
@@ -603,38 +622,74 @@ const parse = (() => {
     // RecordExpression
     function add() {
         return parseRecord([
-            {name: 'type', value: add_e},
-            {name: 'lhs', value: start_2},
-            {name: 'rhs', value: add_e2},
+            {name: 'type', value: add_sub1},
+            {name: 'lhs', value: expr},
+            {name: 'rhs', value: add_sub2},
         ]);
     }
 
     // StringLiteral
-    function add_e() {
+    function add_sub1() {
         OUT = "add";
         return true;
     }
-    add_e.constant = {value: "add"};
+    add_sub1.constant = {value: "add"};
 
     // SequenceExpression
-    function add_e2() {
+    function add_sub2() {
         const stateₒ = getState();
         let out;
-        if (add_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (add_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function add_e3() {
+    function add_sub3() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 43) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    add_e3.constant = {value: "+"};
+    add_sub3.constant = {value: "+"};
+
+    // RecordExpression
+    function sub() {
+        return parseRecord([
+            {name: 'type', value: sub_sub1},
+            {name: 'lhs', value: expr},
+            {name: 'rhs', value: sub_sub2},
+        ]);
+    }
+
+    // StringLiteral
+    function sub_sub1() {
+        OUT = "sub";
+        return true;
+    }
+    sub_sub1.constant = {value: "sub"};
+
+    // SequenceExpression
+    function sub_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (sub_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function sub_sub3() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 45) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    sub_sub3.constant = {value: "-"};
 
     // InstantiationExpression
     let termₘ;
@@ -644,13 +699,13 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('termₘ is not a function')) throw err;
-            termₘ = memoise(term_e);
+            termₘ = memoise(term_sub1);
             return termₘ(arg);
         }
     }
 
     // SelectionExpression
-    function term_e() {
+    function term_sub1() {
         if (mul()) return true;
         if (div()) return true;
         if (factor()) return true;
@@ -661,178 +716,106 @@ const parse = (() => {
     function mul() {
         const stateₒ = getState();
         let out;
-        if (mul_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_e5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function mul_e() {
-        return parseField(mul_e2, mul_e3);
+    function mul_sub1() {
+        return parseField(mul_sub2, mul_sub3);
     }
 
     // StringLiteral
-    function mul_e2() {
+    function mul_sub2() {
         OUT = "type";
         return true;
     }
-    mul_e2.constant = {value: "type"};
+    mul_sub2.constant = {value: "type"};
 
     // StringLiteral
-    function mul_e3() {
+    function mul_sub3() {
         OUT = "mul";
         return true;
     }
-    mul_e3.constant = {value: "mul"};
+    mul_sub3.constant = {value: "mul"};
 
     // RecordExpression
-    function mul_e4() {
+    function mul_sub4() {
         return parseRecord([
             {name: 'lhs', value: term},
         ]);
     }
 
     // FieldExpression
-    function mul_e5() {
-        return parseField(mul_e6, mul_e7);
+    function mul_sub5() {
+        return parseField(mul_sub6, mul_sub7);
     }
 
     // StringLiteral
-    function mul_e6() {
+    function mul_sub6() {
         OUT = "rhs";
         return true;
     }
-    mul_e6.constant = {value: "rhs"};
+    mul_sub6.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_e7() {
+    function mul_sub7() {
         const stateₒ = getState();
         let out;
-        if (mul_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function mul_e8() {
+    function mul_sub8() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 42) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    mul_e8.constant = {value: "*"};
+    mul_sub8.constant = {value: "*"};
 
-    // SelectionExpression
-    function factor() {
-        if (factor_e()) return true;
-        if (factor_e6()) return true;
-        if (factor_e10()) return true;
-        if (factor_e14()) return true;
-        if (factor_e18()) return true;
-        return false;
-    }
-
-    // SequenceExpression
-    function factor_e() {
-        const stateₒ = getState();
-        let out;
-        if (factor_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (f64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // NotExpression
-    function factor_e2() {
-        const stateₒ = getState();
-        const result = !factor_e3();
-        setState(stateₒ);
-        OUT = undefined;
-        return result;
+    // RecordExpression
+    function div() {
+        return parseRecord([
+            {name: 'type', value: div_sub1},
+            {name: 'lhs', value: term},
+            {name: 'rhs', value: div_sub2},
+        ]);
     }
 
     // StringLiteral
-    function factor_e3() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 120) return false;
-        IP += 2;
-        OUT = "0x";
+    function div_sub1() {
+        OUT = "div";
         return true;
     }
-    factor_e3.constant = {value: "0x"};
-
-    // NotExpression
-    function factor_e4() {
-        const stateₒ = getState();
-        const result = !factor_e5();
-        setState(stateₒ);
-        OUT = undefined;
-        return result;
-    }
-
-    // StringLiteral
-    function factor_e5() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 98) return false;
-        IP += 2;
-        OUT = "0b";
-        return true;
-    }
-    factor_e5.constant = {value: "0b"};
-
-    // Intrinsic
+    div_sub1.constant = {value: "div"};
 
     // SequenceExpression
-    function factor_e6() {
+    function div_sub2() {
         const stateₒ = getState();
         let out;
-        if (factor_e7()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (div_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e7() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 120) return false;
-        IP += 2;
+    function div_sub3() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 47) return false;
+        IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e7.constant = {value: "0x"};
-
-    // InstantiationExpression
-    let factor_e8ₘ;
-    function factor_e8(arg) {
-        try {
-            return factor_e8ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e8ₘ is not a function')) throw err;
-            factor_e8ₘ = i32(factor_e9);
-            return factor_e8ₘ(arg);
-        }
-    }
-
-    // Intrinsic
-
-    // Module
-    function factor_e9(member) {
-        switch (member) {
-            case 'base': return base;
-            case 'signed': return signed;
-            default: return undefined;
-        }
-    }
+    div_sub3.constant = {value: "/"};
 
     // NumericLiteral
     function base() {
@@ -848,49 +831,6 @@ const parse = (() => {
     }
     signed.constant = {value: false};
 
-    // SequenceExpression
-    function factor_e10() {
-        const stateₒ = getState();
-        let out;
-        if (factor_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteral
-    function factor_e11() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 98) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
-    }
-    factor_e11.constant = {value: "0b"};
-
-    // InstantiationExpression
-    let factor_e12ₘ;
-    function factor_e12(arg) {
-        try {
-            return factor_e12ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e12ₘ is not a function')) throw err;
-            factor_e12ₘ = i32(factor_e13);
-            return factor_e12ₘ(arg);
-        }
-    }
-
-    // Module
-    function factor_e13(member) {
-        switch (member) {
-            case 'base': return base_2;
-            case 'signed': return signed;
-            default: return undefined;
-        }
-    }
-
     // NumericLiteral
     function base_2() {
         OUT = 2;
@@ -898,149 +838,275 @@ const parse = (() => {
     }
     base_2.constant = {value: 2};
 
+    // BooleanLiteral
+    function signed_2() {
+        OUT = false;
+        return true;
+    }
+    signed_2.constant = {value: false};
+
+    // BooleanLiteral
+    function signed_3() {
+        OUT = false;
+        return true;
+    }
+    signed_3.constant = {value: false};
+
+    // SelectionExpression
+    function factor() {
+        if (factor_sub1()) return true;
+        if (factor_sub6()) return true;
+        if (factor_sub10()) return true;
+        if (factor_sub14()) return true;
+        if (factor_sub18()) return true;
+        return false;
+    }
+
     // SequenceExpression
-    function factor_e14() {
+    function factor_sub1() {
         const stateₒ = getState();
         let out;
-        if (factor_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // NotExpression
+    function factor_sub2() {
+        const stateₒ = getState();
+        const result = !factor_sub3();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteral
+    function factor_sub3() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
+        OUT = "0x";
+        return true;
+    }
+    factor_sub3.constant = {value: "0x"};
+
+    // NotExpression
+    function factor_sub4() {
+        const stateₒ = getState();
+        const result = !factor_sub5();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteral
+    function factor_sub5() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = "0b";
+        return true;
+    }
+    factor_sub5.constant = {value: "0b"};
+
+    // SequenceExpression
+    function factor_sub6() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e15() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        IP += 1;
+    function factor_sub7() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
         OUT = undefined;
         return true;
     }
-    factor_e15.constant = {value: "i"};
+    factor_sub7.constant = {value: "0x"};
 
     // InstantiationExpression
-    let factor_e16ₘ;
-    function factor_e16(arg) {
+    let factor_sub8ₘ;
+    function factor_sub8(arg) {
         try {
-            return factor_e16ₘ(arg);
+            return factor_sub8ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e16ₘ is not a function')) throw err;
-            factor_e16ₘ = i32(factor_e17);
-            return factor_e16ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub8ₘ is not a function')) throw err;
+            factor_sub8ₘ = i32(factor_sub9);
+            return factor_sub8ₘ(arg);
         }
     }
 
     // Module
-    function factor_e17(member) {
+    function factor_sub9(member) {
         switch (member) {
+            case 'base': return base;
             case 'signed': return signed;
             default: return undefined;
         }
     }
 
     // SequenceExpression
-    function factor_e18() {
+    function factor_sub10() {
         const stateₒ = getState();
         let out;
-        if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start_2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e19() {
+    function factor_sub11() {
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = undefined;
+        return true;
+    }
+    factor_sub11.constant = {value: "0b"};
+
+    // InstantiationExpression
+    let factor_sub12ₘ;
+    function factor_sub12(arg) {
+        try {
+            return factor_sub12ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub12ₘ is not a function')) throw err;
+            factor_sub12ₘ = i32(factor_sub13);
+            return factor_sub12ₘ(arg);
+        }
+    }
+
+    // Module
+    function factor_sub13(member) {
+        switch (member) {
+            case 'base': return base_2;
+            case 'signed': return signed_2;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function factor_sub14() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function factor_sub15() {
+        if (IP + 1 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    factor_sub15.constant = {value: "i"};
+
+    // InstantiationExpression
+    let factor_sub16ₘ;
+    function factor_sub16(arg) {
+        try {
+            return factor_sub16ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub16ₘ is not a function')) throw err;
+            factor_sub16ₘ = i32(factor_sub17);
+            return factor_sub16ₘ(arg);
+        }
+    }
+
+    // Module
+    function factor_sub17(member) {
+        switch (member) {
+            case 'signed': return signed_3;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function factor_sub18() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (expr()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function factor_sub19() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 40) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e19.constant = {value: "("};
+    factor_sub19.constant = {value: "("};
 
     // StringLiteral
-    function factor_e20() {
+    function factor_sub20() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 41) return false;
         IP += 1;
         OUT = undefined;
         return true;
     }
-    factor_e20.constant = {value: ")"};
+    factor_sub20.constant = {value: ")"};
 
-    // RecordExpression
-    function div() {
-        return parseRecord([
-            {name: 'type', value: div_e},
-            {name: 'lhs', value: term},
-            {name: 'rhs', value: div_e2},
-        ]);
+    // Module
+    function Ɱ_math(member) {
+        switch (member) {
+            case 'memoise': return memoise;
+            case 'f64': return f64;
+            case 'i32': return i32;
+            case 'start': return start_2;
+            case 'expr': return expr;
+            case 'add': return add;
+            case 'sub': return sub;
+            case 'term': return term;
+            case 'mul': return mul;
+            case 'div': return div;
+            case 'factor': return factor;
+            default: return undefined;
+        }
     }
 
-    // StringLiteral
-    function div_e() {
-        OUT = "div";
-        return true;
-    }
-    div_e.constant = {value: "div"};
+    // Intrinsic
 
-    // SequenceExpression
-    function div_e2() {
-        const stateₒ = getState();
-        let out;
-        if (div_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
+    // Intrinsic
 
-    // StringLiteral
-    function div_e3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 47) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
-    }
-    div_e3.constant = {value: "/"};
+    // Intrinsic
 
-    // RecordExpression
-    function sub() {
-        return parseRecord([
-            {name: 'type', value: sub_e},
-            {name: 'lhs', value: start_2},
-            {name: 'rhs', value: sub_e2},
-        ]);
-    }
+    // Intrinsic
 
-    // StringLiteral
-    function sub_e() {
-        OUT = "sub";
-        return true;
+    // Module
+    function Ɱ_std(member) {
+        switch (member) {
+            case 'char': return char;
+            case 'f64': return f64_2;
+            case 'i32': return i32_2;
+            case 'memoise': return memoise_2;
+            default: return undefined;
+        }
     }
-    sub_e.constant = {value: "sub"};
-
-    // SequenceExpression
-    function sub_e2() {
-        const stateₒ = getState();
-        let out;
-        if (sub_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteral
-    function sub_e3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 45) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
-    }
-    sub_e3.constant = {value: "-"};
 
     return start_2;
 })();
@@ -1052,27 +1118,46 @@ const parse = (() => {
 const print = (() => {
 
     // Intrinsic
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 7});
-    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
+    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 7});
+    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
+    const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
+    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 7});
+
+    // Identifier
+    function memoise(arg) {
+        return memoise_2(arg);
+    }
+
+    // Identifier
+    function f64(arg) {
+        return f64_2(arg);
+    }
+
+    // Identifier
+    function i32(arg) {
+        return i32_2(arg);
+    }
+
+    // Identifier
+    function start_2(arg) {
+        return expr(arg);
+    }
 
     // InstantiationExpression
-    let start_2ₘ;
-    function start_2(arg) {
+    let exprₘ;
+    function expr(arg) {
         try {
-            return start_2ₘ(arg);
+            return exprₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2ₘ is not a function')) throw err;
-            start_2ₘ = memoise(start_2_e);
-            return start_2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('exprₘ is not a function')) throw err;
+            exprₘ = memoise(expr_sub1);
+            return exprₘ(arg);
         }
     }
 
-    // Intrinsic
-
     // SelectionExpression
-    function start_2_e() {
+    function expr_sub1() {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
@@ -1082,14 +1167,14 @@ const print = (() => {
     // RecordExpression
     function add() {
         return printRecord([
-            {name: 'type', value: add_e},
-            {name: 'lhs', value: start_2},
-            {name: 'rhs', value: add_e2},
+            {name: 'type', value: add_sub1},
+            {name: 'lhs', value: expr},
+            {name: 'rhs', value: add_sub2},
         ]);
     }
 
     // StringLiteral
-    function add_e() {
+    function add_sub1() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 97) return false;
@@ -1099,24 +1184,63 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    add_e.constant = {value: "add"};
+    add_sub1.constant = {value: "add"};
 
     // SequenceExpression
-    function add_e2() {
+    function add_sub2() {
         const stateₒ = getState();
         let out;
-        if (add_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (add_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function add_e3() {
+    function add_sub3() {
         OUT = "+";
         return true;
     }
-    add_e3.constant = {value: "+"};
+    add_sub3.constant = {value: "+"};
+
+    // RecordExpression
+    function sub() {
+        return printRecord([
+            {name: 'type', value: sub_sub1},
+            {name: 'lhs', value: expr},
+            {name: 'rhs', value: sub_sub2},
+        ]);
+    }
+
+    // StringLiteral
+    function sub_sub1() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 115) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 98) return false;
+        IP += 3;
+        OUT = undefined;
+        return true;
+    }
+    sub_sub1.constant = {value: "sub"};
+
+    // SequenceExpression
+    function sub_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (sub_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function sub_sub3() {
+        OUT = "-";
+        return true;
+    }
+    sub_sub3.constant = {value: "-"};
 
     // InstantiationExpression
     let termₘ;
@@ -1126,13 +1250,13 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('termₘ is not a function')) throw err;
-            termₘ = memoise(term_e);
+            termₘ = memoise(term_sub1);
             return termₘ(arg);
         }
     }
 
     // SelectionExpression
-    function term_e() {
+    function term_sub1() {
         if (mul()) return true;
         if (div()) return true;
         if (factor()) return true;
@@ -1143,20 +1267,20 @@ const print = (() => {
     function mul() {
         const stateₒ = getState();
         let out;
-        if (mul_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_e5()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // FieldExpression
-    function mul_e() {
-        return printField(mul_e2, mul_e3);
+    function mul_sub1() {
+        return printField(mul_sub2, mul_sub3);
     }
 
     // StringLiteral
-    function mul_e2() {
+    function mul_sub2() {
         if (typeof IN !== 'string') return false;
         if (IP + 4 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 116) return false;
@@ -1167,10 +1291,10 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    mul_e2.constant = {value: "type"};
+    mul_sub2.constant = {value: "type"};
 
     // StringLiteral
-    function mul_e3() {
+    function mul_sub3() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 109) return false;
@@ -1180,22 +1304,22 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    mul_e3.constant = {value: "mul"};
+    mul_sub3.constant = {value: "mul"};
 
     // RecordExpression
-    function mul_e4() {
+    function mul_sub4() {
         return printRecord([
             {name: 'lhs', value: term},
         ]);
     }
 
     // FieldExpression
-    function mul_e5() {
-        return printField(mul_e6, mul_e7);
+    function mul_sub5() {
+        return printField(mul_sub6, mul_sub7);
     }
 
     // StringLiteral
-    function mul_e6() {
+    function mul_sub6() {
         if (typeof IN !== 'string') return false;
         if (IP + 3 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 114) return false;
@@ -1205,130 +1329,63 @@ const print = (() => {
         OUT = undefined;
         return true;
     }
-    mul_e6.constant = {value: "rhs"};
+    mul_sub6.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_e7() {
+    function mul_sub7() {
         const stateₒ = getState();
         let out;
-        if (mul_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function mul_e8() {
+    function mul_sub8() {
         OUT = "*";
         return true;
     }
-    mul_e8.constant = {value: "*"};
+    mul_sub8.constant = {value: "*"};
 
-    // SelectionExpression
-    function factor() {
-        if (factor_e()) return true;
-        if (factor_e6()) return true;
-        if (factor_e10()) return true;
-        if (factor_e14()) return true;
-        if (factor_e18()) return true;
-        return false;
-    }
-
-    // SequenceExpression
-    function factor_e() {
-        const stateₒ = getState();
-        let out;
-        if (factor_e2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (f64()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // NotExpression
-    function factor_e2() {
-        const stateₒ = getState();
-        const result = !factor_e3();
-        setState(stateₒ);
-        OUT = undefined;
-        return result;
+    // RecordExpression
+    function div() {
+        return printRecord([
+            {name: 'type', value: div_sub1},
+            {name: 'lhs', value: term},
+            {name: 'rhs', value: div_sub2},
+        ]);
     }
 
     // StringLiteral
-    function factor_e3() {
+    function div_sub1() {
         if (typeof IN !== 'string') return false;
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 120) return false;
-        IP += 2;
-        OUT = "0x";
-        return true;
-    }
-    factor_e3.constant = {value: "0x"};
-
-    // NotExpression
-    function factor_e4() {
-        const stateₒ = getState();
-        const result = !factor_e5();
-        setState(stateₒ);
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 100) return false;
+        if (IN.charCodeAt(IP + 1) !== 105) return false;
+        if (IN.charCodeAt(IP + 2) !== 118) return false;
+        IP += 3;
         OUT = undefined;
-        return result;
-    }
-
-    // StringLiteral
-    function factor_e5() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        if (IN.charCodeAt(IP + 1) !== 98) return false;
-        IP += 2;
-        OUT = "0b";
         return true;
     }
-    factor_e5.constant = {value: "0b"};
-
-    // Intrinsic
+    div_sub1.constant = {value: "div"};
 
     // SequenceExpression
-    function factor_e6() {
+    function div_sub2() {
         const stateₒ = getState();
         let out;
-        if (factor_e7()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (div_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e7() {
-        OUT = "0x";
+    function div_sub3() {
+        OUT = "/";
         return true;
     }
-    factor_e7.constant = {value: "0x"};
-
-    // InstantiationExpression
-    let factor_e8ₘ;
-    function factor_e8(arg) {
-        try {
-            return factor_e8ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e8ₘ is not a function')) throw err;
-            factor_e8ₘ = i32(factor_e9);
-            return factor_e8ₘ(arg);
-        }
-    }
-
-    // Intrinsic
-
-    // Module
-    function factor_e9(member) {
-        switch (member) {
-            case 'base': return base;
-            case 'signed': return signed;
-            default: return undefined;
-        }
-    }
+    div_sub3.constant = {value: "/"};
 
     // NumericLiteral
     function base() {
@@ -1348,45 +1405,6 @@ const print = (() => {
     }
     signed.constant = {value: false};
 
-    // SequenceExpression
-    function factor_e10() {
-        const stateₒ = getState();
-        let out;
-        if (factor_e11()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteral
-    function factor_e11() {
-        OUT = "0b";
-        return true;
-    }
-    factor_e11.constant = {value: "0b"};
-
-    // InstantiationExpression
-    let factor_e12ₘ;
-    function factor_e12(arg) {
-        try {
-            return factor_e12ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e12ₘ is not a function')) throw err;
-            factor_e12ₘ = i32(factor_e13);
-            return factor_e12ₘ(arg);
-        }
-    }
-
-    // Module
-    function factor_e13(member) {
-        switch (member) {
-            case 'base': return base_2;
-            case 'signed': return signed;
-            default: return undefined;
-        }
-    }
-
     // NumericLiteral
     function base_2() {
         if (IN !== 2 || IP !== 0) return false;
@@ -1396,146 +1414,264 @@ const print = (() => {
     }
     base_2.constant = {value: 2};
 
+    // BooleanLiteral
+    function signed_2() {
+        if (IN !== false || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    signed_2.constant = {value: false};
+
+    // BooleanLiteral
+    function signed_3() {
+        if (IN !== false || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    signed_3.constant = {value: false};
+
+    // SelectionExpression
+    function factor() {
+        if (factor_sub1()) return true;
+        if (factor_sub6()) return true;
+        if (factor_sub10()) return true;
+        if (factor_sub14()) return true;
+        if (factor_sub18()) return true;
+        return false;
+    }
+
     // SequenceExpression
-    function factor_e14() {
+    function factor_sub1() {
         const stateₒ = getState();
         let out;
-        if (factor_e15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (f64()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // NotExpression
+    function factor_sub2() {
+        const stateₒ = getState();
+        const result = !factor_sub3();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteral
+    function factor_sub3() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 120) return false;
+        IP += 2;
+        OUT = "0x";
+        return true;
+    }
+    factor_sub3.constant = {value: "0x"};
+
+    // NotExpression
+    function factor_sub4() {
+        const stateₒ = getState();
+        const result = !factor_sub5();
+        setState(stateₒ);
+        OUT = undefined;
+        return result;
+    }
+
+    // StringLiteral
+    function factor_sub5() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 2 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 48) return false;
+        if (IN.charCodeAt(IP + 1) !== 98) return false;
+        IP += 2;
+        OUT = "0b";
+        return true;
+    }
+    factor_sub5.constant = {value: "0b"};
+
+    // SequenceExpression
+    function factor_sub6() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub7()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e15() {
-        OUT = "i";
+    function factor_sub7() {
+        OUT = "0x";
         return true;
     }
-    factor_e15.constant = {value: "i"};
+    factor_sub7.constant = {value: "0x"};
 
     // InstantiationExpression
-    let factor_e16ₘ;
-    function factor_e16(arg) {
+    let factor_sub8ₘ;
+    function factor_sub8(arg) {
         try {
-            return factor_e16ₘ(arg);
+            return factor_sub8ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_e16ₘ is not a function')) throw err;
-            factor_e16ₘ = i32(factor_e17);
-            return factor_e16ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub8ₘ is not a function')) throw err;
+            factor_sub8ₘ = i32(factor_sub9);
+            return factor_sub8ₘ(arg);
         }
     }
 
     // Module
-    function factor_e17(member) {
+    function factor_sub9(member) {
         switch (member) {
+            case 'base': return base;
             case 'signed': return signed;
             default: return undefined;
         }
     }
 
     // SequenceExpression
-    function factor_e18() {
+    function factor_sub10() {
         const stateₒ = getState();
         let out;
-        if (factor_e19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (start_2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor_e20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub12()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function factor_e19() {
+    function factor_sub11() {
+        OUT = "0b";
+        return true;
+    }
+    factor_sub11.constant = {value: "0b"};
+
+    // InstantiationExpression
+    let factor_sub12ₘ;
+    function factor_sub12(arg) {
+        try {
+            return factor_sub12ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub12ₘ is not a function')) throw err;
+            factor_sub12ₘ = i32(factor_sub13);
+            return factor_sub12ₘ(arg);
+        }
+    }
+
+    // Module
+    function factor_sub13(member) {
+        switch (member) {
+            case 'base': return base_2;
+            case 'signed': return signed_2;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function factor_sub14() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub16()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function factor_sub15() {
+        OUT = "i";
+        return true;
+    }
+    factor_sub15.constant = {value: "i"};
+
+    // InstantiationExpression
+    let factor_sub16ₘ;
+    function factor_sub16(arg) {
+        try {
+            return factor_sub16ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('factor_sub16ₘ is not a function')) throw err;
+            factor_sub16ₘ = i32(factor_sub17);
+            return factor_sub16ₘ(arg);
+        }
+    }
+
+    // Module
+    function factor_sub17(member) {
+        switch (member) {
+            case 'signed': return signed_3;
+            default: return undefined;
+        }
+    }
+
+    // SequenceExpression
+    function factor_sub18() {
+        const stateₒ = getState();
+        let out;
+        if (factor_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (expr()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (factor_sub20()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // StringLiteral
+    function factor_sub19() {
         OUT = "(";
         return true;
     }
-    factor_e19.constant = {value: "("};
+    factor_sub19.constant = {value: "("};
 
     // StringLiteral
-    function factor_e20() {
+    function factor_sub20() {
         OUT = ")";
         return true;
     }
-    factor_e20.constant = {value: ")"};
+    factor_sub20.constant = {value: ")"};
 
-    // RecordExpression
-    function div() {
-        return printRecord([
-            {name: 'type', value: div_e},
-            {name: 'lhs', value: term},
-            {name: 'rhs', value: div_e2},
-        ]);
+    // Module
+    function Ɱ_math(member) {
+        switch (member) {
+            case 'memoise': return memoise;
+            case 'f64': return f64;
+            case 'i32': return i32;
+            case 'start': return start_2;
+            case 'expr': return expr;
+            case 'add': return add;
+            case 'sub': return sub;
+            case 'term': return term;
+            case 'mul': return mul;
+            case 'div': return div;
+            case 'factor': return factor;
+            default: return undefined;
+        }
     }
 
-    // StringLiteral
-    function div_e() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 100) return false;
-        if (IN.charCodeAt(IP + 1) !== 105) return false;
-        if (IN.charCodeAt(IP + 2) !== 118) return false;
-        IP += 3;
-        OUT = undefined;
-        return true;
-    }
-    div_e.constant = {value: "div"};
+    // Intrinsic
 
-    // SequenceExpression
-    function div_e2() {
-        const stateₒ = getState();
-        let out;
-        if (div_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
+    // Intrinsic
 
-    // StringLiteral
-    function div_e3() {
-        OUT = "/";
-        return true;
-    }
-    div_e3.constant = {value: "/"};
+    // Intrinsic
 
-    // RecordExpression
-    function sub() {
-        return printRecord([
-            {name: 'type', value: sub_e},
-            {name: 'lhs', value: start_2},
-            {name: 'rhs', value: sub_e2},
-        ]);
-    }
+    // Intrinsic
 
-    // StringLiteral
-    function sub_e() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 115) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 98) return false;
-        IP += 3;
-        OUT = undefined;
-        return true;
+    // Module
+    function Ɱ_std(member) {
+        switch (member) {
+            case 'char': return char;
+            case 'f64': return f64_2;
+            case 'i32': return i32_2;
+            case 'memoise': return memoise_2;
+            default: return undefined;
+        }
     }
-    sub_e.constant = {value: "sub"};
-
-    // SequenceExpression
-    function sub_e2() {
-        const stateₒ = getState();
-        let out;
-        if (sub_e3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (term()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // StringLiteral
-    function sub_e3() {
-        OUT = "-";
-        return true;
-    }
-    sub_e3.constant = {value: "-"};
 
     return start_2;
 })();

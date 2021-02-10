@@ -229,47 +229,31 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // SelectionExpression
-    function start_2() {
-        if (start_2_e()) return true;
-        if (letexpr()) return true;
-        return false;
+    // StringLiteral
+    function x() {
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 111) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "outer x";
+        return true;
     }
-
-    // InstantiationExpression
-    let start_2_eₘ;
-    function start_2_e(arg) {
-        try {
-            return start_2_eₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2_eₘ is not a function')) throw err;
-            start_2_eₘ = REP(start_2_e2);
-            return start_2_eₘ(arg);
-        }
-    }
+    x.constant = {value: "outer x"};
 
     // GenericExpression
     function REP(ℙ1) {
         throw new Error('Not implemented');
     }
 
-    // SequenceExpression
-    function REP_e() {
-        const stateₒ = getState();
-        let out;
-        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+    // GenericExpression
+    function GEN(ℙ2) {
+        throw new Error('Not implemented');
     }
-
-    // MemberExpression
-    // NOT HANDLED: a
-
-    // GenericParameter
-    // NOT HANDLED: a_e
 
     // StringLiteral
     function x_3() {
@@ -287,50 +271,116 @@ const parse = (() => {
     }
     x_3.constant = {value: "inner x"};
 
+    // NumericLiteral
+    function a_2() {
+        OUT = 42;
+        return true;
+    }
+    a_2.constant = {value: 42};
+
     // Module
-    function start_2_e2(member) {
+    function nested(member) {
         switch (member) {
-            case 'a': return x;
+            case 'REP': return REP;
+            case 'GEN': return GEN;
+            case 'x': return x_3;
+            case 'a': return a_2;
             default: return undefined;
         }
     }
 
     // StringLiteral
-    function x() {
+    function lx() {
         if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 111) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
         if (IN.charCodeAt(IP + 3) !== 101) return false;
         if (IN.charCodeAt(IP + 4) !== 114) return false;
         if (IN.charCodeAt(IP + 5) !== 32) return false;
         if (IN.charCodeAt(IP + 6) !== 120) return false;
         IP += 7;
-        OUT = "outer x";
+        OUT = "inner x";
         return true;
     }
-    x.constant = {value: "outer x"};
+    lx.constant = {value: "inner x"};
+
+    // StringLiteral
+    function ly() {
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 42) return false;
+        if (IN.charCodeAt(IP + 1) !== 42) return false;
+        if (IN.charCodeAt(IP + 2) !== 42) return false;
+        IP += 3;
+        OUT = "***";
+        return true;
+    }
+    ly.constant = {value: "***"};
 
     // SequenceExpression
     function letexpr() {
         const stateₒ = getState();
         let out;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (lx()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (letexpr_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (lx()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function letexpr_e() {
+    function letexpr_sub1() {
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 45) return false;
         IP += 1;
         OUT = "-";
         return true;
     }
-    letexpr_e.constant = {value: "-"};
+    letexpr_sub1.constant = {value: "-"};
+
+    // Identifier
+    function a_3(arg) {
+        return x(arg);
+    }
+
+    // SelectionExpression
+    function start_2() {
+        if (start_2_sub1()) return true;
+        if (letexpr()) return true;
+        return false;
+    }
+
+    // InstantiationExpression
+    let start_2_sub1ₘ;
+    function start_2_sub1(arg) {
+        try {
+            return start_2_sub1ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('start_2_sub1ₘ is not a function')) throw err;
+            start_2_sub1ₘ = REP(start_2_sub2);
+            return start_2_sub1ₘ(arg);
+        }
+    }
+
+    // Module
+    function start_2_sub2(member) {
+        switch (member) {
+            case 'a': return a_3;
+            default: return undefined;
+        }
+    }
+
+    // Module
+    function Ɱ_compile_test(member) {
+        switch (member) {
+            case 'x': return x;
+            case 'nested': return nested;
+            case 'letexpr': return letexpr;
+            case 'start': return start_2;
+            default: return undefined;
+        }
+    }
 
     return start_2;
 })();
@@ -341,47 +391,32 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // SelectionExpression
-    function start_2() {
-        if (start_2_e()) return true;
-        if (letexpr()) return true;
-        return false;
+    // StringLiteral
+    function x() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 7 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 111) return false;
+        if (IN.charCodeAt(IP + 1) !== 117) return false;
+        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 3) !== 101) return false;
+        if (IN.charCodeAt(IP + 4) !== 114) return false;
+        if (IN.charCodeAt(IP + 5) !== 32) return false;
+        if (IN.charCodeAt(IP + 6) !== 120) return false;
+        IP += 7;
+        OUT = "outer x";
+        return true;
     }
-
-    // InstantiationExpression
-    let start_2_eₘ;
-    function start_2_e(arg) {
-        try {
-            return start_2_eₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2_eₘ is not a function')) throw err;
-            start_2_eₘ = REP(start_2_e2);
-            return start_2_eₘ(arg);
-        }
-    }
+    x.constant = {value: "outer x"};
 
     // GenericExpression
     function REP(ℙ1) {
         throw new Error('Not implemented');
     }
 
-    // SequenceExpression
-    function REP_e() {
-        const stateₒ = getState();
-        let out;
-        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+    // GenericExpression
+    function GEN(ℙ2) {
+        throw new Error('Not implemented');
     }
-
-    // MemberExpression
-    // NOT HANDLED: a
-
-    // GenericParameter
-    // NOT HANDLED: a_e
 
     // StringLiteral
     function x_3() {
@@ -400,44 +435,69 @@ const print = (() => {
     }
     x_3.constant = {value: "inner x"};
 
+    // NumericLiteral
+    function a_2() {
+        if (IN !== 42 || IP !== 0) return false;
+        IP += 1;
+        OUT = undefined;
+        return true;
+    }
+    a_2.constant = {value: 42};
+
     // Module
-    function start_2_e2(member) {
+    function nested(member) {
         switch (member) {
-            case 'a': return x;
+            case 'REP': return REP;
+            case 'GEN': return GEN;
+            case 'x': return x_3;
+            case 'a': return a_2;
             default: return undefined;
         }
     }
 
     // StringLiteral
-    function x() {
+    function lx() {
         if (typeof IN !== 'string') return false;
         if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 111) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
+        if (IN.charCodeAt(IP + 0) !== 105) return false;
+        if (IN.charCodeAt(IP + 1) !== 110) return false;
+        if (IN.charCodeAt(IP + 2) !== 110) return false;
         if (IN.charCodeAt(IP + 3) !== 101) return false;
         if (IN.charCodeAt(IP + 4) !== 114) return false;
         if (IN.charCodeAt(IP + 5) !== 32) return false;
         if (IN.charCodeAt(IP + 6) !== 120) return false;
         IP += 7;
-        OUT = "outer x";
+        OUT = "inner x";
         return true;
     }
-    x.constant = {value: "outer x"};
+    lx.constant = {value: "inner x"};
+
+    // StringLiteral
+    function ly() {
+        if (typeof IN !== 'string') return false;
+        if (IP + 3 > IN.length) return false;
+        if (IN.charCodeAt(IP + 0) !== 42) return false;
+        if (IN.charCodeAt(IP + 1) !== 42) return false;
+        if (IN.charCodeAt(IP + 2) !== 42) return false;
+        IP += 3;
+        OUT = "***";
+        return true;
+    }
+    ly.constant = {value: "***"};
 
     // SequenceExpression
     function letexpr() {
         const stateₒ = getState();
         let out;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (letexpr_e()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (lx()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (letexpr_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (lx()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // StringLiteral
-    function letexpr_e() {
+    function letexpr_sub1() {
         if (typeof IN !== 'string') return false;
         if (IP + 1 > IN.length) return false;
         if (IN.charCodeAt(IP + 0) !== 45) return false;
@@ -445,7 +505,51 @@ const print = (() => {
         OUT = "-";
         return true;
     }
-    letexpr_e.constant = {value: "-"};
+    letexpr_sub1.constant = {value: "-"};
+
+    // Identifier
+    function a_3(arg) {
+        return x(arg);
+    }
+
+    // SelectionExpression
+    function start_2() {
+        if (start_2_sub1()) return true;
+        if (letexpr()) return true;
+        return false;
+    }
+
+    // InstantiationExpression
+    let start_2_sub1ₘ;
+    function start_2_sub1(arg) {
+        try {
+            return start_2_sub1ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('start_2_sub1ₘ is not a function')) throw err;
+            start_2_sub1ₘ = REP(start_2_sub2);
+            return start_2_sub1ₘ(arg);
+        }
+    }
+
+    // Module
+    function start_2_sub2(member) {
+        switch (member) {
+            case 'a': return a_3;
+            default: return undefined;
+        }
+    }
+
+    // Module
+    function Ɱ_compile_test(member) {
+        switch (member) {
+            case 'x': return x;
+            case 'nested': return nested;
+            case 'letexpr': return letexpr;
+            case 'start': return start_2;
+            default: return undefined;
+        }
+    }
 
     return start_2;
 })();

@@ -10,7 +10,7 @@ import * as modes from './modes';
 
 // TODO: is this a representation? Move out...
 export interface Program {
-    ast: V.AST<300>;
+    ast: V.AST<400>;
     consts: Record<string, {value: unknown}>;
 }
 
@@ -63,7 +63,7 @@ export function generateTargetCode(program: Program) {
 
 function emitIntrinsics(emit: Emitter, {ast}: Program) {
     const {bindings} = ast.start;
-    const isIntrinsic = (e: V.Expression<300>): e is V.Intrinsic => e.kind === 'Intrinsic';
+    const isIntrinsic = (e: V.Expression<400>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
     const extPaths = extExprs.reduce((set, {path: p}) => set.add(p), new Set<string>());
     emit.down(5).text(`// ------------------------------ Extensions ------------------------------`);
@@ -111,10 +111,11 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 }
 
 
-function emitExpression(emit: Emitter, name: string, expr: V.Expression<300>, mode: Mode) {
-    // Should never see a GlobalReferenceExpression here.
-    // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out
-    assert(expr.kind !== 'Identifier');
+function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mode: Mode) {
+    // TODO: old... was... maybe restore?
+    // Should never see an Identifier here.
+    // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out?
+    // assert(expr.kind !== 'Identifier');
 
     emit.down(2).text(`// ${expr.kind}`);
     switch (expr.kind) {
@@ -155,6 +156,14 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<300>, mo
         case 'GenericExpression': {
             emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
             emit.down(1).text(`throw new Error('Not implemented');`);
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
+
+        // TODO: ...
+        case 'Identifier': {
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text(`return ${expr.name}(arg);`);
             emit.dedent().down(1).text(`}`);
             break;
         }
