@@ -89,7 +89,19 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
     emit.down(5).text(`// ------------------------------ ${modeName.toUpperCase()} ------------------------------`);
     emit.down(1).text(`const ${modeName} = (() => {`).indent();
 
-    // Emit extension exports before anything else
+    // TODO: emit top-level bindings
+    emitBindings(emit, bindings, consts, mode);
+
+    // TODO: emit epilog...
+    assert(program.ast.start.expression.kind === 'Identifier');
+    emit.down(2).text(`return ${program.ast.start.expression.name};`);
+    emit.dedent().down(1).text('})();');
+}
+
+
+function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record<string, {value: unknown}>, mode: Mode) {
+
+    // Emit extension exports before anything else (if any)
     const extExprIds = Object.keys(bindings).filter(name => bindings[name].kind === 'Intrinsic');
     if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
     for (const id of extExprIds) {
@@ -99,19 +111,14 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 
     // TODO: emit each binding...
     for (const [name, value] of Object.entries(bindings)) {
-        emitExpression(emit, name, value, mode);
+        emitBinding(emit, name, value, consts, mode);
         if (consts[name] === undefined) continue;
         emitConstant(emit, name, consts[name].value);
     }
-
-    // TODO: emit epilog...
-    assert(program.ast.start.expression.kind === 'Identifier');
-    emit.down(2).text(`return ${program.ast.start.expression.name};`);
-    emit.dedent().down(1).text('})();');
 }
 
 
-function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mode: Mode) {
+function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, consts: Record<string, {value: unknown}>, mode: Mode) {
     // TODO: old... was... maybe restore?
     // Should never see an Identifier here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out?
@@ -123,9 +130,13 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
         case 'Intrinsic': // already handled by emitProgram
             break;
 
-        // TODO: implement...
-        // case 'MemberExpression': // TODO: old comment... revise... can only refer to an extension export, and they have already been emitted
-        //     break;
+        // TODO:
+        case 'MemberExpression':  {
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)});`);
+            emit.dedent().down(1).text('}');
+            break;
+        }
 
         case 'BooleanLiteral':
         case 'NullLiteral':
@@ -143,8 +154,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
         }
 
         case 'FieldExpression': {
-            assert(expr.name.kind === 'Identifier');
-            assert(expr.value.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${modes.isParse(mode) ? 'parseField' : 'printField'}`);
             emit.text(`(${expr.name.name}, ${expr.value.name});`);
@@ -155,12 +164,14 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
         // TODO: ...
         case 'GenericExpression': {
             emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
-            emit.down(1).text(`throw new Error('Not implemented');`);
+            emitBindings(emit, expr.body.bindings, consts, mode);
+            emit.down(2).text(`return ${expr.body.expression.name};`);
             emit.dedent().down(1).text(`}`);
             break;
         }
 
         // TODO: ...
+        case 'GenericParameter':
         case 'Identifier': {
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text(`return ${expr.name}(arg);`);
@@ -173,8 +184,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
             // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
             const MEMO_SUFFIX = 'ₘ';
 
-            assert(expr.generic.kind === 'Identifier');
-            assert(expr.argument.kind === 'Identifier');
             emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text('try {').indent();
@@ -190,7 +199,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
 
         case 'ListExpression': {
             const elements = expr.elements.map(element => {
-                assert(element.kind === 'Identifier');
                 return element.name;
             });
             emit.down(1).text(`function ${name}() {`).indent();
@@ -203,7 +211,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
             emit.down(1).text(`function ${name}(member) {`).indent();
             emit.down(1).text(`switch (member) {`).indent();
             for (const [name, ref] of Object.entries(expr.bindings)) {
-                assert(ref.kind === 'Identifier');
                 emit.down(1).text(`case '${name}': return ${ref.name};`);
             }
             emit.down(1).text(`default: return undefined;`);
@@ -213,7 +220,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
         }
 
         case 'NotExpression': {
-            assert(expr.expression.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`const stateₒ = getState();`);
             emit.down(1).text(`const result = !${expr.expression.name}();`);
@@ -225,7 +231,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
         }
 
         case 'QuantifiedExpression': {
-            assert(expr.expression.kind === 'Identifier');
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
                 emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
@@ -247,7 +252,6 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
 
         case 'RecordExpression': {
             const fields = expr.fields.map(field => {
-                assert(field.value.kind === 'Identifier');
                 return `{name: '${field.name}', value: ${field.value.name}},`;
             });
             emit.down(1).text(`function ${name}() {`).indent();
@@ -264,7 +268,7 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
 
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Identifier'); return e.name; });
+            const exprVars = expr.expressions.map(e => e.name);
             emit.down(1).text(`function ${name}() {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
@@ -276,7 +280,7 @@ function emitExpression(emit: Emitter, name: string, expr: V.Expression<400>, mo
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
-            const exprVars = expr.expressions.map(e => { assert(e.kind === 'Identifier'); return e.name; });
+            const exprVars = expr.expressions.map(e => e.name);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('const stateₒ = getState();');
             emit.down(1).text('let out;');

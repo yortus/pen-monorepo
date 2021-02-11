@@ -247,12 +247,45 @@ const parse = (() => {
 
     // GenericExpression
     function REP(ℙ1) {
-        throw new Error('Not implemented');
+
+        // MemberExpression
+        function a() {
+            return ℙ1("a");
+        }
+
+        // SequenceExpression
+        function 𝕊1() {
+            const stateₒ = getState();
+            let out;
+            if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+            OUT = out;
+            return true;
+        }
+
+        return 𝕊1;
     }
 
     // GenericExpression
     function GEN(ℙ2) {
-        throw new Error('Not implemented');
+
+        // GenericParameter
+        function x_2(arg) {
+            return ℙ2(arg);
+        }
+
+        // SequenceExpression
+        function 𝕊2() {
+            const stateₒ = getState();
+            let out;
+            if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+            OUT = out;
+            return true;
+        }
+
+        return 𝕊2;
     }
 
     // StringLiteral
@@ -410,12 +443,45 @@ const print = (() => {
 
     // GenericExpression
     function REP(ℙ1) {
-        throw new Error('Not implemented');
+
+        // MemberExpression
+        function a() {
+            return ℙ1("a");
+        }
+
+        // SequenceExpression
+        function 𝕊1() {
+            const stateₒ = getState();
+            let out;
+            if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (x_3()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (a()) out = concat(out, OUT); else return setState(stateₒ), false;
+            OUT = out;
+            return true;
+        }
+
+        return 𝕊1;
     }
 
     // GenericExpression
     function GEN(ℙ2) {
-        throw new Error('Not implemented');
+
+        // GenericParameter
+        function x_2(arg) {
+            return ℙ2(arg);
+        }
+
+        // SequenceExpression
+        function 𝕊2() {
+            const stateₒ = getState();
+            let out;
+            if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+            if (x_2()) out = concat(out, OUT); else return setState(stateₒ), false;
+            OUT = out;
+            return true;
+        }
+
+        return 𝕊2;
     }
 
     // StringLiteral
