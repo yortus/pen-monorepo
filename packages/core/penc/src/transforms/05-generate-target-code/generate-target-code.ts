@@ -132,8 +132,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         // TODO:
         case 'MemberExpression':  {
-            emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)});`);
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
             emit.dedent().down(1).text('}');
             break;
         }

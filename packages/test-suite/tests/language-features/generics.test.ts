@@ -15,18 +15,14 @@ describe(`Language features: generics`, () => {
 
     const L2 = compile({source: `
         start = gen("hi")
-        gen = r => (
-            // TODO: temp next line just so L2 compiles
-            start = r
-
-// TODO: uncomment lines below to reveal pen compile error (but program should be valid)
-//            start = rDash rDash
-//            rDash = enclose(r)
-//            enclose = makeEncloser(
-//                lp="("
-//                rp=")"
-//            )
-//            makeEncloser = (lp, rp) => (x => lp x rp)
+        gen = r => (start where
+            start = rDash rDash
+            rDash = enclose(r)
+            enclose = makeEncloser(
+                lp="("
+                rp=")"
+            )
+            makeEncloser = (lp, rp) => (x => lp x rp)
         )
     `}).eval();
 
@@ -40,7 +36,10 @@ describe(`Language features: generics`, () => {
     for (const {lang, text, ast, textᐟ} of tests) {
         it(text, () => {
             let actualAst: unknown;
-            try { actualAst = lang.parse(text); } catch (err) {
+            try {
+                actualAst = lang.parse(text);
+            }
+            catch (err) {
                 [] = [err];
                 actualAst = Error;
             }

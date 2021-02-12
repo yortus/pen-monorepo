@@ -249,8 +249,8 @@ const parse = (() => {
     function REP(ℙ1) {
 
         // MemberExpression
-        function a() {
-            return ℙ1("a");
+        function a(arg) {
+            return ℙ1("a")(arg);
         }
 
         // SequenceExpression
@@ -445,8 +445,8 @@ const print = (() => {
     function REP(ℙ1) {
 
         // MemberExpression
-        function a() {
-            return ℙ1("a");
+        function a(arg) {
+            return ℙ1("a")(arg);
         }
 
         // SequenceExpression
