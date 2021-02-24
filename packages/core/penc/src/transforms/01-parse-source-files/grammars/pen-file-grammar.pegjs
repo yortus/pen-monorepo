@@ -34,7 +34,7 @@ ModulePatternName
         NotExpression                   !a   !a(b)   !a.b   !{a: b}
 
     PRECEDENCE 4
-        QuantifiedExpression            a?   a(b)?   a.b?   {a: b}?
+        QuantifiedExpression            a?   a(b)*   a.b?   {a: b}*
 
     PRECEDENCE 5
         InstantiationExpression         a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
