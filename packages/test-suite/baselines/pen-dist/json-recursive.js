@@ -2,6 +2,7 @@
 module.exports = {
     parse(text) {
         setState({ IN: text, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
         if (OUT === undefined) throw new Error('parse didn\'t return a value');
@@ -9,6 +10,7 @@ module.exports = {
     },
     print(node) {
         setState({ IN: node, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
         if (OUT === undefined) throw new Error('print didn\'t return a value');
@@ -148,18 +150,6 @@ function printRecord(fields) {
     OUT = text;
     return true;
 }
-const PARSE = 6;
-const PRINT = 7;
-const COVAL = 4;
-const COGEN = 5;
-const ABGEN = 2;
-const ABVAL = 3;
-const isParse = (mode) => (mode & 1) === 0;
-const isPrint = (mode) => (mode & 1) !== 0;
-const hasConcreteForm = (mode) => (mode & 4) !== 0;
-const hasAbstractForm = (mode) => (mode & 2) !== 0;
-const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
-const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
 function isRule(_x) {
     return true;
 }
@@ -172,6 +162,8 @@ function isModule(_x) {
 let IN;
 let IP;
 let OUT;
+let HAS_IN;
+let HAS_OUT;
 function getState() {
     return { IN, IP };
 }
@@ -242,80 +234,42 @@ const extensions = {
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
                 const checkRange = min !== '\u0000' || max !== '\uFFFF';
-                if (!hasInput(mode)) {
-                    assert(hasOutput(mode));
-                    return function CHA() { return OUT = min, true; };
-                }
                 return function CHA() {
-                    if (isPrint(mode) && typeof IN !== 'string')
-                        return false;
-                    if (IP < 0 || IP >= IN.length)
-                        return false;
-                    const c = IN.charAt(IP);
-                    if (checkRange && (c < min || c > max))
-                        return false;
-                    IP += 1;
-                    OUT = hasOutput(mode) ? c : undefined;
+                    let c = min;
+                    if (HAS_IN) {
+                        if (mode === 'print' && typeof IN !== 'string')
+                            return false;
+                        if (IP < 0 || IP >= IN.length)
+                            return false;
+                        c = IN.charAt(IP);
+                        if (checkRange && (c < min || c > max))
+                            return false;
+                        IP += 1;
+                    }
+                    OUT = HAS_OUT ? c : undefined;
                     return true;
                 };
             };
         }
         // TODO: doc... has both 'txt' and 'ast' representation
         function f64({ mode }) {
-            if (!hasInput(mode)) {
-                assert(hasOutput(mode));
-                const out = isParse(mode) ? 0 : '0';
-                return function F64() { return OUT = out, true; };
-            }
-            if (isParse(mode)) {
+            if (mode === 'parse') {
                 return function F64() {
-                    if (typeof IN !== 'string')
-                        return false;
-                    const stateₒ = getState();
-                    const LEN = IN.length;
-                    const EOS = 0;
-                    let digitCount = 0;
-                    // Parse optional '+' or '-' sign
-                    let c = IN.charCodeAt(IP);
-                    if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse optional '.'
-                    if (c === DECIMAL_POINT) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Ensure we have parsed at least one significant digit
-                    if (digitCount === 0)
-                        return setState(stateₒ), false;
-                    // Parse optional exponent
-                    if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                    let num = 0;
+                    if (HAS_IN) {
+                        if (typeof IN !== 'string')
+                            return false;
+                        const stateₒ = getState();
+                        const LEN = IN.length;
+                        const EOS = 0;
+                        let digitCount = 0;
                         // Parse optional '+' or '-' sign
+                        let c = IN.charCodeAt(IP);
                         if (c === PLUS_SIGN || c === MINUS_SIGN) {
                             IP += 1;
                             c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                         }
-                        // Parse 1..M digits
-                        digitCount = 0;
+                        // Parse 0..M digits
                         while (true) {
                             if (c < ZERO_DIGIT || c > NINE_DIGIT)
                                 break;
@@ -323,29 +277,69 @@ const extensions = {
                             IP += 1;
                             c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                         }
+                        // Parse optional '.'
+                        if (c === DECIMAL_POINT) {
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        }
+                        // Parse 0..M digits
+                        while (true) {
+                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                break;
+                            digitCount += 1;
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        }
+                        // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
                             return setState(stateₒ), false;
+                        // Parse optional exponent
+                        if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            // Parse optional '+' or '-' sign
+                            if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                                IP += 1;
+                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            }
+                            // Parse 1..M digits
+                            digitCount = 0;
+                            while (true) {
+                                if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                    break;
+                                digitCount += 1;
+                                IP += 1;
+                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            }
+                            if (digitCount === 0)
+                                return setState(stateₒ), false;
+                        }
+                        // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                        // Reject the number if it parses to Infinity or Nan.
+                        // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                        num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                        if (!Number.isFinite(num))
+                            return setState(stateₒ), false;
                     }
-                    // There is a syntactically valid float. Delegate parsing to the JS runtime.
-                    // Reject the number if it parses to Infinity or Nan.
-                    // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    const num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
-                    if (!Number.isFinite(num))
-                        return setState(stateₒ), false;
                     // Success
-                    OUT = hasOutput(mode) ? num : undefined;
+                    OUT = HAS_OUT ? num : undefined;
                     return true;
                 };
             }
-            else /* isPrint */ {
+            else /* mode === 'print' */ {
                 return function F64() {
-                    // Ensure N is a number.
-                    if (typeof IN !== 'number' || IP !== 0)
-                        return false;
-                    // Delegate unparsing to the JS runtime.
-                    // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = hasOutput(mode) ? String(IN) : undefined;
-                    IP = 1;
+                    let out = '0';
+                    if (HAS_IN) {
+                        // Ensure N is a number.
+                        if (typeof IN !== 'number' || IP !== 0)
+                            return false;
+                        IP = 1;
+                        // Delegate unparsing to the JS runtime.
+                        // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                        out = String(IN);
+                    }
+                    // Success
+                    OUT = HAS_OUT ? out : undefined;
                     return true;
                 };
             }
@@ -367,88 +361,90 @@ const extensions = {
                 const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
-                if (!hasInput(mode)) {
-                    assert(hasOutput(mode));
-                    const out = isParse(mode) ? 0 : '0';
-                    return function I32() { return OUT = out, true; };
-                }
-                if (isParse(mode)) {
+                if (mode === 'parse') {
                     return function I32() {
-                        if (typeof IN !== 'string')
-                            return false;
-                        const stateₒ = getState();
-                        // Parse optional leading '-' sign (if signed)...
-                        let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                        let isNegative = false;
-                        if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                            isNegative = true;
-                            MAX_NUM = 0x80000000;
-                            IP += 1;
-                        }
-                        // ...followed by one or more decimal digits. (NB: no exponents).
                         let num = 0;
-                        let digits = 0;
-                        while (IP < IN.length) {
-                            // Read a digit.
-                            let c = IN.charCodeAt(IP);
-                            if (c >= 256)
-                                break;
-                            const digitValue = DIGIT_VALUES[c];
-                            if (digitValue >= base)
-                                break;
-                            // Update parsed number.
-                            num *= base;
-                            num += digitValue;
-                            // Check for overflow.
-                            if (num > MAX_NUM)
+                        if (HAS_IN) {
+                            if (typeof IN !== 'string')
+                                return false;
+                            const stateₒ = getState();
+                            // Parse optional leading '-' sign (if signed)...
+                            let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                            let isNegative = false;
+                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                                isNegative = true;
+                                MAX_NUM = 0x80000000;
+                                IP += 1;
+                            }
+                            // ...followed by one or more decimal digits. (NB: no exponents).
+                            let digits = 0;
+                            while (IP < IN.length) {
+                                // Read a digit.
+                                let c = IN.charCodeAt(IP);
+                                if (c >= 256)
+                                    break;
+                                const digitValue = DIGIT_VALUES[c];
+                                if (digitValue >= base)
+                                    break;
+                                // Update parsed number.
+                                num *= base;
+                                num += digitValue;
+                                // Check for overflow.
+                                if (num > MAX_NUM)
+                                    return setState(stateₒ), false;
+                                // Loop again.
+                                IP += 1;
+                                digits += 1;
+                            }
+                            // Check that we parsed at least one digit.
+                            if (digits === 0)
                                 return setState(stateₒ), false;
-                            // Loop again.
-                            IP += 1;
-                            digits += 1;
+                            // Apply the sign.
+                            if (isNegative)
+                                num = -num;
                         }
-                        // Check that we parsed at least one digit.
-                        if (digits === 0)
-                            return setState(stateₒ), false;
-                        // Apply the sign.
-                        if (isNegative)
-                            num = -num;
                         // Success
-                        OUT = hasOutput(mode) ? num : undefined;
+                        OUT = HAS_OUT ? num : undefined;
                         return true;
                     };
                 }
-                else /* isPrint */ {
+                else /* mode === 'print' */ {
                     return function I32() {
-                        if (typeof IN !== 'number' || IP !== 0)
-                            return false;
-                        let num = IN;
-                        // Determine the number's sign and ensure it is in range.
-                        let isNegative = false;
-                        let MAX_NUM = 0x7FFFFFFF;
-                        if (num < 0) {
-                            if (!signed)
+                        let out = '0';
+                        if (HAS_IN) {
+                            if (typeof IN !== 'number' || IP !== 0)
                                 return false;
-                            isNegative = true;
-                            num = -num;
-                            MAX_NUM = 0x80000000;
+                            let num = IN;
+                            // Determine the number's sign and ensure it is in range.
+                            let isNegative = false;
+                            let MAX_NUM = 0x7FFFFFFF;
+                            if (num < 0) {
+                                if (!signed)
+                                    return false;
+                                isNegative = true;
+                                num = -num;
+                                MAX_NUM = 0x80000000;
+                            }
+                            if (num > MAX_NUM)
+                                return false;
+                            // Extract the digits.
+                            const digits = [];
+                            while (true) {
+                                const d = num % base;
+                                num = (num / base) | 0;
+                                digits.push(CHAR_CODES[d]);
+                                if (num === 0)
+                                    break;
+                            }
+                            // Compute the final string.
+                            IP = 1;
+                            if (isNegative)
+                                digits.push(0x2d); // char code for '-'
+                            // TODO: is String.fromCharCode(...) performant?
+                            out = String.fromCharCode(...digits.reverse());
                         }
-                        if (num > MAX_NUM)
-                            return false;
-                        // Extract the digits.
-                        const digits = [];
-                        while (true) {
-                            const d = num % base;
-                            num = (num / base) | 0;
-                            digits.push(CHAR_CODES[d]);
-                            if (num === 0)
-                                break;
-                        }
-                        // Compute the final string.
-                        if (isNegative)
-                            digits.push(0x2d); // char code for '-'
-                        // TODO: is String.fromCharCode(...) performant?
-                        OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
-                        IP = 1;
+                        // Success
+                        OUT = HAS_OUT ? out : undefined;
                         return true;
                     };
                 }
@@ -582,7 +578,7 @@ const extensions = {
                 // Construct a regex to match the digits
                 const pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                 const regex = RegExp(pattern, 'i');
-                if (isParse(mode)) {
+                if (mode === 'parse') {
                     return function UNI() {
                         if (typeof IN !== 'string')
                             return false;
@@ -609,7 +605,7 @@ const extensions = {
                         return true;
                     };
                 }
-                else /* isPrint */ {
+                else /* mode === 'print' */ {
                     return function UNI() {
                         // TODO: implement
                         return false;
@@ -628,11 +624,11 @@ const extensions = {
 const parse = (() => {
 
     // Intrinsic
-    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 6});
-    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 6});
-    const unicode_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 6});
+    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'parse'});
+    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'parse'});
+    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'parse'});
+    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
+    const unicode_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 'parse'});
 
     // Identifier
     function char(arg) {
@@ -677,91 +673,124 @@ const parse = (() => {
         const stateₒ = getState();
         let out;
         if (False_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (False_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function False_sub1() {
-        if (IP + 5 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 102) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 108) return false;
-        if (IN.charCodeAt(IP + 3) !== 115) return false;
-        if (IN.charCodeAt(IP + 4) !== 101) return false;
-        IP += 5;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = False_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function False_sub2() {
+        if (HAS_IN) {
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 108) return false;
+            if (IN.charCodeAt(IP + 3) !== 115) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "false" : undefined;
         return true;
     }
-    False_sub1.constant = {value: "false"};
+    False_sub2.constant = {value: "false"};
 
     // BooleanLiteral
-    function False_sub2() {
-        OUT = false;
+    function False_sub3() {
+        OUT = HAS_OUT ? false : undefined;
         return true;
     }
-    False_sub2.constant = {value: false};
+    False_sub3.constant = {value: false};
 
     // SequenceExpression
     function Null() {
         const stateₒ = getState();
         let out;
         if (Null_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Null_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function Null_sub1() {
-        if (IP + 4 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 110) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 108) return false;
-        if (IN.charCodeAt(IP + 3) !== 108) return false;
-        IP += 4;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = Null_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function Null_sub2() {
+        if (HAS_IN) {
+            if (IP + 4 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 110) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            if (IN.charCodeAt(IP + 2) !== 108) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            IP += 4;
+        }
+        OUT = HAS_OUT ? "null" : undefined;
         return true;
     }
-    Null_sub1.constant = {value: "null"};
+    Null_sub2.constant = {value: "null"};
 
     // NullLiteral
-    function Null_sub2() {
-        OUT = null;
+    function Null_sub3() {
+        OUT = HAS_OUT ? null : undefined;
         return true;
     }
-    Null_sub2.constant = {value: null};
+    Null_sub3.constant = {value: null};
 
     // SequenceExpression
     function True() {
         const stateₒ = getState();
         let out;
         if (True_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (True_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function True_sub1() {
-        if (IP + 4 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 116) return false;
-        if (IN.charCodeAt(IP + 1) !== 114) return false;
-        if (IN.charCodeAt(IP + 2) !== 117) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        IP += 4;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = True_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function True_sub2() {
+        if (HAS_IN) {
+            if (IP + 4 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 116) return false;
+            if (IN.charCodeAt(IP + 1) !== 114) return false;
+            if (IN.charCodeAt(IP + 2) !== 117) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            IP += 4;
+        }
+        OUT = HAS_OUT ? "true" : undefined;
         return true;
     }
-    True_sub1.constant = {value: "true"};
+    True_sub2.constant = {value: "true"};
 
     // BooleanLiteral
-    function True_sub2() {
-        OUT = true;
+    function True_sub3() {
+        OUT = HAS_OUT ? true : undefined;
         return true;
     }
-    True_sub2.constant = {value: true};
+    True_sub3.constant = {value: true};
 
     // SequenceExpression
     function Object() {
@@ -910,43 +939,47 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function min() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 32) return false;
-        IP += 1;
-        OUT = " ";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? " " : undefined;
         return true;
     }
     min.constant = {value: " "};
 
-    // StringLiteral
+    // StringUniversal
     function max() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 65535) return false;
-        IP += 1;
-        OUT = "￿";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65535) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "￿" : undefined;
         return true;
     }
     max.constant = {value: "￿"};
 
     // NumericLiteral
     function base() {
-        OUT = 16;
+        OUT = HAS_OUT ? 16 : undefined;
         return true;
     }
     base.constant = {value: 16};
 
     // NumericLiteral
     function minDigits() {
-        OUT = 4;
+        OUT = HAS_OUT ? 4 : undefined;
         return true;
     }
     minDigits.constant = {value: 4};
 
     // NumericLiteral
     function maxDigits() {
-        OUT = 4;
+        OUT = HAS_OUT ? 4 : undefined;
         return true;
     }
     maxDigits.constant = {value: 4};
@@ -955,14 +988,14 @@ const parse = (() => {
     function CHAR() {
         if (CHAR_sub1()) return true;
         if (CHAR_sub8()) return true;
-        if (CHAR_sub11()) return true;
-        if (CHAR_sub14()) return true;
-        if (CHAR_sub17()) return true;
+        if (CHAR_sub12()) return true;
+        if (CHAR_sub16()) return true;
         if (CHAR_sub20()) return true;
-        if (CHAR_sub23()) return true;
-        if (CHAR_sub26()) return true;
-        if (CHAR_sub29()) return true;
+        if (CHAR_sub24()) return true;
+        if (CHAR_sub28()) return true;
         if (CHAR_sub32()) return true;
+        if (CHAR_sub36()) return true;
+        if (CHAR_sub40()) return true;
         return false;
     }
 
@@ -986,12 +1019,14 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        IP += 1;
-        OUT = "\\";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\\" : undefined;
         return true;
     }
     CHAR_sub3.constant = {value: "\\"};
@@ -1005,12 +1040,14 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub5() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 34) return false;
-        IP += 1;
-        OUT = "\"";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 34) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\"" : undefined;
         return true;
     }
     CHAR_sub5.constant = {value: "\""};
@@ -1042,261 +1079,360 @@ const parse = (() => {
         const stateₒ = getState();
         let out;
         if (CHAR_sub9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub9() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 34) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub10();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub9.constant = {value: "\\\""};
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub10() {
-        OUT = "\"";
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 34) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\\"" : undefined;
         return true;
     }
-    CHAR_sub10.constant = {value: "\""};
+    CHAR_sub10.constant = {value: "\\\""};
 
-    // SequenceExpression
+    // StringAbstract
     function CHAR_sub11() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        OUT = HAS_OUT ? "\"" : undefined;
         return true;
     }
+    CHAR_sub11.constant = {value: "\""};
 
-    // StringLiteral
+    // SequenceExpression
     function CHAR_sub12() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 92) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
-    }
-    CHAR_sub12.constant = {value: "\\\\"};
-
-    // StringLiteral
-    function CHAR_sub13() {
-        OUT = "\\";
-        return true;
-    }
-    CHAR_sub13.constant = {value: "\\"};
-
-    // SequenceExpression
-    function CHAR_sub14() {
         const stateₒ = getState();
         let out;
+        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub16()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub15() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 47) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+    // CodeExpression
+    function CHAR_sub13() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub14();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub15.constant = {value: "\\/"};
 
-    // StringLiteral
-    function CHAR_sub16() {
-        OUT = "/";
+    // StringUniversal
+    function CHAR_sub14() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 92) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\\\" : undefined;
         return true;
     }
-    CHAR_sub16.constant = {value: "/"};
+    CHAR_sub14.constant = {value: "\\\\"};
+
+    // StringAbstract
+    function CHAR_sub15() {
+        OUT = HAS_OUT ? "\\" : undefined;
+        return true;
+    }
+    CHAR_sub15.constant = {value: "\\"};
 
     // SequenceExpression
-    function CHAR_sub17() {
+    function CHAR_sub16() {
         const stateₒ = getState();
         let out;
-        if (CHAR_sub18()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub17()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub18() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 98) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+    // CodeExpression
+    function CHAR_sub17() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub18();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub18.constant = {value: "\\b"};
 
-    // StringLiteral
-    function CHAR_sub19() {
-        OUT = "\b";
+    // StringUniversal
+    function CHAR_sub18() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 47) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\/" : undefined;
         return true;
     }
-    CHAR_sub19.constant = {value: "\b"};
+    CHAR_sub18.constant = {value: "\\/"};
+
+    // StringAbstract
+    function CHAR_sub19() {
+        OUT = HAS_OUT ? "/" : undefined;
+        return true;
+    }
+    CHAR_sub19.constant = {value: "/"};
 
     // SequenceExpression
     function CHAR_sub20() {
         const stateₒ = getState();
         let out;
         if (CHAR_sub21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub23()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub21() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 102) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub22();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub21.constant = {value: "\\f"};
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub22() {
-        OUT = "\f";
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 98) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\b" : undefined;
         return true;
     }
-    CHAR_sub22.constant = {value: "\f"};
+    CHAR_sub22.constant = {value: "\\b"};
 
-    // SequenceExpression
+    // StringAbstract
     function CHAR_sub23() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub24()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        OUT = HAS_OUT ? "\b" : undefined;
         return true;
     }
+    CHAR_sub23.constant = {value: "\b"};
 
-    // StringLiteral
+    // SequenceExpression
     function CHAR_sub24() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
-    }
-    CHAR_sub24.constant = {value: "\\n"};
-
-    // StringLiteral
-    function CHAR_sub25() {
-        OUT = "\n";
-        return true;
-    }
-    CHAR_sub25.constant = {value: "\n"};
-
-    // SequenceExpression
-    function CHAR_sub26() {
         const stateₒ = getState();
         let out;
+        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub28()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub27() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 114) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+    // CodeExpression
+    function CHAR_sub25() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub26();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub27.constant = {value: "\\r"};
 
-    // StringLiteral
-    function CHAR_sub28() {
-        OUT = "\r";
+    // StringUniversal
+    function CHAR_sub26() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 102) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\f" : undefined;
         return true;
     }
-    CHAR_sub28.constant = {value: "\r"};
+    CHAR_sub26.constant = {value: "\\f"};
+
+    // StringAbstract
+    function CHAR_sub27() {
+        OUT = HAS_OUT ? "\f" : undefined;
+        return true;
+    }
+    CHAR_sub27.constant = {value: "\f"};
 
     // SequenceExpression
-    function CHAR_sub29() {
+    function CHAR_sub28() {
         const stateₒ = getState();
         let out;
-        if (CHAR_sub30()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub29()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub31()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub30() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 116) return false;
-        IP += 2;
-        OUT = undefined;
-        return true;
+    // CodeExpression
+    function CHAR_sub29() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub30();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    CHAR_sub30.constant = {value: "\\t"};
 
-    // StringLiteral
-    function CHAR_sub31() {
-        OUT = "\t";
+    // StringUniversal
+    function CHAR_sub30() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\n" : undefined;
         return true;
     }
-    CHAR_sub31.constant = {value: "\t"};
+    CHAR_sub30.constant = {value: "\\n"};
+
+    // StringAbstract
+    function CHAR_sub31() {
+        OUT = HAS_OUT ? "\n" : undefined;
+        return true;
+    }
+    CHAR_sub31.constant = {value: "\n"};
 
     // SequenceExpression
     function CHAR_sub32() {
         const stateₒ = getState();
         let out;
         if (CHAR_sub33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub34()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub35()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub33() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        IP += 2;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub34();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub34() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 114) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\r" : undefined;
         return true;
     }
-    CHAR_sub33.constant = {value: "\\u"};
+    CHAR_sub34.constant = {value: "\\r"};
+
+    // StringAbstract
+    function CHAR_sub35() {
+        OUT = HAS_OUT ? "\r" : undefined;
+        return true;
+    }
+    CHAR_sub35.constant = {value: "\r"};
+
+    // SequenceExpression
+    function CHAR_sub36() {
+        const stateₒ = getState();
+        let out;
+        if (CHAR_sub37()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub39()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // CodeExpression
+    function CHAR_sub37() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub38();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub38() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\t" : undefined;
+        return true;
+    }
+    CHAR_sub38.constant = {value: "\\t"};
+
+    // StringAbstract
+    function CHAR_sub39() {
+        OUT = HAS_OUT ? "\t" : undefined;
+        return true;
+    }
+    CHAR_sub39.constant = {value: "\t"};
+
+    // SequenceExpression
+    function CHAR_sub40() {
+        const stateₒ = getState();
+        let out;
+        if (CHAR_sub41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // CodeExpression
+    function CHAR_sub41() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = CHAR_sub42();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub42() {
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\u" : undefined;
+        return true;
+    }
+    CHAR_sub42.constant = {value: "\\u"};
 
     // InstantiationExpression
-    let CHAR_sub34ₘ;
-    function CHAR_sub34(arg) {
+    let CHAR_sub43ₘ;
+    function CHAR_sub43(arg) {
         try {
-            return CHAR_sub34ₘ(arg);
+            return CHAR_sub43ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub34ₘ is not a function')) throw err;
-            CHAR_sub34ₘ = unicode(CHAR_sub35);
-            return CHAR_sub34ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub43ₘ is not a function')) throw err;
+            CHAR_sub43ₘ = unicode(CHAR_sub44);
+            return CHAR_sub43ₘ(arg);
         }
     }
 
     // Module
-    function CHAR_sub35(member) {
+    function CHAR_sub44(member) {
         switch (member) {
             case 'base': return base;
             case 'minDigits': return minDigits;
@@ -1316,15 +1452,26 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function LBRACE_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 123) return false;
-        IP += 1;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = LBRACE_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function LBRACE_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 123) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "{" : undefined;
         return true;
     }
-    LBRACE_sub1.constant = {value: "{"};
+    LBRACE_sub2.constant = {value: "{"};
 
     // SequenceExpression
     function RBRACE() {
@@ -1337,15 +1484,26 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function RBRACE_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 125) return false;
-        IP += 1;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = RBRACE_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function RBRACE_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 125) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "}" : undefined;
         return true;
     }
-    RBRACE_sub1.constant = {value: "}"};
+    RBRACE_sub2.constant = {value: "}"};
 
     // SequenceExpression
     function LBRACKET() {
@@ -1358,15 +1516,26 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function LBRACKET_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 91) return false;
-        IP += 1;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = LBRACKET_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function LBRACKET_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 91) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "[" : undefined;
         return true;
     }
-    LBRACKET_sub1.constant = {value: "["};
+    LBRACKET_sub2.constant = {value: "["};
 
     // SequenceExpression
     function RBRACKET() {
@@ -1379,15 +1548,26 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function RBRACKET_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 93) return false;
-        IP += 1;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = RBRACKET_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function RBRACKET_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 93) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "]" : undefined;
         return true;
     }
-    RBRACKET_sub1.constant = {value: "]"};
+    RBRACKET_sub2.constant = {value: "]"};
 
     // SequenceExpression
     function COLON() {
@@ -1400,15 +1580,26 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function COLON_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 58) return false;
-        IP += 1;
-        OUT = undefined;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = COLON_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function COLON_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 58) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? ":" : undefined;
         return true;
     }
-    COLON_sub1.constant = {value: ":"};
+    COLON_sub2.constant = {value: ":"};
 
     // SequenceExpression
     function COMMA() {
@@ -1421,32 +1612,63 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function COMMA_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 44) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = COMMA_sub2();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
     }
-    COMMA_sub1.constant = {value: ","};
 
-    // StringLiteral
-    function DOUBLE_QUOTE() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 34) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringUniversal
+    function COMMA_sub2() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 44) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "," : undefined;
         return true;
     }
-    DOUBLE_QUOTE.constant = {value: "\""};
+    COMMA_sub2.constant = {value: ","};
+
+    // CodeExpression
+    function DOUBLE_QUOTE() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = DOUBLE_QUOTE_sub1();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function DOUBLE_QUOTE_sub1() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 34) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\"" : undefined;
+        return true;
+    }
+    DOUBLE_QUOTE_sub1.constant = {value: "\""};
+
+    // CodeExpression
+    function WS() {
+        const HAS_OUTₒ = HAS_OUT;
+        HAS_OUT = false;
+        const result = WS_sub1();
+        HAS_OUT = HAS_OUTₒ;
+        return result;
+    }
 
     // QuantifiedExpression
-    function WS() {
+    function WS_sub1() {
         const IPₒ = IP;
         let out;
         do {
-            if (!WS_sub1()) break;
+            if (!WS_sub2()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -1455,53 +1677,61 @@ const parse = (() => {
     }
 
     // SelectionExpression
-    function WS_sub1() {
-        if (WS_sub2()) return true;
+    function WS_sub2() {
         if (WS_sub3()) return true;
         if (WS_sub4()) return true;
         if (WS_sub5()) return true;
+        if (WS_sub6()) return true;
         return false;
     }
 
-    // StringLiteral
-    function WS_sub2() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 32) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
-    }
-    WS_sub2.constant = {value: " "};
-
-    // StringLiteral
+    // StringUniversal
     function WS_sub3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 9) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? " " : undefined;
         return true;
     }
-    WS_sub3.constant = {value: "\t"};
+    WS_sub3.constant = {value: " "};
 
-    // StringLiteral
+    // StringUniversal
     function WS_sub4() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 10) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 9) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\t" : undefined;
         return true;
     }
-    WS_sub4.constant = {value: "\n"};
+    WS_sub4.constant = {value: "\t"};
 
-    // StringLiteral
+    // StringUniversal
     function WS_sub5() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 13) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 10) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\n" : undefined;
         return true;
     }
-    WS_sub5.constant = {value: "\r"};
+    WS_sub5.constant = {value: "\n"};
+
+    // StringUniversal
+    function WS_sub6() {
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 13) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\r" : undefined;
+        return true;
+    }
+    WS_sub6.constant = {value: "\r"};
 
     // Module
     function Ɱ_json_recursive(member) {
@@ -1572,11 +1802,11 @@ const parse = (() => {
 const print = (() => {
 
     // Intrinsic
-    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 7});
-    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 7});
-    const unicode_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 7});
+    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'print'});
+    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'print'});
+    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'print'});
+    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
+    const unicode_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode: 'print'});
 
     // Identifier
     function char(arg) {
@@ -1621,78 +1851,139 @@ const print = (() => {
         const stateₒ = getState();
         let out;
         if (False_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (False_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (False_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function False_sub1() {
-        OUT = "false";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = False_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function False_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 108) return false;
+            if (IN.charCodeAt(IP + 3) !== 115) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "false" : undefined;
         return true;
     }
-    False_sub1.constant = {value: "false"};
+    False_sub2.constant = {value: "false"};
 
     // BooleanLiteral
-    function False_sub2() {
-        if (IN !== false || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+    function False_sub3() {
+        if (HAS_IN) {
+            if (IN !== false || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    False_sub2.constant = {value: false};
+    False_sub3.constant = {value: false};
 
     // SequenceExpression
     function Null() {
         const stateₒ = getState();
         let out;
         if (Null_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Null_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Null_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function Null_sub1() {
-        OUT = "null";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = Null_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function Null_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 4 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 110) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            if (IN.charCodeAt(IP + 2) !== 108) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            IP += 4;
+        }
+        OUT = HAS_OUT ? "null" : undefined;
         return true;
     }
-    Null_sub1.constant = {value: "null"};
+    Null_sub2.constant = {value: "null"};
 
     // NullLiteral
-    function Null_sub2() {
-        if (IN !== null || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+    function Null_sub3() {
+        if (HAS_IN) {
+            if (IN !== null || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    Null_sub2.constant = {value: null};
+    Null_sub3.constant = {value: null};
 
     // SequenceExpression
     function True() {
         const stateₒ = getState();
         let out;
         if (True_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (True_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (True_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function True_sub1() {
-        OUT = "true";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = True_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function True_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 4 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 116) return false;
+            if (IN.charCodeAt(IP + 1) !== 114) return false;
+            if (IN.charCodeAt(IP + 2) !== 117) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            IP += 4;
+        }
+        OUT = HAS_OUT ? "true" : undefined;
         return true;
     }
-    True_sub1.constant = {value: "true"};
+    True_sub2.constant = {value: "true"};
 
     // BooleanLiteral
-    function True_sub2() {
-        if (IN !== true || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+    function True_sub3() {
+        if (HAS_IN) {
+            if (IN !== true || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    True_sub2.constant = {value: true};
+    True_sub3.constant = {value: true};
 
     // SequenceExpression
     function Object() {
@@ -1841,51 +2132,61 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function min() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 32) return false;
-        IP += 1;
-        OUT = " ";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? " " : undefined;
         return true;
     }
     min.constant = {value: " "};
 
-    // StringLiteral
+    // StringUniversal
     function max() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 65535) return false;
-        IP += 1;
-        OUT = "￿";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65535) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "￿" : undefined;
         return true;
     }
     max.constant = {value: "￿"};
 
     // NumericLiteral
     function base() {
-        if (IN !== 16 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IN !== 16 || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     base.constant = {value: 16};
 
     // NumericLiteral
     function minDigits() {
-        if (IN !== 4 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IN !== 4 || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     minDigits.constant = {value: 4};
 
     // NumericLiteral
     function maxDigits() {
-        if (IN !== 4 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IN !== 4 || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     maxDigits.constant = {value: 4};
@@ -1894,14 +2195,14 @@ const print = (() => {
     function CHAR() {
         if (CHAR_sub1()) return true;
         if (CHAR_sub8()) return true;
-        if (CHAR_sub11()) return true;
-        if (CHAR_sub14()) return true;
-        if (CHAR_sub17()) return true;
+        if (CHAR_sub12()) return true;
+        if (CHAR_sub16()) return true;
         if (CHAR_sub20()) return true;
-        if (CHAR_sub23()) return true;
-        if (CHAR_sub26()) return true;
-        if (CHAR_sub29()) return true;
+        if (CHAR_sub24()) return true;
+        if (CHAR_sub28()) return true;
         if (CHAR_sub32()) return true;
+        if (CHAR_sub36()) return true;
+        if (CHAR_sub40()) return true;
         return false;
     }
 
@@ -1925,13 +2226,15 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub3() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        IP += 1;
-        OUT = "\\";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\\" : undefined;
         return true;
     }
     CHAR_sub3.constant = {value: "\\"};
@@ -1945,13 +2248,15 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub5() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 34) return false;
-        IP += 1;
-        OUT = "\"";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 34) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\"" : undefined;
         return true;
     }
     CHAR_sub5.constant = {value: "\""};
@@ -1983,257 +2288,417 @@ const print = (() => {
         const stateₒ = getState();
         let out;
         if (CHAR_sub9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub10()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub9() {
-        OUT = "\\\"";
-        return true;
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub10();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub9.constant = {value: "\\\""};
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub10() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 34) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 34) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\\"" : undefined;
         return true;
     }
-    CHAR_sub10.constant = {value: "\""};
+    CHAR_sub10.constant = {value: "\\\""};
 
-    // SequenceExpression
+    // StringAbstract
     function CHAR_sub11() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub12()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 34) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
+    CHAR_sub11.constant = {value: "\""};
 
-    // StringLiteral
+    // SequenceExpression
     function CHAR_sub12() {
-        OUT = "\\\\";
-        return true;
-    }
-    CHAR_sub12.constant = {value: "\\\\"};
-
-    // StringLiteral
-    function CHAR_sub13() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 92) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
-    }
-    CHAR_sub13.constant = {value: "\\"};
-
-    // SequenceExpression
-    function CHAR_sub14() {
         const stateₒ = getState();
         let out;
+        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub16()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub15() {
-        OUT = "\\/";
-        return true;
+    // CodeExpression
+    function CHAR_sub13() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub14();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub15.constant = {value: "\\/"};
 
-    // StringLiteral
-    function CHAR_sub16() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 47) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringUniversal
+    function CHAR_sub14() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 92) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\\\" : undefined;
         return true;
     }
-    CHAR_sub16.constant = {value: "/"};
+    CHAR_sub14.constant = {value: "\\\\"};
+
+    // StringAbstract
+    function CHAR_sub15() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub15.constant = {value: "\\"};
 
     // SequenceExpression
-    function CHAR_sub17() {
+    function CHAR_sub16() {
         const stateₒ = getState();
         let out;
-        if (CHAR_sub18()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub17()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub18() {
-        OUT = "\\b";
-        return true;
+    // CodeExpression
+    function CHAR_sub17() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub18();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub18.constant = {value: "\\b"};
 
-    // StringLiteral
-    function CHAR_sub19() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 8) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringUniversal
+    function CHAR_sub18() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 47) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\/" : undefined;
         return true;
     }
-    CHAR_sub19.constant = {value: "\b"};
+    CHAR_sub18.constant = {value: "\\/"};
+
+    // StringAbstract
+    function CHAR_sub19() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 47) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub19.constant = {value: "/"};
 
     // SequenceExpression
     function CHAR_sub20() {
         const stateₒ = getState();
         let out;
         if (CHAR_sub21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub22()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub23()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub21() {
-        OUT = "\\f";
-        return true;
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub22();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub21.constant = {value: "\\f"};
 
-    // StringLiteral
+    // StringUniversal
     function CHAR_sub22() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 12) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 98) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\b" : undefined;
         return true;
     }
-    CHAR_sub22.constant = {value: "\f"};
+    CHAR_sub22.constant = {value: "\\b"};
 
-    // SequenceExpression
+    // StringAbstract
     function CHAR_sub23() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub24()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 8) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
+    CHAR_sub23.constant = {value: "\b"};
 
-    // StringLiteral
+    // SequenceExpression
     function CHAR_sub24() {
-        OUT = "\\n";
-        return true;
-    }
-    CHAR_sub24.constant = {value: "\\n"};
-
-    // StringLiteral
-    function CHAR_sub25() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 10) return false;
-        IP += 1;
-        OUT = undefined;
-        return true;
-    }
-    CHAR_sub25.constant = {value: "\n"};
-
-    // SequenceExpression
-    function CHAR_sub26() {
         const stateₒ = getState();
         let out;
+        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub28()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub27() {
-        OUT = "\\r";
-        return true;
+    // CodeExpression
+    function CHAR_sub25() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub26();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub27.constant = {value: "\\r"};
 
-    // StringLiteral
-    function CHAR_sub28() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 13) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringUniversal
+    function CHAR_sub26() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 102) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\f" : undefined;
         return true;
     }
-    CHAR_sub28.constant = {value: "\r"};
+    CHAR_sub26.constant = {value: "\\f"};
+
+    // StringAbstract
+    function CHAR_sub27() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 12) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub27.constant = {value: "\f"};
 
     // SequenceExpression
-    function CHAR_sub29() {
+    function CHAR_sub28() {
         const stateₒ = getState();
         let out;
-        if (CHAR_sub30()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub29()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (CHAR_sub31()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
-    function CHAR_sub30() {
-        OUT = "\\t";
-        return true;
+    // CodeExpression
+    function CHAR_sub29() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub30();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    CHAR_sub30.constant = {value: "\\t"};
 
-    // StringLiteral
-    function CHAR_sub31() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 9) return false;
-        IP += 1;
-        OUT = undefined;
+    // StringUniversal
+    function CHAR_sub30() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\n" : undefined;
         return true;
     }
-    CHAR_sub31.constant = {value: "\t"};
+    CHAR_sub30.constant = {value: "\\n"};
+
+    // StringAbstract
+    function CHAR_sub31() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 10) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub31.constant = {value: "\n"};
 
     // SequenceExpression
     function CHAR_sub32() {
         const stateₒ = getState();
         let out;
         if (CHAR_sub33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub34()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub35()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function CHAR_sub33() {
-        OUT = "\\u";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub34();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub34() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 114) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\r" : undefined;
         return true;
     }
-    CHAR_sub33.constant = {value: "\\u"};
+    CHAR_sub34.constant = {value: "\\r"};
+
+    // StringAbstract
+    function CHAR_sub35() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 13) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub35.constant = {value: "\r"};
+
+    // SequenceExpression
+    function CHAR_sub36() {
+        const stateₒ = getState();
+        let out;
+        if (CHAR_sub37()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub39()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // CodeExpression
+    function CHAR_sub37() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub38();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub38() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\t" : undefined;
+        return true;
+    }
+    CHAR_sub38.constant = {value: "\\t"};
+
+    // StringAbstract
+    function CHAR_sub39() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 9) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
+        return true;
+    }
+    CHAR_sub39.constant = {value: "\t"};
+
+    // SequenceExpression
+    function CHAR_sub40() {
+        const stateₒ = getState();
+        let out;
+        if (CHAR_sub41()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (CHAR_sub43()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // CodeExpression
+    function CHAR_sub41() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = CHAR_sub42();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function CHAR_sub42() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 92) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "\\u" : undefined;
+        return true;
+    }
+    CHAR_sub42.constant = {value: "\\u"};
 
     // InstantiationExpression
-    let CHAR_sub34ₘ;
-    function CHAR_sub34(arg) {
+    let CHAR_sub43ₘ;
+    function CHAR_sub43(arg) {
         try {
-            return CHAR_sub34ₘ(arg);
+            return CHAR_sub43ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub34ₘ is not a function')) throw err;
-            CHAR_sub34ₘ = unicode(CHAR_sub35);
-            return CHAR_sub34ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub43ₘ is not a function')) throw err;
+            CHAR_sub43ₘ = unicode(CHAR_sub44);
+            return CHAR_sub43ₘ(arg);
         }
     }
 
     // Module
-    function CHAR_sub35(member) {
+    function CHAR_sub44(member) {
         switch (member) {
             case 'base': return base;
             case 'minDigits': return minDigits;
@@ -2253,12 +2718,27 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function LBRACE_sub1() {
-        OUT = "{";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = LBRACE_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function LBRACE_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 123) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "{" : undefined;
         return true;
     }
-    LBRACE_sub1.constant = {value: "{"};
+    LBRACE_sub2.constant = {value: "{"};
 
     // SequenceExpression
     function RBRACE() {
@@ -2271,12 +2751,27 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function RBRACE_sub1() {
-        OUT = "}";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = RBRACE_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function RBRACE_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 125) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "}" : undefined;
         return true;
     }
-    RBRACE_sub1.constant = {value: "}"};
+    RBRACE_sub2.constant = {value: "}"};
 
     // SequenceExpression
     function LBRACKET() {
@@ -2289,12 +2784,27 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function LBRACKET_sub1() {
-        OUT = "[";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = LBRACKET_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function LBRACKET_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 91) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "[" : undefined;
         return true;
     }
-    LBRACKET_sub1.constant = {value: "["};
+    LBRACKET_sub2.constant = {value: "["};
 
     // SequenceExpression
     function RBRACKET() {
@@ -2307,12 +2817,27 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function RBRACKET_sub1() {
-        OUT = "]";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = RBRACKET_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function RBRACKET_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 93) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "]" : undefined;
         return true;
     }
-    RBRACKET_sub1.constant = {value: "]"};
+    RBRACKET_sub2.constant = {value: "]"};
 
     // SequenceExpression
     function COLON() {
@@ -2325,12 +2850,27 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function COLON_sub1() {
-        OUT = ":";
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = COLON_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function COLON_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 58) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? ":" : undefined;
         return true;
     }
-    COLON_sub1.constant = {value: ":"};
+    COLON_sub2.constant = {value: ":"};
 
     // SequenceExpression
     function COMMA() {
@@ -2343,26 +2883,65 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // CodeExpression
     function COMMA_sub1() {
-        OUT = ",";
-        return true;
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = COMMA_sub2();
+        HAS_IN = HAS_INₒ;
+        return result;
     }
-    COMMA_sub1.constant = {value: ","};
 
-    // StringLiteral
-    function DOUBLE_QUOTE() {
-        OUT = "\"";
+    // StringUniversal
+    function COMMA_sub2() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 44) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "," : undefined;
         return true;
     }
-    DOUBLE_QUOTE.constant = {value: "\""};
+    COMMA_sub2.constant = {value: ","};
+
+    // CodeExpression
+    function DOUBLE_QUOTE() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = DOUBLE_QUOTE_sub1();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
+
+    // StringUniversal
+    function DOUBLE_QUOTE_sub1() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 34) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\"" : undefined;
+        return true;
+    }
+    DOUBLE_QUOTE_sub1.constant = {value: "\""};
+
+    // CodeExpression
+    function WS() {
+        const HAS_INₒ = HAS_IN;
+        HAS_IN = false;
+        const result = WS_sub1();
+        HAS_IN = HAS_INₒ;
+        return result;
+    }
 
     // QuantifiedExpression
-    function WS() {
+    function WS_sub1() {
         const IPₒ = IP;
         let out;
         do {
-            if (!WS_sub1()) break;
+            if (!WS_sub2()) break;
             if (IP === IPₒ) break;
             out = concat(out, OUT);
         } while (true);
@@ -2371,41 +2950,65 @@ const print = (() => {
     }
 
     // SelectionExpression
-    function WS_sub1() {
-        if (WS_sub2()) return true;
+    function WS_sub2() {
         if (WS_sub3()) return true;
         if (WS_sub4()) return true;
         if (WS_sub5()) return true;
+        if (WS_sub6()) return true;
         return false;
     }
 
-    // StringLiteral
-    function WS_sub2() {
-        OUT = " ";
-        return true;
-    }
-    WS_sub2.constant = {value: " "};
-
-    // StringLiteral
+    // StringUniversal
     function WS_sub3() {
-        OUT = "\t";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 32) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? " " : undefined;
         return true;
     }
-    WS_sub3.constant = {value: "\t"};
+    WS_sub3.constant = {value: " "};
 
-    // StringLiteral
+    // StringUniversal
     function WS_sub4() {
-        OUT = "\n";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 9) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\t" : undefined;
         return true;
     }
-    WS_sub4.constant = {value: "\n"};
+    WS_sub4.constant = {value: "\t"};
 
-    // StringLiteral
+    // StringUniversal
     function WS_sub5() {
-        OUT = "\r";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 10) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\n" : undefined;
         return true;
     }
-    WS_sub5.constant = {value: "\r"};
+    WS_sub5.constant = {value: "\n"};
+
+    // StringUniversal
+    function WS_sub6() {
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 13) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "\r" : undefined;
+        return true;
+    }
+    WS_sub6.constant = {value: "\r"};
 
     // Module
     function Ɱ_json_recursive(member) {

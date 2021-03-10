@@ -2,6 +2,7 @@
 module.exports = {
     parse(text) {
         setState({ IN: text, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
         if (OUT === undefined) throw new Error('parse didn\'t return a value');
@@ -9,6 +10,7 @@ module.exports = {
     },
     print(node) {
         setState({ IN: node, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
         if (OUT === undefined) throw new Error('print didn\'t return a value');
@@ -148,18 +150,6 @@ function printRecord(fields) {
     OUT = text;
     return true;
 }
-const PARSE = 6;
-const PRINT = 7;
-const COVAL = 4;
-const COGEN = 5;
-const ABGEN = 2;
-const ABVAL = 3;
-const isParse = (mode) => (mode & 1) === 0;
-const isPrint = (mode) => (mode & 1) !== 0;
-const hasConcreteForm = (mode) => (mode & 4) !== 0;
-const hasAbstractForm = (mode) => (mode & 2) !== 0;
-const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
-const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
 function isRule(_x) {
     return true;
 }
@@ -172,6 +162,8 @@ function isModule(_x) {
 let IN;
 let IP;
 let OUT;
+let HAS_IN;
+let HAS_OUT;
 function getState() {
     return { IN, IP };
 }
@@ -234,26 +226,30 @@ const parse = (() => {
         return foo(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function foo() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 102) return false;
-        if (IN.charCodeAt(IP + 1) !== 111) return false;
-        if (IN.charCodeAt(IP + 2) !== 111) return false;
-        IP += 3;
-        OUT = "foo";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "foo" : undefined;
         return true;
     }
     foo.constant = {value: "foo"};
 
-    // StringLiteral
+    // StringUniversal
     function bar() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "bar" : undefined;
         return true;
     }
     bar.constant = {value: "bar"};
@@ -278,40 +274,46 @@ const parse = (() => {
         return b(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function b() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 50) return false;
-        IP += 2;
-        OUT = "b2";
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "b2" : undefined;
         return true;
     }
     b.constant = {value: "b2"};
 
-    // StringLiteral
+    // StringUniversal
     function baz() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "baz" : undefined;
         return true;
     }
     baz.constant = {value: "baz"};
 
-    // StringLiteral
+    // StringUniversal
     function mem() {
-        if (IP + 6 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 109) return false;
-        if (IN.charCodeAt(IP + 1) !== 101) return false;
-        if (IN.charCodeAt(IP + 2) !== 109) return false;
-        if (IN.charCodeAt(IP + 3) !== 98) return false;
-        if (IN.charCodeAt(IP + 4) !== 101) return false;
-        if (IN.charCodeAt(IP + 5) !== 114) return false;
-        IP += 6;
-        OUT = "member";
+        if (HAS_IN) {
+            if (IP + 6 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 109) return false;
+            if (IN.charCodeAt(IP + 1) !== 101) return false;
+            if (IN.charCodeAt(IP + 2) !== 109) return false;
+            if (IN.charCodeAt(IP + 3) !== 98) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            if (IN.charCodeAt(IP + 5) !== 114) return false;
+            IP += 6;
+        }
+        OUT = HAS_OUT ? "member" : undefined;
         return true;
     }
     mem.constant = {value: "member"};
@@ -334,12 +336,14 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function a_3_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 97) return false;
-        IP += 1;
-        OUT = "a";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 97) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "a" : undefined;
         return true;
     }
     a_3_sub1.constant = {value: "a"};
@@ -362,12 +366,14 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function b_2_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        IP += 1;
-        OUT = "b";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "b" : undefined;
         return true;
     }
     b_2_sub1.constant = {value: "b"};
@@ -385,24 +391,28 @@ const parse = (() => {
         return c1(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function c1() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 99) return false;
-        if (IN.charCodeAt(IP + 1) !== 49) return false;
-        IP += 2;
-        OUT = "c1";
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 49) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "c1" : undefined;
         return true;
     }
     c1.constant = {value: "c1"};
 
-    // StringLiteral
+    // StringUniversal
     function c2() {
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 99) return false;
-        if (IN.charCodeAt(IP + 1) !== 50) return false;
-        IP += 2;
-        OUT = "c2";
+        if (HAS_IN) {
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "c2" : undefined;
         return true;
     }
     c2.constant = {value: "c2"};
@@ -485,28 +495,32 @@ const print = (() => {
         return foo(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function foo() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 102) return false;
-        if (IN.charCodeAt(IP + 1) !== 111) return false;
-        if (IN.charCodeAt(IP + 2) !== 111) return false;
-        IP += 3;
-        OUT = "foo";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "foo" : undefined;
         return true;
     }
     foo.constant = {value: "foo"};
 
-    // StringLiteral
+    // StringUniversal
     function bar() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "bar" : undefined;
         return true;
     }
     bar.constant = {value: "bar"};
@@ -531,43 +545,49 @@ const print = (() => {
         return b(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function b() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 50) return false;
-        IP += 2;
-        OUT = "b2";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "b2" : undefined;
         return true;
     }
     b.constant = {value: "b2"};
 
-    // StringLiteral
+    // StringUniversal
     function baz() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "baz" : undefined;
         return true;
     }
     baz.constant = {value: "baz"};
 
-    // StringLiteral
+    // StringUniversal
     function mem() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 6 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 109) return false;
-        if (IN.charCodeAt(IP + 1) !== 101) return false;
-        if (IN.charCodeAt(IP + 2) !== 109) return false;
-        if (IN.charCodeAt(IP + 3) !== 98) return false;
-        if (IN.charCodeAt(IP + 4) !== 101) return false;
-        if (IN.charCodeAt(IP + 5) !== 114) return false;
-        IP += 6;
-        OUT = "member";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 6 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 109) return false;
+            if (IN.charCodeAt(IP + 1) !== 101) return false;
+            if (IN.charCodeAt(IP + 2) !== 109) return false;
+            if (IN.charCodeAt(IP + 3) !== 98) return false;
+            if (IN.charCodeAt(IP + 4) !== 101) return false;
+            if (IN.charCodeAt(IP + 5) !== 114) return false;
+            IP += 6;
+        }
+        OUT = HAS_OUT ? "member" : undefined;
         return true;
     }
     mem.constant = {value: "member"};
@@ -590,13 +610,15 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function a_3_sub1() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 97) return false;
-        IP += 1;
-        OUT = "a";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 97) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "a" : undefined;
         return true;
     }
     a_3_sub1.constant = {value: "a"};
@@ -619,13 +641,15 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function b_2_sub1() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        IP += 1;
-        OUT = "b";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "b" : undefined;
         return true;
     }
     b_2_sub1.constant = {value: "b"};
@@ -643,26 +667,30 @@ const print = (() => {
         return c1(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function c1() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 99) return false;
-        if (IN.charCodeAt(IP + 1) !== 49) return false;
-        IP += 2;
-        OUT = "c1";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 49) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "c1" : undefined;
         return true;
     }
     c1.constant = {value: "c1"};
 
-    // StringLiteral
+    // StringUniversal
     function c2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 2 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 99) return false;
-        if (IN.charCodeAt(IP + 1) !== 50) return false;
-        IP += 2;
-        OUT = "c2";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 2 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 99) return false;
+            if (IN.charCodeAt(IP + 1) !== 50) return false;
+            IP += 2;
+        }
+        OUT = HAS_OUT ? "c2" : undefined;
         return true;
     }
     c2.constant = {value: "c2"};

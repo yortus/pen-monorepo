@@ -10,7 +10,8 @@ export function resolveConstantValues(ast: V.AST<400>): Record<string, {value: u
             case 'BooleanLiteral': result[name] = {value: value.value}; break;
             case 'NullLiteral': result[name] = {value: value.value}; break;
             case 'NumericLiteral': result[name] = {value: value.value}; break;
-            case 'StringLiteral': result[name] = {value: value.value}; break;
+            case 'StringAbstract': result[name] = {value: value.value}; break;
+            case 'StringUniversal': result[name] = {value: value.value}; break;
         }
     }
     return result;

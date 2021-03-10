@@ -43,6 +43,7 @@ const allAstVersions = [100, 200, 300, 400];
 const allNodeKinds = [
     'Binding',
     'BooleanLiteral',
+    'CodeExpression',
     'FieldExpression',
     'Identifier',
     'ImportExpression',
@@ -63,5 +64,6 @@ const allNodeKinds = [
     'RecordExpression',
     'SelectionExpression',
     'SequenceExpression',
-    'StringLiteral',
+    'StringAbstract',
+    'StringUniversal',
 ] as const;

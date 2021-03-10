@@ -11,6 +11,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
         switch (n.kind) {
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
+            case 'CodeExpression': return rec(n.expression), cb(n);
             case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GenericExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
             case 'GenericParameter': return cb(n);
@@ -31,7 +32,8 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
-            case 'StringLiteral': return cb(n);
+            case 'StringAbstract': return cb(n);
+            case 'StringUniversal': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }

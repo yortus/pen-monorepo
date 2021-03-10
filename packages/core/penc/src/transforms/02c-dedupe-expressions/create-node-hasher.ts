@@ -58,6 +58,7 @@ export function createNodeHasher() {
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
             case 'BooleanLiteral': return setSig('LITERAL', n.value);
+            case 'CodeExpression': return setSig('CODE', getSig(n.expression));
             case 'FieldExpression': return setSig('FIELD', getSig(n.name), getSig(n.value));
             case 'GenericExpression': return setSig('GENEXPR', getSig(n.body));
             case 'GenericParameter': return setSig('GENPARAM', n.name);
@@ -74,7 +75,8 @@ export function createNodeHasher() {
             case 'RecordExpression': return setSig('RECORD', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
-            case 'StringLiteral': return setSig('STRLIT', n.value, n.abstract, n.concrete);
+            case 'StringAbstract': return setSig('STRABS', n.value);
+            case 'StringUniversal': return setSig('STRCON', n.value);
             default: ((n: never) => { throw new Error(`Unhandled node kind ${(n as any).kind}`); })(n);
         }
     }

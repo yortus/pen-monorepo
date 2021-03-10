@@ -11,18 +11,16 @@ function char({mode}: StaticOptions): Generic {
         assert(typeof max === 'string' && max.length === 1);
         const checkRange = min !== '\u0000' || max !== '\uFFFF';
 
-        if (!hasInput(mode)) {
-            assert(hasOutput(mode));
-            return function CHA() { return OUT = min, true; };
-        }
-
         return function CHA() {
-            if (isPrint(mode) && typeof IN !== 'string') return false;
-            if (IP < 0 || IP >= (IN as string).length) return false;
-            const c = (IN as string).charAt(IP);
-            if (checkRange && (c < min || c > max)) return false;
-            IP += 1;
-            OUT = hasOutput(mode) ? c : undefined;
+            let c = min;
+            if (HAS_IN) {
+                if (mode === 'print' && typeof IN !== 'string') return false;
+                if (IP < 0 || IP >= (IN as string).length) return false;
+                c = (IN as string).charAt(IP);
+                if (checkRange && (c < min || c > max)) return false;
+                IP += 1;
+            }
+            OUT = HAS_OUT ? c : undefined;
             return true;
         };
     };

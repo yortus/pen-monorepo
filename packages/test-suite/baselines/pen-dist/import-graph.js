@@ -2,6 +2,7 @@
 module.exports = {
     parse(text) {
         setState({ IN: text, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
         if (OUT === undefined) throw new Error('parse didn\'t return a value');
@@ -9,6 +10,7 @@ module.exports = {
     },
     print(node) {
         setState({ IN: node, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
         if (OUT === undefined) throw new Error('print didn\'t return a value');
@@ -148,18 +150,6 @@ function printRecord(fields) {
     OUT = text;
     return true;
 }
-const PARSE = 6;
-const PRINT = 7;
-const COVAL = 4;
-const COGEN = 5;
-const ABGEN = 2;
-const ABVAL = 3;
-const isParse = (mode) => (mode & 1) === 0;
-const isPrint = (mode) => (mode & 1) !== 0;
-const hasConcreteForm = (mode) => (mode & 4) !== 0;
-const hasAbstractForm = (mode) => (mode & 2) !== 0;
-const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
-const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
 function isRule(_x) {
     return true;
 }
@@ -172,6 +162,8 @@ function isModule(_x) {
 let IN;
 let IP;
 let OUT;
+let HAS_IN;
+let HAS_OUT;
 function getState() {
     return { IN, IP };
 }
@@ -242,80 +234,42 @@ const extensions = {
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
                 const checkRange = min !== '\u0000' || max !== '\uFFFF';
-                if (!hasInput(mode)) {
-                    assert(hasOutput(mode));
-                    return function CHA() { return OUT = min, true; };
-                }
                 return function CHA() {
-                    if (isPrint(mode) && typeof IN !== 'string')
-                        return false;
-                    if (IP < 0 || IP >= IN.length)
-                        return false;
-                    const c = IN.charAt(IP);
-                    if (checkRange && (c < min || c > max))
-                        return false;
-                    IP += 1;
-                    OUT = hasOutput(mode) ? c : undefined;
+                    let c = min;
+                    if (HAS_IN) {
+                        if (mode === 'print' && typeof IN !== 'string')
+                            return false;
+                        if (IP < 0 || IP >= IN.length)
+                            return false;
+                        c = IN.charAt(IP);
+                        if (checkRange && (c < min || c > max))
+                            return false;
+                        IP += 1;
+                    }
+                    OUT = HAS_OUT ? c : undefined;
                     return true;
                 };
             };
         }
         // TODO: doc... has both 'txt' and 'ast' representation
         function f64({ mode }) {
-            if (!hasInput(mode)) {
-                assert(hasOutput(mode));
-                const out = isParse(mode) ? 0 : '0';
-                return function F64() { return OUT = out, true; };
-            }
-            if (isParse(mode)) {
+            if (mode === 'parse') {
                 return function F64() {
-                    if (typeof IN !== 'string')
-                        return false;
-                    const stateₒ = getState();
-                    const LEN = IN.length;
-                    const EOS = 0;
-                    let digitCount = 0;
-                    // Parse optional '+' or '-' sign
-                    let c = IN.charCodeAt(IP);
-                    if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse optional '.'
-                    if (c === DECIMAL_POINT) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-                    }
-                    // Ensure we have parsed at least one significant digit
-                    if (digitCount === 0)
-                        return setState(stateₒ), false;
-                    // Parse optional exponent
-                    if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                        IP += 1;
-                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                    let num = 0;
+                    if (HAS_IN) {
+                        if (typeof IN !== 'string')
+                            return false;
+                        const stateₒ = getState();
+                        const LEN = IN.length;
+                        const EOS = 0;
+                        let digitCount = 0;
                         // Parse optional '+' or '-' sign
+                        let c = IN.charCodeAt(IP);
                         if (c === PLUS_SIGN || c === MINUS_SIGN) {
                             IP += 1;
                             c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                         }
-                        // Parse 1..M digits
-                        digitCount = 0;
+                        // Parse 0..M digits
                         while (true) {
                             if (c < ZERO_DIGIT || c > NINE_DIGIT)
                                 break;
@@ -323,29 +277,69 @@ const extensions = {
                             IP += 1;
                             c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                         }
+                        // Parse optional '.'
+                        if (c === DECIMAL_POINT) {
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        }
+                        // Parse 0..M digits
+                        while (true) {
+                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                break;
+                            digitCount += 1;
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        }
+                        // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
                             return setState(stateₒ), false;
+                        // Parse optional exponent
+                        if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                            IP += 1;
+                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            // Parse optional '+' or '-' sign
+                            if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                                IP += 1;
+                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            }
+                            // Parse 1..M digits
+                            digitCount = 0;
+                            while (true) {
+                                if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                    break;
+                                digitCount += 1;
+                                IP += 1;
+                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            }
+                            if (digitCount === 0)
+                                return setState(stateₒ), false;
+                        }
+                        // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                        // Reject the number if it parses to Infinity or Nan.
+                        // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                        num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                        if (!Number.isFinite(num))
+                            return setState(stateₒ), false;
                     }
-                    // There is a syntactically valid float. Delegate parsing to the JS runtime.
-                    // Reject the number if it parses to Infinity or Nan.
-                    // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    const num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
-                    if (!Number.isFinite(num))
-                        return setState(stateₒ), false;
                     // Success
-                    OUT = hasOutput(mode) ? num : undefined;
+                    OUT = HAS_OUT ? num : undefined;
                     return true;
                 };
             }
-            else /* isPrint */ {
+            else /* mode === 'print' */ {
                 return function F64() {
-                    // Ensure N is a number.
-                    if (typeof IN !== 'number' || IP !== 0)
-                        return false;
-                    // Delegate unparsing to the JS runtime.
-                    // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    OUT = hasOutput(mode) ? String(IN) : undefined;
-                    IP = 1;
+                    let out = '0';
+                    if (HAS_IN) {
+                        // Ensure N is a number.
+                        if (typeof IN !== 'number' || IP !== 0)
+                            return false;
+                        IP = 1;
+                        // Delegate unparsing to the JS runtime.
+                        // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                        out = String(IN);
+                    }
+                    // Success
+                    OUT = HAS_OUT ? out : undefined;
                     return true;
                 };
             }
@@ -367,88 +361,90 @@ const extensions = {
                 const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
-                if (!hasInput(mode)) {
-                    assert(hasOutput(mode));
-                    const out = isParse(mode) ? 0 : '0';
-                    return function I32() { return OUT = out, true; };
-                }
-                if (isParse(mode)) {
+                if (mode === 'parse') {
                     return function I32() {
-                        if (typeof IN !== 'string')
-                            return false;
-                        const stateₒ = getState();
-                        // Parse optional leading '-' sign (if signed)...
-                        let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                        let isNegative = false;
-                        if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                            isNegative = true;
-                            MAX_NUM = 0x80000000;
-                            IP += 1;
-                        }
-                        // ...followed by one or more decimal digits. (NB: no exponents).
                         let num = 0;
-                        let digits = 0;
-                        while (IP < IN.length) {
-                            // Read a digit.
-                            let c = IN.charCodeAt(IP);
-                            if (c >= 256)
-                                break;
-                            const digitValue = DIGIT_VALUES[c];
-                            if (digitValue >= base)
-                                break;
-                            // Update parsed number.
-                            num *= base;
-                            num += digitValue;
-                            // Check for overflow.
-                            if (num > MAX_NUM)
+                        if (HAS_IN) {
+                            if (typeof IN !== 'string')
+                                return false;
+                            const stateₒ = getState();
+                            // Parse optional leading '-' sign (if signed)...
+                            let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                            let isNegative = false;
+                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                                isNegative = true;
+                                MAX_NUM = 0x80000000;
+                                IP += 1;
+                            }
+                            // ...followed by one or more decimal digits. (NB: no exponents).
+                            let digits = 0;
+                            while (IP < IN.length) {
+                                // Read a digit.
+                                let c = IN.charCodeAt(IP);
+                                if (c >= 256)
+                                    break;
+                                const digitValue = DIGIT_VALUES[c];
+                                if (digitValue >= base)
+                                    break;
+                                // Update parsed number.
+                                num *= base;
+                                num += digitValue;
+                                // Check for overflow.
+                                if (num > MAX_NUM)
+                                    return setState(stateₒ), false;
+                                // Loop again.
+                                IP += 1;
+                                digits += 1;
+                            }
+                            // Check that we parsed at least one digit.
+                            if (digits === 0)
                                 return setState(stateₒ), false;
-                            // Loop again.
-                            IP += 1;
-                            digits += 1;
+                            // Apply the sign.
+                            if (isNegative)
+                                num = -num;
                         }
-                        // Check that we parsed at least one digit.
-                        if (digits === 0)
-                            return setState(stateₒ), false;
-                        // Apply the sign.
-                        if (isNegative)
-                            num = -num;
                         // Success
-                        OUT = hasOutput(mode) ? num : undefined;
+                        OUT = HAS_OUT ? num : undefined;
                         return true;
                     };
                 }
-                else /* isPrint */ {
+                else /* mode === 'print' */ {
                     return function I32() {
-                        if (typeof IN !== 'number' || IP !== 0)
-                            return false;
-                        let num = IN;
-                        // Determine the number's sign and ensure it is in range.
-                        let isNegative = false;
-                        let MAX_NUM = 0x7FFFFFFF;
-                        if (num < 0) {
-                            if (!signed)
+                        let out = '0';
+                        if (HAS_IN) {
+                            if (typeof IN !== 'number' || IP !== 0)
                                 return false;
-                            isNegative = true;
-                            num = -num;
-                            MAX_NUM = 0x80000000;
+                            let num = IN;
+                            // Determine the number's sign and ensure it is in range.
+                            let isNegative = false;
+                            let MAX_NUM = 0x7FFFFFFF;
+                            if (num < 0) {
+                                if (!signed)
+                                    return false;
+                                isNegative = true;
+                                num = -num;
+                                MAX_NUM = 0x80000000;
+                            }
+                            if (num > MAX_NUM)
+                                return false;
+                            // Extract the digits.
+                            const digits = [];
+                            while (true) {
+                                const d = num % base;
+                                num = (num / base) | 0;
+                                digits.push(CHAR_CODES[d]);
+                                if (num === 0)
+                                    break;
+                            }
+                            // Compute the final string.
+                            IP = 1;
+                            if (isNegative)
+                                digits.push(0x2d); // char code for '-'
+                            // TODO: is String.fromCharCode(...) performant?
+                            out = String.fromCharCode(...digits.reverse());
                         }
-                        if (num > MAX_NUM)
-                            return false;
-                        // Extract the digits.
-                        const digits = [];
-                        while (true) {
-                            const d = num % base;
-                            num = (num / base) | 0;
-                            digits.push(CHAR_CODES[d]);
-                            if (num === 0)
-                                break;
-                        }
-                        // Compute the final string.
-                        if (isNegative)
-                            digits.push(0x2d); // char code for '-'
-                        // TODO: is String.fromCharCode(...) performant?
-                        OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
-                        IP = 1;
+                        // Success
+                        OUT = HAS_OUT ? out : undefined;
                         return true;
                     };
                 }
@@ -573,10 +569,10 @@ const extensions = {
 const parse = (() => {
 
     // Intrinsic
-    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 6});
-    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 6});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 6});
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 6});
+    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'parse'});
+    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'parse'});
+    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'parse'});
+    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
 
     // Identifier
     function foo(arg) {
@@ -603,22 +599,26 @@ const parse = (() => {
         return result(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function min() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        IP += 1;
-        OUT = "0";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 48) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "0" : undefined;
         return true;
     }
     min.constant = {value: "0"};
 
-    // StringLiteral
+    // StringUniversal
     function max() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 57) return false;
-        IP += 1;
-        OUT = "9";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 57) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "9" : undefined;
         return true;
     }
     max.constant = {value: "9"};
@@ -645,42 +645,50 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function min_2() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 97) return false;
-        IP += 1;
-        OUT = "a";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 97) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "a" : undefined;
         return true;
     }
     min_2.constant = {value: "a"};
 
-    // StringLiteral
+    // StringUniversal
     function max_2() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 122) return false;
-        IP += 1;
-        OUT = "z";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 122) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "z" : undefined;
         return true;
     }
     max_2.constant = {value: "z"};
 
-    // StringLiteral
+    // StringUniversal
     function min_3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 65) return false;
-        IP += 1;
-        OUT = "A";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "A" : undefined;
         return true;
     }
     min_3.constant = {value: "A"};
 
-    // StringLiteral
+    // StringUniversal
     function max_3() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 90) return false;
-        IP += 1;
-        OUT = "Z";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 90) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "Z" : undefined;
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -782,16 +790,16 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringAbstract
     function b() {
-        OUT = "b thing";
+        OUT = HAS_OUT ? "b thing" : undefined;
         return true;
     }
     b.constant = {value: "b thing"};
 
-    // StringLiteral
+    // StringAbstract
     function d() {
-        OUT = "d thing";
+        OUT = HAS_OUT ? "d thing" : undefined;
         return true;
     }
     d.constant = {value: "d thing"};
@@ -834,38 +842,44 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function f() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 102) return false;
-        if (IN.charCodeAt(IP + 1) !== 111) return false;
-        if (IN.charCodeAt(IP + 2) !== 111) return false;
-        IP += 3;
-        OUT = "foo";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "foo" : undefined;
         return true;
     }
     f.constant = {value: "foo"};
 
-    // StringLiteral
+    // StringUniversal
     function b_2() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "bar" : undefined;
         return true;
     }
     b_2.constant = {value: "bar"};
 
-    // StringLiteral
+    // StringUniversal
     function baz_2() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "baz" : undefined;
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -947,16 +961,18 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function util1_2() {
-        if (IP + 5 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 117) return false;
-        if (IN.charCodeAt(IP + 1) !== 116) return false;
-        if (IN.charCodeAt(IP + 2) !== 105) return false;
-        if (IN.charCodeAt(IP + 3) !== 108) return false;
-        if (IN.charCodeAt(IP + 4) !== 49) return false;
-        IP += 5;
-        OUT = "util1";
+        if (HAS_IN) {
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 117) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            if (IN.charCodeAt(IP + 2) !== 105) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            if (IN.charCodeAt(IP + 4) !== 49) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "util1" : undefined;
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -969,16 +985,18 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function util2_2() {
-        if (IP + 5 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 117) return false;
-        if (IN.charCodeAt(IP + 1) !== 116) return false;
-        if (IN.charCodeAt(IP + 2) !== 105) return false;
-        if (IN.charCodeAt(IP + 3) !== 108) return false;
-        if (IN.charCodeAt(IP + 4) !== 50) return false;
-        IP += 5;
-        OUT = "util2";
+        if (HAS_IN) {
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 117) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            if (IN.charCodeAt(IP + 2) !== 105) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            if (IN.charCodeAt(IP + 4) !== 50) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "util2" : undefined;
         return true;
     }
     util2_2.constant = {value: "util2"};
@@ -1001,10 +1019,10 @@ const parse = (() => {
 const print = (() => {
 
     // Intrinsic
-    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 7});
-    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 7});
-    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 7});
-    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 7});
+    const char_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'print'});
+    const f64 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'print'});
+    const i32 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'print'});
+    const memoise = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
 
     // Identifier
     function foo(arg) {
@@ -1031,24 +1049,28 @@ const print = (() => {
         return result(arg);
     }
 
-    // StringLiteral
+    // StringUniversal
     function min() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 48) return false;
-        IP += 1;
-        OUT = "0";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 48) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "0" : undefined;
         return true;
     }
     min.constant = {value: "0"};
 
-    // StringLiteral
+    // StringUniversal
     function max() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 57) return false;
-        IP += 1;
-        OUT = "9";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 57) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "9" : undefined;
         return true;
     }
     max.constant = {value: "9"};
@@ -1075,46 +1097,54 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function min_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 97) return false;
-        IP += 1;
-        OUT = "a";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 97) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "a" : undefined;
         return true;
     }
     min_2.constant = {value: "a"};
 
-    // StringLiteral
+    // StringUniversal
     function max_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 122) return false;
-        IP += 1;
-        OUT = "z";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 122) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "z" : undefined;
         return true;
     }
     max_2.constant = {value: "z"};
 
-    // StringLiteral
+    // StringUniversal
     function min_3() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 65) return false;
-        IP += 1;
-        OUT = "A";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 65) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "A" : undefined;
         return true;
     }
     min_3.constant = {value: "A"};
 
-    // StringLiteral
+    // StringUniversal
     function max_3() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 90) return false;
-        IP += 1;
-        OUT = "Z";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 90) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "Z" : undefined;
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -1216,36 +1246,40 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringAbstract
     function b() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 32) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
-        if (IN.charCodeAt(IP + 3) !== 104) return false;
-        if (IN.charCodeAt(IP + 4) !== 105) return false;
-        if (IN.charCodeAt(IP + 5) !== 110) return false;
-        if (IN.charCodeAt(IP + 6) !== 103) return false;
-        IP += 7;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 32) return false;
+            if (IN.charCodeAt(IP + 2) !== 116) return false;
+            if (IN.charCodeAt(IP + 3) !== 104) return false;
+            if (IN.charCodeAt(IP + 4) !== 105) return false;
+            if (IN.charCodeAt(IP + 5) !== 110) return false;
+            if (IN.charCodeAt(IP + 6) !== 103) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     b.constant = {value: "b thing"};
 
-    // StringLiteral
+    // StringAbstract
     function d() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 100) return false;
-        if (IN.charCodeAt(IP + 1) !== 32) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
-        if (IN.charCodeAt(IP + 3) !== 104) return false;
-        if (IN.charCodeAt(IP + 4) !== 105) return false;
-        if (IN.charCodeAt(IP + 5) !== 110) return false;
-        if (IN.charCodeAt(IP + 6) !== 103) return false;
-        IP += 7;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 100) return false;
+            if (IN.charCodeAt(IP + 1) !== 32) return false;
+            if (IN.charCodeAt(IP + 2) !== 116) return false;
+            if (IN.charCodeAt(IP + 3) !== 104) return false;
+            if (IN.charCodeAt(IP + 4) !== 105) return false;
+            if (IN.charCodeAt(IP + 5) !== 110) return false;
+            if (IN.charCodeAt(IP + 6) !== 103) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     d.constant = {value: "d thing"};
@@ -1288,41 +1322,47 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function f() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 102) return false;
-        if (IN.charCodeAt(IP + 1) !== 111) return false;
-        if (IN.charCodeAt(IP + 2) !== 111) return false;
-        IP += 3;
-        OUT = "foo";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 102) return false;
+            if (IN.charCodeAt(IP + 1) !== 111) return false;
+            if (IN.charCodeAt(IP + 2) !== 111) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "foo" : undefined;
         return true;
     }
     f.constant = {value: "foo"};
 
-    // StringLiteral
+    // StringUniversal
     function b_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 114) return false;
-        IP += 3;
-        OUT = "bar";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 114) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "bar" : undefined;
         return true;
     }
     b_2.constant = {value: "bar"};
 
-    // StringLiteral
+    // StringUniversal
     function baz_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 98) return false;
-        if (IN.charCodeAt(IP + 1) !== 97) return false;
-        if (IN.charCodeAt(IP + 2) !== 122) return false;
-        IP += 3;
-        OUT = "baz";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 98) return false;
+            if (IN.charCodeAt(IP + 1) !== 97) return false;
+            if (IN.charCodeAt(IP + 2) !== 122) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "baz" : undefined;
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -1404,17 +1444,19 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function util1_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 5 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 117) return false;
-        if (IN.charCodeAt(IP + 1) !== 116) return false;
-        if (IN.charCodeAt(IP + 2) !== 105) return false;
-        if (IN.charCodeAt(IP + 3) !== 108) return false;
-        if (IN.charCodeAt(IP + 4) !== 49) return false;
-        IP += 5;
-        OUT = "util1";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 117) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            if (IN.charCodeAt(IP + 2) !== 105) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            if (IN.charCodeAt(IP + 4) !== 49) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "util1" : undefined;
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -1427,17 +1469,19 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function util2_2() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 5 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 117) return false;
-        if (IN.charCodeAt(IP + 1) !== 116) return false;
-        if (IN.charCodeAt(IP + 2) !== 105) return false;
-        if (IN.charCodeAt(IP + 3) !== 108) return false;
-        if (IN.charCodeAt(IP + 4) !== 50) return false;
-        IP += 5;
-        OUT = "util2";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 5 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 117) return false;
+            if (IN.charCodeAt(IP + 1) !== 116) return false;
+            if (IN.charCodeAt(IP + 2) !== 105) return false;
+            if (IN.charCodeAt(IP + 3) !== 108) return false;
+            if (IN.charCodeAt(IP + 4) !== 50) return false;
+            IP += 5;
+        }
+        OUT = HAS_OUT ? "util2" : undefined;
         return true;
     }
     util2_2.constant = {value: "util2"};

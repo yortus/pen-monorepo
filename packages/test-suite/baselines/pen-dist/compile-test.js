@@ -2,6 +2,7 @@
 module.exports = {
     parse(text) {
         setState({ IN: text, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
         if (OUT === undefined) throw new Error('parse didn\'t return a value');
@@ -9,6 +10,7 @@ module.exports = {
     },
     print(node) {
         setState({ IN: node, IP: 0 });
+        HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
         if (OUT === undefined) throw new Error('print didn\'t return a value');
@@ -148,18 +150,6 @@ function printRecord(fields) {
     OUT = text;
     return true;
 }
-const PARSE = 6;
-const PRINT = 7;
-const COVAL = 4;
-const COGEN = 5;
-const ABGEN = 2;
-const ABVAL = 3;
-const isParse = (mode) => (mode & 1) === 0;
-const isPrint = (mode) => (mode & 1) !== 0;
-const hasConcreteForm = (mode) => (mode & 4) !== 0;
-const hasAbstractForm = (mode) => (mode & 2) !== 0;
-const hasInput = (mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
-const hasOutput = (mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
 function isRule(_x) {
     return true;
 }
@@ -172,6 +162,8 @@ function isModule(_x) {
 let IN;
 let IP;
 let OUT;
+let HAS_IN;
+let HAS_OUT;
 function getState() {
     return { IN, IP };
 }
@@ -229,18 +221,20 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // StringLiteral
+    // StringUniversal
     function x() {
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 111) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "outer x";
+        if (HAS_IN) {
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 111) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            if (IN.charCodeAt(IP + 2) !== 116) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "outer x" : undefined;
         return true;
     }
     x.constant = {value: "outer x"};
@@ -288,25 +282,27 @@ const parse = (() => {
         return 𝕊2;
     }
 
-    // StringLiteral
+    // StringUniversal
     function x_3() {
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
+        if (HAS_IN) {
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 105) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            if (IN.charCodeAt(IP + 2) !== 110) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "inner x" : undefined;
         return true;
     }
     x_3.constant = {value: "inner x"};
 
     // NumericLiteral
     function a_2() {
-        OUT = 42;
+        OUT = HAS_OUT ? 42 : undefined;
         return true;
     }
     a_2.constant = {value: 42};
@@ -322,30 +318,34 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function lx() {
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
+        if (HAS_IN) {
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 105) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            if (IN.charCodeAt(IP + 2) !== 110) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "inner x" : undefined;
         return true;
     }
     lx.constant = {value: "inner x"};
 
-    // StringLiteral
+    // StringUniversal
     function ly() {
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 42) return false;
-        if (IN.charCodeAt(IP + 1) !== 42) return false;
-        if (IN.charCodeAt(IP + 2) !== 42) return false;
-        IP += 3;
-        OUT = "***";
+        if (HAS_IN) {
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 42) return false;
+            if (IN.charCodeAt(IP + 1) !== 42) return false;
+            if (IN.charCodeAt(IP + 2) !== 42) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "***" : undefined;
         return true;
     }
     ly.constant = {value: "***"};
@@ -361,12 +361,14 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function letexpr_sub1() {
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 45) return false;
-        IP += 1;
-        OUT = "-";
+        if (HAS_IN) {
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 45) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "-" : undefined;
         return true;
     }
     letexpr_sub1.constant = {value: "-"};
@@ -424,19 +426,21 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // StringLiteral
+    // StringUniversal
     function x() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 111) return false;
-        if (IN.charCodeAt(IP + 1) !== 117) return false;
-        if (IN.charCodeAt(IP + 2) !== 116) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "outer x";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 111) return false;
+            if (IN.charCodeAt(IP + 1) !== 117) return false;
+            if (IN.charCodeAt(IP + 2) !== 116) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "outer x" : undefined;
         return true;
     }
     x.constant = {value: "outer x"};
@@ -484,28 +488,32 @@ const print = (() => {
         return 𝕊2;
     }
 
-    // StringLiteral
+    // StringUniversal
     function x_3() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 105) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            if (IN.charCodeAt(IP + 2) !== 110) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "inner x" : undefined;
         return true;
     }
     x_3.constant = {value: "inner x"};
 
     // NumericLiteral
     function a_2() {
-        if (IN !== 42 || IP !== 0) return false;
-        IP += 1;
-        OUT = undefined;
+        if (HAS_IN) {
+            if (IN !== 42 || IP !== 0) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     a_2.constant = {value: 42};
@@ -521,32 +529,36 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // StringUniversal
     function lx() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 7 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 105) return false;
-        if (IN.charCodeAt(IP + 1) !== 110) return false;
-        if (IN.charCodeAt(IP + 2) !== 110) return false;
-        if (IN.charCodeAt(IP + 3) !== 101) return false;
-        if (IN.charCodeAt(IP + 4) !== 114) return false;
-        if (IN.charCodeAt(IP + 5) !== 32) return false;
-        if (IN.charCodeAt(IP + 6) !== 120) return false;
-        IP += 7;
-        OUT = "inner x";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 7 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 105) return false;
+            if (IN.charCodeAt(IP + 1) !== 110) return false;
+            if (IN.charCodeAt(IP + 2) !== 110) return false;
+            if (IN.charCodeAt(IP + 3) !== 101) return false;
+            if (IN.charCodeAt(IP + 4) !== 114) return false;
+            if (IN.charCodeAt(IP + 5) !== 32) return false;
+            if (IN.charCodeAt(IP + 6) !== 120) return false;
+            IP += 7;
+        }
+        OUT = HAS_OUT ? "inner x" : undefined;
         return true;
     }
     lx.constant = {value: "inner x"};
 
-    // StringLiteral
+    // StringUniversal
     function ly() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 3 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 42) return false;
-        if (IN.charCodeAt(IP + 1) !== 42) return false;
-        if (IN.charCodeAt(IP + 2) !== 42) return false;
-        IP += 3;
-        OUT = "***";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 3 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 42) return false;
+            if (IN.charCodeAt(IP + 1) !== 42) return false;
+            if (IN.charCodeAt(IP + 2) !== 42) return false;
+            IP += 3;
+        }
+        OUT = HAS_OUT ? "***" : undefined;
         return true;
     }
     ly.constant = {value: "***"};
@@ -562,13 +574,15 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // StringUniversal
     function letexpr_sub1() {
-        if (typeof IN !== 'string') return false;
-        if (IP + 1 > IN.length) return false;
-        if (IN.charCodeAt(IP + 0) !== 45) return false;
-        IP += 1;
-        OUT = "-";
+        if (HAS_IN) {
+            if (typeof IN !== 'string') return false;
+            if (IP + 1 > IN.length) return false;
+            if (IN.charCodeAt(IP + 0) !== 45) return false;
+            IP += 1;
+        }
+        OUT = HAS_OUT ? "-" : undefined;
         return true;
     }
     letexpr_sub1.constant = {value: "-"};

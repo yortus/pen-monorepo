@@ -2,8 +2,6 @@ import * as fs from 'fs';
 import type {V} from '../../representations';
 import {assert} from '../../utils';
 import {Emitter, makeEmitter} from './emitter';
-import {Mode, PARSE, PRINT} from './modes';
-import * as modes from './modes';
 
 
 
@@ -30,14 +28,14 @@ export function generateTargetCode(program: Program) {
     // TODO: Emit main exports...
     emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
     emit.down(1).text(`module.exports = {`).indent();
-    for (const mode of [PARSE, PRINT] as const) {
-        const fname = mode === PARSE ? 'parse' : 'print';
-        const paramName = mode === PARSE ? 'text' : 'node';
-        emit.down(1).text(`${fname}(${paramName}) {`).indent();
+    for (const mode of ['parse', 'print'] as const) {
+        const paramName = mode === 'parse' ? 'text' : 'node';
+        emit.down(1).text(`${mode}(${paramName}) {`).indent();
         emit.down(1).text(`setState({ IN: ${paramName}, IP: 0 });`);
-        emit.down(1).text(`if (!${fname}()) throw new Error('${fname} failed');`);
-        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${fname} didn\\\'t consume entire input');`);
-        emit.down(1).text(`if (OUT === undefined) throw new Error('${fname} didn\\\'t return a value');`);
+        emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
+        emit.down(1).text(`if (!${mode}()) throw new Error('${mode} failed');`);
+        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
+        emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
         emit.down(1).text(`return OUT;`);
         emit.dedent().down(1).text(`},`);
     }
@@ -53,8 +51,8 @@ export function generateTargetCode(program: Program) {
     emitIntrinsics(emit, program);
 
     // TODO: Emit parse() and print() fns
-    emitProgram(emit, program, PARSE);
-    emitProgram(emit, program, PRINT);
+    emitProgram(emit, program, 'parse');
+    emitProgram(emit, program, 'print');
 
     // All done.
     return emit.down(1).toString();
@@ -80,14 +78,13 @@ function emitIntrinsics(emit: Emitter, {ast}: Program) {
 }
 
 
-function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
+function emitProgram(emit: Emitter, program: Program, mode: 'parse' | 'print') {
     const {consts, ast} = program;
     const {bindings} = ast.start;
 
     // TODO: emit prolog...
-    const modeName = mode === PARSE ? 'parse' : 'print';
-    emit.down(5).text(`// ------------------------------ ${modeName.toUpperCase()} ------------------------------`);
-    emit.down(1).text(`const ${modeName} = (() => {`).indent();
+    emit.down(5).text(`// ------------------------------ ${mode.toUpperCase()} ------------------------------`);
+    emit.down(1).text(`const ${mode} = (() => {`).indent();
 
     // TODO: emit top-level bindings
     emitBindings(emit, bindings, consts, mode);
@@ -99,14 +96,14 @@ function emitProgram(emit: Emitter, program: Program, mode: PARSE | PRINT) {
 }
 
 
-function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record<string, {value: unknown}>, mode: Mode) {
+function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record<string, {value: unknown}>, mode: 'parse' | 'print') {
 
     // Emit extension exports before anything else (if any)
     const extExprIds = Object.keys(bindings).filter(name => bindings[name].kind === 'Intrinsic');
     if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
     for (const id of extExprIds) {
         const extExpr = bindings[id] as V.Intrinsic;
-        emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: ${mode}});`);
+        emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode: '${mode}'});`);
     }
 
     // TODO: emit each binding...
@@ -118,7 +115,7 @@ function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record
 }
 
 
-function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, consts: Record<string, {value: unknown}>, mode: Mode) {
+function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, consts: Record<string, {value: unknown}>, mode: 'parse' | 'print') {
     // TODO: old... was... maybe restore?
     // Should never see an Identifier here.
     // TODO: jsdoc this and make it part of fn signature? Any other kinds to assert in/out?
@@ -141,22 +138,43 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
-            const outText = modes.isParse(mode) && modes.hasOutput(mode) ? JSON.stringify(expr.value) : 'undefined';
+            const outText = mode === 'parse' ? JSON.stringify(expr.value) : 'undefined';
             emit.down(1).text(`function ${name}() {`).indent();
-            if (modes.isPrint(mode) && modes.hasInput(mode)) {
+            if (mode === 'print') {
+                emit.down(1).text(`if (HAS_IN) {`).indent();
                 emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
                 emit.down(1).text(`IP += 1;`);
+                emit.dedent().down(1).text(`}`);
             }
-            emit.down(1).text(`OUT = ${outText};`);
+            emit.down(1).text(`OUT = HAS_OUT ? ${outText} : undefined;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;
         }
 
+        case 'CodeExpression': {
+            emit.down(1).text(`function ${name}() {`).indent();
+            if (mode === 'parse') {
+                emit.down(1).text(`const HAS_OUTₒ = HAS_OUT;`);
+                emit.down(1).text(`HAS_OUT = false;`);
+                emit.down(1).text(`const result = ${expr.expression.name}();`);
+                emit.down(1).text(`HAS_OUT = HAS_OUTₒ;`);
+                emit.down(1).text(`return result;`);
+            }
+            else /* mode === 'print' */ {
+                emit.down(1).text(`const HAS_INₒ = HAS_IN;`);
+                emit.down(1).text(`HAS_IN = false;`);
+                emit.down(1).text(`const result = ${expr.expression.name}();`);
+                emit.down(1).text(`HAS_IN = HAS_INₒ;`);
+                emit.down(1).text(`return result;`);
+            }
+            emit.dedent().down(1).text(`}`);
+            break;
+        }
+
         case 'FieldExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseField' : 'printField'}`);
-            emit.text(`(${expr.name.name}, ${expr.value.name});`);
+            emit.down(1).text(`return ${mode}Field(${expr.name.name}, ${expr.value.name});`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -202,7 +220,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 return element.name;
             });
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseList' : 'printList'}([${elements.join(', ')}]);`);
+            emit.down(1).text(`return ${mode}List([${elements.join(', ')}]);`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -255,7 +273,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 return `{name: '${field.name}', value: ${field.value.name}},`;
             });
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${modes.isParse(mode) ? 'parseRecord' : 'printRecord'}([`);
+            emit.down(1).text(`return ${mode}Record([`);
             if (fields.length > 0) {
                 emit.indent();
                 for (const field of fields) emit.down(1).text(field);
@@ -293,18 +311,36 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
-        case 'StringLiteral': {
-            const localMode = (mode & ~(expr.abstract ? 4 : expr.concrete ? 2 : 0)) as Mode;
+        case 'StringAbstract': { // AST literal
+            const outText = mode === 'parse' ? JSON.stringify(expr.value) : 'undefined';
             emit.down(1).text(`function ${name}() {`).indent();
-            if (modes.hasInput(localMode)) {
-                if (modes.isPrint(localMode)) emit.down(1).text(`if (typeof IN !== 'string') return false;`);
+            if (mode === 'print') {
+                emit.down(1).text(`if (HAS_IN) {`).indent();
+                emit.down(1).text(`if (typeof IN !== 'string') return false;`);
                 emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
                 for (let i = 0; i < expr.value.length; ++i) {
                     emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
                 }
                 emit.down(1).text(`IP += ${expr.value.length};`);
+                emit.dedent().down(1).text(`}`);
             }
-            emit.down(1).text(`OUT = ${modes.hasOutput(localMode) ? JSON.stringify(expr.value) : 'undefined'};`);
+            emit.down(1).text(`OUT = HAS_OUT ? ${outText} : undefined;`);
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('}');
+            break;
+        }
+
+        case 'StringUniversal': { // Code parse from bytestream to string
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`if (HAS_IN) {`).indent();
+            if (mode === 'print') emit.down(1).text(`if (typeof IN !== 'string') return false;`);
+            emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
+            for (let i = 0; i < expr.value.length; ++i) {
+                emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+            }
+            emit.down(1).text(`IP += ${expr.value.length};`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`OUT = HAS_OUT ? ${JSON.stringify(expr.value)} : undefined;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;

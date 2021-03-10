@@ -14,16 +14,16 @@ start = expr
 
 
 expr = memoise(add | sub | term)
-add = {type: 'add',  lhs: expr,  rhs: `+` term} // NB: commas allowed but optional
-sub = {type: 'sub'   lhs: expr   rhs: `-` term}
+add = {type: 'add',  lhs: expr,  rhs: #"+" term} // NB: commas allowed but optional
+sub = {type: 'sub'   lhs: expr   rhs: #"-" term}
 
 term = memoise(mul | div | factor)
-mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: `*` factor} // test both Record and Field exprs
-div = {type: 'div'   lhs: term   rhs: `/` factor}
+mul = {['type']: 'mul'}   {lhs: term}   {['rhs']: #"*" factor} // test both Record and Field exprs
+div = {type: 'div'   lhs: term   rhs: #"/" factor}
 
 factor =
     | !"0x"   !"0b"   f64
-    | `0x`   i32(base=16 signed=false)
-    | `0b`   i32(base=2 signed=false)
-    | `i`    i32(signed=false)
-    | `(`   expr   `)`
+    | #"0x"   i32(base=16 signed=false)
+    | #"0b"   i32(base=2 signed=false)
+    | #"i"    i32(signed=false)
+    | #"("   expr   #")"

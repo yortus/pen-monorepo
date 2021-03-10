@@ -50,6 +50,7 @@ export type Node<V extends Version = Version> =
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
     | BooleanLiteral
+    | CodeExpression<V>
     | FieldExpression<V>
     | Identifier
     | ImportExpression<V>
@@ -69,7 +70,8 @@ export type Expression<V extends Version = Version> =
     | RecordExpression<V>
     | SelectionExpression<V>
     | SequenceExpression<V>
-    | StringLiteral
+    | StringAbstract // TODO: rename
+    | StringUniversal // TODO: rename
 ;
 
 
@@ -102,6 +104,12 @@ export type Binding<V extends Version> = {
 export interface BooleanLiteral {
     kind: 'BooleanLiteral';
     value: boolean;
+}
+
+
+export interface CodeExpression<V extends Version> {
+    kind: 'CodeExpression';
+    expression: Subexpression<V>;
 }
 
 
@@ -285,11 +293,15 @@ export interface SequenceExpression<V extends Version> {
 }
 
 
-export interface StringLiteral {
-    kind: 'StringLiteral';
+export interface StringAbstract {
+    kind: 'StringAbstract';
     value: string;
-    concrete: boolean;
-    abstract: boolean;
+}
+
+
+export interface StringUniversal {
+    kind: 'StringUniversal';
+    value: string;
 }
 
 

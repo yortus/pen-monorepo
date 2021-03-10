@@ -7,91 +7,93 @@ function i32({mode}: StaticOptions): Generic {
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
-        if (!hasInput(mode)) {
-            assert(hasOutput(mode));
-            const out = isParse(mode) ? 0 : '0';
-            return function I32() { return OUT = out, true; };
-        }
-
-        if (isParse(mode)) {
+        if (mode === 'parse') {
             return function I32() {
-                if (typeof IN !== 'string') return false;
-                const stateₒ = getState();
-
-                // Parse optional leading '-' sign (if signed)...
-                let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                let isNegative = false;
-                if (signed && IP < IN.length && IN.charAt(IP) === '-') {
-                    isNegative = true;
-                    MAX_NUM = 0x80000000;
-                    IP += 1;
-                }
-
-                // ...followed by one or more decimal digits. (NB: no exponents).
                 let num = 0;
-                let digits = 0;
-                while (IP < IN.length) {
+                if (HAS_IN) {
+                    if (typeof IN !== 'string') return false;
+                    const stateₒ = getState();
 
-                    // Read a digit.
-                    let c = IN.charCodeAt(IP);
-                    if (c >= 256) break;
-                    const digitValue = DIGIT_VALUES[c];
-                    if (digitValue >= base) break;
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        IP += 1;
+                    }
 
-                    // Update parsed number.
-                    num *= base;
-                    num += digitValue;
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let digits = 0;
+                    while (IP < IN.length) {
 
-                    // Check for overflow.
-                    if (num > MAX_NUM) return setState(stateₒ), false;
+                        // Read a digit.
+                        let c = IN.charCodeAt(IP);
+                        if (c >= 256) break;
+                        const digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base) break;
 
-                    // Loop again.
-                    IP += 1;
-                    digits += 1;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
+
+                        // Check for overflow.
+                        if (num > MAX_NUM) return setState(stateₒ), false;
+
+                        // Loop again.
+                        IP += 1;
+                        digits += 1;
+                    }
+
+                    // Check that we parsed at least one digit.
+                    if (digits === 0) return setState(stateₒ), false;
+
+                    // Apply the sign.
+                    if (isNegative) num = -num;
                 }
-
-                // Check that we parsed at least one digit.
-                if (digits === 0) return setState(stateₒ), false;
-
-                // Apply the sign.
-                if (isNegative) num = -num;
 
                 // Success
-                OUT = hasOutput(mode) ? num : undefined;
+                OUT = HAS_OUT ? num : undefined;
                 return true;
             };
         }
 
-        else /* isPrint */ {
+        else /* mode === 'print' */ {
             return function I32() {
-                if (typeof IN !== 'number' || IP !== 0) return false;
-                let num = IN;
+                let out = '0';
+                if (HAS_IN) {
+                    if (typeof IN !== 'number' || IP !== 0) return false;
+                    let num = IN;
 
-                // Determine the number's sign and ensure it is in range.
-                let isNegative = false;
-                let MAX_NUM = 0x7FFFFFFF;
-                if (num < 0) {
-                    if (!signed) return false;
-                    isNegative = true;
-                    num = -num;
-                    MAX_NUM = 0x80000000;
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed) return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM) return false;
+
+                    // Extract the digits.
+                    const digits = [] as number[];
+                    while (true) {
+                        const d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0) break;
+                    }
+
+                    // Compute the final string.
+                    IP = 1;
+                    if (isNegative) digits.push(0x2d); // char code for '-'
+                    // TODO: is String.fromCharCode(...) performant?
+                    out = String.fromCharCode(...digits.reverse());
                 }
-                if (num > MAX_NUM) return false;
 
-                // Extract the digits.
-                const digits = [] as number[];
-                while (true) {
-                    const d = num % base;
-                    num = (num / base) | 0;
-                    digits.push(CHAR_CODES[d]);
-                    if (num === 0) break;
-                }
-
-                // Compute the final string.
-                if (isNegative) digits.push(0x2d); // char code for '-'
-                // TODO: is String.fromCharCode(...) performant?
-                OUT = hasOutput(mode) ? String.fromCharCode(...digits.reverse()) : undefined;
-                IP = 1;
+                // Success
+                OUT = HAS_OUT ? out : undefined;
                 return true;
             };
         }

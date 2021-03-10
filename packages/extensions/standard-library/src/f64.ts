@@ -1,94 +1,97 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 function f64({mode}: StaticOptions): Rule {
-    if (!hasInput(mode)) {
-        assert(hasOutput(mode));
-        const out = isParse(mode) ? 0 : '0';
-        return function F64() { return OUT = out, true; };
-    }
-
-    if (isParse(mode)) {
+    if (mode === 'parse') {
         return function F64() {
-            if (typeof IN !== 'string') return false;
-            const stateₒ = getState();
-            const LEN = IN.length;
-            const EOS = 0;
-            let digitCount = 0;
-
-            // Parse optional '+' or '-' sign
-            let c = IN.charCodeAt(IP);
-            if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                IP += 1;
-                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-            }
-
-            // Parse 0..M digits
-            while (true) {
-                if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
-                digitCount += 1;
-                IP += 1;
-                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-            }
-
-            // Parse optional '.'
-            if (c === DECIMAL_POINT) {
-                IP += 1;
-                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-            }
-
-            // Parse 0..M digits
-            while (true) {
-                if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
-                digitCount += 1;
-                IP += 1;
-                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
-            }
-
-            // Ensure we have parsed at least one significant digit
-            if (digitCount === 0) return setState(stateₒ), false;
-
-            // Parse optional exponent
-            if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                IP += 1;
-                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+            let num = 0;
+            if (HAS_IN) {
+                if (typeof IN !== 'string') return false;
+                const stateₒ = getState();
+                const LEN = IN.length;
+                const EOS = 0;
+                let digitCount = 0;
 
                 // Parse optional '+' or '-' sign
+                let c = IN.charCodeAt(IP);
                 if (c === PLUS_SIGN || c === MINUS_SIGN) {
                     IP += 1;
                     c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
 
-                // Parse 1..M digits
-                digitCount = 0;
+                // Parse 0..M digits
                 while (true) {
                     if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
                     digitCount += 1;
                     IP += 1;
                     c = IP < LEN ? IN.charCodeAt(IP) : EOS;
                 }
+
+                // Parse optional '.'
+                if (c === DECIMAL_POINT) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+
+                // Parse 0..M digits
+                while (true) {
+                    if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
+                    digitCount += 1;
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                }
+
+                // Ensure we have parsed at least one significant digit
                 if (digitCount === 0) return setState(stateₒ), false;
+
+                // Parse optional exponent
+                if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                    IP += 1;
+                    c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+
+                    // Parse optional '+' or '-' sign
+                    if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                        IP += 1;
+                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                    }
+
+                    // Parse 1..M digits
+                    digitCount = 0;
+                    while (true) {
+                        if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
+                        digitCount += 1;
+                        IP += 1;
+                        c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                    }
+                    if (digitCount === 0) return setState(stateₒ), false;
+                }
+
+                // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                // Reject the number if it parses to Infinity or Nan.
+                // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                if (!Number.isFinite(num)) return setState(stateₒ), false;
             }
 
-            // There is a syntactically valid float. Delegate parsing to the JS runtime.
-            // Reject the number if it parses to Infinity or Nan.
-            // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-            const num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
-            if (!Number.isFinite(num)) return setState(stateₒ), false;
-
             // Success
-            OUT = hasOutput(mode) ? num : undefined;
+            OUT = HAS_OUT ? num : undefined;
             return true;
         };
     }
 
-    else /* isPrint */ {
+    else /* mode === 'print' */ {
         return function F64() {
-            // Ensure N is a number.
-            if (typeof IN !== 'number' || IP !== 0) return false;
+            let out = '0';
+            if (HAS_IN) {
+                // Ensure N is a number.
+                if (typeof IN !== 'number' || IP !== 0) return false;
+                IP = 1;
 
-            // Delegate unparsing to the JS runtime.
-            // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-            OUT = hasOutput(mode) ? String(IN) : undefined;
-            IP = 1;
+                // Delegate unparsing to the JS runtime.
+                // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                out = String(IN);
+            }
+
+            // Success
+            OUT = HAS_OUT ? out : undefined;
             return true;
         };
     }

@@ -12,7 +12,7 @@ function unicode({mode}: StaticOptions): Generic {
         const pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
         const regex = RegExp(pattern, 'i');
 
-        if (isParse(mode)) {
+        if (mode === 'parse') {
             return function UNI() {
                 if (typeof IN !== 'string') return false;
                 const stateₒ = getState();
@@ -38,7 +38,7 @@ function unicode({mode}: StaticOptions): Generic {
             };
         }
 
-        else /* isPrint */ {
+        else /* mode === 'print' */ {
             return function UNI() {
                 // TODO: implement
                 return false;

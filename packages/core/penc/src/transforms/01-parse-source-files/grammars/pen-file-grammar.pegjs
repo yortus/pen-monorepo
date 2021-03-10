@@ -31,6 +31,7 @@ ModulePatternName
         SequenceExpression              a b      a  b c                                                                 NB: whitespace between terms, else is application
 
     PRECEDENCE 3
+        CodeExpression
         NotExpression                   !a   !a(b)   !a.b   !{a: b}
 
     PRECEDENCE 4
@@ -66,7 +67,8 @@ Precedence2OrHigher
     = SequenceExpression
 
 Precedence3OrHigher
-    = NotExpression
+    = CodeExpression
+    / NotExpression
     / Precedence4OrHigher
 
 Precedence4OrHigher
@@ -88,7 +90,8 @@ PrimaryExpression
     / ListExpression
     / NullLiteral
     / BooleanLiteral
-    / StringLiteral
+    / StringAbstract
+    / StringUniversal
     / NumericLiteral
     / Identifier
     / ImportExpression
@@ -107,8 +110,12 @@ SequenceExpression
         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
     }
 
+CodeExpression
+    = "#"   __   expression:Precedence3OrHigher
+    { return {kind: 'CodeExpression', expression}; }
+
 NotExpression
-    = "!"   __   expression:Precedence4OrHigher
+    = "!"   __   expression:Precedence3OrHigher
     { return {kind: 'NotExpression', expression}; }
 
 QuantifiedExpression
@@ -178,15 +185,13 @@ BooleanLiteral
     = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
     / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
 
-StringLiteral
+StringAbstract
     = "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: false, abstract: true}; }
+    { return {kind: 'StringAbstract', value: chars.map(el => el[1]).join('')}; }
 
-    / '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: false, abstract: false}; }
-
-    / "`"   chars:(!"`"   CHARACTER)*   "`"
-    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), concrete: true, abstract: false}; }
+StringUniversal
+    = '"'   chars:(!'"'   CHARACTER)*   '"'
+    { return {kind: 'StringUniversal', value: chars.map(el => el[1]).join('')}; }
 
 NumericLiteral
     = DecimalLiteral
