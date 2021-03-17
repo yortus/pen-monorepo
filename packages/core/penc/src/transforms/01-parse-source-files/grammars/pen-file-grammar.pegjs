@@ -52,7 +52,7 @@ ModulePatternName
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'   `a`
-        NumericLiteral                  123   3.14   -0.1   5.7e-53
+        NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
 */
@@ -194,14 +194,8 @@ StringUniversal
     { return {kind: 'StringUniversal', value: chars.map(el => el[1]).join('')}; }
 
 NumericLiteral
-    = DecimalLiteral
-    {
-        let n = parseFloat(text());
-        if (!Number.isFinite(n)) error('cannot represent numeric literal'); // TODO: also ensure exact representation, aka safenum?
-        return {kind: 'NumericLiteral', value: n}
-    }
-
-    // TODO: HexIntegerLiteral
+    = value:(DecimalLiteral / HexIntegerLiteral)
+    { return {kind: 'NumericLiteral', value}; }
 
 Identifier
     = name:IDENTIFIER
@@ -231,11 +225,25 @@ ElementList
 
 // ====================   Numeric literal parts   ====================
 DecimalLiteral
-    = [+-]?   [0-9]+   ("."   [0-9]*)?   ExponentPart?   { return text(); }
-    / [+-]?   "."   [0-9]+   ExponentPart?   { return text(); }
+    = !"0x"   [+-]?   ([0-9]+ ("." [0-9]*)?   /   "." [0-9]+)   ExponentPart?   ![a-zA-Z]
+    {
+        // TODO: also ensure exact representation, aka safenum?
+        let n = parseFloat(text());
+        if (!Number.isFinite(n)) error('cannot represent numeric literal');
+        return n;
+    }
 
 ExponentPart
     = [eE]   [+-]?   [0-9]+
+
+HexIntegerLiteral
+    = "0x"    [0-9a-fA-F]+   ![a-zA-Z]
+    {
+        // TODO: also ensure exact representation, aka safenum?
+        let n = parseInt(text());
+        if (!Number.isFinite(n)) error('cannot represent numeric literal');
+        return n;
+    }
 
 
 // ====================   Literal characters and escape sequences   ====================
