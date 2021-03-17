@@ -1,5 +1,5 @@
 /* @pen exports = {
-    char,
+    ascii,
     f64,
     i32,
     memoise,

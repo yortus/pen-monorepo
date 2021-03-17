@@ -1,11 +1,11 @@
 (f as foo, b as bar, baz) = import './a'
 () = import './b.pen'
-(char) = import 'std'
+(ascii) = import 'std'
 
 start = result
 
-digit = char(min="0" max="9")
-alpha = char(min="a" max="z") | char(min="A" max="Z")
+digit = ascii(min="0" max="9")
+alpha = ascii(min="a" max="z") | ascii(min="A" max="Z")
 
 result = foo (bar baz)
 

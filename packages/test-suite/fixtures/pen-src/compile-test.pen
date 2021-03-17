@@ -65,7 +65,7 @@ start = nested.REP(a = x)
 
 // ================================================================================
 // TODO: was...
-// (char, f64) = import 'std'
+// (ascii, f64) = import 'std'
 // 
 // start = f64 x a b c
 // 

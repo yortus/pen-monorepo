@@ -233,22 +233,39 @@ const extensions = {
                 const max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
                 assert(typeof min === 'string' && min.length === 1);
                 assert(typeof max === 'string' && max.length === 1);
-                const checkRange = min !== '\u0000' || max !== '\uFFFF';
-                return function CHA() {
-                    let c = min;
-                    if (HAS_IN) {
-                        if (mode === 'print' && typeof IN !== 'string')
-                            return false;
-                        if (IP < 0 || IP >= IN.length)
-                            return false;
-                        c = IN.charAt(IP);
-                        if (checkRange && (c < min || c > max))
-                            return false;
-                        IP += 1;
-                    }
-                    OUT = HAS_OUT ? c : undefined;
-                    return true;
-                };
+                const isRangeCheckRequired = min !== '\u0000' || max !== '\uFFFF';
+                if (mode === 'parse') {
+                    return function CHA() {
+                        let c = min;
+                        if (HAS_IN) {
+                            if (IP < 0 || IP >= IN.length)
+                                return false;
+                            c = IN.charAt(IP);
+                            if (isRangeCheckRequired && (c < min || c > max))
+                                return false;
+                            IP += 1;
+                        }
+                        OUT = HAS_OUT ? c : undefined;
+                        return true;
+                    };
+                }
+                else /* mode === 'print' */ {
+                    return function CHA() {
+                        let c = min;
+                        if (HAS_IN) {
+                            if (typeof IN !== 'string')
+                                return false;
+                            if (IP < 0 || IP >= IN.length)
+                                return false;
+                            c = IN.charAt(IP);
+                            if (isRangeCheckRequired && (c < min || c > max))
+                                return false;
+                            IP += 1;
+                        }
+                        OUT = HAS_OUT ? c : undefined;
+                        return true;
+                    };
+                }
             };
         }
         // TODO: doc... has both 'txt' and 'ast' representation

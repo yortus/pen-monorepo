@@ -1,7 +1,7 @@
 // ===============================================================================
 // |                                  Imports                                    |
 // ===============================================================================
-(char, f64) = import 'std'
+(ascii, f64) = import 'std'
 (unicode) = import 'experiments'
 
 
@@ -79,19 +79,20 @@ Number = f64
 
 // ---------- Strings ----------
 String = DOUBLE_QUOTE   CHAR*   DOUBLE_QUOTE
-// TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents (in NODE)
+// TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents? (in NODE)
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
+// TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
-    |   !"\\"   !"\""    char(min="\u0020" max="\uFFFF")    // any char except '\', '"', or control char
-    |   #"\\\""   '"'                                        // quotation mark
-    |   #"\\\\"   '\\'                                       // reverse solidus
-    |   #"\\/"   '/'                                         // solidus
-    |   #"\\b"   '\b'                                        // backspace
-    |   #"\\f"   '\f'                                        // formfeed
-    |   #"\\n"   '\n'                                        // newline
-    |   #"\\r"   '\r'                                        // carriage return
-    |   #"\\t"   '\t'                                        // horizontal tab
-    |   #"\\u"   unicode(base=16 minDigits=4 maxDigits=4)    // unicode escape sequence
+    |   !"\\"   !"\""    ascii(min=0x20 max=0x7f)           // any ascii char except '\', '"', or control char
+    |   #"\\\""   '"'                                       // quotation mark
+    |   #"\\\\"   '\\'                                      // reverse solidus
+    |   #"\\/"   '/'                                        // solidus
+    |   #"\\b"   '\b'                                       // backspace
+    |   #"\\f"   '\f'                                       // formfeed
+    |   #"\\n"   '\n'                                       // newline
+    |   #"\\r"   '\r'                                       // carriage return
+    |   #"\\t"   '\t'                                       // horizontal tab
+    |   #"\\u"   unicode(base=16 minDigits=4 maxDigits=4)   // unicode escape sequence
 
 // ---------- Literal characters ----------
 LBRACE          = WS #"{" WS
