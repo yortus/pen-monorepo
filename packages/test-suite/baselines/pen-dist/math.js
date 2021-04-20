@@ -216,51 +216,62 @@ const extensions = {
     "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": (() => {
         "use strict";
         /* @pen exports = {
-            char,
+            ascii,
             f64,
             i32,
             memoise,
         } */
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: supports only single UTF-16 code units, ie basic multilingual plane. Extend to full unicode support somehow...
-        // TODO: optimise 'any char' case better
+        // TODO: optimise 'any char' case better - or is that a whole other primitive now?
         // TODO: optimise all cases better
-        function char({ mode }) {
-            return function CHA_generic(expr) {
+        function ascii({ mode }) {
+            return function ASC_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
-                const min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : '\u0000';
-                const max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : '\uFFFF';
-                assert(typeof min === 'string' && min.length === 1);
-                assert(typeof max === 'string' && max.length === 1);
-                const isRangeCheckRequired = min !== '\u0000' || max !== '\uFFFF';
+                let min = (_c = (_b = (_a = expr('min')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 0x00;
+                let max = (_f = (_e = (_d = expr('max')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : 0x7f;
+                if (typeof min === 'string' && min.length === 1)
+                    min = min.charCodeAt(0);
+                if (typeof max === 'string' && max.length === 1)
+                    max = max.charCodeAt(0);
+                assert(typeof min === 'number' && min >= 0x00 && min <= 0x7f);
+                assert(typeof max === 'number' && max >= 0x00 && max <= 0x7f);
                 if (mode === 'parse') {
-                    return function CHA() {
-                        let c = min;
+                    return function ASC() {
+                        let c;
                         if (HAS_IN) {
                             if (IP < 0 || IP >= IN.length)
                                 return false;
                             c = IN.charAt(IP);
-                            if (isRangeCheckRequired && (c < min || c > max))
+                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            if (cc < min || cc > max)
                                 return false;
                             IP += 1;
+                        }
+                        else {
+                            c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
                         OUT = HAS_OUT ? c : undefined;
                         return true;
                     };
                 }
                 else /* mode === 'print' */ {
-                    return function CHA() {
-                        let c = min;
+                    return function ASC() {
+                        let c;
                         if (HAS_IN) {
                             if (typeof IN !== 'string')
                                 return false;
                             if (IP < 0 || IP >= IN.length)
                                 return false;
                             c = IN.charAt(IP);
-                            if (isRangeCheckRequired && (c < min || c > max))
+                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            if (cc < min || cc > max)
                                 return false;
                             IP += 1;
+                        }
+                        else {
+                            c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
                         OUT = HAS_OUT ? c : undefined;
                         return true;
@@ -575,7 +586,7 @@ const extensions = {
                 };
             };
         }
-        return {char, f64, i32, memoise};
+        return {ascii, f64, i32, memoise};
     })(),
 };
 
@@ -586,7 +597,7 @@ const extensions = {
 const parse = (() => {
 
     // Intrinsic
-    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'parse'});
+    const ascii = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].ascii({mode: 'parse'});
     const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'parse'});
     const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'parse'});
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
@@ -1216,7 +1227,7 @@ const parse = (() => {
     // Module
     function Ɱ_std(member) {
         switch (member) {
-            case 'char': return char;
+            case 'ascii': return ascii;
             case 'f64': return f64_2;
             case 'i32': return i32_2;
             case 'memoise': return memoise_2;
@@ -1234,7 +1245,7 @@ const parse = (() => {
 const print = (() => {
 
     // Intrinsic
-    const char = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].char({mode: 'print'});
+    const ascii = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].ascii({mode: 'print'});
     const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'print'});
     const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'print'});
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
@@ -1944,7 +1955,7 @@ const print = (() => {
     // Module
     function Ɱ_std(member) {
         switch (member) {
-            case 'char': return char;
+            case 'ascii': return ascii;
             case 'f64': return f64_2;
             case 'i32': return i32_2;
             case 'memoise': return memoise_2;
