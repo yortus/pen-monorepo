@@ -80,7 +80,6 @@ function concat(a: any, b: any): unknown {
     // TODO: if program is statically proven valid, the following guard isn't necessary
     if (type !== objectToString.call(b)) throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]') return a + b;
-    if (type === '[object Array]') return [...a, ...b];
     if (type === '[object Object]') return {...a, ...b};
     // TODO: if program is statically proven valid, the following guard isn't necessary
     throw new Error(`Internal error: invalid sequence`);

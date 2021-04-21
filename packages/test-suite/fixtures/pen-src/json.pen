@@ -53,8 +53,8 @@ Properties  = {[String]: COLON Value}   ...(COMMA Properties) // NB: impl should
 ==================== */
 
 // ---------- Arrays ----------
-Array       = LBRACKET   (Element (COMMA Element)* | [])   RBRACKET
-Element    = [Value]
+Array       = LBRACKET   (Elements   |   [])   RBRACKET
+Elements    = [Value, ...COMMA Elements]   |   [Value]
 
 /* NEW: ====================
 // Option 1: ellipsis is followed by an element expression, which is iterated 0..M times

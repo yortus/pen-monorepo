@@ -203,8 +203,6 @@ function concat(a, b) {
         throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]')
         return a + b;
-    if (type === '[object Array]')
-        return [...a, ...b];
     if (type === '[object Object]')
         return Object.assign(Object.assign({}, a), b);
     throw new Error(`Internal error: invalid sequence`);
@@ -922,51 +920,43 @@ const parse = (() => {
 
     // SelectionExpression
     function Array_sub1() {
+        if (Elements()) return true;
         if (Array_sub2()) return true;
-        if (Array_sub5()) return true;
         return false;
     }
 
-    // SequenceExpression
-    function Array_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Array_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // QuantifiedExpression
-    function Array_sub3() {
-        const IPₒ = IP;
-        let out;
-        do {
-            if (!Array_sub4()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    }
-
-    // SequenceExpression
-    function Array_sub4() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
     // ListExpression
-    function Array_sub5() {
+    function Array_sub2() {
         return parseList([]);
     }
 
+    // SelectionExpression
+    function Elements() {
+        if (Elements_sub1()) return true;
+        if (Elements_sub3()) return true;
+        return false;
+    }
+
     // ListExpression
-    function Element() {
+    function Elements_sub1() {
+        return parseList([
+            {kind: 'Element', expr: Value},
+            {kind: 'Splice', expr: Elements_sub2},
+        ]);
+    }
+
+    // SequenceExpression
+    function Elements_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // ListExpression
+    function Elements_sub3() {
         return parseList([
             {kind: 'Element', expr: Value},
         ]);
@@ -1799,7 +1789,7 @@ const parse = (() => {
             case 'Object': return Object;
             case 'Property': return Property;
             case 'Array': return Array;
-            case 'Element': return Element;
+            case 'Elements': return Elements;
             case 'Number': return Number;
             case 'String': return String;
             case 'CHAR': return CHAR;
@@ -2121,51 +2111,43 @@ const print = (() => {
 
     // SelectionExpression
     function Array_sub1() {
+        if (Elements()) return true;
         if (Array_sub2()) return true;
-        if (Array_sub5()) return true;
         return false;
     }
 
-    // SequenceExpression
-    function Array_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Array_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
-    // QuantifiedExpression
-    function Array_sub3() {
-        const IPₒ = IP;
-        let out;
-        do {
-            if (!Array_sub4()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    }
-
-    // SequenceExpression
-    function Array_sub4() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Element()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
     // ListExpression
-    function Array_sub5() {
+    function Array_sub2() {
         return printList([]);
     }
 
+    // SelectionExpression
+    function Elements() {
+        if (Elements_sub1()) return true;
+        if (Elements_sub3()) return true;
+        return false;
+    }
+
     // ListExpression
-    function Element() {
+    function Elements_sub1() {
+        return printList([
+            {kind: 'Element', expr: Value},
+            {kind: 'Splice', expr: Elements_sub2},
+        ]);
+    }
+
+    // SequenceExpression
+    function Elements_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
+    }
+
+    // ListExpression
+    function Elements_sub3() {
         return printList([
             {kind: 'Element', expr: Value},
         ]);
@@ -3088,7 +3070,7 @@ const print = (() => {
             case 'Object': return Object;
             case 'Property': return Property;
             case 'Array': return Array;
-            case 'Element': return Element;
+            case 'Elements': return Elements;
             case 'Number': return Number;
             case 'String': return String;
             case 'CHAR': return CHAR;

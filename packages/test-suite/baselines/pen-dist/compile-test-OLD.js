@@ -203,8 +203,6 @@ function concat(a, b) {
         throw new Error(`Internal error: invalid sequence`);
     if (type === '[object String]')
         return a + b;
-    if (type === '[object Array]')
-        return [...a, ...b];
     if (type === '[object Object]')
         return Object.assign(Object.assign({}, a), b);
     throw new Error(`Internal error: invalid sequence`);
