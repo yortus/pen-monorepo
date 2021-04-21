@@ -216,11 +216,17 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ListExpression': {
-            const elements = expr.elements.map(element => {
-                return element.name;
+            const items = expr.items.map(item => {
+                return `{kind: '${item.kind}', expr: ${item.expression.name}},`;
             });
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${mode}List([${elements.join(', ')}]);`);
+            emit.down(1).text(`return ${mode}List([`);
+            if (items.length > 0) {
+                emit.indent();
+                for (const item of items) emit.down(1).text(item);
+                emit.dedent().down(1);
+            }
+            emit.text(`]);`);
             emit.dedent().down(1).text(`}`);
             break;
         }

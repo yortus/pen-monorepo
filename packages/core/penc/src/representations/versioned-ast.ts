@@ -200,7 +200,7 @@ export interface LetExpression<V extends Version> {
 
 export interface ListExpression<V extends Version> {
     kind: 'ListExpression';
-    elements: Array<Subexpression<V>>;
+    items: Array<ListItem<V>>;
 }
 
 
@@ -307,3 +307,9 @@ export interface StringUniversal {
 
 export type BindingList<V extends Version> = Array<Binding<V>>;
 export type BindingMap<V extends Version, Value extends Expression<V> = Expression<V>> = Record<string, Value>;
+
+// TODO: temp testing...
+export type ListItem<V extends Version> =
+    | {kind: 'Element', expression: Subexpression<V>}
+    | {kind: 'Splice', expression: Subexpression<V>}
+;

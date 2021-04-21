@@ -175,8 +175,8 @@ ParenthesisedExpression
     { return {kind: 'ParenthesisedExpression', expression}; }
 
 ListExpression
-    = "["   __   elements:ElementList   __   "]"
-    { return {kind: 'ListExpression', elements}; }
+    = "["   __   items:ListItems   __   "]"
+    { return {kind: 'ListExpression', items}; }
 
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }
@@ -218,9 +218,13 @@ RecordField
     = name:IDENTIFIER   __   ":"   __   value:Expression
     { return {name, value}; }
 
-ElementList
-    = !","   head:Expression?   tail:((__   ",")?   __   Expression)*   (__   ",")?
+ListItems
+    = !","   head:ListItem?   tail:((__   ",")?   __   ListItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
+
+ListItem
+    = "..."   __   expression:Expression   { return {kind: 'Splice', expression}; }
+    / expression:Expression   { return {kind: 'Element', expression}; }
 
 
 // ====================   Numeric literal parts   ====================

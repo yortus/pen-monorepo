@@ -72,38 +72,48 @@ function printField(name, value) {
     setState(stateₒ);
     return false;
 }
-function parseList(elements) {
-    const elementsLength = elements.length;
+function parseList(items) {
+    const itemsLength = items.length;
     const stateₒ = getState();
     const arr = [];
-    for (let i = 0; i < elementsLength; ++i) {
-        if (!elements[i]())
-            return setState(stateₒ), false;
-        assert(OUT !== undefined);
-        arr.push(OUT);
+    for (let i = 0; i < itemsLength; ++i) {
+        const item = items[i];
+        if (item.kind === 'Element') {
+            if (!item.expr())
+                return setState(stateₒ), false;
+            assert(OUT !== undefined);
+            arr.push(OUT);
+        }
+        else {
+            throw new Error('Not implemented!');
+        }
     }
     OUT = arr;
     return true;
 }
-function printList(elements) {
-    const elementsLength = elements.length;
+function printList(items) {
+    const itemsLength = items.length;
     if (!Array.isArray(IN))
-        return false;
-    if (IP < 0 || IP + elementsLength > IN.length)
         return false;
     const stateₒ = getState();
     let text;
     const arr = IN;
     const off = IP;
-    for (let i = 0; i < elementsLength; ++i) {
-        setState({ IN: arr[off + i], IP: 0 });
-        if (!elements[i]())
-            return setState(stateₒ), false;
-        if (!isInputFullyConsumed())
-            return setState(stateₒ), false;
-        text = concat(text, OUT);
+    for (let i = 0; i < itemsLength; ++i) {
+        const item = items[i];
+        if (item.kind === 'Element') {
+            setState({ IN: arr[off + i], IP: 0 });
+            if (!item.expr())
+                return setState(stateₒ), false;
+            if (!isInputFullyConsumed())
+                return setState(stateₒ), false;
+            text = concat(text, OUT);
+        }
+        else {
+            throw new Error('Not implemented!');
+        }
     }
-    setState({ IN: arr, IP: off + elementsLength });
+    setState({ IN: arr, IP: off + itemsLength });
     OUT = text;
     return true;
 }
@@ -949,7 +959,9 @@ const parse = (() => {
 
     // ListExpression
     function Element() {
-        return parseList([Value]);
+        return parseList([
+            {kind: 'Element', expr: Value},
+        ]);
     }
 
     // Identifier
@@ -2146,7 +2158,9 @@ const print = (() => {
 
     // ListExpression
     function Element() {
-        return printList([Value]);
+        return printList([
+            {kind: 'Element', expr: Value},
+        ]);
     }
 
     // Identifier
