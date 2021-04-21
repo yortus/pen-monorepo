@@ -12,8 +12,9 @@ function parseList(items: ListItem[]) {
             arr.push(OUT);
         }
         else /* item.kind === 'Splice' */ {
-            // TODO: implement...
-            throw new Error('Not implemented!');
+            if (!item.expr()) return setState(stateₒ), false;
+            assert(Array.isArray(OUT));
+            arr.push(...OUT);
         }
     }
     OUT = arr;
@@ -23,32 +24,29 @@ function parseList(items: ListItem[]) {
 function printList(items: ListItem[]) {
     const itemsLength = items.length;
     if (!Array.isArray(IN)) return false;
-    // TODO: was... remove? if (IP < 0 || IP + elementsLength > IN.length) return false;
-
     const stateₒ = getState();
     let text: unknown;
     const arr = IN;
-    const off = IP;
+    let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
         if (item.kind === 'Element') {
             // TODO: buggy
             // BUG: wrong if splices are present
-            setState({IN: arr[off + i], IP: 0});
+            setState({IN: arr[off], IP: 0});
             if (!item.expr()) return setState(stateₒ), false;
             if (!isInputFullyConsumed()) return setState(stateₒ), false;
             text = concat(text, OUT);
+            off += 1;
         }
         else /* item.kind === 'Splice' */ {
-            // TODO: implement...
-            throw new Error('Not implemented!');
+            setState({IN: arr, IP: off});
+            if (!item.expr()) return setState(stateₒ), false;
+            text = concat(text, OUT);
+            off = IP;
         }
     }
-
-    // TODO: buggy
-    // BUG: wrong if splices are present
-    setState({IN: arr, IP: off + itemsLength});
-
+    setState({IN: arr, IP: off});
     OUT = text;
     return true;
 }

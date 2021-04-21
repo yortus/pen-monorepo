@@ -85,7 +85,10 @@ function parseList(items) {
             arr.push(OUT);
         }
         else {
-            throw new Error('Not implemented!');
+            if (!item.expr())
+                return setState(stateₒ), false;
+            assert(Array.isArray(OUT));
+            arr.push(...OUT);
         }
     }
     OUT = arr;
@@ -98,22 +101,27 @@ function printList(items) {
     const stateₒ = getState();
     let text;
     const arr = IN;
-    const off = IP;
+    let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
         if (item.kind === 'Element') {
-            setState({ IN: arr[off + i], IP: 0 });
+            setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
             if (!isInputFullyConsumed())
                 return setState(stateₒ), false;
             text = concat(text, OUT);
+            off += 1;
         }
         else {
-            throw new Error('Not implemented!');
+            setState({ IN: arr, IP: off });
+            if (!item.expr())
+                return setState(stateₒ), false;
+            text = concat(text, OUT);
+            off = IP;
         }
     }
-    setState({ IN: arr, IP: off + itemsLength });
+    setState({ IN: arr, IP: off });
     OUT = text;
     return true;
 }
