@@ -31,8 +31,6 @@ function printList(items: ListItem[]) {
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
         if (item.kind === 'Element') {
-            // TODO: buggy
-            // BUG: wrong if splices are present
             setState({IN: arr[off], IP: 0});
             if (!item.expr()) return setState(stateₒ), false;
             if (!isInputFullyConsumed()) return setState(stateₒ), false;
