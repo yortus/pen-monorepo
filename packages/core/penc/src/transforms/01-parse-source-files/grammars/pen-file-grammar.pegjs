@@ -223,7 +223,7 @@ ListItems
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 ListItem
-    = "..."   __   expression:Expression   { return {kind: 'Splice', expression}; }
+    = "..."   __   list:Expression   { return {kind: 'Splice', list}; }
     / expression:Expression   { return {kind: 'Element', expression}; }
 
 

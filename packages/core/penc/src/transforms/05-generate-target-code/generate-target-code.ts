@@ -217,7 +217,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'ListExpression': {
             const items = expr.items.map(item => {
-                return `{kind: '${item.kind}', expr: ${item.expression.name}},`;
+                return `{kind: '${item.kind}', expr: ${item.kind === 'Element' ? item.expression.name : item.list.name}},`;
             });
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${mode}List([`);

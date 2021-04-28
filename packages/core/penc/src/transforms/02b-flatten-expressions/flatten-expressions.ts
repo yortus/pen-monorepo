@@ -57,7 +57,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
                     case 'Intrinsic': return setV(e);
                     case 'LetExpression': return setV(e); // TODO: doc this node was already handled in the depth-first mapNode traversal
-                    case 'ListExpression': return setV(e, {items: e.items.map(it => ({...it, expression: ref(it.expression)}))});
+                    case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'Element' ? {...it, expression: ref(it.expression)} : {...it, list: ref(it.list)})});
                     case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
                     case 'Module': return setV(e); // TODO: explain... already in the right form
                     case 'NotExpression': return setV(e, {expression: ref(e.expression)});

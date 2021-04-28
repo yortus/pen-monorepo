@@ -45,7 +45,13 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'InstantiationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Intrinsic': return n;
             case 'LetExpression': return {...n, expression: rec(n.expression), bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
-            case 'ListExpression': return {...n, items: n.items.map(it => ({...it, expression: rec(it.expression)}))};
+            case 'ListExpression': return {
+                ...n,
+                items: n.items.map(it => it.kind === 'Element'
+                    ? {...it, expression: rec(it.expression)}
+                    : {...it, list: rec(it.list)}
+                )
+            };
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
             case 'ModulePattern': return n;
@@ -55,6 +61,16 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
             case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
+
+            // TODO: new...
+            // case 'RecordExpression': return {
+            //     ...n,
+            //     items: n.items.map(it => it.kind === 'Field'
+            //         ? {...it, name: typeof it.name === 'string' ? it.name : rec(it.name), value: rec(it.expression)}
+            //         : {...it, record: rec(it.record)}
+            //     )
+            // };
+
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'StringAbstract': return n;

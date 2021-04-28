@@ -308,8 +308,19 @@ export interface StringUniversal {
 export type BindingList<V extends Version> = Array<Binding<V>>;
 export type BindingMap<V extends Version, Value extends Expression<V> = Expression<V>> = Record<string, Value>;
 
-// TODO: temp testing...
+
 export type ListItem<V extends Version> =
     | {kind: 'Element', expression: Subexpression<V>}
-    | {kind: 'Splice', expression: Subexpression<V>}
+    | {kind: 'Splice', list: Subexpression<V>}
 ;
+
+
+// TODO: new...
+// export interface RecordExpression<V extends Version> {
+//     kind: 'RecordExpression';
+//     items: Array<RecordItem<V>>;
+// }
+// export type RecordItem<V extends Version> =
+//     | {kind: 'Field', name: string | Subexpression<V>, expression: Subexpression<V>}
+//     | {kind: 'Splice', record: Subexpression<V>}
+// ;
