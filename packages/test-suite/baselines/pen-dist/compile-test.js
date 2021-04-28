@@ -246,14 +246,9 @@ function concat(a, b) {
         return b;
     if (b === undefined)
         return a;
-    const type = objectToString.call(a);
-    if (type !== objectToString.call(b))
+    if (typeof a !== 'string' || typeof b !== 'string')
         throw new Error(`Internal error: invalid sequence`);
-    if (type === '[object String]')
-        return a + b;
-    if (type === '[object Object]')
-        return Object.assign(Object.assign({}, a), b);
-    throw new Error(`Internal error: invalid sequence`);
+    return a + b;
 }
 function isInputFullyConsumed() {
     const type = objectToString.call(IN);

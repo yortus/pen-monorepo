@@ -76,13 +76,9 @@ function assert(value: unknown): asserts value {
 function concat(a: any, b: any): unknown {
     if (a === undefined) return b;
     if (b === undefined) return a;
-    const type = objectToString.call(a);
     // TODO: if program is statically proven valid, the following guard isn't necessary
-    if (type !== objectToString.call(b)) throw new Error(`Internal error: invalid sequence`);
-    if (type === '[object String]') return a + b;
-    if (type === '[object Object]') return {...a, ...b};
-    // TODO: if program is statically proven valid, the following guard isn't necessary
-    throw new Error(`Internal error: invalid sequence`);
+    if (typeof a !== 'string' || typeof b !== 'string') throw new Error(`Internal error: invalid sequence`);
+    return a + b;
 }
 
 
