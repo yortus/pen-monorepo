@@ -44,6 +44,7 @@ export type Node<V extends Version = Version> =
     | Expression<V>
     | Pattern<V>
     | Binding<V>
+    | Other<V>
 ;
 
 
@@ -99,6 +100,13 @@ export type Binding<V extends Version> = {
     300: never;
     400: never;
 }[V];
+
+
+/** Union of all node types not included elsewhere (eg clauses). */
+export type Other<V extends Version = Version> =
+    | ListElement<V>
+    | ListSplice<V>
+;
 
 
 export interface BooleanLiteral {
@@ -198,9 +206,21 @@ export interface LetExpression<V extends Version> {
 }
 
 
+export interface ListElement<V extends Version> {
+    kind: 'ListElement';
+    expression: Subexpression<V>;
+}
+
+
 export interface ListExpression<V extends Version> {
     kind: 'ListExpression';
-    items: Array<ListItem<V>>;
+    items: Array<ListElement<V> | ListSplice<V>>;
+}
+
+
+export interface ListSplice<V extends Version> {
+    kind: 'ListSplice';
+    list: Subexpression<V>;
 }
 
 
@@ -307,12 +327,6 @@ export interface StringUniversal {
 
 export type BindingList<V extends Version> = Array<Binding<V>>;
 export type BindingMap<V extends Version, Value extends Expression<V> = Expression<V>> = Record<string, Value>;
-
-
-export type ListItem<V extends Version> =
-    | {kind: 'Element', expression: Subexpression<V>}
-    | {kind: 'Splice', list: Subexpression<V>}
-;
 
 
 // TODO: new...

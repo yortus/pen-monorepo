@@ -78,7 +78,7 @@ function parseList(items) {
     const arr = [];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
@@ -104,7 +104,7 @@ function printList(items) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
@@ -811,9 +811,9 @@ const parse = (() => {
     // ListExpression
     function myList() {
         return parseList([
-            {kind: 'Element', expr: digit},
-            {kind: 'Element', expr: myList_sub1},
-            {kind: 'Element', expr: myList_sub2},
+            {kind: 'ListElement', expr: digit},
+            {kind: 'ListElement', expr: myList_sub1},
+            {kind: 'ListElement', expr: myList_sub2},
         ]);
     }
 
@@ -1271,9 +1271,9 @@ const print = (() => {
     // ListExpression
     function myList() {
         return printList([
-            {kind: 'Element', expr: digit},
-            {kind: 'Element', expr: myList_sub1},
-            {kind: 'Element', expr: myList_sub2},
+            {kind: 'ListElement', expr: digit},
+            {kind: 'ListElement', expr: myList_sub1},
+            {kind: 'ListElement', expr: myList_sub2},
         ]);
     }
 

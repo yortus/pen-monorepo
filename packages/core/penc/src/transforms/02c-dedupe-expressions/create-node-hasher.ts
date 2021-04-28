@@ -65,7 +65,7 @@ export function createNodeHasher() {
             case 'InstantiationExpression': return setSig('INSTEXPR', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INTRINSIC', n.name, n.path);
             case 'LetExpression': return setSig('LETEXPR', getSig(n.expression), mapObj(n.bindings, getSig));
-            case 'ListExpression': return setSig('LIST', n.items.map(i => i.kind === 'Element' ? {k: i.kind, e: getSig(i.expression)} : {k: i.kind, l: getSig(i.list)}));
+            case 'ListExpression': return setSig('LIST', n.items.map(i => i.kind === 'ListElement' ? {k: i.kind, e: getSig(i.expression)} : {k: i.kind, l: getSig(i.list)}));
             case 'MemberExpression': return setSig('MEMBER', getSig(n.module), n.member);
             case 'Module': return setSig('MODULE', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));

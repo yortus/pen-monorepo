@@ -78,7 +78,7 @@ function parseList(items) {
     const arr = [];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
@@ -104,7 +104,7 @@ function printList(items) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
@@ -940,8 +940,8 @@ const parse = (() => {
     // ListExpression
     function Elements_sub1() {
         return parseList([
-            {kind: 'Element', expr: Value},
-            {kind: 'Splice', expr: Elements_sub2},
+            {kind: 'ListElement', expr: Value},
+            {kind: 'ListSplice', expr: Elements_sub2},
         ]);
     }
 
@@ -958,7 +958,7 @@ const parse = (() => {
     // ListExpression
     function Elements_sub3() {
         return parseList([
-            {kind: 'Element', expr: Value},
+            {kind: 'ListElement', expr: Value},
         ]);
     }
 
@@ -2131,8 +2131,8 @@ const print = (() => {
     // ListExpression
     function Elements_sub1() {
         return printList([
-            {kind: 'Element', expr: Value},
-            {kind: 'Splice', expr: Elements_sub2},
+            {kind: 'ListElement', expr: Value},
+            {kind: 'ListSplice', expr: Elements_sub2},
         ]);
     }
 
@@ -2149,7 +2149,7 @@ const print = (() => {
     // ListExpression
     function Elements_sub3() {
         return printList([
-            {kind: 'Element', expr: Value},
+            {kind: 'ListElement', expr: Value},
         ]);
     }
 

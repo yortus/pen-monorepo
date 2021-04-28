@@ -78,7 +78,7 @@ function parseList(items) {
     const arr = [];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
@@ -104,7 +104,7 @@ function printList(items) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'Element') {
+        if (item.kind === 'ListElement') {
             setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
