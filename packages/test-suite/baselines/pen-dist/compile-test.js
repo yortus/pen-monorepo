@@ -125,20 +125,37 @@ function printList(items) {
     OUT = text;
     return true;
 }
-function parseRecord(fields) {
+function parseRecord(items) {
     const stateₒ = getState();
     const obj = {};
-    for (const field of fields) {
-        const propName = field.name;
-        if (!field.value())
-            return setState(stateₒ), false;
-        assert(OUT !== undefined);
-        obj[propName] = OUT;
+    for (const item of items) {
+        if (item.kind === 'RecordField') {
+            let propName;
+            if (typeof item.name === 'string') {
+                propName = item.name;
+            }
+            else {
+                if (!item.name())
+                    return setState(stateₒ), false;
+                assert(typeof OUT === 'string');
+                propName = OUT;
+            }
+            if (!item.expr())
+                return setState(stateₒ), false;
+            assert(OUT !== undefined);
+            obj[propName] = OUT;
+        }
+        else {
+            if (!item.expr())
+                return setState(stateₒ), false;
+            assert(OUT && typeof OUT === 'object');
+            Object.assign(obj, OUT);
+        }
     }
     OUT = obj;
     return true;
 }
-function printRecord(fields) {
+function printRecord(items) {
     if (objectToString.call(IN) !== '[object Object]')
         return false;
     const stateₒ = getState();
@@ -148,21 +165,39 @@ function printRecord(fields) {
     assert(propCount <= 32);
     const obj = IN;
     let bitmask = IP;
-    for (const field of fields) {
-        const i = propNames.indexOf(field.name);
-        if (i < 0)
-            return setState(stateₒ), false;
-        const propName = propNames[i];
-        const propBit = 1 << i;
-        if ((bitmask & propBit) !== 0)
-            return setState(stateₒ), false;
-        setState({ IN: obj[propName], IP: 0 });
-        if (!field.value())
-            return setState(stateₒ), false;
-        if (!isInputFullyConsumed())
-            return setState(stateₒ), false;
-        text = concat(text, OUT);
-        bitmask += propBit;
+    outerLoop: for (const item of items) {
+        if (item.kind === 'RecordField') {
+            for (let i = 0; i < propCount; ++i) {
+                let propName = propNames[i];
+                const propBit = 1 << i;
+                if ((bitmask & propBit) !== 0)
+                    continue;
+                if (typeof item.name !== 'string') {
+                    setState({ IN: propName, IP: 0 });
+                    if (!item.name())
+                        continue;
+                    if (IP !== propName.length)
+                        continue;
+                    text = concat(text, OUT);
+                }
+                else {
+                    if (propName !== item.name)
+                        continue;
+                }
+                setState({ IN: obj[propName], IP: 0 });
+                if (!item.expr())
+                    continue;
+                if (!isInputFullyConsumed())
+                    continue;
+                text = concat(text, OUT);
+                bitmask += propBit;
+                continue outerLoop;
+            }
+            setState(stateₒ);
+            return false;
+        }
+        else {
+        }
     }
     setState({ IN: obj, IP: bitmask });
     OUT = text;

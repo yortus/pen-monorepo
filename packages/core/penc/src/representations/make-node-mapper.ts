@@ -37,7 +37,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'CodeExpression': return {...n, expression: rec(n.expression)};
-            case 'FieldExpression': return {...n, name: rec(n.name), value: rec(n.value)};
             case 'GenericExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'GenericParameter': return n;
             case 'Identifier': return n;
@@ -56,17 +55,9 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'NumericLiteral': return n;
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
-            case 'RecordExpression': return {...n, fields: n.fields.map((f) => ({name: f.name, value: rec(f.value)}))};
-
-            // TODO: new...
-            // case 'RecordExpression': return {
-            //     ...n,
-            //     items: n.items.map(it => it.kind === 'Field'
-            //         ? {...it, name: typeof it.name === 'string' ? it.name : rec(it.name), value: rec(it.expression)}
-            //         : {...it, record: rec(it.record)}
-            //     )
-            // };
-
+            case 'RecordExpression': return {...n, items: n.items.map(rec)};
+            case 'RecordField': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
+            case 'RecordSplice': return {...n, record: rec(n.record)};
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'StringAbstract': return n;

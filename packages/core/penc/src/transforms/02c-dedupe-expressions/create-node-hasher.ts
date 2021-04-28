@@ -59,20 +59,25 @@ export function createNodeHasher() {
         switch (n.kind) {
             case 'BooleanLiteral': return setSig('LITERAL', n.value);
             case 'CodeExpression': return setSig('CODE', getSig(n.expression));
-            case 'FieldExpression': return setSig('FIELD', getSig(n.name), getSig(n.value));
             case 'GenericExpression': return setSig('GENEXPR', getSig(n.body));
             case 'GenericParameter': return setSig('GENPARAM', n.name);
             case 'InstantiationExpression': return setSig('INSTEXPR', getSig(n.generic), getSig(n.argument));
             case 'Intrinsic': return setSig('INTRINSIC', n.name, n.path);
             case 'LetExpression': return setSig('LETEXPR', getSig(n.expression), mapObj(n.bindings, getSig));
-            case 'ListExpression': return setSig('LIST', n.items.map(i => i.kind === 'ListElement' ? {k: i.kind, e: getSig(i.expression)} : {k: i.kind, l: getSig(i.list)}));
+            case 'ListExpression': return setSig('LIST', n.items.map(i => i.kind === 'ListElement'
+                ? {k: i.kind, e: getSig(i.expression)}
+                : {k: i.kind, l: getSig(i.list)}
+            ));
             case 'MemberExpression': return setSig('MEMBER', getSig(n.module), n.member);
             case 'Module': return setSig('MODULE', mapObj(n.bindings, getSig));
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LITERAL', n.value);
             case 'NumericLiteral': return setSig('LITERAL', n.value);
             case 'QuantifiedExpression': return setSig('QUANT', getSig(n.expression), n.quantifier);
-            case 'RecordExpression': return setSig('RECORD', n.fields.map(f => ({n: f.name, v: getSig(f.value)})));
+            case 'RecordExpression': return setSig('RECORD', n.items.map(i => i.kind === 'RecordField'
+            ? {k: i.kind, n: typeof i.name === 'string' ? i.name : getSig(i.name), e: getSig(i.expression)}
+            : {k: i.kind, r: getSig(i.record)}
+        ));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
             case 'StringAbstract': return setSig('STRABS', n.value);

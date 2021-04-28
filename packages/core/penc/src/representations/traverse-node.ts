@@ -12,7 +12,6 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'CodeExpression': return rec(n.expression), cb(n);
-            case 'FieldExpression': return rec(n.name), rec(n.value), cb(n);
             case 'GenericExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
             case 'GenericParameter': return cb(n);
             case 'Identifier': return cb(n);
@@ -31,7 +30,9 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'NumericLiteral': return cb(n);
             case 'ParenthesisedExpression': return rec(n.expression), cb(n);
             case 'QuantifiedExpression': return rec(n.expression), cb(n);
-            case 'RecordExpression': return n.fields.forEach(f => rec(f.value)), cb(n);
+            case 'RecordExpression': return n.items.forEach(rec), cb(n);
+            case 'RecordField': return (typeof n.name === 'string' || rec(n.name)), rec(n.expression), cb(n);
+            case 'RecordSplice': return rec(n.record), cb(n);
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'StringAbstract': return cb(n);

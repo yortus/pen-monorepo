@@ -52,7 +52,6 @@ export type Node<V extends Version = Version> =
 export type Expression<V extends Version = Version> =
     | BooleanLiteral
     | CodeExpression<V>
-    | FieldExpression<V>
     | Identifier
     | ImportExpression<V>
     | InstantiationExpression<V>
@@ -104,8 +103,14 @@ export type Binding<V extends Version> = {
 
 /** Union of all node types not included elsewhere (eg clauses). */
 export type Other<V extends Version = Version> =
+    // TODO:
+    // - don't need ListElement (its just an expression)
+    // - don't need two splice clauses, one called just Splice will do for both
+    // - rename RecordField to just Field
     | ListElement<V>
     | ListSplice<V>
+    | RecordField<V>
+    | RecordSplice<V>
 ;
 
 
@@ -118,13 +123,6 @@ export interface BooleanLiteral {
 export interface CodeExpression<V extends Version> {
     kind: 'CodeExpression';
     expression: Subexpression<V>;
-}
-
-
-export interface FieldExpression<V extends Version> {
-    kind: 'FieldExpression';
-    name: Subexpression<V>;
-    value: Subexpression<V>;
 }
 
 
@@ -294,10 +292,20 @@ export interface QuantifiedExpression<V extends Version> {
 
 export interface RecordExpression<V extends Version> {
     kind: 'RecordExpression';
-    fields: Array<{
-        name: string;
-        value: Subexpression<V>;
-    }>;
+    items: Array<RecordField<V> | RecordSplice<V>>;
+}
+
+
+export interface RecordField<V extends Version> {
+    kind: 'RecordField';
+    name: string | Subexpression<V>;
+    expression: Subexpression<V>;
+}
+
+
+export interface RecordSplice<V extends Version> {
+    kind: 'RecordSplice';
+    record: Subexpression<V>;
 }
 
 
@@ -327,14 +335,3 @@ export interface StringUniversal {
 
 export type BindingList<V extends Version> = Array<Binding<V>>;
 export type BindingMap<V extends Version, Value extends Expression<V> = Expression<V>> = Record<string, Value>;
-
-
-// TODO: new...
-// export interface RecordExpression<V extends Version> {
-//     kind: 'RecordExpression';
-//     items: Array<RecordItem<V>>;
-// }
-// export type RecordItem<V extends Version> =
-//     | {kind: 'Field', name: string | Subexpression<V>, expression: Subexpression<V>}
-//     | {kind: 'Splice', record: Subexpression<V>}
-// ;

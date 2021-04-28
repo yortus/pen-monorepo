@@ -48,7 +48,6 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
         
                 switch (e.kind) {
                     case 'BooleanLiteral': return setV(e);
-                    case 'FieldExpression': return setV(e, {name: ref(e.name), value: ref(e.value)});
                     case 'CodeExpression': return setV(e, {expression: ref(e.expression)});
                     // TODO: special... should not be encountered here, since each genexpr would be a separate context
                     case 'GenericExpression': return setV(e); // TODO: explain... already in the right form
@@ -57,14 +56,20 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
                     case 'Intrinsic': return setV(e);
                     case 'LetExpression': return setV(e); // TODO: doc this node was already handled in the depth-first mapNode traversal
-                    case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'ListElement' ? {...it, expression: ref(it.expression)} : {...it, list: ref(it.list)})});
+                    case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'ListElement'
+                        ? {...it, expression: ref(it.expression)}
+                        : {...it, list: ref(it.list)}
+                    )});
                     case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
                     case 'Module': return setV(e); // TODO: explain... already in the right form
                     case 'NotExpression': return setV(e, {expression: ref(e.expression)});
                     case 'NullLiteral': return setV(e);
                     case 'NumericLiteral': return setV(e);
                     case 'QuantifiedExpression': return setV(e, {expression: ref(e.expression), quantifier: e.quantifier});
-                    case 'RecordExpression': return setV(e, {fields: e.fields.map(f => ({name: f.name, value: ref(f.value)}))});
+                    case 'RecordExpression': return setV(e, {items: e.items.map(it => it.kind === 'RecordField'
+                        ? {...it, name: typeof it.name === 'string' ? it.name : ref(it.name), expression: ref(it.expression)}
+                        : {...it, record: ref(it.record)}
+                    )});
                     case 'SelectionExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'SequenceExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'StringAbstract': return setV(e);

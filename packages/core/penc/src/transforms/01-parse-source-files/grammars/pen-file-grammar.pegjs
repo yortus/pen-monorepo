@@ -43,12 +43,11 @@ ModulePatternName
 
     PRECEDENCE 6 (HIGHEST):
         GenericExpression               a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
-        RecordExpression                {a: b   c: d   e: f}   {a: b}   {}
-        FieldExpression                 {[a]: b}
+        RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
         Module                          (a=b c=d e=f)   (a=b)
         LetExpression                   (a b where a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
-        ListExpression                  [a, b, c]   [a]   []
+        ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'   `a`
@@ -83,7 +82,6 @@ Precedence6OrHigher
 PrimaryExpression
     = GenericExpression
     / RecordExpression
-    / FieldExpression
     / Module
     / LetExpression
     / ParenthesisedExpression
@@ -151,16 +149,16 @@ GenericExpression
     { return {kind: 'GenericExpression', param, body}; }
 
 RecordExpression
-    = "{"   __   fields:RecordFieldList   __   "}"
+    = "{"   __   items:RecordItems   __   "}"
     {
         const names = new Set();
-        for (const {name} of fields) if (names.has(name)) error(`Duplicate field name '${name}'`); else names.add(name);
-        return {kind: 'RecordExpression', fields};
+        for (const item of items) {
+            if (item.kind !== 'RecordField' || typeof item.name !== 'string') continue;
+            if (names.has(item.name)) return error(`Duplicate field name '${name}'`);
+            names.add(item.name);
+        }
+        return {kind: 'RecordExpression', items};
     }
-
-FieldExpression
-    = "{"   __   "["   __   name:Expression   __   "]"   __   ":"   __   value:Expression   __   "}"
-    { return {kind: 'FieldExpression', name, value}; }
 
 Module
     = "("   __   bindings:BindingList   __   ")"
@@ -209,22 +207,31 @@ ImportExpression
     }
 
 
-// ====================   Record/List Parts   ====================
-RecordFieldList
-    = !","   head:RecordField?   tail:((__   ",")?   __   RecordField)*   (__   ",")?
+// ====================   Clauses (eg record/list Parts)   ====================
+RecordItems
+    = !","   head:RecordItem?   tail:((__   ",")?   __   RecordItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
-RecordField
-    = name:IDENTIFIER   __   ":"   __   value:Expression
-    { return {name, value}; }
+RecordItem
+    = "..."   __   record:Expression
+    { return {kind: 'RecordSplice', record}; }
+
+    / "["   __   name:Expression   __   "]"   __   ":"   __   expression:Expression
+    { return {kind: 'RecordField', name, expression}; }
+
+    / name:IDENTIFIER   __   ":"   __   expression:Expression
+    { return {kind: 'RecordField', name, expression}; }
 
 ListItems
     = !","   head:ListItem?   tail:((__   ",")?   __   ListItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 ListItem
-    = "..."   __   list:Expression   { return {kind: 'ListSplice', list}; }
-    / expression:Expression   { return {kind: 'ListElement', expression}; }
+    = "..."   __   list:Expression
+    { return {kind: 'ListSplice', list}; }
+
+    / expression:Expression
+    { return {kind: 'ListElement', expression}; }
 
 
 // ====================   Numeric literal parts   ====================

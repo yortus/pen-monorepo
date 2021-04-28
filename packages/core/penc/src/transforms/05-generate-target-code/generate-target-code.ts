@@ -172,13 +172,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
-        case 'FieldExpression': {
-            emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${mode}Field(${expr.name.name}, ${expr.value.name});`);
-            emit.dedent().down(1).text(`}`);
-            break;
-        }
-
         // TODO: ...
         case 'GenericExpression': {
             emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
@@ -216,9 +209,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ListExpression': {
-            const items = expr.items.map(item => {
-                return `{kind: '${item.kind}', expr: ${item.kind === 'ListElement' ? item.expression.name : item.list.name}},`;
-            });
+            const items = expr.items.map(item => `{
+                kind: '${item.kind}',
+                expr: ${item.kind === 'ListElement' ? item.expression.name : item.list.name}
+            },`);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${mode}List([`);
             if (items.length > 0) {
@@ -275,14 +269,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'RecordExpression': {
-            const fields = expr.fields.map(field => {
-                return `{name: '${field.name}', value: ${field.value.name}},`;
-            });
+            const items = expr.items.map(item => `{
+                kind: '${item.kind}',
+                name: ${item.kind === 'RecordSplice'
+                    ? 'undefined'
+                    : typeof item.name === 'string' ? JSON.stringify(item.name) : item.name.name},
+                expr: ${item.kind === 'RecordField' ? item.expression.name : item.record.name}
+            },`);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${mode}Record([`);
-            if (fields.length > 0) {
+            if (items.length > 0) {
                 emit.indent();
-                for (const field of fields) emit.down(1).text(field);
+                for (const field of items) emit.down(1).text(field);
                 emit.dedent().down(1);
             }
             emit.text(`]);`);
