@@ -5,7 +5,6 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('parse didn\'t return a value');
         return OUT;
     },
     print(node) {
@@ -13,7 +12,7 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        OUT = OUT || '';
         return OUT;
     },
 };
@@ -128,6 +127,7 @@ function printList(items) {
 function parseRecord(items) {
     const stateₒ = getState();
     const obj = {};
+    const propNames = [];
     for (const item of items) {
         if (item.kind === 'RecordField') {
             let propName;
@@ -140,16 +140,24 @@ function parseRecord(items) {
                 assert(typeof OUT === 'string');
                 propName = OUT;
             }
+            if (propNames.includes(propName))
+                return setState(stateₒ), false;
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
             obj[propName] = OUT;
+            propNames.push(propName);
         }
         else {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT && typeof OUT === 'object');
-            Object.assign(obj, OUT);
+            for (const propName of Object.keys(OUT)) {
+                if (propNames.includes(propName))
+                    return setState(stateₒ), false;
+                obj[propName] = OUT[propName];
+                propNames.push(propName);
+            }
         }
     }
     OUT = obj;
@@ -197,6 +205,11 @@ function printRecord(items) {
             return false;
         }
         else {
+            setState({ IN: obj, IP: bitmask });
+            if (!item.expr())
+                return setState(stateₒ), false;
+            text = concat(text, OUT);
+            bitmask = IP;
         }
     }
     setState({ IN: obj, IP: bitmask });

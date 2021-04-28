@@ -3,6 +3,7 @@
 function parseRecord(items: RecordItem[]) {
     const stateₒ = getState();
     const obj = {} as Record<string, unknown>;
+    const propNames: string[] = [];
     for (const item of items) {
         if (item.kind === 'RecordField') {
             let propName: string;
@@ -16,14 +17,20 @@ function parseRecord(items: RecordItem[]) {
                 assert(typeof OUT === 'string');
                 propName = OUT;
             }
+            if (propNames.includes(propName)) return setState(stateₒ), false;
             if (!item.expr()) return setState(stateₒ), false;
             assert(OUT !== undefined);
             obj[propName] = OUT;
+            propNames.push(propName);
         }
         else /* item.kind === 'RecordSplice' */ {
             if (!item.expr()) return setState(stateₒ), false;
             assert(OUT && typeof OUT === 'object');
-            Object.assign(obj, OUT);
+            for (const propName of Object.keys(OUT)) {
+                if (propNames.includes(propName)) return setState(stateₒ), false;
+                obj[propName] = (OUT as any)[propName];
+                propNames.push(propName);
+            }
         }
     }
     OUT = obj;

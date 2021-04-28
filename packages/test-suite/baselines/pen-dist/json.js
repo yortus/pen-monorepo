@@ -5,7 +5,6 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('parse didn\'t return a value');
         return OUT;
     },
     print(node) {
@@ -13,7 +12,7 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        OUT = OUT || '';
         return OUT;
     },
 };
@@ -128,6 +127,7 @@ function printList(items) {
 function parseRecord(items) {
     const stateₒ = getState();
     const obj = {};
+    const propNames = [];
     for (const item of items) {
         if (item.kind === 'RecordField') {
             let propName;
@@ -140,16 +140,24 @@ function parseRecord(items) {
                 assert(typeof OUT === 'string');
                 propName = OUT;
             }
+            if (propNames.includes(propName))
+                return setState(stateₒ), false;
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
             obj[propName] = OUT;
+            propNames.push(propName);
         }
         else {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT && typeof OUT === 'object');
-            Object.assign(obj, OUT);
+            for (const propName of Object.keys(OUT)) {
+                if (propNames.includes(propName))
+                    return setState(stateₒ), false;
+                obj[propName] = OUT[propName];
+                propNames.push(propName);
+            }
         }
     }
     OUT = obj;
@@ -197,6 +205,11 @@ function printRecord(items) {
             return false;
         }
         else {
+            setState({ IN: obj, IP: bitmask });
+            if (!item.expr())
+                return setState(stateₒ), false;
+            text = concat(text, OUT);
+            bitmask = IP;
         }
     }
     setState({ IN: obj, IP: bitmask });
@@ -884,47 +897,47 @@ const parse = (() => {
 
     // SelectionExpression
     function Object_sub1() {
+        if (Properties()) return true;
         if (Object_sub2()) return true;
-        if (Object_sub5()) return true;
         return false;
     }
 
-    // SequenceExpression
+    // RecordExpression
     function Object_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Object_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+        return parseRecord([]);
     }
 
-    // QuantifiedExpression
-    function Object_sub3() {
-        const IPₒ = IP;
-        let out;
-        do {
-            if (!Object_sub4()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    }
-
-    // SequenceExpression
-    function Object_sub4() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+    // SelectionExpression
+    function Properties() {
+        if (Properties_sub1()) return true;
+        if (Property()) return true;
+        return false;
     }
 
     // RecordExpression
-    function Object_sub5() {
-        return parseRecord([]);
+    function Properties_sub1() {
+        return parseRecord([
+            {
+                kind: 'RecordSplice',
+                name: undefined,
+                expr: Property
+            },
+            {
+                kind: 'RecordSplice',
+                name: undefined,
+                expr: Properties_sub2
+            },
+        ]);
+    }
+
+    // SequenceExpression
+    function Properties_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
     }
 
     // RecordExpression
@@ -1837,6 +1850,7 @@ const parse = (() => {
             case 'Null': return Null;
             case 'True': return True;
             case 'Object': return Object;
+            case 'Properties': return Properties;
             case 'Property': return Property;
             case 'Array': return Array;
             case 'Elements': return Elements;
@@ -2090,47 +2104,47 @@ const print = (() => {
 
     // SelectionExpression
     function Object_sub1() {
+        if (Properties()) return true;
         if (Object_sub2()) return true;
-        if (Object_sub5()) return true;
         return false;
     }
 
-    // SequenceExpression
+    // RecordExpression
     function Object_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Object_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+        return printRecord([]);
     }
 
-    // QuantifiedExpression
-    function Object_sub3() {
-        const IPₒ = IP;
-        let out;
-        do {
-            if (!Object_sub4()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
-        } while (true);
-        OUT = out;
-        return true;
-    }
-
-    // SequenceExpression
-    function Object_sub4() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Property()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
+    // SelectionExpression
+    function Properties() {
+        if (Properties_sub1()) return true;
+        if (Property()) return true;
+        return false;
     }
 
     // RecordExpression
-    function Object_sub5() {
-        return printRecord([]);
+    function Properties_sub1() {
+        return printRecord([
+            {
+                kind: 'RecordSplice',
+                name: undefined,
+                expr: Property
+            },
+            {
+                kind: 'RecordSplice',
+                name: undefined,
+                expr: Properties_sub2
+            },
+        ]);
+    }
+
+    // SequenceExpression
+    function Properties_sub2() {
+        const stateₒ = getState();
+        let out;
+        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
+        OUT = out;
+        return true;
     }
 
     // RecordExpression
@@ -3133,6 +3147,7 @@ const print = (() => {
             case 'Null': return Null;
             case 'True': return True;
             case 'Object': return Object;
+            case 'Properties': return Properties;
             case 'Property': return Property;
             case 'Array': return Array;
             case 'Elements': return Elements;

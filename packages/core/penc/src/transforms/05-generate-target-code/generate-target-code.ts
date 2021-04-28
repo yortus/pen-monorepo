@@ -35,7 +35,7 @@ export function generateTargetCode(program: Program) {
         emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
         emit.down(1).text(`if (!${mode}()) throw new Error('${mode} failed');`);
         emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
-        emit.down(1).text(`if (OUT === undefined) throw new Error('${mode} didn\\\'t return a value');`);
+        if (mode === 'print') emit.down(1).text(`OUT = OUT || '';`);
         emit.down(1).text(`return OUT;`);
         emit.dedent().down(1).text(`},`);
     }

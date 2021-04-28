@@ -5,7 +5,6 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!parse()) throw new Error('parse failed');
         if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('parse didn\'t return a value');
         return OUT;
     },
     print(node) {
@@ -13,7 +12,7 @@ module.exports = {
         HAS_IN = HAS_OUT = true;
         if (!print()) throw new Error('print failed');
         if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-        if (OUT === undefined) throw new Error('print didn\'t return a value');
+        OUT = OUT || '';
         return OUT;
     },
 };
@@ -128,6 +127,7 @@ function printList(items) {
 function parseRecord(items) {
     const stateₒ = getState();
     const obj = {};
+    const propNames = [];
     for (const item of items) {
         if (item.kind === 'RecordField') {
             let propName;
@@ -140,16 +140,24 @@ function parseRecord(items) {
                 assert(typeof OUT === 'string');
                 propName = OUT;
             }
+            if (propNames.includes(propName))
+                return setState(stateₒ), false;
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
             obj[propName] = OUT;
+            propNames.push(propName);
         }
         else {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT && typeof OUT === 'object');
-            Object.assign(obj, OUT);
+            for (const propName of Object.keys(OUT)) {
+                if (propNames.includes(propName))
+                    return setState(stateₒ), false;
+                obj[propName] = OUT[propName];
+                propNames.push(propName);
+            }
         }
     }
     OUT = obj;
@@ -197,6 +205,11 @@ function printRecord(items) {
             return false;
         }
         else {
+            setState({ IN: obj, IP: bitmask });
+            if (!item.expr())
+                return setState(stateₒ), false;
+            text = concat(text, OUT);
+            bitmask = IP;
         }
     }
     setState({ IN: obj, IP: bitmask });
@@ -833,92 +846,69 @@ const parse = (() => {
         return false;
     }
 
-    // SequenceExpression
-    function mul() {
-        const stateₒ = getState();
-        let out;
-        if (mul_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
     // RecordExpression
-    function mul_sub1() {
+    function mul() {
         return parseRecord([
             {
                 kind: 'RecordField',
-                name: mul_sub2,
-                expr: mul_sub3
+                name: mul_sub1,
+                expr: mul_sub2
             },
-        ]);
-    }
-
-    // StringAbstract
-    function mul_sub2() {
-        OUT = HAS_OUT ? "type" : undefined;
-        return true;
-    }
-    mul_sub2.constant = {value: "type"};
-
-    // StringAbstract
-    function mul_sub3() {
-        OUT = HAS_OUT ? "mul" : undefined;
-        return true;
-    }
-    mul_sub3.constant = {value: "mul"};
-
-    // RecordExpression
-    function mul_sub4() {
-        return parseRecord([
             {
                 kind: 'RecordField',
                 name: "lhs",
                 expr: term
             },
-        ]);
-    }
-
-    // RecordExpression
-    function mul_sub5() {
-        return parseRecord([
             {
                 kind: 'RecordField',
-                name: mul_sub6,
-                expr: mul_sub7
+                name: mul_sub3,
+                expr: mul_sub4
             },
         ]);
     }
 
     // StringAbstract
-    function mul_sub6() {
+    function mul_sub1() {
+        OUT = HAS_OUT ? "type" : undefined;
+        return true;
+    }
+    mul_sub1.constant = {value: "type"};
+
+    // StringAbstract
+    function mul_sub2() {
+        OUT = HAS_OUT ? "mul" : undefined;
+        return true;
+    }
+    mul_sub2.constant = {value: "mul"};
+
+    // StringAbstract
+    function mul_sub3() {
         OUT = HAS_OUT ? "rhs" : undefined;
         return true;
     }
-    mul_sub6.constant = {value: "rhs"};
+    mul_sub3.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_sub7() {
+    function mul_sub4() {
         const stateₒ = getState();
         let out;
-        if (mul_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // CodeExpression
-    function mul_sub8() {
+    function mul_sub5() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = mul_sub9();
+        const result = mul_sub6();
         HAS_OUT = HAS_OUTₒ;
         return result;
     }
 
     // StringUniversal
-    function mul_sub9() {
+    function mul_sub6() {
         if (HAS_IN) {
             if (IP + 1 > IN.length) return false;
             if (IN.charCodeAt(IP + 0) !== 42) return false;
@@ -927,7 +917,7 @@ const parse = (() => {
         OUT = HAS_OUT ? "*" : undefined;
         return true;
     }
-    mul_sub9.constant = {value: "*"};
+    mul_sub6.constant = {value: "*"};
 
     // RecordExpression
     function div() {
@@ -1551,30 +1541,29 @@ const print = (() => {
         return false;
     }
 
-    // SequenceExpression
-    function mul() {
-        const stateₒ = getState();
-        let out;
-        if (mul_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
-        return true;
-    }
-
     // RecordExpression
-    function mul_sub1() {
+    function mul() {
         return printRecord([
             {
                 kind: 'RecordField',
-                name: mul_sub2,
-                expr: mul_sub3
+                name: mul_sub1,
+                expr: mul_sub2
+            },
+            {
+                kind: 'RecordField',
+                name: "lhs",
+                expr: term
+            },
+            {
+                kind: 'RecordField',
+                name: mul_sub3,
+                expr: mul_sub4
             },
         ]);
     }
 
     // StringAbstract
-    function mul_sub2() {
+    function mul_sub1() {
         if (HAS_IN) {
             if (typeof IN !== 'string') return false;
             if (IP + 4 > IN.length) return false;
@@ -1587,10 +1576,10 @@ const print = (() => {
         OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    mul_sub2.constant = {value: "type"};
+    mul_sub1.constant = {value: "type"};
 
     // StringAbstract
-    function mul_sub3() {
+    function mul_sub2() {
         if (HAS_IN) {
             if (typeof IN !== 'string') return false;
             if (IP + 3 > IN.length) return false;
@@ -1602,32 +1591,10 @@ const print = (() => {
         OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    mul_sub3.constant = {value: "mul"};
-
-    // RecordExpression
-    function mul_sub4() {
-        return printRecord([
-            {
-                kind: 'RecordField',
-                name: "lhs",
-                expr: term
-            },
-        ]);
-    }
-
-    // RecordExpression
-    function mul_sub5() {
-        return printRecord([
-            {
-                kind: 'RecordField',
-                name: mul_sub6,
-                expr: mul_sub7
-            },
-        ]);
-    }
+    mul_sub2.constant = {value: "mul"};
 
     // StringAbstract
-    function mul_sub6() {
+    function mul_sub3() {
         if (HAS_IN) {
             if (typeof IN !== 'string') return false;
             if (IP + 3 > IN.length) return false;
@@ -1639,29 +1606,29 @@ const print = (() => {
         OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
-    mul_sub6.constant = {value: "rhs"};
+    mul_sub3.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_sub7() {
+    function mul_sub4() {
         const stateₒ = getState();
         let out;
-        if (mul_sub8()) out = concat(out, OUT); else return setState(stateₒ), false;
+        if (mul_sub5()) out = concat(out, OUT); else return setState(stateₒ), false;
         if (factor()) out = concat(out, OUT); else return setState(stateₒ), false;
         OUT = out;
         return true;
     }
 
     // CodeExpression
-    function mul_sub8() {
+    function mul_sub5() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = mul_sub9();
+        const result = mul_sub6();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringUniversal
-    function mul_sub9() {
+    function mul_sub6() {
         if (HAS_IN) {
             if (typeof IN !== 'string') return false;
             if (IP + 1 > IN.length) return false;
@@ -1671,7 +1638,7 @@ const print = (() => {
         OUT = HAS_OUT ? "*" : undefined;
         return true;
     }
-    mul_sub9.constant = {value: "*"};
+    mul_sub6.constant = {value: "*"};
 
     // RecordExpression
     function div() {
