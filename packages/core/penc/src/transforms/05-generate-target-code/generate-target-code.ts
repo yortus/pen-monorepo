@@ -210,8 +210,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'ListExpression': {
             const items = expr.items.map(item => `{
-                kind: '${item.kind}',
-                expr: ${item.kind === 'ListElement' ? item.expression.name : item.list.name}
+                kind: '${item.kind === 'Splice' ? 'Splice' : 'Element'}',
+                expr: ${item.kind === 'Splice' ? item.expression.name : item.name}
             },`);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${mode}List([`);
@@ -271,10 +271,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'RecordExpression': {
             const items = expr.items.map(item => `{
                 kind: '${item.kind}',
-                name: ${item.kind === 'RecordSplice'
+                name: ${item.kind === 'Splice'
                     ? 'undefined'
                     : typeof item.name === 'string' ? JSON.stringify(item.name) : item.name.name},
-                expr: ${item.kind === 'RecordField' ? item.expression.name : item.record.name}
+                expr: ${item.kind === 'Field' ? item.expression.name : item.expression.name}
             },`);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`return ${mode}Record([`);

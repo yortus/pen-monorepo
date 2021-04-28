@@ -207,31 +207,30 @@ ImportExpression
     }
 
 
-// ====================   Clauses (eg record/list Parts)   ====================
+// ====================   Clauses (eg record/list parts)   ====================
 RecordItems
     = !","   head:RecordItem?   tail:((__   ",")?   __   RecordItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 RecordItem
-    = "..."   __   record:Expression
-    { return {kind: 'RecordSplice', record}; }
+    = Splice
 
     / "["   __   name:Expression   __   "]"   __   ":"   __   expression:Expression
-    { return {kind: 'RecordField', name, expression}; }
+    { return {kind: 'Field', name, expression}; }
 
     / name:IDENTIFIER   __   ":"   __   expression:Expression
-    { return {kind: 'RecordField', name, expression}; }
+    { return {kind: 'Field', name, expression}; }
 
 ListItems
     = !","   head:ListItem?   tail:((__   ",")?   __   ListItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
 
 ListItem
-    = "..."   __   list:Expression
-    { return {kind: 'ListSplice', list}; }
+    = Splice / Expression
 
-    / expression:Expression
-    { return {kind: 'ListElement', expression}; }
+Splice
+    = "..."   __   expression:Expression
+    { return {kind: 'Splice', expression}; }
 
 
 // ====================   Numeric literal parts   ====================

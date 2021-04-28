@@ -37,6 +37,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'CodeExpression': return {...n, expression: rec(n.expression)};
+            case 'Field': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
             case 'GenericExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'GenericParameter': return n;
             case 'Identifier': return n;
@@ -44,9 +45,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'InstantiationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Intrinsic': return n;
             case 'LetExpression': return {...n, expression: rec(n.expression), bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
-            case 'ListElement': return {...n, expression: rec(n.expression)};
             case 'ListExpression': return {...n, items: n.items.map(rec)};
-            case 'ListSplice': return {...n, list: rec(n.list)};
             case 'MemberExpression': return {...n, module: rec(n.module)};
             case 'Module': return {...n, bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
             case 'ModulePattern': return n;
@@ -56,10 +55,9 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'ParenthesisedExpression': return {...n, expression: rec(n.expression)};
             case 'QuantifiedExpression': return {...n, expression: rec(n.expression)};
             case 'RecordExpression': return {...n, items: n.items.map(rec)};
-            case 'RecordField': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
-            case 'RecordSplice': return {...n, record: rec(n.record)};
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
+            case 'Splice': return {...n, expression: rec(n.expression)};
             case 'StringAbstract': return n;
             case 'StringUniversal': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);

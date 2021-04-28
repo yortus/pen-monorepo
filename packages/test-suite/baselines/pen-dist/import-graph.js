@@ -28,7 +28,7 @@ function parseList(items) {
     const arr = [];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
@@ -54,7 +54,7 @@ function printList(items) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
@@ -80,7 +80,7 @@ function parseRecord(items) {
     const obj = {};
     const propNames = [];
     for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             let propName;
             if (typeof item.name === 'string') {
                 propName = item.name;
@@ -125,7 +125,7 @@ function printRecord(items) {
     const obj = IN;
     let bitmask = IP;
     outerLoop: for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
                 const propBit = 1 << i;
@@ -806,15 +806,15 @@ const parse = (() => {
     function myList() {
         return parseList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: digit
             },
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: myList_sub1
             },
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: myList_sub2
             },
         ]);
@@ -1275,15 +1275,15 @@ const print = (() => {
     function myList() {
         return printList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: digit
             },
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: myList_sub1
             },
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: myList_sub2
             },
         ]);

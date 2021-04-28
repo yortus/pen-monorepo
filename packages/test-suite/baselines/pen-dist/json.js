@@ -28,7 +28,7 @@ function parseList(items) {
     const arr = [];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             if (!item.expr())
                 return setState(stateₒ), false;
             assert(OUT !== undefined);
@@ -54,7 +54,7 @@ function printList(items) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             setState({ IN: arr[off], IP: 0 });
             if (!item.expr())
                 return setState(stateₒ), false;
@@ -80,7 +80,7 @@ function parseRecord(items) {
     const obj = {};
     const propNames = [];
     for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             let propName;
             if (typeof item.name === 'string') {
                 propName = item.name;
@@ -125,7 +125,7 @@ function printRecord(items) {
     const obj = IN;
     let bitmask = IP;
     outerLoop: for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
                 const propBit = 1 << i;
@@ -864,12 +864,12 @@ const parse = (() => {
     function Properties_sub1() {
         return parseRecord([
             {
-                kind: 'RecordSplice',
+                kind: 'Splice',
                 name: undefined,
                 expr: Property
             },
             {
-                kind: 'RecordSplice',
+                kind: 'Splice',
                 name: undefined,
                 expr: Properties_sub2
             },
@@ -890,7 +890,7 @@ const parse = (() => {
     function Property() {
         return parseRecord([
             {
-                kind: 'RecordField',
+                kind: 'Field',
                 name: String,
                 expr: Property_sub1
             },
@@ -941,11 +941,11 @@ const parse = (() => {
     function Elements_sub1() {
         return parseList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: Value
             },
             {
-                kind: 'ListSplice',
+                kind: 'Splice',
                 expr: Elements_sub2
             },
         ]);
@@ -965,7 +965,7 @@ const parse = (() => {
     function Elements_sub3() {
         return parseList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: Value
             },
         ]);
@@ -2071,12 +2071,12 @@ const print = (() => {
     function Properties_sub1() {
         return printRecord([
             {
-                kind: 'RecordSplice',
+                kind: 'Splice',
                 name: undefined,
                 expr: Property
             },
             {
-                kind: 'RecordSplice',
+                kind: 'Splice',
                 name: undefined,
                 expr: Properties_sub2
             },
@@ -2097,7 +2097,7 @@ const print = (() => {
     function Property() {
         return printRecord([
             {
-                kind: 'RecordField',
+                kind: 'Field',
                 name: String,
                 expr: Property_sub1
             },
@@ -2148,11 +2148,11 @@ const print = (() => {
     function Elements_sub1() {
         return printList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: Value
             },
             {
-                kind: 'ListSplice',
+                kind: 'Splice',
                 expr: Elements_sub2
             },
         ]);
@@ -2172,7 +2172,7 @@ const print = (() => {
     function Elements_sub3() {
         return printList([
             {
-                kind: 'ListElement',
+                kind: 'Element',
                 expr: Value
             },
         ]);

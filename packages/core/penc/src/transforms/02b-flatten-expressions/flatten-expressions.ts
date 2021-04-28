@@ -56,9 +56,9 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
                     case 'Intrinsic': return setV(e);
                     case 'LetExpression': return setV(e); // TODO: doc this node was already handled in the depth-first mapNode traversal
-                    case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'ListElement'
+                    case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'Splice'
                         ? {...it, expression: ref(it.expression)}
-                        : {...it, list: ref(it.list)}
+                        : ref(it)
                     )});
                     case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
                     case 'Module': return setV(e); // TODO: explain... already in the right form
@@ -66,9 +66,9 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     case 'NullLiteral': return setV(e);
                     case 'NumericLiteral': return setV(e);
                     case 'QuantifiedExpression': return setV(e, {expression: ref(e.expression), quantifier: e.quantifier});
-                    case 'RecordExpression': return setV(e, {items: e.items.map(it => it.kind === 'RecordField'
-                        ? {...it, name: typeof it.name === 'string' ? it.name : ref(it.name), expression: ref(it.expression)}
-                        : {...it, record: ref(it.record)}
+                    case 'RecordExpression': return setV(e, {items: e.items.map(it => it.kind === 'Splice'
+                        ? {...it, expression: ref(it.expression)}
+                        : {...it, name: typeof it.name === 'string' ? it.name : ref(it.name), expression: ref(it.expression)}
                     )});
                     case 'SelectionExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'SequenceExpression': return setV(e, {expressions: e.expressions.map(ref)});

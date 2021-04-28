@@ -5,7 +5,7 @@ function parseRecord(items: RecordItem[]) {
     const obj = {} as Record<string, unknown>;
     const propNames: string[] = [];
     for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             let propName: string;
             if (typeof item.name === 'string') {
                 // Statically-named field
@@ -23,7 +23,7 @@ function parseRecord(items: RecordItem[]) {
             obj[propName] = OUT;
             propNames.push(propName);
         }
-        else /* item.kind === 'RecordSplice' */ {
+        else /* item.kind === 'Splice' */ {
             if (!item.expr()) return setState(stateₒ), false;
             assert(OUT && typeof OUT === 'object');
             for (const propName of Object.keys(OUT)) {
@@ -53,7 +53,7 @@ function printRecord(items: RecordItem[]) {
     // TODO: O(n^2)? Can we do better? More fast paths for common cases?
     outerLoop:
     for (const item of items) {
-        if (item.kind === 'RecordField') {
+        if (item.kind === 'Field') {
             // Find the first property key/value pair that matches this field name/value pair (if any)
             for (let i = 0; i < propCount; ++i) {
                 let propName = propNames[i];
@@ -92,7 +92,7 @@ function printRecord(items: RecordItem[]) {
             setState(stateₒ);
             return false;
         }
-        else /* item.kind === 'RecordSplice' */ {
+        else /* item.kind === 'Splice' */ {
             setState({IN: obj, IP: bitmask});
             if (!item.expr()) return setState(stateₒ), false;
             text = concat(text, OUT);
@@ -105,6 +105,6 @@ function printRecord(items: RecordItem[]) {
 }
 
 type RecordItem =
-    | {kind: 'RecordField', name: string | Rule, expr: Rule}
-    | {kind: 'RecordSplice', expr: Rule}
+    | {kind: 'Field', name: string | Rule, expr: Rule}
+    | {kind: 'Splice', expr: Rule}
 ;

@@ -6,12 +6,12 @@ function parseList(items: ListItem[]) {
     const arr = [] as unknown[];
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             if (!item.expr()) return setState(stateₒ), false;
             assert(OUT !== undefined);
             arr.push(OUT);
         }
-        else /* item.kind === 'ListSplice' */ {
+        else /* item.kind === 'Splice' */ {
             if (!item.expr()) return setState(stateₒ), false;
             assert(Array.isArray(OUT));
             arr.push(...OUT);
@@ -30,14 +30,14 @@ function printList(items: ListItem[]) {
     let off = IP;
     for (let i = 0; i < itemsLength; ++i) {
         const item = items[i];
-        if (item.kind === 'ListElement') {
+        if (item.kind === 'Element') {
             setState({IN: arr[off], IP: 0});
             if (!item.expr()) return setState(stateₒ), false;
             if (!isInputFullyConsumed()) return setState(stateₒ), false;
             text = concat(text, OUT);
             off += 1;
         }
-        else /* item.kind === 'ListSplice' */ {
+        else /* item.kind === 'Splice' */ {
             setState({IN: arr, IP: off});
             if (!item.expr()) return setState(stateₒ), false;
             text = concat(text, OUT);
@@ -50,6 +50,6 @@ function printList(items: ListItem[]) {
 }
 
 type ListItem =
-    | {kind: 'ListElement', expr: Rule}
-    | {kind: 'ListSplice', expr: Rule}
+    | {kind: 'Element', expr: Rule}
+    | {kind: 'Splice', expr: Rule}
 ;

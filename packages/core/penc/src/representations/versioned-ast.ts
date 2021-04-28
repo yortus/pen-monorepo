@@ -103,14 +103,8 @@ export type Binding<V extends Version> = {
 
 /** Union of all node types not included elsewhere (eg clauses). */
 export type Other<V extends Version = Version> =
-    // TODO:
-    // - don't need ListElement (its just an expression)
-    // - don't need two splice clauses, one called just Splice will do for both
-    // - rename RecordField to just Field
-    | ListElement<V>
-    | ListSplice<V>
-    | RecordField<V>
-    | RecordSplice<V>
+    | Field<V>
+    | Splice<V>
 ;
 
 
@@ -122,6 +116,13 @@ export interface BooleanLiteral {
 
 export interface CodeExpression<V extends Version> {
     kind: 'CodeExpression';
+    expression: Subexpression<V>;
+}
+
+
+export interface Field<V extends Version> {
+    kind: 'Field';
+    name: string | Subexpression<V>;
     expression: Subexpression<V>;
 }
 
@@ -204,21 +205,9 @@ export interface LetExpression<V extends Version> {
 }
 
 
-export interface ListElement<V extends Version> {
-    kind: 'ListElement';
-    expression: Subexpression<V>;
-}
-
-
 export interface ListExpression<V extends Version> {
     kind: 'ListExpression';
-    items: Array<ListElement<V> | ListSplice<V>>;
-}
-
-
-export interface ListSplice<V extends Version> {
-    kind: 'ListSplice';
-    list: Subexpression<V>;
+    items: Array<Subexpression<V> | Splice<V>>;
 }
 
 
@@ -292,20 +281,7 @@ export interface QuantifiedExpression<V extends Version> {
 
 export interface RecordExpression<V extends Version> {
     kind: 'RecordExpression';
-    items: Array<RecordField<V> | RecordSplice<V>>;
-}
-
-
-export interface RecordField<V extends Version> {
-    kind: 'RecordField';
-    name: string | Subexpression<V>;
-    expression: Subexpression<V>;
-}
-
-
-export interface RecordSplice<V extends Version> {
-    kind: 'RecordSplice';
-    record: Subexpression<V>;
+    items: Array<Field<V> | Splice<V>>;
 }
 
 
@@ -318,6 +294,12 @@ export interface SelectionExpression<V extends Version> {
 export interface SequenceExpression<V extends Version> {
     kind: 'SequenceExpression';
     expressions: Array<Subexpression<V>>;
+}
+
+
+export interface Splice<V extends Version> {
+    kind: 'Splice';
+    expression: Subexpression<V>;
 }
 
 
