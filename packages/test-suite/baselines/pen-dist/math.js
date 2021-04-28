@@ -22,55 +22,6 @@ module.exports = {
 
 // ------------------------------ Runtime ------------------------------
 "use strict";
-function parseField(name, value) {
-    const stateₒ = getState();
-    const obj = {};
-    if (!name())
-        return false;
-    assert(typeof OUT === 'string');
-    const propName = OUT;
-    if (!value())
-        return setState(stateₒ), false;
-    assert(OUT !== undefined);
-    obj[propName] = OUT;
-    OUT = obj;
-    return true;
-}
-function printField(name, value) {
-    if (objectToString.call(IN) !== '[object Object]')
-        return false;
-    const stateₒ = getState();
-    let text;
-    const propNames = Object.keys(IN);
-    const propCount = propNames.length;
-    assert(propCount <= 32);
-    const obj = IN;
-    let bitmask = IP;
-    for (let i = 0; i < propCount; ++i) {
-        const propName = propNames[i];
-        const propBit = 1 << i;
-        if ((bitmask & propBit) !== 0)
-            continue;
-        setState({ IN: propName, IP: 0 });
-        if (!name())
-            continue;
-        if (IP !== propName.length)
-            continue;
-        text = concat(text, OUT);
-        setState({ IN: obj[propName], IP: 0 });
-        if (!value())
-            continue;
-        if (!isInputFullyConsumed())
-            continue;
-        text = concat(text, OUT);
-        bitmask += propBit;
-        setState({ IN: obj, IP: bitmask });
-        OUT = text;
-        return true;
-    }
-    setState(stateₒ);
-    return false;
-}
 function parseList(items) {
     const itemsLength = items.length;
     const stateₒ = getState();
