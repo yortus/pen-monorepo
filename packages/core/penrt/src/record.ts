@@ -86,7 +86,10 @@ function printRecord(items: RecordItem[]) {
             return false;
         }
         else /* item.kind === 'RecordSplice' */ {
-            // TODO...
+            setState({IN: obj, IP: bitmask});
+            if (!item.expr()) return setState(stateₒ), false;
+            text = concat(text, OUT);
+            bitmask = IP;
         }
     }
     setState({IN: obj, IP: bitmask});
