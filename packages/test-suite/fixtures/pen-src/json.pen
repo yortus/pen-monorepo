@@ -32,12 +32,12 @@ True    = #"true"   true
 
 // ---------- Objects ----------
 Object      = LBRACE   (Properties   |   {})   RBRACE
-Properties  = {...Property, ...COMMA Properties}   |   Property
+Properties  = {...Property, ...COMMA Properties}   |   Property     // NB: tail-recursive form - impl efficient handling
 Property    = {[String]: COLON Value}
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements   |   [])   RBRACKET
-Elements    = [Value, ...COMMA Elements]   |   [Value]      // NB: tail-recursive form - impl efficient handling
+Elements    = [Value, ...COMMA Elements]   |   [Value]              // NB: tail-recursive form - impl efficient handling
 
 // ---------- Numbers ----------
 Number = f64
