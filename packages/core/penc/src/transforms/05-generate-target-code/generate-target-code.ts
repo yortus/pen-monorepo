@@ -191,10 +191,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'InstantiationExpression': {
-            // TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
-            // unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
-            const MEMO_SUFFIX = 'ₘ';
-
             emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text('try {').indent();
@@ -209,18 +205,25 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ListExpression': {
-            const items = expr.items.map(item => `{
-                kind: '${item.kind === 'Splice' ? 'Splice' : 'Element'}',
-                expr: ${item.kind === 'Splice' ? item.expression.name : item.name}
-            },`);
-            emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${mode}List([`);
-            if (items.length > 0) {
-                emit.indent();
-                for (const item of items) emit.down(1).text(item);
-                emit.dedent().down(1);
+            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text('try {').indent();
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
+            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
+            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${mode}List([`);
+            emit.indent();
+            for (const item of expr.items) {
+                emit.down(1).text(`{
+                    kind: '${item.kind === 'Splice' ? 'Splice' : 'Element'}',
+                    expr: ${item.kind === 'Splice' ? item.expression.name : item.name}
+                },`);
             }
+            emit.dedent();
+            if (expr.items.length > 0) emit.down(1);
             emit.text(`]);`);
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -269,21 +272,28 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'RecordExpression': {
-            const items = expr.items.map(item => `{
-                kind: '${item.kind}',
-                name: ${item.kind === 'Splice'
-                    ? 'undefined'
-                    : typeof item.name === 'string' ? JSON.stringify(item.name) : item.name.name},
-                expr: ${item.kind === 'Field' ? item.expression.name : item.expression.name}
-            },`);
-            emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`return ${mode}Record([`);
-            if (items.length > 0) {
-                emit.indent();
-                for (const field of items) emit.down(1).text(field);
-                emit.dedent().down(1);
+            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text('try {').indent();
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
+            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
+            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${mode}Record([`);
+            emit.indent();
+            for (const item of expr.items) {
+                emit.down(1).text(`{
+                    kind: '${item.kind}',
+                    name: ${item.kind === 'Splice'
+                        ? 'undefined'
+                        : typeof item.name === 'string' ? JSON.stringify(item.name) : item.name.name},
+                    expr: ${item.kind === 'Field' ? item.expression.name : item.expression.name}
+                },`);
             }
+            emit.dedent();
+            if (expr.items.length > 0) emit.down(1);
             emit.text(`]);`);
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -357,6 +367,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             // throw new Error('Internal Error'); // TODO...
     }
 }
+
+// TODO: will need a way to ensure no clashes with other identifiers once ids are relaxed to allow wider use of
+// unicode chars (grammar and SymTab currently only allow [A-Za-z0-9_] ids and scope names)
+const MEMO_SUFFIX = 'ₘ';
 
 
 // TODO: helper function

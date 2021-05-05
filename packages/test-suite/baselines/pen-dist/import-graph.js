@@ -22,150 +22,158 @@ module.exports = {
 
 // ------------------------------ Runtime ------------------------------
 "use strict";
-function parseList(items) {
-    const itemsLength = items.length;
-    const stateₒ = getState();
-    const arr = [];
-    for (let i = 0; i < itemsLength; ++i) {
-        const item = items[i];
-        if (item.kind === 'Element') {
-            if (!item.expr())
-                return setState(stateₒ), false;
-            assert(OUT !== undefined);
-            arr.push(OUT);
-        }
-        else {
-            if (!item.expr())
-                return setState(stateₒ), false;
-            assert(Array.isArray(OUT));
-            arr.push(...OUT);
-        }
-    }
-    OUT = arr;
-    return true;
-}
-function printList(items) {
-    const itemsLength = items.length;
-    if (!Array.isArray(IN))
-        return false;
-    const stateₒ = getState();
-    let text;
-    const arr = IN;
-    let off = IP;
-    for (let i = 0; i < itemsLength; ++i) {
-        const item = items[i];
-        if (item.kind === 'Element') {
-            setState({ IN: arr[off], IP: 0 });
-            if (!item.expr())
-                return setState(stateₒ), false;
-            if (!isInputFullyConsumed())
-                return setState(stateₒ), false;
-            text = concat(text, OUT);
-            off += 1;
-        }
-        else {
-            setState({ IN: arr, IP: off });
-            if (!item.expr())
-                return setState(stateₒ), false;
-            text = concat(text, OUT);
-            off = IP;
-        }
-    }
-    setState({ IN: arr, IP: off });
-    OUT = text;
-    return true;
-}
-function parseRecord(items) {
-    const stateₒ = getState();
-    const obj = {};
-    const propNames = [];
-    for (const item of items) {
-        if (item.kind === 'Field') {
-            let propName;
-            if (typeof item.name === 'string') {
-                propName = item.name;
+function parseList(listItems) {
+    const itemCount = listItems.length;
+    return function LST() {
+        const stateₒ = getState();
+        const arr = [];
+        for (let i = 0; i < itemCount; ++i) {
+            const listItem = listItems[i];
+            if (listItem.kind === 'Element') {
+                if (!listItem.expr())
+                    return setState(stateₒ), false;
+                assert(OUT !== undefined);
+                arr.push(OUT);
             }
             else {
-                if (!item.name())
+                if (!listItem.expr())
                     return setState(stateₒ), false;
-                assert(typeof OUT === 'string');
-                propName = OUT;
-            }
-            if (propNames.includes(propName))
-                return setState(stateₒ), false;
-            if (!item.expr())
-                return setState(stateₒ), false;
-            assert(OUT !== undefined);
-            obj[propName] = OUT;
-            propNames.push(propName);
-        }
-        else {
-            if (!item.expr())
-                return setState(stateₒ), false;
-            assert(OUT && typeof OUT === 'object');
-            for (const propName of Object.keys(OUT)) {
-                if (propNames.includes(propName))
-                    return setState(stateₒ), false;
-                obj[propName] = OUT[propName];
-                propNames.push(propName);
+                assert(Array.isArray(OUT));
+                arr.push(...OUT);
             }
         }
-    }
-    OUT = obj;
-    return true;
+        OUT = arr;
+        return true;
+    };
 }
-function printRecord(items) {
-    if (objectToString.call(IN) !== '[object Object]')
-        return false;
-    const stateₒ = getState();
-    let text;
-    const propNames = Object.keys(IN);
-    const propCount = propNames.length;
-    assert(propCount <= 32);
-    const obj = IN;
-    let bitmask = IP;
-    outerLoop: for (const item of items) {
-        if (item.kind === 'Field') {
-            for (let i = 0; i < propCount; ++i) {
-                let propName = propNames[i];
-                const propBit = 1 << i;
-                if ((bitmask & propBit) !== 0)
-                    continue;
-                if (typeof item.name !== 'string') {
-                    setState({ IN: propName, IP: 0 });
-                    if (!item.name())
-                        continue;
-                    if (IP !== propName.length)
-                        continue;
-                    text = concat(text, OUT);
+function printList(listItems) {
+    const itemCount = listItems.length;
+    return function LST() {
+        if (!Array.isArray(IN))
+            return false;
+        const stateₒ = getState();
+        let text;
+        const arr = IN;
+        let off = IP;
+        for (let i = 0; i < itemCount; ++i) {
+            const listItem = listItems[i];
+            if (listItem.kind === 'Element') {
+                setState({ IN: arr[off], IP: 0 });
+                if (!listItem.expr())
+                    return setState(stateₒ), false;
+                if (!isInputFullyConsumed())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+                off += 1;
+            }
+            else {
+                setState({ IN: arr, IP: off });
+                if (!listItem.expr())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+                off = IP;
+            }
+        }
+        setState({ IN: arr, IP: off });
+        OUT = text;
+        return true;
+    };
+}
+function parseRecord(recordItems) {
+    return function RCD() {
+        const stateₒ = getState();
+        const obj = {};
+        const propNames = [];
+        for (const recordItem of recordItems) {
+            if (recordItem.kind === 'Field') {
+                let propName;
+                if (typeof recordItem.name === 'string') {
+                    propName = recordItem.name;
                 }
                 else {
-                    if (propName !== item.name)
-                        continue;
+                    if (!recordItem.name())
+                        return setState(stateₒ), false;
+                    assert(typeof OUT === 'string');
+                    propName = OUT;
                 }
-                setState({ IN: obj[propName], IP: 0 });
-                if (!item.expr())
-                    continue;
-                if (!isInputFullyConsumed())
-                    continue;
-                text = concat(text, OUT);
-                bitmask += propBit;
-                continue outerLoop;
+                if (propNames.includes(propName))
+                    return setState(stateₒ), false;
+                if (!recordItem.expr())
+                    return setState(stateₒ), false;
+                assert(OUT !== undefined);
+                obj[propName] = OUT;
+                propNames.push(propName);
             }
-            setState(stateₒ);
+            else {
+                if (!recordItem.expr())
+                    return setState(stateₒ), false;
+                assert(OUT && typeof OUT === 'object');
+                for (const propName of Object.keys(OUT)) {
+                    if (propNames.includes(propName))
+                        return setState(stateₒ), false;
+                    obj[propName] = OUT[propName];
+                    propNames.push(propName);
+                }
+            }
+        }
+        OUT = obj;
+        return true;
+    };
+}
+function printRecord(recordItems) {
+    return function RCD() {
+        if (objectToString.call(IN) !== '[object Object]')
             return false;
+        const stateₒ = getState();
+        let text;
+        const propNames = Object.keys(IN);
+        const propCount = propNames.length;
+        assert(propCount <= 32);
+        const obj = IN;
+        let bitmask = IP;
+        outerLoop: for (const recordItem of recordItems) {
+            if (recordItem.kind === 'Field') {
+                for (let i = 0; i < propCount; ++i) {
+                    let propName = propNames[i];
+                    const propBit = 1 << i;
+                    if ((bitmask & propBit) !== 0)
+                        continue;
+                    if (typeof recordItem.name !== 'string') {
+                        setState({ IN: propName, IP: 0 });
+                        if (!recordItem.name())
+                            continue;
+                        if (IP !== propName.length)
+                            continue;
+                        text = concat(text, OUT);
+                    }
+                    else {
+                        if (propName !== recordItem.name)
+                            continue;
+                    }
+                    setState({ IN: obj[propName], IP: 0 });
+                    if (!recordItem.expr())
+                        continue;
+                    if (!isInputFullyConsumed())
+                        continue;
+                    text = concat(text, OUT);
+                    bitmask += propBit;
+                    continue outerLoop;
+                }
+                setState(stateₒ);
+                return false;
+            }
+            else {
+                setState({ IN: obj, IP: bitmask });
+                if (!recordItem.expr())
+                    return setState(stateₒ), false;
+                text = concat(text, OUT);
+                bitmask = IP;
+            }
         }
-        else {
-            setState({ IN: obj, IP: bitmask });
-            if (!item.expr())
-                return setState(stateₒ), false;
-            text = concat(text, OUT);
-            bitmask = IP;
-        }
-    }
-    setState({ IN: obj, IP: bitmask });
-    OUT = text;
-    return true;
+        setState({ IN: obj, IP: bitmask });
+        OUT = text;
+        return true;
+    };
 }
 function isRule(_x) {
     return true;
@@ -803,21 +811,29 @@ const parse = (() => {
     }
 
     // ListExpression
-    function myList() {
-        return parseList([
-            {
-                kind: 'Element',
-                expr: digit
-            },
-            {
-                kind: 'Element',
-                expr: myList_sub1
-            },
-            {
-                kind: 'Element',
-                expr: myList_sub2
-            },
-        ]);
+    let myListₘ;
+    function myList(arg) {
+        try {
+            return myListₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('myListₘ is not a function')) throw err;
+            myListₘ = parseList([
+                {
+                    kind: 'Element',
+                    expr: digit
+                },
+                {
+                    kind: 'Element',
+                    expr: myList_sub1
+                },
+                {
+                    kind: 'Element',
+                    expr: myList_sub2
+                },
+            ]);
+            return myListₘ(arg);
+        }
     }
 
     // SequenceExpression
@@ -1272,21 +1288,29 @@ const print = (() => {
     }
 
     // ListExpression
-    function myList() {
-        return printList([
-            {
-                kind: 'Element',
-                expr: digit
-            },
-            {
-                kind: 'Element',
-                expr: myList_sub1
-            },
-            {
-                kind: 'Element',
-                expr: myList_sub2
-            },
-        ]);
+    let myListₘ;
+    function myList(arg) {
+        try {
+            return myListₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('myListₘ is not a function')) throw err;
+            myListₘ = printList([
+                {
+                    kind: 'Element',
+                    expr: digit
+                },
+                {
+                    kind: 'Element',
+                    expr: myList_sub1
+                },
+                {
+                    kind: 'Element',
+                    expr: myList_sub2
+                },
+            ]);
+            return myListₘ(arg);
+        }
     }
 
     // SequenceExpression
