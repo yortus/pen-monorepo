@@ -97,3 +97,112 @@ function isInputFullyConsumed(): boolean {
 }
 
 const objectToString = Object.prototype.toString;
+
+
+
+
+
+
+
+
+
+// TODO: NEW VM (WIP):
+let AREP: Array<unknown>;
+let APOS: number;
+let ATYP: ATYP;
+
+let CREP: string;
+let CPOS: number;
+
+type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5] as const;
+
+const savepoint = (): [APOS: number, CPOS: number] => [APOS, CPOS];
+const backtrack = (APOSₒ: number, CPOSₒ: number): false => (APOS = APOSₒ, CPOS = CPOSₒ, false);
+
+function parseInner(rule: Rule, mustProduce: boolean): boolean {
+    const APOSₒ = APOS;
+    if (!rule()) return false;
+    switch (ATYP) {
+        case NOTHING:
+            assert(mustProduce === false);
+            return true;
+        case SCALAR:
+            assert(APOS - APOSₒ === 1);
+            return true;
+        case STRING:
+            if (APOS - APOSₒ > 1) {
+                const str = AREP.slice(APOSₒ).join('');
+                AREP[APOSₒ] = str;
+                APOS = APOSₒ + 1;
+            }
+            return true;
+        case LIST:
+            const lst = AREP.slice(APOSₒ);
+            AREP[APOSₒ] = lst;
+            APOS = APOSₒ + 1;
+            return true;
+        case RECORD:
+            const rec = Object.fromEntries((AREP as Array<[string, unknown]>).slice(APOSₒ));
+            AREP[APOSₒ] = rec;
+            APOS = APOSₒ + 1;
+            return true;
+        default:
+            // Ensure all cases have been handled, both at compile time and at runtime.
+            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+    }
+}
+
+function printInner(rule: Rule): boolean {
+    // TODO: need to handle NOTHING case / mustConsume === false?
+
+    // Scalar case
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    let value = AREP[APOS];
+    let atyp: ATYP;
+    if (value === null || value === true || value === false || typeof value === 'number') {
+        ATYP = SCALAR;
+        const result = rule();
+        assert(APOS - APOSₒ === 1);
+        return result;
+    }
+
+    // Aggregate cases
+    if (typeof value === 'string') {
+        AREP = value as any; // TODO: fix cast by having a type with common features of string and Array<unknown>
+        atyp = ATYP = STRING;
+    }
+    else if (Array.isArray(value)) {
+        AREP = value;
+        atyp = ATYP = LIST;
+    }
+    else if (typeof value === 'object') {
+        AREP = value = [...Object.entries(value!)]; // TODO: doc reliance on prop order and what this means
+        assert(AREP.length <= 32); // TODO: document this limit, move to constant, consider how to remove it
+        atyp = ATYP = RECORD;
+    }
+    else {
+        throw new Error(`Unsupported value type for value ${value}`);
+    }
+
+    // Do the thing
+    APOS = 0;
+    let result = rule();
+
+    // Restore AREP/APOS
+    const apos = APOS;
+    AREP = AREPₒ;
+    APOS = APOSₒ;
+    if (!result) return false;
+
+    // Ensure input was fully consumed
+    if (atyp === RECORD) {
+        const keyCount = (value as any).length;
+        if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
+    }
+    else /* STRING | LIST */ {
+        if (apos !== (value as any).length) return false;
+    }
+    APOS += 1;
+    return true;
+}
