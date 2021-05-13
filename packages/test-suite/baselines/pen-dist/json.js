@@ -1,19 +1,23 @@
 // ------------------------------ Main exports ------------------------------
 module.exports = {
     parse(text) {
-        setState({ IN: text, IP: 0 });
+        CREP = text;
+        CPOS = 0;
+        AREP = [];
+        APOS = 0;
         HAS_IN = HAS_OUT = true;
-        if (!parse()) throw new Error('parse failed');
-        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-        return OUT;
+        if (!parseInner(parse, true)) throw new Error('parse failed');
+        if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
+        return AREP[0];
     },
     print(node) {
-        setState({ IN: node, IP: 0 });
+        AREP = [node];
+        APOS = 0;
+        CREP = [];
+        CPOS = 0;
         HAS_IN = HAS_OUT = true;
-        if (!print()) throw new Error('print failed');
-        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-        OUT = OUT || '';
-        return OUT;
+        if (!printInner(print)) throw new Error('print failed');
+        return CREP.join('');
     },
 };
 
@@ -23,155 +27,126 @@ module.exports = {
 // ------------------------------ Runtime ------------------------------
 "use strict";
 function parseList(listItems) {
-    const itemCount = listItems.length;
     return function LST() {
-        const stateₒ = getState();
-        const arr = [];
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!listItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
+                if (!parseInner(listItem.expr, true))
+                    return backtrack(APOSₒ, CPOSₒ);
             }
             else {
                 if (!listItem.expr())
-                    return setState(stateₒ), false;
-                assert(Array.isArray(OUT));
-                arr.push(...OUT);
+                    return backtrack(APOSₒ, CPOSₒ);
             }
         }
-        OUT = arr;
+        ATYP = LIST;
         return true;
     };
 }
 function printList(listItems) {
-    const itemCount = listItems.length;
     return function LST() {
-        if (!Array.isArray(IN))
+        if (ATYP !== LIST)
             return false;
-        const stateₒ = getState();
-        let text;
-        const arr = IN;
-        let off = IP;
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                setState({ IN: arr[off], IP: 0 });
-                if (!listItem.expr())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off += 1;
+                if (!printInner(listItem.expr))
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                setState({ IN: arr, IP: off });
+                ATYP = LIST;
                 if (!listItem.expr())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off = IP;
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
         }
-        setState({ IN: arr, IP: off });
-        OUT = text;
         return true;
     };
 }
 function parseRecord(recordItems) {
     return function RCD() {
-        const stateₒ = getState();
-        const obj = {};
-        const propNames = [];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        const fieldNames = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
-                let propName;
+                let fieldName;
                 if (typeof recordItem.name === 'string') {
-                    propName = recordItem.name;
+                    fieldName = recordItem.name;
                 }
                 else {
-                    if (!recordItem.name())
-                        return setState(stateₒ), false;
-                    assert(typeof OUT === 'string');
-                    propName = OUT;
+                    if (!parseInner(recordItem.name, true))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    assert(ATYP === STRING);
+                    APOS -= 1;
+                    fieldName = AREP[APOS];
                 }
-                if (propNames.includes(propName))
-                    return setState(stateₒ), false;
-                if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                propNames.push(propName);
+                if (fieldNames.includes(fieldName))
+                    return backtrack(APOSₒ, CPOSₒ);
+                if (!parseInner(recordItem.expr, true))
+                    return backtrack(APOSₒ, CPOSₒ);
+                AREP[APOS - 1] = [fieldName, AREP[APOS - 1]];
+                fieldNames.push(fieldName);
             }
             else {
+                const apos = APOS;
                 if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT && typeof OUT === 'object');
-                for (const propName of Object.keys(OUT)) {
-                    if (propNames.includes(propName))
-                        return setState(stateₒ), false;
-                    obj[propName] = OUT[propName];
-                    propNames.push(propName);
+                    return backtrack(APOSₒ, CPOSₒ);
+                for (let i = apos; i < APOS; ++i) {
+                    const fieldName = AREP[i][0];
+                    if (fieldNames.includes(fieldName))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    fieldNames.push(fieldName);
                 }
             }
         }
-        OUT = obj;
+        ATYP = RECORD;
         return true;
     };
 }
 function printRecord(recordItems) {
     return function RCD() {
-        if (objectToString.call(IN) !== '[object Object]')
+        if (ATYP !== RECORD)
             return false;
-        const stateₒ = getState();
-        let text;
-        const propNames = Object.keys(IN);
-        const propCount = propNames.length;
-        assert(propCount <= 32);
-        const obj = IN;
-        let bitmask = IP;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const propList = AREP;
+        const propCount = AREP.length;
+        let bitmask = APOS;
         outerLoop: for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
+                    let propName = propList[i][0];
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        setState({ IN: propName, IP: 0 });
-                        if (!recordItem.name())
+                        AREP = propName;
+                        APOS = 0;
+                        if (!printInner(recordItem.name))
                             continue;
-                        if (IP !== propName.length)
-                            continue;
-                        text = concat(text, OUT);
                     }
                     else {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!recordItem.expr())
+                    AREP = propList[i][1];
+                    APOS = 0;
+                    if (!printInner(recordItem.expr))
                         continue;
-                    if (!isInputFullyConsumed())
-                        continue;
-                    text = concat(text, OUT);
                     bitmask += propBit;
                     continue outerLoop;
                 }
-                setState(stateₒ);
-                return false;
+                return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                setState({ IN: obj, IP: bitmask });
+                AREP = propList;
+                APOS = bitmask;
+                ATYP = RECORD;
                 if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                bitmask = IP;
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                bitmask = APOS;
             }
         }
-        setState({ IN: obj, IP: bitmask });
-        OUT = text;
+        AREP = propList;
+        APOS = bitmask;
         return true;
     };
 }
@@ -225,6 +200,91 @@ function isInputFullyConsumed() {
     return IP === 1;
 }
 const objectToString = Object.prototype.toString;
+let AREP;
+let APOS;
+let ATYP;
+let CREP;
+let CPOS;
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5];
+const savepoint = () => [APOS, CPOS, ATYP];
+const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
+function parseInner(rule, mustProduce) {
+    const APOSₒ = APOS;
+    if (!rule())
+        return false;
+    switch (ATYP) {
+        case NOTHING:
+            assert(mustProduce === false);
+            return true;
+        case SCALAR:
+            assert(APOS - APOSₒ === 1);
+            return true;
+        case STRING:
+            if (APOS - APOSₒ > 1) {
+                const str = AREP.slice(APOSₒ).join('');
+                AREP[APOSₒ] = str;
+                APOS = APOSₒ + 1;
+            }
+            return true;
+        case LIST:
+            const lst = AREP.slice(APOSₒ);
+            AREP[APOSₒ] = lst;
+            APOS = APOSₒ + 1;
+            return true;
+        case RECORD:
+            const rec = Object.fromEntries(AREP.slice(APOSₒ));
+            AREP[APOSₒ] = rec;
+            APOS = APOSₒ + 1;
+            return true;
+        default:
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+    }
+}
+function printInner(rule) {
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    let value = AREP[APOS];
+    let atyp;
+    if (value === null || value === true || value === false || typeof value === 'number') {
+        ATYP = SCALAR;
+        const result = rule();
+        assert(APOS - APOSₒ === 1);
+        return result;
+    }
+    if (typeof value === 'string') {
+        AREP = value;
+        atyp = ATYP = STRING;
+    }
+    else if (Array.isArray(value)) {
+        AREP = value;
+        atyp = ATYP = LIST;
+    }
+    else if (typeof value === 'object') {
+        AREP = value = [...Object.entries(value)];
+        assert(AREP.length <= 32);
+        atyp = ATYP = RECORD;
+    }
+    else {
+        throw new Error(`Unsupported value type for value ${value}`);
+    }
+    APOS = 0;
+    let result = rule();
+    const apos = APOS;
+    AREP = AREPₒ;
+    APOS = APOSₒ;
+    if (!result)
+        return false;
+    if (atyp === RECORD) {
+        const keyCount = value.length;
+        if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
+            return false;
+    }
+    else {
+        if (apos !== value.length)
+            return false;
+    }
+    APOS += 1;
+    return true;
+}
 
 
 
@@ -693,12 +753,10 @@ const parse = (() => {
 
     // SequenceExpression
     function start_2() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -716,11 +774,9 @@ const parse = (() => {
 
     // SequenceExpression
     function False() {
-        const stateₒ = getState();
-        let out;
-        if (False_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (False_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!False_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!False_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -736,15 +792,16 @@ const parse = (() => {
     // StringUniversal
     function False_sub2() {
         if (HAS_IN) {
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 108) return false;
-            if (IN.charCodeAt(IP + 3) !== 115) return false;
-            if (IN.charCodeAt(IP + 4) !== 101) return false;
-            IP += 5;
+            if (CPOS + 5 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 102) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 97) return false;
+            if (CREP.charCodeAt(CPOS + 2) !== 108) return false;
+            if (CREP.charCodeAt(CPOS + 3) !== 115) return false;
+            if (CREP.charCodeAt(CPOS + 4) !== 101) return false;
+            CPOS += 5;
         }
-        OUT = HAS_OUT ? "false" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "false";
+        ATYP = STRING;
         return true;
     }
     False_sub2.constant = {value: "false"};
@@ -758,11 +815,9 @@ const parse = (() => {
 
     // SequenceExpression
     function Null() {
-        const stateₒ = getState();
-        let out;
-        if (Null_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Null_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!Null_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Null_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -778,14 +833,15 @@ const parse = (() => {
     // StringUniversal
     function Null_sub2() {
         if (HAS_IN) {
-            if (IP + 4 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 110) return false;
-            if (IN.charCodeAt(IP + 1) !== 117) return false;
-            if (IN.charCodeAt(IP + 2) !== 108) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            IP += 4;
+            if (CPOS + 4 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 110) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 117) return false;
+            if (CREP.charCodeAt(CPOS + 2) !== 108) return false;
+            if (CREP.charCodeAt(CPOS + 3) !== 108) return false;
+            CPOS += 4;
         }
-        OUT = HAS_OUT ? "null" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "null";
+        ATYP = STRING;
         return true;
     }
     Null_sub2.constant = {value: "null"};
@@ -799,11 +855,9 @@ const parse = (() => {
 
     // SequenceExpression
     function True() {
-        const stateₒ = getState();
-        let out;
-        if (True_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (True_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!True_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!True_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -819,14 +873,15 @@ const parse = (() => {
     // StringUniversal
     function True_sub2() {
         if (HAS_IN) {
-            if (IP + 4 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 116) return false;
-            if (IN.charCodeAt(IP + 1) !== 114) return false;
-            if (IN.charCodeAt(IP + 2) !== 117) return false;
-            if (IN.charCodeAt(IP + 3) !== 101) return false;
-            IP += 4;
+            if (CPOS + 4 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 116) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 114) return false;
+            if (CREP.charCodeAt(CPOS + 2) !== 117) return false;
+            if (CREP.charCodeAt(CPOS + 3) !== 101) return false;
+            CPOS += 4;
         }
-        OUT = HAS_OUT ? "true" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "true";
+        ATYP = STRING;
         return true;
     }
     True_sub2.constant = {value: "true"};
@@ -840,12 +895,10 @@ const parse = (() => {
 
     // SequenceExpression
     function Object() {
-        const stateₒ = getState();
-        let out;
-        if (LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Object_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Object_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -902,11 +955,9 @@ const parse = (() => {
 
     // SequenceExpression
     function Properties_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Properties()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -931,22 +982,18 @@ const parse = (() => {
 
     // SequenceExpression
     function Property_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // SequenceExpression
     function Array() {
-        const stateₒ = getState();
-        let out;
-        if (LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Array_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Array_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1001,11 +1048,9 @@ const parse = (() => {
 
     // SequenceExpression
     function Elements_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Elements()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1034,25 +1079,20 @@ const parse = (() => {
 
     // SequenceExpression
     function String() {
-        const stateₒ = getState();
-        let out;
-        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (String_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!String_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // QuantifiedExpression
     function String_sub1() {
-        const IPₒ = IP;
-        let out;
+        const CPOSₒ = CPOS;
         do {
             if (!CHAR()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
+            if (CPOS === CPOSₒ) break;
         } while (true);
-        OUT = out;
         return true;
     }
 
@@ -1108,12 +1148,10 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub6()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1129,11 +1167,12 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub3() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\\" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub3.constant = {value: "\\"};
@@ -1150,11 +1189,12 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub5() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 34) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 34) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\"" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\"";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub5.constant = {value: "\""};
@@ -1183,11 +1223,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub8() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1203,12 +1241,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub10() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 34) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 34) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\\"" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\\"";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub10.constant = {value: "\\\""};
@@ -1222,11 +1261,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub12() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1242,12 +1279,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub14() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 92) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 92) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\\\" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\\\";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub14.constant = {value: "\\\\"};
@@ -1261,11 +1299,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub16() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1281,12 +1317,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub18() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 47) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 47) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\/" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\/";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub18.constant = {value: "\\/"};
@@ -1300,11 +1337,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub20() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub23()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1320,12 +1355,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub22() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 98) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 98) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\b" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\b";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub22.constant = {value: "\\b"};
@@ -1339,11 +1375,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub24() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1359,12 +1393,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub26() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 102) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 102) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\f" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\f";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub26.constant = {value: "\\f"};
@@ -1378,11 +1413,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub28() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub29()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub31()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1398,12 +1431,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub30() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 110) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 110) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\n" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\n";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub30.constant = {value: "\\n"};
@@ -1417,11 +1451,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub32() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub35()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1437,12 +1469,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub34() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 114) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 114) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\r" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\r";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub34.constant = {value: "\\r"};
@@ -1456,11 +1489,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub36() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub37()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1476,12 +1507,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub38() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 116) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\t" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\t";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub38.constant = {value: "\\t"};
@@ -1495,11 +1527,9 @@ const parse = (() => {
 
     // SequenceExpression
     function CHAR_sub40() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub41()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub43()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1515,12 +1545,13 @@ const parse = (() => {
     // StringUniversal
     function CHAR_sub42() {
         if (HAS_IN) {
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 117) return false;
-            IP += 2;
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP.charCodeAt(CPOS + 1) !== 117) return false;
+            CPOS += 2;
         }
-        OUT = HAS_OUT ? "\\u" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\\u";
+        ATYP = STRING;
         return true;
     }
     CHAR_sub42.constant = {value: "\\u"};
@@ -1550,12 +1581,10 @@ const parse = (() => {
 
     // SequenceExpression
     function LBRACE() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (LBRACE_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!LBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1571,23 +1600,22 @@ const parse = (() => {
     // StringUniversal
     function LBRACE_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 123) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 123) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "{" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "{";
+        ATYP = STRING;
         return true;
     }
     LBRACE_sub2.constant = {value: "{"};
 
     // SequenceExpression
     function RBRACE() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACE_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1603,23 +1631,22 @@ const parse = (() => {
     // StringUniversal
     function RBRACE_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 125) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 125) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "}" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "}";
+        ATYP = STRING;
         return true;
     }
     RBRACE_sub2.constant = {value: "}"};
 
     // SequenceExpression
     function LBRACKET() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (LBRACKET_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!LBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1635,23 +1662,22 @@ const parse = (() => {
     // StringUniversal
     function LBRACKET_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 91) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 91) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "[" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "[";
+        ATYP = STRING;
         return true;
     }
     LBRACKET_sub2.constant = {value: "["};
 
     // SequenceExpression
     function RBRACKET() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACKET_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1667,23 +1693,22 @@ const parse = (() => {
     // StringUniversal
     function RBRACKET_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 93) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 93) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "]" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "]";
+        ATYP = STRING;
         return true;
     }
     RBRACKET_sub2.constant = {value: "]"};
 
     // SequenceExpression
     function COLON() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (COLON_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!COLON_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1699,23 +1724,22 @@ const parse = (() => {
     // StringUniversal
     function COLON_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 58) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 58) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? ":" : undefined;
+        if (HAS_OUT) AREP[APOS++] = ":";
+        ATYP = STRING;
         return true;
     }
     COLON_sub2.constant = {value: ":"};
 
     // SequenceExpression
     function COMMA() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (COMMA_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!COMMA_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1731,11 +1755,12 @@ const parse = (() => {
     // StringUniversal
     function COMMA_sub2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 44) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 44) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "," : undefined;
+        if (HAS_OUT) AREP[APOS++] = ",";
+        ATYP = STRING;
         return true;
     }
     COMMA_sub2.constant = {value: ","};
@@ -1752,11 +1777,12 @@ const parse = (() => {
     // StringUniversal
     function DOUBLE_QUOTE_sub1() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 34) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 34) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\"" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\"";
+        ATYP = STRING;
         return true;
     }
     DOUBLE_QUOTE_sub1.constant = {value: "\""};
@@ -1772,14 +1798,11 @@ const parse = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
-        const IPₒ = IP;
-        let out;
+        const CPOSₒ = CPOS;
         do {
             if (!WS_sub2()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
+            if (CPOS === CPOSₒ) break;
         } while (true);
-        OUT = out;
         return true;
     }
 
@@ -1795,11 +1818,12 @@ const parse = (() => {
     // StringUniversal
     function WS_sub3() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 32) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 32) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? " " : undefined;
+        if (HAS_OUT) AREP[APOS++] = " ";
+        ATYP = STRING;
         return true;
     }
     WS_sub3.constant = {value: " "};
@@ -1807,11 +1831,12 @@ const parse = (() => {
     // StringUniversal
     function WS_sub4() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 9) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 9) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\t" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\t";
+        ATYP = STRING;
         return true;
     }
     WS_sub4.constant = {value: "\t"};
@@ -1819,11 +1844,12 @@ const parse = (() => {
     // StringUniversal
     function WS_sub5() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 10) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 10) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\n" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\n";
+        ATYP = STRING;
         return true;
     }
     WS_sub5.constant = {value: "\n"};
@@ -1831,11 +1857,12 @@ const parse = (() => {
     // StringUniversal
     function WS_sub6() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 13) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP.charCodeAt(CPOS + 0) !== 13) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "\r" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "\r";
+        ATYP = STRING;
         return true;
     }
     WS_sub6.constant = {value: "\r"};
@@ -1933,12 +1960,10 @@ const print = (() => {
 
     // SequenceExpression
     function start_2() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1956,11 +1981,9 @@ const print = (() => {
 
     // SequenceExpression
     function False() {
-        const stateₒ = getState();
-        let out;
-        if (False_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (False_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!False_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!False_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1976,16 +1999,16 @@ const print = (() => {
     // StringUniversal
     function False_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 108) return false;
-            if (IN.charCodeAt(IP + 3) !== 115) return false;
-            if (IN.charCodeAt(IP + 4) !== 101) return false;
-            IP += 5;
+            if (ATYP !== STRING) return false;
+            if (APOS + 5 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 102) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 97) return false;
+            if (AREP.charCodeAt(APOS + 2) !== 108) return false;
+            if (AREP.charCodeAt(APOS + 3) !== 115) return false;
+            if (AREP.charCodeAt(APOS + 4) !== 101) return false;
+            APOS += 5;
         }
-        OUT = HAS_OUT ? "false" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "false";
         return true;
     }
     False_sub2.constant = {value: "false"};
@@ -2003,11 +2026,9 @@ const print = (() => {
 
     // SequenceExpression
     function Null() {
-        const stateₒ = getState();
-        let out;
-        if (Null_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Null_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!Null_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Null_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2023,15 +2044,15 @@ const print = (() => {
     // StringUniversal
     function Null_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 4 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 110) return false;
-            if (IN.charCodeAt(IP + 1) !== 117) return false;
-            if (IN.charCodeAt(IP + 2) !== 108) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            IP += 4;
+            if (ATYP !== STRING) return false;
+            if (APOS + 4 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 110) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 117) return false;
+            if (AREP.charCodeAt(APOS + 2) !== 108) return false;
+            if (AREP.charCodeAt(APOS + 3) !== 108) return false;
+            APOS += 4;
         }
-        OUT = HAS_OUT ? "null" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "null";
         return true;
     }
     Null_sub2.constant = {value: "null"};
@@ -2049,11 +2070,9 @@ const print = (() => {
 
     // SequenceExpression
     function True() {
-        const stateₒ = getState();
-        let out;
-        if (True_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (True_sub3()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!True_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!True_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2069,15 +2088,15 @@ const print = (() => {
     // StringUniversal
     function True_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 4 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 116) return false;
-            if (IN.charCodeAt(IP + 1) !== 114) return false;
-            if (IN.charCodeAt(IP + 2) !== 117) return false;
-            if (IN.charCodeAt(IP + 3) !== 101) return false;
-            IP += 4;
+            if (ATYP !== STRING) return false;
+            if (APOS + 4 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 116) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 114) return false;
+            if (AREP.charCodeAt(APOS + 2) !== 117) return false;
+            if (AREP.charCodeAt(APOS + 3) !== 101) return false;
+            APOS += 4;
         }
-        OUT = HAS_OUT ? "true" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "true";
         return true;
     }
     True_sub2.constant = {value: "true"};
@@ -2095,12 +2114,10 @@ const print = (() => {
 
     // SequenceExpression
     function Object() {
-        const stateₒ = getState();
-        let out;
-        if (LBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Object_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Object_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2157,11 +2174,9 @@ const print = (() => {
 
     // SequenceExpression
     function Properties_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Properties()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Properties()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2186,22 +2201,18 @@ const print = (() => {
 
     // SequenceExpression
     function Property_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (COLON()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Value()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // SequenceExpression
     function Array() {
-        const stateₒ = getState();
-        let out;
-        if (LBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Array_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACKET()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Array_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2256,11 +2267,9 @@ const print = (() => {
 
     // SequenceExpression
     function Elements_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (COMMA()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (Elements()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Elements()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2289,25 +2298,20 @@ const print = (() => {
 
     // SequenceExpression
     function String() {
-        const stateₒ = getState();
-        let out;
-        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (String_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (DOUBLE_QUOTE()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!String_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // QuantifiedExpression
     function String_sub1() {
-        const IPₒ = IP;
-        let out;
+        const APOSₒ = APOS;
         do {
             if (!CHAR()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
+            if (APOS === APOSₒ) break;
         } while (true);
-        OUT = out;
         return true;
     }
 
@@ -2383,12 +2387,10 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub2()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub4()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub6()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2404,12 +2406,12 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub3() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\\" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\";
         return true;
     }
     CHAR_sub3.constant = {value: "\\"};
@@ -2426,12 +2428,12 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub5() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 34) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 34) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\"" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\"";
         return true;
     }
     CHAR_sub5.constant = {value: "\""};
@@ -2460,11 +2462,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub8() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub9()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub11()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2480,13 +2480,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub10() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 34) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 34) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\\"" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\\"";
         return true;
     }
     CHAR_sub10.constant = {value: "\\\""};
@@ -2506,11 +2506,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub12() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub13()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub15()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2526,13 +2524,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub14() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 92) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 92) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\\\" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\\\";
         return true;
     }
     CHAR_sub14.constant = {value: "\\\\"};
@@ -2552,11 +2550,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub16() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub17()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub19()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2572,13 +2568,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub18() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 47) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 47) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\/" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\/";
         return true;
     }
     CHAR_sub18.constant = {value: "\\/"};
@@ -2598,11 +2594,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub20() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub21()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub23()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2618,13 +2612,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub22() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 98) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 98) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\b" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\b";
         return true;
     }
     CHAR_sub22.constant = {value: "\\b"};
@@ -2644,11 +2638,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub24() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub25()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub27()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2664,13 +2656,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub26() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 102) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 102) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\f" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\f";
         return true;
     }
     CHAR_sub26.constant = {value: "\\f"};
@@ -2690,11 +2682,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub28() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub29()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub31()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2710,13 +2700,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub30() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 110) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 110) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\n" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\n";
         return true;
     }
     CHAR_sub30.constant = {value: "\\n"};
@@ -2736,11 +2726,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub32() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub33()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub35()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2756,13 +2744,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub34() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 114) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 114) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\r" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\r";
         return true;
     }
     CHAR_sub34.constant = {value: "\\r"};
@@ -2782,11 +2770,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub36() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub37()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub39()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2802,13 +2788,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub38() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 116) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\t" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\t";
         return true;
     }
     CHAR_sub38.constant = {value: "\\t"};
@@ -2828,11 +2814,9 @@ const print = (() => {
 
     // SequenceExpression
     function CHAR_sub40() {
-        const stateₒ = getState();
-        let out;
-        if (CHAR_sub41()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (CHAR_sub43()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2848,13 +2832,13 @@ const print = (() => {
     // StringUniversal
     function CHAR_sub42() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 2 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 92) return false;
-            if (IN.charCodeAt(IP + 1) !== 117) return false;
-            IP += 2;
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 92) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 117) return false;
+            APOS += 2;
         }
-        OUT = HAS_OUT ? "\\u" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\\u";
         return true;
     }
     CHAR_sub42.constant = {value: "\\u"};
@@ -2884,12 +2868,10 @@ const print = (() => {
 
     // SequenceExpression
     function LBRACE() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (LBRACE_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!LBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2905,24 +2887,22 @@ const print = (() => {
     // StringUniversal
     function LBRACE_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 123) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 123) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "{" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "{";
         return true;
     }
     LBRACE_sub2.constant = {value: "{"};
 
     // SequenceExpression
     function RBRACE() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACE_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2938,24 +2918,22 @@ const print = (() => {
     // StringUniversal
     function RBRACE_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 125) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 125) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "}" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "}";
         return true;
     }
     RBRACE_sub2.constant = {value: "}"};
 
     // SequenceExpression
     function LBRACKET() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (LBRACKET_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!LBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2971,24 +2949,22 @@ const print = (() => {
     // StringUniversal
     function LBRACKET_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 91) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 91) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "[" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "[";
         return true;
     }
     LBRACKET_sub2.constant = {value: "["};
 
     // SequenceExpression
     function RBRACKET() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (RBRACKET_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -3004,24 +2980,22 @@ const print = (() => {
     // StringUniversal
     function RBRACKET_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 93) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 93) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "]" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "]";
         return true;
     }
     RBRACKET_sub2.constant = {value: "]"};
 
     // SequenceExpression
     function COLON() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (COLON_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!COLON_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -3037,24 +3011,22 @@ const print = (() => {
     // StringUniversal
     function COLON_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 58) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 58) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? ":" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = ":";
         return true;
     }
     COLON_sub2.constant = {value: ":"};
 
     // SequenceExpression
     function COMMA() {
-        const stateₒ = getState();
-        let out;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (COMMA_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (WS()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!COMMA_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -3070,12 +3042,12 @@ const print = (() => {
     // StringUniversal
     function COMMA_sub2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 44) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 44) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "," : undefined;
+        if (HAS_OUT) CREP[CPOS++] = ",";
         return true;
     }
     COMMA_sub2.constant = {value: ","};
@@ -3092,12 +3064,12 @@ const print = (() => {
     // StringUniversal
     function DOUBLE_QUOTE_sub1() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 34) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 34) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\"" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\"";
         return true;
     }
     DOUBLE_QUOTE_sub1.constant = {value: "\""};
@@ -3113,14 +3085,11 @@ const print = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
-        const IPₒ = IP;
-        let out;
+        const APOSₒ = APOS;
         do {
             if (!WS_sub2()) break;
-            if (IP === IPₒ) break;
-            out = concat(out, OUT);
+            if (APOS === APOSₒ) break;
         } while (true);
-        OUT = out;
         return true;
     }
 
@@ -3136,12 +3105,12 @@ const print = (() => {
     // StringUniversal
     function WS_sub3() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 32) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 32) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? " " : undefined;
+        if (HAS_OUT) CREP[CPOS++] = " ";
         return true;
     }
     WS_sub3.constant = {value: " "};
@@ -3149,12 +3118,12 @@ const print = (() => {
     // StringUniversal
     function WS_sub4() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 9) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 9) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\t" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\t";
         return true;
     }
     WS_sub4.constant = {value: "\t"};
@@ -3162,12 +3131,12 @@ const print = (() => {
     // StringUniversal
     function WS_sub5() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 10) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 10) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\n" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\n";
         return true;
     }
     WS_sub5.constant = {value: "\n"};
@@ -3175,12 +3144,12 @@ const print = (() => {
     // StringUniversal
     function WS_sub6() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 13) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 13) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "\r" : undefined;
+        if (HAS_OUT) CREP[CPOS++] = "\r";
         return true;
     }
     WS_sub6.constant = {value: "\r"};

@@ -19,14 +19,14 @@ function parseList(listItems: ListItem[]) {
 function printList(listItems: ListItem[]) {
     return function LST() {
         if (ATYP !== LIST) return false;
-        const [APOSₒ, CPOSₒ] = savepoint();
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!printInner(listItem.expr)) return backtrack(APOSₒ, CPOSₒ);
+                if (!printInner(listItem.expr)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
                 ATYP = LIST;
-                if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ);
+                if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
         }
         return true;

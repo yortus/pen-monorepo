@@ -117,8 +117,8 @@ let CPOS: number;
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5] as const;
 
-const savepoint = (): [APOS: number, CPOS: number] => [APOS, CPOS];
-const backtrack = (APOSₒ: number, CPOSₒ: number): false => (APOS = APOSₒ, CPOS = CPOSₒ, false);
+const savepoint = (): [APOS: number, CPOS: number, ATYP: ATYP] => [APOS, CPOS, ATYP];
+const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ ?? NOTHING, false);
 
 function parseInner(rule: Rule, mustProduce: boolean): boolean {
     const APOSₒ = APOS;
@@ -132,18 +132,18 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             return true;
         case STRING:
             if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ).join('');
+                const str = AREP.slice(APOSₒ, APOS).join('');
                 AREP[APOSₒ] = str;
                 APOS = APOSₒ + 1;
             }
             return true;
         case LIST:
-            const lst = AREP.slice(APOSₒ);
+            const lst = AREP.slice(APOSₒ, APOS);
             AREP[APOSₒ] = lst;
             APOS = APOSₒ + 1;
             return true;
         case RECORD:
-            const rec = Object.fromEntries((AREP as Array<[string, unknown]>).slice(APOSₒ));
+            const rec = Object.fromEntries((AREP as Array<[string, unknown]>).slice(APOSₒ, APOS));
             AREP[APOSₒ] = rec;
             APOS = APOSₒ + 1;
             return true;
@@ -154,12 +154,19 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
 }
 
 function printInner(rule: Rule): boolean {
-    // TODO: need to handle NOTHING case / mustConsume === false?
-
-    // Scalar case
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp: ATYP;
+
+    // Nothing case
+    if (value === undefined) {
+        ATYP = NOTHING;
+        const result = rule();
+        assert(APOS === APOSₒ);
+        return result;
+    }
+
+    // Scalar case
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
         const result = rule();
@@ -189,10 +196,9 @@ function printInner(rule: Rule): boolean {
     APOS = 0;
     let result = rule();
 
-    // Restore AREP/APOS
+    // Restore AREP/APOS/ATYP
     const apos = APOS;
-    AREP = AREPₒ;
-    APOS = APOSₒ;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed

@@ -44,7 +44,7 @@ function parseRecord(recordItems: RecordItem[]) {
 function printRecord(recordItems: RecordItem[]) {
     return function RCD() {
         if (ATYP !== RECORD) return false;
-        const [APOSₒ, CPOSₒ] = savepoint();
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
 
         // const propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
         const propList = AREP as Array<[name: string, value: unknown]>;
@@ -91,13 +91,13 @@ function printRecord(recordItems: RecordItem[]) {
                 }
 
                 // If we get here, no match...
-                return backtrack(APOSₒ, CPOSₒ);
+                return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
                 AREP = propList;
                 APOS = bitmask;
                 ATYP = RECORD;
-                if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ);
+                if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
                 bitmask = APOS;
             }
         }

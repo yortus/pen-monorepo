@@ -28,17 +28,28 @@ export function generateTargetCode(program: Program) {
     // TODO: Emit main exports...
     emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
     emit.down(1).text(`module.exports = {`).indent();
-    for (const mode of ['parse', 'print'] as const) {
-        const paramName = mode === 'parse' ? 'text' : 'node';
-        emit.down(1).text(`${mode}(${paramName}) {`).indent();
-        emit.down(1).text(`setState({ IN: ${paramName}, IP: 0 });`);
-        emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
-        emit.down(1).text(`if (!${mode}()) throw new Error('${mode} failed');`);
-        emit.down(1).text(`if (!isInputFullyConsumed()) throw new Error('${mode} didn\\\'t consume entire input');`);
-        if (mode === 'print') emit.down(1).text(`OUT = OUT || '';`);
-        emit.down(1).text(`return OUT;`);
-        emit.dedent().down(1).text(`},`);
-    }
+
+    emit.down(1).text(`parse(text) {`).indent();
+    emit.down(1).text(`CREP = text;`);
+    emit.down(1).text(`CPOS = 0;`);
+    emit.down(1).text(`AREP = [];`);
+    emit.down(1).text(`APOS = 0;`);
+    emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
+    emit.down(1).text(`if (!parseInner(parse, true)) throw new Error('parse failed');`);
+    emit.down(1).text(`if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');`);
+    emit.down(1).text(`return AREP[0];`);
+    emit.dedent().down(1).text(`},`);
+
+    emit.down(1).text(`print(node) {`).indent();
+    emit.down(1).text(`AREP = [node];`);
+    emit.down(1).text(`APOS = 0;`);
+    emit.down(1).text(`CREP = [];`);
+    emit.down(1).text(`CPOS = 0;`);
+    emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
+    emit.down(1).text(`if (!printInner(print)) throw new Error('print failed');`);
+    emit.down(1).text(`return CREP.join('');`);
+    emit.dedent().down(1).text(`},`);
+
     emit.dedent().down(1).text(`};`);
 
     // TODO: Emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
@@ -254,17 +265,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'QuantifiedExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
+                // TODO: update...
                 emit.down(1).text(`if (!${expr.expression.name}()) OUT = undefined;`);
             }
             else /* expr.quantifier === '*' */ {
-                emit.down(1).text(`const IPₒ = IP;`);
-                emit.down(1).text(`let out;`);
+                // TODO: update...
+                const [_IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+                const [_OREP, _OPOS] = mode === 'parse' ? ['AREP', 'APOS'] : ['CREP', 'CPOS'];
+                emit.down(1).text(`const ${IPOS}ₒ = ${IPOS};`);
                 emit.down(1).text(`do {`).indent();
                 emit.down(1).text(`if (!${expr.expression.name}()) break;`);
-                emit.down(1).text(`if (IP === IPₒ) break;`);
-                emit.down(1).text(`out = concat(out, OUT);`);
+                emit.down(1).text(`if (${IPOS} === ${IPOS}ₒ) break;`);
                 emit.dedent().down(1).text(`} while (true);`);
-                emit.down(1).text(`OUT = out;`);
             }
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
@@ -314,12 +326,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text('const stateₒ = getState();');
-            emit.down(1).text('let out;');
+            emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();');
             for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`if (${exprVars[i]}()) out = concat(out, OUT); else return setState(stateₒ), false;`);
+                emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
             }
-            emit.down(1).text('OUT = out;');
             emit.down(1).text('return true;');
             emit.dedent().down(1).text('}');
             break;
@@ -345,16 +355,19 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'StringUniversal': { // Code parse from bytestream to string
+            const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+            const [OREP, OPOS] = mode === 'parse' ? ['AREP', 'APOS'] : ['CREP', 'CPOS'];
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`if (HAS_IN) {`).indent();
-            if (mode === 'print') emit.down(1).text(`if (typeof IN !== 'string') return false;`);
-            emit.down(1).text(`if (IP + ${expr.value.length} > IN.length) return false;`);
+            if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+            emit.down(1).text(`if (${IPOS} + ${expr.value.length} > ${IREP}.length) return false;`);
             for (let i = 0; i < expr.value.length; ++i) {
-                emit.down(1).text(`if (IN.charCodeAt(IP + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+                emit.down(1).text(`if (${IREP}.charCodeAt(${IPOS} + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
             }
-            emit.down(1).text(`IP += ${expr.value.length};`);
+            emit.down(1).text(`${IPOS} += ${expr.value.length};`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`OUT = HAS_OUT ? ${JSON.stringify(expr.value)} : undefined;`);
+            emit.down(1).text(`if (HAS_OUT) ${OREP}[${OPOS}++] = ${JSON.stringify(expr.value)};`);
+            if (mode === 'parse') emit.down(1).text(`ATYP = STRING;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;
