@@ -16,16 +16,17 @@ function ascii({mode}: StaticOptions): Generic {
             return function ASC() {
                 let c: string | undefined;
                 if (HAS_IN) {
-                    if (IP < 0 || IP >= (IN as string).length) return false;
-                    c = (IN as string).charAt(IP);
+                    if (CPOS >= (CREP as string).length) return false;
+                    c = (CREP as string).charAt(CPOS);
                     const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                     if (cc < min || cc > max) return false;
-                    IP += 1;
+                    CPOS += 1;
                 }
                 else {
                     c = String.fromCharCode(min as number); // TODO: inefficient! improve...
                 }
-                OUT = HAS_OUT ? c : undefined;
+                if (HAS_OUT) AREP[APOS++] = c;
+                ATYP = HAS_OUT ? STRING : NOTHING;
                 return true;
             };
         }
@@ -34,17 +35,17 @@ function ascii({mode}: StaticOptions): Generic {
             return function ASC() {
                 let c: string | undefined;
                 if (HAS_IN) {
-                    if (typeof IN !== 'string') return false;
-                    if (IP < 0 || IP >= (IN as string).length) return false;
-                    c = (IN as string).charAt(IP);
+                    if (ATYP !== STRING) return false;
+                    if (APOS >= (AREP as any).length) return false; // TODO: fix cast
+                    c = (AREP as any).charAt(APOS) as string; // TODO: fix casts
                     const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                     if (cc < min || cc > max) return false;
-                    IP += 1;
+                    APOS += 1;
                 }
                 else {
                     c = String.fromCharCode(min as number); // TODO: inefficient! improve...
                 }
-                OUT = HAS_OUT ? c : undefined;
+                if (HAS_OUT) (CREP as any)[CPOS++] = c;
                 return true;
             };
         }

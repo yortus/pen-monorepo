@@ -149,16 +149,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
-            const outText = mode === 'parse' ? JSON.stringify(expr.value) : 'undefined';
             emit.down(1).text(`function ${name}() {`).indent();
-            if (mode === 'print') {
+            if (mode === 'parse') {
+                emit.down(1).text(`if (HAS_OUT) AREP[APOS++] = ${JSON.stringify(expr.value)};`);
+                emit.down(1).text(`ATYP = HAS_OUT ? SCALAR : NOTHING;`);
+            }
+            else /* mode === 'print' */ {
                 emit.down(1).text(`if (HAS_IN) {`).indent();
-                emit.down(1).text(`if (IN !== ${JSON.stringify(expr.value)} || IP !== 0) return false;`);
-                emit.down(1).text(`IP += 1;`);
+                emit.down(1).text(`if (ATYP !== SCALAR) return false;`);
+                emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
+                emit.down(1).text(`APOS += 1;`);
                 emit.dedent().down(1).text(`}`);
             }
-            emit.down(1).text(`OUT = HAS_OUT ? ${outText} : undefined;`);
-            if (mode === 'parse') emit.down(1).text(`ATYP = HAS_OUT ? SCALAR : NOTHING;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;
@@ -171,6 +173,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`HAS_OUT = false;`);
                 emit.down(1).text(`const result = ${expr.expression.name}();`);
                 emit.down(1).text(`HAS_OUT = HAS_OUTₒ;`);
+                emit.down(1).text(`ATYP = NOTHING;`);
                 emit.down(1).text(`return result;`);
             }
             else /* mode === 'print' */ {
@@ -272,6 +275,16 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             }
             else /* expr.quantifier === '*' */ {
                 const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
+
+
+                // TODO: temp testing... added for json.pen tests - gets the '[]' test case working...
+                // BUT is this correct in general? The problem being addressed here is when SomeStr*
+                // matches 0 times because the input being printed isn't even a string (say, it's NOTHING), but it still
+                // succeeds because 0 times is allowed, but it should _probably_ fail because there's no input?
+                // -or- is the source program just wrong in this example? If so how should it be corrected?
+                if (mode === 'print') emit.down(1).text(`if (HAS_IN && ATYP === NOTHING) return false;`);
+
+
                 emit.down(1).text(`const ${IPOS}ₒ = ${IPOS};`);
                 emit.down(1).text(`do {`).indent();
                 emit.down(1).text(`if (!${expr.expression.name}()) break;`);
@@ -327,10 +340,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const exprVars = expr.expressions.map(e => e.name);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();');
-            emit.down(1).text('let seqType = NOTHING;');
+            if (mode === 'parse') emit.down(1).text('let seqType = NOTHING;');
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
-                emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
+                if (mode === 'parse') emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
             }
             emit.down(1).text('return true;');
             emit.dedent().down(1).text('}');

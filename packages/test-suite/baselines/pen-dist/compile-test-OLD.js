@@ -698,11 +698,8 @@ const print = (() => {
     // SequenceExpression
     function a_3() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!a_3_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!b_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -730,11 +727,8 @@ const print = (() => {
     // SequenceExpression
     function b_2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!b_2_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!a_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 

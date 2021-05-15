@@ -325,18 +325,20 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (IP < 0 || IP >= IN.length)
+                            if (CPOS >= CREP.length)
                                 return false;
-                            c = IN.charAt(IP);
+                            c = CREP.charAt(CPOS);
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            CPOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            AREP[APOS++] = c;
+                        ATYP = HAS_OUT ? STRING : NOTHING;
                         return true;
                     };
                 }
@@ -344,20 +346,21 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
+                            if (ATYP !== STRING)
                                 return false;
-                            if (IP < 0 || IP >= IN.length)
-                                return false;
-                            c = IN.charAt(IP);
+                            if (APOS >= AREP.length)
+                                return false; // TODO: fix cast
+                            c = AREP.charAt(APOS); // TODO: fix casts
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            APOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            CREP[CPOS++] = c;
                         return true;
                     };
                 }
@@ -1446,22 +1449,16 @@ const print = (() => {
     // SequenceExpression
     function result() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function result_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -1494,24 +1491,17 @@ const print = (() => {
     // SequenceExpression
     function myList_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function myList_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 

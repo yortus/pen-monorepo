@@ -391,7 +391,7 @@ const parse = (() => {
 
     // NumericLiteral
     function a_2() {
-        OUT = HAS_OUT ? 42 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 42;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -551,13 +551,9 @@ const print = (() => {
         // SequenceExpression
         function 𝕊1() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-            let seqType = NOTHING;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            seqType |= ATYP;
             if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            seqType |= ATYP;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            ATYP |= seqType;
             return true;
         }
 
@@ -575,11 +571,8 @@ const print = (() => {
         // SequenceExpression
         function 𝕊2() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-            let seqType = NOTHING;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            seqType |= ATYP;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            ATYP |= seqType;
             return true;
         }
 
@@ -608,10 +601,10 @@ const print = (() => {
     // NumericLiteral
     function a_2() {
         if (HAS_IN) {
-            if (IN !== 42 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 42) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     a_2.constant = {value: 42};
@@ -664,13 +657,9 @@ const print = (() => {
     // SequenceExpression
     function letexpr() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 

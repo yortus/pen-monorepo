@@ -325,18 +325,20 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (IP < 0 || IP >= IN.length)
+                            if (CPOS >= CREP.length)
                                 return false;
-                            c = IN.charAt(IP);
+                            c = CREP.charAt(CPOS);
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            CPOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            AREP[APOS++] = c;
+                        ATYP = HAS_OUT ? STRING : NOTHING;
                         return true;
                     };
                 }
@@ -344,20 +346,21 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
+                            if (ATYP !== STRING)
                                 return false;
-                            if (IP < 0 || IP >= IN.length)
-                                return false;
-                            c = IN.charAt(IP);
+                            if (APOS >= AREP.length)
+                                return false; // TODO: fix cast
+                            c = AREP.charAt(APOS); // TODO: fix casts
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            APOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            CREP[CPOS++] = c;
                         return true;
                     };
                 }
@@ -891,6 +894,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = False_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -913,7 +917,7 @@ const parse = (() => {
 
     // BooleanLiteral
     function False_sub3() {
-        OUT = HAS_OUT ? false : undefined;
+        if (HAS_OUT) AREP[APOS++] = false;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -936,6 +940,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = Null_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -957,7 +962,7 @@ const parse = (() => {
 
     // NullLiteral
     function Null_sub3() {
-        OUT = HAS_OUT ? null : undefined;
+        if (HAS_OUT) AREP[APOS++] = null;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -980,6 +985,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = True_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1001,7 +1007,7 @@ const parse = (() => {
 
     // BooleanLiteral
     function True_sub3() {
-        OUT = HAS_OUT ? true : undefined;
+        if (HAS_OUT) AREP[APOS++] = true;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1233,7 +1239,7 @@ const parse = (() => {
 
     // NumericLiteral
     function min() {
-        OUT = HAS_OUT ? 32 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 32;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1241,7 +1247,7 @@ const parse = (() => {
 
     // NumericLiteral
     function max() {
-        OUT = HAS_OUT ? 127 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 127;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1249,7 +1255,7 @@ const parse = (() => {
 
     // NumericLiteral
     function base() {
-        OUT = HAS_OUT ? 16 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 16;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1257,7 +1263,7 @@ const parse = (() => {
 
     // NumericLiteral
     function minDigits() {
-        OUT = HAS_OUT ? 4 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 4;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1265,7 +1271,7 @@ const parse = (() => {
 
     // NumericLiteral
     function maxDigits() {
-        OUT = HAS_OUT ? 4 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 4;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1382,6 +1388,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub10();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1424,6 +1431,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub14();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1466,6 +1474,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub18();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1508,6 +1517,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub22();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1550,6 +1560,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub26();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1592,6 +1603,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub30();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1634,6 +1646,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub34();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1676,6 +1689,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub38();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1718,6 +1732,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = CHAR_sub42();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1777,6 +1792,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = LBRACE_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1812,6 +1828,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = RBRACE_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1847,6 +1864,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = LBRACKET_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1882,6 +1900,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = RBRACKET_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1917,6 +1936,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = COLON_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1952,6 +1972,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = COMMA_sub2();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1974,6 +1995,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = DOUBLE_QUOTE_sub1();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1996,6 +2018,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = WS_sub1();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -2164,13 +2187,9 @@ const print = (() => {
     // SequenceExpression
     function start_2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2189,11 +2208,8 @@ const print = (() => {
     // SequenceExpression
     function False() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!False_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!False_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2226,10 +2242,10 @@ const print = (() => {
     // BooleanLiteral
     function False_sub3() {
         if (HAS_IN) {
-            if (IN !== false || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     False_sub3.constant = {value: false};
@@ -2237,11 +2253,8 @@ const print = (() => {
     // SequenceExpression
     function Null() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!Null_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Null_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2273,10 +2286,10 @@ const print = (() => {
     // NullLiteral
     function Null_sub3() {
         if (HAS_IN) {
-            if (IN !== null || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== null) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     Null_sub3.constant = {value: null};
@@ -2284,11 +2297,8 @@ const print = (() => {
     // SequenceExpression
     function True() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!True_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!True_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2320,10 +2330,10 @@ const print = (() => {
     // BooleanLiteral
     function True_sub3() {
         if (HAS_IN) {
-            if (IN !== true || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== true) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     True_sub3.constant = {value: true};
@@ -2331,13 +2341,9 @@ const print = (() => {
     // SequenceExpression
     function Object() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!LBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Object_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!RBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2395,11 +2401,8 @@ const print = (() => {
     // SequenceExpression
     function Properties_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Properties()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2425,24 +2428,17 @@ const print = (() => {
     // SequenceExpression
     function Property_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function Array() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!LBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Array_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!RBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2498,11 +2494,8 @@ const print = (() => {
     // SequenceExpression
     function Elements_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!Elements()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2532,18 +2525,15 @@ const print = (() => {
     // SequenceExpression
     function String() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!String_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!DOUBLE_QUOTE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
     // QuantifiedExpression
     function String_sub1() {
+        if (HAS_IN && ATYP === NOTHING) return false;
         const APOSₒ = APOS;
         do {
             if (!CHAR()) break;
@@ -2555,10 +2545,10 @@ const print = (() => {
     // NumericLiteral
     function min() {
         if (HAS_IN) {
-            if (IN !== 32 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 32) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     min.constant = {value: 32};
@@ -2566,10 +2556,10 @@ const print = (() => {
     // NumericLiteral
     function max() {
         if (HAS_IN) {
-            if (IN !== 127 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 127) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     max.constant = {value: 127};
@@ -2577,10 +2567,10 @@ const print = (() => {
     // NumericLiteral
     function base() {
         if (HAS_IN) {
-            if (IN !== 16 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 16) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     base.constant = {value: 16};
@@ -2588,10 +2578,10 @@ const print = (() => {
     // NumericLiteral
     function minDigits() {
         if (HAS_IN) {
-            if (IN !== 4 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 4) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     minDigits.constant = {value: 4};
@@ -2599,10 +2589,10 @@ const print = (() => {
     // NumericLiteral
     function maxDigits() {
         if (HAS_IN) {
-            if (IN !== 4 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 4) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     maxDigits.constant = {value: 4};
@@ -2625,13 +2615,9 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2702,11 +2688,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub8() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2748,11 +2731,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub12() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2794,11 +2774,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub16() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2840,11 +2817,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub20() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2886,11 +2860,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub24() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2932,11 +2903,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub28() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2978,11 +2946,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub32() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3024,11 +2989,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub36() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3070,11 +3032,8 @@ const print = (() => {
     // SequenceExpression
     function CHAR_sub40() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3127,13 +3086,9 @@ const print = (() => {
     // SequenceExpression
     function LBRACE() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!LBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3162,13 +3117,9 @@ const print = (() => {
     // SequenceExpression
     function RBRACE() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!RBRACE_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3197,13 +3148,9 @@ const print = (() => {
     // SequenceExpression
     function LBRACKET() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!LBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3232,13 +3179,9 @@ const print = (() => {
     // SequenceExpression
     function RBRACKET() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!RBRACKET_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3267,13 +3210,9 @@ const print = (() => {
     // SequenceExpression
     function COLON() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!COLON_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3302,13 +3241,9 @@ const print = (() => {
     // SequenceExpression
     function COMMA() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!COMMA_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!WS()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -3367,6 +3302,7 @@ const print = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
+        if (HAS_IN && ATYP === NOTHING) return false;
         const APOSₒ = APOS;
         do {
             if (!WS_sub2()) break;

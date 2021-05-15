@@ -325,18 +325,20 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (IP < 0 || IP >= IN.length)
+                            if (CPOS >= CREP.length)
                                 return false;
-                            c = IN.charAt(IP);
+                            c = CREP.charAt(CPOS);
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            CPOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            AREP[APOS++] = c;
+                        ATYP = HAS_OUT ? STRING : NOTHING;
                         return true;
                     };
                 }
@@ -344,20 +346,21 @@ const extensions = {
                     return function ASC() {
                         let c;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
+                            if (ATYP !== STRING)
                                 return false;
-                            if (IP < 0 || IP >= IN.length)
-                                return false;
-                            c = IN.charAt(IP);
+                            if (APOS >= AREP.length)
+                                return false; // TODO: fix cast
+                            c = AREP.charAt(APOS); // TODO: fix casts
                             const cc = c.charCodeAt(0); // TODO: inefficient! improve...
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            APOS += 1;
                         }
                         else {
                             c = String.fromCharCode(min); // TODO: inefficient! improve...
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            CREP[CPOS++] = c;
                         return true;
                     };
                 }
@@ -873,6 +876,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = add_sub4();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -943,6 +947,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = sub_sub4();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1050,6 +1055,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = mul_sub6();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1120,6 +1126,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = div_sub4();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1138,7 +1145,7 @@ const parse = (() => {
 
     // NumericLiteral
     function base() {
-        OUT = HAS_OUT ? 16 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 16;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1146,7 +1153,7 @@ const parse = (() => {
 
     // BooleanLiteral
     function signed() {
-        OUT = HAS_OUT ? false : undefined;
+        if (HAS_OUT) AREP[APOS++] = false;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1154,7 +1161,7 @@ const parse = (() => {
 
     // NumericLiteral
     function base_2() {
-        OUT = HAS_OUT ? 2 : undefined;
+        if (HAS_OUT) AREP[APOS++] = 2;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1162,7 +1169,7 @@ const parse = (() => {
 
     // BooleanLiteral
     function signed_2() {
-        OUT = HAS_OUT ? false : undefined;
+        if (HAS_OUT) AREP[APOS++] = false;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1170,7 +1177,7 @@ const parse = (() => {
 
     // BooleanLiteral
     function signed_3() {
-        OUT = HAS_OUT ? false : undefined;
+        if (HAS_OUT) AREP[APOS++] = false;
         ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
@@ -1262,6 +1269,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = factor_sub8();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1318,6 +1326,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = factor_sub13();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1374,6 +1383,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = factor_sub18();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1430,6 +1440,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = factor_sub23();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1452,6 +1463,7 @@ const parse = (() => {
         HAS_OUT = false;
         const result = factor_sub25();
         HAS_OUT = HAS_OUTₒ;
+        ATYP = NOTHING;
         return result;
     }
 
@@ -1607,11 +1619,8 @@ const print = (() => {
     // SequenceExpression
     function add_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -1683,11 +1692,8 @@ const print = (() => {
     // SequenceExpression
     function sub_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -1809,11 +1815,8 @@ const print = (() => {
     // SequenceExpression
     function mul_sub4() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -1885,11 +1888,8 @@ const print = (() => {
     // SequenceExpression
     function div_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -1918,10 +1918,10 @@ const print = (() => {
     // NumericLiteral
     function base() {
         if (HAS_IN) {
-            if (IN !== 16 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 16) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     base.constant = {value: 16};
@@ -1929,10 +1929,10 @@ const print = (() => {
     // BooleanLiteral
     function signed() {
         if (HAS_IN) {
-            if (IN !== false || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     signed.constant = {value: false};
@@ -1940,10 +1940,10 @@ const print = (() => {
     // NumericLiteral
     function base_2() {
         if (HAS_IN) {
-            if (IN !== 2 || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 2) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     base_2.constant = {value: 2};
@@ -1951,10 +1951,10 @@ const print = (() => {
     // BooleanLiteral
     function signed_2() {
         if (HAS_IN) {
-            if (IN !== false || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     signed_2.constant = {value: false};
@@ -1962,10 +1962,10 @@ const print = (() => {
     // BooleanLiteral
     function signed_3() {
         if (HAS_IN) {
-            if (IN !== false || IP !== 0) return false;
-            IP += 1;
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     signed_3.constant = {value: false};
@@ -1983,13 +1983,9 @@ const print = (() => {
     // SequenceExpression
     function factor_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!f64()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2040,11 +2036,8 @@ const print = (() => {
     // SequenceExpression
     function factor_sub6() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2096,11 +2089,8 @@ const print = (() => {
     // SequenceExpression
     function factor_sub11() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor_sub14()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2152,11 +2142,8 @@ const print = (() => {
     // SequenceExpression
     function factor_sub16() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!factor_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
@@ -2206,13 +2193,9 @@ const print = (() => {
     // SequenceExpression
     function factor_sub21() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
         if (!factor_sub22()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
         if (!factor_sub24()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
         return true;
     }
 
