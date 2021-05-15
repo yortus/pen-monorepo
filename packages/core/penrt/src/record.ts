@@ -45,13 +45,8 @@ function printRecord(recordItems: RecordItem[]) {
     return function RCD() {
         if (ATYP !== RECORD) return false;
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-
-        // const propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
         const propList = AREP as Array<[name: string, value: unknown]>;
         const propCount = AREP.length;
-
-        // TODO: temp testing...
-        // const obj = IN as Record<string, unknown>;
         let bitmask = APOS;
 
         // TODO: O(n^2)? Can we do better? More fast paths for common cases?

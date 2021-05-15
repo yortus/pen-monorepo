@@ -160,52 +160,13 @@ function isGeneric(_x) {
 function isModule(_x) {
     return true;
 }
-let IN;
-let IP;
-let OUT;
-let HAS_IN;
-let HAS_OUT;
-function getState() {
-    return { IN, IP };
-}
-function setState(state) {
-    IN = state.IN;
-    IP = state.IP;
-}
-function assert(value) {
-    if (!value)
-        throw new Error(`Assertion failed`);
-}
-function concat(a, b) {
-    if (a === undefined)
-        return b;
-    if (b === undefined)
-        return a;
-    if (typeof a !== 'string' || typeof b !== 'string')
-        throw new Error(`Internal error: invalid sequence`);
-    return a + b;
-}
-function isInputFullyConsumed() {
-    const type = objectToString.call(IN);
-    if (type === '[object String]')
-        return IP === IN.length;
-    if (type === '[object Array]')
-        return IP === IN.length;
-    if (type === '[object Object]') {
-        const keyCount = Object.keys(IN).length;
-        assert(keyCount <= 32);
-        if (keyCount === 0)
-            return true;
-        return IP === -1 >>> (32 - keyCount);
-    }
-    return IP === 1;
-}
-const objectToString = Object.prototype.toString;
 let AREP;
 let APOS;
 let ATYP;
 let CREP;
 let CPOS;
+let HAS_IN;
+let HAS_OUT;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const savepoint = () => [APOS, CPOS, ATYP];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
@@ -290,6 +251,10 @@ function printInner(rule) {
     }
     APOS += 1;
     return true;
+}
+function assert(value) {
+    if (!value)
+        throw new Error(`Assertion failed`);
 }
 
 
@@ -787,28 +752,29 @@ const extensions = {
                 const regex = RegExp(pattern, 'i');
                 if (mode === 'parse') {
                     return function UNI() {
-                        if (typeof IN !== 'string')
-                            return false;
-                        const stateₒ = getState();
-                        const LEN = IN.length;
+                        // TODO: was... still need equiv?   if (typeof IN !== 'string') return false;
+                        const [APOSₒ, CPOSₒ] = savepoint();
+                        const LEN = CREP.length;
                         const EOS = '';
                         let len = 0;
                         let num = ''; // TODO: fix this - should actually keep count
-                        let c = IP < LEN ? IN.charAt(IP) : EOS;
+                        let c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
                         while (true) {
                             if (!regex.test(c))
                                 break;
                             num += c;
-                            IP += 1;
+                            CPOS += 1;
                             len += 1;
                             if (len === maxDigits)
                                 break;
-                            c = IP < LEN ? IN.charAt(IP) : EOS;
+                            c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
                         }
                         if (len < minDigits)
-                            return setState(stateₒ), false;
+                            return backtrack(APOSₒ, CPOSₒ);
                         // tslint:disable-next-line: no-eval
-                        OUT = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                        if (HAS_OUT)
+                            AREP[APOS++] = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                        ATYP = HAS_OUT ? STRING : NOTHING;
                         return true;
                     };
                 }
