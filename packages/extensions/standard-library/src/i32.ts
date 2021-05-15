@@ -11,24 +11,23 @@ function i32({mode}: StaticOptions): Generic {
             return function I32() {
                 let num = 0;
                 if (HAS_IN) {
-                    if (typeof IN !== 'string') return false;
-                    const stateₒ = getState();
+                    const [APOSₒ, CPOSₒ] = savepoint();
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                    if (signed && CPOS < CREP.length && CREP.charAt(CPOS) === '-') {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
-                        IP += 1;
+                        CPOS += 1;
                     }
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let digits = 0;
-                    while (IP < IN.length) {
+                    while (CPOS < CREP.length) {
 
                         // Read a digit.
-                        let c = IN.charCodeAt(IP);
+                        let c = CREP.charCodeAt(CPOS);
                         if (c >= 256) break;
                         const digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -38,22 +37,23 @@ function i32({mode}: StaticOptions): Generic {
                         num += digitValue;
 
                         // Check for overflow.
-                        if (num > MAX_NUM) return setState(stateₒ), false;
+                        if (num > MAX_NUM) return backtrack(APOSₒ, CPOSₒ);
 
                         // Loop again.
-                        IP += 1;
+                        CPOS += 1;
                         digits += 1;
                     }
 
                     // Check that we parsed at least one digit.
-                    if (digits === 0) return setState(stateₒ), false;
+                    if (digits === 0) return backtrack(APOSₒ, CPOSₒ);
 
                     // Apply the sign.
                     if (isNegative) num = -num;
                 }
 
                 // Success
-                OUT = HAS_OUT ? num : undefined;
+                if (HAS_OUT) AREP[APOS++] = num;
+                ATYP = HAS_OUT ? SCALAR : NOTHING;
                 return true;
             };
         }
@@ -62,8 +62,9 @@ function i32({mode}: StaticOptions): Generic {
             return function I32() {
                 let out = '0';
                 if (HAS_IN) {
-                    if (typeof IN !== 'number' || IP !== 0) return false;
-                    let num = IN;
+                    if (ATYP !== SCALAR) return false;
+                    let num = AREP[APOS] as number;
+                    if (typeof num !== 'number') return false;
 
                     // Determine the number's sign and ensure it is in range.
                     let isNegative = false;
@@ -86,14 +87,14 @@ function i32({mode}: StaticOptions): Generic {
                     }
 
                     // Compute the final string.
-                    IP = 1;
+                    APOS += 1;
                     if (isNegative) digits.push(0x2d); // char code for '-'
                     // TODO: is String.fromCharCode(...) performant?
                     out = String.fromCharCode(...digits.reverse());
                 }
 
                 // Success
-                OUT = HAS_OUT ? out : undefined;
+                if (HAS_OUT) (CREP as any)[CPOS++] = out;
                 return true;
             };
         }

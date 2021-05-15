@@ -17,7 +17,7 @@ module.exports = {
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
         if (!printInner(print)) throw new Error('print failed');
-        return CREP.join('');
+        return CREP.slice(0, CPOS).join('');
     },
 };
 
@@ -118,7 +118,7 @@ function printRecord(recordItems) {
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        AREP = propName;
+                        AREP = propList[i];
                         APOS = 0;
                         if (!printInner(recordItem.name))
                             continue;
@@ -127,13 +127,14 @@ function printRecord(recordItems) {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    AREP = propList[i][1];
-                    APOS = 0;
+                    AREP = propList[i];
+                    APOS = 1;
                     if (!printInner(recordItem.expr))
                         continue;
                     bitmask += propBit;
                     continue outerLoop;
                 }
+                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
@@ -205,7 +206,7 @@ let APOS;
 let ATYP;
 let CREP;
 let CPOS;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5];
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const savepoint = () => [APOS, CPOS, ATYP];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
 function parseInner(rule, mustProduce) {
@@ -221,18 +222,18 @@ function parseInner(rule, mustProduce) {
             return true;
         case STRING:
             if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ).join('');
+                const str = AREP.slice(APOSₒ, APOS).join('');
                 AREP[APOSₒ] = str;
                 APOS = APOSₒ + 1;
             }
             return true;
         case LIST:
-            const lst = AREP.slice(APOSₒ);
+            const lst = AREP.slice(APOSₒ, APOS);
             AREP[APOSₒ] = lst;
             APOS = APOSₒ + 1;
             return true;
         case RECORD:
-            const rec = Object.fromEntries(AREP.slice(APOSₒ));
+            const rec = Object.fromEntries(AREP.slice(APOSₒ, APOS));
             AREP[APOSₒ] = rec;
             APOS = APOSₒ + 1;
             return true;
@@ -241,9 +242,15 @@ function parseInner(rule, mustProduce) {
     }
 }
 function printInner(rule) {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
+    if (value === undefined) {
+        ATYP = NOTHING;
+        const result = rule();
+        assert(APOS === APOSₒ);
+        return result;
+    }
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
         const result = rule();
@@ -269,8 +276,7 @@ function printInner(rule) {
     APOS = 0;
     let result = rule();
     const apos = APOS;
-    AREP = AREPₒ;
-    APOS = APOSₒ;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
     if (atyp === RECORD) {
@@ -313,7 +319,7 @@ const parse = (() => {
             CPOS += 7;
         }
         if (HAS_OUT) AREP[APOS++] = "outer x";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     x.constant = {value: "outer x"};
@@ -329,9 +335,13 @@ const parse = (() => {
         // SequenceExpression
         function 𝕊1() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            let seqType = NOTHING;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
             return true;
         }
 
@@ -349,8 +359,11 @@ const parse = (() => {
         // SequenceExpression
         function 𝕊2() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            let seqType = NOTHING;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
             return true;
         }
 
@@ -371,7 +384,7 @@ const parse = (() => {
             CPOS += 7;
         }
         if (HAS_OUT) AREP[APOS++] = "inner x";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     x_3.constant = {value: "inner x"};
@@ -379,6 +392,7 @@ const parse = (() => {
     // NumericLiteral
     function a_2() {
         OUT = HAS_OUT ? 42 : undefined;
+        ATYP = HAS_OUT ? SCALAR : NOTHING;
         return true;
     }
     a_2.constant = {value: 42};
@@ -408,7 +422,7 @@ const parse = (() => {
             CPOS += 7;
         }
         if (HAS_OUT) AREP[APOS++] = "inner x";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     lx.constant = {value: "inner x"};
@@ -423,7 +437,7 @@ const parse = (() => {
             CPOS += 3;
         }
         if (HAS_OUT) AREP[APOS++] = "***";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     ly.constant = {value: "***"};
@@ -431,9 +445,13 @@ const parse = (() => {
     // SequenceExpression
     function letexpr() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
@@ -445,7 +463,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "-";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     letexpr_sub1.constant = {value: "-"};
@@ -533,9 +551,13 @@ const print = (() => {
         // SequenceExpression
         function 𝕊1() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            let seqType = NOTHING;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
             return true;
         }
 
@@ -553,8 +575,11 @@ const print = (() => {
         // SequenceExpression
         function 𝕊2() {
             const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            let seqType = NOTHING;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
             return true;
         }
 
@@ -639,9 +664,13 @@ const print = (() => {
     // SequenceExpression
     function letexpr() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 

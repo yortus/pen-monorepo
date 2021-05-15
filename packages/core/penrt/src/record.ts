@@ -71,7 +71,7 @@ function printRecord(recordItems: RecordItem[]) {
                     // TODO: match field name
                     if (typeof recordItem.name !== 'string') {
                         // Dynamically-named field
-                        AREP = propName as any;
+                        AREP = propList[i];
                         APOS = 0;
                         if (!printInner(recordItem.name)) continue;
                     }
@@ -81,8 +81,8 @@ function printRecord(recordItems: RecordItem[]) {
                     }
 
                     // TODO: match field value
-                    AREP = propList[i][1] as any;
-                    APOS = 0;
+                    AREP = propList[i];
+                    APOS = 1;
                     if (!printInner(recordItem.expr)) continue;
             
                     // TODO: we matched both name and value - consume them from AREP
@@ -90,7 +90,8 @@ function printRecord(recordItems: RecordItem[]) {
                     continue outerLoop;
                 }
 
-                // If we get here, no match...
+                // If we get here, no match... Ensure AREP is restored, since it may have been changed above.
+                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {

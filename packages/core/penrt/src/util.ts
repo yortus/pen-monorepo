@@ -115,7 +115,7 @@ let CREP: string;
 let CPOS: number;
 
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5] as const;
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
 
 const savepoint = (): [APOS: number, CPOS: number, ATYP: ATYP] => [APOS, CPOS, ATYP];
 const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ ?? NOTHING, false);

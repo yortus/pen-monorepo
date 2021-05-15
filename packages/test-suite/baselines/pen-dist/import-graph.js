@@ -17,7 +17,7 @@ module.exports = {
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
         if (!printInner(print)) throw new Error('print failed');
-        return CREP.join('');
+        return CREP.slice(0, CPOS).join('');
     },
 };
 
@@ -118,7 +118,7 @@ function printRecord(recordItems) {
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        AREP = propName;
+                        AREP = propList[i];
                         APOS = 0;
                         if (!printInner(recordItem.name))
                             continue;
@@ -127,13 +127,14 @@ function printRecord(recordItems) {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    AREP = propList[i][1];
-                    APOS = 0;
+                    AREP = propList[i];
+                    APOS = 1;
                     if (!printInner(recordItem.expr))
                         continue;
                     bitmask += propBit;
                     continue outerLoop;
                 }
+                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
@@ -205,7 +206,7 @@ let APOS;
 let ATYP;
 let CREP;
 let CPOS;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [1, 2, 3, 4, 5];
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const savepoint = () => [APOS, CPOS, ATYP];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
 function parseInner(rule, mustProduce) {
@@ -221,18 +222,18 @@ function parseInner(rule, mustProduce) {
             return true;
         case STRING:
             if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ).join('');
+                const str = AREP.slice(APOSₒ, APOS).join('');
                 AREP[APOSₒ] = str;
                 APOS = APOSₒ + 1;
             }
             return true;
         case LIST:
-            const lst = AREP.slice(APOSₒ);
+            const lst = AREP.slice(APOSₒ, APOS);
             AREP[APOSₒ] = lst;
             APOS = APOSₒ + 1;
             return true;
         case RECORD:
-            const rec = Object.fromEntries(AREP.slice(APOSₒ));
+            const rec = Object.fromEntries(AREP.slice(APOSₒ, APOS));
             AREP[APOSₒ] = rec;
             APOS = APOSₒ + 1;
             return true;
@@ -241,9 +242,15 @@ function parseInner(rule, mustProduce) {
     }
 }
 function printInner(rule) {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
+    if (value === undefined) {
+        ATYP = NOTHING;
+        const result = rule();
+        assert(APOS === APOSₒ);
+        return result;
+    }
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
         const result = rule();
@@ -269,8 +276,7 @@ function printInner(rule) {
     APOS = 0;
     let result = rule();
     const apos = APOS;
-    AREP = AREPₒ;
-    APOS = APOSₒ;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
     if (atyp === RECORD) {
@@ -363,50 +369,48 @@ const extensions = {
                 return function F64() {
                     let num = 0;
                     if (HAS_IN) {
-                        if (typeof IN !== 'string')
-                            return false;
-                        const stateₒ = getState();
-                        const LEN = IN.length;
+                        const [APOSₒ, CPOSₒ] = savepoint();
+                        const LEN = CREP.length;
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
-                        let c = IN.charCodeAt(IP);
+                        let c = CREP.charCodeAt(CPOS);
                         if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
                             if (c < ZERO_DIGIT || c > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                         }
                         // Parse optional '.'
                         if (c === DECIMAL_POINT) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
                             if (c < ZERO_DIGIT || c > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
-                            return setState(stateₒ), false;
+                            return backtrack(APOSₒ, CPOSₒ);
                         // Parse optional exponent
                         if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                             // Parse optional '+' or '-' sign
                             if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                                IP += 1;
-                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                                CPOS += 1;
+                                c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
@@ -414,21 +418,23 @@ const extensions = {
                                 if (c < ZERO_DIGIT || c > NINE_DIGIT)
                                     break;
                                 digitCount += 1;
-                                IP += 1;
-                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                                CPOS += 1;
+                                c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
                             }
                             if (digitCount === 0)
-                                return setState(stateₒ), false;
+                                return backtrack(APOSₒ, CPOSₒ);
                         }
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                        num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                        num = Number.parseFloat(CREP.slice(CPOSₒ, CPOS));
                         if (!Number.isFinite(num))
-                            return setState(stateₒ), false;
+                            return backtrack(APOSₒ, CPOSₒ);
                     }
                     // Success
-                    OUT = HAS_OUT ? num : undefined;
+                    if (HAS_OUT)
+                        AREP[APOS++] = num;
+                    ATYP = HAS_OUT ? SCALAR : NOTHING;
                     return true;
                 };
             }
@@ -437,15 +443,19 @@ const extensions = {
                     let out = '0';
                     if (HAS_IN) {
                         // Ensure N is a number.
-                        if (typeof IN !== 'number' || IP !== 0)
+                        if (ATYP !== SCALAR)
                             return false;
-                        IP = 1;
+                        let num = AREP[APOS];
+                        if (typeof num !== 'number')
+                            return false;
+                        APOS += 1;
                         // Delegate unparsing to the JS runtime.
                         // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                        out = String(IN);
+                        out = String(num);
                     }
                     // Success
-                    OUT = HAS_OUT ? out : undefined;
+                    if (HAS_OUT)
+                        CREP[CPOS++] = out;
                     return true;
                 };
             }
@@ -471,22 +481,20 @@ const extensions = {
                     return function I32() {
                         let num = 0;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
-                                return false;
-                            const stateₒ = getState();
+                            const [APOSₒ, CPOSₒ] = savepoint();
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                            if (signed && CPOS < CREP.length && CREP.charAt(CPOS) === '-') {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
-                                IP += 1;
+                                CPOS += 1;
                             }
                             // ...followed by one or more decimal digits. (NB: no exponents).
                             let digits = 0;
-                            while (IP < IN.length) {
+                            while (CPOS < CREP.length) {
                                 // Read a digit.
-                                let c = IN.charCodeAt(IP);
+                                let c = CREP.charCodeAt(CPOS);
                                 if (c >= 256)
                                     break;
                                 const digitValue = DIGIT_VALUES[c];
@@ -497,20 +505,22 @@ const extensions = {
                                 num += digitValue;
                                 // Check for overflow.
                                 if (num > MAX_NUM)
-                                    return setState(stateₒ), false;
+                                    return backtrack(APOSₒ, CPOSₒ);
                                 // Loop again.
-                                IP += 1;
+                                CPOS += 1;
                                 digits += 1;
                             }
                             // Check that we parsed at least one digit.
                             if (digits === 0)
-                                return setState(stateₒ), false;
+                                return backtrack(APOSₒ, CPOSₒ);
                             // Apply the sign.
                             if (isNegative)
                                 num = -num;
                         }
                         // Success
-                        OUT = HAS_OUT ? num : undefined;
+                        if (HAS_OUT)
+                            AREP[APOS++] = num;
+                        ATYP = HAS_OUT ? SCALAR : NOTHING;
                         return true;
                     };
                 }
@@ -518,9 +528,11 @@ const extensions = {
                     return function I32() {
                         let out = '0';
                         if (HAS_IN) {
-                            if (typeof IN !== 'number' || IP !== 0)
+                            if (ATYP !== SCALAR)
                                 return false;
-                            let num = IN;
+                            let num = AREP[APOS];
+                            if (typeof num !== 'number')
+                                return false;
                             // Determine the number's sign and ensure it is in range.
                             let isNegative = false;
                             let MAX_NUM = 0x7FFFFFFF;
@@ -543,14 +555,15 @@ const extensions = {
                                     break;
                             }
                             // Compute the final string.
-                            IP = 1;
+                            APOS += 1;
                             if (isNegative)
                                 digits.push(0x2d); // char code for '-'
                             // TODO: is String.fromCharCode(...) performant?
                             out = String.fromCharCode(...digits.reverse());
                         }
                         // Success
-                        OUT = HAS_OUT ? out : undefined;
+                        if (HAS_OUT)
+                            CREP[CPOS++] = out;
                         return true;
                     };
                 }
@@ -585,83 +598,168 @@ const extensions = {
             0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
             0x57, 0x58, 0x59, 0x5a, // 32-35    WXYZ
         ];
-        function memoise({}) {
+        function memoise({ mode }) {
             return function MEM_generic(expr) {
-                // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
+                // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
-                return function MEM() {
-                    // Check whether the memo table already has an entry for the given initial state.
-                    const stateₒ = getState();
-                    let memos2 = memos.get(IN);
-                    if (memos2 === undefined) {
-                        memos2 = new Map();
-                        memos.set(IN, memos2);
-                    }
-                    let memo = memos2.get(IP);
-                    if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                        // this initial state. The first thing we do is create a memo table entry, which is marked as
-                        // *unresolved*. All future applications of this rule with the same initial state will find this
-                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                        // left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
-                        memos2.set(IP, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                        // At this point, any left-recursive paths encountered during application are guaranteed to have
-                        // been noted and aborted (see below).
-                        if (expr()) { // TODO: fix cast
-                            memo.result = true;
-                            memo.stateᐟ = getState();
-                            memo.OUT = OUT;
+                if (mode === 'parse') {
+                    return function MEM() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let memos2 = memos.get(CREP);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            memos.set(CREP, memos2);
                         }
-                        memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                        // final.
-                        if (!memo.isLeftRecursive) {
-                            setState(memo.stateᐟ);
-                            OUT = memo.OUT;
-                            return memo.result;
+                        let memo = memos2.get(CPOS);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: CPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                            memos2.set(CPOS, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr()) { // TODO: fix cast
+                                memo.result = true;
+                                memo.IPOSᐟ = CPOS;
+                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                // No-op. Fall through to exit code.
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                CPOS = CPOSₒ;
+                                APOS = APOSₒ;
+                                // TODO: break cases for UNPARSING:
+                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                // some node --> some different non-empty node (assert: should never happen!)
+                                if (!expr())
+                                    break; // TODO: fix cast
+                                if (CPOS <= memo.IPOSᐟ)
+                                    break;
+                                // TODO: was for unparse... comment above says should never happen...
+                                // if (!isInputFullyConsumed()) break;
+                                memo.IPOSᐟ = CPOS;
+                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
                         }
-                        // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                        // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                        // the same rule with the same initial state. We continue to iterate as long as the application
-                        // succeeds and consumes more input than the previous iteration did, in which case we update the
-                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                        // does not consume more input, at which point we take the result of the previous iteration as
-                        // final.
-                        while (memo.result === true) {
-                            setState(stateₒ);
-                            // TODO: break cases for UNPARSING:
-                            // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                            // some node --> some different non-empty node (assert: should never happen!)
-                            if (!expr())
-                                break; // TODO: fix cast
-                            const state = getState();
-                            if (state.IP <= memo.stateᐟ.IP)
-                                break;
-                            // TODO: was for unparse... comment above says should never happen...
-                            // if (!isInputFullyConsumed()) break;
-                            memo.stateᐟ = state;
-                            memo.OUT = OUT;
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
                         }
-                    }
-                    else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet
-                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                        // note that the rule application encountered left-recursion, and return with failure. This means
-                        // that the initial application of the rule for this initial state can only possibly succeed along a
-                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                        // left-recursive rules.
-                        memo.isLeftRecursive = true;
-                        return false;
-                    }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has
-                    // already been computed. Return it from the memo.
-                    setState(memo.stateᐟ);
-                    OUT = memo.OUT;
-                    return memo.result;
-                };
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        CPOS = memo.IPOSᐟ;
+                        APOS = APOSₒ;
+                        for (const i of memo.OREPᐞ)
+                            AREP[APOS++] = i;
+                        ATYP = memo.ATYPᐟ;
+                        return memo.result;
+                    };
+                }
+                else /* mode === 'print' */ {
+                    // TODO: the below function is exact copypasta of the above function, with AREP/APOS <-> CREP/CPOS
+                    // This is a case where it would be better to have IREP/IPOS+OREP/OPOS and have just one function here.
+                    return function MEM() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let memos2 = memos.get(AREP);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            memos.set(AREP, memos2);
+                        }
+                        let memo = memos2.get(APOS);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: APOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                            memos2.set(APOS, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr()) { // TODO: fix cast
+                                memo.result = true;
+                                memo.IPOSᐟ = APOS;
+                                memo.OREPᐞ = CREP.slice(CPOSₒ, CPOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                // No-op. Fall through to exit code.
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                APOS = APOSₒ;
+                                CPOS = CPOSₒ;
+                                // TODO: break cases for UNPARSING:
+                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                // some node --> some different non-empty node (assert: should never happen!)
+                                if (!expr())
+                                    break; // TODO: fix cast
+                                if (APOS <= memo.IPOSᐟ)
+                                    break;
+                                // TODO: was for unparse... comment above says should never happen...
+                                // if (!isInputFullyConsumed()) break;
+                                memo.IPOSᐟ = APOS;
+                                memo.OREPᐞ = CREP.slice(CPOSₒ, CPOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                        }
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
+                        }
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        APOS = memo.IPOSᐟ;
+                        CPOS = CPOSₒ;
+                        for (const i of memo.OREPᐞ)
+                            CREP[CPOS++] = i;
+                        ATYP = memo.ATYPᐟ;
+                        return memo.result;
+                    };
+                }
             };
         }
         return {ascii, f64, i32, memoise};
@@ -713,7 +811,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "0";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     min.constant = {value: "0"};
@@ -726,7 +824,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "9";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     max.constant = {value: "9"};
@@ -761,7 +859,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "a";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     min_2.constant = {value: "a"};
@@ -774,7 +872,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "z";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     max_2.constant = {value: "z"};
@@ -787,7 +885,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "A";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     min_3.constant = {value: "A"};
@@ -800,7 +898,7 @@ const parse = (() => {
             CPOS += 1;
         }
         if (HAS_OUT) AREP[APOS++] = "Z";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -859,16 +957,22 @@ const parse = (() => {
     // SequenceExpression
     function result() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function result_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
@@ -901,30 +1005,39 @@ const parse = (() => {
     // SequenceExpression
     function myList_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function myList_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // StringAbstract
     function b() {
-        OUT = HAS_OUT ? "b thing" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "b thing";
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     b.constant = {value: "b thing"};
 
     // StringAbstract
     function d() {
-        OUT = HAS_OUT ? "d thing" : undefined;
+        if (HAS_OUT) AREP[APOS++] = "d thing";
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     d.constant = {value: "d thing"};
@@ -977,7 +1090,7 @@ const parse = (() => {
             CPOS += 3;
         }
         if (HAS_OUT) AREP[APOS++] = "foo";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     f.constant = {value: "foo"};
@@ -992,7 +1105,7 @@ const parse = (() => {
             CPOS += 3;
         }
         if (HAS_OUT) AREP[APOS++] = "bar";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     b_2.constant = {value: "bar"};
@@ -1007,7 +1120,7 @@ const parse = (() => {
             CPOS += 3;
         }
         if (HAS_OUT) AREP[APOS++] = "baz";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -1101,7 +1214,7 @@ const parse = (() => {
             CPOS += 5;
         }
         if (HAS_OUT) AREP[APOS++] = "util1";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -1126,7 +1239,7 @@ const parse = (() => {
             CPOS += 5;
         }
         if (HAS_OUT) AREP[APOS++] = "util2";
-        ATYP = STRING;
+        ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
     util2_2.constant = {value: "util2"};
@@ -1333,16 +1446,22 @@ const print = (() => {
     // SequenceExpression
     function result() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function result_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
@@ -1375,35 +1494,41 @@ const print = (() => {
     // SequenceExpression
     function myList_sub1() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function myList_sub2() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // StringAbstract
     function b() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 7 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 32) return false;
-            if (IN.charCodeAt(IP + 2) !== 116) return false;
-            if (IN.charCodeAt(IP + 3) !== 104) return false;
-            if (IN.charCodeAt(IP + 4) !== 105) return false;
-            if (IN.charCodeAt(IP + 5) !== 110) return false;
-            if (IN.charCodeAt(IP + 6) !== 103) return false;
-            IP += 7;
+            if (ATYP !== STRING) return false;
+            if (APOS + 7 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 98) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 32) return false;
+            if (AREP.charCodeAt(APOS + 2) !== 116) return false;
+            if (AREP.charCodeAt(APOS + 3) !== 104) return false;
+            if (AREP.charCodeAt(APOS + 4) !== 105) return false;
+            if (AREP.charCodeAt(APOS + 5) !== 110) return false;
+            if (AREP.charCodeAt(APOS + 6) !== 103) return false;
+            APOS += 7;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     b.constant = {value: "b thing"};
@@ -1411,18 +1536,17 @@ const print = (() => {
     // StringAbstract
     function d() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 7 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 100) return false;
-            if (IN.charCodeAt(IP + 1) !== 32) return false;
-            if (IN.charCodeAt(IP + 2) !== 116) return false;
-            if (IN.charCodeAt(IP + 3) !== 104) return false;
-            if (IN.charCodeAt(IP + 4) !== 105) return false;
-            if (IN.charCodeAt(IP + 5) !== 110) return false;
-            if (IN.charCodeAt(IP + 6) !== 103) return false;
-            IP += 7;
+            if (ATYP !== STRING) return false;
+            if (APOS + 7 > AREP.length) return false;
+            if (AREP.charCodeAt(APOS + 0) !== 100) return false;
+            if (AREP.charCodeAt(APOS + 1) !== 32) return false;
+            if (AREP.charCodeAt(APOS + 2) !== 116) return false;
+            if (AREP.charCodeAt(APOS + 3) !== 104) return false;
+            if (AREP.charCodeAt(APOS + 4) !== 105) return false;
+            if (AREP.charCodeAt(APOS + 5) !== 110) return false;
+            if (AREP.charCodeAt(APOS + 6) !== 103) return false;
+            APOS += 7;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     d.constant = {value: "d thing"};

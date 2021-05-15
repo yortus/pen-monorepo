@@ -35,6 +35,19 @@ describe(`Compiling and executing the 'math.pen' program`, () => {
             },
         },
         {
+            text: '(1+2)*3',
+            ast: {
+                type: 'mul',
+                lhs: {
+                    type: 'add',
+                    lhs: 1,
+                    rhs: 2,
+                },
+                rhs: 3,
+            },
+            textᐟ: '(1+2)*3',
+        },
+        {
             text: '1+(-1-22)*333',
             ast: {
                 type: 'add',
