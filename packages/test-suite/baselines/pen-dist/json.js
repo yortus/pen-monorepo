@@ -16,7 +16,7 @@ module.exports = {
         CREP = [];
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
-        if (!printInner(print)) throw new Error('print failed');
+        if (!printInner(print, true)) throw new Error('print failed');
         return CREP.slice(0, CPOS).join('');
     },
 };
@@ -50,7 +50,7 @@ function printList(listItems) {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!printInner(listItem.expr))
+                if (!printInner(listItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
@@ -120,7 +120,7 @@ function printRecord(recordItems) {
                     if (typeof recordItem.name !== 'string') {
                         AREP = propList[i];
                         APOS = 0;
-                        if (!printInner(recordItem.name))
+                        if (!printInner(recordItem.name, true))
                             continue;
                     }
                     else {
@@ -129,7 +129,7 @@ function printRecord(recordItems) {
                     }
                     AREP = propList[i];
                     APOS = 1;
-                    if (!printInner(recordItem.expr))
+                    if (!printInner(recordItem.expr, true))
                         continue;
                     bitmask += propBit;
                     continue outerLoop;
@@ -176,8 +176,7 @@ function parseInner(rule, mustProduce) {
         return false;
     switch (ATYP) {
         case NOTHING:
-            assert(mustProduce === false);
-            return true;
+            return mustProduce;
         case SCALAR:
             assert(APOS - APOSₒ === 1);
             return true;
@@ -202,11 +201,13 @@ function parseInner(rule, mustProduce) {
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
 }
-function printInner(rule) {
+function printInner(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
     if (value === undefined) {
+        if (mustConsume)
+            return false;
         ATYP = NOTHING;
         const result = rule();
         assert(APOS === APOSₒ);
@@ -2499,7 +2500,6 @@ const print = (() => {
 
     // QuantifiedExpression
     function String_sub1() {
-        if (HAS_IN && ATYP === NOTHING) return false;
         const APOSₒ = APOS;
         do {
             if (!CHAR()) break;
@@ -3268,7 +3268,6 @@ const print = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
-        if (HAS_IN && ATYP === NOTHING) return false;
         const APOSₒ = APOS;
         do {
             if (!WS_sub2()) break;

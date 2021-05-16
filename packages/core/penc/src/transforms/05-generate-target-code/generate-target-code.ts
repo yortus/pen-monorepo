@@ -46,7 +46,7 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`CREP = [];`);
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
-    emit.down(1).text(`if (!printInner(print)) throw new Error('print failed');`);
+    emit.down(1).text(`if (!printInner(print, true)) throw new Error('print failed');`);
     emit.down(1).text(`return CREP.slice(0, CPOS).join('');`);
     emit.dedent().down(1).text(`},`);
 
@@ -277,12 +277,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
 
 
-                // TODO: temp testing... added for json.pen tests - gets the '[]' test case working...
-                // BUT is this correct in general? The problem being addressed here is when SomeStr*
-                // matches 0 times because the input being printed isn't even a string (say, it's NOTHING), but it still
-                // succeeds because 0 times is allowed, but it should _probably_ fail because there's no input?
-                // -or- is the source program just wrong in this example? If so how should it be corrected?
-                if (mode === 'print') emit.down(1).text(`if (HAS_IN && ATYP === NOTHING) return false;`);
+                // // TODO: temp testing... added for json.pen tests - gets the '[]' test case working...
+                // // BUT is this correct in general? The problem being addressed here is when SomeStr*
+                // // matches 0 times because the input being printed isn't even a string (say, it's NOTHING), but it still
+                // // succeeds because 0 times is allowed, but it should _probably_ fail because there's no input?
+                // // -or- is the source program just wrong in this example? If so how should it be corrected?
+                // if (mode === 'print') emit.down(1).text(`if (HAS_IN && ATYP === NOTHING) return false;`);
 
 
                 emit.down(1).text(`const ${IPOS}ₒ = ${IPOS};`);

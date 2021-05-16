@@ -22,7 +22,7 @@ function printList(listItems: ListItem[]) {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!printInner(listItem.expr)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!printInner(listItem.expr, true)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
                 ATYP = LIST;

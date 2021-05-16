@@ -68,7 +68,7 @@ function printRecord(recordItems: RecordItem[]) {
                         // Dynamically-named field
                         AREP = propList[i];
                         APOS = 0;
-                        if (!printInner(recordItem.name)) continue;
+                        if (!printInner(recordItem.name, true)) continue;
                     }
                     else {
                         // Statically-named field
@@ -78,7 +78,7 @@ function printRecord(recordItems: RecordItem[]) {
                     // TODO: match field value
                     AREP = propList[i];
                     APOS = 1;
-                    if (!printInner(recordItem.expr)) continue;
+                    if (!printInner(recordItem.expr, true)) continue;
             
                     // TODO: we matched both name and value - consume them from AREP
                     bitmask += propBit;

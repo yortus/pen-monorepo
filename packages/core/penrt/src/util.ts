@@ -71,8 +71,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     if (!rule()) return false;
     switch (ATYP) {
         case NOTHING:
-            assert(mustProduce === false);
-            return true;
+            return mustProduce;
         case SCALAR:
             assert(APOS - APOSₒ === 1);
             return true;
@@ -99,13 +98,14 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     }
 }
 
-function printInner(rule: Rule): boolean {
+function printInner(rule: Rule, mustConsume: boolean): boolean {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp: ATYP;
 
     // Nothing case
     if (value === undefined) {
+        if (mustConsume) return false;
         ATYP = NOTHING;
         const result = rule();
         assert(APOS === APOSₒ);
