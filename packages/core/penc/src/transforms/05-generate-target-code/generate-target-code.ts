@@ -275,21 +275,14 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             }
             else /* expr.quantifier === '*' */ {
                 const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
-
-
-                // // TODO: temp testing... added for json.pen tests - gets the '[]' test case working...
-                // // BUT is this correct in general? The problem being addressed here is when SomeStr*
-                // // matches 0 times because the input being printed isn't even a string (say, it's NOTHING), but it still
-                // // succeeds because 0 times is allowed, but it should _probably_ fail because there's no input?
-                // // -or- is the source program just wrong in this example? If so how should it be corrected?
-                // if (mode === 'print') emit.down(1).text(`if (HAS_IN && ATYP === NOTHING) return false;`);
-
-
-                emit.down(1).text(`const ${IPOS}ₒ = ${IPOS};`);
+                const OPOS = mode === 'parse' ? 'APOS' : 'CPOS';
+                emit.down(1).text(`let [${IPOS}ᐟ, ${OPOS}ᐟ] = [${IPOS}, ${OPOS}];`);
                 emit.down(1).text(`do {`).indent();
                 emit.down(1).text(`if (!${expr.expression.name}()) break;`);
-                emit.down(1).text(`if (${IPOS} === ${IPOS}ₒ) break;`);
+                emit.down(1).text(`if (${IPOS} <= ${IPOS}ᐟ) break;`);
+                emit.down(1).text(`${IPOS}ᐟ = ${IPOS}, ${OPOS}ᐟ = ${OPOS};`);
                 emit.dedent().down(1).text(`} while (true);`);
+                emit.down(1).text(`${IPOS} = ${IPOS}ᐟ, ${OPOS} = ${OPOS}ᐟ;`);
             }
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');

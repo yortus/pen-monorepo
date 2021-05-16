@@ -1196,11 +1196,13 @@ const parse = (() => {
 
     // QuantifiedExpression
     function String_sub1() {
-        const CPOSₒ = CPOS;
+        let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
         do {
             if (!CHAR()) break;
-            if (CPOS === CPOSₒ) break;
+            if (CPOS <= CPOSᐟ) break;
+            CPOSᐟ = CPOS, APOSᐟ = APOS;
         } while (true);
+        CPOS = CPOSᐟ, APOS = APOSᐟ;
         return true;
     }
 
@@ -1991,11 +1993,13 @@ const parse = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
-        const CPOSₒ = CPOS;
+        let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
         do {
             if (!WS_sub2()) break;
-            if (CPOS === CPOSₒ) break;
+            if (CPOS <= CPOSᐟ) break;
+            CPOSᐟ = CPOS, APOSᐟ = APOS;
         } while (true);
+        CPOS = CPOSᐟ, APOS = APOSᐟ;
         return true;
     }
 
@@ -2500,11 +2504,13 @@ const print = (() => {
 
     // QuantifiedExpression
     function String_sub1() {
-        const APOSₒ = APOS;
+        let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
         do {
             if (!CHAR()) break;
-            if (APOS === APOSₒ) break;
+            if (APOS <= APOSᐟ) break;
+            APOSᐟ = APOS, CPOSᐟ = CPOS;
         } while (true);
+        APOS = APOSᐟ, CPOS = CPOSᐟ;
         return true;
     }
 
@@ -3268,11 +3274,13 @@ const print = (() => {
 
     // QuantifiedExpression
     function WS_sub1() {
-        const APOSₒ = APOS;
+        let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
         do {
             if (!WS_sub2()) break;
-            if (APOS === APOSₒ) break;
+            if (APOS <= APOSᐟ) break;
+            APOSᐟ = APOS, CPOSᐟ = CPOS;
         } while (true);
+        APOS = APOSᐟ, CPOS = CPOSᐟ;
         return true;
     }
 
