@@ -14,18 +14,17 @@ function ascii({mode}: StaticOptions): Generic {
 
         if (mode === 'parse') {
             return function ASC() {
-                let c: string | undefined;
+                let cc: number;
                 if (HAS_IN) {
                     if (CPOS >= (CREP as string).length) return false;
-                    c = (CREP as string).charAt(CPOS);
-                    const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                    cc = (CREP as string).charCodeAt(CPOS);
                     if (cc < min || cc > max) return false;
                     CPOS += 1;
                 }
                 else {
-                    c = String.fromCharCode(min as number); // TODO: inefficient! improve...
+                    cc = min as number;
                 }
-                if (HAS_OUT) AREP[APOS++] = c;
+                if (HAS_OUT) AREP[APOS++] = String.fromCharCode(cc);
                 ATYP = HAS_OUT ? STRING : NOTHING;
                 return true;
             };
@@ -33,19 +32,19 @@ function ascii({mode}: StaticOptions): Generic {
 
         else /* mode === 'print' */ {
             return function ASC() {
-                let c: string | undefined;
+                let cc: number;
                 if (HAS_IN) {
                     if (ATYP !== STRING) return false;
-                    if (APOS >= (AREP as any).length) return false; // TODO: fix cast
-                    c = (AREP as any).charAt(APOS) as string; // TODO: fix casts
-                    const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                    const arep = AREP as unknown as string; // TODO: fix cast
+                    if (APOS >= arep.length) return false;
+                    cc = arep.charCodeAt(APOS);
                     if (cc < min || cc > max) return false;
                     APOS += 1;
                 }
                 else {
-                    c = String.fromCharCode(min as number); // TODO: inefficient! improve...
+                    cc = min as number;
                 }
-                if (HAS_OUT) (CREP as any)[CPOS++] = c;
+                if (HAS_OUT) (CREP as any)[CPOS++] = String.fromCharCode(cc);
                 return true;
             };
         }

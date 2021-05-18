@@ -289,44 +289,43 @@ const extensions = {
                 assert(typeof max === 'number' && max >= 0x00 && max <= 0x7f);
                 if (mode === 'parse') {
                     return function ASC() {
-                        let c;
+                        let cc;
                         if (HAS_IN) {
                             if (CPOS >= CREP.length)
                                 return false;
-                            c = CREP.charAt(CPOS);
-                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            cc = CREP.charCodeAt(CPOS);
                             if (cc < min || cc > max)
                                 return false;
                             CPOS += 1;
                         }
                         else {
-                            c = String.fromCharCode(min); // TODO: inefficient! improve...
+                            cc = min;
                         }
                         if (HAS_OUT)
-                            AREP[APOS++] = c;
+                            AREP[APOS++] = String.fromCharCode(cc);
                         ATYP = HAS_OUT ? STRING : NOTHING;
                         return true;
                     };
                 }
                 else /* mode === 'print' */ {
                     return function ASC() {
-                        let c;
+                        let cc;
                         if (HAS_IN) {
                             if (ATYP !== STRING)
                                 return false;
-                            if (APOS >= AREP.length)
-                                return false; // TODO: fix cast
-                            c = AREP.charAt(APOS); // TODO: fix casts
-                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            const arep = AREP; // TODO: fix cast
+                            if (APOS >= arep.length)
+                                return false;
+                            cc = arep.charCodeAt(APOS);
                             if (cc < min || cc > max)
                                 return false;
                             APOS += 1;
                         }
                         else {
-                            c = String.fromCharCode(min); // TODO: inefficient! improve...
+                            cc = min;
                         }
                         if (HAS_OUT)
-                            CREP[CPOS++] = c;
+                            CREP[CPOS++] = String.fromCharCode(cc);
                         return true;
                     };
                 }
@@ -454,7 +453,7 @@ const extensions = {
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && CPOS < CREP.length && CREP.charAt(CPOS) === '-') {
+                            if (signed && CPOS < CREP.length && CREP.charCodeAt(CPOS) === HYPHEN) {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
                                 CPOS += 1;
@@ -567,6 +566,7 @@ const extensions = {
             0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
             0x57, 0x58, 0x59, 0x5a, // 32-35    WXYZ
         ];
+        const HYPHEN = 0x2d;
         function memoise({ mode }) {
             return function MEM_generic(expr) {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.

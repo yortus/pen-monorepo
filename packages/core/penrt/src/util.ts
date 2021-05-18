@@ -43,6 +43,20 @@ function isModule(_x: PenVal): _x is Module {
 
 
 
+// TODO: next:
+// [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
+// [ ] 2. change CREP from string to UInt8Array
+// [ ] 3. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
+// [ ] 4. A/C --> I/O (leave ATYP for now)
+// [ ] 5. ATYP handling?
+// [ ] 6. restore LEN checking
+
+
+interface Arrayish<T> {
+    [n: number]: T;
+    length: number;
+    slice(start?: number, end?: number): T[];
+}
 
 
 
@@ -50,11 +64,11 @@ function isModule(_x: PenVal): _x is Module {
 
 
 // TODO: NEW VM (WIP):
-let AREP: Array<unknown>;
+let AREP: Arrayish<unknown>;
 let APOS: number;
 let ATYP: ATYP;
 
-let CREP: string;
+let CREP: string; //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
 let CPOS: number;
 
 let HAS_IN: boolean; // Flag: is there input?

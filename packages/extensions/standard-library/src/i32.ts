@@ -16,7 +16,7 @@ function i32({mode}: StaticOptions): Generic {
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && CPOS < CREP.length && CREP.charAt(CPOS) === '-') {
+                    if (signed && CPOS < CREP.length && CREP.charCodeAt(CPOS) === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
                         CPOS += 1;
@@ -133,3 +133,5 @@ const CHAR_CODES = [
     0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, // 24-31    OPQRSTUV
     0x57, 0x58, 0x59, 0x5a,                         // 32-35    WXYZ
 ];
+
+const HYPHEN = 0x2d;
