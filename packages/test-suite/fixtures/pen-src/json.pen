@@ -37,7 +37,7 @@ Property    = {[String]: COLON Value}
 
 // ---------- Arrays ----------
 Array       = LBRACKET   (Elements   |   [])   RBRACKET
-Elements    = [Value, ...COMMA Elements]   |   [Value]              // NB: tail-recursive form - impl efficient handling
+Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-recursive form - impl efficient handling
 
 // ---------- Numbers ----------
 Number = f64

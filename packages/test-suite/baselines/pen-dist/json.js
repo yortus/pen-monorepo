@@ -1124,33 +1124,33 @@ const parse = (() => {
         }
     }
 
-    // SelectionExpression
-    function Elements() {
-        if (Elements_sub1()) return true;
-        if (Elements_sub3()) return true;
-        return false;
-    }
-
     // ListExpression
-    let Elements_sub1ₘ;
-    function Elements_sub1(arg) {
+    let Elementsₘ;
+    function Elements(arg) {
         try {
-            return Elements_sub1ₘ(arg);
+            return Elementsₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elements_sub1ₘ is not a function')) throw err;
-            Elements_sub1ₘ = parseList([
+            if (!(err instanceof TypeError) || !err.message.includes('Elementsₘ is not a function')) throw err;
+            Elementsₘ = parseList([
                 {
                     kind: 'Element',
                     expr: Value
                 },
                 {
                     kind: 'Splice',
-                    expr: Elements_sub2
+                    expr: Elements_sub1
                 },
             ]);
-            return Elements_sub1ₘ(arg);
+            return Elementsₘ(arg);
         }
+    }
+
+    // SelectionExpression
+    function Elements_sub1() {
+        if (Elements_sub2()) return true;
+        if (Elements_sub3()) return true;
+        return false;
     }
 
     // SequenceExpression
@@ -1172,12 +1172,7 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('Elements_sub3ₘ is not a function')) throw err;
-            Elements_sub3ₘ = parseList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-            ]);
+            Elements_sub3ₘ = parseList([]);
             return Elements_sub3ₘ(arg);
         }
     }
@@ -2489,33 +2484,33 @@ const print = (() => {
         }
     }
 
-    // SelectionExpression
-    function Elements() {
-        if (Elements_sub1()) return true;
-        if (Elements_sub3()) return true;
-        return false;
-    }
-
     // ListExpression
-    let Elements_sub1ₘ;
-    function Elements_sub1(arg) {
+    let Elementsₘ;
+    function Elements(arg) {
         try {
-            return Elements_sub1ₘ(arg);
+            return Elementsₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elements_sub1ₘ is not a function')) throw err;
-            Elements_sub1ₘ = printList([
+            if (!(err instanceof TypeError) || !err.message.includes('Elementsₘ is not a function')) throw err;
+            Elementsₘ = printList([
                 {
                     kind: 'Element',
                     expr: Value
                 },
                 {
                     kind: 'Splice',
-                    expr: Elements_sub2
+                    expr: Elements_sub1
                 },
             ]);
-            return Elements_sub1ₘ(arg);
+            return Elementsₘ(arg);
         }
+    }
+
+    // SelectionExpression
+    function Elements_sub1() {
+        if (Elements_sub2()) return true;
+        if (Elements_sub3()) return true;
+        return false;
     }
 
     // SequenceExpression
@@ -2534,12 +2529,7 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('Elements_sub3ₘ is not a function')) throw err;
-            Elements_sub3ₘ = printList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-            ]);
+            Elements_sub3ₘ = printList([]);
             return Elements_sub3ₘ(arg);
         }
     }
