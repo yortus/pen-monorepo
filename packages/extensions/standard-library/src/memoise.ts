@@ -8,7 +8,7 @@ function memoise({mode}: StaticOptions): Generic {
                 isLeftRecursive: boolean,
                 result: boolean;
                 IPOSᐟ: number;
-                OREPᐞ: unknown[];
+                OREPᐞ: Arrayish<unknown>;
                 ATYPᐟ: ATYP;
             }>
         >();
@@ -39,7 +39,7 @@ function memoise({mode}: StaticOptions): Generic {
                     if ((expr as Rule)()) { // TODO: fix cast
                         memo.result = true;
                         memo.IPOSᐟ = CPOS;
-                        memo.OREPᐞ = (AREP as any).slice(APOSₒ, APOS);
+                        memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                         memo.ATYPᐟ = ATYP;
                     }
                     memo.resolved = true;
@@ -70,7 +70,7 @@ function memoise({mode}: StaticOptions): Generic {
                         // TODO: was for unparse... comment above says should never happen...
                         // if (!isInputFullyConsumed()) break;
                         memo.IPOSᐟ = CPOS;
-                        memo.OREPᐞ = (AREP as any).slice(APOSₒ, APOS);
+                        memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                         memo.ATYPᐟ = ATYP;
                     }
                 }
@@ -89,7 +89,7 @@ function memoise({mode}: StaticOptions): Generic {
                 // already been computed. Return it from the memo.
                 CPOS = memo.IPOSᐟ;
                 APOS = APOSₒ;
-                for (const i of memo.OREPᐞ) (AREP as any)[APOS++] = i;
+                for (let i = 0; i < memo.OREPᐞ.length; ++i) AREP[APOS++] = memo.OREPᐞ[i];
                 ATYP = memo.ATYPᐟ;
                 return memo.result;
             };
@@ -122,7 +122,7 @@ function memoise({mode}: StaticOptions): Generic {
                     if ((expr as Rule)()) { // TODO: fix cast
                         memo.result = true;
                         memo.IPOSᐟ = APOS;
-                        memo.OREPᐞ = (CREP as any).slice(CPOSₒ, CPOS);
+                        memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
                         memo.ATYPᐟ = ATYP;
                     }
                     memo.resolved = true;
@@ -153,7 +153,7 @@ function memoise({mode}: StaticOptions): Generic {
                         // TODO: was for unparse... comment above says should never happen...
                         // if (!isInputFullyConsumed()) break;
                         memo.IPOSᐟ = APOS;
-                        memo.OREPᐞ = (CREP as any).slice(CPOSₒ, CPOS);
+                        memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
                         memo.ATYPᐟ = ATYP;
                     }
                 }
@@ -172,7 +172,7 @@ function memoise({mode}: StaticOptions): Generic {
                 // already been computed. Return it from the memo.
                 APOS = memo.IPOSᐟ;
                 CPOS = CPOSₒ;
-                for (const i of memo.OREPᐞ) (CREP as any)[CPOS++] = i;
+                CPOS += (memo.OREPᐞ as Buffer).copy(CREP, CPOS);
                 ATYP = memo.ATYPᐟ;
                 return memo.result;
             };

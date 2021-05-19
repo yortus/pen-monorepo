@@ -1,7 +1,7 @@
 // ------------------------------ Main exports ------------------------------
 module.exports = {
     parse(text) {
-        CREP = text;
+        CREP = Buffer.from(text, 'utf8');
         CPOS = 0;
         AREP = [];
         APOS = 0;
@@ -13,11 +13,12 @@ module.exports = {
     print(node) {
         AREP = [node];
         APOS = 0;
-        CREP = [];
+        CREP = Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
         if (!printInner(print, true)) throw new Error('print failed');
-        return CREP.slice(0, CPOS).join('');
+        if (CPOS > CREP.length) throw new Error('output buffer too small');
+        return CREP.toString('utf8', 0, CPOS);
     },
 };
 
@@ -275,16 +276,18 @@ const parse = (() => {
     function x() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 111) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 117) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 116) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 101) return false;
-            if (CREP.charCodeAt(CPOS + 4) !== 114) return false;
-            if (CREP.charCodeAt(CPOS + 5) !== 32) return false;
-            if (CREP.charCodeAt(CPOS + 6) !== 120) return false;
+            if (CREP[CPOS + 0] !== 111) return false;
+            if (CREP[CPOS + 1] !== 117) return false;
+            if (CREP[CPOS + 2] !== 116) return false;
+            if (CREP[CPOS + 3] !== 101) return false;
+            if (CREP[CPOS + 4] !== 114) return false;
+            if (CREP[CPOS + 5] !== 32) return false;
+            if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) AREP[APOS++] = "outer x";
+        if (HAS_OUT) {
+            AREP[APOS++] = "outer x";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -340,16 +343,18 @@ const parse = (() => {
     function x_3() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 105) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 110) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 110) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 101) return false;
-            if (CREP.charCodeAt(CPOS + 4) !== 114) return false;
-            if (CREP.charCodeAt(CPOS + 5) !== 32) return false;
-            if (CREP.charCodeAt(CPOS + 6) !== 120) return false;
+            if (CREP[CPOS + 0] !== 105) return false;
+            if (CREP[CPOS + 1] !== 110) return false;
+            if (CREP[CPOS + 2] !== 110) return false;
+            if (CREP[CPOS + 3] !== 101) return false;
+            if (CREP[CPOS + 4] !== 114) return false;
+            if (CREP[CPOS + 5] !== 32) return false;
+            if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) AREP[APOS++] = "inner x";
+        if (HAS_OUT) {
+            AREP[APOS++] = "inner x";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -378,16 +383,18 @@ const parse = (() => {
     function lx() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 105) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 110) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 110) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 101) return false;
-            if (CREP.charCodeAt(CPOS + 4) !== 114) return false;
-            if (CREP.charCodeAt(CPOS + 5) !== 32) return false;
-            if (CREP.charCodeAt(CPOS + 6) !== 120) return false;
+            if (CREP[CPOS + 0] !== 105) return false;
+            if (CREP[CPOS + 1] !== 110) return false;
+            if (CREP[CPOS + 2] !== 110) return false;
+            if (CREP[CPOS + 3] !== 101) return false;
+            if (CREP[CPOS + 4] !== 114) return false;
+            if (CREP[CPOS + 5] !== 32) return false;
+            if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) AREP[APOS++] = "inner x";
+        if (HAS_OUT) {
+            AREP[APOS++] = "inner x";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -397,12 +404,14 @@ const parse = (() => {
     function ly() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 42) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 42) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 42) return false;
+            if (CREP[CPOS + 0] !== 42) return false;
+            if (CREP[CPOS + 1] !== 42) return false;
+            if (CREP[CPOS + 2] !== 42) return false;
             CPOS += 3;
         }
-        if (HAS_OUT) AREP[APOS++] = "***";
+        if (HAS_OUT) {
+            AREP[APOS++] = "***";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -425,10 +434,12 @@ const parse = (() => {
     function letexpr_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 45) return false;
+            if (CREP[CPOS + 0] !== 45) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "-";
+        if (HAS_OUT) {
+            AREP[APOS++] = "-";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -501,7 +512,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 6) !== 120) return false;
             APOS += 7;
         }
-        if (HAS_OUT) CREP[CPOS++] = "outer x";
+        if (HAS_OUT) {
+            CPOS += CREP.write("outer x", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     x.constant = {value: "outer x"};
@@ -559,7 +572,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 6) !== 120) return false;
             APOS += 7;
         }
-        if (HAS_OUT) CREP[CPOS++] = "inner x";
+        if (HAS_OUT) {
+            CPOS += CREP.write("inner x", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     x_3.constant = {value: "inner x"};
@@ -600,7 +615,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 6) !== 120) return false;
             APOS += 7;
         }
-        if (HAS_OUT) CREP[CPOS++] = "inner x";
+        if (HAS_OUT) {
+            CPOS += CREP.write("inner x", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     lx.constant = {value: "inner x"};
@@ -615,7 +632,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 2) !== 42) return false;
             APOS += 3;
         }
-        if (HAS_OUT) CREP[CPOS++] = "***";
+        if (HAS_OUT) {
+            CPOS += CREP.write("***", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     ly.constant = {value: "***"};
@@ -637,7 +656,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 45) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "-";
+        if (HAS_OUT) {
+            CPOS += CREP.write("-", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     letexpr_sub1.constant = {value: "-"};

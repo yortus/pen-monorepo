@@ -16,8 +16,8 @@ function ascii({mode}: StaticOptions): Generic {
             return function ASC() {
                 let cc: number;
                 if (HAS_IN) {
-                    if (CPOS >= (CREP as string).length) return false;
-                    cc = (CREP as string).charCodeAt(CPOS);
+                    if (CPOS >= CREP.length) return false;
+                    cc = CREP[CPOS];
                     if (cc < min || cc > max) return false;
                     CPOS += 1;
                 }
@@ -44,7 +44,7 @@ function ascii({mode}: StaticOptions): Generic {
                 else {
                     cc = min as number;
                 }
-                if (HAS_OUT) (CREP as any)[CPOS++] = String.fromCharCode(cc);
+                if (HAS_OUT) CREP[CPOS++] = cc;
                 return true;
             };
         }

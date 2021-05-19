@@ -4,7 +4,7 @@
         "target": "es2019",
         "module": "None",
         "lib": ["es2019"],
-        "types": [],
+        "types": ["node"],
 
         "rootDir": "src",
         "outFile": "dist/std.pen.js",

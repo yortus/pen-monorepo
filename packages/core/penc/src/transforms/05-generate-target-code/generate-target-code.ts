@@ -30,7 +30,7 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`module.exports = {`).indent();
 
     emit.down(1).text(`parse(text) {`).indent();
-    emit.down(1).text(`CREP = text;`);
+    emit.down(1).text(`CREP = Buffer.from(text, 'utf8');`);
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`AREP = [];`);
     emit.down(1).text(`APOS = 0;`);
@@ -43,11 +43,12 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`print(node) {`).indent();
     emit.down(1).text(`AREP = [node];`);
     emit.down(1).text(`APOS = 0;`);
-    emit.down(1).text(`CREP = [];`);
+    emit.down(1).text(`CREP = Buffer.alloc(2 ** 22); // 4MB`);
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
     emit.down(1).text(`if (!printInner(print, true)) throw new Error('print failed');`);
-    emit.down(1).text(`return CREP.slice(0, CPOS).join('');`);
+    emit.down(1).text(`if (CPOS > CREP.length) throw new Error('output buffer too small');`);
+    emit.down(1).text(`return CREP.toString('utf8', 0, CPOS);`);
     emit.dedent().down(1).text(`},`);
 
     emit.dedent().down(1).text(`};`);
@@ -344,7 +345,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'StringAbstract': { // AST literal
-            const [OREP, OPOS] = mode === 'parse' ? ['AREP', 'APOS'] : ['CREP', 'CPOS'];
             emit.down(1).text(`function ${name}() {`).indent();
             if (mode === 'print') {
                 emit.down(1).text(`if (HAS_IN) {`).indent();
@@ -357,7 +357,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.dedent().down(1).text(`}`);
             }
             if (mode === 'parse') {
-                emit.down(1).text(`if (HAS_OUT) ${OREP}[${OPOS}++] = ${JSON.stringify(expr.value)};`);
+                emit.down(1).text(`if (HAS_OUT) AREP[APOS++] = ${JSON.stringify(expr.value)};`);
                 emit.down(1).text(`ATYP = HAS_OUT ? STRING : NOTHING;`);
             }
             emit.down(1).text(`return true;`);
@@ -367,17 +367,28 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'StringUniversal': { // Code parse from bytestream to string
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
-            const [OREP, OPOS] = mode === 'parse' ? ['AREP', 'APOS'] : ['CREP', 'CPOS'];
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`if (HAS_IN) {`).indent();
             if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
             emit.down(1).text(`if (${IPOS} + ${expr.value.length} > ${IREP}.length) return false;`);
             for (let i = 0; i < expr.value.length; ++i) {
-                emit.down(1).text(`if (${IREP}.charCodeAt(${IPOS} + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+                if (mode === 'parse') {
+                    emit.down(1).text(`if (CREP[CPOS + ${i}] !== ${expr.value.charCodeAt(i)}) return false;`);
+                }
+                else /* mode === 'print' */ {
+                    emit.down(1).text(`if (AREP.charCodeAt(APOS + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+                }
             }
             emit.down(1).text(`${IPOS} += ${expr.value.length};`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`if (HAS_OUT) ${OREP}[${OPOS}++] = ${JSON.stringify(expr.value)};`);
+            emit.down(1).text(`if (HAS_OUT) {`).indent();
+            if (mode === 'parse') {
+                emit.down(1).text(`AREP[APOS++] = ${JSON.stringify(expr.value)};`);
+            }
+            else /* mode === 'print' */ {
+                emit.down(1).text(`CPOS += CREP.write(${JSON.stringify(expr.value)}, CPOS, undefined, 'utf8');`);
+            }
+            emit.dedent().down(1).text('}');
             if (mode === 'parse') emit.down(1).text(`ATYP = HAS_OUT ? STRING : NOTHING;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');

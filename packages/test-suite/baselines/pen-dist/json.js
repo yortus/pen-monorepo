@@ -1,7 +1,7 @@
 // ------------------------------ Main exports ------------------------------
 module.exports = {
     parse(text) {
-        CREP = text;
+        CREP = Buffer.from(text, 'utf8');
         CPOS = 0;
         AREP = [];
         APOS = 0;
@@ -13,11 +13,12 @@ module.exports = {
     print(node) {
         AREP = [node];
         APOS = 0;
-        CREP = [];
+        CREP = Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
         if (!printInner(print, true)) throw new Error('print failed');
-        return CREP.slice(0, CPOS).join('');
+        if (CPOS > CREP.length) throw new Error('output buffer too small');
+        return CREP.toString('utf8', 0, CPOS);
     },
 };
 
@@ -293,7 +294,7 @@ const extensions = {
                         if (HAS_IN) {
                             if (CPOS >= CREP.length)
                                 return false;
-                            cc = CREP.charCodeAt(CPOS);
+                            cc = CREP[CPOS];
                             if (cc < min || cc > max)
                                 return false;
                             CPOS += 1;
@@ -325,7 +326,7 @@ const extensions = {
                             cc = min;
                         }
                         if (HAS_OUT)
-                            CREP[CPOS++] = String.fromCharCode(cc);
+                            CREP[CPOS++] = cc;
                         return true;
                     };
                 }
@@ -342,52 +343,52 @@ const extensions = {
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
-                        let c = CREP.charCodeAt(CPOS);
-                        if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                        let cc = CREP[CPOS];
+                        if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                             CPOS += 1;
-                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                            if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
                             CPOS += 1;
-                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse optional '.'
-                        if (c === DECIMAL_POINT) {
+                        if (cc === DECIMAL_POINT) {
                             CPOS += 1;
-                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                            if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
                             CPOS += 1;
-                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
                             return backtrack(APOSₒ, CPOSₒ);
                         // Parse optional exponent
-                        if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                        if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                             CPOS += 1;
-                            c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             // Parse optional '+' or '-' sign
-                            if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                            if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                                 CPOS += 1;
-                                c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
                             while (true) {
-                                if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                     break;
                                 digitCount += 1;
                                 CPOS += 1;
-                                c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             }
                             if (digitCount === 0)
                                 return backtrack(APOSₒ, CPOSₒ);
@@ -395,7 +396,7 @@ const extensions = {
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                        num = Number.parseFloat(CREP.slice(CPOSₒ, CPOS));
+                        num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
                         if (!Number.isFinite(num))
                             return backtrack(APOSₒ, CPOSₒ);
                     }
@@ -423,7 +424,7 @@ const extensions = {
                     }
                     // Success
                     if (HAS_OUT)
-                        CREP[CPOS++] = out;
+                        CPOS += CREP.write(out, CPOS, undefined, 'utf8');
                     return true;
                 };
             }
@@ -453,7 +454,7 @@ const extensions = {
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && CPOS < CREP.length && CREP.charCodeAt(CPOS) === HYPHEN) {
+                            if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
                                 CPOS += 1;
@@ -462,7 +463,7 @@ const extensions = {
                             let digits = 0;
                             while (CPOS < CREP.length) {
                                 // Read a digit.
-                                let c = CREP.charCodeAt(CPOS);
+                                let c = CREP[CPOS];
                                 if (c >= 256)
                                     break;
                                 const digitValue = DIGIT_VALUES[c];
@@ -494,7 +495,7 @@ const extensions = {
                 }
                 else /* mode === 'print' */ {
                     return function I32() {
-                        let out = '0';
+                        const digits = [];
                         if (HAS_IN) {
                             if (ATYP !== SCALAR)
                                 return false;
@@ -514,7 +515,6 @@ const extensions = {
                             if (num > MAX_NUM)
                                 return false;
                             // Extract the digits.
-                            const digits = [];
                             while (true) {
                                 const d = num % base;
                                 num = (num / base) | 0;
@@ -525,13 +525,14 @@ const extensions = {
                             // Compute the final string.
                             APOS += 1;
                             if (isNegative)
-                                digits.push(0x2d); // char code for '-'
-                            // TODO: is String.fromCharCode(...) performant?
-                            out = String.fromCharCode(...digits.reverse());
+                                digits.push(HYPHEN);
                         }
                         // Success
-                        if (HAS_OUT)
-                            CREP[CPOS++] = out;
+                        if (HAS_OUT) {
+                            for (let i = 0; i < digits.length; ++i) {
+                                CREP[CPOS++] = digits[i];
+                            }
+                        }
                         return true;
                     };
                 }
@@ -643,8 +644,8 @@ const extensions = {
                         // already been computed. Return it from the memo.
                         CPOS = memo.IPOSᐟ;
                         APOS = APOSₒ;
-                        for (const i of memo.OREPᐞ)
-                            AREP[APOS++] = i;
+                        for (let i = 0; i < memo.OREPᐞ.length; ++i)
+                            AREP[APOS++] = memo.OREPᐞ[i];
                         ATYP = memo.ATYPᐟ;
                         return memo.result;
                     };
@@ -675,7 +676,7 @@ const extensions = {
                             if (expr()) { // TODO: fix cast
                                 memo.result = true;
                                 memo.IPOSᐟ = APOS;
-                                memo.OREPᐞ = CREP.slice(CPOSₒ, CPOS);
+                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
                                 memo.ATYPᐟ = ATYP;
                             }
                             memo.resolved = true;
@@ -705,7 +706,7 @@ const extensions = {
                                 // TODO: was for unparse... comment above says should never happen...
                                 // if (!isInputFullyConsumed()) break;
                                 memo.IPOSᐟ = APOS;
-                                memo.OREPᐞ = CREP.slice(CPOSₒ, CPOS);
+                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
                                 memo.ATYPᐟ = ATYP;
                             }
                         }
@@ -723,8 +724,7 @@ const extensions = {
                         // already been computed. Return it from the memo.
                         APOS = memo.IPOSᐟ;
                         CPOS = CPOSₒ;
-                        for (const i of memo.OREPᐞ)
-                            CREP[CPOS++] = i;
+                        CPOS += memo.OREPᐞ.copy(CREP, CPOS);
                         ATYP = memo.ATYPᐟ;
                         return memo.result;
                     };
@@ -759,7 +759,7 @@ const extensions = {
                         const EOS = '';
                         let len = 0;
                         let num = ''; // TODO: fix this - should actually keep count
-                        let c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
+                        let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
                         while (true) {
                             if (!regex.test(c))
                                 break;
@@ -768,7 +768,7 @@ const extensions = {
                             len += 1;
                             if (len === maxDigits)
                                 break;
-                            c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
+                            c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
                         }
                         if (len < minDigits)
                             return backtrack(APOSₒ, CPOSₒ);
@@ -869,14 +869,16 @@ const parse = (() => {
     function False_sub2() {
         if (HAS_IN) {
             if (CPOS + 5 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 102) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 97) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 108) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 115) return false;
-            if (CREP.charCodeAt(CPOS + 4) !== 101) return false;
+            if (CREP[CPOS + 0] !== 102) return false;
+            if (CREP[CPOS + 1] !== 97) return false;
+            if (CREP[CPOS + 2] !== 108) return false;
+            if (CREP[CPOS + 3] !== 115) return false;
+            if (CREP[CPOS + 4] !== 101) return false;
             CPOS += 5;
         }
-        if (HAS_OUT) AREP[APOS++] = "false";
+        if (HAS_OUT) {
+            AREP[APOS++] = "false";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -915,13 +917,15 @@ const parse = (() => {
     function Null_sub2() {
         if (HAS_IN) {
             if (CPOS + 4 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 110) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 117) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 108) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 108) return false;
+            if (CREP[CPOS + 0] !== 110) return false;
+            if (CREP[CPOS + 1] !== 117) return false;
+            if (CREP[CPOS + 2] !== 108) return false;
+            if (CREP[CPOS + 3] !== 108) return false;
             CPOS += 4;
         }
-        if (HAS_OUT) AREP[APOS++] = "null";
+        if (HAS_OUT) {
+            AREP[APOS++] = "null";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -960,13 +964,15 @@ const parse = (() => {
     function True_sub2() {
         if (HAS_IN) {
             if (CPOS + 4 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 116) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 114) return false;
-            if (CREP.charCodeAt(CPOS + 2) !== 117) return false;
-            if (CREP.charCodeAt(CPOS + 3) !== 101) return false;
+            if (CREP[CPOS + 0] !== 116) return false;
+            if (CREP[CPOS + 1] !== 114) return false;
+            if (CREP[CPOS + 2] !== 117) return false;
+            if (CREP[CPOS + 3] !== 101) return false;
             CPOS += 4;
         }
-        if (HAS_OUT) AREP[APOS++] = "true";
+        if (HAS_OUT) {
+            AREP[APOS++] = "true";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1287,10 +1293,12 @@ const parse = (() => {
     function CHAR_sub3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1309,10 +1317,12 @@ const parse = (() => {
     function CHAR_sub5() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 34) return false;
+            if (CREP[CPOS + 0] !== 34) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\"";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\"";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1365,11 +1375,13 @@ const parse = (() => {
     function CHAR_sub10() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 34) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 34) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\\"";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\\"";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1408,11 +1420,13 @@ const parse = (() => {
     function CHAR_sub14() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 92) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 92) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\\\";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\\\";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1451,11 +1465,13 @@ const parse = (() => {
     function CHAR_sub18() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 47) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 47) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\/";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\/";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1494,11 +1510,13 @@ const parse = (() => {
     function CHAR_sub22() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 98) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 98) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\b";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\b";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1537,11 +1555,13 @@ const parse = (() => {
     function CHAR_sub26() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 102) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 102) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\f";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\f";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1580,11 +1600,13 @@ const parse = (() => {
     function CHAR_sub30() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 110) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 110) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\n";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\n";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1623,11 +1645,13 @@ const parse = (() => {
     function CHAR_sub34() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 114) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 114) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\r";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\r";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1666,11 +1690,13 @@ const parse = (() => {
     function CHAR_sub38() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 116) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 116) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\t";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\t";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1709,11 +1735,13 @@ const parse = (() => {
     function CHAR_sub42() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 92) return false;
-            if (CREP.charCodeAt(CPOS + 1) !== 117) return false;
+            if (CREP[CPOS + 0] !== 92) return false;
+            if (CREP[CPOS + 1] !== 117) return false;
             CPOS += 2;
         }
-        if (HAS_OUT) AREP[APOS++] = "\\u";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\\u";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1769,10 +1797,12 @@ const parse = (() => {
     function LBRACE_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 123) return false;
+            if (CREP[CPOS + 0] !== 123) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "{";
+        if (HAS_OUT) {
+            AREP[APOS++] = "{";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1805,10 +1835,12 @@ const parse = (() => {
     function RBRACE_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 125) return false;
+            if (CREP[CPOS + 0] !== 125) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "}";
+        if (HAS_OUT) {
+            AREP[APOS++] = "}";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1841,10 +1873,12 @@ const parse = (() => {
     function LBRACKET_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 91) return false;
+            if (CREP[CPOS + 0] !== 91) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "[";
+        if (HAS_OUT) {
+            AREP[APOS++] = "[";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1877,10 +1911,12 @@ const parse = (() => {
     function RBRACKET_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 93) return false;
+            if (CREP[CPOS + 0] !== 93) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "]";
+        if (HAS_OUT) {
+            AREP[APOS++] = "]";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1913,10 +1949,12 @@ const parse = (() => {
     function COLON_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 58) return false;
+            if (CREP[CPOS + 0] !== 58) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = ":";
+        if (HAS_OUT) {
+            AREP[APOS++] = ":";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1949,10 +1987,12 @@ const parse = (() => {
     function COMMA_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 44) return false;
+            if (CREP[CPOS + 0] !== 44) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = ",";
+        if (HAS_OUT) {
+            AREP[APOS++] = ",";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -1972,10 +2012,12 @@ const parse = (() => {
     function DOUBLE_QUOTE_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 34) return false;
+            if (CREP[CPOS + 0] !== 34) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\"";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\"";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -2016,10 +2058,12 @@ const parse = (() => {
     function WS_sub3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 32) return false;
+            if (CREP[CPOS + 0] !== 32) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = " ";
+        if (HAS_OUT) {
+            AREP[APOS++] = " ";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -2029,10 +2073,12 @@ const parse = (() => {
     function WS_sub4() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 9) return false;
+            if (CREP[CPOS + 0] !== 9) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\t";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\t";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -2042,10 +2088,12 @@ const parse = (() => {
     function WS_sub5() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 10) return false;
+            if (CREP[CPOS + 0] !== 10) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\n";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\n";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -2055,10 +2103,12 @@ const parse = (() => {
     function WS_sub6() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP.charCodeAt(CPOS + 0) !== 13) return false;
+            if (CREP[CPOS + 0] !== 13) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) AREP[APOS++] = "\r";
+        if (HAS_OUT) {
+            AREP[APOS++] = "\r";
+        }
         ATYP = HAS_OUT ? STRING : NOTHING;
         return true;
     }
@@ -2205,7 +2255,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 4) !== 101) return false;
             APOS += 5;
         }
-        if (HAS_OUT) CREP[CPOS++] = "false";
+        if (HAS_OUT) {
+            CPOS += CREP.write("false", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     False_sub2.constant = {value: "false"};
@@ -2249,7 +2301,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 3) !== 108) return false;
             APOS += 4;
         }
-        if (HAS_OUT) CREP[CPOS++] = "null";
+        if (HAS_OUT) {
+            CPOS += CREP.write("null", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     Null_sub2.constant = {value: "null"};
@@ -2293,7 +2347,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 3) !== 101) return false;
             APOS += 4;
         }
-        if (HAS_OUT) CREP[CPOS++] = "true";
+        if (HAS_OUT) {
+            CPOS += CREP.write("true", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     True_sub2.constant = {value: "true"};
@@ -2609,7 +2665,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 92) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub3.constant = {value: "\\"};
@@ -2630,7 +2688,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 34) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\"";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\"", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub5.constant = {value: "\""};
@@ -2683,7 +2743,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 34) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\\"";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\\"", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub10.constant = {value: "\\\""};
@@ -2726,7 +2788,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 92) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\\\";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\\\", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub14.constant = {value: "\\\\"};
@@ -2769,7 +2833,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 47) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\/";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\/", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub18.constant = {value: "\\/"};
@@ -2812,7 +2878,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 98) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\b";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\b", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub22.constant = {value: "\\b"};
@@ -2855,7 +2923,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 102) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\f";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\f", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub26.constant = {value: "\\f"};
@@ -2898,7 +2968,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 110) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\n";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\n", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub30.constant = {value: "\\n"};
@@ -2941,7 +3013,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 114) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\r";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\r", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub34.constant = {value: "\\r"};
@@ -2984,7 +3058,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 116) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\t";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\t", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub38.constant = {value: "\\t"};
@@ -3027,7 +3103,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 1) !== 117) return false;
             APOS += 2;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\\u";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\\u", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     CHAR_sub42.constant = {value: "\\u"};
@@ -3081,7 +3159,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 123) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "{";
+        if (HAS_OUT) {
+            CPOS += CREP.write("{", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     LBRACE_sub2.constant = {value: "{"};
@@ -3112,7 +3192,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 125) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "}";
+        if (HAS_OUT) {
+            CPOS += CREP.write("}", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     RBRACE_sub2.constant = {value: "}"};
@@ -3143,7 +3225,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 91) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "[";
+        if (HAS_OUT) {
+            CPOS += CREP.write("[", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     LBRACKET_sub2.constant = {value: "["};
@@ -3174,7 +3258,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 93) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "]";
+        if (HAS_OUT) {
+            CPOS += CREP.write("]", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     RBRACKET_sub2.constant = {value: "]"};
@@ -3205,7 +3291,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 58) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = ":";
+        if (HAS_OUT) {
+            CPOS += CREP.write(":", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     COLON_sub2.constant = {value: ":"};
@@ -3236,7 +3324,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 44) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = ",";
+        if (HAS_OUT) {
+            CPOS += CREP.write(",", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     COMMA_sub2.constant = {value: ","};
@@ -3258,7 +3348,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 34) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\"";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\"", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     DOUBLE_QUOTE_sub1.constant = {value: "\""};
@@ -3301,7 +3393,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 32) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = " ";
+        if (HAS_OUT) {
+            CPOS += CREP.write(" ", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     WS_sub3.constant = {value: " "};
@@ -3314,7 +3408,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 9) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\t";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\t", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     WS_sub4.constant = {value: "\t"};
@@ -3327,7 +3423,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 10) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\n";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\n", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     WS_sub5.constant = {value: "\n"};
@@ -3340,7 +3438,9 @@ const print = (() => {
             if (AREP.charCodeAt(APOS + 0) !== 13) return false;
             APOS += 1;
         }
-        if (HAS_OUT) CREP[CPOS++] = "\r";
+        if (HAS_OUT) {
+            CPOS += CREP.write("\r", CPOS, undefined, 'utf8');
+        }
         return true;
     }
     WS_sub6.constant = {value: "\r"};

@@ -16,7 +16,7 @@ function i32({mode}: StaticOptions): Generic {
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && CPOS < CREP.length && CREP.charCodeAt(CPOS) === HYPHEN) {
+                    if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
                         CPOS += 1;
@@ -27,7 +27,7 @@ function i32({mode}: StaticOptions): Generic {
                     while (CPOS < CREP.length) {
 
                         // Read a digit.
-                        let c = CREP.charCodeAt(CPOS);
+                        let c = CREP[CPOS];
                         if (c >= 256) break;
                         const digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -60,7 +60,7 @@ function i32({mode}: StaticOptions): Generic {
 
         else /* mode === 'print' */ {
             return function I32() {
-                let out = '0';
+                const digits = [] as number[];
                 if (HAS_IN) {
                     if (ATYP !== SCALAR) return false;
                     let num = AREP[APOS] as number;
@@ -78,7 +78,6 @@ function i32({mode}: StaticOptions): Generic {
                     if (num > MAX_NUM) return false;
 
                     // Extract the digits.
-                    const digits = [] as number[];
                     while (true) {
                         const d = num % base;
                         num = (num / base) | 0;
@@ -88,13 +87,15 @@ function i32({mode}: StaticOptions): Generic {
 
                     // Compute the final string.
                     APOS += 1;
-                    if (isNegative) digits.push(0x2d); // char code for '-'
-                    // TODO: is String.fromCharCode(...) performant?
-                    out = String.fromCharCode(...digits.reverse());
+                    if (isNegative) digits.push(HYPHEN);
                 }
 
                 // Success
-                if (HAS_OUT) (CREP as any)[CPOS++] = out;
+                if (HAS_OUT) {
+                    for (let i = 0; i < digits.length; ++i) {
+                        CREP[CPOS++] = digits[i];
+                    }
+                }
                 return true;
             };
         }

@@ -45,7 +45,7 @@ function isModule(_x: PenVal): _x is Module {
 
 // TODO: next:
 // [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
-// [ ] 2. change CREP from string to UInt8Array
+// [x] 2. change CREP from string to Buffer
 // [ ] 3. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 4. A/C --> I/O (leave ATYP for now)
 // [ ] 5. ATYP handling?
@@ -55,7 +55,7 @@ function isModule(_x: PenVal): _x is Module {
 interface Arrayish<T> {
     [n: number]: T;
     length: number;
-    slice(start?: number, end?: number): T[];
+    slice(start?: number, end?: number): Arrayish<T>;
 }
 
 
@@ -68,7 +68,7 @@ let AREP: Arrayish<unknown>;
 let APOS: number;
 let ATYP: ATYP;
 
-let CREP: string; //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
+let CREP: Buffer; //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
 let CPOS: number;
 
 let HAS_IN: boolean; // Flag: is there input?
@@ -91,7 +91,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             return true;
         case STRING:
             if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ, APOS).join('');
+                const str = (AREP as string[]).slice(APOSₒ, APOS).join('');
                 AREP[APOSₒ] = str;
                 APOS = APOSₒ + 1;
             }

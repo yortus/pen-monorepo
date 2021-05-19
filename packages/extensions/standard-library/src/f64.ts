@@ -10,55 +10,55 @@ function f64({mode}: StaticOptions): Rule {
                 let digitCount = 0;
 
                 // Parse optional '+' or '-' sign
-                let c = CREP.charCodeAt(CPOS);
-                if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                let cc = CREP[CPOS];
+                if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                     CPOS += 1;
-                    c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                    cc = CPOS < LEN ? CREP[CPOS] : EOS;
                 }
 
                 // Parse 0..M digits
                 while (true) {
-                    if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
+                    if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     CPOS += 1;
-                    c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                    cc = CPOS < LEN ? CREP[CPOS] : EOS;
                 }
 
                 // Parse optional '.'
-                if (c === DECIMAL_POINT) {
+                if (cc === DECIMAL_POINT) {
                     CPOS += 1;
-                    c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                    cc = CPOS < LEN ? CREP[CPOS] : EOS;
                 }
 
                 // Parse 0..M digits
                 while (true) {
-                    if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
+                    if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     CPOS += 1;
-                    c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                    cc = CPOS < LEN ? CREP[CPOS] : EOS;
                 }
 
                 // Ensure we have parsed at least one significant digit
                 if (digitCount === 0) return backtrack(APOSₒ, CPOSₒ);
 
                 // Parse optional exponent
-                if (c === UPPERCASE_E || c === LOWERCASE_E) {
+                if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                     CPOS += 1;
-                    c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                    cc = CPOS < LEN ? CREP[CPOS] : EOS;
 
                     // Parse optional '+' or '-' sign
-                    if (c === PLUS_SIGN || c === MINUS_SIGN) {
+                    if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                         CPOS += 1;
-                        c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
                     }
 
                     // Parse 1..M digits
                     digitCount = 0;
                     while (true) {
-                        if (c < ZERO_DIGIT || c > NINE_DIGIT) break;
+                        if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                         digitCount += 1;
                         CPOS += 1;
-                        c = CPOS < LEN ? CREP.charCodeAt(CPOS) : EOS;
+                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
                     }
                     if (digitCount === 0) return backtrack(APOSₒ, CPOSₒ);
                 }
@@ -66,7 +66,7 @@ function f64({mode}: StaticOptions): Rule {
                 // There is a syntactically valid float. Delegate parsing to the JS runtime.
                 // Reject the number if it parses to Infinity or Nan.
                 // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                num = Number.parseFloat(CREP.slice(CPOSₒ, CPOS));
+                num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
                 if (!Number.isFinite(num)) return backtrack(APOSₒ, CPOSₒ);
             }
 
@@ -93,7 +93,7 @@ function f64({mode}: StaticOptions): Rule {
             }
 
             // Success
-            if (HAS_OUT) (CREP as any)[CPOS++] = out;
+            if (HAS_OUT) CPOS += CREP.write(out, CPOS, undefined, 'utf8');
             return true;
         };
     }

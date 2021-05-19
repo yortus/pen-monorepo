@@ -21,14 +21,14 @@ function unicode({mode}: StaticOptions): Generic {
 
                 let len = 0;
                 let num = ''; // TODO: fix this - should actually keep count
-                let c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
+                let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
                 while (true) {
                     if (!regex.test(c)) break;
                     num += c;
                     CPOS += 1;
                     len += 1;
                     if (len === maxDigits) break;
-                    c = CPOS < LEN ? CREP.charAt(CPOS) : EOS;
+                    c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
                 }
 
                 if (len < minDigits) return backtrack(APOSₒ, CPOSₒ);
