@@ -46,7 +46,10 @@ function isModule(_x: PenVal): _x is Module {
 // TODO: next:
 // [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
 // [x] 2. change CREP from string to Buffer
-// [ ] 3. perf profile - what are the hottest paths now where speedups would improve overall perf?
+// [x] 3. perf profile - what are the hottest paths now where speedups would improve overall perf?
+// [x] 3a. no obvious low-hanging fruit
+// [ ] 3b. most obvious 'smell': extremely deep call chains with LST and RCD. These are tail-recursive in json.pen. fn call/ret overheads dominating execution time?
+// [ ] 3c. can we (a) identify tail-recursion in lists and records? (b) lower it to iteration in a transform?
 // [ ] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
