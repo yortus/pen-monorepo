@@ -20,8 +20,9 @@ export interface CompilerResult {
 
     // TODO: doc...
     eval(): {
-        parse(text: string): unknown;
+        parse(strOrBuf: string | Buffer): unknown;
         print(ast: unknown): string;
+        print(ast: unknown, buf: Buffer): number;
     };
 
     // TODO: doc...

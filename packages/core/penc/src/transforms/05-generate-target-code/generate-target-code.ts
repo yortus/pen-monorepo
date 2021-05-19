@@ -29,8 +29,8 @@ export function generateTargetCode(program: Program) {
     emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
     emit.down(1).text(`module.exports = {`).indent();
 
-    emit.down(1).text(`parse(text) {`).indent();
-    emit.down(1).text(`CREP = Buffer.from(text, 'utf8');`);
+    emit.down(1).text(`parse(strOrBuf) { // expects buf to be utf8 encoded`).indent();
+    emit.down(1).text(`CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');`);
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`AREP = [];`);
     emit.down(1).text(`APOS = 0;`);
@@ -40,15 +40,15 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`return AREP[0];`);
     emit.dedent().down(1).text(`},`);
 
-    emit.down(1).text(`print(node) {`).indent();
+    emit.down(1).text(`print(node, buf) {`).indent();
     emit.down(1).text(`AREP = [node];`);
     emit.down(1).text(`APOS = 0;`);
-    emit.down(1).text(`CREP = Buffer.alloc(2 ** 22); // 4MB`);
+    emit.down(1).text(`CREP = buf || Buffer.alloc(2 ** 22); // 4MB`);
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`HAS_IN = HAS_OUT = true;`);
     emit.down(1).text(`if (!printInner(print, true)) throw new Error('print failed');`);
     emit.down(1).text(`if (CPOS > CREP.length) throw new Error('output buffer too small');`);
-    emit.down(1).text(`return CREP.toString('utf8', 0, CPOS);`);
+    emit.down(1).text(`return buf ? CPOS : CREP.toString('utf8', 0, CPOS);`);
     emit.dedent().down(1).text(`},`);
 
     emit.dedent().down(1).text(`};`);

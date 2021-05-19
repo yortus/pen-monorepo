@@ -46,10 +46,11 @@ function isModule(_x: PenVal): _x is Module {
 // TODO: next:
 // [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
 // [x] 2. change CREP from string to Buffer
-// [ ] 3. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
-// [ ] 4. A/C --> I/O (leave ATYP for now)
-// [ ] 5. ATYP handling?
-// [ ] 6. restore LEN checking
+// [ ] 3. perf profile - what are the hottest paths now where speedups would improve overall perf?
+// [ ] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
+// [ ] 5. A/C --> I/O (leave ATYP for now)
+// [ ] 6. ATYP handling?
+// [ ] 7. restore LEN checking
 
 
 interface Arrayish<T> {

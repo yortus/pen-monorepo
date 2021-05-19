@@ -1,7 +1,7 @@
 // ------------------------------ Main exports ------------------------------
 module.exports = {
-    parse(text) {
-        CREP = Buffer.from(text, 'utf8');
+    parse(strOrBuf) { // expects buf to be utf8 encoded
+        CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
         CPOS = 0;
         AREP = [];
         APOS = 0;
@@ -10,15 +10,15 @@ module.exports = {
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
-    print(node) {
+    print(node, buf) {
         AREP = [node];
         APOS = 0;
-        CREP = Buffer.alloc(2 ** 22); // 4MB
+        CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
         HAS_IN = HAS_OUT = true;
         if (!printInner(print, true)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
-        return CREP.toString('utf8', 0, CPOS);
+        return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
 };
 

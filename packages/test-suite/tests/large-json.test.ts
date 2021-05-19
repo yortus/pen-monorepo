@@ -11,16 +11,18 @@ const jsonDocPath = path.join(__dirname, '../fixtures/documents/1mb.json');
 describe(`Procesing a large JSON document`, () => {
 
     it('parses', () => {
-        const text = fs.readFileSync(jsonDocPath, 'utf8');
-        const v8Json = JSON.parse(text);
-        const penJson = parse(text);
+        const buf = fs.readFileSync(jsonDocPath);
+        const v8Json = JSON.parse(buf.toString('utf8'));
+        const penJson = parse(buf);
         expect(penJson).to.deep.equal(v8Json);
     });
 
     it('prints', () => {
         const json = require(jsonDocPath);
         const v8Text = JSON.stringify(json);
-        const penText = print(json);
+        const buf = Buffer.alloc(2_000_000);
+        const len = print(json, buf);
+        const penText = buf.toString('utf8', 0, len);
         expect(penText).to.equal(v8Text);
     });
 });
