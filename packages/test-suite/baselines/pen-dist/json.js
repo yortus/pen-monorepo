@@ -1019,26 +1019,19 @@ const parse = (() => {
         }
     }
 
-    // SelectionExpression
-    function Properties() {
-        if (Properties_sub1()) return true;
-        if (Property()) return true;
-        return false;
-    }
-
     // RecordExpression
-    let Properties_sub1ₘ;
-    function Properties_sub1(arg) {
+    let Propertiesₘ;
+    function Properties(arg) {
         try {
-            return Properties_sub1ₘ(arg);
+            return Propertiesₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub1ₘ is not a function')) throw err;
-            Properties_sub1ₘ = parseRecord([
+            if (!(err instanceof TypeError) || !err.message.includes('Propertiesₘ is not a function')) throw err;
+            Propertiesₘ = parseRecord([
                 {
-                    kind: 'Splice',
-                    name: undefined,
-                    expr: Property
+                    kind: 'Field',
+                    name: String,
+                    expr: Properties_sub1
                 },
                 {
                     kind: 'Splice',
@@ -1046,12 +1039,30 @@ const parse = (() => {
                     expr: Properties_sub2
                 },
             ]);
-            return Properties_sub1ₘ(arg);
+            return Propertiesₘ(arg);
         }
     }
 
     // SequenceExpression
+    function Properties_sub1() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // SelectionExpression
     function Properties_sub2() {
+        if (Properties_sub3()) return true;
+        if (Properties_sub4()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Properties_sub3() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
         let seqType = NOTHING;
         if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
@@ -1062,33 +1073,16 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Propertyₘ;
-    function Property(arg) {
+    let Properties_sub4ₘ;
+    function Properties_sub4(arg) {
         try {
-            return Propertyₘ(arg);
+            return Properties_sub4ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Propertyₘ is not a function')) throw err;
-            Propertyₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    name: String,
-                    expr: Property_sub1
-                },
-            ]);
-            return Propertyₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub4ₘ is not a function')) throw err;
+            Properties_sub4ₘ = parseRecord([]);
+            return Properties_sub4ₘ(arg);
         }
-    }
-
-    // SequenceExpression
-    function Property_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        let seqType = NOTHING;
-        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
     }
 
     // SequenceExpression
@@ -2122,7 +2116,6 @@ const parse = (() => {
             case 'True': return True;
             case 'Object': return Object;
             case 'Properties': return Properties;
-            case 'Property': return Property;
             case 'Array': return Array;
             case 'Elements': return Elements;
             case 'Number': return Number;
@@ -2389,26 +2382,19 @@ const print = (() => {
         }
     }
 
-    // SelectionExpression
-    function Properties() {
-        if (Properties_sub1()) return true;
-        if (Property()) return true;
-        return false;
-    }
-
     // RecordExpression
-    let Properties_sub1ₘ;
-    function Properties_sub1(arg) {
+    let Propertiesₘ;
+    function Properties(arg) {
         try {
-            return Properties_sub1ₘ(arg);
+            return Propertiesₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub1ₘ is not a function')) throw err;
-            Properties_sub1ₘ = printRecord([
+            if (!(err instanceof TypeError) || !err.message.includes('Propertiesₘ is not a function')) throw err;
+            Propertiesₘ = printRecord([
                 {
-                    kind: 'Splice',
-                    name: undefined,
-                    expr: Property
+                    kind: 'Field',
+                    name: String,
+                    expr: Properties_sub1
                 },
                 {
                     kind: 'Splice',
@@ -2416,12 +2402,27 @@ const print = (() => {
                     expr: Properties_sub2
                 },
             ]);
-            return Properties_sub1ₘ(arg);
+            return Propertiesₘ(arg);
         }
     }
 
     // SequenceExpression
+    function Properties_sub1() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // SelectionExpression
     function Properties_sub2() {
+        if (Properties_sub3()) return true;
+        if (Properties_sub4()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Properties_sub3() {
         const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
         if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!Properties()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
@@ -2429,30 +2430,16 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Propertyₘ;
-    function Property(arg) {
+    let Properties_sub4ₘ;
+    function Properties_sub4(arg) {
         try {
-            return Propertyₘ(arg);
+            return Properties_sub4ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Propertyₘ is not a function')) throw err;
-            Propertyₘ = printRecord([
-                {
-                    kind: 'Field',
-                    name: String,
-                    expr: Property_sub1
-                },
-            ]);
-            return Propertyₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub4ₘ is not a function')) throw err;
+            Properties_sub4ₘ = printRecord([]);
+            return Properties_sub4ₘ(arg);
         }
-    }
-
-    // SequenceExpression
-    function Property_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
     }
 
     // SequenceExpression
@@ -3448,7 +3435,6 @@ const print = (() => {
             case 'True': return True;
             case 'Object': return Object;
             case 'Properties': return Properties;
-            case 'Property': return Property;
             case 'Array': return Array;
             case 'Elements': return Elements;
             case 'Number': return Number;
