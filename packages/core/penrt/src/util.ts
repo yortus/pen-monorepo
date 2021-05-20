@@ -126,6 +126,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
         if (mustConsume) return false;
         ATYP = NOTHING;
         const result = rule();
+        ATYP = ATYPₒ;
         assert(APOS === APOSₒ);
         return result;
     }
@@ -134,6 +135,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
         const result = rule();
+        ATYP = ATYPₒ;
         assert(APOS - APOSₒ === 1);
         return result;
     }
