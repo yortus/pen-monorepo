@@ -54,6 +54,8 @@ function isModule(_x: PenVal): _x is Module {
 // [ ]    e. impl json.pen using (d) and profile again
 // [ ]    f. now, most time is spend in the following 2 areas:
 // [ ]       i) parseInner
+// [ ]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
+// [ ]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
 // [ ]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`
 // [ ] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
@@ -100,7 +102,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             return true;
         case STRING:
             if (APOS - APOSₒ > 1) {
-                const str = (AREP as string[]).slice(APOSₒ, APOS).join('');
+                const str = (AREP as string[]).slice(APOSₒ, APOS).join(''); // TODO: use utf8 Buffer and do toString here? But how? AREP is an array, not a buffer. Could switch it to Buffer if empty and wanting to emit chars
                 AREP[APOSₒ] = str;
                 APOS = APOSₒ + 1;
             }
