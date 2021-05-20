@@ -31,11 +31,15 @@ Null    = #"null"   null
 True    = #"true"   true
 
 // ---------- Objects ----------
-Object      = LBRACE   (Properties | {})   RBRACE
+Object      = LBRACE   ({[String]: COLON Value}   (COMMA {[String]: COLON Value})*   |   {})   RBRACE
+// Equivalent expression but using tail-recursive splice:
+Object2     = LBRACE   (Properties | {})   RBRACE
 Properties  = {[String]: COLON Value, ...(COMMA Properties | {})}   // NB: tail-recursive form - impl efficient handling
 
 // ---------- Arrays ----------
-Array       = LBRACKET   (Elements | [])   RBRACKET
+Array       = LBRACKET   (([Value]   [COMMA Value]*) | [])   RBRACKET
+// Equivalent expression but using tail-recursive splice:
+Array2      = LBRACKET   (Elements | [])   RBRACKET
 Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-recursive form - impl efficient handling
 
 // ---------- Numbers ----------

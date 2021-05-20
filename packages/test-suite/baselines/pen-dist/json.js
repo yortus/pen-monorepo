@@ -1003,21 +1003,148 @@ const parse = (() => {
 
     // SelectionExpression
     function Object_sub1() {
-        if (Properties()) return true;
         if (Object_sub2()) return true;
+        if (Object_sub9()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Object_sub2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!Object_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Object_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub3ₘ;
+    function Object_sub3(arg) {
+        try {
+            return Object_sub3ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub3ₘ is not a function')) throw err;
+            Object_sub3ₘ = parseRecord([
+                {
+                    kind: 'Field',
+                    name: String,
+                    expr: Object_sub4
+                },
+            ]);
+            return Object_sub3ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object_sub4() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // QuantifiedExpression
+    function Object_sub5() {
+        let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+        do {
+            if (!Object_sub6()) break;
+            if (CPOS <= CPOSᐟ) break;
+            CPOSᐟ = CPOS, APOSᐟ = APOS;
+        } while (true);
+        CPOS = CPOSᐟ, APOS = APOSᐟ;
+        return true;
+    }
+
+    // SequenceExpression
+    function Object_sub6() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Object_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub7ₘ;
+    function Object_sub7(arg) {
+        try {
+            return Object_sub7ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub7ₘ is not a function')) throw err;
+            Object_sub7ₘ = parseRecord([
+                {
+                    kind: 'Field',
+                    name: String,
+                    expr: Object_sub8
+                },
+            ]);
+            return Object_sub7ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object_sub8() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub9ₘ;
+    function Object_sub9(arg) {
+        try {
+            return Object_sub9ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub9ₘ is not a function')) throw err;
+            Object_sub9ₘ = parseRecord([]);
+            return Object_sub9ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!LBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Object2_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!RBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // SelectionExpression
+    function Object2_sub1() {
+        if (Properties()) return true;
+        if (Object2_sub2()) return true;
         return false;
     }
 
     // RecordExpression
-    let Object_sub2ₘ;
-    function Object_sub2(arg) {
+    let Object2_sub2ₘ;
+    function Object2_sub2(arg) {
         try {
-            return Object_sub2ₘ(arg);
+            return Object2_sub2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub2ₘ is not a function')) throw err;
-            Object_sub2ₘ = parseRecord([]);
-            return Object_sub2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Object2_sub2ₘ is not a function')) throw err;
+            Object2_sub2ₘ = parseRecord([]);
+            return Object2_sub2ₘ(arg);
         }
     }
 
@@ -1102,21 +1229,124 @@ const parse = (() => {
 
     // SelectionExpression
     function Array_sub1() {
-        if (Elements()) return true;
         if (Array_sub2()) return true;
+        if (Array_sub7()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Array_sub2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!Array_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Array_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub3ₘ;
+    function Array_sub3(arg) {
+        try {
+            return Array_sub3ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub3ₘ is not a function')) throw err;
+            Array_sub3ₘ = parseList([
+                {
+                    kind: 'Element',
+                    expr: Value
+                },
+            ]);
+            return Array_sub3ₘ(arg);
+        }
+    }
+
+    // QuantifiedExpression
+    function Array_sub4() {
+        let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+        do {
+            if (!Array_sub5()) break;
+            if (CPOS <= CPOSᐟ) break;
+            CPOSᐟ = CPOS, APOSᐟ = APOS;
+        } while (true);
+        CPOS = CPOSᐟ, APOS = APOSᐟ;
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub5ₘ;
+    function Array_sub5(arg) {
+        try {
+            return Array_sub5ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub5ₘ is not a function')) throw err;
+            Array_sub5ₘ = parseList([
+                {
+                    kind: 'Element',
+                    expr: Array_sub6
+                },
+            ]);
+            return Array_sub5ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Array_sub6() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub7ₘ;
+    function Array_sub7(arg) {
+        try {
+            return Array_sub7ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub7ₘ is not a function')) throw err;
+            Array_sub7ₘ = parseList([]);
+            return Array_sub7ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Array2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        let seqType = NOTHING;
+        if (!LBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!Array2_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!RBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // SelectionExpression
+    function Array2_sub1() {
+        if (Elements()) return true;
+        if (Array2_sub2()) return true;
         return false;
     }
 
     // ListExpression
-    let Array_sub2ₘ;
-    function Array_sub2(arg) {
+    let Array2_sub2ₘ;
+    function Array2_sub2(arg) {
         try {
-            return Array_sub2ₘ(arg);
+            return Array2_sub2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub2ₘ is not a function')) throw err;
-            Array_sub2ₘ = parseList([]);
-            return Array_sub2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Array2_sub2ₘ is not a function')) throw err;
+            Array2_sub2ₘ = parseList([]);
+            return Array2_sub2ₘ(arg);
         }
     }
 
@@ -2117,8 +2347,10 @@ const parse = (() => {
             case 'Null': return Null;
             case 'True': return True;
             case 'Object': return Object;
+            case 'Object2': return Object2;
             case 'Properties': return Properties;
             case 'Array': return Array;
+            case 'Array2': return Array2;
             case 'Elements': return Elements;
             case 'Number': return Number;
             case 'String': return String;
@@ -2366,21 +2598,132 @@ const print = (() => {
 
     // SelectionExpression
     function Object_sub1() {
-        if (Properties()) return true;
         if (Object_sub2()) return true;
+        if (Object_sub9()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Object_sub2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!Object_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Object_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub3ₘ;
+    function Object_sub3(arg) {
+        try {
+            return Object_sub3ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub3ₘ is not a function')) throw err;
+            Object_sub3ₘ = printRecord([
+                {
+                    kind: 'Field',
+                    name: String,
+                    expr: Object_sub4
+                },
+            ]);
+            return Object_sub3ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object_sub4() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // QuantifiedExpression
+    function Object_sub5() {
+        let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+        do {
+            if (!Object_sub6()) break;
+            if (APOS <= APOSᐟ) break;
+            APOSᐟ = APOS, CPOSᐟ = CPOS;
+        } while (true);
+        APOS = APOSᐟ, CPOS = CPOSᐟ;
+        return true;
+    }
+
+    // SequenceExpression
+    function Object_sub6() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Object_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub7ₘ;
+    function Object_sub7(arg) {
+        try {
+            return Object_sub7ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub7ₘ is not a function')) throw err;
+            Object_sub7ₘ = printRecord([
+                {
+                    kind: 'Field',
+                    name: String,
+                    expr: Object_sub8
+                },
+            ]);
+            return Object_sub7ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object_sub8() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COLON()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // RecordExpression
+    let Object_sub9ₘ;
+    function Object_sub9(arg) {
+        try {
+            return Object_sub9ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub9ₘ is not a function')) throw err;
+            Object_sub9ₘ = printRecord([]);
+            return Object_sub9ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Object2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Object2_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACE()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // SelectionExpression
+    function Object2_sub1() {
+        if (Properties()) return true;
+        if (Object2_sub2()) return true;
         return false;
     }
 
     // RecordExpression
-    let Object_sub2ₘ;
-    function Object_sub2(arg) {
+    let Object2_sub2ₘ;
+    function Object2_sub2(arg) {
         try {
-            return Object_sub2ₘ(arg);
+            return Object2_sub2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub2ₘ is not a function')) throw err;
-            Object_sub2ₘ = printRecord([]);
-            return Object_sub2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Object2_sub2ₘ is not a function')) throw err;
+            Object2_sub2ₘ = printRecord([]);
+            return Object2_sub2ₘ(arg);
         }
     }
 
@@ -2455,21 +2798,114 @@ const print = (() => {
 
     // SelectionExpression
     function Array_sub1() {
-        if (Elements()) return true;
         if (Array_sub2()) return true;
+        if (Array_sub7()) return true;
+        return false;
+    }
+
+    // SequenceExpression
+    function Array_sub2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!Array_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Array_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub3ₘ;
+    function Array_sub3(arg) {
+        try {
+            return Array_sub3ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub3ₘ is not a function')) throw err;
+            Array_sub3ₘ = printList([
+                {
+                    kind: 'Element',
+                    expr: Value
+                },
+            ]);
+            return Array_sub3ₘ(arg);
+        }
+    }
+
+    // QuantifiedExpression
+    function Array_sub4() {
+        let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+        do {
+            if (!Array_sub5()) break;
+            if (APOS <= APOSᐟ) break;
+            APOSᐟ = APOS, CPOSᐟ = CPOS;
+        } while (true);
+        APOS = APOSᐟ, CPOS = CPOSᐟ;
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub5ₘ;
+    function Array_sub5(arg) {
+        try {
+            return Array_sub5ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub5ₘ is not a function')) throw err;
+            Array_sub5ₘ = printList([
+                {
+                    kind: 'Element',
+                    expr: Array_sub6
+                },
+            ]);
+            return Array_sub5ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Array_sub6() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Value()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // ListExpression
+    let Array_sub7ₘ;
+    function Array_sub7(arg) {
+        try {
+            return Array_sub7ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Array_sub7ₘ is not a function')) throw err;
+            Array_sub7ₘ = printList([]);
+            return Array_sub7ₘ(arg);
+        }
+    }
+
+    // SequenceExpression
+    function Array2() {
+        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        if (!LBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!Array2_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!RBRACKET()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // SelectionExpression
+    function Array2_sub1() {
+        if (Elements()) return true;
+        if (Array2_sub2()) return true;
         return false;
     }
 
     // ListExpression
-    let Array_sub2ₘ;
-    function Array_sub2(arg) {
+    let Array2_sub2ₘ;
+    function Array2_sub2(arg) {
         try {
-            return Array_sub2ₘ(arg);
+            return Array2_sub2ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub2ₘ is not a function')) throw err;
-            Array_sub2ₘ = printList([]);
-            return Array_sub2ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('Array2_sub2ₘ is not a function')) throw err;
+            Array2_sub2ₘ = printList([]);
+            return Array2_sub2ₘ(arg);
         }
     }
 
@@ -3436,8 +3872,10 @@ const print = (() => {
             case 'Null': return Null;
             case 'True': return True;
             case 'Object': return Object;
+            case 'Object2': return Object2;
             case 'Properties': return Properties;
             case 'Array': return Array;
+            case 'Array2': return Array2;
             case 'Elements': return Elements;
             case 'Number': return Number;
             case 'String': return String;
