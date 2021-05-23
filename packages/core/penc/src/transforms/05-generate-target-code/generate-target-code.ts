@@ -166,6 +166,34 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
+        case 'ByteExpression': {
+            const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`let cc;`);
+            emit.down(1).text(`if (HAS_IN) {`).indent();
+            emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
+            emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
+
+            // TODO: go thru all items in `ranges`
+
+            emit.down(1).text(`if (cc < ${expr.ranges[0].min} || cc > ${expr.ranges[0].max}) return false;`);
+            emit.down(1).text(`${IPOS} += 1;`);
+            emit.dedent().down(1).text(`}`);
+            emit.down(1).text(`else {`).indent();
+            // TODO: calc default val for cc without any input
+            emit.down(1).text(`cc = ${expr.ranges[0].min};`);
+            emit.dedent().down(1).text(`}`);
+            if (mode === 'parse') {
+                emit.down(1).text(`emitByte(cc);`);
+            }
+            else /* mode === 'print' */ {
+                emit.down(1).text(`if (HAS_OUT) CREP[CPOS++] = cc;`);
+            }
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('}');
+            break;
+        }
+
         case 'CodeExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
             if (mode === 'parse') {

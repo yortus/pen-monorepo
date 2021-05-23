@@ -48,6 +48,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
         
                 switch (e.kind) {
                     case 'BooleanLiteral': return setV(e);
+                    case 'ByteExpression': return setV(e);
                     case 'CodeExpression': return setV(e, {expression: ref(e.expression)});
                     // TODO: special... should not be encountered here, since each genexpr would be a separate context
                     case 'GenericExpression': return setV(e); // TODO: explain... already in the right form

@@ -43,6 +43,7 @@ const allAstVersions = [100, 200, 300, 400];
 const allNodeKinds = [
     'Binding',
     'BooleanLiteral',
+    'ByteExpression',
     'CodeExpression',
     'Field',
     'Identifier',

@@ -11,6 +11,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
         switch (n.kind) {
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
+            case 'ByteExpression': return cb(n);
             case 'CodeExpression': return rec(n.expression), cb(n);
             case 'Field': return (typeof n.name === 'string' || rec(n.name)), rec(n.expression), cb(n);
             case 'GenericExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);

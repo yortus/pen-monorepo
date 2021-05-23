@@ -48,6 +48,7 @@ ModulePatternName
         LetExpression                   (a b where a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
+        ByteExpression                  \00   \41   \20-7f   \00-FF
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'
@@ -86,6 +87,7 @@ PrimaryExpression
     / LetExpression
     / ParenthesisedExpression
     / ListExpression
+    / ByteExpression
     / NullLiteral
     / BooleanLiteral
     / StringLiteral
@@ -175,6 +177,14 @@ ListExpression
     = "["   __   items:ListItems   __   "]"
     { return {kind: 'ListExpression', items}; }
 
+ByteExpression
+    = "\\"   lo:(HEX_DIGIT   HEX_DIGIT)   hi:("-"   HEX_DIGIT   HEX_DIGIT)?
+    {
+        const min = parseInt(lo.join(''), 16);
+        const max = hi ? parseInt(hi.slice(1).join(''), 16) : min;
+        return {kind: 'ByteExpression', ranges: [{min, max}]};
+    }
+
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }
 
@@ -200,7 +210,7 @@ Identifier
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
     {
-        let moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        const moduleSpecifier = specifierChars.map(el => el[1]).join('');
         return {kind: 'ImportExpression', moduleSpecifier};
     }
 
@@ -236,7 +246,7 @@ DecimalLiteral
     = !"0x"   [+-]?   ([0-9]+ ("." [0-9]*)?   /   "." [0-9]+)   ExponentPart?   ![a-zA-Z]
     {
         // TODO: also ensure exact representation, aka safenum?
-        let n = parseFloat(text());
+        const n = parseFloat(text());
         if (!Number.isFinite(n)) error('cannot represent numeric literal');
         return n;
     }
@@ -245,10 +255,10 @@ ExponentPart
     = [eE]   [+-]?   [0-9]+
 
 HexIntegerLiteral
-    = "0x"    [0-9a-fA-F]+   ![a-zA-Z]
+    = "0x"    HEX_DIGIT+   ![a-zA-Z]
     {
         // TODO: also ensure exact representation, aka safenum?
-        let n = parseInt(text());
+        const n = parseInt(text());
         if (!Number.isFinite(n)) error('cannot represent numeric literal');
         return n;
     }

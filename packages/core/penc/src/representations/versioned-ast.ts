@@ -51,6 +51,7 @@ export type Node<V extends Version = Version> =
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
     | BooleanLiteral
+    | ByteExpression
     | CodeExpression<V>
     | Identifier
     | ImportExpression<V>
@@ -110,6 +111,16 @@ export type Other<V extends Version = Version> =
 export interface BooleanLiteral {
     kind: 'BooleanLiteral';
     value: boolean;
+}
+
+
+export interface ByteExpression {
+    kind: 'ByteExpression';
+    ranges: Array<{
+        min: number;
+        max: number;
+        isNegated?: boolean;
+    }>;
 }
 
 
