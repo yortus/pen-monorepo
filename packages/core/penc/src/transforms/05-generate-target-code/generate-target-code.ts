@@ -343,43 +343,26 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
-        case 'StringAbstract': { // AST literal
-            const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
-            emit.down(1).text(`function ${name}() {`).indent();
-            if (mode === 'parse') {
-                emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
-            }
-            if (mode === 'print') {
-                emit.down(1).text(`if (HAS_IN) {`).indent();
-                emit.down(1).text(`if (ATYP !== STRING) return false;`);
-                emit.down(1).text(`if (APOS + ${bytes.length} > AREP.length) return false;`);
-                for (let i = 0; i < bytes.length; ++i) {
-                    emit.down(1).text(`if (AREP[APOS + ${i}] !== ${bytes[i]}) return false;`);
-                }
-                emit.down(1).text(`APOS += ${bytes.length};`);
-                emit.dedent().down(1).text(`}`);
-            }
-            emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('}');
-            break;
-        }
-
-        case 'StringUniversal': { // Code parse from bytestream to string
+        case 'StringAbstract':      // AST literal
+        case 'StringUniversal': {   // Code parse from bytestream to string
+            const hasConcreteForm = expr.kind === 'StringUniversal';
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`if (HAS_IN) {`).indent();
-            if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
-            emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
-            for (let i = 0; i < bytes.length; ++i) {
-                emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
+            if (mode === 'print' || hasConcreteForm) {
+                emit.down(1).text(`if (HAS_IN) {`).indent();
+                if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
+                }
+                emit.down(1).text(`${IPOS} += ${bytes.length};`);
+                emit.dedent().down(1).text(`}`);
             }
-            emit.down(1).text(`${IPOS} += ${bytes.length};`);
-            emit.dedent().down(1).text(`}`);
             if (mode === 'parse') {
                 emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
             }
-            else /* mode === 'print */ {
+            else if (hasConcreteForm) {
                 emit.down(1).text(`if (HAS_OUT) {`).indent();
                 for (let i = 0; i < bytes.length; ++i) {
                     emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);

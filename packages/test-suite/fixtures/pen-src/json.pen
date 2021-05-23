@@ -51,7 +51,7 @@ String = DOUBLE_QUOTE   CHAR*   DOUBLE_QUOTE
 //       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
 // TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
-    |   !"\\"   !"\""    ascii(min=0x20 max=0x7f)           // any ascii char except '\', '"', or control char
+    |   !"\\"   !"\""   ascii(min=0x20 max=0x7f)            // any ascii char except '\', '"', or control char
     |   #"\\\""   '"'                                       // quotation mark
     |   #"\\\\"   '\\'                                      // reverse solidus
 
