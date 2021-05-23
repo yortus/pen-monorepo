@@ -14,26 +14,26 @@ function unicode({mode}: StaticOptions): Generic {
 
         if (mode === 'parse') {
             return function UNI() {
-                if (typeof IN !== 'string') return false;
-                const stateₒ = getState();
-                const LEN = IN.length;
+                // TODO: was... still need equiv?   if (typeof IN !== 'string') return false;
+                const [APOSₒ, CPOSₒ] = savepoint();
+                const LEN = CREP.length;
                 const EOS = '';
 
                 let len = 0;
                 let num = ''; // TODO: fix this - should actually keep count
-                let c = IP < LEN ? IN.charAt(IP) : EOS;
+                let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
                 while (true) {
                     if (!regex.test(c)) break;
                     num += c;
-                    IP += 1;
+                    CPOS += 1;
                     len += 1;
                     if (len === maxDigits) break;
-                    c = IP < LEN ? IN.charAt(IP) : EOS;
+                    c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
                 }
 
-                if (len < minDigits) return setState(stateₒ), false;
+                if (len < minDigits) return backtrack(APOSₒ, CPOSₒ);
                 // tslint:disable-next-line: no-eval
-                OUT = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
+                emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
                 return true;
             };
         }

@@ -1,19 +1,24 @@
 // ------------------------------ Main exports ------------------------------
 module.exports = {
-    parse(text) {
-        setState({ IN: text, IP: 0 });
+    parse(strOrBuf) { // expects buf to be utf8 encoded
+        CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
+        CPOS = 0;
+        AREP = [];
+        APOS = 0;
         HAS_IN = HAS_OUT = true;
-        if (!parse()) throw new Error('parse failed');
-        if (!isInputFullyConsumed()) throw new Error('parse didn\'t consume entire input');
-        return OUT;
+        if (!parseInner(parse, true)) throw new Error('parse failed');
+        if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
+        return AREP[0];
     },
-    print(node) {
-        setState({ IN: node, IP: 0 });
+    print(node, buf) {
+        AREP = [node];
+        APOS = 0;
+        CREP = buf || Buffer.alloc(2 ** 22); // 4MB
+        CPOS = 0;
         HAS_IN = HAS_OUT = true;
-        if (!print()) throw new Error('print failed');
-        if (!isInputFullyConsumed()) throw new Error('print didn\'t consume entire input');
-        OUT = OUT || '';
-        return OUT;
+        if (!printInner(print, true)) throw new Error('print failed');
+        if (CPOS > CREP.length) throw new Error('output buffer too small');
+        return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
 };
 
@@ -23,155 +28,130 @@ module.exports = {
 // ------------------------------ Runtime ------------------------------
 "use strict";
 function parseList(listItems) {
-    const itemCount = listItems.length;
     return function LST() {
-        const stateₒ = getState();
-        const arr = [];
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!listItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
+                if (!parseInner(listItem.expr, true))
+                    return backtrack(APOSₒ, CPOSₒ);
             }
             else {
                 if (!listItem.expr())
-                    return setState(stateₒ), false;
-                assert(Array.isArray(OUT));
-                arr.push(...OUT);
+                    return backtrack(APOSₒ, CPOSₒ);
             }
         }
-        OUT = arr;
+        ATYP = LIST;
         return true;
     };
 }
 function printList(listItems) {
-    const itemCount = listItems.length;
     return function LST() {
-        if (!Array.isArray(IN))
+        if (ATYP !== LIST)
             return false;
-        const stateₒ = getState();
-        let text;
-        const arr = IN;
-        let off = IP;
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                setState({ IN: arr[off], IP: 0 });
-                if (!listItem.expr())
-                    return setState(stateₒ), false;
-                if (!isInputFullyConsumed())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off += 1;
+                if (!printInner(listItem.expr, true))
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                setState({ IN: arr, IP: off });
+                ATYP = LIST;
                 if (!listItem.expr())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off = IP;
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
         }
-        setState({ IN: arr, IP: off });
-        OUT = text;
         return true;
     };
 }
 function parseRecord(recordItems) {
     return function RCD() {
-        const stateₒ = getState();
-        const obj = {};
-        const propNames = [];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
+        const fieldNames = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
-                let propName;
+                let fieldName;
                 if (typeof recordItem.name === 'string') {
-                    propName = recordItem.name;
+                    fieldName = recordItem.name;
                 }
                 else {
-                    if (!recordItem.name())
-                        return setState(stateₒ), false;
-                    assert(typeof OUT === 'string');
-                    propName = OUT;
+                    if (!parseInner(recordItem.name, true))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    assert(ATYP === STRING);
+                    APOS -= 1;
+                    fieldName = AREP[APOS];
                 }
-                if (propNames.includes(propName))
-                    return setState(stateₒ), false;
-                if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                propNames.push(propName);
+                if (fieldNames.includes(fieldName))
+                    return backtrack(APOSₒ, CPOSₒ);
+                if (!parseInner(recordItem.expr, true))
+                    return backtrack(APOSₒ, CPOSₒ);
+                if (HAS_OUT) {
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldName;
+                    AREP[APOS++] = fieldValue;
+                }
+                fieldNames.push(fieldName);
             }
             else {
+                const apos = APOS;
                 if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                assert(OUT && typeof OUT === 'object');
-                for (const propName of Object.keys(OUT)) {
-                    if (propNames.includes(propName))
-                        return setState(stateₒ), false;
-                    obj[propName] = OUT[propName];
-                    propNames.push(propName);
+                    return backtrack(APOSₒ, CPOSₒ);
+                for (let i = apos; i < APOS; i += 2) {
+                    const fieldName = AREP[i];
+                    if (fieldNames.includes(fieldName))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    fieldNames.push(fieldName);
                 }
             }
         }
-        OUT = obj;
+        ATYP = HAS_OUT ? RECORD : NOTHING;
         return true;
     };
 }
 function printRecord(recordItems) {
     return function RCD() {
-        if (objectToString.call(IN) !== '[object Object]')
+        if (ATYP !== RECORD)
             return false;
-        const stateₒ = getState();
-        let text;
-        const propNames = Object.keys(IN);
-        const propCount = propNames.length;
-        assert(propCount <= 32);
-        const obj = IN;
-        let bitmask = IP;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        const propList = AREP;
+        const propCount = AREP.length;
+        let bitmask = APOS;
         outerLoop: for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
+                    let propName = propList[i << 1];
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        setState({ IN: propName, IP: 0 });
-                        if (!recordItem.name())
+                        APOS = i << 1;
+                        if (!printInner(recordItem.name, true))
                             continue;
-                        if (IP !== propName.length)
-                            continue;
-                        text = concat(text, OUT);
                     }
                     else {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    setState({ IN: obj[propName], IP: 0 });
-                    if (!recordItem.expr())
+                    APOS = (i << 1) + 1;
+                    if (!printInner(recordItem.expr, true))
                         continue;
-                    if (!isInputFullyConsumed())
-                        continue;
-                    text = concat(text, OUT);
                     bitmask += propBit;
                     continue outerLoop;
                 }
-                setState(stateₒ);
-                return false;
+                return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                setState({ IN: obj, IP: bitmask });
+                APOS = bitmask;
+                ATYP = RECORD;
                 if (!recordItem.expr())
-                    return setState(stateₒ), false;
-                text = concat(text, OUT);
-                bitmask = IP;
+                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                bitmask = APOS;
             }
         }
-        setState({ IN: obj, IP: bitmask });
-        OUT = text;
+        APOS = bitmask;
         return true;
     };
 }
@@ -184,47 +164,140 @@ function isGeneric(_x) {
 function isModule(_x) {
     return true;
 }
-let IN;
-let IP;
-let OUT;
+let AREP;
+let APOS;
+let ATYP;
+let CREP;
+let CPOS;
 let HAS_IN;
 let HAS_OUT;
-function getState() {
-    return { IN, IP };
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
+const savepoint = () => [APOS, CPOS];
+const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
+const theScalarArray = [];
+const theBuffer = Buffer.alloc(2 ** 10);
+function emitScalar(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theScalarArray;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? SCALAR : NOTHING;
 }
-function setState(state) {
-    IN = state.IN;
-    IP = state.IP;
+function emitByte(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function emitBytes(...values) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        for (let i = 0; i < values.length; ++i)
+            AREP[APOS++] = values[i];
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function parseInner(rule, mustProduce) {
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined;
+    APOS = 0;
+    if (!rule())
+        return AREP = AREPₒ, APOS = APOSₒ, false;
+    if (ATYP === NOTHING)
+        return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+    let value;
+    switch (ATYP) {
+        case SCALAR:
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
+        case STRING:
+            value = AREP.toString('utf8', 0, APOS);
+            break;
+        case LIST:
+            if (AREP.length !== APOS)
+                AREP.length === APOS;
+            value = AREP;
+            break;
+        case RECORD:
+            const obj = value = {};
+            for (let i = 0; i < APOS; i += 2)
+                obj[AREP[i]] = AREP[i + 1];
+            break;
+        default:
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+    }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+    return true;
+}
+function printInner(rule, mustConsume) {
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    let value = AREP[APOS];
+    let atyp;
+    if (value === undefined) {
+        if (mustConsume)
+            return false;
+        ATYP = NOTHING;
+        const result = rule();
+        ATYP = ATYPₒ;
+        assert(APOS === APOSₒ);
+        return result;
+    }
+    if (value === null || value === true || value === false || typeof value === 'number') {
+        ATYP = SCALAR;
+        const result = rule();
+        ATYP = ATYPₒ;
+        assert(APOS - APOSₒ === 1);
+        return result;
+    }
+    if (typeof value === 'string') {
+        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
+        atyp = ATYP = STRING;
+    }
+    else if (Array.isArray(value)) {
+        AREP = value;
+        atyp = ATYP = LIST;
+    }
+    else if (typeof value === 'object') {
+        const arr = AREP = [];
+        const keys = Object.keys(value);
+        assert(keys.length < 32);
+        for (let i = 0; i < keys.length; ++i)
+            arr.push(keys[i], value[keys[i]]);
+        value = arr;
+        atyp = ATYP = RECORD;
+    }
+    else {
+        throw new Error(`Unsupported value type for value ${value}`);
+    }
+    APOS = 0;
+    let result = rule();
+    const apos = APOS;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    if (!result)
+        return false;
+    if (atyp === RECORD) {
+        const keyCount = value.length >> 1;
+        if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
+            return false;
+    }
+    else {
+        if (apos !== value.length)
+            return false;
+    }
+    APOS += 1;
+    return true;
 }
 function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
-function concat(a, b) {
-    if (a === undefined)
-        return b;
-    if (b === undefined)
-        return a;
-    if (typeof a !== 'string' || typeof b !== 'string')
-        throw new Error(`Internal error: invalid sequence`);
-    return a + b;
-}
-function isInputFullyConsumed() {
-    const type = objectToString.call(IN);
-    if (type === '[object String]')
-        return IP === IN.length;
-    if (type === '[object Array]')
-        return IP === IN.length;
-    if (type === '[object Object]') {
-        const keyCount = Object.keys(IN).length;
-        assert(keyCount <= 32);
-        if (keyCount === 0)
-            return true;
-        return IP === -1 >>> (32 - keyCount);
-    }
-    return IP === 1;
-}
-const objectToString = Object.prototype.toString;
 
 
 
@@ -257,41 +330,41 @@ const extensions = {
                 assert(typeof max === 'number' && max >= 0x00 && max <= 0x7f);
                 if (mode === 'parse') {
                     return function ASC() {
-                        let c;
+                        let cc;
                         if (HAS_IN) {
-                            if (IP < 0 || IP >= IN.length)
+                            if (CPOS >= CREP.length)
                                 return false;
-                            c = IN.charAt(IP);
-                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            cc = CREP[CPOS];
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            CPOS += 1;
                         }
                         else {
-                            c = String.fromCharCode(min); // TODO: inefficient! improve...
+                            cc = min;
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        emitByte(cc);
                         return true;
                     };
                 }
                 else /* mode === 'print' */ {
                     return function ASC() {
-                        let c;
+                        let cc;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
+                            if (ATYP !== STRING)
                                 return false;
-                            if (IP < 0 || IP >= IN.length)
+                            const arep = AREP;
+                            if (APOS >= arep.length)
                                 return false;
-                            c = IN.charAt(IP);
-                            const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                            cc = arep[APOS];
                             if (cc < min || cc > max)
                                 return false;
-                            IP += 1;
+                            APOS += 1;
                         }
                         else {
-                            c = String.fromCharCode(min); // TODO: inefficient! improve...
+                            cc = min;
                         }
-                        OUT = HAS_OUT ? c : undefined;
+                        if (HAS_OUT)
+                            CREP[CPOS++] = cc;
                         return true;
                     };
                 }
@@ -303,72 +376,70 @@ const extensions = {
                 return function F64() {
                     let num = 0;
                     if (HAS_IN) {
-                        if (typeof IN !== 'string')
-                            return false;
-                        const stateₒ = getState();
-                        const LEN = IN.length;
+                        const [APOSₒ, CPOSₒ] = savepoint();
+                        const LEN = CREP.length;
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
-                        let c = IN.charCodeAt(IP);
-                        if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        let cc = CREP[CPOS];
+                        if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                            if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse optional '.'
-                        if (c === DECIMAL_POINT) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        if (cc === DECIMAL_POINT) {
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
-                            if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                            if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
-                            return setState(stateₒ), false;
+                            return backtrack(APOSₒ, CPOSₒ);
                         // Parse optional exponent
-                        if (c === UPPERCASE_E || c === LOWERCASE_E) {
-                            IP += 1;
-                            c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                        if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             // Parse optional '+' or '-' sign
-                            if (c === PLUS_SIGN || c === MINUS_SIGN) {
-                                IP += 1;
-                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                            if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
+                                CPOS += 1;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
                             while (true) {
-                                if (c < ZERO_DIGIT || c > NINE_DIGIT)
+                                if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                     break;
                                 digitCount += 1;
-                                IP += 1;
-                                c = IP < LEN ? IN.charCodeAt(IP) : EOS;
+                                CPOS += 1;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             }
                             if (digitCount === 0)
-                                return setState(stateₒ), false;
+                                return backtrack(APOSₒ, CPOSₒ);
                         }
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                        num = Number.parseFloat(IN.slice(stateₒ.IP, IP));
+                        num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
                         if (!Number.isFinite(num))
-                            return setState(stateₒ), false;
+                            return backtrack(APOSₒ, CPOSₒ);
                     }
                     // Success
-                    OUT = HAS_OUT ? num : undefined;
+                    emitScalar(num);
                     return true;
                 };
             }
@@ -377,15 +448,19 @@ const extensions = {
                     let out = '0';
                     if (HAS_IN) {
                         // Ensure N is a number.
-                        if (typeof IN !== 'number' || IP !== 0)
+                        if (ATYP !== SCALAR)
                             return false;
-                        IP = 1;
+                        let num = AREP[APOS];
+                        if (typeof num !== 'number')
+                            return false;
+                        APOS += 1;
                         // Delegate unparsing to the JS runtime.
                         // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                        out = String(IN);
+                        out = String(num);
                     }
                     // Success
-                    OUT = HAS_OUT ? out : undefined;
+                    if (HAS_OUT)
+                        CPOS += CREP.write(out, CPOS, undefined, 'utf8');
                     return true;
                 };
             }
@@ -411,22 +486,20 @@ const extensions = {
                     return function I32() {
                         let num = 0;
                         if (HAS_IN) {
-                            if (typeof IN !== 'string')
-                                return false;
-                            const stateₒ = getState();
+                            const [APOSₒ, CPOSₒ] = savepoint();
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && IP < IN.length && IN.charAt(IP) === '-') {
+                            if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
-                                IP += 1;
+                                CPOS += 1;
                             }
                             // ...followed by one or more decimal digits. (NB: no exponents).
                             let digits = 0;
-                            while (IP < IN.length) {
+                            while (CPOS < CREP.length) {
                                 // Read a digit.
-                                let c = IN.charCodeAt(IP);
+                                let c = CREP[CPOS];
                                 if (c >= 256)
                                     break;
                                 const digitValue = DIGIT_VALUES[c];
@@ -437,30 +510,32 @@ const extensions = {
                                 num += digitValue;
                                 // Check for overflow.
                                 if (num > MAX_NUM)
-                                    return setState(stateₒ), false;
+                                    return backtrack(APOSₒ, CPOSₒ);
                                 // Loop again.
-                                IP += 1;
+                                CPOS += 1;
                                 digits += 1;
                             }
                             // Check that we parsed at least one digit.
                             if (digits === 0)
-                                return setState(stateₒ), false;
+                                return backtrack(APOSₒ, CPOSₒ);
                             // Apply the sign.
                             if (isNegative)
                                 num = -num;
                         }
                         // Success
-                        OUT = HAS_OUT ? num : undefined;
+                        emitScalar(num);
                         return true;
                     };
                 }
                 else /* mode === 'print' */ {
                     return function I32() {
-                        let out = '0';
+                        const digits = [];
                         if (HAS_IN) {
-                            if (typeof IN !== 'number' || IP !== 0)
+                            if (ATYP !== SCALAR)
                                 return false;
-                            let num = IN;
+                            let num = AREP[APOS];
+                            if (typeof num !== 'number')
+                                return false;
                             // Determine the number's sign and ensure it is in range.
                             let isNegative = false;
                             let MAX_NUM = 0x7FFFFFFF;
@@ -474,7 +549,6 @@ const extensions = {
                             if (num > MAX_NUM)
                                 return false;
                             // Extract the digits.
-                            const digits = [];
                             while (true) {
                                 const d = num % base;
                                 num = (num / base) | 0;
@@ -483,14 +557,16 @@ const extensions = {
                                     break;
                             }
                             // Compute the final string.
-                            IP = 1;
+                            APOS += 1;
                             if (isNegative)
-                                digits.push(0x2d); // char code for '-'
-                            // TODO: is String.fromCharCode(...) performant?
-                            out = String.fromCharCode(...digits.reverse());
+                                digits.push(HYPHEN);
                         }
                         // Success
-                        OUT = HAS_OUT ? out : undefined;
+                        if (HAS_OUT) {
+                            for (let i = 0; i < digits.length; ++i) {
+                                CREP[CPOS++] = digits[i];
+                            }
+                        }
                         return true;
                     };
                 }
@@ -525,83 +601,169 @@ const extensions = {
             0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56,
             0x57, 0x58, 0x59, 0x5a, // 32-35    WXYZ
         ];
-        function memoise({}) {
+        const HYPHEN = 0x2d;
+        function memoise({ mode }) {
             return function MEM_generic(expr) {
-                // TODO: investigate... need to use `text` as part of memo key? Study lifecycle/extent of each `memos` instance.
+                // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
-                return function MEM() {
-                    // Check whether the memo table already has an entry for the given initial state.
-                    const stateₒ = getState();
-                    let memos2 = memos.get(IN);
-                    if (memos2 === undefined) {
-                        memos2 = new Map();
-                        memos.set(IN, memos2);
-                    }
-                    let memo = memos2.get(IP);
-                    if (!memo) {
-                        // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                        // this initial state. The first thing we do is create a memo table entry, which is marked as
-                        // *unresolved*. All future applications of this rule with the same initial state will find this
-                        // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                        // left-recursion.
-                        memo = { resolved: false, isLeftRecursive: false, result: false, stateᐟ: stateₒ, OUT: undefined };
-                        memos2.set(IP, memo);
-                        // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                        // At this point, any left-recursive paths encountered during application are guaranteed to have
-                        // been noted and aborted (see below).
-                        if (expr()) { // TODO: fix cast
-                            memo.result = true;
-                            memo.stateᐟ = getState();
-                            memo.OUT = OUT;
+                if (mode === 'parse') {
+                    return function MEM() {
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let memos2 = memos.get(CREP);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            memos.set(CREP, memos2);
                         }
-                        memo.resolved = true;
-                        // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                        // final.
-                        if (!memo.isLeftRecursive) {
-                            setState(memo.stateᐟ);
-                            OUT = memo.OUT;
-                            return memo.result;
+                        let memo = memos2.get(CPOS);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: CPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                            memos2.set(CPOS, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr()) { // TODO: fix cast
+                                memo.result = true;
+                                memo.IPOSᐟ = CPOS;
+                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                // No-op. Fall through to exit code.
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                APOS = APOSₒ, CPOS = CPOSₒ;
+                                // TODO: break cases for UNPARSING:
+                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                // some node --> some different non-empty node (assert: should never happen!)
+                                if (!expr())
+                                    break; // TODO: fix cast
+                                if (CPOS <= memo.IPOSᐟ)
+                                    break;
+                                // TODO: was for unparse... comment above says should never happen...
+                                // if (!isInputFullyConsumed()) break;
+                                memo.IPOSᐟ = CPOS;
+                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
                         }
-                        // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                        // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                        // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                        // the same rule with the same initial state. We continue to iterate as long as the application
-                        // succeeds and consumes more input than the previous iteration did, in which case we update the
-                        // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                        // does not consume more input, at which point we take the result of the previous iteration as
-                        // final.
-                        while (memo.result === true) {
-                            setState(stateₒ);
-                            // TODO: break cases for UNPARSING:
-                            // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                            // some node --> some different non-empty node (assert: should never happen!)
-                            if (!expr())
-                                break; // TODO: fix cast
-                            const state = getState();
-                            if (state.IP <= memo.stateᐟ.IP)
-                                break;
-                            // TODO: was for unparse... comment above says should never happen...
-                            // if (!isInputFullyConsumed()) break;
-                            memo.stateᐟ = state;
-                            memo.OUT = OUT;
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
                         }
-                    }
-                    else if (!memo.resolved) {
-                        // If we get here, then we have already applied the rule with this initial state, but not yet
-                        // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                        // note that the rule application encountered left-recursion, and return with failure. This means
-                        // that the initial application of the rule for this initial state can only possibly succeed along a
-                        // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                        // left-recursive rules.
-                        memo.isLeftRecursive = true;
-                        return false;
-                    }
-                    // We have a resolved memo, so the result of the rule application for the given initial state has
-                    // already been computed. Return it from the memo.
-                    setState(memo.stateᐟ);
-                    OUT = memo.OUT;
-                    return memo.result;
-                };
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        ATYP = memo.ATYPᐟ;
+                        AREP !== null && AREP !== void 0 ? AREP : (AREP = ATYP === STRING ? theBuffer : []);
+                        APOS = APOSₒ;
+                        CPOS = memo.IPOSᐟ;
+                        for (let i = 0; i < memo.OREPᐞ.length; ++i) {
+                            AREP[APOS++] = memo.OREPᐞ[i];
+                        }
+                        return memo.result;
+                    };
+                }
+                else /* mode === 'print' */ {
+                    // TODO: the below function is exact copypasta of the above function, with AREP/APOS <-> CREP/CPOS
+                    // This is a case where it would be better to have IREP/IPOS+OREP/OPOS and have just one function here.
+                    return function MEM() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        // Check whether the memo table already has an entry for the given initial state.
+                        let memos2 = memos.get(AREP);
+                        if (memos2 === undefined) {
+                            memos2 = new Map();
+                            memos.set(AREP, memos2);
+                        }
+                        let memo = memos2.get(APOS);
+                        if (!memo) {
+                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                            // this initial state. The first thing we do is create a memo table entry, which is marked as
+                            // *unresolved*. All future applications of this rule with the same initial state will find this
+                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                            // left-recursion.
+                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: APOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                            memos2.set(APOS, memo);
+                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                            // At this point, any left-recursive paths encountered during application are guaranteed to have
+                            // been noted and aborted (see below).
+                            if (expr()) { // TODO: fix cast
+                                memo.result = true;
+                                memo.IPOSᐟ = APOS;
+                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                            memo.resolved = true;
+                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                            // final.
+                            if (!memo.isLeftRecursive) {
+                                // No-op. Fall through to exit code.
+                            }
+                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                            // the same rule with the same initial state. We continue to iterate as long as the application
+                            // succeeds and consumes more input than the previous iteration did, in which case we update the
+                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                            // does not consume more input, at which point we take the result of the previous iteration as
+                            // final.
+                            while (memo.result === true) {
+                                APOS = APOSₒ;
+                                CPOS = CPOSₒ;
+                                // TODO: break cases for UNPARSING:
+                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                // some node --> some different non-empty node (assert: should never happen!)
+                                if (!expr())
+                                    break; // TODO: fix cast
+                                if (APOS <= memo.IPOSᐟ)
+                                    break;
+                                // TODO: was for unparse... comment above says should never happen...
+                                // if (!isInputFullyConsumed()) break;
+                                memo.IPOSᐟ = APOS;
+                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
+                                memo.ATYPᐟ = ATYP;
+                            }
+                        }
+                        else if (!memo.resolved) {
+                            // If we get here, then we have already applied the rule with this initial state, but not yet
+                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                            // note that the rule application encountered left-recursion, and return with failure. This means
+                            // that the initial application of the rule for this initial state can only possibly succeed along a
+                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                            // left-recursive rules.
+                            memo.isLeftRecursive = true;
+                            return false;
+                        }
+                        // We have a resolved memo, so the result of the rule application for the given initial state has
+                        // already been computed. Return it from the memo.
+                        APOS = memo.IPOSᐟ;
+                        CPOS = CPOSₒ;
+                        CPOS += memo.OREPᐞ.copy(CREP, CPOS);
+                        ATYP = memo.ATYPᐟ;
+                        return memo.result;
+                    };
+                }
             };
         }
         return {ascii, f64, i32, memoise};
@@ -648,11 +810,11 @@ const parse = (() => {
     // StringUniversal
     function min() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 48) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x30) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "0" : undefined;
+        emitByte(0x30);
         return true;
     }
     min.constant = {value: "0"};
@@ -660,11 +822,11 @@ const parse = (() => {
     // StringUniversal
     function max() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 57) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x39) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "9" : undefined;
+        emitByte(0x39);
         return true;
     }
     max.constant = {value: "9"};
@@ -694,11 +856,11 @@ const parse = (() => {
     // StringUniversal
     function min_2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 97) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x61) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "a" : undefined;
+        emitByte(0x61);
         return true;
     }
     min_2.constant = {value: "a"};
@@ -706,11 +868,11 @@ const parse = (() => {
     // StringUniversal
     function max_2() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 122) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x7a) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "z" : undefined;
+        emitByte(0x7a);
         return true;
     }
     max_2.constant = {value: "z"};
@@ -718,11 +880,11 @@ const parse = (() => {
     // StringUniversal
     function min_3() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 65) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x41) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "A" : undefined;
+        emitByte(0x41);
         return true;
     }
     min_3.constant = {value: "A"};
@@ -730,11 +892,11 @@ const parse = (() => {
     // StringUniversal
     function max_3() {
         if (HAS_IN) {
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 90) return false;
-            IP += 1;
+            if (CPOS + 1 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x5a) return false;
+            CPOS += 1;
         }
-        OUT = HAS_OUT ? "Z" : undefined;
+        emitByte(0x5a);
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -792,21 +954,23 @@ const parse = (() => {
 
     // SequenceExpression
     function result() {
-        const stateₒ = getState();
-        let out;
-        if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (result_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        let seqType = NOTHING;
+        if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function result_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (baz()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        let seqType = NOTHING;
+        if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
@@ -838,35 +1002,38 @@ const parse = (() => {
 
     // SequenceExpression
     function myList_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        let seqType = NOTHING;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // SequenceExpression
     function myList_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        let seqType = NOTHING;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
         return true;
     }
 
     // StringAbstract
     function b() {
-        OUT = HAS_OUT ? "b thing" : undefined;
+        emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
     }
     b.constant = {value: "b thing"};
 
     // StringAbstract
     function d() {
-        OUT = HAS_OUT ? "d thing" : undefined;
+        emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
     }
     d.constant = {value: "d thing"};
@@ -912,13 +1079,13 @@ const parse = (() => {
     // StringUniversal
     function f() {
         if (HAS_IN) {
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 111) return false;
-            if (IN.charCodeAt(IP + 2) !== 111) return false;
-            IP += 3;
+            if (CPOS + 3 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x66) return false;
+            if (CREP[CPOS + 1] !== 0x6f) return false;
+            if (CREP[CPOS + 2] !== 0x6f) return false;
+            CPOS += 3;
         }
-        OUT = HAS_OUT ? "foo" : undefined;
+        emitBytes(0x66, 0x6f, 0x6f);
         return true;
     }
     f.constant = {value: "foo"};
@@ -926,13 +1093,13 @@ const parse = (() => {
     // StringUniversal
     function b_2() {
         if (HAS_IN) {
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 114) return false;
-            IP += 3;
+            if (CPOS + 3 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CREP[CPOS + 1] !== 0x61) return false;
+            if (CREP[CPOS + 2] !== 0x72) return false;
+            CPOS += 3;
         }
-        OUT = HAS_OUT ? "bar" : undefined;
+        emitBytes(0x62, 0x61, 0x72);
         return true;
     }
     b_2.constant = {value: "bar"};
@@ -940,13 +1107,13 @@ const parse = (() => {
     // StringUniversal
     function baz_2() {
         if (HAS_IN) {
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 122) return false;
-            IP += 3;
+            if (CPOS + 3 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CREP[CPOS + 1] !== 0x61) return false;
+            if (CREP[CPOS + 2] !== 0x7a) return false;
+            CPOS += 3;
         }
-        OUT = HAS_OUT ? "baz" : undefined;
+        emitBytes(0x62, 0x61, 0x7a);
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -1031,15 +1198,15 @@ const parse = (() => {
     // StringUniversal
     function util1_2() {
         if (HAS_IN) {
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 117) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            if (IN.charCodeAt(IP + 2) !== 105) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            if (IN.charCodeAt(IP + 4) !== 49) return false;
-            IP += 5;
+            if (CPOS + 5 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x75) return false;
+            if (CREP[CPOS + 1] !== 0x74) return false;
+            if (CREP[CPOS + 2] !== 0x69) return false;
+            if (CREP[CPOS + 3] !== 0x6c) return false;
+            if (CREP[CPOS + 4] !== 0x31) return false;
+            CPOS += 5;
         }
-        OUT = HAS_OUT ? "util1" : undefined;
+        emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -1055,15 +1222,15 @@ const parse = (() => {
     // StringUniversal
     function util2_2() {
         if (HAS_IN) {
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 117) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            if (IN.charCodeAt(IP + 2) !== 105) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            if (IN.charCodeAt(IP + 4) !== 50) return false;
-            IP += 5;
+            if (CPOS + 5 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x75) return false;
+            if (CREP[CPOS + 1] !== 0x74) return false;
+            if (CREP[CPOS + 2] !== 0x69) return false;
+            if (CREP[CPOS + 3] !== 0x6c) return false;
+            if (CREP[CPOS + 4] !== 0x32) return false;
+            CPOS += 5;
         }
-        OUT = HAS_OUT ? "util2" : undefined;
+        emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
         return true;
     }
     util2_2.constant = {value: "util2"};
@@ -1119,12 +1286,14 @@ const print = (() => {
     // StringUniversal
     function min() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 48) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x30) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "0" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x30;
+        }
         return true;
     }
     min.constant = {value: "0"};
@@ -1132,12 +1301,14 @@ const print = (() => {
     // StringUniversal
     function max() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 57) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x39) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "9" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x39;
+        }
         return true;
     }
     max.constant = {value: "9"};
@@ -1167,12 +1338,14 @@ const print = (() => {
     // StringUniversal
     function min_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 97) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x61) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "a" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x61;
+        }
         return true;
     }
     min_2.constant = {value: "a"};
@@ -1180,12 +1353,14 @@ const print = (() => {
     // StringUniversal
     function max_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 122) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x7a) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "z" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x7a;
+        }
         return true;
     }
     max_2.constant = {value: "z"};
@@ -1193,12 +1368,14 @@ const print = (() => {
     // StringUniversal
     function min_3() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 65) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x41) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "A" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x41;
+        }
         return true;
     }
     min_3.constant = {value: "A"};
@@ -1206,12 +1383,14 @@ const print = (() => {
     // StringUniversal
     function max_3() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 1 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 90) return false;
-            IP += 1;
+            if (ATYP !== STRING) return false;
+            if (APOS + 1 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x5a) return false;
+            APOS += 1;
         }
-        OUT = HAS_OUT ? "Z" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x5a;
+        }
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -1269,21 +1448,17 @@ const print = (() => {
 
     // SequenceExpression
     function result() {
-        const stateₒ = getState();
-        let out;
-        if (foo()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (result_sub1()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // SequenceExpression
     function result_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (bar()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (baz()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -1315,40 +1490,35 @@ const print = (() => {
 
     // SequenceExpression
     function myList_sub1() {
-        const stateₒ = getState();
-        let out;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // SequenceExpression
     function myList_sub2() {
-        const stateₒ = getState();
-        let out;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        if (digit()) out = concat(out, OUT); else return setState(stateₒ), false;
-        OUT = out;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // StringAbstract
     function b() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 7 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 32) return false;
-            if (IN.charCodeAt(IP + 2) !== 116) return false;
-            if (IN.charCodeAt(IP + 3) !== 104) return false;
-            if (IN.charCodeAt(IP + 4) !== 105) return false;
-            if (IN.charCodeAt(IP + 5) !== 110) return false;
-            if (IN.charCodeAt(IP + 6) !== 103) return false;
-            IP += 7;
+            if (ATYP !== STRING) return false;
+            if (APOS + 7 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x20) return false;
+            if (AREP[APOS + 2] !== 0x74) return false;
+            if (AREP[APOS + 3] !== 0x68) return false;
+            if (AREP[APOS + 4] !== 0x69) return false;
+            if (AREP[APOS + 5] !== 0x6e) return false;
+            if (AREP[APOS + 6] !== 0x67) return false;
+            APOS += 7;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     b.constant = {value: "b thing"};
@@ -1356,18 +1526,17 @@ const print = (() => {
     // StringAbstract
     function d() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 7 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 100) return false;
-            if (IN.charCodeAt(IP + 1) !== 32) return false;
-            if (IN.charCodeAt(IP + 2) !== 116) return false;
-            if (IN.charCodeAt(IP + 3) !== 104) return false;
-            if (IN.charCodeAt(IP + 4) !== 105) return false;
-            if (IN.charCodeAt(IP + 5) !== 110) return false;
-            if (IN.charCodeAt(IP + 6) !== 103) return false;
-            IP += 7;
+            if (ATYP !== STRING) return false;
+            if (APOS + 7 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x64) return false;
+            if (AREP[APOS + 1] !== 0x20) return false;
+            if (AREP[APOS + 2] !== 0x74) return false;
+            if (AREP[APOS + 3] !== 0x68) return false;
+            if (AREP[APOS + 4] !== 0x69) return false;
+            if (AREP[APOS + 5] !== 0x6e) return false;
+            if (AREP[APOS + 6] !== 0x67) return false;
+            APOS += 7;
         }
-        OUT = HAS_OUT ? undefined : undefined;
         return true;
     }
     d.constant = {value: "d thing"};
@@ -1413,14 +1582,18 @@ const print = (() => {
     // StringUniversal
     function f() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 102) return false;
-            if (IN.charCodeAt(IP + 1) !== 111) return false;
-            if (IN.charCodeAt(IP + 2) !== 111) return false;
-            IP += 3;
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x66) return false;
+            if (AREP[APOS + 1] !== 0x6f) return false;
+            if (AREP[APOS + 2] !== 0x6f) return false;
+            APOS += 3;
         }
-        OUT = HAS_OUT ? "foo" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x66;
+            CREP[CPOS++] = 0x6f;
+            CREP[CPOS++] = 0x6f;
+        }
         return true;
     }
     f.constant = {value: "foo"};
@@ -1428,14 +1601,18 @@ const print = (() => {
     // StringUniversal
     function b_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 114) return false;
-            IP += 3;
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x61) return false;
+            if (AREP[APOS + 2] !== 0x72) return false;
+            APOS += 3;
         }
-        OUT = HAS_OUT ? "bar" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x72;
+        }
         return true;
     }
     b_2.constant = {value: "bar"};
@@ -1443,14 +1620,18 @@ const print = (() => {
     // StringUniversal
     function baz_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 3 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 98) return false;
-            if (IN.charCodeAt(IP + 1) !== 97) return false;
-            if (IN.charCodeAt(IP + 2) !== 122) return false;
-            IP += 3;
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x61) return false;
+            if (AREP[APOS + 2] !== 0x7a) return false;
+            APOS += 3;
         }
-        OUT = HAS_OUT ? "baz" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x7a;
+        }
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -1535,16 +1716,22 @@ const print = (() => {
     // StringUniversal
     function util1_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 117) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            if (IN.charCodeAt(IP + 2) !== 105) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            if (IN.charCodeAt(IP + 4) !== 49) return false;
-            IP += 5;
+            if (ATYP !== STRING) return false;
+            if (APOS + 5 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x75) return false;
+            if (AREP[APOS + 1] !== 0x74) return false;
+            if (AREP[APOS + 2] !== 0x69) return false;
+            if (AREP[APOS + 3] !== 0x6c) return false;
+            if (AREP[APOS + 4] !== 0x31) return false;
+            APOS += 5;
         }
-        OUT = HAS_OUT ? "util1" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x75;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6c;
+            CREP[CPOS++] = 0x31;
+        }
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -1560,16 +1747,22 @@ const print = (() => {
     // StringUniversal
     function util2_2() {
         if (HAS_IN) {
-            if (typeof IN !== 'string') return false;
-            if (IP + 5 > IN.length) return false;
-            if (IN.charCodeAt(IP + 0) !== 117) return false;
-            if (IN.charCodeAt(IP + 1) !== 116) return false;
-            if (IN.charCodeAt(IP + 2) !== 105) return false;
-            if (IN.charCodeAt(IP + 3) !== 108) return false;
-            if (IN.charCodeAt(IP + 4) !== 50) return false;
-            IP += 5;
+            if (ATYP !== STRING) return false;
+            if (APOS + 5 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x75) return false;
+            if (AREP[APOS + 1] !== 0x74) return false;
+            if (AREP[APOS + 2] !== 0x69) return false;
+            if (AREP[APOS + 3] !== 0x6c) return false;
+            if (AREP[APOS + 4] !== 0x32) return false;
+            APOS += 5;
         }
-        OUT = HAS_OUT ? "util2" : undefined;
+        if (HAS_OUT) {
+            CREP[CPOS++] = 0x75;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6c;
+            CREP[CPOS++] = 0x32;
+        }
         return true;
     }
     util2_2.constant = {value: "util2"};

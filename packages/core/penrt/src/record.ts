@@ -2,56 +2,58 @@
 
 function parseRecord(recordItems: RecordItem[]) {
     return function RCD() {
-        const stateₒ = getState();
-        const obj = {} as Record<string, unknown>;
-        const propNames: string[] = [];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0) AREP = [];
+        const fieldNames: string[] = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
-                let propName: string;
+                // Parse field name
+                let fieldName: string;
                 if (typeof recordItem.name === 'string') {
                     // Statically-named field
-                    propName = recordItem.name;
+                    fieldName = recordItem.name;
                 }
                 else {
                     // Dynamically-named field
-                    if (!(recordItem.name as Rule)()) return setState(stateₒ), false;
-                    assert(typeof OUT === 'string');
-                    propName = OUT;
+                    if (!parseInner(recordItem.name, true)) return backtrack(APOSₒ, CPOSₒ);
+                    assert(ATYP === STRING);
+                    APOS -= 1;
+                    fieldName = AREP[APOS] as string;
                 }
-                if (propNames.includes(propName)) return setState(stateₒ), false;
-                if (!recordItem.expr()) return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                obj[propName] = OUT;
-                propNames.push(propName);
+                if (fieldNames.includes(fieldName)) return backtrack(APOSₒ, CPOSₒ);
+
+                // Parse field value
+                if (!parseInner(recordItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
+
+                if (HAS_OUT) {
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldName;
+                    AREP[APOS++] = fieldValue;
+                }
+                fieldNames.push(fieldName); // keep track of field names to support duplicate detection
             }
             else /* item.kind === 'Splice' */ {
-                if (!recordItem.expr()) return setState(stateₒ), false;
-                assert(OUT && typeof OUT === 'object');
-                for (const propName of Object.keys(OUT)) {
-                    if (propNames.includes(propName)) return setState(stateₒ), false;
-                    obj[propName] = (OUT as any)[propName];
-                    propNames.push(propName);
+                const apos = APOS;
+                if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ);
+                for (let i = apos; i < APOS; i += 2) {
+                    const fieldName = AREP[i] as string;
+                    if (fieldNames.includes(fieldName)) return backtrack(APOSₒ, CPOSₒ);
+                    fieldNames.push(fieldName);
                 }
             }
         }
-        OUT = obj;
+        ATYP = HAS_OUT ? RECORD : NOTHING;
         return true;
     };
 }
 
 function printRecord(recordItems: RecordItem[]) {
     return function RCD() {
-        if (objectToString.call(IN) !== '[object Object]') return false;
-        const stateₒ = getState();
-        let text: unknown;
-
-        const propNames = Object.keys(IN as any); // TODO: doc reliance on prop order and what this means
-        const propCount = propNames.length;
-        assert(propCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-
-        // TODO: temp testing...
-        const obj = IN as Record<string, unknown>;
-        let bitmask = IP;
+        if (ATYP !== RECORD) return false;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        const propList = AREP;
+        const propCount = AREP.length;
+        let bitmask = APOS;
 
         // TODO: O(n^2)? Can we do better? More fast paths for common cases?
         outerLoop:
@@ -59,7 +61,7 @@ function printRecord(recordItems: RecordItem[]) {
             if (recordItem.kind === 'Field') {
                 // Find the first property key/value pair that matches this field name/value pair (if any)
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propNames[i];
+                    let propName = propList[i << 1];
 
                     // TODO: skip already-consumed key/value pairs
                     // tslint:disable-next-line: no-bitwise
@@ -70,10 +72,8 @@ function printRecord(recordItems: RecordItem[]) {
                     // TODO: match field name
                     if (typeof recordItem.name !== 'string') {
                         // Dynamically-named field
-                        setState({IN: propName, IP: 0});
-                        if (!recordItem.name()) continue;
-                        if (IP !== propName.length) continue;
-                        text = concat(text, OUT);
+                        APOS = i << 1;
+                        if (!printInner(recordItem.name, true)) continue;
                     }
                     else {
                         // Statically-named field
@@ -81,29 +81,25 @@ function printRecord(recordItems: RecordItem[]) {
                     }
 
                     // TODO: match field value
-                    setState({IN: obj[propName], IP: 0});
-                    if (!recordItem.expr()) continue;
-                    if (!isInputFullyConsumed()) continue;
-                    text = concat(text, OUT);
+                    APOS = (i << 1) + 1;
+                    if (!printInner(recordItem.expr, true)) continue;
             
-                    // TODO: we matched both name and value - consume them from `node`
+                    // TODO: we matched both name and value - consume them from AREP
                     bitmask += propBit;
                     continue outerLoop;
                 }
 
-                // If we get here, no match...
-                setState(stateₒ);
-                return false;
+                // If we get here, no match... Ensure AREP is restored, since it may have been changed above.
+                return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
-                setState({IN: obj, IP: bitmask});
-                if (!recordItem.expr()) return setState(stateₒ), false;
-                text = concat(text, OUT);
-                bitmask = IP;
+                APOS = bitmask;
+                ATYP = RECORD;
+                if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                bitmask = APOS;
             }
         }
-        setState({IN: obj, IP: bitmask});
-        OUT = text;
+        APOS = bitmask;
         return true;
     }
 }

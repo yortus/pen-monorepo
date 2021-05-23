@@ -7,15 +7,16 @@ import {parse as penParse, print as penPrint} from '../baselines/pen-dist/json.j
 import {parse as pegParse} from './pegjs-json-parser';
 
 
-const json = fs.readFileSync(path.join(__dirname, '../fixtures/documents/1mb.json'), 'utf8');
+const jsonStr = fs.readFileSync(path.join(__dirname, '../fixtures/documents/1mb.json'), 'utf8');
+const jsonBuf = fs.readFileSync(path.join(__dirname, '../fixtures/documents/1mb.json'));
 const suite = new Benchmark.Suite();
 
 
 // Add tests.
-suite.add('V8', () => JSON.parse(json));
-suite.add('penc', () => penParse(json));
-suite.add('pegjs', () => pegParse(json));
-suite.add('penc (print)', () => penPrint(json));
+suite.add('V8', () => JSON.parse(jsonStr));
+suite.add('penc', () => penParse(jsonBuf));
+suite.add('pegjs', () => pegParse(jsonStr));
+// TODO: was... not apples to apples... restore... suite.add('penc (print)', () => penPrint(json));
 
 
 // Add listeners.

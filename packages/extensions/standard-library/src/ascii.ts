@@ -14,37 +14,36 @@ function ascii({mode}: StaticOptions): Generic {
 
         if (mode === 'parse') {
             return function ASC() {
-                let c: string | undefined;
+                let cc: number;
                 if (HAS_IN) {
-                    if (IP < 0 || IP >= (IN as string).length) return false;
-                    c = (IN as string).charAt(IP);
-                    const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                    if (CPOS >= CREP.length) return false;
+                    cc = CREP[CPOS];
                     if (cc < min || cc > max) return false;
-                    IP += 1;
+                    CPOS += 1;
                 }
                 else {
-                    c = String.fromCharCode(min as number); // TODO: inefficient! improve...
+                    cc = min as number;
                 }
-                OUT = HAS_OUT ? c : undefined;
+                emitByte(cc);
                 return true;
             };
         }
 
         else /* mode === 'print' */ {
             return function ASC() {
-                let c: string | undefined;
+                let cc: number;
                 if (HAS_IN) {
-                    if (typeof IN !== 'string') return false;
-                    if (IP < 0 || IP >= (IN as string).length) return false;
-                    c = (IN as string).charAt(IP);
-                    const cc = c.charCodeAt(0); // TODO: inefficient! improve...
+                    if (ATYP !== STRING) return false;
+                    const arep = AREP as Buffer;
+                    if (APOS >= arep.length) return false;
+                    cc = arep[APOS];
                     if (cc < min || cc > max) return false;
-                    IP += 1;
+                    APOS += 1;
                 }
                 else {
-                    c = String.fromCharCode(min as number); // TODO: inefficient! improve...
+                    cc = min as number;
                 }
-                OUT = HAS_OUT ? c : undefined;
+                if (HAS_OUT) CREP[CPOS++] = cc;
                 return true;
             };
         }

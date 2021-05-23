@@ -1,54 +1,35 @@
-// TODO: doc... has only 'ast' representation
+// TODO: doc... has only abstract representation, no concrete representation
 
 function parseList(listItems: ListItem[]) {
-    const itemCount = listItems.length;
     return function LST() {
-        const stateₒ = getState();
-        const arr = [] as unknown[];
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0) AREP = [];
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                if (!listItem.expr()) return setState(stateₒ), false;
-                assert(OUT !== undefined);
-                arr.push(OUT);
+                if (!parseInner(listItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
             }
             else /* item.kind === 'Splice' */ {
-                if (!listItem.expr()) return setState(stateₒ), false;
-                assert(Array.isArray(OUT));
-                arr.push(...OUT);
+                if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ);
             }
         }
-        OUT = arr;
+        ATYP = LIST;
         return true;
     };
 }
 
 function printList(listItems: ListItem[]) {
-    const itemCount = listItems.length;
     return function LST() {
-        if (!Array.isArray(IN)) return false;
-        const stateₒ = getState();
-        let text: unknown;
-        const arr = IN;
-        let off = IP;
-        for (let i = 0; i < itemCount; ++i) {
-            const listItem = listItems[i];
+        if (ATYP !== LIST) return false;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
-                setState({IN: arr[off], IP: 0});
-                if (!listItem.expr()) return setState(stateₒ), false;
-                if (!isInputFullyConsumed()) return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off += 1;
+                if (!printInner(listItem.expr, true)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
-                setState({IN: arr, IP: off});
-                if (!listItem.expr()) return setState(stateₒ), false;
-                text = concat(text, OUT);
-                off = IP;
+                ATYP = LIST;
+                if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
         }
-        setState({IN: arr, IP: off});
-        OUT = text;
         return true;
     };
 }

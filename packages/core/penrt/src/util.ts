@@ -43,24 +43,179 @@ function isModule(_x: PenVal): _x is Module {
 
 
 
-// TODO: new 'registers'... temp testing...
-let IN: unknown;
-let IP: number;
-let OUT: unknown;
+// TODO: next:
+// [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
+// [x] 2. change CREP from string to Buffer
+// [x] 3. perf profile - what are the hottest paths now where speedups would improve overall perf?
+// [x]    a. no obvious low-hanging fruit
+// [x]    b. most obvious 'smell': extremely deep call chains with LST and RCD. These are tail-recursive in json.pen. fn call/ret overheads dominating execution time?
+// [x]    c. can we (a) identify tail-recursion in lists and records? (b) lower it to iteration in a transform?
+// [x]    d. list/record sequences still work! These are iterative instead of recursive so don't have super-deep call chains
+// [x]    e. impl json.pen using (d) and profile again
+// [x]    f. now, most time is spend in the following 2 areas:
+// [x]       i) parseInner
+// [x]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
+// [x]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
+// [ ]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`
+// [x] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
+// [ ] 5. A/C --> I/O (leave ATYP for now)
+// [ ] 6. ATYP handling?
+// [ ] 7. restore LEN/CAP (capacity) checking
+// [ ]    a. eg printInner for STRING always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
-// TODO: temp testing new...
-let HAS_IN: boolean; // Flag: is there input?
-let HAS_OUT: boolean; // Flag: is there output?
 
-
-function getState() {
-    return {IN, IP};
+interface Arrayish<T> {
+    [n: number]: T;
+    length: number;
+    slice(start?: number, end?: number): Arrayish<T>;
 }
 
 
-function setState(state: {IN: unknown, IP: number}) {
-    IN = state.IN;
-    IP = state.IP;
+
+
+
+
+// TODO: NEW VM (WIP):
+let AREP: Arrayish<unknown>;
+let APOS: number;
+let ATYP: ATYP;
+
+let CREP: Buffer; //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
+let CPOS: number;
+
+let HAS_IN: boolean; // Flag: is there input?
+let HAS_OUT: boolean; // Flag: is there output?
+
+type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
+const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
+
+const savepoint = (): [APOS: number, CPOS: number] => [APOS, CPOS];
+const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ ?? NOTHING, false);
+
+// TODO: temp testing...
+const theScalarArray: unknown[] = [];
+const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
+function emitScalar(value: number | boolean | null) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theScalarArray;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? SCALAR : NOTHING;
+}
+function emitByte(value: number) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theBuffer;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function emitBytes(...values: number[]) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theBuffer;
+        for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+
+
+function parseInner(rule: Rule, mustProduce: boolean): boolean {
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined as any; // TODO: fix cast
+    APOS = 0;
+    if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
+    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+
+    let value: unknown;
+    switch (ATYP) {
+        case SCALAR:
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
+        case STRING:
+            value = (AREP as Buffer).toString('utf8', 0, APOS);
+            break;
+        case LIST:
+            if (AREP.length !== APOS) AREP.length === APOS;
+            value = AREP;
+            break;
+        case RECORD:
+            const obj = value = {} as Record<string, unknown>;
+            for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            break;
+        default:
+            // Ensure all cases have been handled, both at compile time and at runtime.
+            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+    }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+    return true;
+}
+
+function printInner(rule: Rule, mustConsume: boolean): boolean {
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    let value = AREP[APOS];
+    let atyp: ATYP;
+
+    // Nothing case
+    if (value === undefined) {
+        if (mustConsume) return false;
+        ATYP = NOTHING;
+        const result = rule();
+        ATYP = ATYPₒ;
+        assert(APOS === APOSₒ);
+        return result;
+    }
+
+    // Scalar case
+    if (value === null || value === true || value === false || typeof value === 'number') {
+        ATYP = SCALAR;
+        const result = rule();
+        ATYP = ATYPₒ;
+        assert(APOS - APOSₒ === 1);
+        return result;
+    }
+
+    // Aggregate cases
+    if (typeof value === 'string') {
+        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
+        atyp = ATYP = STRING;
+    }
+    else if (Array.isArray(value)) {
+        AREP = value;
+        atyp = ATYP = LIST;
+    }
+    else if (typeof value === 'object') {
+        const arr = AREP = [] as unknown[];        
+        const keys = Object.keys(value!); // TODO: doc reliance on prop order and what this means
+        assert(keys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
+        for (let i = 0; i < keys.length; ++i) arr.push(keys[i], (value as any)[keys[i]]);
+        value = arr;
+        atyp = ATYP = RECORD;
+    }
+    else {
+        throw new Error(`Unsupported value type for value ${value}`);
+    }
+
+    // Do the thing
+    APOS = 0;
+    let result = rule();
+
+    // Restore AREP/APOS/ATYP
+    const apos = APOS;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    if (!result) return false;
+
+    // Ensure input was fully consumed
+    if (atyp === RECORD) {
+        const keyCount = (value as any).length >> 1;
+        if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
+    }
+    else /* STRING | LIST */ {
+        if (apos !== (value as any).length) return false;
+    }
+    APOS += 1;
+    return true;
 }
 
 
@@ -68,32 +223,3 @@ function setState(state: {IN: unknown, IP: number}) {
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
 }
-
-
-// TODO: doc... helper...
-// TODO: provide faster impl for known cases - eg when unparsing to text, don't need array/object handling
-//       (but instrument first)
-function concat(a: any, b: any): unknown {
-    if (a === undefined) return b;
-    if (b === undefined) return a;
-    // TODO: if program is statically proven valid, the following guard isn't necessary
-    if (typeof a !== 'string' || typeof b !== 'string') throw new Error(`Internal error: invalid sequence`);
-    return a + b;
-}
-
-
-// TODO: doc... helper...
-function isInputFullyConsumed(): boolean {
-    const type = objectToString.call(IN);
-    if (type === '[object String]') return IP === (IN as any).length;
-    if (type === '[object Array]') return IP === (IN as any).length;
-    if (type === '[object Object]') {
-        const keyCount = Object.keys(IN as any).length;
-        assert(keyCount <= 32); // TODO: document this limit, move to constant, consider how to remove it
-        if (keyCount === 0) return true;
-        return IP === -1 >>> (32 - keyCount);
-    }
-    return IP === 1; // TODO: doc which case(s) this covers. Better to just return false?
-}
-
-const objectToString = Object.prototype.toString;
