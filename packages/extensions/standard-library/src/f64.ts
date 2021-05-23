@@ -71,8 +71,7 @@ function f64({mode}: StaticOptions): Rule {
             }
 
             // Success
-            if (HAS_OUT) AREP[APOS++] = num;
-            ATYP = HAS_OUT ? SCALAR : NOTHING;
+            emitScalar(num);
             return true;
         };
     }

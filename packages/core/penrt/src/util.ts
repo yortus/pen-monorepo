@@ -88,39 +88,66 @@ let HAS_OUT: boolean; // Flag: is there output?
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
 
-const savepoint = (): [APOS: number, CPOS: number, ATYP: ATYP] => [APOS, CPOS, ATYP];
+const savepoint = (): [APOS: number, CPOS: number] => [APOS, CPOS];
 const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ ?? NOTHING, false);
 
+// TODO: temp testing...
+const theScalarArray: unknown[] = [];
+const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
+function emitScalar(value: number | boolean | null) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theScalarArray;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? SCALAR : NOTHING;
+}
+function emitByte(value: number) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theBuffer;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function emitBytes(...values: number[]) {
+    if (HAS_OUT) {
+        if (APOS === 0) AREP = theBuffer;
+        for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+
+
 function parseInner(rule: Rule, mustProduce: boolean): boolean {
-    const APOSₒ = APOS;
-    if (!rule()) return false;
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined as any; // TODO: fix cast
+    APOS = 0;
+    if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
+    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+
+    let value: unknown;
     switch (ATYP) {
-        case NOTHING:
-            return mustProduce;
         case SCALAR:
-            assert(APOS - APOSₒ === 1);
-            return true;
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
         case STRING:
-            if (APOS - APOSₒ > 1) {
-                const str = (AREP as string[]).slice(APOSₒ, APOS).join(''); // TODO: use utf8 Buffer and do toString here? But how? AREP is an array, not a buffer. Could switch it to Buffer if empty and wanting to emit chars
-                AREP[APOSₒ] = str;
-                APOS = APOSₒ + 1;
-            }
-            return true;
+            value = (AREP as Buffer).toString('utf8', 0, APOS);
+            break;
         case LIST:
-            const lst = AREP.slice(APOSₒ, APOS);
-            AREP[APOSₒ] = lst;
-            APOS = APOSₒ + 1;
-            return true;
+            value = APOS === AREP.length ? AREP : AREP.slice(0, APOS);
+            break;
         case RECORD:
-            const rec = Object.fromEntries((AREP as Array<[string, unknown]>).slice(APOSₒ, APOS));
-            AREP[APOSₒ] = rec;
-            APOS = APOSₒ + 1;
-            return true;
+            const obj = value = {} as Record<string, unknown>;
+            for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+    return true;
 }
 
 function printInner(rule: Rule, mustConsume: boolean): boolean {
@@ -157,8 +184,11 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
         atyp = ATYP = LIST;
     }
     else if (typeof value === 'object') {
-        AREP = value = [...Object.entries(value!)]; // TODO: doc reliance on prop order and what this means
-        assert(AREP.length <= 32); // TODO: document this limit, move to constant, consider how to remove it
+        const arr = AREP = [] as unknown[];        
+        const keys = Object.keys(value!); // TODO: doc reliance on prop order and what this means
+        assert(keys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
+        for (let i = 0; i < keys.length; ++i) arr.push(keys[i], (value as any)[keys[i]]);
+        value = arr;
         atyp = ATYP = RECORD;
     }
     else {
@@ -176,7 +206,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
 
     // Ensure input was fully consumed
     if (atyp === RECORD) {
-        const keyCount = (value as any).length;
+        const keyCount = (value as any).length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
     }
     else /* STRING | LIST */ {

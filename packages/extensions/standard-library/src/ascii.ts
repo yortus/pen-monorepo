@@ -24,8 +24,7 @@ function ascii({mode}: StaticOptions): Generic {
                 else {
                     cc = min as number;
                 }
-                if (HAS_OUT) AREP[APOS++] = String.fromCharCode(cc);
-                ATYP = HAS_OUT ? STRING : NOTHING;
+                emitByte(cc);
                 return true;
             };
         }

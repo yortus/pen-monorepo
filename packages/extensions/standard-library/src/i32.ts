@@ -52,8 +52,7 @@ function i32({mode}: StaticOptions): Generic {
                 }
 
                 // Success
-                if (HAS_OUT) AREP[APOS++] = num;
-                ATYP = HAS_OUT ? SCALAR : NOTHING;
+                emitScalar(num);
                 return true;
             };
         }

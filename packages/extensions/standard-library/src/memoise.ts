@@ -15,7 +15,7 @@ function memoise({mode}: StaticOptions): Generic {
 
         if (mode === 'parse') {
             return function MEM() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
 
                 // Check whether the memo table already has an entry for the given initial state.
                 let memos2 = memos.get(CREP);
@@ -59,8 +59,7 @@ function memoise({mode}: StaticOptions): Generic {
                     // does not consume more input, at which point we take the result of the previous iteration as
                     // final.
                     while (memo.result === true) {
-                        CPOS = CPOSₒ;
-                        APOS = APOSₒ;
+                        APOS = APOSₒ, CPOS = CPOSₒ;
 
                         // TODO: break cases for UNPARSING:
                         // anything --> same thing (covers all string cases, since they can only be same or shorter)
@@ -87,10 +86,13 @@ function memoise({mode}: StaticOptions): Generic {
 
                 // We have a resolved memo, so the result of the rule application for the given initial state has
                 // already been computed. Return it from the memo.
-                CPOS = memo.IPOSᐟ;
-                APOS = APOSₒ;
-                for (let i = 0; i < memo.OREPᐞ.length; ++i) AREP[APOS++] = memo.OREPᐞ[i];
                 ATYP = memo.ATYPᐟ;
+                AREP ??= (ATYP === STRING ? theBuffer : []);
+                APOS = APOSₒ;
+                CPOS = memo.IPOSᐟ;
+                for (let i = 0; i < memo.OREPᐞ.length; ++i) {
+                    AREP[APOS++] = memo.OREPᐞ[i];
+                }
                 return memo.result;
             };
         }

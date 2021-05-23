@@ -30,6 +30,8 @@ module.exports = {
 function parseList(listItems) {
     return function LST() {
         const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
                 if (!parseInner(listItem.expr, true))
@@ -48,7 +50,7 @@ function printList(listItems) {
     return function LST() {
         if (ATYP !== LIST)
             return false;
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
                 if (!printInner(listItem.expr, true))
@@ -66,6 +68,8 @@ function printList(listItems) {
 function parseRecord(recordItems) {
     return function RCD() {
         const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
         const fieldNames = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
@@ -84,22 +88,26 @@ function parseRecord(recordItems) {
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
-                AREP[APOS - 1] = [fieldName, AREP[APOS - 1]];
+                if (HAS_OUT) {
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldName;
+                    AREP[APOS++] = fieldValue;
+                }
                 fieldNames.push(fieldName);
             }
             else {
                 const apos = APOS;
                 if (!recordItem.expr())
                     return backtrack(APOSₒ, CPOSₒ);
-                for (let i = apos; i < APOS; ++i) {
-                    const fieldName = AREP[i][0];
+                for (let i = apos; i < APOS; i += 2) {
+                    const fieldName = AREP[i];
                     if (fieldNames.includes(fieldName))
                         return backtrack(APOSₒ, CPOSₒ);
                     fieldNames.push(fieldName);
                 }
             }
         }
-        ATYP = RECORD;
+        ATYP = HAS_OUT ? RECORD : NOTHING;
         return true;
     };
 }
@@ -107,20 +115,19 @@ function printRecord(recordItems) {
     return function RCD() {
         if (ATYP !== RECORD)
             return false;
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const propList = AREP;
         const propCount = AREP.length;
         let bitmask = APOS;
         outerLoop: for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propList[i][0];
+                    let propName = propList[i << 1];
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        AREP = propList[i];
-                        APOS = 0;
+                        APOS = i << 1;
                         if (!printInner(recordItem.name, true))
                             continue;
                     }
@@ -128,18 +135,15 @@ function printRecord(recordItems) {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    AREP = propList[i];
-                    APOS = 1;
+                    APOS = (i << 1) + 1;
                     if (!printInner(recordItem.expr, true))
                         continue;
                     bitmask += propBit;
                     continue outerLoop;
                 }
-                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                AREP = propList;
                 APOS = bitmask;
                 ATYP = RECORD;
                 if (!recordItem.expr())
@@ -147,7 +151,6 @@ function printRecord(recordItems) {
                 bitmask = APOS;
             }
         }
-        AREP = propList;
         APOS = bitmask;
         return true;
     };
@@ -169,38 +172,67 @@ let CPOS;
 let HAS_IN;
 let HAS_OUT;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
-const savepoint = () => [APOS, CPOS, ATYP];
+const savepoint = () => [APOS, CPOS];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
+const theScalarArray = [];
+const theBuffer = Buffer.alloc(2 ** 10);
+function emitScalar(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theScalarArray;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? SCALAR : NOTHING;
+}
+function emitByte(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function emitBytes(...values) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        for (let i = 0; i < values.length; ++i)
+            AREP[APOS++] = values[i];
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
 function parseInner(rule, mustProduce) {
-    const APOSₒ = APOS;
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined;
+    APOS = 0;
     if (!rule())
-        return false;
+        return AREP = AREPₒ, APOS = APOSₒ, false;
+    if (ATYP === NOTHING)
+        return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+    let value;
     switch (ATYP) {
-        case NOTHING:
-            return mustProduce;
         case SCALAR:
-            assert(APOS - APOSₒ === 1);
-            return true;
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
         case STRING:
-            if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ, APOS).join('');
-                AREP[APOSₒ] = str;
-                APOS = APOSₒ + 1;
-            }
-            return true;
+            value = AREP.toString('utf8', 0, APOS);
+            break;
         case LIST:
-            const lst = AREP.slice(APOSₒ, APOS);
-            AREP[APOSₒ] = lst;
-            APOS = APOSₒ + 1;
-            return true;
+            value = APOS === AREP.length ? AREP : AREP.slice(0, APOS);
+            break;
         case RECORD:
-            const rec = Object.fromEntries(AREP.slice(APOSₒ, APOS));
-            AREP[APOSₒ] = rec;
-            APOS = APOSₒ + 1;
-            return true;
+            const obj = value = {};
+            for (let i = 0; i < APOS; i += 2)
+                obj[AREP[i]] = AREP[i + 1];
+            break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+    return true;
 }
 function printInner(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
@@ -231,8 +263,12 @@ function printInner(rule, mustConsume) {
         atyp = ATYP = LIST;
     }
     else if (typeof value === 'object') {
-        AREP = value = [...Object.entries(value)];
-        assert(AREP.length <= 32);
+        const arr = AREP = [];
+        const keys = Object.keys(value);
+        assert(keys.length < 32);
+        for (let i = 0; i < keys.length; ++i)
+            arr.push(keys[i], value[keys[i]]);
+        value = arr;
         atyp = ATYP = RECORD;
     }
     else {
@@ -245,7 +281,7 @@ function printInner(rule, mustConsume) {
     if (!result)
         return false;
     if (atyp === RECORD) {
-        const keyCount = value.length;
+        const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
     }
@@ -287,10 +323,7 @@ const parse = (() => {
             if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "outer x";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x6f, 0x75, 0x74, 0x65, 0x72, 0x20, 0x78);
         return true;
     }
     x.constant = {value: "outer x"};
@@ -305,7 +338,7 @@ const parse = (() => {
 
         // SequenceExpression
         function 𝕊1() {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             let seqType = NOTHING;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             seqType |= ATYP;
@@ -329,7 +362,7 @@ const parse = (() => {
 
         // SequenceExpression
         function 𝕊2() {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             let seqType = NOTHING;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             seqType |= ATYP;
@@ -354,18 +387,14 @@ const parse = (() => {
             if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "inner x";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x69, 0x6e, 0x6e, 0x65, 0x72, 0x20, 0x78);
         return true;
     }
     x_3.constant = {value: "inner x"};
 
     // NumericLiteral
     function a_2() {
-        if (HAS_OUT) AREP[APOS++] = 42;
-        ATYP = HAS_OUT ? SCALAR : NOTHING;
+        emitScalar(42);
         return true;
     }
     a_2.constant = {value: 42};
@@ -394,10 +423,7 @@ const parse = (() => {
             if (CREP[CPOS + 6] !== 120) return false;
             CPOS += 7;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "inner x";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x69, 0x6e, 0x6e, 0x65, 0x72, 0x20, 0x78);
         return true;
     }
     lx.constant = {value: "inner x"};
@@ -411,17 +437,14 @@ const parse = (() => {
             if (CREP[CPOS + 2] !== 42) return false;
             CPOS += 3;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "***";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x2a, 0x2a, 0x2a);
         return true;
     }
     ly.constant = {value: "***"};
 
     // SequenceExpression
     function letexpr() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
@@ -439,10 +462,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 45) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "-";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x2d);
         return true;
     }
     letexpr_sub1.constant = {value: "-"};
@@ -531,7 +551,7 @@ const print = (() => {
 
         // SequenceExpression
         function 𝕊1() {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
@@ -551,7 +571,7 @@ const print = (() => {
 
         // SequenceExpression
         function 𝕊2() {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
@@ -643,7 +663,7 @@ const print = (() => {
 
     // SequenceExpression
     function letexpr() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);

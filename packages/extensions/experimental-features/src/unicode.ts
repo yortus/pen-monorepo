@@ -33,8 +33,7 @@ function unicode({mode}: StaticOptions): Generic {
 
                 if (len < minDigits) return backtrack(APOSₒ, CPOSₒ);
                 // tslint:disable-next-line: no-eval
-                if (HAS_OUT) AREP[APOS++] = eval(`"\\u{${num}}"`); // TODO: hacky... fix when we have a charCode
-                ATYP = HAS_OUT ? STRING : NOTHING;
+                emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
                 return true;
             };
         }

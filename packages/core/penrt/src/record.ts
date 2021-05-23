@@ -3,6 +3,7 @@
 function parseRecord(recordItems: RecordItem[]) {
     return function RCD() {
         const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0) AREP = [];
         const fieldNames: string[] = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
@@ -23,20 +24,25 @@ function parseRecord(recordItems: RecordItem[]) {
 
                 // Parse field value
                 if (!parseInner(recordItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
-                AREP[APOS - 1] = [fieldName, AREP[APOS - 1]]; // replace field value with field name/value pair
+
+                if (HAS_OUT) {
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldName;
+                    AREP[APOS++] = fieldValue;
+                }
                 fieldNames.push(fieldName); // keep track of field names to support duplicate detection
             }
             else /* item.kind === 'Splice' */ {
                 const apos = APOS;
                 if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ);
-                for (let i = apos; i < APOS; ++i) {
-                    const fieldName = (AREP[i] as any)[0];
+                for (let i = apos; i < APOS; i += 2) {
+                    const fieldName = AREP[i] as string;
                     if (fieldNames.includes(fieldName)) return backtrack(APOSₒ, CPOSₒ);
                     fieldNames.push(fieldName);
                 }
             }
         }
-        ATYP = RECORD;
+        ATYP = HAS_OUT ? RECORD : NOTHING;
         return true;
     };
 }
@@ -44,8 +50,8 @@ function parseRecord(recordItems: RecordItem[]) {
 function printRecord(recordItems: RecordItem[]) {
     return function RCD() {
         if (ATYP !== RECORD) return false;
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
-        const propList = AREP as Array<[name: string, value: unknown]>;
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        const propList = AREP;
         const propCount = AREP.length;
         let bitmask = APOS;
 
@@ -55,7 +61,7 @@ function printRecord(recordItems: RecordItem[]) {
             if (recordItem.kind === 'Field') {
                 // Find the first property key/value pair that matches this field name/value pair (if any)
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propList[i][0];
+                    let propName = propList[i << 1];
 
                     // TODO: skip already-consumed key/value pairs
                     // tslint:disable-next-line: no-bitwise
@@ -66,8 +72,7 @@ function printRecord(recordItems: RecordItem[]) {
                     // TODO: match field name
                     if (typeof recordItem.name !== 'string') {
                         // Dynamically-named field
-                        AREP = propList[i];
-                        APOS = 0;
+                        APOS = i << 1;
                         if (!printInner(recordItem.name, true)) continue;
                     }
                     else {
@@ -76,8 +81,7 @@ function printRecord(recordItems: RecordItem[]) {
                     }
 
                     // TODO: match field value
-                    AREP = propList[i];
-                    APOS = 1;
+                    APOS = (i << 1) + 1;
                     if (!printInner(recordItem.expr, true)) continue;
             
                     // TODO: we matched both name and value - consume them from AREP
@@ -86,18 +90,15 @@ function printRecord(recordItems: RecordItem[]) {
                 }
 
                 // If we get here, no match... Ensure AREP is restored, since it may have been changed above.
-                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else /* item.kind === 'Splice' */ {
-                AREP = propList;
                 APOS = bitmask;
                 ATYP = RECORD;
                 if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
                 bitmask = APOS;
             }
         }
-        AREP = propList;
         APOS = bitmask;
         return true;
     }

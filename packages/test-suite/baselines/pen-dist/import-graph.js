@@ -30,6 +30,8 @@ module.exports = {
 function parseList(listItems) {
     return function LST() {
         const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
                 if (!parseInner(listItem.expr, true))
@@ -48,7 +50,7 @@ function printList(listItems) {
     return function LST() {
         if (ATYP !== LIST)
             return false;
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         for (const listItem of listItems) {
             if (listItem.kind === 'Element') {
                 if (!printInner(listItem.expr, true))
@@ -66,6 +68,8 @@ function printList(listItems) {
 function parseRecord(recordItems) {
     return function RCD() {
         const [APOSₒ, CPOSₒ] = savepoint();
+        if (APOS === 0)
+            AREP = [];
         const fieldNames = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
@@ -84,22 +88,26 @@ function parseRecord(recordItems) {
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
-                AREP[APOS - 1] = [fieldName, AREP[APOS - 1]];
+                if (HAS_OUT) {
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldName;
+                    AREP[APOS++] = fieldValue;
+                }
                 fieldNames.push(fieldName);
             }
             else {
                 const apos = APOS;
                 if (!recordItem.expr())
                     return backtrack(APOSₒ, CPOSₒ);
-                for (let i = apos; i < APOS; ++i) {
-                    const fieldName = AREP[i][0];
+                for (let i = apos; i < APOS; i += 2) {
+                    const fieldName = AREP[i];
                     if (fieldNames.includes(fieldName))
                         return backtrack(APOSₒ, CPOSₒ);
                     fieldNames.push(fieldName);
                 }
             }
         }
-        ATYP = RECORD;
+        ATYP = HAS_OUT ? RECORD : NOTHING;
         return true;
     };
 }
@@ -107,20 +115,19 @@ function printRecord(recordItems) {
     return function RCD() {
         if (ATYP !== RECORD)
             return false;
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const propList = AREP;
         const propCount = AREP.length;
         let bitmask = APOS;
         outerLoop: for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
                 for (let i = 0; i < propCount; ++i) {
-                    let propName = propList[i][0];
+                    let propName = propList[i << 1];
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
                     if (typeof recordItem.name !== 'string') {
-                        AREP = propList[i];
-                        APOS = 0;
+                        APOS = i << 1;
                         if (!printInner(recordItem.name, true))
                             continue;
                     }
@@ -128,18 +135,15 @@ function printRecord(recordItems) {
                         if (propName !== recordItem.name)
                             continue;
                     }
-                    AREP = propList[i];
-                    APOS = 1;
+                    APOS = (i << 1) + 1;
                     if (!printInner(recordItem.expr, true))
                         continue;
                     bitmask += propBit;
                     continue outerLoop;
                 }
-                AREP = propList;
                 return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             }
             else {
-                AREP = propList;
                 APOS = bitmask;
                 ATYP = RECORD;
                 if (!recordItem.expr())
@@ -147,7 +151,6 @@ function printRecord(recordItems) {
                 bitmask = APOS;
             }
         }
-        AREP = propList;
         APOS = bitmask;
         return true;
     };
@@ -169,38 +172,67 @@ let CPOS;
 let HAS_IN;
 let HAS_OUT;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
-const savepoint = () => [APOS, CPOS, ATYP];
+const savepoint = () => [APOS, CPOS];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
+const theScalarArray = [];
+const theBuffer = Buffer.alloc(2 ** 10);
+function emitScalar(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theScalarArray;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? SCALAR : NOTHING;
+}
+function emitByte(value) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        AREP[APOS++] = value;
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
+function emitBytes(...values) {
+    if (HAS_OUT) {
+        if (APOS === 0)
+            AREP = theBuffer;
+        for (let i = 0; i < values.length; ++i)
+            AREP[APOS++] = values[i];
+    }
+    ATYP = HAS_OUT ? STRING : NOTHING;
+}
 function parseInner(rule, mustProduce) {
-    const APOSₒ = APOS;
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined;
+    APOS = 0;
     if (!rule())
-        return false;
+        return AREP = AREPₒ, APOS = APOSₒ, false;
+    if (ATYP === NOTHING)
+        return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+    let value;
     switch (ATYP) {
-        case NOTHING:
-            return mustProduce;
         case SCALAR:
-            assert(APOS - APOSₒ === 1);
-            return true;
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
         case STRING:
-            if (APOS - APOSₒ > 1) {
-                const str = AREP.slice(APOSₒ, APOS).join('');
-                AREP[APOSₒ] = str;
-                APOS = APOSₒ + 1;
-            }
-            return true;
+            value = AREP.toString('utf8', 0, APOS);
+            break;
         case LIST:
-            const lst = AREP.slice(APOSₒ, APOS);
-            AREP[APOSₒ] = lst;
-            APOS = APOSₒ + 1;
-            return true;
+            value = APOS === AREP.length ? AREP : AREP.slice(0, APOS);
+            break;
         case RECORD:
-            const rec = Object.fromEntries(AREP.slice(APOSₒ, APOS));
-            AREP[APOSₒ] = rec;
-            APOS = APOSₒ + 1;
-            return true;
+            const obj = value = {};
+            for (let i = 0; i < APOS; i += 2)
+                obj[AREP[i]] = AREP[i + 1];
+            break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+    return true;
 }
 function printInner(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
@@ -231,8 +263,12 @@ function printInner(rule, mustConsume) {
         atyp = ATYP = LIST;
     }
     else if (typeof value === 'object') {
-        AREP = value = [...Object.entries(value)];
-        assert(AREP.length <= 32);
+        const arr = AREP = [];
+        const keys = Object.keys(value);
+        assert(keys.length < 32);
+        for (let i = 0; i < keys.length; ++i)
+            arr.push(keys[i], value[keys[i]]);
+        value = arr;
         atyp = ATYP = RECORD;
     }
     else {
@@ -245,7 +281,7 @@ function printInner(rule, mustConsume) {
     if (!result)
         return false;
     if (atyp === RECORD) {
-        const keyCount = value.length;
+        const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
     }
@@ -304,9 +340,7 @@ const extensions = {
                         else {
                             cc = min;
                         }
-                        if (HAS_OUT)
-                            AREP[APOS++] = String.fromCharCode(cc);
-                        ATYP = HAS_OUT ? STRING : NOTHING;
+                        emitByte(cc);
                         return true;
                     };
                 }
@@ -403,9 +437,7 @@ const extensions = {
                             return backtrack(APOSₒ, CPOSₒ);
                     }
                     // Success
-                    if (HAS_OUT)
-                        AREP[APOS++] = num;
-                    ATYP = HAS_OUT ? SCALAR : NOTHING;
+                    emitScalar(num);
                     return true;
                 };
             }
@@ -489,9 +521,7 @@ const extensions = {
                                 num = -num;
                         }
                         // Success
-                        if (HAS_OUT)
-                            AREP[APOS++] = num;
-                        ATYP = HAS_OUT ? SCALAR : NOTHING;
+                        emitScalar(num);
                         return true;
                     };
                 }
@@ -576,7 +606,7 @@ const extensions = {
                 const memos = new Map();
                 if (mode === 'parse') {
                     return function MEM() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
                         // Check whether the memo table already has an entry for the given initial state.
                         let memos2 = memos.get(CREP);
                         if (memos2 === undefined) {
@@ -616,8 +646,7 @@ const extensions = {
                             // does not consume more input, at which point we take the result of the previous iteration as
                             // final.
                             while (memo.result === true) {
-                                CPOS = CPOSₒ;
-                                APOS = APOSₒ;
+                                APOS = APOSₒ, CPOS = CPOSₒ;
                                 // TODO: break cases for UNPARSING:
                                 // anything --> same thing (covers all string cases, since they can only be same or shorter)
                                 // some node --> some different non-empty node (assert: should never happen!)
@@ -644,11 +673,13 @@ const extensions = {
                         }
                         // We have a resolved memo, so the result of the rule application for the given initial state has
                         // already been computed. Return it from the memo.
-                        CPOS = memo.IPOSᐟ;
-                        APOS = APOSₒ;
-                        for (let i = 0; i < memo.OREPᐞ.length; ++i)
-                            AREP[APOS++] = memo.OREPᐞ[i];
                         ATYP = memo.ATYPᐟ;
+                        AREP !== null && AREP !== void 0 ? AREP : (AREP = ATYP === STRING ? theBuffer : []);
+                        APOS = APOSₒ;
+                        CPOS = memo.IPOSᐟ;
+                        for (let i = 0; i < memo.OREPᐞ.length; ++i) {
+                            AREP[APOS++] = memo.OREPᐞ[i];
+                        }
                         return memo.result;
                     };
                 }
@@ -781,10 +812,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 48) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "0";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x30);
         return true;
     }
     min.constant = {value: "0"};
@@ -796,10 +824,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 57) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "9";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x39);
         return true;
     }
     max.constant = {value: "9"};
@@ -833,10 +858,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 97) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "a";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x61);
         return true;
     }
     min_2.constant = {value: "a"};
@@ -848,10 +870,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 122) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "z";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x7a);
         return true;
     }
     max_2.constant = {value: "z"};
@@ -863,10 +882,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 65) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "A";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x41);
         return true;
     }
     min_3.constant = {value: "A"};
@@ -878,10 +894,7 @@ const parse = (() => {
             if (CREP[CPOS + 0] !== 90) return false;
             CPOS += 1;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "Z";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitByte(0x5a);
         return true;
     }
     max_3.constant = {value: "Z"};
@@ -939,7 +952,7 @@ const parse = (() => {
 
     // SequenceExpression
     function result() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
@@ -950,7 +963,7 @@ const parse = (() => {
 
     // SequenceExpression
     function result_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
@@ -987,7 +1000,7 @@ const parse = (() => {
 
     // SequenceExpression
     function myList_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
@@ -998,7 +1011,7 @@ const parse = (() => {
 
     // SequenceExpression
     function myList_sub2() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
@@ -1011,16 +1024,14 @@ const parse = (() => {
 
     // StringAbstract
     function b() {
-        if (HAS_OUT) AREP[APOS++] = "b thing";
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
     }
     b.constant = {value: "b thing"};
 
     // StringAbstract
     function d() {
-        if (HAS_OUT) AREP[APOS++] = "d thing";
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
     }
     d.constant = {value: "d thing"};
@@ -1072,10 +1083,7 @@ const parse = (() => {
             if (CREP[CPOS + 2] !== 111) return false;
             CPOS += 3;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "foo";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x66, 0x6f, 0x6f);
         return true;
     }
     f.constant = {value: "foo"};
@@ -1089,10 +1097,7 @@ const parse = (() => {
             if (CREP[CPOS + 2] !== 114) return false;
             CPOS += 3;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "bar";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x62, 0x61, 0x72);
         return true;
     }
     b_2.constant = {value: "bar"};
@@ -1106,10 +1111,7 @@ const parse = (() => {
             if (CREP[CPOS + 2] !== 122) return false;
             CPOS += 3;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "baz";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x62, 0x61, 0x7a);
         return true;
     }
     baz_2.constant = {value: "baz"};
@@ -1202,10 +1204,7 @@ const parse = (() => {
             if (CREP[CPOS + 4] !== 49) return false;
             CPOS += 5;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "util1";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
         return true;
     }
     util1_2.constant = {value: "util1"};
@@ -1229,10 +1228,7 @@ const parse = (() => {
             if (CREP[CPOS + 4] !== 50) return false;
             CPOS += 5;
         }
-        if (HAS_OUT) {
-            AREP[APOS++] = "util2";
-        }
-        ATYP = HAS_OUT ? STRING : NOTHING;
+        emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
         return true;
     }
     util2_2.constant = {value: "util2"};
@@ -1450,7 +1446,7 @@ const print = (() => {
 
     // SequenceExpression
     function result() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
@@ -1458,7 +1454,7 @@ const print = (() => {
 
     // SequenceExpression
     function result_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
@@ -1492,7 +1488,7 @@ const print = (() => {
 
     // SequenceExpression
     function myList_sub1() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
@@ -1500,7 +1496,7 @@ const print = (() => {
 
     // SequenceExpression
     function myList_sub2() {
-        const [APOSₒ, CPOSₒ, ATYPₒ] = savepoint();
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
