@@ -1549,11 +1549,11 @@ const parse = (() => {
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
-            if (cc < 32 || cc > 127) return false;
+            if ((cc < 0x20 || cc > 0x7f)) return false;
             CPOS += 1;
         }
         else {
-            cc = 32;
+            cc = 0x20;
         }
         emitByte(cc);
         return true;
@@ -3024,11 +3024,11 @@ const print = (() => {
         if (HAS_IN) {
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
-            if (cc < 32 || cc > 127) return false;
+            if ((cc < 0x20 || cc > 0x7f)) return false;
             APOS += 1;
         }
         else {
-            cc = 32;
+            cc = 0x20;
         }
         if (HAS_OUT) CREP[CPOS++] = cc;
         return true;

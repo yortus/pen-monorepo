@@ -173,22 +173,26 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.down(1).text(`if (HAS_IN) {`).indent();
             emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
             emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
-
-            // TODO: go thru all items in `ranges`
-
-            emit.down(1).text(`if (cc < ${expr.ranges[0].min} || cc > ${expr.ranges[0].max}) return false;`);
+            for (const range of expr.ranges) {
+                const min = `0x${range.min.toString(16).padStart(2, '0')}`;
+                const max = `0x${range.max.toString(16).padStart(2, '0')}`;
+                const neg = range.isNegated;
+                const cond = min === max ? `cc ${neg ? '===' : '!=='} ${min}` : `${neg ? '!' : ''}(cc < ${min} || cc > ${max})`;
+                emit.down(1).text(`if (${cond}) return false;`);
+            }
             emit.down(1).text(`${IPOS} += 1;`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`else {`).indent();
-            // TODO: calc default val for cc without any input
-            emit.down(1).text(`cc = ${expr.ranges[0].min};`);
+            // Calculate default byte value when there is no input.
+            // TODO: assertions below document assumptions about valid `ranges`. Should enforce these when syntax checking. 
+            const lastRange = expr.ranges[expr.ranges.length - 1];
+            assert(lastRange && !lastRange.isNegated && lastRange.min <= lastRange.max);
+            const val = lastRange.min;
+            const negRanges = expr.ranges.slice(0, -1);
+            assert(negRanges.every(r => r.isNegated && (val < r.min || val > r.max)));
+            emit.down(1).text(`cc = 0x${val.toString(16).padStart(2, '0')};`);
             emit.dedent().down(1).text(`}`);
-            if (mode === 'parse') {
-                emit.down(1).text(`emitByte(cc);`);
-            }
-            else /* mode === 'print' */ {
-                emit.down(1).text(`if (HAS_OUT) CREP[CPOS++] = cc;`);
-            }
+            emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `if (HAS_OUT) CREP[CPOS++] = cc;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;
