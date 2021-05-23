@@ -219,7 +219,9 @@ function parseInner(rule, mustProduce) {
             value = AREP.toString('utf8', 0, APOS);
             break;
         case LIST:
-            value = APOS === AREP.length ? AREP : AREP.slice(0, APOS);
+            if (AREP.length !== APOS)
+                AREP.length === APOS;
+            value = AREP;
             break;
         case RECORD:
             const obj = value = {};

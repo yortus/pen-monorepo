@@ -134,7 +134,8 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             value = (AREP as Buffer).toString('utf8', 0, APOS);
             break;
         case LIST:
-            value = APOS === AREP.length ? AREP : AREP.slice(0, APOS);
+            if (AREP.length !== APOS) AREP.length === APOS;
+            value = AREP;
             break;
         case RECORD:
             const obj = value = {} as Record<string, unknown>;
