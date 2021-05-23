@@ -807,29 +807,37 @@ const parse = (() => {
         return result(arg);
     }
 
-    // StringLiteral
+    // ByteExpression
     function min() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x30) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x30) return false;
             CPOS += 1;
         }
-        emitByte(0x30);
+        else {
+            cc = 0x30;
+        }
+        emitByte(cc);
         return true;
     }
-    min.constant = {value: "0"};
 
-    // StringLiteral
+    // ByteExpression
     function max() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x39) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x39) return false;
             CPOS += 1;
         }
-        emitByte(0x39);
+        else {
+            cc = 0x39;
+        }
+        emitByte(cc);
         return true;
     }
-    max.constant = {value: "9"};
 
     // InstantiationExpression
     let digitₘ;
@@ -853,53 +861,69 @@ const parse = (() => {
         }
     }
 
-    // StringLiteral
+    // ByteExpression
     function min_2() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x61) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x61) return false;
             CPOS += 1;
         }
-        emitByte(0x61);
+        else {
+            cc = 0x61;
+        }
+        emitByte(cc);
         return true;
     }
-    min_2.constant = {value: "a"};
 
-    // StringLiteral
+    // ByteExpression
     function max_2() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x7a) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x7a) return false;
             CPOS += 1;
         }
-        emitByte(0x7a);
+        else {
+            cc = 0x7a;
+        }
+        emitByte(cc);
         return true;
     }
-    max_2.constant = {value: "z"};
 
-    // StringLiteral
+    // ByteExpression
     function min_3() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x41) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x41) return false;
             CPOS += 1;
         }
-        emitByte(0x41);
+        else {
+            cc = 0x41;
+        }
+        emitByte(cc);
         return true;
     }
-    min_3.constant = {value: "A"};
 
-    // StringLiteral
+    // ByteExpression
     function max_3() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5a) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x5a) return false;
             CPOS += 1;
         }
-        emitByte(0x5a);
+        else {
+            cc = 0x5a;
+        }
+        emitByte(cc);
         return true;
     }
-    max_3.constant = {value: "Z"};
 
     // SelectionExpression
     function alpha() {
@@ -1283,35 +1307,39 @@ const print = (() => {
         return result(arg);
     }
 
-    // StringLiteral
+    // ByteExpression
     function min() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x30) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x30) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x30;
+        else {
+            cc = 0x30;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    min.constant = {value: "0"};
 
-    // StringLiteral
+    // ByteExpression
     function max() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x39) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x39) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x39;
+        else {
+            cc = 0x39;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    max.constant = {value: "9"};
 
     // InstantiationExpression
     let digitₘ;
@@ -1335,65 +1363,73 @@ const print = (() => {
         }
     }
 
-    // StringLiteral
+    // ByteExpression
     function min_2() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x61) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x61) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x61;
+        else {
+            cc = 0x61;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    min_2.constant = {value: "a"};
 
-    // StringLiteral
+    // ByteExpression
     function max_2() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x7a) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x7a) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x7a;
+        else {
+            cc = 0x7a;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    max_2.constant = {value: "z"};
 
-    // StringLiteral
+    // ByteExpression
     function min_3() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x41) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x41) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x41;
+        else {
+            cc = 0x41;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    min_3.constant = {value: "A"};
 
-    // StringLiteral
+    // ByteExpression
     function max_3() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x5a) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x5a) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x5a;
+        else {
+            cc = 0x5a;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    max_3.constant = {value: "Z"};
 
     // SelectionExpression
     function alpha() {

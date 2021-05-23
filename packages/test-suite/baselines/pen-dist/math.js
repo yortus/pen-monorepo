@@ -880,17 +880,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function add_sub4() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x2b) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2b) return false;
             CPOS += 1;
         }
-        emitByte(0x2b);
+        else {
+            cc = 0x2b;
+        }
+        emitByte(cc);
         return true;
     }
-    add_sub4.constant = {value: "+"};
 
     // RecordExpression
     let subₘ;
@@ -949,17 +953,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function sub_sub4() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x2d) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2d) return false;
             CPOS += 1;
         }
-        emitByte(0x2d);
+        else {
+            cc = 0x2d;
+        }
+        emitByte(cc);
         return true;
     }
-    sub_sub4.constant = {value: "-"};
 
     // InstantiationExpression
     let termₘ;
@@ -1053,17 +1061,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function mul_sub6() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x2a) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2a) return false;
             CPOS += 1;
         }
-        emitByte(0x2a);
+        else {
+            cc = 0x2a;
+        }
+        emitByte(cc);
         return true;
     }
-    mul_sub6.constant = {value: "*"};
 
     // RecordExpression
     let divₘ;
@@ -1122,17 +1134,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function div_sub4() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x2f) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2f) return false;
             CPOS += 1;
         }
-        emitByte(0x2f);
+        else {
+            cc = 0x2f;
+        }
+        emitByte(cc);
         return true;
     }
-    div_sub4.constant = {value: "/"};
 
     // NumericLiteral
     function base() {
@@ -1369,17 +1385,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub18() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x69) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x69) return false;
             CPOS += 1;
         }
-        emitByte(0x69);
+        else {
+            cc = 0x69;
+        }
+        emitByte(cc);
         return true;
     }
-    factor_sub18.constant = {value: "i"};
 
     // InstantiationExpression
     let factor_sub19ₘ;
@@ -1425,17 +1445,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub23() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x28) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x28) return false;
             CPOS += 1;
         }
-        emitByte(0x28);
+        else {
+            cc = 0x28;
+        }
+        emitByte(cc);
         return true;
     }
-    factor_sub23.constant = {value: "("};
 
     // CodeExpression
     function factor_sub24() {
@@ -1447,17 +1471,21 @@ const parse = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub25() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x29) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x29) return false;
             CPOS += 1;
         }
-        emitByte(0x29);
+        else {
+            cc = 0x29;
+        }
+        emitByte(cc);
         return true;
     }
-    factor_sub25.constant = {value: ")"};
 
     // Module
     function Ɱ_math(member) {
@@ -1612,20 +1640,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function add_sub4() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x2b) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x2b) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x2b;
+        else {
+            cc = 0x2b;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    add_sub4.constant = {value: "+"};
 
     // RecordExpression
     let subₘ;
@@ -1687,20 +1717,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function sub_sub4() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x2d) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x2d) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x2d;
+        else {
+            cc = 0x2d;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    sub_sub4.constant = {value: "-"};
 
     // InstantiationExpression
     let termₘ;
@@ -1812,20 +1844,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function mul_sub6() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x2a) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x2a) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x2a;
+        else {
+            cc = 0x2a;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    mul_sub6.constant = {value: "*"};
 
     // RecordExpression
     let divₘ;
@@ -1887,20 +1921,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function div_sub4() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x2f) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x2f) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x2f;
+        else {
+            cc = 0x2f;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    div_sub4.constant = {value: "/"};
 
     // NumericLiteral
     function base() {
@@ -2155,20 +2191,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub18() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x69) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x69) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x69;
+        else {
+            cc = 0x69;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    factor_sub18.constant = {value: "i"};
 
     // InstantiationExpression
     let factor_sub19ₘ;
@@ -2209,20 +2247,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub23() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x28) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x28) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x28;
+        else {
+            cc = 0x28;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    factor_sub23.constant = {value: "("};
 
     // CodeExpression
     function factor_sub24() {
@@ -2233,20 +2273,22 @@ const print = (() => {
         return result;
     }
 
-    // StringLiteral
+    // ByteExpression
     function factor_sub25() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x29) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x29) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x29;
+        else {
+            cc = 0x29;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    factor_sub25.constant = {value: ")"};
 
     // Module
     function Ɱ_math(member) {

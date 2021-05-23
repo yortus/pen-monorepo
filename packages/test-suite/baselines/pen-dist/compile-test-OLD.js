@@ -428,17 +428,21 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // ByteExpression
     function a_3_sub1() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x61) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x61) return false;
             CPOS += 1;
         }
-        emitByte(0x61);
+        else {
+            cc = 0x61;
+        }
+        emitByte(cc);
         return true;
     }
-    a_3_sub1.constant = {value: "a"};
 
     // Module
     function recA(member) {
@@ -459,17 +463,21 @@ const parse = (() => {
         return true;
     }
 
-    // StringLiteral
+    // ByteExpression
     function b_2_sub1() {
+        let cc;
         if (HAS_IN) {
-            if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x62) return false;
             CPOS += 1;
         }
-        emitByte(0x62);
+        else {
+            cc = 0x62;
+        }
+        emitByte(cc);
         return true;
     }
-    b_2_sub1.constant = {value: "b"};
 
     // Module
     function recB(member) {
@@ -723,20 +731,22 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // ByteExpression
     function a_3_sub1() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x61) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x61) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x61;
+        else {
+            cc = 0x61;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    a_3_sub1.constant = {value: "a"};
 
     // Module
     function recA(member) {
@@ -754,20 +764,22 @@ const print = (() => {
         return true;
     }
 
-    // StringLiteral
+    // ByteExpression
     function b_2_sub1() {
+        let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
-            if (APOS + 1 > AREP.length) return false;
-            if (AREP[APOS + 0] !== 0x62) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if (cc !== 0x62) return false;
             APOS += 1;
         }
-        if (HAS_OUT) {
-            CREP[CPOS++] = 0x62;
+        else {
+            cc = 0x62;
         }
+        if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
     }
-    b_2_sub1.constant = {value: "b"};
 
     // Module
     function recB(member) {
