@@ -60,8 +60,8 @@ function isModule(_x: PenVal): _x is Module {
 // [x] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
-// [ ] 7. restore LEN checking
-// [ ]    a. eg printInner for STRING always slices a new Buffer, could just set LEN instead if it was respected/checked everywhere
+// [ ] 7. restore LEN/CAP (capacity) checking
+// [ ]    a. eg printInner for STRING always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
 
 interface Arrayish<T> {
