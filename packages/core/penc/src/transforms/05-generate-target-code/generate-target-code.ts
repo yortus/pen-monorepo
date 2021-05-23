@@ -171,6 +171,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`let cc;`);
             emit.down(1).text(`if (HAS_IN) {`).indent();
+            if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
             emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
             emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
             for (const range of expr.ranges) {

@@ -3022,6 +3022,7 @@ const print = (() => {
     function CHAR_sub6() {
         let cc;
         if (HAS_IN) {
+            if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x20 || cc > 0x7f)) return false;
