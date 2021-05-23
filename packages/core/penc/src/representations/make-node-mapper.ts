@@ -58,8 +58,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'Splice': return {...n, expression: rec(n.expression)};
-            case 'StringAbstract': return n;
-            case 'StringUniversal': return n;
+            case 'StringLiteral': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     };

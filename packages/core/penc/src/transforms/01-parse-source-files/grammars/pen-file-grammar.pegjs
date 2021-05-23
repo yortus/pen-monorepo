@@ -50,7 +50,7 @@ ModulePatternName
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         NullLiteral                     null
         BooleanLiteral                  false   true
-        StringLiteral                   "foo"   'a string!'   `a`
+        StringLiteral                   "foo"   'a string!'
         NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
@@ -88,8 +88,7 @@ PrimaryExpression
     / ListExpression
     / NullLiteral
     / BooleanLiteral
-    / StringAbstract
-    / StringUniversal
+    / StringLiteral
     / NumericLiteral
     / Identifier
     / ImportExpression
@@ -183,13 +182,12 @@ BooleanLiteral
     = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
     / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
 
-StringAbstract
+StringLiteral
     = "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringAbstract', value: chars.map(el => el[1]).join('')}; }
+    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), isAbstract: true}; }
 
-StringUniversal
-    = '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringUniversal', value: chars.map(el => el[1]).join('')}; }
+    / '"'   chars:(!'"'   CHARACTER)*   '"'
+    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), isAbstract: false}; }
 
 NumericLiteral
     = value:(DecimalLiteral / HexIntegerLiteral)

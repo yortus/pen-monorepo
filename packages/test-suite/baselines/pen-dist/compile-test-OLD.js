@@ -317,7 +317,7 @@ const parse = (() => {
         return foo(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function foo() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -331,7 +331,7 @@ const parse = (() => {
     }
     foo.constant = {value: "foo"};
 
-    // StringUniversal
+    // StringLiteral
     function bar() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -365,7 +365,7 @@ const parse = (() => {
         return b(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function b() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -378,7 +378,7 @@ const parse = (() => {
     }
     b.constant = {value: "b2"};
 
-    // StringUniversal
+    // StringLiteral
     function baz() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -392,7 +392,7 @@ const parse = (() => {
     }
     baz.constant = {value: "baz"};
 
-    // StringUniversal
+    // StringLiteral
     function mem() {
         if (HAS_IN) {
             if (CPOS + 6 > CREP.length) return false;
@@ -428,7 +428,7 @@ const parse = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function a_3_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -459,7 +459,7 @@ const parse = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function b_2_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -484,7 +484,7 @@ const parse = (() => {
         return c1(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function c1() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -497,7 +497,7 @@ const parse = (() => {
     }
     c1.constant = {value: "c1"};
 
-    // StringUniversal
+    // StringLiteral
     function c2() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -588,7 +588,7 @@ const print = (() => {
         return foo(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function foo() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -607,7 +607,7 @@ const print = (() => {
     }
     foo.constant = {value: "foo"};
 
-    // StringUniversal
+    // StringLiteral
     function bar() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -646,7 +646,7 @@ const print = (() => {
         return b(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function b() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -663,7 +663,7 @@ const print = (() => {
     }
     b.constant = {value: "b2"};
 
-    // StringUniversal
+    // StringLiteral
     function baz() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -682,7 +682,7 @@ const print = (() => {
     }
     baz.constant = {value: "baz"};
 
-    // StringUniversal
+    // StringLiteral
     function mem() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -723,7 +723,7 @@ const print = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function a_3_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -754,7 +754,7 @@ const print = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function b_2_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -782,7 +782,7 @@ const print = (() => {
         return c1(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function c1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -799,7 +799,7 @@ const print = (() => {
     }
     c1.constant = {value: "c1"};
 
-    // StringUniversal
+    // StringLiteral
     function c2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;

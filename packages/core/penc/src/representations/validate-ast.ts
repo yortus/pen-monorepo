@@ -65,6 +65,5 @@ const allNodeKinds = [
     'SelectionExpression',
     'SequenceExpression',
     'Splice',
-    'StringAbstract',
-    'StringUniversal',
+    'StringLiteral',
 ] as const;

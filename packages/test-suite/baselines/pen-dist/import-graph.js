@@ -807,7 +807,7 @@ const parse = (() => {
         return result(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function min() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -819,7 +819,7 @@ const parse = (() => {
     }
     min.constant = {value: "0"};
 
-    // StringUniversal
+    // StringLiteral
     function max() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -853,7 +853,7 @@ const parse = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function min_2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -865,7 +865,7 @@ const parse = (() => {
     }
     min_2.constant = {value: "a"};
 
-    // StringUniversal
+    // StringLiteral
     function max_2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -877,7 +877,7 @@ const parse = (() => {
     }
     max_2.constant = {value: "z"};
 
-    // StringUniversal
+    // StringLiteral
     function min_3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -889,7 +889,7 @@ const parse = (() => {
     }
     min_3.constant = {value: "A"};
 
-    // StringUniversal
+    // StringLiteral
     function max_3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1024,14 +1024,14 @@ const parse = (() => {
         return true;
     }
 
-    // StringAbstract
+    // StringLiteral
     function b() {
         emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
     }
     b.constant = {value: "b thing"};
 
-    // StringAbstract
+    // StringLiteral
     function d() {
         emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
@@ -1076,7 +1076,7 @@ const parse = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function f() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -1090,7 +1090,7 @@ const parse = (() => {
     }
     f.constant = {value: "foo"};
 
-    // StringUniversal
+    // StringLiteral
     function b_2() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -1104,7 +1104,7 @@ const parse = (() => {
     }
     b_2.constant = {value: "bar"};
 
-    // StringUniversal
+    // StringLiteral
     function baz_2() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -1195,7 +1195,7 @@ const parse = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function util1_2() {
         if (HAS_IN) {
             if (CPOS + 5 > CREP.length) return false;
@@ -1219,7 +1219,7 @@ const parse = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function util2_2() {
         if (HAS_IN) {
             if (CPOS + 5 > CREP.length) return false;
@@ -1283,7 +1283,7 @@ const print = (() => {
         return result(arg);
     }
 
-    // StringUniversal
+    // StringLiteral
     function min() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1298,7 +1298,7 @@ const print = (() => {
     }
     min.constant = {value: "0"};
 
-    // StringUniversal
+    // StringLiteral
     function max() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1335,7 +1335,7 @@ const print = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function min_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1350,7 +1350,7 @@ const print = (() => {
     }
     min_2.constant = {value: "a"};
 
-    // StringUniversal
+    // StringLiteral
     function max_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1365,7 +1365,7 @@ const print = (() => {
     }
     max_2.constant = {value: "z"};
 
-    // StringUniversal
+    // StringLiteral
     function min_3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1380,7 +1380,7 @@ const print = (() => {
     }
     min_3.constant = {value: "A"};
 
-    // StringUniversal
+    // StringLiteral
     function max_3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1505,7 +1505,7 @@ const print = (() => {
         return true;
     }
 
-    // StringAbstract
+    // StringLiteral
     function b() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1523,7 +1523,7 @@ const print = (() => {
     }
     b.constant = {value: "b thing"};
 
-    // StringAbstract
+    // StringLiteral
     function d() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1579,7 +1579,7 @@ const print = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function f() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1598,7 +1598,7 @@ const print = (() => {
     }
     f.constant = {value: "foo"};
 
-    // StringUniversal
+    // StringLiteral
     function b_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1617,7 +1617,7 @@ const print = (() => {
     }
     b_2.constant = {value: "bar"};
 
-    // StringUniversal
+    // StringLiteral
     function baz_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1713,7 +1713,7 @@ const print = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function util1_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1744,7 +1744,7 @@ const print = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function util2_2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;

@@ -343,9 +343,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
-        case 'StringAbstract':      // AST literal
-        case 'StringUniversal': {   // Code parse from bytestream to string
-            const hasConcreteForm = expr.kind === 'StringUniversal';
+        case 'StringLiteral': {
+            const hasConcreteForm = !expr.isAbstract;
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();

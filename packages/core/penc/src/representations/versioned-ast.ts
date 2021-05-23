@@ -70,8 +70,7 @@ export type Expression<V extends Version = Version> =
     | RecordExpression<V>
     | SelectionExpression<V>
     | SequenceExpression<V>
-    | StringAbstract // TODO: rename
-    | StringUniversal // TODO: rename
+    | StringLiteral
 ;
 
 
@@ -303,15 +302,10 @@ export interface Splice<V extends Version> {
 }
 
 
-export interface StringAbstract {
-    kind: 'StringAbstract';
+export interface StringLiteral {
+    kind: 'StringLiteral';
     value: string;
-}
-
-
-export interface StringUniversal {
-    kind: 'StringUniversal';
-    value: string;
+    isAbstract: boolean;
 }
 
 

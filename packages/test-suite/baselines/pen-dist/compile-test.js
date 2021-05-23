@@ -312,7 +312,7 @@ const extensions = {
 // ------------------------------ PARSE ------------------------------
 const parse = (() => {
 
-    // StringUniversal
+    // StringLiteral
     function x() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
@@ -376,7 +376,7 @@ const parse = (() => {
         return 𝕊2;
     }
 
-    // StringUniversal
+    // StringLiteral
     function x_3() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
@@ -412,7 +412,7 @@ const parse = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function lx() {
         if (HAS_IN) {
             if (CPOS + 7 > CREP.length) return false;
@@ -430,7 +430,7 @@ const parse = (() => {
     }
     lx.constant = {value: "inner x"};
 
-    // StringUniversal
+    // StringLiteral
     function ly() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
@@ -457,7 +457,7 @@ const parse = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function letexpr_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -522,7 +522,7 @@ const parse = (() => {
 // ------------------------------ PRINT ------------------------------
 const print = (() => {
 
-    // StringUniversal
+    // StringLiteral
     function x() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -588,7 +588,7 @@ const print = (() => {
         return 𝕊2;
     }
 
-    // StringUniversal
+    // StringLiteral
     function x_3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -637,7 +637,7 @@ const print = (() => {
         }
     }
 
-    // StringUniversal
+    // StringLiteral
     function lx() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -664,7 +664,7 @@ const print = (() => {
     }
     lx.constant = {value: "inner x"};
 
-    // StringUniversal
+    // StringLiteral
     function ly() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -692,7 +692,7 @@ const print = (() => {
         return true;
     }
 
-    // StringUniversal
+    // StringLiteral
     function letexpr_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;

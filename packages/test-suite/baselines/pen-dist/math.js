@@ -852,7 +852,7 @@ const parse = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function add_sub1() {
         emitBytes(0x61, 0x64, 0x64);
         return true;
@@ -880,7 +880,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function add_sub4() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -921,7 +921,7 @@ const parse = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function sub_sub1() {
         emitBytes(0x73, 0x75, 0x62);
         return true;
@@ -949,7 +949,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function sub_sub4() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1011,21 +1011,21 @@ const parse = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub1() {
         emitBytes(0x74, 0x79, 0x70, 0x65);
         return true;
     }
     mul_sub1.constant = {value: "type"};
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub2() {
         emitBytes(0x6d, 0x75, 0x6c);
         return true;
     }
     mul_sub2.constant = {value: "mul"};
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub3() {
         emitBytes(0x72, 0x68, 0x73);
         return true;
@@ -1053,7 +1053,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function mul_sub6() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1094,7 +1094,7 @@ const parse = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function div_sub1() {
         emitBytes(0x64, 0x69, 0x76);
         return true;
@@ -1122,7 +1122,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function div_sub4() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1201,7 +1201,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub3() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1223,7 +1223,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub5() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1257,7 +1257,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub8() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1313,7 +1313,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub13() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1369,7 +1369,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub18() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1425,7 +1425,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub23() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1447,7 +1447,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub25() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1581,7 +1581,7 @@ const print = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function add_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1612,7 +1612,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function add_sub4() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1656,7 +1656,7 @@ const print = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function sub_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1687,7 +1687,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function sub_sub4() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1752,7 +1752,7 @@ const print = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1767,7 +1767,7 @@ const print = (() => {
     }
     mul_sub1.constant = {value: "type"};
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1781,7 +1781,7 @@ const print = (() => {
     }
     mul_sub2.constant = {value: "mul"};
 
-    // StringAbstract
+    // StringLiteral
     function mul_sub3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1812,7 +1812,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function mul_sub6() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1856,7 +1856,7 @@ const print = (() => {
         }
     }
 
-    // StringAbstract
+    // StringLiteral
     function div_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1887,7 +1887,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function div_sub4() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -1984,7 +1984,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2009,7 +2009,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub5() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2043,7 +2043,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub8() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2099,7 +2099,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub13() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2155,7 +2155,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub18() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2209,7 +2209,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub23() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2233,7 +2233,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function factor_sub25() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;

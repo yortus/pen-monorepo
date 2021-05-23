@@ -898,7 +898,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function False_sub2() {
         if (HAS_IN) {
             if (CPOS + 5 > CREP.length) return false;
@@ -942,7 +942,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function Null_sub2() {
         if (HAS_IN) {
             if (CPOS + 4 > CREP.length) return false;
@@ -985,7 +985,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function True_sub2() {
         if (HAS_IN) {
             if (CPOS + 4 > CREP.length) return false;
@@ -1524,7 +1524,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1545,7 +1545,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub5() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -1600,7 +1600,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub10() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1613,7 +1613,7 @@ const parse = (() => {
     }
     CHAR_sub10.constant = {value: "\\\""};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub11() {
         emitByte(0x22);
         return true;
@@ -1641,7 +1641,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub14() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1654,7 +1654,7 @@ const parse = (() => {
     }
     CHAR_sub14.constant = {value: "\\\\"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub15() {
         emitByte(0x5c);
         return true;
@@ -1682,7 +1682,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub18() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1695,7 +1695,7 @@ const parse = (() => {
     }
     CHAR_sub18.constant = {value: "\\/"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub19() {
         emitByte(0x2f);
         return true;
@@ -1723,7 +1723,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub22() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1736,7 +1736,7 @@ const parse = (() => {
     }
     CHAR_sub22.constant = {value: "\\b"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub23() {
         emitByte(0x08);
         return true;
@@ -1764,7 +1764,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub26() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1777,7 +1777,7 @@ const parse = (() => {
     }
     CHAR_sub26.constant = {value: "\\f"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub27() {
         emitByte(0x0c);
         return true;
@@ -1805,7 +1805,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub30() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1818,7 +1818,7 @@ const parse = (() => {
     }
     CHAR_sub30.constant = {value: "\\n"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub31() {
         emitByte(0x0a);
         return true;
@@ -1846,7 +1846,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub34() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1859,7 +1859,7 @@ const parse = (() => {
     }
     CHAR_sub34.constant = {value: "\\r"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub35() {
         emitByte(0x0d);
         return true;
@@ -1887,7 +1887,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub38() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1900,7 +1900,7 @@ const parse = (() => {
     }
     CHAR_sub38.constant = {value: "\\t"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub39() {
         emitByte(0x09);
         return true;
@@ -1928,7 +1928,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub42() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
@@ -1987,7 +1987,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function LBRACE_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2022,7 +2022,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function RBRACE_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2057,7 +2057,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function LBRACKET_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2092,7 +2092,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function RBRACKET_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2127,7 +2127,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function COLON_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2162,7 +2162,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function COMMA_sub2() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2184,7 +2184,7 @@ const parse = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function DOUBLE_QUOTE_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2227,7 +2227,7 @@ const parse = (() => {
         return false;
     }
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub3() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2239,7 +2239,7 @@ const parse = (() => {
     }
     WS_sub3.constant = {value: " "};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub4() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2251,7 +2251,7 @@ const parse = (() => {
     }
     WS_sub4.constant = {value: "\t"};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub5() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2263,7 +2263,7 @@ const parse = (() => {
     }
     WS_sub5.constant = {value: "\n"};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub6() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
@@ -2405,7 +2405,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function False_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2456,7 +2456,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function Null_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -2505,7 +2505,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function True_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3022,7 +3022,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3045,7 +3045,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub5() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3099,7 +3099,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub10() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3116,7 +3116,7 @@ const print = (() => {
     }
     CHAR_sub10.constant = {value: "\\\""};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub11() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3145,7 +3145,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub14() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3162,7 +3162,7 @@ const print = (() => {
     }
     CHAR_sub14.constant = {value: "\\\\"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub15() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3191,7 +3191,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub18() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3208,7 +3208,7 @@ const print = (() => {
     }
     CHAR_sub18.constant = {value: "\\/"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub19() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3237,7 +3237,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub22() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3254,7 +3254,7 @@ const print = (() => {
     }
     CHAR_sub22.constant = {value: "\\b"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub23() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3283,7 +3283,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub26() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3300,7 +3300,7 @@ const print = (() => {
     }
     CHAR_sub26.constant = {value: "\\f"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub27() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3329,7 +3329,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub30() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3346,7 +3346,7 @@ const print = (() => {
     }
     CHAR_sub30.constant = {value: "\\n"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub31() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3375,7 +3375,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub34() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3392,7 +3392,7 @@ const print = (() => {
     }
     CHAR_sub34.constant = {value: "\\r"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub35() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3421,7 +3421,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub38() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3438,7 +3438,7 @@ const print = (() => {
     }
     CHAR_sub38.constant = {value: "\\t"};
 
-    // StringAbstract
+    // StringLiteral
     function CHAR_sub39() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3467,7 +3467,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function CHAR_sub42() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3525,7 +3525,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function LBRACE_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3558,7 +3558,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function RBRACE_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3591,7 +3591,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function LBRACKET_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3624,7 +3624,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function RBRACKET_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3657,7 +3657,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function COLON_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3690,7 +3690,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function COMMA_sub2() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3714,7 +3714,7 @@ const print = (() => {
         return result;
     }
 
-    // StringUniversal
+    // StringLiteral
     function DOUBLE_QUOTE_sub1() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3759,7 +3759,7 @@ const print = (() => {
         return false;
     }
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub3() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3774,7 +3774,7 @@ const print = (() => {
     }
     WS_sub3.constant = {value: " "};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub4() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3789,7 +3789,7 @@ const print = (() => {
     }
     WS_sub4.constant = {value: "\t"};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub5() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3804,7 +3804,7 @@ const print = (() => {
     }
     WS_sub5.constant = {value: "\n"};
 
-    // StringUniversal
+    // StringLiteral
     function WS_sub6() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;

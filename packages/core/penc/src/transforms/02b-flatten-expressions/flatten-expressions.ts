@@ -72,8 +72,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     )});
                     case 'SelectionExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'SequenceExpression': return setV(e, {expressions: e.expressions.map(ref)});
-                    case 'StringAbstract': return setV(e);
-                    case 'StringUniversal': return setV(e);
+                    case 'StringLiteral': return setV(e);
                     default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(e);    
                 }
             }

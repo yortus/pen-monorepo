@@ -80,8 +80,7 @@ export function createNodeHasher() {
             ));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));
-            case 'StringAbstract': return setSig('STRABS', n.value);
-            case 'StringUniversal': return setSig('STRCON', n.value);
+            case 'StringLiteral': return setSig('LITERAL', n.value, n.isAbstract);
             default: ((n: never) => { throw new Error(`Unhandled node kind ${(n as any).kind}`); })(n);
         }
     }

@@ -33,8 +33,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'SelectionExpression': return n.expressions.forEach(rec), cb(n);
             case 'SequenceExpression': return n.expressions.forEach(rec), cb(n);
             case 'Splice': return rec(n.expression), cb(n);
-            case 'StringAbstract': return cb(n);
-            case 'StringUniversal': return cb(n);
+            case 'StringLiteral': return cb(n);
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }
     }
