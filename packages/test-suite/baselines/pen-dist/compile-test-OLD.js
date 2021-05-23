@@ -257,7 +257,7 @@ function printInner(rule, mustConsume) {
         return result;
     }
     if (typeof value === 'string') {
-        AREP = value;
+        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
         atyp = ATYP = STRING;
     }
     else if (Array.isArray(value)) {
@@ -321,9 +321,9 @@ const parse = (() => {
     function foo() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 102) return false;
-            if (CREP[CPOS + 1] !== 111) return false;
-            if (CREP[CPOS + 2] !== 111) return false;
+            if (CREP[CPOS + 0] !== 0x66) return false;
+            if (CREP[CPOS + 1] !== 0x6f) return false;
+            if (CREP[CPOS + 2] !== 0x6f) return false;
             CPOS += 3;
         }
         emitBytes(0x66, 0x6f, 0x6f);
@@ -335,9 +335,9 @@ const parse = (() => {
     function bar() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 98) return false;
-            if (CREP[CPOS + 1] !== 97) return false;
-            if (CREP[CPOS + 2] !== 114) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CREP[CPOS + 1] !== 0x61) return false;
+            if (CREP[CPOS + 2] !== 0x72) return false;
             CPOS += 3;
         }
         emitBytes(0x62, 0x61, 0x72);
@@ -369,8 +369,8 @@ const parse = (() => {
     function b() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 98) return false;
-            if (CREP[CPOS + 1] !== 50) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CREP[CPOS + 1] !== 0x32) return false;
             CPOS += 2;
         }
         emitBytes(0x62, 0x32);
@@ -382,9 +382,9 @@ const parse = (() => {
     function baz() {
         if (HAS_IN) {
             if (CPOS + 3 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 98) return false;
-            if (CREP[CPOS + 1] !== 97) return false;
-            if (CREP[CPOS + 2] !== 122) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
+            if (CREP[CPOS + 1] !== 0x61) return false;
+            if (CREP[CPOS + 2] !== 0x7a) return false;
             CPOS += 3;
         }
         emitBytes(0x62, 0x61, 0x7a);
@@ -396,12 +396,12 @@ const parse = (() => {
     function mem() {
         if (HAS_IN) {
             if (CPOS + 6 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 109) return false;
-            if (CREP[CPOS + 1] !== 101) return false;
-            if (CREP[CPOS + 2] !== 109) return false;
-            if (CREP[CPOS + 3] !== 98) return false;
-            if (CREP[CPOS + 4] !== 101) return false;
-            if (CREP[CPOS + 5] !== 114) return false;
+            if (CREP[CPOS + 0] !== 0x6d) return false;
+            if (CREP[CPOS + 1] !== 0x65) return false;
+            if (CREP[CPOS + 2] !== 0x6d) return false;
+            if (CREP[CPOS + 3] !== 0x62) return false;
+            if (CREP[CPOS + 4] !== 0x65) return false;
+            if (CREP[CPOS + 5] !== 0x72) return false;
             CPOS += 6;
         }
         emitBytes(0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72);
@@ -432,7 +432,7 @@ const parse = (() => {
     function a_3_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 97) return false;
+            if (CREP[CPOS + 0] !== 0x61) return false;
             CPOS += 1;
         }
         emitByte(0x61);
@@ -463,7 +463,7 @@ const parse = (() => {
     function b_2_sub1() {
         if (HAS_IN) {
             if (CPOS + 1 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 98) return false;
+            if (CREP[CPOS + 0] !== 0x62) return false;
             CPOS += 1;
         }
         emitByte(0x62);
@@ -488,8 +488,8 @@ const parse = (() => {
     function c1() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 99) return false;
-            if (CREP[CPOS + 1] !== 49) return false;
+            if (CREP[CPOS + 0] !== 0x63) return false;
+            if (CREP[CPOS + 1] !== 0x31) return false;
             CPOS += 2;
         }
         emitBytes(0x63, 0x31);
@@ -501,8 +501,8 @@ const parse = (() => {
     function c2() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 99) return false;
-            if (CREP[CPOS + 1] !== 50) return false;
+            if (CREP[CPOS + 0] !== 0x63) return false;
+            if (CREP[CPOS + 1] !== 0x32) return false;
             CPOS += 2;
         }
         emitBytes(0x63, 0x32);
@@ -593,13 +593,15 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 102) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 111) return false;
-            if (AREP.charCodeAt(APOS + 2) !== 111) return false;
+            if (AREP[APOS + 0] !== 0x66) return false;
+            if (AREP[APOS + 1] !== 0x6f) return false;
+            if (AREP[APOS + 2] !== 0x6f) return false;
             APOS += 3;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("foo", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x66;
+            CREP[CPOS++] = 0x6f;
+            CREP[CPOS++] = 0x6f;
         }
         return true;
     }
@@ -610,13 +612,15 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 98) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 97) return false;
-            if (AREP.charCodeAt(APOS + 2) !== 114) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x61) return false;
+            if (AREP[APOS + 2] !== 0x72) return false;
             APOS += 3;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("bar", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x72;
         }
         return true;
     }
@@ -647,12 +651,13 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 98) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 50) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x32) return false;
             APOS += 2;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("b2", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x32;
         }
         return true;
     }
@@ -663,13 +668,15 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 98) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 97) return false;
-            if (AREP.charCodeAt(APOS + 2) !== 122) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
+            if (AREP[APOS + 1] !== 0x61) return false;
+            if (AREP[APOS + 2] !== 0x7a) return false;
             APOS += 3;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("baz", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x7a;
         }
         return true;
     }
@@ -680,16 +687,21 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 6 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 109) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 101) return false;
-            if (AREP.charCodeAt(APOS + 2) !== 109) return false;
-            if (AREP.charCodeAt(APOS + 3) !== 98) return false;
-            if (AREP.charCodeAt(APOS + 4) !== 101) return false;
-            if (AREP.charCodeAt(APOS + 5) !== 114) return false;
+            if (AREP[APOS + 0] !== 0x6d) return false;
+            if (AREP[APOS + 1] !== 0x65) return false;
+            if (AREP[APOS + 2] !== 0x6d) return false;
+            if (AREP[APOS + 3] !== 0x62) return false;
+            if (AREP[APOS + 4] !== 0x65) return false;
+            if (AREP[APOS + 5] !== 0x72) return false;
             APOS += 6;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("member", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x6d;
+            CREP[CPOS++] = 0x65;
+            CREP[CPOS++] = 0x6d;
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x65;
+            CREP[CPOS++] = 0x72;
         }
         return true;
     }
@@ -716,11 +728,11 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 97) return false;
+            if (AREP[APOS + 0] !== 0x61) return false;
             APOS += 1;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("a", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x61;
         }
         return true;
     }
@@ -747,11 +759,11 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 98) return false;
+            if (AREP[APOS + 0] !== 0x62) return false;
             APOS += 1;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("b", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x62;
         }
         return true;
     }
@@ -775,12 +787,13 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 99) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 49) return false;
+            if (AREP[APOS + 0] !== 0x63) return false;
+            if (AREP[APOS + 1] !== 0x31) return false;
             APOS += 2;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("c1", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x63;
+            CREP[CPOS++] = 0x31;
         }
         return true;
     }
@@ -791,12 +804,13 @@ const print = (() => {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
-            if (AREP.charCodeAt(APOS + 0) !== 99) return false;
-            if (AREP.charCodeAt(APOS + 1) !== 50) return false;
+            if (AREP[APOS + 0] !== 0x63) return false;
+            if (AREP[APOS + 1] !== 0x32) return false;
             APOS += 2;
         }
         if (HAS_OUT) {
-            CPOS += CREP.write("c2", CPOS, undefined, 'utf8');
+            CREP[CPOS++] = 0x63;
+            CREP[CPOS++] = 0x32;
         }
         return true;
     }

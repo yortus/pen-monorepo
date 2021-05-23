@@ -34,9 +34,9 @@ function ascii({mode}: StaticOptions): Generic {
                 let cc: number;
                 if (HAS_IN) {
                     if (ATYP !== STRING) return false;
-                    const arep = AREP as unknown as string; // TODO: fix cast
+                    const arep = AREP as Buffer;
                     if (APOS >= arep.length) return false;
-                    cc = arep.charCodeAt(APOS);
+                    cc = arep[APOS];
                     if (cc < min || cc > max) return false;
                     APOS += 1;
                 }

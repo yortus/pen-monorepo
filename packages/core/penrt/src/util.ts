@@ -50,17 +50,18 @@ function isModule(_x: PenVal): _x is Module {
 // [x]    a. no obvious low-hanging fruit
 // [x]    b. most obvious 'smell': extremely deep call chains with LST and RCD. These are tail-recursive in json.pen. fn call/ret overheads dominating execution time?
 // [x]    c. can we (a) identify tail-recursion in lists and records? (b) lower it to iteration in a transform?
-// [ ]    d. list/record sequences still work! These are iterative instead of recursive so don't have super-deep call chains
-// [ ]    e. impl json.pen using (d) and profile again
-// [ ]    f. now, most time is spend in the following 2 areas:
-// [ ]       i) parseInner
-// [ ]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
-// [ ]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
+// [x]    d. list/record sequences still work! These are iterative instead of recursive so don't have super-deep call chains
+// [x]    e. impl json.pen using (d) and profile again
+// [x]    f. now, most time is spend in the following 2 areas:
+// [x]       i) parseInner
+// [x]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
+// [x]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
 // [ ]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`
-// [ ] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
+// [x] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
 // [ ] 7. restore LEN checking
+// [ ]    a. eg printInner for STRING always slices a new Buffer, could just set LEN instead if it was respected/checked everywhere
 
 
 interface Arrayish<T> {
@@ -177,7 +178,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
 
     // Aggregate cases
     if (typeof value === 'string') {
-        AREP = value as any; // TODO: fix cast by having a type with common features of string and Array<unknown>
+        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
         atyp = ATYP = STRING;
     }
     else if (Array.isArray(value)) {

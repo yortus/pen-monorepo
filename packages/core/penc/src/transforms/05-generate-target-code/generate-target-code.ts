@@ -344,19 +344,19 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'StringAbstract': { // AST literal
+            const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();
             if (mode === 'parse') {
-                const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
                 emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
             }
             if (mode === 'print') {
                 emit.down(1).text(`if (HAS_IN) {`).indent();
                 emit.down(1).text(`if (ATYP !== STRING) return false;`);
-                emit.down(1).text(`if (APOS + ${expr.value.length} > AREP.length) return false;`);
-                for (let i = 0; i < expr.value.length; ++i) {
-                    emit.down(1).text(`if (AREP.charCodeAt(APOS + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
+                emit.down(1).text(`if (APOS + ${bytes.length} > AREP.length) return false;`);
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`if (AREP[APOS + ${i}] !== ${bytes[i]}) return false;`);
                 }
-                emit.down(1).text(`APOS += ${expr.value.length};`);
+                emit.down(1).text(`APOS += ${bytes.length};`);
                 emit.dedent().down(1).text(`}`);
             }
             emit.down(1).text(`return true;`);
@@ -366,27 +366,24 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'StringUniversal': { // Code parse from bytestream to string
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+            const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`if (HAS_IN) {`).indent();
             if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
-            emit.down(1).text(`if (${IPOS} + ${expr.value.length} > ${IREP}.length) return false;`);
-            for (let i = 0; i < expr.value.length; ++i) {
-                if (mode === 'parse') {
-                    emit.down(1).text(`if (CREP[CPOS + ${i}] !== ${expr.value.charCodeAt(i)}) return false;`);
-                }
-                else /* mode === 'print' */ {
-                    emit.down(1).text(`if (AREP.charCodeAt(APOS + ${i}) !== ${expr.value.charCodeAt(i)}) return false;`);
-                }
+            emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
+            for (let i = 0; i < bytes.length; ++i) {
+                emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
             }
-            emit.down(1).text(`${IPOS} += ${expr.value.length};`);
+            emit.down(1).text(`${IPOS} += ${bytes.length};`);
             emit.dedent().down(1).text(`}`);
             if (mode === 'parse') {
-                const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
                 emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
             }
             else /* mode === 'print */ {
                 emit.down(1).text(`if (HAS_OUT) {`).indent();
-                emit.down(1).text(`CPOS += CREP.write(${JSON.stringify(expr.value)}, CPOS, undefined, 'utf8');`);
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                }
                 emit.dedent().down(1).text('}');
             }
             emit.down(1).text(`return true;`);
