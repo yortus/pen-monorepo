@@ -13,6 +13,13 @@ describe(`Compiling and executing the 'json.pen' program`, () => {
         {text: '[]', ast: []},
         {text: '123', ast: 123},
         {text: '"abc"', ast: 'abc'},
+        {text: '"\\\\"', ast: '\\'},
+        {text: '"\\t"', ast: '\t'},
+        {text: '"\\u0041"', ast: 'A'},
+        {text: '"\\u2368"', ast: '⍨'},
+        {text: '"😄"', ast: '😄'},
+        {text: '"\uD83D\uDE04"', ast: '😄'},
+        {text: '"\\u0041+\\t\\u2368"', ast: 'A+\t⍨'},
         {
             // NB: JSON doesn't accept some number formats that JS does - eg +3, 1., .1
             text: '[3.14, 5e-50, 200e3, -1.004]', // TODO: add more corner cases...
@@ -51,7 +58,7 @@ describe(`Compiling and executing the 'json.pen' program`, () => {
         // NB: currently only ASCII is supported...
         // TODO: restore utf8 support (and other encodings?)
         // TODO: add more unicode escapes in strings, corner cases (eg surrogate pairs - do they work in JSON?)
-        // TODO: should (and did once) work, now fails due to only ascii char support {text: '"\\u0041+\s\\u2368"', ast: 'A+ ⍨'},
+        // TODO: should (and did once) work, now fails due to only ascii char support {text: '"\\u0041+\\s\\u2368"', ast: 'A+ ⍨'},
     ];
 
     for (const test of tests) {

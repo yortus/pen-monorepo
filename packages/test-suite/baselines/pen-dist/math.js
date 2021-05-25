@@ -278,7 +278,7 @@ function printInner(rule, mustConsume) {
     }
     APOS = 0;
     let result = rule();
-    const apos = APOS;
+    const [arep, apos] = [AREP, APOS];
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
@@ -288,7 +288,7 @@ function printInner(rule, mustConsume) {
             return false;
     }
     else {
-        if (apos !== value.length)
+        if (apos !== arep.length)
             return false;
     }
     APOS += 1;

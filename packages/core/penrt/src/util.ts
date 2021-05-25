@@ -203,7 +203,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     let result = rule();
 
     // Restore AREP/APOS/ATYP
-    const apos = APOS;
+    const [arep, apos] = [AREP, APOS];
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result) return false;
 
@@ -213,7 +213,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
     }
     else /* STRING | LIST */ {
-        if (apos !== (value as any).length) return false;
+        if (apos !== arep.length) return false;
     }
     APOS += 1;
     return true;
