@@ -2173,74 +2173,17 @@ const parse = (() => {
         return true;
     }
 
-    // SelectionExpression
-    function WS_sub2() {
-        if (WS_sub3()) return true;
-        if (WS_sub4()) return true;
-        if (WS_sub5()) return true;
-        if (WS_sub6()) return true;
-        return false;
-    }
-
     // ByteExpression
-    function WS_sub3() {
+    function WS_sub2() {
         let cc;
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
-            if (cc !== 0x20) return false;
+            if (cc !== 0x20 && cc !== 0x09 && cc !== 0x0a && cc !== 0x0d) return false;
             CPOS += 1;
         }
         else {
             cc = 0x20;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub4() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x09) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x09;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub5() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x0a) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x0a;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub6() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x0d) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x0d;
         }
         emitByte(cc);
         return true;
@@ -3655,78 +3598,18 @@ const print = (() => {
         return true;
     }
 
-    // SelectionExpression
-    function WS_sub2() {
-        if (WS_sub3()) return true;
-        if (WS_sub4()) return true;
-        if (WS_sub5()) return true;
-        if (WS_sub6()) return true;
-        return false;
-    }
-
     // ByteExpression
-    function WS_sub3() {
+    function WS_sub2() {
         let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
-            if (cc !== 0x20) return false;
+            if (cc !== 0x20 && cc !== 0x09 && cc !== 0x0a && cc !== 0x0d) return false;
             APOS += 1;
         }
         else {
             cc = 0x20;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub4() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x09) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x09;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub5() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x0a) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x0a;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function WS_sub6() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x0d) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x0d;
         }
         if (HAS_OUT) CREP[CPOS++] = cc;
         return true;

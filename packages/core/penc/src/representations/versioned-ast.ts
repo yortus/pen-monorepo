@@ -116,11 +116,9 @@ export interface BooleanLiteral {
 
 export interface ByteExpression {
     kind: 'ByteExpression';
-    ranges: Array<{
-        min: number;
-        max: number;
-        isNegated?: boolean;
-    }>;
+    include: Array<number | [min: number, max: number]>;
+    exclude?: Array<number | [min: number, max: number]>;
+    default: number;
 }
 
 

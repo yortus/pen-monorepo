@@ -56,7 +56,8 @@ function isModule(_x: PenVal): _x is Module {
 // [x]       i) parseInner
 // [x]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
 // [x]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
-// [ ]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`
+// [x]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`     DONE! optimisation works
+// [ ]       iii) the WS rulw, specifically four ByteExprs in a selection could be simplified? Perf test first...
 // [x] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?

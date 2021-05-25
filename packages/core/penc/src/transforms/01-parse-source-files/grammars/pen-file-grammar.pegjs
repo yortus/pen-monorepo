@@ -182,7 +182,8 @@ ByteExpression
     {
         const min = parseInt(lo.join(''), 16);
         const max = hi ? parseInt(hi.slice(1).join(''), 16) : min;
-        return {kind: 'ByteExpression', ranges: [{min, max}]};
+        if (min > max) error('invalid byte range: min is greater than max');
+        return {kind: 'ByteExpression', include: [hi ? [min, max] : [min]], default: min};
     }
 
 NullLiteral

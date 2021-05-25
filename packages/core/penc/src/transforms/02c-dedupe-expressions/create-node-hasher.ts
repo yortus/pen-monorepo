@@ -58,7 +58,7 @@ export function createNodeHasher() {
         // Recursively compute the signature according to the node type.
         switch (n.kind) {
             case 'BooleanLiteral': return setSig('LITERAL', n.value);
-            case 'ByteExpression': return setSig('BYTE', n.ranges); // TODO: sort/normalise ranges so equiv ones will have the same signature
+            case 'ByteExpression': return setSig('BYTE', n.include, n.exclude, n.default); // TODO: sort/normalise inc/exc arrays so equiv ones will have the same signature
             case 'CodeExpression': return setSig('CODE', getSig(n.expression));
             case 'GenericExpression': return setSig('GENEXPR', getSig(n.body));
             case 'GenericParameter': return setSig('GENPARAM', n.name);

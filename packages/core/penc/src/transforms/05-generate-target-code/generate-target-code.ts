@@ -174,24 +174,25 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
             emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
             emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
-            for (const range of expr.ranges) {
-                const min = `0x${range.min.toString(16).padStart(2, '0')}`;
-                const max = `0x${range.max.toString(16).padStart(2, '0')}`;
-                const neg = range.isNegated;
-                const cond = min === max ? `cc ${neg ? '===' : '!=='} ${min}` : `${neg ? '!' : ''}(cc < ${min} || cc > ${max})`;
+            for (const excl of expr.exclude || []) {
+                const [lo, hi, isRange] = Array.isArray(excl) ? [...excl, true] : [excl, -1, false];
+                const min = `0x${lo.toString(16).padStart(2, '0')}`;
+                const max = `0x${hi.toString(16).padStart(2, '0')}`;
+                const cond = isRange ? `cc >= ${min} && cc <= ${max}` : `cc === ${min}`;
                 emit.down(1).text(`if (${cond}) return false;`);
             }
+            const include = expr.include.length === 0 ? [0x00, 0xff] : expr.include;
+            const cond = include.map(incl => {
+                const [lo, hi, isRange] = Array.isArray(incl) ? [...incl, true] : [incl, -1, false];
+                const min = `0x${lo.toString(16).padStart(2, '0')}`;
+                const max = `0x${hi.toString(16).padStart(2, '0')}`;
+                return isRange ? `(cc < ${min} || cc > ${max})` : `cc !== ${min}`;
+            }).join(' && ');
+            emit.down(1).text(`if (${cond}) return false;`);
             emit.down(1).text(`${IPOS} += 1;`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(`else {`).indent();
-            // Calculate default byte value when there is no input.
-            // TODO: assertions below document assumptions about valid `ranges`. Should enforce these when syntax checking. 
-            const lastRange = expr.ranges[expr.ranges.length - 1];
-            assert(lastRange && !lastRange.isNegated && lastRange.min <= lastRange.max);
-            const val = lastRange.min;
-            const negRanges = expr.ranges.slice(0, -1);
-            assert(negRanges.every(r => r.isNegated && (val < r.min || val > r.max)));
-            emit.down(1).text(`cc = 0x${val.toString(16).padStart(2, '0')};`);
+            emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
             emit.dedent().down(1).text(`}`);
             emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `if (HAS_OUT) CREP[CPOS++] = cc;`);
             emit.down(1).text(`return true;`);
