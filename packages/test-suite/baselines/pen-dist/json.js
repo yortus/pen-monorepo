@@ -1442,96 +1442,29 @@ const parse = (() => {
     // SelectionExpression
     function CHAR() {
         if (CHAR_sub1()) return true;
-        if (CHAR_sub20()) return true;
-        if (CHAR_sub24()) return true;
-        if (CHAR_sub28()) return true;
-        if (CHAR_sub32()) return true;
-        if (CHAR_sub36()) return true;
-        if (CHAR_sub40()) return true;
-        if (CHAR_sub44()) return true;
-        if (CHAR_sub48()) return true;
-        if (CHAR_sub52()) return true;
+        if (CHAR_sub2()) return true;
+        if (CHAR_sub5()) return true;
+        if (CHAR_sub9()) return true;
+        if (CHAR_sub14()) return true;
+        if (CHAR_sub18()) return true;
+        if (CHAR_sub22()) return true;
+        if (CHAR_sub26()) return true;
+        if (CHAR_sub30()) return true;
+        if (CHAR_sub34()) return true;
+        if (CHAR_sub38()) return true;
+        if (CHAR_sub42()) return true;
+        if (CHAR_sub46()) return true;
         return false;
     }
 
-    // SequenceExpression
+    // ByteExpression
     function CHAR_sub1() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        if (!CHAR_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    }
-
-    // NotExpression
-    function CHAR_sub2() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !CHAR_sub3();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP = NOTHING;
-        return result;
-    }
-
-    // ByteExpression
-    function CHAR_sub3() {
         let cc;
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
-            if (cc !== 0x5c) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x5c;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // NotExpression
-    function CHAR_sub4() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !CHAR_sub5();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP = NOTHING;
-        return result;
-    }
-
-    // ByteExpression
-    function CHAR_sub5() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x22) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x22;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // SelectionExpression
-    function CHAR_sub6() {
-        if (CHAR_sub7()) return true;
-        if (CHAR_sub8()) return true;
-        if (CHAR_sub11()) return true;
-        if (CHAR_sub15()) return true;
-        return false;
-    }
-
-    // ByteExpression
-    function CHAR_sub7() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
+            if (cc === 0x5c) return false;
+            if (cc === 0x22) return false;
             if ((cc < 0x20 || cc > 0x7f)) return false;
             CPOS += 1;
         }
@@ -1543,18 +1476,18 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function CHAR_sub8() {
+    function CHAR_sub2() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub10()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // ByteExpression
-    function CHAR_sub9() {
+    function CHAR_sub3() {
         let cc;
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
@@ -1570,7 +1503,7 @@ const parse = (() => {
     }
 
     // ByteExpression
-    function CHAR_sub10() {
+    function CHAR_sub4() {
         let cc;
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
@@ -1586,20 +1519,20 @@ const parse = (() => {
     }
 
     // SequenceExpression
-    function CHAR_sub11() {
+    function CHAR_sub5() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub14()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // ByteExpression
-    function CHAR_sub12() {
+    function CHAR_sub6() {
         let cc;
         if (HAS_IN) {
             if (CPOS >= CREP.length) return false;
@@ -1609,6 +1542,101 @@ const parse = (() => {
         }
         else {
             cc = 0xe0;
+        }
+        emitByte(cc);
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub7() {
+        let cc;
+        if (HAS_IN) {
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            CPOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        emitByte(cc);
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub8() {
+        let cc;
+        if (HAS_IN) {
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            CPOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        emitByte(cc);
+        return true;
+    }
+
+    // SequenceExpression
+    function CHAR_sub9() {
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        let seqType = NOTHING;
+        if (!CHAR_sub10()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!CHAR_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!CHAR_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        seqType |= ATYP;
+        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        ATYP |= seqType;
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub10() {
+        let cc;
+        if (HAS_IN) {
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if ((cc < 0xf0 || cc > 0xf7)) return false;
+            CPOS += 1;
+        }
+        else {
+            cc = 0xf0;
+        }
+        emitByte(cc);
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub11() {
+        let cc;
+        if (HAS_IN) {
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            CPOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        emitByte(cc);
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub12() {
+        let cc;
+        if (HAS_IN) {
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            CPOS += 1;
+        }
+        else {
+            cc = 0x80;
         }
         emitByte(cc);
         return true;
@@ -1630,124 +1658,29 @@ const parse = (() => {
         return true;
     }
 
-    // ByteExpression
-    function CHAR_sub14() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        emitByte(cc);
-        return true;
-    }
-
     // SequenceExpression
-    function CHAR_sub15() {
+    function CHAR_sub14() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
         if (!CHAR_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!CHAR_sub18()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub16() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0xf0 || cc > 0xf7)) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0xf0;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub17() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub18() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub19() {
-        let cc;
-        if (HAS_IN) {
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        emitByte(cc);
-        return true;
-    }
-
-    // SequenceExpression
-    function CHAR_sub20() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub21() {
+    function CHAR_sub15() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub22();
+        const result = CHAR_sub16();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub22() {
+    function CHAR_sub16() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1757,38 +1690,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x22);
         return true;
     }
-    CHAR_sub22.constant = {value: "\\\""};
+    CHAR_sub16.constant = {value: "\\\""};
 
     // StringLiteral
-    function CHAR_sub23() {
+    function CHAR_sub17() {
         emitByte(0x22);
         return true;
     }
-    CHAR_sub23.constant = {value: "\""};
+    CHAR_sub17.constant = {value: "\""};
 
     // SequenceExpression
-    function CHAR_sub24() {
+    function CHAR_sub18() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub25() {
+    function CHAR_sub19() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub26();
+        const result = CHAR_sub20();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub26() {
+    function CHAR_sub20() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1798,38 +1731,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x5c);
         return true;
     }
-    CHAR_sub26.constant = {value: "\\\\"};
+    CHAR_sub20.constant = {value: "\\\\"};
 
     // StringLiteral
-    function CHAR_sub27() {
+    function CHAR_sub21() {
         emitByte(0x5c);
         return true;
     }
-    CHAR_sub27.constant = {value: "\\"};
+    CHAR_sub21.constant = {value: "\\"};
 
     // SequenceExpression
-    function CHAR_sub28() {
+    function CHAR_sub22() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub29() {
+    function CHAR_sub23() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub30();
+        const result = CHAR_sub24();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub30() {
+    function CHAR_sub24() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1839,38 +1772,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x2f);
         return true;
     }
-    CHAR_sub30.constant = {value: "\\/"};
+    CHAR_sub24.constant = {value: "\\/"};
 
     // StringLiteral
-    function CHAR_sub31() {
+    function CHAR_sub25() {
         emitByte(0x2f);
         return true;
     }
-    CHAR_sub31.constant = {value: "/"};
+    CHAR_sub25.constant = {value: "/"};
 
     // SequenceExpression
-    function CHAR_sub32() {
+    function CHAR_sub26() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub33() {
+    function CHAR_sub27() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub34();
+        const result = CHAR_sub28();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub34() {
+    function CHAR_sub28() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1880,38 +1813,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x62);
         return true;
     }
-    CHAR_sub34.constant = {value: "\\b"};
+    CHAR_sub28.constant = {value: "\\b"};
 
     // StringLiteral
-    function CHAR_sub35() {
+    function CHAR_sub29() {
         emitByte(0x08);
         return true;
     }
-    CHAR_sub35.constant = {value: "\b"};
+    CHAR_sub29.constant = {value: "\b"};
 
     // SequenceExpression
-    function CHAR_sub36() {
+    function CHAR_sub30() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub37() {
+    function CHAR_sub31() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub38();
+        const result = CHAR_sub32();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub38() {
+    function CHAR_sub32() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1921,38 +1854,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x66);
         return true;
     }
-    CHAR_sub38.constant = {value: "\\f"};
+    CHAR_sub32.constant = {value: "\\f"};
 
     // StringLiteral
-    function CHAR_sub39() {
+    function CHAR_sub33() {
         emitByte(0x0c);
         return true;
     }
-    CHAR_sub39.constant = {value: "\f"};
+    CHAR_sub33.constant = {value: "\f"};
 
     // SequenceExpression
-    function CHAR_sub40() {
+    function CHAR_sub34() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub41() {
+    function CHAR_sub35() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub42();
+        const result = CHAR_sub36();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub42() {
+    function CHAR_sub36() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -1962,38 +1895,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x6e);
         return true;
     }
-    CHAR_sub42.constant = {value: "\\n"};
+    CHAR_sub36.constant = {value: "\\n"};
 
     // StringLiteral
-    function CHAR_sub43() {
+    function CHAR_sub37() {
         emitByte(0x0a);
         return true;
     }
-    CHAR_sub43.constant = {value: "\n"};
+    CHAR_sub37.constant = {value: "\n"};
 
     // SequenceExpression
-    function CHAR_sub44() {
+    function CHAR_sub38() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub45()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub47()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub45() {
+    function CHAR_sub39() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub46();
+        const result = CHAR_sub40();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub46() {
+    function CHAR_sub40() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -2003,38 +1936,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x72);
         return true;
     }
-    CHAR_sub46.constant = {value: "\\r"};
+    CHAR_sub40.constant = {value: "\\r"};
 
     // StringLiteral
-    function CHAR_sub47() {
+    function CHAR_sub41() {
         emitByte(0x0d);
         return true;
     }
-    CHAR_sub47.constant = {value: "\r"};
+    CHAR_sub41.constant = {value: "\r"};
 
     // SequenceExpression
-    function CHAR_sub48() {
+    function CHAR_sub42() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub49()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub51()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub45()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub49() {
+    function CHAR_sub43() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub50();
+        const result = CHAR_sub44();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub50() {
+    function CHAR_sub44() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -2044,38 +1977,38 @@ const parse = (() => {
         emitBytes(0x5c, 0x74);
         return true;
     }
-    CHAR_sub50.constant = {value: "\\t"};
+    CHAR_sub44.constant = {value: "\\t"};
 
     // StringLiteral
-    function CHAR_sub51() {
+    function CHAR_sub45() {
         emitByte(0x09);
         return true;
     }
-    CHAR_sub51.constant = {value: "\t"};
+    CHAR_sub45.constant = {value: "\t"};
 
     // SequenceExpression
-    function CHAR_sub52() {
+    function CHAR_sub46() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
-        if (!CHAR_sub53()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub47()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!CHAR_sub55()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub49()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub53() {
+    function CHAR_sub47() {
         const HAS_OUTₒ = HAS_OUT;
         HAS_OUT = false;
-        const result = CHAR_sub54();
+        const result = CHAR_sub48();
         HAS_OUT = HAS_OUTₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub54() {
+    function CHAR_sub48() {
         if (HAS_IN) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x5c) return false;
@@ -2085,23 +2018,23 @@ const parse = (() => {
         emitBytes(0x5c, 0x75);
         return true;
     }
-    CHAR_sub54.constant = {value: "\\u"};
+    CHAR_sub48.constant = {value: "\\u"};
 
     // InstantiationExpression
-    let CHAR_sub55ₘ;
-    function CHAR_sub55(arg) {
+    let CHAR_sub49ₘ;
+    function CHAR_sub49(arg) {
         try {
-            return CHAR_sub55ₘ(arg);
+            return CHAR_sub49ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub55ₘ is not a function')) throw err;
-            CHAR_sub55ₘ = unicode(CHAR_sub56);
-            return CHAR_sub55ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub49ₘ is not a function')) throw err;
+            CHAR_sub49ₘ = unicode(CHAR_sub50);
+            return CHAR_sub49ₘ(arg);
         }
     }
 
     // Module
-    function CHAR_sub56(member) {
+    function CHAR_sub50(member) {
         switch (member) {
             case 'base': return base;
             case 'minDigits': return minDigits;
@@ -3094,93 +3027,30 @@ const print = (() => {
     // SelectionExpression
     function CHAR() {
         if (CHAR_sub1()) return true;
-        if (CHAR_sub20()) return true;
-        if (CHAR_sub24()) return true;
-        if (CHAR_sub28()) return true;
-        if (CHAR_sub32()) return true;
-        if (CHAR_sub36()) return true;
-        if (CHAR_sub40()) return true;
-        if (CHAR_sub44()) return true;
-        if (CHAR_sub48()) return true;
-        if (CHAR_sub52()) return true;
+        if (CHAR_sub2()) return true;
+        if (CHAR_sub5()) return true;
+        if (CHAR_sub9()) return true;
+        if (CHAR_sub14()) return true;
+        if (CHAR_sub18()) return true;
+        if (CHAR_sub22()) return true;
+        if (CHAR_sub26()) return true;
+        if (CHAR_sub30()) return true;
+        if (CHAR_sub34()) return true;
+        if (CHAR_sub38()) return true;
+        if (CHAR_sub42()) return true;
+        if (CHAR_sub46()) return true;
         return false;
     }
 
-    // SequenceExpression
+    // ByteExpression
     function CHAR_sub1() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    }
-
-    // NotExpression
-    function CHAR_sub2() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !CHAR_sub3();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return result;
-    }
-
-    // ByteExpression
-    function CHAR_sub3() {
         let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
-            if (cc !== 0x5c) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x5c;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // NotExpression
-    function CHAR_sub4() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !CHAR_sub5();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return result;
-    }
-
-    // ByteExpression
-    function CHAR_sub5() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x22) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x22;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // SelectionExpression
-    function CHAR_sub6() {
-        if (CHAR_sub7()) return true;
-        if (CHAR_sub8()) return true;
-        if (CHAR_sub11()) return true;
-        if (CHAR_sub15()) return true;
-        return false;
-    }
-
-    // ByteExpression
-    function CHAR_sub7() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
+            if (cc === 0x5c) return false;
+            if (cc === 0x22) return false;
             if ((cc < 0x20 || cc > 0x7f)) return false;
             APOS += 1;
         }
@@ -3192,15 +3062,15 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function CHAR_sub8() {
+    function CHAR_sub2() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub9()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub10()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // ByteExpression
-    function CHAR_sub9() {
+    function CHAR_sub3() {
         let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3217,7 +3087,7 @@ const print = (() => {
     }
 
     // ByteExpression
-    function CHAR_sub10() {
+    function CHAR_sub4() {
         let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3234,16 +3104,16 @@ const print = (() => {
     }
 
     // SequenceExpression
-    function CHAR_sub11() {
+    function CHAR_sub5() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub14()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub6()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // ByteExpression
-    function CHAR_sub12() {
+    function CHAR_sub6() {
         let cc;
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
@@ -3254,6 +3124,101 @@ const print = (() => {
         }
         else {
             cc = 0xe0;
+        }
+        if (HAS_OUT) CREP[CPOS++] = cc;
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub7() {
+        let cc;
+        if (HAS_IN) {
+            if (ATYP !== STRING) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            APOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        if (HAS_OUT) CREP[CPOS++] = cc;
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub8() {
+        let cc;
+        if (HAS_IN) {
+            if (ATYP !== STRING) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            APOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        if (HAS_OUT) CREP[CPOS++] = cc;
+        return true;
+    }
+
+    // SequenceExpression
+    function CHAR_sub9() {
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!CHAR_sub10()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub13()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub10() {
+        let cc;
+        if (HAS_IN) {
+            if (ATYP !== STRING) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if ((cc < 0xf0 || cc > 0xf7)) return false;
+            APOS += 1;
+        }
+        else {
+            cc = 0xf0;
+        }
+        if (HAS_OUT) CREP[CPOS++] = cc;
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub11() {
+        let cc;
+        if (HAS_IN) {
+            if (ATYP !== STRING) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            APOS += 1;
+        }
+        else {
+            cc = 0x80;
+        }
+        if (HAS_OUT) CREP[CPOS++] = cc;
+        return true;
+    }
+
+    // ByteExpression
+    function CHAR_sub12() {
+        let cc;
+        if (HAS_IN) {
+            if (ATYP !== STRING) return false;
+            if (APOS >= AREP.length) return false;
+            cc = AREP[APOS];
+            if ((cc < 0x80 || cc > 0xbf)) return false;
+            APOS += 1;
+        }
+        else {
+            cc = 0x80;
         }
         if (HAS_OUT) CREP[CPOS++] = cc;
         return true;
@@ -3276,120 +3241,25 @@ const print = (() => {
         return true;
     }
 
-    // ByteExpression
+    // SequenceExpression
     function CHAR_sub14() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // SequenceExpression
-    function CHAR_sub15() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!CHAR_sub17()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub18()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub16() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0xf0 || cc > 0xf7)) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0xf0;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub17() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub18() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // ByteExpression
-    function CHAR_sub19() {
-        let cc;
-        if (HAS_IN) {
-            if (ATYP !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-        }
-        else {
-            cc = 0x80;
-        }
-        if (HAS_OUT) CREP[CPOS++] = cc;
-        return true;
-    }
-
-    // SequenceExpression
-    function CHAR_sub20() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub21() {
+    function CHAR_sub15() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub22();
+        const result = CHAR_sub16();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub22() {
+    function CHAR_sub16() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3403,10 +3273,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub22.constant = {value: "\\\""};
+    CHAR_sub16.constant = {value: "\\\""};
 
     // StringLiteral
-    function CHAR_sub23() {
+    function CHAR_sub17() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3415,27 +3285,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub23.constant = {value: "\""};
+    CHAR_sub17.constant = {value: "\""};
 
     // SequenceExpression
-    function CHAR_sub24() {
+    function CHAR_sub18() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub21()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub25() {
+    function CHAR_sub19() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub26();
+        const result = CHAR_sub20();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub26() {
+    function CHAR_sub20() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3449,10 +3319,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub26.constant = {value: "\\\\"};
+    CHAR_sub20.constant = {value: "\\\\"};
 
     // StringLiteral
-    function CHAR_sub27() {
+    function CHAR_sub21() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3461,27 +3331,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub27.constant = {value: "\\"};
+    CHAR_sub21.constant = {value: "\\"};
 
     // SequenceExpression
-    function CHAR_sub28() {
+    function CHAR_sub22() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub23()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub25()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub29() {
+    function CHAR_sub23() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub30();
+        const result = CHAR_sub24();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub30() {
+    function CHAR_sub24() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3495,10 +3365,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub30.constant = {value: "\\/"};
+    CHAR_sub24.constant = {value: "\\/"};
 
     // StringLiteral
-    function CHAR_sub31() {
+    function CHAR_sub25() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3507,27 +3377,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub31.constant = {value: "/"};
+    CHAR_sub25.constant = {value: "/"};
 
     // SequenceExpression
-    function CHAR_sub32() {
+    function CHAR_sub26() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub27()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub29()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub33() {
+    function CHAR_sub27() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub34();
+        const result = CHAR_sub28();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub34() {
+    function CHAR_sub28() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3541,10 +3411,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub34.constant = {value: "\\b"};
+    CHAR_sub28.constant = {value: "\\b"};
 
     // StringLiteral
-    function CHAR_sub35() {
+    function CHAR_sub29() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3553,27 +3423,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub35.constant = {value: "\b"};
+    CHAR_sub29.constant = {value: "\b"};
 
     // SequenceExpression
-    function CHAR_sub36() {
+    function CHAR_sub30() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub31()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub33()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub37() {
+    function CHAR_sub31() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub38();
+        const result = CHAR_sub32();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub38() {
+    function CHAR_sub32() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3587,10 +3457,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub38.constant = {value: "\\f"};
+    CHAR_sub32.constant = {value: "\\f"};
 
     // StringLiteral
-    function CHAR_sub39() {
+    function CHAR_sub33() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3599,27 +3469,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub39.constant = {value: "\f"};
+    CHAR_sub33.constant = {value: "\f"};
 
     // SequenceExpression
-    function CHAR_sub40() {
+    function CHAR_sub34() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub35()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub37()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub41() {
+    function CHAR_sub35() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub42();
+        const result = CHAR_sub36();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub42() {
+    function CHAR_sub36() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3633,10 +3503,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub42.constant = {value: "\\n"};
+    CHAR_sub36.constant = {value: "\\n"};
 
     // StringLiteral
-    function CHAR_sub43() {
+    function CHAR_sub37() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3645,27 +3515,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub43.constant = {value: "\n"};
+    CHAR_sub37.constant = {value: "\n"};
 
     // SequenceExpression
-    function CHAR_sub44() {
+    function CHAR_sub38() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub45()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub47()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub39()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub41()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub45() {
+    function CHAR_sub39() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub46();
+        const result = CHAR_sub40();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub46() {
+    function CHAR_sub40() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3679,10 +3549,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub46.constant = {value: "\\r"};
+    CHAR_sub40.constant = {value: "\\r"};
 
     // StringLiteral
-    function CHAR_sub47() {
+    function CHAR_sub41() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3691,27 +3561,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub47.constant = {value: "\r"};
+    CHAR_sub41.constant = {value: "\r"};
 
     // SequenceExpression
-    function CHAR_sub48() {
+    function CHAR_sub42() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub49()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub51()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub43()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub45()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub49() {
+    function CHAR_sub43() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub50();
+        const result = CHAR_sub44();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub50() {
+    function CHAR_sub44() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3725,10 +3595,10 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub50.constant = {value: "\\t"};
+    CHAR_sub44.constant = {value: "\\t"};
 
     // StringLiteral
-    function CHAR_sub51() {
+    function CHAR_sub45() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 1 > AREP.length) return false;
@@ -3737,27 +3607,27 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub51.constant = {value: "\t"};
+    CHAR_sub45.constant = {value: "\t"};
 
     // SequenceExpression
-    function CHAR_sub52() {
+    function CHAR_sub46() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!CHAR_sub53()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!CHAR_sub55()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub47()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!CHAR_sub49()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
     // CodeExpression
-    function CHAR_sub53() {
+    function CHAR_sub47() {
         const HAS_INₒ = HAS_IN;
         HAS_IN = false;
-        const result = CHAR_sub54();
+        const result = CHAR_sub48();
         HAS_IN = HAS_INₒ;
         return result;
     }
 
     // StringLiteral
-    function CHAR_sub54() {
+    function CHAR_sub48() {
         if (HAS_IN) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
@@ -3771,23 +3641,23 @@ const print = (() => {
         }
         return true;
     }
-    CHAR_sub54.constant = {value: "\\u"};
+    CHAR_sub48.constant = {value: "\\u"};
 
     // InstantiationExpression
-    let CHAR_sub55ₘ;
-    function CHAR_sub55(arg) {
+    let CHAR_sub49ₘ;
+    function CHAR_sub49(arg) {
         try {
-            return CHAR_sub55ₘ(arg);
+            return CHAR_sub49ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub55ₘ is not a function')) throw err;
-            CHAR_sub55ₘ = unicode(CHAR_sub56);
-            return CHAR_sub55ₘ(arg);
+            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub49ₘ is not a function')) throw err;
+            CHAR_sub49ₘ = unicode(CHAR_sub50);
+            return CHAR_sub49ₘ(arg);
         }
     }
 
     // Module
-    function CHAR_sub56(member) {
+    function CHAR_sub50(member) {
         switch (member) {
             case 'base': return base;
             case 'minDigits': return minDigits;
