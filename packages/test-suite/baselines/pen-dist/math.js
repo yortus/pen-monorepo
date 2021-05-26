@@ -5,7 +5,6 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        HAS_IN = HAS_OUT = true;
         if (!parseInner(parse, true)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
@@ -15,7 +14,6 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        HAS_IN = HAS_OUT = true;
         if (!printInner(print, true)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
@@ -88,7 +86,7 @@ function parseRecord(recordItems) {
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
-                if (HAS_OUT) {
+                if (AREP !== VOID) {
                     const fieldValue = AREP[--APOS];
                     AREP[APOS++] = fieldName;
                     AREP[APOS++] = fieldValue;
@@ -107,7 +105,7 @@ function parseRecord(recordItems) {
                 }
             }
         }
-        ATYP = HAS_OUT ? RECORD : NOTHING;
+        ATYP = AREP !== VOID ? RECORD : NOTHING;
         return true;
     };
 }
@@ -169,37 +167,36 @@ let APOS;
 let ATYP;
 let CREP;
 let CPOS;
-let HAS_IN;
-let HAS_OUT;
+let VOID = null;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const savepoint = () => [APOS, CPOS];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theScalarArray;
         AREP[APOS++] = value;
     }
-    ATYP = HAS_OUT ? SCALAR : NOTHING;
+    ATYP = AREP !== VOID ? SCALAR : NOTHING;
 }
 function emitByte(value) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theBuffer;
         AREP[APOS++] = value;
     }
-    ATYP = HAS_OUT ? STRING : NOTHING;
+    ATYP = AREP !== VOID ? STRING : NOTHING;
 }
 function emitBytes(...values) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theBuffer;
         for (let i = 0; i < values.length; ++i)
             AREP[APOS++] = values[i];
     }
-    ATYP = HAS_OUT ? STRING : NOTHING;
+    ATYP = AREP !== VOID ? STRING : NOTHING;
 }
 function parseInner(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -316,7 +313,7 @@ const extensions = {
             if (mode === 'parse') {
                 return function F64() {
                     let num = 0;
-                    if (HAS_IN) {
+                    if (CREP !== VOID) {
                         const [APOSₒ, CPOSₒ] = savepoint();
                         const LEN = CREP.length;
                         const EOS = 0;
@@ -387,7 +384,7 @@ const extensions = {
             else /* mode === 'print' */ {
                 return function F64() {
                     let out = '0';
-                    if (HAS_IN) {
+                    if (AREP !== VOID) {
                         // Ensure N is a number.
                         if (ATYP !== SCALAR)
                             return false;
@@ -400,7 +397,7 @@ const extensions = {
                         out = String(num);
                     }
                     // Success
-                    if (HAS_OUT)
+                    if (CREP !== VOID)
                         CPOS += CREP.write(out, CPOS, undefined, 'utf8');
                     return true;
                 };
@@ -426,7 +423,7 @@ const extensions = {
                 if (mode === 'parse') {
                     return function I32() {
                         let num = 0;
-                        if (HAS_IN) {
+                        if (AREP !== VOID) {
                             const [APOSₒ, CPOSₒ] = savepoint();
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
@@ -471,7 +468,7 @@ const extensions = {
                 else /* mode === 'print' */ {
                     return function I32() {
                         const digits = [];
-                        if (HAS_IN) {
+                        if (CREP !== VOID) {
                             if (ATYP !== SCALAR)
                                 return false;
                             let num = AREP[APOS];
@@ -503,7 +500,7 @@ const extensions = {
                                 digits.push(HYPHEN);
                         }
                         // Success
-                        if (HAS_OUT) {
+                        if (AREP !== VOID) {
                             for (let i = 0; i < digits.length; ++i) {
                                 CREP[CPOS++] = digits[i];
                             }
@@ -812,10 +809,10 @@ const parse = (() => {
 
     // CodeExpression
     function add_sub3() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = add_sub4();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -823,7 +820,7 @@ const parse = (() => {
     // ByteExpression
     function add_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x2b) return false;
@@ -885,10 +882,10 @@ const parse = (() => {
 
     // CodeExpression
     function sub_sub3() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = sub_sub4();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -896,7 +893,7 @@ const parse = (() => {
     // ByteExpression
     function sub_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x2d) return false;
@@ -993,10 +990,10 @@ const parse = (() => {
 
     // CodeExpression
     function mul_sub5() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = mul_sub6();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -1004,7 +1001,7 @@ const parse = (() => {
     // ByteExpression
     function mul_sub6() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x2a) return false;
@@ -1066,10 +1063,10 @@ const parse = (() => {
 
     // CodeExpression
     function div_sub3() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = div_sub4();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -1077,7 +1074,7 @@ const parse = (() => {
     // ByteExpression
     function div_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x2f) return false;
@@ -1159,7 +1156,7 @@ const parse = (() => {
 
     // StringLiteral
     function factor_sub3() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x30) return false;
             if (CREP[CPOS + 1] !== 0x78) return false;
@@ -1181,7 +1178,7 @@ const parse = (() => {
 
     // StringLiteral
     function factor_sub5() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x30) return false;
             if (CREP[CPOS + 1] !== 0x62) return false;
@@ -1205,17 +1202,17 @@ const parse = (() => {
 
     // CodeExpression
     function factor_sub7() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub8();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
     function factor_sub8() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x30) return false;
             if (CREP[CPOS + 1] !== 0x78) return false;
@@ -1261,17 +1258,17 @@ const parse = (() => {
 
     // CodeExpression
     function factor_sub12() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub13();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
 
     // StringLiteral
     function factor_sub13() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x30) return false;
             if (CREP[CPOS + 1] !== 0x62) return false;
@@ -1317,10 +1314,10 @@ const parse = (() => {
 
     // CodeExpression
     function factor_sub17() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub18();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -1328,7 +1325,7 @@ const parse = (() => {
     // ByteExpression
     function factor_sub18() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x69) return false;
@@ -1377,10 +1374,10 @@ const parse = (() => {
 
     // CodeExpression
     function factor_sub22() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub23();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -1388,7 +1385,7 @@ const parse = (() => {
     // ByteExpression
     function factor_sub23() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x28) return false;
@@ -1403,10 +1400,10 @@ const parse = (() => {
 
     // CodeExpression
     function factor_sub24() {
-        const HAS_OUTₒ = HAS_OUT;
-        HAS_OUT = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub25();
-        HAS_OUT = HAS_OUTₒ;
+        AREP = AREPₒ;
         ATYP = NOTHING;
         return result;
     }
@@ -1414,7 +1411,7 @@ const parse = (() => {
     // ByteExpression
     function factor_sub25() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x29) return false;
@@ -1547,7 +1544,7 @@ const print = (() => {
 
     // StringLiteral
     function add_sub1() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x61) return false;
@@ -1569,17 +1566,17 @@ const print = (() => {
 
     // CodeExpression
     function add_sub3() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = add_sub4();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function add_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -1589,7 +1586,7 @@ const print = (() => {
         else {
             cc = 0x2b;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -1624,7 +1621,7 @@ const print = (() => {
 
     // StringLiteral
     function sub_sub1() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x73) return false;
@@ -1646,17 +1643,17 @@ const print = (() => {
 
     // CodeExpression
     function sub_sub3() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = sub_sub4();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function sub_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -1666,7 +1663,7 @@ const print = (() => {
         else {
             cc = 0x2d;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -1722,7 +1719,7 @@ const print = (() => {
 
     // StringLiteral
     function mul_sub1() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 4 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x74) return false;
@@ -1737,7 +1734,7 @@ const print = (() => {
 
     // StringLiteral
     function mul_sub2() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x6d) return false;
@@ -1751,7 +1748,7 @@ const print = (() => {
 
     // StringLiteral
     function mul_sub3() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x72) return false;
@@ -1773,17 +1770,17 @@ const print = (() => {
 
     // CodeExpression
     function mul_sub5() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = mul_sub6();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function mul_sub6() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -1793,7 +1790,7 @@ const print = (() => {
         else {
             cc = 0x2a;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -1828,7 +1825,7 @@ const print = (() => {
 
     // StringLiteral
     function div_sub1() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x64) return false;
@@ -1850,17 +1847,17 @@ const print = (() => {
 
     // CodeExpression
     function div_sub3() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = div_sub4();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function div_sub4() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -1870,13 +1867,13 @@ const print = (() => {
         else {
             cc = 0x2f;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
     // NumericLiteral
     function base() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== SCALAR) return false;
             if (AREP[APOS] !== 16) return false;
             APOS += 1;
@@ -1887,7 +1884,7 @@ const print = (() => {
 
     // BooleanLiteral
     function signed() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== SCALAR) return false;
             if (AREP[APOS] !== false) return false;
             APOS += 1;
@@ -1898,7 +1895,7 @@ const print = (() => {
 
     // NumericLiteral
     function base_2() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== SCALAR) return false;
             if (AREP[APOS] !== 2) return false;
             APOS += 1;
@@ -1909,7 +1906,7 @@ const print = (() => {
 
     // BooleanLiteral
     function signed_2() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== SCALAR) return false;
             if (AREP[APOS] !== false) return false;
             APOS += 1;
@@ -1920,7 +1917,7 @@ const print = (() => {
 
     // BooleanLiteral
     function signed_3() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== SCALAR) return false;
             if (AREP[APOS] !== false) return false;
             APOS += 1;
@@ -1958,14 +1955,14 @@ const print = (() => {
 
     // StringLiteral
     function factor_sub3() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x30) return false;
             if (AREP[APOS + 1] !== 0x78) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x30;
             CREP[CPOS++] = 0x78;
         }
@@ -1983,14 +1980,14 @@ const print = (() => {
 
     // StringLiteral
     function factor_sub5() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x30) return false;
             if (AREP[APOS + 1] !== 0x62) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x30;
             CREP[CPOS++] = 0x62;
         }
@@ -2008,23 +2005,23 @@ const print = (() => {
 
     // CodeExpression
     function factor_sub7() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub8();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // StringLiteral
     function factor_sub8() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x30) return false;
             if (AREP[APOS + 1] !== 0x78) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x30;
             CREP[CPOS++] = 0x78;
         }
@@ -2064,23 +2061,23 @@ const print = (() => {
 
     // CodeExpression
     function factor_sub12() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub13();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // StringLiteral
     function factor_sub13() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x30) return false;
             if (AREP[APOS + 1] !== 0x62) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x30;
             CREP[CPOS++] = 0x62;
         }
@@ -2120,17 +2117,17 @@ const print = (() => {
 
     // CodeExpression
     function factor_sub17() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub18();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function factor_sub18() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -2140,7 +2137,7 @@ const print = (() => {
         else {
             cc = 0x69;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -2176,17 +2173,17 @@ const print = (() => {
 
     // CodeExpression
     function factor_sub22() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub23();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function factor_sub23() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -2196,23 +2193,23 @@ const print = (() => {
         else {
             cc = 0x28;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
     // CodeExpression
     function factor_sub24() {
-        const HAS_INₒ = HAS_IN;
-        HAS_IN = false;
+        const AREPₒ = AREP;
+        AREP = VOID;
         const result = factor_sub25();
-        HAS_IN = HAS_INₒ;
+        AREP = AREPₒ;
         return result;
     }
 
     // ByteExpression
     function factor_sub25() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -2222,7 +2219,7 @@ const print = (() => {
         else {
             cc = 0x29;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 

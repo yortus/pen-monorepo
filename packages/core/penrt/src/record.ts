@@ -25,7 +25,7 @@ function parseRecord(recordItems: RecordItem[]) {
                 // Parse field value
                 if (!parseInner(recordItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
 
-                if (HAS_OUT) {
+                if (AREP !== VOID) {
                     const fieldValue = AREP[--APOS];
                     AREP[APOS++] = fieldName;
                     AREP[APOS++] = fieldValue;
@@ -42,7 +42,7 @@ function parseRecord(recordItems: RecordItem[]) {
                 }
             }
         }
-        ATYP = HAS_OUT ? RECORD : NOTHING;
+        ATYP = AREP !== VOID ? RECORD : NOTHING;
         return true;
     };
 }

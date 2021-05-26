@@ -10,7 +10,7 @@ function i32({mode}: StaticOptions): Generic {
         if (mode === 'parse') {
             return function I32() {
                 let num = 0;
-                if (HAS_IN) {
+                if (AREP !== VOID) {
                     const [APOSₒ, CPOSₒ] = savepoint();
 
                     // Parse optional leading '-' sign (if signed)...
@@ -60,7 +60,7 @@ function i32({mode}: StaticOptions): Generic {
         else /* mode === 'print' */ {
             return function I32() {
                 const digits = [] as number[];
-                if (HAS_IN) {
+                if (CREP !== VOID) {
                     if (ATYP !== SCALAR) return false;
                     let num = AREP[APOS] as number;
                     if (typeof num !== 'number') return false;
@@ -90,7 +90,7 @@ function i32({mode}: StaticOptions): Generic {
                 }
 
                 // Success
-                if (HAS_OUT) {
+                if (AREP !== VOID) {
                     for (let i = 0; i < digits.length; ++i) {
                         CREP[CPOS++] = digits[i];
                     }

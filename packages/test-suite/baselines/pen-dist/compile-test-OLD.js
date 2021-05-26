@@ -5,7 +5,6 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        HAS_IN = HAS_OUT = true;
         if (!parseInner(parse, true)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
@@ -15,7 +14,6 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        HAS_IN = HAS_OUT = true;
         if (!printInner(print, true)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
@@ -88,7 +86,7 @@ function parseRecord(recordItems) {
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
-                if (HAS_OUT) {
+                if (AREP !== VOID) {
                     const fieldValue = AREP[--APOS];
                     AREP[APOS++] = fieldName;
                     AREP[APOS++] = fieldValue;
@@ -107,7 +105,7 @@ function parseRecord(recordItems) {
                 }
             }
         }
-        ATYP = HAS_OUT ? RECORD : NOTHING;
+        ATYP = AREP !== VOID ? RECORD : NOTHING;
         return true;
     };
 }
@@ -169,37 +167,36 @@ let APOS;
 let ATYP;
 let CREP;
 let CPOS;
-let HAS_IN;
-let HAS_OUT;
+let VOID = null;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const savepoint = () => [APOS, CPOS];
 const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theScalarArray;
         AREP[APOS++] = value;
     }
-    ATYP = HAS_OUT ? SCALAR : NOTHING;
+    ATYP = AREP !== VOID ? SCALAR : NOTHING;
 }
 function emitByte(value) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theBuffer;
         AREP[APOS++] = value;
     }
-    ATYP = HAS_OUT ? STRING : NOTHING;
+    ATYP = AREP !== VOID ? STRING : NOTHING;
 }
 function emitBytes(...values) {
-    if (HAS_OUT) {
+    if (AREP !== VOID) {
         if (APOS === 0)
             AREP = theBuffer;
         for (let i = 0; i < values.length; ++i)
             AREP[APOS++] = values[i];
     }
-    ATYP = HAS_OUT ? STRING : NOTHING;
+    ATYP = AREP !== VOID ? STRING : NOTHING;
 }
 function parseInner(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -319,7 +316,7 @@ const parse = (() => {
 
     // StringLiteral
     function foo() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 3 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x66) return false;
             if (CREP[CPOS + 1] !== 0x6f) return false;
@@ -333,7 +330,7 @@ const parse = (() => {
 
     // StringLiteral
     function bar() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 3 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x62) return false;
             if (CREP[CPOS + 1] !== 0x61) return false;
@@ -367,7 +364,7 @@ const parse = (() => {
 
     // StringLiteral
     function b() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x62) return false;
             if (CREP[CPOS + 1] !== 0x32) return false;
@@ -380,7 +377,7 @@ const parse = (() => {
 
     // StringLiteral
     function baz() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 3 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x62) return false;
             if (CREP[CPOS + 1] !== 0x61) return false;
@@ -394,7 +391,7 @@ const parse = (() => {
 
     // StringLiteral
     function mem() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 6 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x6d) return false;
             if (CREP[CPOS + 1] !== 0x65) return false;
@@ -431,7 +428,7 @@ const parse = (() => {
     // ByteExpression
     function a_3_sub1() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x61) return false;
@@ -466,7 +463,7 @@ const parse = (() => {
     // ByteExpression
     function b_2_sub1() {
         let cc;
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS >= CREP.length) return false;
             cc = CREP[CPOS];
             if (cc !== 0x62) return false;
@@ -494,7 +491,7 @@ const parse = (() => {
 
     // StringLiteral
     function c1() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x63) return false;
             if (CREP[CPOS + 1] !== 0x31) return false;
@@ -507,7 +504,7 @@ const parse = (() => {
 
     // StringLiteral
     function c2() {
-        if (HAS_IN) {
+        if (CREP !== VOID) {
             if (CPOS + 2 > CREP.length) return false;
             if (CREP[CPOS + 0] !== 0x63) return false;
             if (CREP[CPOS + 1] !== 0x32) return false;
@@ -598,7 +595,7 @@ const print = (() => {
 
     // StringLiteral
     function foo() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x66) return false;
@@ -606,7 +603,7 @@ const print = (() => {
             if (AREP[APOS + 2] !== 0x6f) return false;
             APOS += 3;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x66;
             CREP[CPOS++] = 0x6f;
             CREP[CPOS++] = 0x6f;
@@ -617,7 +614,7 @@ const print = (() => {
 
     // StringLiteral
     function bar() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x62) return false;
@@ -625,7 +622,7 @@ const print = (() => {
             if (AREP[APOS + 2] !== 0x72) return false;
             APOS += 3;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x62;
             CREP[CPOS++] = 0x61;
             CREP[CPOS++] = 0x72;
@@ -656,14 +653,14 @@ const print = (() => {
 
     // StringLiteral
     function b() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x62) return false;
             if (AREP[APOS + 1] !== 0x32) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x62;
             CREP[CPOS++] = 0x32;
         }
@@ -673,7 +670,7 @@ const print = (() => {
 
     // StringLiteral
     function baz() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x62) return false;
@@ -681,7 +678,7 @@ const print = (() => {
             if (AREP[APOS + 2] !== 0x7a) return false;
             APOS += 3;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x62;
             CREP[CPOS++] = 0x61;
             CREP[CPOS++] = 0x7a;
@@ -692,7 +689,7 @@ const print = (() => {
 
     // StringLiteral
     function mem() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 6 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x6d) return false;
@@ -703,7 +700,7 @@ const print = (() => {
             if (AREP[APOS + 5] !== 0x72) return false;
             APOS += 6;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x6d;
             CREP[CPOS++] = 0x65;
             CREP[CPOS++] = 0x6d;
@@ -734,7 +731,7 @@ const print = (() => {
     // ByteExpression
     function a_3_sub1() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -744,7 +741,7 @@ const print = (() => {
         else {
             cc = 0x61;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -767,7 +764,7 @@ const print = (() => {
     // ByteExpression
     function b_2_sub1() {
         let cc;
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
@@ -777,7 +774,7 @@ const print = (() => {
         else {
             cc = 0x62;
         }
-        if (HAS_OUT) CREP[CPOS++] = cc;
+        if (CREP !== VOID) CREP[CPOS++] = cc;
         return true;
     }
 
@@ -796,14 +793,14 @@ const print = (() => {
 
     // StringLiteral
     function c1() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x63) return false;
             if (AREP[APOS + 1] !== 0x31) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x63;
             CREP[CPOS++] = 0x31;
         }
@@ -813,14 +810,14 @@ const print = (() => {
 
     // StringLiteral
     function c2() {
-        if (HAS_IN) {
+        if (AREP !== VOID) {
             if (ATYP !== STRING) return false;
             if (APOS + 2 > AREP.length) return false;
             if (AREP[APOS + 0] !== 0x63) return false;
             if (AREP[APOS + 1] !== 0x32) return false;
             APOS += 2;
         }
-        if (HAS_OUT) {
+        if (CREP !== VOID) {
             CREP[CPOS++] = 0x63;
             CREP[CPOS++] = 0x32;
         }

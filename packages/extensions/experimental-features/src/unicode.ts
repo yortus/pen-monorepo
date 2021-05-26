@@ -17,7 +17,7 @@ function unicode({mode}: StaticOptions): Generic {
         if (mode === 'parse') {
             return function UNI() {
 
-                // TODO: respect HAS_IN/HAS_OUT
+                // TODO: respect VOID AREP/CREP...
 
                 const [APOSₒ, CPOSₒ] = savepoint();
                 const LEN = CREP.length;
@@ -45,7 +45,7 @@ function unicode({mode}: StaticOptions): Generic {
         else /* mode === 'print' */ {
             return function UNI() {
 
-                // TODO: respect HAS_IN/HAS_OUT
+                // TODO: respect VOID AREP/CREP...
 
                 if (ATYP !== STRING) return false;
                 const [APOSₒ, CPOSₒ] = savepoint();

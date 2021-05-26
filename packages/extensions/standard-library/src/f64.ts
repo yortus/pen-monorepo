@@ -3,7 +3,7 @@ function f64({mode}: StaticOptions): Rule {
     if (mode === 'parse') {
         return function F64() {
             let num = 0;
-            if (HAS_IN) {
+            if (CREP !== VOID) {
                 const [APOSₒ, CPOSₒ] = savepoint();
                 const LEN = CREP.length;
                 const EOS = 0;
@@ -79,7 +79,7 @@ function f64({mode}: StaticOptions): Rule {
     else /* mode === 'print' */ {
         return function F64() {
             let out = '0';
-            if (HAS_IN) {
+            if (AREP !== VOID) {
                 // Ensure N is a number.
                 if (ATYP !== SCALAR) return false;
                 let num = AREP[APOS] as number;
@@ -92,7 +92,7 @@ function f64({mode}: StaticOptions): Rule {
             }
 
             // Success
-            if (HAS_OUT) CPOS += CREP.write(out, CPOS, undefined, 'utf8');
+            if (CREP !== VOID) CPOS += CREP.write(out, CPOS, undefined, 'utf8');
             return true;
         };
     }
