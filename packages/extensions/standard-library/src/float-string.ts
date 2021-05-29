@@ -1,7 +1,8 @@
 // TODO: doc... has both 'txt' and 'ast' representation
-function f64({mode}: StaticOptions): Rule {
+// TODO: revise/document range and precision of floats that can be parsed/printed by this rule
+function floatString({mode}: StaticOptions): Rule {
     if (mode === 'parse') {
-        return function F64() {
+        return function FSTR() {
             let num = 0;
             if (CREP !== VOID) {
                 const [APOSₒ, CPOSₒ] = savepoint();
@@ -77,7 +78,7 @@ function f64({mode}: StaticOptions): Rule {
     }
 
     else /* mode === 'print' */ {
-        return function F64() {
+        return function FSTR() {
             let out = '0';
             if (AREP !== VOID) {
                 // Ensure N is a number.
@@ -99,7 +100,7 @@ function f64({mode}: StaticOptions): Rule {
 }
 
 
-// These constants are used by the f64 rule.
+// These constants are used by the floatString rule.
 const PLUS_SIGN = '+'.charCodeAt(0);
 const MINUS_SIGN = '-'.charCodeAt(0);
 const DECIMAL_POINT = '.'.charCodeAt(0);

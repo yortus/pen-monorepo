@@ -304,14 +304,14 @@ const extensions = {
     "V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js": (() => {
         "use strict";
         /* @pen exports = {
-            f64,
-            i32,
+            floatString,
+            intString,
             memoise,
         } */
         // TODO: doc... has both 'txt' and 'ast' representation
-        function f64({ mode }) {
+        function floatString({ mode }) {
             if (mode === 'parse') {
-                return function F64() {
+                return function FSTR() {
                     let num = 0;
                     if (CREP !== VOID) {
                         const [APOSₒ, CPOSₒ] = savepoint();
@@ -382,7 +382,7 @@ const extensions = {
                 };
             }
             else /* mode === 'print' */ {
-                return function F64() {
+                return function FSTR() {
                     let out = '0';
                     if (AREP !== VOID) {
                         // Ensure N is a number.
@@ -403,7 +403,7 @@ const extensions = {
                 };
             }
         }
-        // These constants are used by the f64 rule.
+        // These constants are used by the floatString rule.
         const PLUS_SIGN = '+'.charCodeAt(0);
         const MINUS_SIGN = '-'.charCodeAt(0);
         const DECIMAL_POINT = '.'.charCodeAt(0);
@@ -412,8 +412,8 @@ const extensions = {
         const LOWERCASE_E = 'e'.charCodeAt(0);
         const UPPERCASE_E = 'E'.charCodeAt(0);
         // TODO: doc... has both 'txt' and 'ast' representation
-        function i32({ mode }) {
-            return function I32_generic(expr) {
+        function intString({ mode }) {
+            return function ISTR_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
@@ -421,7 +421,7 @@ const extensions = {
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 if (mode === 'parse') {
-                    return function I32() {
+                    return function ISTR() {
                         let num = 0;
                         if (AREP !== VOID) {
                             const [APOSₒ, CPOSₒ] = savepoint();
@@ -466,7 +466,7 @@ const extensions = {
                     };
                 }
                 else /* mode === 'print' */ {
-                    return function I32() {
+                    return function ISTR() {
                         const digits = [];
                         if (CREP !== VOID) {
                             if (ATYP !== SCALAR)
@@ -704,7 +704,7 @@ const extensions = {
                 }
             };
         }
-        return {f64, i32, memoise};
+        return {floatString, intString, memoise};
     })(),
 };
 
@@ -715,8 +715,8 @@ const extensions = {
 const parse = (() => {
 
     // Intrinsic
-    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'parse'});
-    const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'parse'});
+    const floatString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode: 'parse'});
+    const intString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode: 'parse'});
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
 
     // Identifier
@@ -725,13 +725,13 @@ const parse = (() => {
     }
 
     // Identifier
-    function f64(arg) {
-        return f64_2(arg);
+    function floatString(arg) {
+        return floatString_2(arg);
     }
 
     // Identifier
-    function i32(arg) {
-        return i32_2(arg);
+    function intString(arg) {
+        return intString_2(arg);
     }
 
     // Identifier
@@ -1140,7 +1140,7 @@ const parse = (() => {
         seqType |= ATYP;
         if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!f64()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
     }
@@ -1231,7 +1231,7 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub9ₘ is not a function')) throw err;
-            factor_sub9ₘ = i32(factor_sub10);
+            factor_sub9ₘ = intString(factor_sub10);
             return factor_sub9ₘ(arg);
         }
     }
@@ -1287,7 +1287,7 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub14ₘ is not a function')) throw err;
-            factor_sub14ₘ = i32(factor_sub15);
+            factor_sub14ₘ = intString(factor_sub15);
             return factor_sub14ₘ(arg);
         }
     }
@@ -1346,7 +1346,7 @@ const parse = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub19ₘ is not a function')) throw err;
-            factor_sub19ₘ = i32(factor_sub20);
+            factor_sub19ₘ = intString(factor_sub20);
             return factor_sub19ₘ(arg);
         }
     }
@@ -1428,8 +1428,8 @@ const parse = (() => {
     function Ɱ_math(member) {
         switch (member) {
             case 'memoise': return memoise;
-            case 'f64': return f64;
-            case 'i32': return i32;
+            case 'floatString': return floatString;
+            case 'intString': return intString;
             case 'start': return start_2;
             case 'expr': return expr;
             case 'add': return add;
@@ -1451,8 +1451,8 @@ const parse = (() => {
     // Module
     function Ɱ_std(member) {
         switch (member) {
-            case 'f64': return f64_2;
-            case 'i32': return i32_2;
+            case 'floatString': return floatString_2;
+            case 'intString': return intString_2;
             case 'memoise': return memoise_2;
             default: return undefined;
         }
@@ -1468,8 +1468,8 @@ const parse = (() => {
 const print = (() => {
 
     // Intrinsic
-    const f64_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].f64({mode: 'print'});
-    const i32_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].i32({mode: 'print'});
+    const floatString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode: 'print'});
+    const intString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode: 'print'});
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
 
     // Identifier
@@ -1478,13 +1478,13 @@ const print = (() => {
     }
 
     // Identifier
-    function f64(arg) {
-        return f64_2(arg);
+    function floatString(arg) {
+        return floatString_2(arg);
     }
 
     // Identifier
-    function i32(arg) {
-        return i32_2(arg);
+    function intString(arg) {
+        return intString_2(arg);
     }
 
     // Identifier
@@ -1941,7 +1941,7 @@ const print = (() => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!f64()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
     }
 
@@ -2037,7 +2037,7 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub9ₘ is not a function')) throw err;
-            factor_sub9ₘ = i32(factor_sub10);
+            factor_sub9ₘ = intString(factor_sub10);
             return factor_sub9ₘ(arg);
         }
     }
@@ -2093,7 +2093,7 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub14ₘ is not a function')) throw err;
-            factor_sub14ₘ = i32(factor_sub15);
+            factor_sub14ₘ = intString(factor_sub15);
             return factor_sub14ₘ(arg);
         }
     }
@@ -2149,7 +2149,7 @@ const print = (() => {
         }
         catch (err) {
             if (!(err instanceof TypeError) || !err.message.includes('factor_sub19ₘ is not a function')) throw err;
-            factor_sub19ₘ = i32(factor_sub20);
+            factor_sub19ₘ = intString(factor_sub20);
             return factor_sub19ₘ(arg);
         }
     }
@@ -2227,8 +2227,8 @@ const print = (() => {
     function Ɱ_math(member) {
         switch (member) {
             case 'memoise': return memoise;
-            case 'f64': return f64;
-            case 'i32': return i32;
+            case 'floatString': return floatString;
+            case 'intString': return intString;
             case 'start': return start_2;
             case 'expr': return expr;
             case 'add': return add;
@@ -2250,8 +2250,8 @@ const print = (() => {
     // Module
     function Ɱ_std(member) {
         switch (member) {
-            case 'f64': return f64_2;
-            case 'i32': return i32_2;
+            case 'floatString': return floatString_2;
+            case 'intString': return intString_2;
             case 'memoise': return memoise_2;
             default: return undefined;
         }

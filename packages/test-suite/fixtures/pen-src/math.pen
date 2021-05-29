@@ -7,7 +7,7 @@
  */
 
 
-(memoise, f64, i32) = import 'std'
+(memoise, floatString, intString) = import 'std'
 
 
 start = expr
@@ -22,8 +22,8 @@ mul = {['type']: 'mul',   lhs: term,   ['rhs']: #"*" factor} // test both dynami
 div = {type: 'div'   lhs: term   rhs: #"/" factor}
 
 factor =
-    | !"0x"   !"0b"   f64
-    | #"0x"   i32(base=16 signed=false)
-    | #"0b"   i32(base=2 signed=false)
-    | #"i"    i32(signed=false)
+    | !"0x"   !"0b"   floatString
+    | #"0x"   intString(base=16 signed=false)
+    | #"0b"   intString(base=2 signed=false)
+    | #"i"    intString(signed=false)
     | #"("   expr   #")"

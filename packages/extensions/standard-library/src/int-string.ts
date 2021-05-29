@@ -1,6 +1,7 @@
 // TODO: doc... has both 'txt' and 'ast' representation
-function i32({mode}: StaticOptions): Generic {
-    return function I32_generic(expr) {
+// TODO: revise/document range of ints that can be parsed/printed by this rule
+function intString({mode}: StaticOptions): Generic {
+    return function ISTR_generic(expr) {
         assert(isModule(expr));
         const base = expr('base')?.constant?.value as number | undefined ?? 10;
         const signed = expr('signed')?.constant?.value as boolean | undefined ?? true;
@@ -8,7 +9,7 @@ function i32({mode}: StaticOptions): Generic {
         assert(typeof signed === 'boolean');
 
         if (mode === 'parse') {
-            return function I32() {
+            return function ISTR() {
                 let num = 0;
                 if (AREP !== VOID) {
                     const [APOSₒ, CPOSₒ] = savepoint();
@@ -58,7 +59,7 @@ function i32({mode}: StaticOptions): Generic {
         }
 
         else /* mode === 'print' */ {
-            return function I32() {
+            return function ISTR() {
                 const digits = [] as number[];
                 if (CREP !== VOID) {
                     if (ATYP !== SCALAR) return false;

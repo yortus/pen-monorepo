@@ -1,7 +1,7 @@
 // ===============================================================================
 // |                                  Imports                                    |
 // ===============================================================================
-(f64) = import 'std'
+(floatString) = import 'std'
 (unicode) = import 'experiments'
 
 
@@ -43,12 +43,12 @@ Array2      = LBRACKET   (Elements | [])   RBRACKET
 Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-recursive form - impl efficient handling
 
 // ---------- Numbers ----------
-Number = f64
+Number = floatString
 
 // ---------- Strings ----------
 String = DOUBLE_QUOTE   CHAR*   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents? (in NODE)
-//       - something akin to `i32` which parses a number from the input span, call it `char`. Understands common escape sequences
+//       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
 // TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
     |   !"\\"   !"\""   \20-7F                              // any ASCII char except '\', '"', or control char
