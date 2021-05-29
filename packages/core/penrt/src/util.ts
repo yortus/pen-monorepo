@@ -85,7 +85,7 @@ let CREP: Buffer; //Arrayish<string>; // TODO: not working yet - changing back t
 let CPOS: number;
 
 // TODO: temp testing... replaces HAS_IN & HAS_OUT with a sentinel 'void' i/o stream
-let VOID = null as unknown as Arrayish<unknown>;
+let NIL = null as unknown as Arrayish<unknown>;
 
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
@@ -97,25 +97,25 @@ const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (
 const theScalarArray: unknown[] = [];
 const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
 function emitScalar(value: number | boolean | null) {
-    if (AREP !== VOID) {
+    if (AREP !== NIL) {
         if (APOS === 0) AREP = theScalarArray;
         AREP[APOS++] = value;
     }
-    ATYP = AREP !== VOID ? SCALAR : NOTHING;
+    ATYP = AREP !== NIL ? SCALAR : NOTHING;
 }
 function emitByte(value: number) {
-    if (AREP !== VOID) {
+    if (AREP !== NIL) {
         if (APOS === 0) AREP = theBuffer;
         AREP[APOS++] = value;
     }
-    ATYP = AREP !== VOID ? STRING : NOTHING;
+    ATYP = AREP !== NIL ? STRING : NOTHING;
 }
 function emitBytes(...values: number[]) {
-    if (AREP !== VOID) {
+    if (AREP !== NIL) {
         if (APOS === 0) AREP = theBuffer;
         for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
     }
-    ATYP = AREP !== VOID ? STRING : NOTHING;
+    ATYP = AREP !== NIL ? STRING : NOTHING;
 }
 
 

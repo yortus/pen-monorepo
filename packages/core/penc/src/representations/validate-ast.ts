@@ -57,7 +57,6 @@ const allNodeKinds = [
     'MemberExpression',
     'Module',
     'ModulePattern',
-    'NilExpression',
     'NotExpression',
     'NullLiteral',
     'NumericLiteral',

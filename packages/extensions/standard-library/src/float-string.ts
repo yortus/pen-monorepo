@@ -4,7 +4,7 @@ function floatString({mode}: StaticOptions): Rule {
     if (mode === 'parse') {
         return function FSTR() {
             let num = 0;
-            if (CREP !== VOID) {
+            if (CREP !== NIL) {
                 const [APOSₒ, CPOSₒ] = savepoint();
                 const LEN = CREP.length;
                 const EOS = 0;
@@ -80,7 +80,7 @@ function floatString({mode}: StaticOptions): Rule {
     else /* mode === 'print' */ {
         return function FSTR() {
             let out = '0';
-            if (AREP !== VOID) {
+            if (AREP !== NIL) {
                 // Ensure N is a number.
                 if (ATYP !== SCALAR) return false;
                 let num = AREP[APOS] as number;
@@ -93,7 +93,7 @@ function floatString({mode}: StaticOptions): Rule {
             }
 
             // Success
-            if (CREP !== VOID) CPOS += CREP.write(out, CPOS, undefined, 'utf8');
+            if (CREP !== NIL) CPOS += CREP.write(out, CPOS, undefined, 'utf8');
             return true;
         };
     }

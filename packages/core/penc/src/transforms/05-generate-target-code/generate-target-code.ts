@@ -153,7 +153,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`emitScalar(${JSON.stringify(expr.value)});`);
             }
             else /* mode === 'print' */ {
-                emit.down(1).text(`if (AREP !== VOID) {`).indent();
+                emit.down(1).text(`if (AREP !== NIL) {`).indent();
                 emit.down(1).text(`if (ATYP !== SCALAR) return false;`);
                 emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
                 emit.down(1).text(`APOS += 1;`);
@@ -168,7 +168,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`let cc;`);
-            emit.down(1).text(`if (${IREP} !== VOID) {`).indent();
+            emit.down(1).text(`if (${IREP} !== NIL) {`).indent();
             if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
             emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
             emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
@@ -192,7 +192,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.down(1).text(`else {`).indent();
             emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
             emit.dedent().down(1).text(`}`);
-            emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `if (CREP !== VOID) CREP[CPOS++] = cc;`);
+            emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `if (CREP !== NIL) CREP[CPOS++] = cc;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
             break;
@@ -201,7 +201,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'CodeExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`const AREPₒ = AREP;`);
-            emit.down(1).text(`AREP = VOID;`);
+            emit.down(1).text(`AREP = NIL;`);
             emit.down(1).text(`const result = ${expr.expression.name}();`);
             emit.down(1).text(`AREP = AREPₒ;`);
             if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
@@ -289,6 +289,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
+        case 'PipeExpression': {
+            // TODO: ...
+            expr.nilAbstract;
+            throw new Error('PIPE: Not Implemented');
+        }
+
         case 'QuantifiedExpression': {
             emit.down(1).text(`function ${name}() {`).indent();
             if (expr.quantifier === '?') {
@@ -372,7 +378,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();
             if (mode === 'print' || hasConcreteForm) {
-                emit.down(1).text(`if (${IREP} !== VOID) {`).indent();
+                emit.down(1).text(`if (${IREP} !== NIL) {`).indent();
                 if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
                 emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
                 for (let i = 0; i < bytes.length; ++i) {
@@ -385,7 +391,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
             }
             else if (hasConcreteForm) {
-                emit.down(1).text(`if (CREP !== VOID) {`).indent();
+                emit.down(1).text(`if (CREP !== NIL) {`).indent();
                 for (let i = 0; i < bytes.length; ++i) {
                     emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
                 }

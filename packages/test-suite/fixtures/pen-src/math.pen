@@ -23,7 +23,7 @@ div = {type: 'div'   lhs: term   rhs: #"/" factor}
 
 factor =
     | !"0x"   !"0b"   floatString
-    | #"0x"   intString(base=16 signed=false)
+    | "0x">>nil   intString(base=16 signed=false)
     | #"0b"   intString(base=2 signed=false)
     | #"i"    intString(signed=false)
     | #"("   expr   #")"

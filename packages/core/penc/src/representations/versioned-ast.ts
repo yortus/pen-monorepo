@@ -62,7 +62,6 @@ export type Expression<V extends Version = Version> =
     | ListExpression<V>
     | MemberExpression<V>
     | Module<V>
-    | NilExpression
     | NotExpression<V>
     | NullLiteral
     | NumericLiteral
@@ -229,11 +228,6 @@ export type ModulePattern<V extends Version> = {
 }[V extends 100 ? 100 : 'rest'];
 
 
-export interface NilExpression {
-    kind: 'NilExpression';
-}
-
-
 export interface NotExpression<V extends Version> {
     kind: 'NotExpression';
     expression: Subexpression<V>;
@@ -264,6 +258,8 @@ export type ParenthesisedExpression<V extends Version> = {
 export interface PipeExpression<V extends Version> {
     kind: 'PipeExpression';
     expressions: Array<Subexpression<V>>;
+    nilConcrete?: boolean;
+    nilAbstract?: boolean;
 }
 
 

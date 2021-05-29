@@ -38,7 +38,7 @@ ModulePatternName
         QuantifiedExpression            a?   a(b)*   a.b?   {a: b}*
 
     PRECEDENCE 5
-        PipeExpression                  a >> b      x >> y >> z
+        PipeExpression                  a >> b      x >> y >> z      a >> nil      nil >> a
 
     PRECEDENCE 6
         InstantiationExpression         a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
@@ -52,7 +52,6 @@ ModulePatternName
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         ByteExpression                  \00   \41   \20-7f   \00-FF
-        NilExpression					nil
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'
@@ -95,7 +94,6 @@ PrimaryExpression
     / ParenthesisedExpression
     / ListExpression
     / ByteExpression
-    / NilExpression
     / NullLiteral
     / BooleanLiteral
     / StringLiteral
@@ -133,11 +131,18 @@ QuantifiedExpression
     }
 
 PipeExpression
+    = NIL   __   ">>"   __   expressions:PipeInteriorExpressions
+    { return {kind: 'PipeExpression', expressions, nilConcrete: true}; }
+
+    / expressions:PipeInteriorExpressions   __   ">>"   __   NIL
+    { return {kind: 'PipeExpression', expressions, nilAbstract: true}; }
+
+    / expressions:PipeInteriorExpressions
+    { return expressions.length === 1 ? expressions[0] : {kind: 'PipeExpression', expressions}; }
+
+PipeInteriorExpressions
     = head:Precedence6OrHigher   tail:(__   ">>"   __   Precedence6OrHigher)*
-    {
-        if (tail.length === 0) return head;
-        return {kind: 'PipeExpression', expressions: [head].concat(tail.map(el => el[3]))};
-    }
+    { return [head].concat(tail.map(el => el[3])); }
 
 InstantiationOrMemberExpression
     = head:Precedence7OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / InstantiationArgument)*
@@ -200,9 +205,6 @@ ByteExpression
         if (min > max) error('invalid byte range: min is greater than max');
         return {kind: 'ByteExpression', include: [hi ? [min, max] : [min]], default: min};
     }
-
-NilExpression
-    = NIL   { return {kind: 'NilExpression'}; }
 
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }

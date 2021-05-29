@@ -11,7 +11,7 @@ function intString({mode}: StaticOptions): Generic {
         if (mode === 'parse') {
             return function ISTR() {
                 let num = 0;
-                if (AREP !== VOID) {
+                if (AREP !== NIL) {
                     const [APOSₒ, CPOSₒ] = savepoint();
 
                     // Parse optional leading '-' sign (if signed)...
@@ -61,7 +61,7 @@ function intString({mode}: StaticOptions): Generic {
         else /* mode === 'print' */ {
             return function ISTR() {
                 const digits = [] as number[];
-                if (CREP !== VOID) {
+                if (CREP !== NIL) {
                     if (ATYP !== SCALAR) return false;
                     let num = AREP[APOS] as number;
                     if (typeof num !== 'number') return false;
@@ -91,7 +91,7 @@ function intString({mode}: StaticOptions): Generic {
                 }
 
                 // Success
-                if (AREP !== VOID) {
+                if (AREP !== NIL) {
                     for (let i = 0; i < digits.length; ++i) {
                         CREP[CPOS++] = digits[i];
                     }
