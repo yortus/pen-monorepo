@@ -76,11 +76,9 @@ export type Expression<V extends Version = Version> =
 
 
 export type Subexpression<V extends Version = Version> = {
-    100: Expression<V>;
-    200: Expression<V>;
-    300: Expression<V>; // TODO: try removing LetExpr from V300 subexpr?
-    400: Identifier | GenericParameter;
-}[V];
+    '100-300': Expression<V>; // TODO: try removing LetExpr from V300 subexpr?
+    rest: Identifier | GenericParameter;
+}[V extends 100 | 200 | 300 ? '100-300' : 'rest'];
 
 
 /** Union of all node types that bind names to expressions. */
@@ -95,10 +93,8 @@ export type Binding<V extends Version> = {
         left: Identifier | Pattern<V>;
         right: Expression<V>;
     };
-    200: never;
-    300: never;
-    400: never;
-}[V];
+    rest: never;
+}[V extends 100 ? 100 : 'rest'];
 
 
 /** Union of all node types not included elsewhere (eg clauses). */
@@ -146,10 +142,8 @@ export type ImportExpression<V extends Version> = {
         kind: 'ImportExpression';
         moduleSpecifier: string;
     };
-    200: never;
-    300: never;
-    400: never;
-}[V];
+    rest: never;
+}[V extends 100 ? 100 : 'rest'];
 
 
 export interface InstantiationExpression<V extends Version> {
@@ -172,22 +166,12 @@ export type GenericExpression<V extends Version> = {
         param: Identifier | Pattern<V>;
         body: Subexpression<V>;
     };
-    200: {
+    rest: {
         kind: 'GenericExpression';
         param: string;
         body: LetExpression<V>;
     };
-    300: {
-        kind: 'GenericExpression';
-        param: string;
-        body: LetExpression<V>;
-    };
-    400: {
-        kind: 'GenericExpression';
-        param: string;
-        body: LetExpression<V>;
-    };
-}[V];
+}[V extends 100 ? 100 : 'rest'];
 
 
 export interface GenericParameter {
@@ -199,17 +183,13 @@ export interface GenericParameter {
 export interface LetExpression<V extends Version> {
     kind: 'LetExpression';
     expression: {
-        100: Expression<V>;
-        200: Expression<V>;
-        300: Expression<V>;
-        400: Identifier | GenericParameter;
-    }[V];
+        '100-300': Expression<V>;
+        rest: Identifier | GenericParameter;
+    }[V extends 100 | 200 | 300 ? '100-300' : 'rest'];
     bindings: {
         100: BindingList<V>;
-        200: BindingMap<V>;
-        300: BindingMap<V>;
-        400: BindingMap<V>;
-    }[V];
+        rest: BindingMap<V>;
+    }[V extends 100 ? 100 : 'rest'];
 }
 
 
@@ -231,9 +211,8 @@ export interface Module<V extends Version, Value extends Expression<V> = Express
     bindings: {
         100: BindingList<V>;
         200: BindingMap<V, Value>;
-        300: BindingMap<V, Identifier>;
-        400: BindingMap<V, Identifier>;
-    }[V];
+        rest: BindingMap<V, Identifier>;
+    }[V extends 100 ? 100 : V extends 200 ? 200 : 'rest'];
 }
 
 
@@ -245,10 +224,8 @@ export type ModulePattern<V extends Version> = {
             alias?: string;
         }>;
     };
-    200: never;
-    300: never;
-    400: never;
-}[V];
+    rest: never;
+}[V extends 100 ? 100 : 'rest'];
 
 
 export interface NotExpression<V extends Version> {
@@ -274,10 +251,8 @@ export type ParenthesisedExpression<V extends Version> = {
         kind: 'ParenthesisedExpression';
         expression: Subexpression<V>;
     };
-    200: never;
-    300: never;
-    400: never;
-}[V];
+    rest: never;
+}[V extends 100 ? 100 : 'rest'];
 
 
 export interface QuantifiedExpression<V extends Version> {
