@@ -38,10 +38,13 @@ ModulePatternName
         QuantifiedExpression            a?   a(b)*   a.b?   {a: b}*
 
     PRECEDENCE 5
+        PipeExpression                  a >> b      x >> y >> z
+
+    PRECEDENCE 6
         InstantiationExpression         a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
-    PRECEDENCE 6 (HIGHEST):
+    PRECEDENCE 7 (HIGHEST):
         GenericExpression               a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
         Module                          (a=b c=d e=f)   (a=b)
@@ -49,6 +52,7 @@ ModulePatternName
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         ByteExpression                  \00   \41   \20-7f   \00-FF
+        NilExpression					nil
         NullLiteral                     null
         BooleanLiteral                  false   true
         StringLiteral                   "foo"   'a string!'
@@ -75,9 +79,12 @@ Precedence4OrHigher
     = QuantifiedExpression
 
 Precedence5OrHigher
-    = InstantiationOrMemberExpression
+    = PipeExpression
 
 Precedence6OrHigher
+    = InstantiationOrMemberExpression
+
+Precedence7OrHigher
     = PrimaryExpression
 
 PrimaryExpression
@@ -88,6 +95,7 @@ PrimaryExpression
     / ParenthesisedExpression
     / ListExpression
     / ByteExpression
+    / NilExpression
     / NullLiteral
     / BooleanLiteral
     / StringLiteral
@@ -124,8 +132,15 @@ QuantifiedExpression
         return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};
     }
 
+PipeExpression
+    = head:Precedence6OrHigher   tail:(__   ">>"   __   Precedence6OrHigher)*
+    {
+        if (tail.length === 0) return head;
+        return {kind: 'PipeExpression', expressions: [head].concat(tail.map(el => el[3]))};
+    }
+
 InstantiationOrMemberExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / InstantiationArgument)*
+    = head:Precedence7OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / InstantiationArgument)*
     {
         if (tail.length === 0) return head;
         return tail.reduce(
@@ -185,6 +200,9 @@ ByteExpression
         if (min > max) error('invalid byte range: min is greater than max');
         return {kind: 'ByteExpression', include: [hi ? [min, max] : [min]], default: min};
     }
+
+NilExpression
+    = NIL   { return {kind: 'NilExpression'}; }
 
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }
@@ -280,10 +298,11 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE / WHERE
+RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NIL / NULL / TRUE / UNDERSCORE / WHERE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
+NIL                     = "nil"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
 TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
