@@ -63,9 +63,11 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     )});
                     case 'MemberExpression': return setV(e, {module: ref(e.module), member: e.member});
                     case 'Module': return setV(e); // TODO: explain... already in the right form
+                    case 'NilExpression': return setV(e);
                     case 'NotExpression': return setV(e, {expression: ref(e.expression)});
                     case 'NullLiteral': return setV(e);
                     case 'NumericLiteral': return setV(e);
+                    case 'PipeExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'QuantifiedExpression': return setV(e, {expression: ref(e.expression), quantifier: e.quantifier});
                     case 'RecordExpression': return setV(e, {items: e.items.map(it => it.kind === 'Splice'
                         ? {...it, expression: ref(it.expression)}

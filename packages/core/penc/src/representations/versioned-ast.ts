@@ -33,9 +33,8 @@ export interface AST<V extends Version = Version> {
             };
             member: 'start';
         };
-        300: LetExpression<V>;
-        400: LetExpression<V>;
-    }[V];
+        rest: LetExpression<V>;
+    }[V extends 100 ? 100 : V extends 200 ? 200 : 'rest'];
 }
 
 
@@ -63,10 +62,12 @@ export type Expression<V extends Version = Version> =
     | ListExpression<V>
     | MemberExpression<V>
     | Module<V>
+    | NilExpression
     | NotExpression<V>
     | NullLiteral
     | NumericLiteral
     | ParenthesisedExpression<V>
+    | PipeExpression<V>
     | QuantifiedExpression<V>
     | RecordExpression<V>
     | SelectionExpression<V>
@@ -228,6 +229,11 @@ export type ModulePattern<V extends Version> = {
 }[V extends 100 ? 100 : 'rest'];
 
 
+export interface NilExpression {
+    kind: 'NilExpression';
+}
+
+
 export interface NotExpression<V extends Version> {
     kind: 'NotExpression';
     expression: Subexpression<V>;
@@ -253,6 +259,12 @@ export type ParenthesisedExpression<V extends Version> = {
     };
     rest: never;
 }[V extends 100 ? 100 : 'rest'];
+
+
+export interface PipeExpression<V extends Version> {
+    kind: 'PipeExpression';
+    expressions: Array<Subexpression<V>>;
+}
 
 
 export interface QuantifiedExpression<V extends Version> {

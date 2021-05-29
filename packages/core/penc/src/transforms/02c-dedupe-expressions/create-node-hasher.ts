@@ -71,10 +71,12 @@ export function createNodeHasher() {
             ));
             case 'MemberExpression': return setSig('MEMBER', getSig(n.module), n.member);
             case 'Module': return setSig('MODULE', mapObj(n.bindings, getSig));
+            case 'NilExpression': return setSig('NIL');
             case 'NotExpression': return setSig('NOT', getSig(n.expression));
             case 'NullLiteral': return setSig('LITERAL', n.value);
             case 'NumericLiteral': return setSig('LITERAL', n.value);
             case 'QuantifiedExpression': return setSig('QUANT', getSig(n.expression), n.quantifier);
+            case 'PipeExpression': return setSig('PIPE', n.expressions.map(e => getSig(e)));
             case 'RecordExpression': return setSig('RECORD', n.items.map(i => i.kind === 'Splice'
                 ? {k: i.kind, e: getSig(i.expression)}
                 : {k: i.kind, n: typeof i.name === 'string' ? i.name : getSig(i.name), e: getSig(i.expression)}

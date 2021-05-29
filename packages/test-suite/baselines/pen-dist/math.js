@@ -309,6 +309,7 @@ const extensions = {
             memoise,
         } */
         // TODO: doc... has both 'txt' and 'ast' representation
+        // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
         function floatString({ mode }) {
             if (mode === 'parse') {
                 return function FSTR() {
@@ -412,6 +413,7 @@ const extensions = {
         const LOWERCASE_E = 'e'.charCodeAt(0);
         const UPPERCASE_E = 'E'.charCodeAt(0);
         // TODO: doc... has both 'txt' and 'ast' representation
+        // TODO: revise/document range of ints that can be parsed/printed by this rule
         function intString({ mode }) {
             return function ISTR_generic(expr) {
                 var _a, _b, _c, _d, _e, _f;
