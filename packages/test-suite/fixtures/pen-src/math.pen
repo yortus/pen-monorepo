@@ -14,16 +14,16 @@ start = expr
 
 
 expr = memoise(add | sub | term)
-add = {type: 'add',  lhs: expr,  rhs: #"+" term} // NB: commas allowed but optional
-sub = {type: 'sub'   lhs: expr   rhs: #"-" term}
+add = {type: `add`,  lhs: expr,  rhs: '+' term} // NB: commas allowed but optional
+sub = {type: `sub`   lhs: expr   rhs: '-' term}
 
 term = memoise(mul | div | factor)
-mul = {['type']: 'mul',   lhs: term,   ['rhs']: #"*" factor} // test both dynamic and static field names exprs
-div = {type: 'div'   lhs: term   rhs: #"/" factor}
+mul = {[`type`]: `mul`,   lhs: term,   [`rhs`]: '*' factor} // test both dynamic and static field names exprs
+div = {type: `div`   lhs: term   rhs: '/' factor}
 
 factor =
     | !"0x"   !"0b"   floatString
-    | #"0x"   intString(base=16 signed=false)
-    | #"0b"   intString(base=2 signed=false)
-    | #"i"    intString(signed=false)
-    | #"("   expr   #")"
+    | '0x'   intString(base=16 signed=false)
+    | '0b'   intString(base=2 signed=false)
+    | 'i'    intString(signed=false)
+    | '('   expr   ')'

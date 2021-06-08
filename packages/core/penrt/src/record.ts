@@ -25,11 +25,9 @@ function parseRecord(recordItems: RecordItem[]) {
                 // Parse field value
                 if (!parseInner(recordItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
 
-                if (AREP !== VOID) {
-                    const fieldValue = AREP[--APOS];
-                    AREP[APOS++] = fieldName;
-                    AREP[APOS++] = fieldValue;
-                }
+                const fieldValue = AREP[--APOS];
+                AREP[APOS++] = fieldName;
+                AREP[APOS++] = fieldValue;
                 fieldNames.push(fieldName); // keep track of field names to support duplicate detection
             }
             else /* item.kind === 'Splice' */ {
@@ -42,7 +40,7 @@ function parseRecord(recordItems: RecordItem[]) {
                 }
             }
         }
-        ATYP = AREP !== VOID ? RECORD : NOTHING;
+        ATYP = RECORD;
         return true;
     };
 }

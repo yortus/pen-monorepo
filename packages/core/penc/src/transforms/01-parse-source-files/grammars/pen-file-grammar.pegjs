@@ -31,7 +31,6 @@ ModulePatternName
         SequenceExpression              a b      a  b c                                                                 NB: whitespace between terms, else is application
 
     PRECEDENCE 3
-        CodeExpression
         NotExpression                   !a   !a(b)   !a.b   !{a: b}
 
     PRECEDENCE 4
@@ -48,10 +47,9 @@ ModulePatternName
         LetExpression                   (a b where a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
-        ByteExpression                  \00   \41   \20-7f   \00-FF
+        StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
         NullLiteral                     null
         BooleanLiteral                  false   true
-        StringLiteral                   "foo"   'a string!'
         NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
         ImportExpression                import './foo'   import 'somelib'
@@ -67,8 +65,7 @@ Precedence2OrHigher
     = SequenceExpression
 
 Precedence3OrHigher
-    = CodeExpression
-    / NotExpression
+    = NotExpression
     / Precedence4OrHigher
 
 Precedence4OrHigher
@@ -87,10 +84,9 @@ PrimaryExpression
     / LetExpression
     / ParenthesisedExpression
     / ListExpression
-    / ByteExpression
+    / StringExpression
     / NullLiteral
     / BooleanLiteral
-    / StringLiteral
     / NumericLiteral
     / Identifier
     / ImportExpression
@@ -108,10 +104,6 @@ SequenceExpression
         if (tail.length === 0) return head;
         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
     }
-
-CodeExpression
-    = "#"   __   expression:Precedence3OrHigher
-    { return {kind: 'CodeExpression', expression}; }
 
 NotExpression
     = "!"   __   expression:Precedence3OrHigher
@@ -177,14 +169,15 @@ ListExpression
     = "["   __   items:ListItems   __   "]"
     { return {kind: 'ListExpression', items}; }
 
-ByteExpression
-    = "\\"   lo:(HEX_DIGIT   HEX_DIGIT)   hi:("-"   HEX_DIGIT   HEX_DIGIT)?
-    {
-        const min = parseInt(lo.join(''), 16);
-        const max = hi ? parseInt(hi.slice(1).join(''), 16) : min;
-        if (min > max) error('invalid byte range: min is greater than max');
-        return {kind: 'ByteExpression', include: [hi ? [min, max] : [min]], default: min};
-    }
+StringExpression
+    = "`"   items:StringItems   "`"
+    { return {kind: 'StringExpression', subkind: 'A', items}; }
+
+    / "'"   items:StringItems   "'"
+    { return {kind: 'StringExpression', subkind: 'C', items}; }
+
+    / '"'   items:StringItems   '"'
+    { return {kind: 'StringExpression', subkind: 'X', items}; }
 
 NullLiteral
     = NULL   { return {kind: 'NullLiteral', value: null}; }
@@ -192,13 +185,6 @@ NullLiteral
 BooleanLiteral
     = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
     / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
-
-StringLiteral
-    = "'"   chars:(!"'"   CHARACTER)*   "'"
-    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), isAbstract: true}; }
-
-    / '"'   chars:(!'"'   CHARACTER)*   '"'
-    { return {kind: 'StringLiteral', value: chars.map(el => el[1]).join(''), isAbstract: false}; }
 
 NumericLiteral
     = value:(DecimalLiteral / HexIntegerLiteral)
@@ -216,7 +202,7 @@ ImportExpression
     }
 
 
-// ====================   Clauses (eg record/list parts)   ====================
+// ====================   Clauses (eg record/list/string parts)   ====================
 RecordItems
     = !","   head:RecordItem?   tail:((__   ",")?   __   RecordItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
@@ -240,6 +226,25 @@ ListItem
 Splice
     = "..."   __   expression:Expression
     { return {kind: 'Splice', expression}; }
+
+StringItems
+    = items:StringItem*
+
+StringItem
+    = chars:CHARACTER+   { return chars.join(''); }
+    / "{"   expr:Expression   "}"   { return expr; }
+    / "\\(x"   value:ByteRangeHex   ")"   { return value; }
+    / "\\x"   value:ByteRangeHex   { return value; }
+    / "\\("   value:ByteRangeDec   ")"   { return value; }
+    / "\\"   value:ByteRangeDec   { return value; }
+
+ByteRangeDec
+    = min:([0-9]+   {return parseInt(text(), 10)})   max:("-"   ([0-9]+   {return parseInt(text(), 10)}))?
+    { max = max ? max[1] : min; if (min > max || max > 255) error(`invalid byte range: ${min}-${max}`); else return [min, max]; }
+
+ByteRangeHex
+    = min:(HEX_DIGIT+   {return parseInt(text(), 16)})   max:("-"   (HEX_DIGIT+   {return parseInt(text(), 16)}))?
+    { max = max ? max[1] : min; if (min > max || max > 255) error(`invalid byte range: ${min}-${max}`); else return [min, max]; }
 
 
 // ====================   Numeric literal parts   ====================
@@ -267,9 +272,8 @@ HexIntegerLiteral
 
 // ====================   Literal characters and escape sequences   ====================
 CHARACTER
-    = ![\x00-\x1F]   !"\\"   .   { return text(); }
-    / "\\"   c:[bfnrtv0'"\\]   { return eval(`"${text()}"`); }
-    / "\\x"   d:(HEX_DIGIT   HEX_DIGIT)   { return eval(`"\\u00${d.join('')}"`); }
+    = ![\x00-\x1F]   ![\\'"`{]   .   { return text(); }
+    / "\\"   c:[bfnrtv'"`{\\]   { return eval(`"${text()}"`); }
     / "\\u"   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   { return eval(`"${text()}"`); }
     / "\\u{"   d:HEX_DIGIT+   "}"   { return eval(`"${text()}"`); }
 

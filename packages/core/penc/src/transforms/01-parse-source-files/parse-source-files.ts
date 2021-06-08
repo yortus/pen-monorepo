@@ -99,6 +99,25 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
                 // for all ParenthesisedExpression: remove parens
                 ParenthesisedExpression: par => rec(par.expression),
+
+                // for all StringExpression: convert to Sequence of StringLiteral/ByteExpression/Expression
+                StringExpression: ({subkind, items}) => {
+                    const expressions = items.map(item => {
+                        if (typeof item === 'string') {
+                            const expr: V.StringLiteral<200> = {kind: 'StringLiteral', subkind, value: item};
+                            return expr;
+                        }
+                        else if (Array.isArray(item)) {
+                            const [min, max] = item;
+                            const expr: V.ByteExpression<200> = {kind: 'ByteExpression', subkind, include: [min === max ? min : [min, max]], default: item[0]};
+                            return expr;
+                        }
+                        else {
+                            return rec(item);
+                        }
+                    });
+                    return expressions.length === 1 ? expressions[0] : {kind: 'SequenceExpression', expressions};
+                },
             }));
             assert(moduleNode.kind === 'Module');
             acc[moduleName] = moduleNode;

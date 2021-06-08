@@ -37,7 +37,6 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'ByteExpression': return n;
-            case 'CodeExpression': return {...n, expression: rec(n.expression)};
             case 'Field': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
             case 'GenericExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'GenericParameter': return n;
@@ -59,6 +58,8 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'SelectionExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'SequenceExpression': return {...n, expressions: n.expressions.map(rec)};
             case 'Splice': return {...n, expression: rec(n.expression)};
+            case 'StringExpression': return {...n, items: n.items.map(i => (typeof i === 'object' && !Array.isArray(i)) ? rec(i) : i)};
+
             case 'StringLiteral': return n;
             default: ((assertNoKindsLeft: never) => { throw new Error(`Unhandled node ${assertNoKindsLeft}`); })(n);
         }

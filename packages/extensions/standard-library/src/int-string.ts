@@ -11,46 +11,44 @@ function intString({mode}: StaticOptions): Generic {
         if (mode === 'parse') {
             return function ISTR() {
                 let num = 0;
-                if (AREP !== VOID) {
-                    const [APOSₒ, CPOSₒ] = savepoint();
+                const [APOSₒ, CPOSₒ] = savepoint();
 
-                    // Parse optional leading '-' sign (if signed)...
-                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                    let isNegative = false;
-                    if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
-                        isNegative = true;
-                        MAX_NUM = 0x80000000;
-                        CPOS += 1;
-                    }
-
-                    // ...followed by one or more decimal digits. (NB: no exponents).
-                    let digits = 0;
-                    while (CPOS < CREP.length) {
-
-                        // Read a digit.
-                        let c = CREP[CPOS];
-                        if (c >= 256) break;
-                        const digitValue = DIGIT_VALUES[c];
-                        if (digitValue >= base) break;
-
-                        // Update parsed number.
-                        num *= base;
-                        num += digitValue;
-
-                        // Check for overflow.
-                        if (num > MAX_NUM) return backtrack(APOSₒ, CPOSₒ);
-
-                        // Loop again.
-                        CPOS += 1;
-                        digits += 1;
-                    }
-
-                    // Check that we parsed at least one digit.
-                    if (digits === 0) return backtrack(APOSₒ, CPOSₒ);
-
-                    // Apply the sign.
-                    if (isNegative) num = -num;
+                // Parse optional leading '-' sign (if signed)...
+                let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                let isNegative = false;
+                if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
+                    isNegative = true;
+                    MAX_NUM = 0x80000000;
+                    CPOS += 1;
                 }
+
+                // ...followed by one or more decimal digits. (NB: no exponents).
+                let digits = 0;
+                while (CPOS < CREP.length) {
+
+                    // Read a digit.
+                    let c = CREP[CPOS];
+                    if (c >= 256) break;
+                    const digitValue = DIGIT_VALUES[c];
+                    if (digitValue >= base) break;
+
+                    // Update parsed number.
+                    num *= base;
+                    num += digitValue;
+
+                    // Check for overflow.
+                    if (num > MAX_NUM) return backtrack(APOSₒ, CPOSₒ);
+
+                    // Loop again.
+                    CPOS += 1;
+                    digits += 1;
+                }
+
+                // Check that we parsed at least one digit.
+                if (digits === 0) return backtrack(APOSₒ, CPOSₒ);
+
+                // Apply the sign.
+                if (isNegative) num = -num;
 
                 // Success
                 emitScalar(num);
@@ -61,40 +59,36 @@ function intString({mode}: StaticOptions): Generic {
         else /* mode === 'print' */ {
             return function ISTR() {
                 const digits = [] as number[];
-                if (CREP !== VOID) {
-                    if (ATYP !== SCALAR) return false;
-                    let num = AREP[APOS] as number;
-                    if (typeof num !== 'number') return false;
+                if (ATYP !== SCALAR) return false;
+                let num = AREP[APOS] as number;
+                if (typeof num !== 'number') return false;
 
-                    // Determine the number's sign and ensure it is in range.
-                    let isNegative = false;
-                    let MAX_NUM = 0x7FFFFFFF;
-                    if (num < 0) {
-                        if (!signed) return false;
-                        isNegative = true;
-                        num = -num;
-                        MAX_NUM = 0x80000000;
-                    }
-                    if (num > MAX_NUM) return false;
+                // Determine the number's sign and ensure it is in range.
+                let isNegative = false;
+                let MAX_NUM = 0x7FFFFFFF;
+                if (num < 0) {
+                    if (!signed) return false;
+                    isNegative = true;
+                    num = -num;
+                    MAX_NUM = 0x80000000;
+                }
+                if (num > MAX_NUM) return false;
 
-                    // Extract the digits.
-                    while (true) {
-                        const d = num % base;
-                        num = (num / base) | 0;
-                        digits.push(CHAR_CODES[d]);
-                        if (num === 0) break;
-                    }
-
-                    // Compute the final string.
-                    APOS += 1;
-                    if (isNegative) digits.push(HYPHEN);
+                // Extract the digits.
+                while (true) {
+                    const d = num % base;
+                    num = (num / base) | 0;
+                    digits.push(CHAR_CODES[d]);
+                    if (num === 0) break;
                 }
 
+                // Compute the final string.
+                APOS += 1;
+                if (isNegative) digits.push(HYPHEN);
+
                 // Success
-                if (AREP !== VOID) {
-                    for (let i = 0; i < digits.length; ++i) {
-                        CREP[CPOS++] = digits[i];
-                    }
+                for (let i = 0; i < digits.length; ++i) {
+                    CREP[CPOS++] = digits[i];
                 }
                 return true;
             };

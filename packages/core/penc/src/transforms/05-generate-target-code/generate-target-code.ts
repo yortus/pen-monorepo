@@ -153,11 +153,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`emitScalar(${JSON.stringify(expr.value)});`);
             }
             else /* mode === 'print' */ {
-                emit.down(1).text(`if (AREP !== VOID) {`).indent();
                 emit.down(1).text(`if (ATYP !== SCALAR) return false;`);
                 emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
                 emit.down(1).text(`APOS += 1;`);
-                emit.dedent().down(1).text(`}`);
             }
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');
@@ -165,47 +163,39 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ByteExpression': {
+            const hasInput = mode === 'parse' ? expr.subkind !== 'A' : expr.subkind !== 'C';
+            const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text(`let cc;`);
-            emit.down(1).text(`if (${IREP} !== VOID) {`).indent();
-            if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
-            emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
-            emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
-            for (const excl of expr.exclude || []) {
-                const [lo, hi, isRange] = Array.isArray(excl) ? [...excl, true] : [excl, -1, false];
-                const min = `0x${lo.toString(16).padStart(2, '0')}`;
-                const max = `0x${hi.toString(16).padStart(2, '0')}`;
-                const cond = isRange ? `cc >= ${min} && cc <= ${max}` : `cc === ${min}`;
+            if (hasInput) {
+                if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
+                emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
+                for (const excl of expr.exclude || []) {
+                    const [lo, hi, isRange] = Array.isArray(excl) ? [...excl, true] : [excl, -1, false];
+                    const min = `0x${lo.toString(16).padStart(2, '0')}`;
+                    const max = `0x${hi.toString(16).padStart(2, '0')}`;
+                    const cond = isRange ? `cc >= ${min} && cc <= ${max}` : `cc === ${min}`;
+                    emit.down(1).text(`if (${cond}) return false;`);
+                }
+                const include = expr.include.length === 0 ? [0x00, 0xff] : expr.include;
+                const cond = include.map(incl => {
+                    const [lo, hi, isRange] = Array.isArray(incl) ? [...incl, true] : [incl, -1, false];
+                    const min = `0x${lo.toString(16).padStart(2, '0')}`;
+                    const max = `0x${hi.toString(16).padStart(2, '0')}`;
+                    return isRange ? `(cc < ${min} || cc > ${max})` : `cc !== ${min}`;
+                }).join(' && ');
                 emit.down(1).text(`if (${cond}) return false;`);
+                emit.down(1).text(`${IPOS} += 1;`);
             }
-            const include = expr.include.length === 0 ? [0x00, 0xff] : expr.include;
-            const cond = include.map(incl => {
-                const [lo, hi, isRange] = Array.isArray(incl) ? [...incl, true] : [incl, -1, false];
-                const min = `0x${lo.toString(16).padStart(2, '0')}`;
-                const max = `0x${hi.toString(16).padStart(2, '0')}`;
-                return isRange ? `(cc < ${min} || cc > ${max})` : `cc !== ${min}`;
-            }).join(' && ');
-            emit.down(1).text(`if (${cond}) return false;`);
-            emit.down(1).text(`${IPOS} += 1;`);
-            emit.dedent().down(1).text(`}`);
-            emit.down(1).text(`else {`).indent();
-            emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
-            emit.dedent().down(1).text(`}`);
-            emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `if (CREP !== VOID) CREP[CPOS++] = cc;`);
+            else {
+                emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
+            }
+            if (hasOutput) {
+                emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `CREP[CPOS++] = cc;`);
+            }
             emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('}');
-            break;
-        }
-
-        case 'CodeExpression': {
-            emit.down(1).text(`function ${name}() {`).indent();
-            emit.down(1).text(`const AREPₒ = AREP;`);
-            emit.down(1).text(`AREP = VOID;`);
-            emit.down(1).text(`const result = ${expr.expression.name}();`);
-            emit.down(1).text(`AREP = AREPₒ;`);
-            if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
-            emit.down(1).text(`return result;`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -356,7 +346,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const exprVars = expr.expressions.map(e => e.name);
             emit.down(1).text(`function ${name}() {`).indent();
             emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
-            if (mode === 'parse') emit.down(1).text('let seqType = NOTHING;');
+            if (mode === 'parse') {
+                emit.down(1).text('let seqType = NOTHING;');
+                emit.down(1).text('ATYP = NOTHING;');
+            }
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
                 if (mode === 'parse') emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
@@ -367,29 +360,28 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'StringLiteral': {
-            const hasConcreteForm = !expr.isAbstract;
+            const hasInput = mode === 'parse' ? expr.subkind !== 'A' : expr.subkind !== 'C';
+            const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
             emit.down(1).text(`function ${name}() {`).indent();
-            if (mode === 'print' || hasConcreteForm) {
-                emit.down(1).text(`if (${IREP} !== VOID) {`).indent();
+            if (hasInput) {
                 if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
                 emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
                 for (let i = 0; i < bytes.length; ++i) {
                     emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
                 }
                 emit.down(1).text(`${IPOS} += ${bytes.length};`);
-                emit.dedent().down(1).text(`}`);
             }
-            if (mode === 'parse') {
-                emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
-            }
-            else if (hasConcreteForm) {
-                emit.down(1).text(`if (CREP !== VOID) {`).indent();
-                for (let i = 0; i < bytes.length; ++i) {
-                    emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+            if (hasOutput) {
+                if (mode === 'parse') {
+                    emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
                 }
-                emit.dedent().down(1).text('}');
+                else {
+                    for (let i = 0; i < bytes.length; ++i) {
+                        emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                    }
+                }
             }
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('}');

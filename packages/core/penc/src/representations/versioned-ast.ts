@@ -51,8 +51,7 @@ export type Node<V extends Version = Version> =
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
     | BooleanLiteral
-    | ByteExpression
-    | CodeExpression<V>
+    | ByteExpression<V>
     | Identifier
     | ImportExpression<V>
     | InstantiationExpression<V>
@@ -71,7 +70,8 @@ export type Expression<V extends Version = Version> =
     | RecordExpression<V>
     | SelectionExpression<V>
     | SequenceExpression<V>
-    | StringLiteral
+    | StringExpression<V>
+    | StringLiteral<V>
 ;
 
 
@@ -110,18 +110,16 @@ export interface BooleanLiteral {
 }
 
 
-export interface ByteExpression {
-    kind: 'ByteExpression';
-    include: Array<number | [min: number, max: number]>;
-    exclude?: Array<number | [min: number, max: number]>;
-    default: number;
-}
-
-
-export interface CodeExpression<V extends Version> {
-    kind: 'CodeExpression';
-    expression: Subexpression<V>;
-}
+export type ByteExpression<V extends Version> = {
+    100: never;
+    rest: {
+        kind: 'ByteExpression';
+        subkind: 'A' | 'C' | 'X';
+        include: Array<number | [min: number, max: number]>;
+        exclude?: Array<number | [min: number, max: number]>;
+        default: number;
+    };
+}[V extends 100 ? 100 : 'rest']
 
 
 export interface Field<V extends Version> {
@@ -286,11 +284,24 @@ export interface Splice<V extends Version> {
 }
 
 
-export interface StringLiteral {
-    kind: 'StringLiteral';
-    value: string;
-    isAbstract: boolean;
-}
+export type StringExpression<V extends Version> = {
+    100: {
+        kind: 'StringExpression';
+        subkind: 'A' | 'C' | 'X';
+        items: Array<string | [number, number] | Expression<V>>;
+    };
+    rest: never;
+}[V extends 100 ? 100 : 'rest'];
+
+
+export type StringLiteral<V extends Version> = {
+    100: never;
+    rest: {
+        kind: 'StringLiteral';
+        subkind: 'A' | 'C' | 'X';
+        value: string;
+    };
+}[V extends 100 ? 100 : 'rest']
 
 
 export type BindingList<V extends Version> = Array<Binding<V>>;

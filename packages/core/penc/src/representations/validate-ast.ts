@@ -44,7 +44,6 @@ const allNodeKinds = [
     'Binding',
     'BooleanLiteral',
     'ByteExpression',
-    'CodeExpression',
     'Field',
     'Identifier',
     'ImportExpression',
@@ -66,5 +65,6 @@ const allNodeKinds = [
     'SelectionExpression',
     'SequenceExpression',
     'Splice',
+    'StringExpression',
     'StringLiteral',
 ] as const;
