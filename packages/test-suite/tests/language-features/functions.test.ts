@@ -2,20 +2,20 @@ import {expect} from 'chai';
 import {compile} from 'penc';
 
 
-describe(`Language features: generics`, () => {
+describe(`Language features: functions`, () => {
     const L1 = compile({source: `
         x = "OUTER"
         ns = (
-            gen = (a) => [a, x, a]
+            fun = (a) => [a, x, a]
             x = "INNER"
             a = "FURPHY"
         )
-        start = ns.gen(a = x)
+        start = ns.fun(a = x)
     `}).eval();
 
     const L2 = compile({source: `
-        start = gen("hi")
-        gen = r => (start where
+        start = fun("hi")
+        fun = r => (start where
             start = rDash rDash
             rDash = enclose(r)
             enclose = makeEncloser(

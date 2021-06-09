@@ -5,7 +5,7 @@ import {createSymbolTable, Scope, Symbol} from './symbol-table';
 
 // TODO: jsdoc...
 // - resolves all identifiers (output ast Identifiers all refer to globally-unique names in LetExpr bindings)
-// - resolves member lookups where possible (can't resolve member access of intrinsics or generic params)
+// - resolves member lookups where possible (can't resolve member access of intrinsics or function params)
 export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
     validateAST(ast);
     const allSymbols = {} as Record<string, Symbol>;
@@ -26,14 +26,14 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         },
     });
 
-    // STEP 1: Traverse the AST, creating a scope for each module/letexpr/genexpr, and a symbol for each binding name/value pair.
+    // STEP 1: Traverse the AST, creating a scope for each module/letexpr/funexpr, and a symbol for each binding name/value pair.
     let env = rootScope;
     const identifiers = new Map<V.Identifier, Scope>();
     const memberExprs = [] as V.MemberExpression<300>[];
     const startᐟ = mapNode(ast.start, rec => ({
-        GenericExpression: ({param, body}): V.GenericExpression<300> => {
+        FunctionExpression: ({param, body}): V.FunctionExpression<300> => {
 
-            // Create a closure and nested scope for this generic expression.
+            // Create a closure and nested scope for this function expression.
             pushClosure();
             env = env.createNestedScope();
 
@@ -45,7 +45,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
             // TODO: explain...
             return {
-                kind: 'GenericExpression',
+                kind: 'FunctionExpression',
                 param,
                 body: {
                     kind: 'LetExpression',
@@ -133,7 +133,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
         },
     };
 
-    // TODO: doc/validate/type: the ast now has one LetExpr at the root and one per GenExpr, and nowhere else
+    // TODO: doc/validate/type: the ast now has one LetExpr at the root and one per FunExpr, and nowhere else
 
     validateAST(astᐟ);
     return astᐟ;

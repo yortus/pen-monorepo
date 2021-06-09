@@ -137,11 +137,17 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'Intrinsic': // already handled by emitProgram
             break;
 
-        // TODO:
-        case 'MemberExpression':  {
+        case 'ApplicationExpression': {
+            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
             emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
-            emit.dedent().down(1).text('}');
+            emit.down(1).text('try {').indent();
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
+            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
+            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.function.name}(${expr.argument.name});`);
+            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
+            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`}`);
             break;
         }
 
@@ -201,7 +207,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         // TODO: ...
-        case 'GenericExpression': {
+        case 'FunctionExpression': {
             emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
             emitBindings(emit, expr.body.bindings, consts, mode);
             emit.down(2).text(`return ${expr.body.expression.name};`);
@@ -210,24 +216,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         // TODO: ...
-        case 'GenericParameter':
+        case 'FunctionParameter':
         case 'Identifier': {
             emit.down(1).text(`function ${name}(arg) {`).indent();
             emit.down(1).text(`return ${expr.name}(arg);`);
-            emit.dedent().down(1).text(`}`);
-            break;
-        }
-
-        case 'InstantiationExpression': {
-            emit.down(1).text(`let ${name}${MEMO_SUFFIX};`);
-            emit.down(1).text(`function ${name}(arg) {`).indent();
-            emit.down(1).text('try {').indent();
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
-            emit.dedent().down(1).text('}').down(1).text('catch (err) {').indent();
-            emit.down(1).text(`if (!(err instanceof TypeError) || !err.message.includes('${name}${MEMO_SUFFIX} is not a function')) throw err;`);
-            emit.down(1).text(`${name}${MEMO_SUFFIX} = ${expr.generic.name}(${expr.argument.name});`);
-            emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
-            emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
             break;
         }
@@ -253,6 +245,13 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.down(1).text(`return ${name}${MEMO_SUFFIX}(arg);`);
             emit.dedent().down(1).text(`}`);
             emit.dedent().down(1).text(`}`);
+            break;
+        }
+
+        case 'MemberExpression':  {
+            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
+            emit.dedent().down(1).text('}');
             break;
         }
 

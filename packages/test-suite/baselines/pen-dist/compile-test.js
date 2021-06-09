@@ -154,7 +154,7 @@ function printRecord(recordItems) {
 function isRule(_x) {
     return true;
 }
-function isGeneric(_x) {
+function isFunc(_x) {
     return true;
 }
 function isModule(_x) {
@@ -316,7 +316,7 @@ const parse = (() => {
     }
     x.constant = {value: "outer x"};
 
-    // GenericExpression
+    // FunctionExpression
     function REP(ℙ1) {
 
         // MemberExpression
@@ -341,10 +341,10 @@ const parse = (() => {
         return 𝕊1;
     }
 
-    // GenericExpression
-    function GEN(ℙ2) {
+    // FunctionExpression
+    function FUN(ℙ2) {
 
-        // GenericParameter
+        // FunctionParameter
         function x_2(arg) {
             return ℙ2(arg);
         }
@@ -391,7 +391,7 @@ const parse = (() => {
     function nested(member) {
         switch (member) {
             case 'REP': return REP;
-            case 'GEN': return GEN;
+            case 'FUN': return FUN;
             case 'x': return x_3;
             case 'a': return a_2;
             default: return undefined;
@@ -463,7 +463,7 @@ const parse = (() => {
         return false;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let start_2_sub1ₘ;
     function start_2_sub1(arg) {
         try {
@@ -527,7 +527,7 @@ const print = (() => {
     }
     x.constant = {value: "outer x"};
 
-    // GenericExpression
+    // FunctionExpression
     function REP(ℙ1) {
 
         // MemberExpression
@@ -547,10 +547,10 @@ const print = (() => {
         return 𝕊1;
     }
 
-    // GenericExpression
-    function GEN(ℙ2) {
+    // FunctionExpression
+    function FUN(ℙ2) {
 
-        // GenericParameter
+        // FunctionParameter
         function x_2(arg) {
             return ℙ2(arg);
         }
@@ -602,7 +602,7 @@ const print = (() => {
     function nested(member) {
         switch (member) {
             case 'REP': return REP;
-            case 'GEN': return GEN;
+            case 'FUN': return FUN;
             case 'x': return x_3;
             case 'a': return a_2;
             default: return undefined;
@@ -680,7 +680,7 @@ const print = (() => {
         return false;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let start_2_sub1ₘ;
     function start_2_sub1(arg) {
         try {

@@ -17,7 +17,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
 
             // TODO: ...
             let expression = rec(le.expression);
-            if (expression.kind !== 'Identifier' && expression.kind !== 'GenericParameter') {
+            if (expression.kind !== 'Identifier' && expression.kind !== 'FunctionParameter') {
                 let name = `𝕊${++counter}`;
                 name = addBinding(name, expression); // TODO: ensure name can't ever clash with program identifier
                 expression = {kind: 'Identifier', name};
@@ -35,8 +35,8 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                 // TODO: explain... reserve the name so recursive calls don't claim it first
                 bindings[name] = e;
 
-                function ref(expr: V.Expression<400>): V.Identifier | V.GenericParameter {
-                    if (expr.kind === 'Identifier' || expr.kind === 'GenericParameter') return expr;
+                function ref(expr: V.Expression<400>): V.Identifier | V.FunctionParameter {
+                    if (expr.kind === 'Identifier' || expr.kind === 'FunctionParameter') return expr;
                     const addedName = addBinding(baseName, expr); // recurse
                     return {kind: 'Identifier', name: addedName};
                 }
@@ -47,13 +47,13 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                 }
         
                 switch (e.kind) {
+                    case 'ApplicationExpression': return setV(e, {function: ref(e.function), argument: ref(e.argument)});
                     case 'BooleanLiteral': return setV(e);
                     case 'ByteExpression': return setV(e);
-                    // TODO: special... should not be encountered here, since each genexpr would be a separate context
-                    case 'GenericExpression': return setV(e); // TODO: explain... already in the right form
-                    case 'GenericParameter': return setV(e);
+                    // TODO: special... should not be encountered here, since each funexpr would be a separate context
+                    case 'FunctionExpression': return setV(e); // TODO: explain... already in the right form
+                    case 'FunctionParameter': return setV(e);
                     case 'Identifier': return setV(e);
-                    case 'InstantiationExpression': return setV(e, {generic: ref(e.generic), argument: ref(e.argument)});
                     case 'Intrinsic': return setV(e);
                     case 'LetExpression': return setV(e); // TODO: doc this node was already handled in the depth-first mapNode traversal
                     case 'ListExpression': return setV(e, {items: e.items.map(it => it.kind === 'Splice'

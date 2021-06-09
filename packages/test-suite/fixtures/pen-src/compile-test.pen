@@ -2,7 +2,7 @@ x = "outer x"
 
 nested = (
     REP = (a) => a x a
-    GEN = x => x x
+    FUN = x => x x
     x = "inner x"
     a = 42
 )

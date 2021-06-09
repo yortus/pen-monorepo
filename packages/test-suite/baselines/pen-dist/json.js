@@ -154,7 +154,7 @@ function printRecord(recordItems) {
 function isRule(_x) {
     return true;
 }
-function isGeneric(_x) {
+function isFunc(_x) {
     return true;
 }
 function isModule(_x) {
@@ -401,7 +401,7 @@ const extensions = {
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: revise/document range of ints that can be parsed/printed by this rule
         function intString({ mode }) {
-            return function ISTR_generic(expr) {
+            return function ISTR_function(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
@@ -523,7 +523,7 @@ const extensions = {
         ];
         const HYPHEN = 0x2d;
         function memoise({ mode }) {
-            return function MEM_generic(expr) {
+            return function MEM_function(expr) {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
                 if (mode === 'parse') {
@@ -695,7 +695,7 @@ const extensions = {
         } */
         // see https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330 for encode/decode algo in js
         function unicode({ mode }) {
-            return function UNI_generic(expr) {
+            return function UNI_function(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
@@ -1831,7 +1831,7 @@ const parse = (() => {
     }
     CHAR_sub39.constant = {value: "\\u"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let CHAR_sub40ₘ;
     function CHAR_sub40(arg) {
         try {
@@ -3039,7 +3039,7 @@ const print = (() => {
     }
     CHAR_sub39.constant = {value: "\\u"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let CHAR_sub40ₘ;
     function CHAR_sub40(arg) {
         try {

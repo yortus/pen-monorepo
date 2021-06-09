@@ -154,7 +154,7 @@ function printRecord(recordItems) {
 function isRule(_x) {
     return true;
 }
-function isGeneric(_x) {
+function isFunc(_x) {
     return true;
 }
 function isModule(_x) {
@@ -401,7 +401,7 @@ const extensions = {
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: revise/document range of ints that can be parsed/printed by this rule
         function intString({ mode }) {
-            return function ISTR_generic(expr) {
+            return function ISTR_function(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
                 const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
@@ -523,7 +523,7 @@ const extensions = {
         ];
         const HYPHEN = 0x2d;
         function memoise({ mode }) {
-            return function MEM_generic(expr) {
+            return function MEM_function(expr) {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
                 if (mode === 'parse') {
@@ -721,7 +721,7 @@ const parse = (() => {
         return expr(arg);
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let exprₘ;
     function expr(arg) {
         try {
@@ -858,7 +858,7 @@ const parse = (() => {
         return true;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let termₘ;
     function term(arg) {
         try {
@@ -1130,7 +1130,7 @@ const parse = (() => {
     }
     factor_sub7.constant = {value: "0x"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub8ₘ;
     function factor_sub8(arg) {
         try {
@@ -1174,7 +1174,7 @@ const parse = (() => {
     }
     factor_sub11.constant = {value: "0b"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub12ₘ;
     function factor_sub12(arg) {
         try {
@@ -1218,7 +1218,7 @@ const parse = (() => {
         return true;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub16ₘ;
     function factor_sub16(arg) {
         try {
@@ -1341,7 +1341,7 @@ const print = (() => {
         return expr(arg);
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let exprₘ;
     function expr(arg) {
         try {
@@ -1476,7 +1476,7 @@ const print = (() => {
         return true;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let termₘ;
     function term(arg) {
         try {
@@ -1758,7 +1758,7 @@ const print = (() => {
     }
     factor_sub7.constant = {value: "0x"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub8ₘ;
     function factor_sub8(arg) {
         try {
@@ -1796,7 +1796,7 @@ const print = (() => {
     }
     factor_sub11.constant = {value: "0b"};
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub12ₘ;
     function factor_sub12(arg) {
         try {
@@ -1834,7 +1834,7 @@ const print = (() => {
         return true;
     }
 
-    // InstantiationExpression
+    // ApplicationExpression
     let factor_sub16ₘ;
     function factor_sub16(arg) {
         try {

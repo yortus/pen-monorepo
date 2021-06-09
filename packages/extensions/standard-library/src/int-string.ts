@@ -1,7 +1,7 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 // TODO: revise/document range of ints that can be parsed/printed by this rule
-function intString({mode}: StaticOptions): Generic {
-    return function ISTR_generic(expr) {
+function intString({mode}: StaticOptions): Func {
+    return function ISTR_function(expr) {
         assert(isModule(expr));
         const base = expr('base')?.constant?.value as number | undefined ?? 10;
         const signed = expr('signed')?.constant?.value as boolean | undefined ?? true;

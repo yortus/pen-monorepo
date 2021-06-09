@@ -9,15 +9,15 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
 
     function rec(n: Node): void {
         switch (n.kind) {
+            case 'ApplicationExpression': return rec(n.function), rec(n.argument), cb(n);
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'ByteExpression': return cb(n);
             case 'Field': return (typeof n.name === 'string' || rec(n.name)), rec(n.expression), cb(n);
-            case 'GenericExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
-            case 'GenericParameter': return cb(n);
+            case 'FunctionExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
+            case 'FunctionParameter': return cb(n);
             case 'Identifier': return cb(n);
             case 'ImportExpression': return cb(n);
-            case 'InstantiationExpression': return rec(n.generic), rec(n.argument), cb(n);
             case 'Intrinsic': return cb(n);
             case 'LetExpression': return cb(n.expression), Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec), cb(n);
             case 'ListExpression': return n.items.forEach(rec), cb(n);

@@ -37,11 +37,11 @@ ModulePatternName
         QuantifiedExpression            a?   a(b)*   a.b?   {a: b}*
 
     PRECEDENCE 5
-        InstantiationExpression         a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+        ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
-        GenericExpression               a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
+        FunctionExpression              a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
         Module                          (a=b c=d e=f)   (a=b)
         LetExpression                   (a b where a=1 b=2)
@@ -72,13 +72,13 @@ Precedence4OrHigher
     = QuantifiedExpression
 
 Precedence5OrHigher
-    = InstantiationOrMemberExpression
+    = ApplicationOrMemberExpression
 
 Precedence6OrHigher
     = PrimaryExpression
 
 PrimaryExpression
-    = GenericExpression
+    = FunctionExpression
     / RecordExpression
     / Module
     / LetExpression
@@ -116,14 +116,14 @@ QuantifiedExpression
         return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};
     }
 
-InstantiationOrMemberExpression
-    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / InstantiationArgument)*
+ApplicationOrMemberExpression
+    = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)*
     {
         if (tail.length === 0) return head;
         return tail.reduce(
             (lhs, rhs) => (rhs.name
                 ? {kind: 'MemberExpression', module: lhs, member: rhs.name}
-                : {kind: 'InstantiationExpression', generic: lhs, argument: rhs.arg}
+                : {kind: 'ApplicationExpression', function: lhs, argument: rhs.arg}
             ),
             head
         );
@@ -133,13 +133,13 @@ MemberLookup
     = "."   /* NO WHITESPACE */   name:IDENTIFIER
     { return {name}; }
 
-InstantiationArgument
+ApplicationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 
-GenericExpression
+FunctionExpression
     = param:(Identifier / ModulePattern)   __   "=>"   __   body:Expression
-    { return {kind: 'GenericExpression', param, body}; }
+    { return {kind: 'FunctionExpression', param, body}; }
 
 RecordExpression
     = "{"   __   items:RecordItems   __   "}"

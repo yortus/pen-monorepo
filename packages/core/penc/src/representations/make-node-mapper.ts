@@ -34,15 +34,15 @@ export function makeNodeMapper<V extends Version, Vᐟ extends Version>() {
 function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
+            case 'ApplicationExpression': return {...n, function: rec(n.function), argument: rec(n.argument)};
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'ByteExpression': return n;
             case 'Field': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
-            case 'GenericExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
-            case 'GenericParameter': return n;
+            case 'FunctionExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
+            case 'FunctionParameter': return n;
             case 'Identifier': return n;
             case 'ImportExpression': return n;
-            case 'InstantiationExpression': return {...n, generic: rec(n.generic), argument: rec(n.argument)};
             case 'Intrinsic': return n;
             case 'LetExpression': return {...n, expression: rec(n.expression), bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
             case 'ListExpression': return {...n, items: n.items.map(rec)};

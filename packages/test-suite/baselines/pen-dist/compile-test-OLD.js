@@ -154,7 +154,7 @@ function printRecord(recordItems) {
 function isRule(_x) {
     return true;
 }
-function isGeneric(_x) {
+function isFunc(_x) {
     return true;
 }
 function isModule(_x) {

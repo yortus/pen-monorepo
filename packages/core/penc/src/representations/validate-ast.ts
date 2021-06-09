@@ -27,12 +27,12 @@ export function validateAST(ast: AST<Version>) {
             if (n.kind === 'Module' || n.kind === 'LetExpression') {
                 assert(!Array.isArray(n.bindings), `Expected bindings property to be a plain object`);
             }
-            if (n.kind === 'GenericExpression') {
+            if (n.kind === 'FunctionExpression') {
                 assert(n.body.kind === 'LetExpression');
             }
         }
 
-        // TODO: V300: LetExpr can only appear once at root and once per GenExpr, and nowhere else in AST
+        // TODO: V300: LetExpr can only appear once at root and once per FunExpr, and nowhere else in AST
     });
 }
 
@@ -41,16 +41,16 @@ const allAstVersions = [100, 200, 300, 400];
 
 
 const allNodeKinds = [
+    'ApplicationExpression',
     'Binding',
     'BooleanLiteral',
     'ByteExpression',
     'Field',
+    'FunctionExpression',
+    'FunctionParameter',
     'Identifier',
     'ImportExpression',
-    'InstantiationExpression',
     'Intrinsic',
-    'GenericExpression',
-    'GenericParameter',
     'LetExpression',
     'ListExpression',
     'MemberExpression',

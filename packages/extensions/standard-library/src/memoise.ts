@@ -1,5 +1,5 @@
-function memoise({mode}: StaticOptions): Generic {
-    return function MEM_generic(expr) {
+function memoise({mode}: StaticOptions): Func {
+    return function MEM_function(expr) {
         // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
         const memos = new Map<
             unknown,

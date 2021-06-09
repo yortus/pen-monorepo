@@ -10,8 +10,8 @@ import {assert, mapObj} from '../../utils';
 //   - that transform combined deduping with flattening, this one only does deduping
 // - summary: if multiple bindings have semantically equivalent RHSs, then they are reduced to a single deduped binding
 //   - all Identifiers referencing any of these bindings are updated to reference the single deduped binding
-//   - bindings may be hoisted in the process, eg two sibling genexprs containing an equivalent binding will have the
-//       new deduped binding hoisted so it is in scope for both genexprs
+//   - bindings may be hoisted in the process, eg two siblinfunexprs containing an equivalent binding will have the
+//       new deduped binding hoisted so it is in scope for both funexprs
 export function dedupeExpressions(ast: V.AST<400>): V.AST<400> {
     validateAST(ast);
 
@@ -29,7 +29,7 @@ export function dedupeExpressions(ast: V.AST<400>): V.AST<400> {
 
         LetExpression: (le) => {
             const expression = rec(le.expression);
-            assert(expression.kind === 'Identifier' || expression.kind === 'GenericParameter');
+            assert(expression.kind === 'Identifier' || expression.kind === 'FunctionParameter');
             const bindings = mapObj(le.bindings, rec)
 
             // TODO: hash each binding

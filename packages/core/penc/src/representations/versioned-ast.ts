@@ -5,9 +5,9 @@ import type {AbsPath} from '../utils';
 // - [x] WONTFIX (no need) Module --> File (for RAW files), Namespace (for nested modules)
 // - [x] clarify Module/Namespace/Binding terminology
 // - [x] support LetExpressions
-// - [x] new AST version 300 - after resolution transform, no: LetExpression, GenericExpression
+// - [x] new AST version 300 - after resolution transform, no: LetExpression, FunctionExpression
 // - [ ] impl/doc necessary extra rules for v300/post-resolution:
-//       - intrinsic generics: cannot take generics as arg(s)    TODO: what would it take to lift this restriction?
+//       - intrinsic functions: cannot take functions as arg(s)    TODO: what would it take to lift this restriction?
 // - [ ] simplify special handling/synthesis of 'start' and 'ENTRYPOINT' ids
 // - [ ] different node for resolved Identifiers?
 // - [ ] Module: support extra type parameter to constrain the type of the bindings (default = Expression)
@@ -50,14 +50,14 @@ export type Node<V extends Version = Version> =
 
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
+    | ApplicationExpression<V>
     | BooleanLiteral
     | ByteExpression<V>
+    | FunctionExpression<V>
+    | FunctionParameter
     | Identifier
     | ImportExpression<V>
-    | InstantiationExpression<V>
     | Intrinsic
-    | GenericExpression<V>
-    | GenericParameter
     | LetExpression<V>
     | ListExpression<V>
     | MemberExpression<V>
@@ -77,7 +77,7 @@ export type Expression<V extends Version = Version> =
 
 export type Subexpression<V extends Version = Version> = {
     '100-300': Expression<V>; // TODO: try removing LetExpr from V300 subexpr?
-    rest: Identifier | GenericParameter;
+    rest: Identifier | FunctionParameter;
 }[V extends 100 | 200 | 300 ? '100-300' : 'rest'];
 
 
@@ -102,6 +102,13 @@ export type Other<V extends Version = Version> =
     | Field<V>
     | Splice<V>
 ;
+
+
+export interface ApplicationExpression<V extends Version> {
+    kind: 'ApplicationExpression';
+    function: Subexpression<V>;
+    argument: Subexpression<V>;
+}
 
 
 export interface BooleanLiteral {
@@ -129,6 +136,26 @@ export interface Field<V extends Version> {
 }
 
 
+export type FunctionExpression<V extends Version> = {
+    100: {
+        kind: 'FunctionExpression';
+        param: Identifier | Pattern<V>;
+        body: Subexpression<V>;
+    };
+    rest: {
+        kind: 'FunctionExpression';
+        param: string;
+        body: LetExpression<V>;
+    };
+}[V extends 100 ? 100 : 'rest'];
+
+
+export interface FunctionParameter {
+    kind: 'FunctionParameter';
+    name: string;
+}
+
+
 export interface Identifier {
     kind: 'Identifier';
     name: string;
@@ -144,13 +171,6 @@ export type ImportExpression<V extends Version> = {
 }[V extends 100 ? 100 : 'rest'];
 
 
-export interface InstantiationExpression<V extends Version> {
-    kind: 'InstantiationExpression';
-    generic: Subexpression<V>;
-    argument: Subexpression<V>;
-}
-
-
 export interface Intrinsic {
     kind: 'Intrinsic';
     name: string;
@@ -158,31 +178,11 @@ export interface Intrinsic {
 }
 
 
-export type GenericExpression<V extends Version> = {
-    100: {
-        kind: 'GenericExpression';
-        param: Identifier | Pattern<V>;
-        body: Subexpression<V>;
-    };
-    rest: {
-        kind: 'GenericExpression';
-        param: string;
-        body: LetExpression<V>;
-    };
-}[V extends 100 ? 100 : 'rest'];
-
-
-export interface GenericParameter {
-    kind: 'GenericParameter';
-    name: string;
-}
-
-
 export interface LetExpression<V extends Version> {
     kind: 'LetExpression';
     expression: {
         '100-300': Expression<V>;
-        rest: Identifier | GenericParameter;
+        rest: Identifier | FunctionParameter;
     }[V extends 100 | 200 | 300 ? '100-300' : 'rest'];
     bindings: {
         100: BindingList<V>;

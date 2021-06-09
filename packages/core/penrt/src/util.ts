@@ -17,13 +17,13 @@ interface StaticOptions {mode: 'parse' | 'print'; }
 
 
 
-type PenVal = Rule | Generic | Module;
+type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
     constant?: {value: unknown}; // compile-time constant
 }
-interface Generic {
-    (arg: PenVal): PenVal; // generic
+interface Func {
+    (arg: PenVal): PenVal; // function
     constant?: {value: unknown}; // compile-time constant
 }
 interface Module {
@@ -33,7 +33,7 @@ interface Module {
 function isRule(_x: PenVal): _x is Rule {
     return true; // TODO: implement runtime check
 }
-function isGeneric(_x: PenVal): _x is Generic {
+function isFunc(_x: PenVal): _x is Func {
     return true; // TODO: implement runtime check
 }
 function isModule(_x: PenVal): _x is Module {

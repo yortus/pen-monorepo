@@ -51,20 +51,20 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
     }
 
     // TODO: temp testing... traverse AST again...
-    let genericParameterCounter = 0;
+    let functionParameterCounter = 0;
     const sourceFileModulesByModuleName = Object.entries(sourceFileModulesByPath).reduce(
         (acc, [sourceFilePath, sourceFileModule]) => {
             const moduleName = moduleNamesBySourceFilePath[sourceFilePath];
             const moduleNode = mapNode(sourceFileModule, rec => ({
 
-                // for all GenericExpression#param: replace Identifer|Pattern --> string
-                GenericExpression: ({param, body}): V.GenericExpression<200> => {
+                // for all FunctionExpression#param: replace Identifer|Pattern --> string
+                FunctionExpression: ({param, body}): V.FunctionExpression<200> => {
                     // Use parameter names like 'ℙnnn' to ensure no clash with program identifiers.
                     // TODO: but that could be a valid id in future... ensure *can't* clash
-                    // TODO: doc... param name also must be unique across all genexprs in the program
-                    const paramName = `ℙ${++genericParameterCounter}`;
+                    // TODO: doc... param name also must be unique across all funexprs in the program
+                    const paramName = `ℙ${++functionParameterCounter}`;
                     return {
-                        kind: 'GenericExpression',
+                        kind: 'FunctionExpression',
                         param: paramName,
                         body: {
                             kind: 'LetExpression',
@@ -72,7 +72,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                             bindings: bindingListToBindingMap([{
                                 kind: 'Binding',
                                 left: param,
-                                right: {kind: 'GenericParameter', name: paramName}
+                                right: {kind: 'FunctionParameter', name: paramName}
                             }], rec),
                         },
                     };
