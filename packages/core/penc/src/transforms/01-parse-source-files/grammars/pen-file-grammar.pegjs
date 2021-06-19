@@ -44,7 +44,7 @@ ModulePatternName
         FunctionExpression              a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
         Module                          (a=b c=d e=f)   (a=b)
-        LetExpression                   (a b where a=1 b=2)
+        LetExpression                   (-> a b a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
@@ -99,7 +99,7 @@ SelectionExpression
     }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="   !">")   !(__   ":"))*
+    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "=")   !(__   ":"))*
     {
         if (tail.length === 0) return head;
         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
@@ -158,7 +158,7 @@ Module
     { return {kind: 'Module', bindings}; }
 
 LetExpression
-    = "("   __   expression:Expression   __   WHERE   __   bindings:BindingList   __   ")"
+    = "("   __   "->"   __   expression:Expression   __   bindings:BindingList   __   ")"
     { return {kind: 'LetExpression', expression, bindings}; }
 
 ParenthesisedExpression
@@ -284,14 +284,13 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE / WHERE
+RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
 TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
-WHERE                   = "where"   !IDENTIFIER_PART   { return text(); }
 
 
 // ====================   Whitespace and lexical markers   ====================

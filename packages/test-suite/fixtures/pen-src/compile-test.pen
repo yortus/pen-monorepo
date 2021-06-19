@@ -8,9 +8,7 @@ nested = (
 )
 
 letexpr = (
-    lx "-" lx 
-
-    where
+    -> lx "-" lx
     lx = "inner x"
     ly = "***"
 )

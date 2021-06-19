@@ -15,7 +15,7 @@ describe(`Language features: functions`, () => {
 
     const L2 = compile({source: `
         start = fun("hi")
-        fun = r -> (start where
+        fun = r -> (-> start
             start = rDash rDash
             rDash = enclose(r)
             enclose = makeEncloser(
