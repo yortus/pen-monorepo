@@ -6,7 +6,7 @@ describe(`Language features: functions`, () => {
     const L1 = compile({source: `
         x = "OUTER"
         ns = (
-            fun = (a) => [a, x, a]
+            fun = (a) -> [a, x, a]
             x = "INNER"
             a = "FURPHY"
         )
@@ -15,14 +15,14 @@ describe(`Language features: functions`, () => {
 
     const L2 = compile({source: `
         start = fun("hi")
-        fun = r => (start where
+        fun = r -> (start where
             start = rDash rDash
             rDash = enclose(r)
             enclose = makeEncloser(
                 lp="("
                 rp=")"
             )
-            makeEncloser = (lp, rp) => (x => lp x rp)
+            makeEncloser = (lp, rp) -> (x -> lp x rp)
         )
     `}).eval();
 

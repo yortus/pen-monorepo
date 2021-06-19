@@ -1,8 +1,8 @@
 x = "outer x"
 
 nested = (
-    REP = (a) => a x a
-    FUN = x => x x
+    REP = (a) -> a x a
+    FUN = x -> x x
     x = "inner x"
     a = 42
 )
@@ -33,10 +33,10 @@ start = nested.REP(a = x)
 // (f2) = funcs
 // 
 // funcs = (
-//     //f1 = a => a a
-//     f2 = (a) => a a
-//     //f3 = (a, b) => a b
-//     //f4 = () => ()
+//     //f1 = a -> a a
+//     f2 = (a) -> a a
+//     //f3 = (a, b) -> a b
+//     //f4 = () -> ()
 // 
 //     one = "=== ONE ==="
 // )

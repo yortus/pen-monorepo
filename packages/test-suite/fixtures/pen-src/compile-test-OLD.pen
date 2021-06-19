@@ -26,8 +26,8 @@ recA = ( a = "a" recB.b )
 recB = ( b = "b" recA.a )
 
 // function expressions, disabled for now
-// fn1 = a => a a
-// fn2 = (x, y) => x y
+// fn1 = a -> a a
+// fn2 = (x, y) -> x y
 
 // deeper references
 refC = defC.c.c1

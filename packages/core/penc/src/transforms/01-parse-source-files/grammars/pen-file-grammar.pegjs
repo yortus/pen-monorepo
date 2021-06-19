@@ -41,7 +41,7 @@ ModulePatternName
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
     PRECEDENCE 6 (HIGHEST):
-        FunctionExpression              a => a a   (a, b) => a b   () => "blah"                                         NB: param is just like Binding#left
+        FunctionExpression              a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
         RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
         Module                          (a=b c=d e=f)   (a=b)
         LetExpression                   (a b where a=1 b=2)
@@ -138,7 +138,7 @@ ApplicationArgument
     { return {arg}; }
 
 FunctionExpression
-    = param:(Identifier / ModulePattern)   __   "=>"   __   body:Expression
+    = param:(Identifier / ModulePattern)   __   "->"   __   body:Expression
     { return {kind: 'FunctionExpression', param, body}; }
 
 RecordExpression
