@@ -42,7 +42,7 @@ ModulePatternName
 
     PRECEDENCE 6 (HIGHEST):
         FunctionExpression              a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
-        RecordExpression                {a: b   c: d   e: f}   {a: b}   {}   {[a]: b, ...c, ...d, e: f}
+        RecordExpression                {a=b   c=d   e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f}
         Module                          (a=b c=d e=f)   (a=b)
         LetExpression                   (-> a b a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
@@ -99,7 +99,7 @@ SelectionExpression
     }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "=")   !(__   ":"))*
+    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="))*
     {
         if (tail.length === 0) return head;
         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
@@ -210,10 +210,10 @@ RecordItems
 RecordItem
     = Splice
 
-    / "["   __   name:Expression   __   "]"   __   ":"   __   expression:Expression
+    / "["   __   name:Expression   __   "]"   __   "="   __   expression:Expression
     { return {kind: 'Field', name, expression}; }
 
-    / name:IDENTIFIER   __   ":"   __   expression:Expression
+    / name:IDENTIFIER   __   "="   __   expression:Expression
     { return {kind: 'Field', name, expression}; }
 
 ListItems

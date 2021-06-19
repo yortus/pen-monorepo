@@ -993,35 +993,35 @@ const parse = (() => {
         return true;
     }
 
+    // RecordExpression
+    let Object_sub6ₘ;
+    function Object_sub6(arg) {
+        try {
+            return Object_sub6ₘ(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub6ₘ is not a function')) throw err;
+            Object_sub6ₘ = parseRecord([
+                {
+                    kind: 'Field',
+                    name: Object_sub7,
+                    expr: Object_sub8
+                },
+            ]);
+            return Object_sub6ₘ(arg);
+        }
+    }
+
     // SequenceExpression
-    function Object_sub6() {
+    function Object_sub7() {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
         if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         seqType |= ATYP;
-        if (!Object_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!String()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
-
-    // RecordExpression
-    let Object_sub7ₘ;
-    function Object_sub7(arg) {
-        try {
-            return Object_sub7ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub7ₘ is not a function')) throw err;
-            Object_sub7ₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    name: String,
-                    expr: Object_sub8
-                },
-            ]);
-            return Object_sub7ₘ(arg);
-        }
     }
 
     // SequenceExpression
@@ -2278,31 +2278,31 @@ const print = (() => {
         return true;
     }
 
-    // SequenceExpression
-    function Object_sub6() {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!Object_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    }
-
     // RecordExpression
-    let Object_sub7ₘ;
-    function Object_sub7(arg) {
+    let Object_sub6ₘ;
+    function Object_sub6(arg) {
         try {
-            return Object_sub7ₘ(arg);
+            return Object_sub6ₘ(arg);
         }
         catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub7ₘ is not a function')) throw err;
-            Object_sub7ₘ = printRecord([
+            if (!(err instanceof TypeError) || !err.message.includes('Object_sub6ₘ is not a function')) throw err;
+            Object_sub6ₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: String,
+                    name: Object_sub7,
                     expr: Object_sub8
                 },
             ]);
-            return Object_sub7ₘ(arg);
+            return Object_sub6ₘ(arg);
         }
+    }
+
+    // SequenceExpression
+    function Object_sub7() {
+        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+        if (!COMMA()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        if (!String()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+        return true;
     }
 
     // SequenceExpression
