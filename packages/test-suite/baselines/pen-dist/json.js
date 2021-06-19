@@ -68,38 +68,38 @@ function parseRecord(recordItems) {
         const [APOSₒ, CPOSₒ] = savepoint();
         if (APOS === 0)
             AREP = [];
-        const fieldNames = [];
+        const fieldLabels = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
-                let fieldName;
-                if (typeof recordItem.name === 'string') {
-                    fieldName = recordItem.name;
+                let fieldLabel;
+                if (typeof recordItem.label === 'string') {
+                    fieldLabel = recordItem.label;
                 }
                 else {
-                    if (!parseInner(recordItem.name, true))
+                    if (!parseInner(recordItem.label, true))
                         return backtrack(APOSₒ, CPOSₒ);
                     assert(ATYP === STRING);
                     APOS -= 1;
-                    fieldName = AREP[APOS];
+                    fieldLabel = AREP[APOS];
                 }
-                if (fieldNames.includes(fieldName))
+                if (fieldLabels.includes(fieldLabel))
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
                 const fieldValue = AREP[--APOS];
-                AREP[APOS++] = fieldName;
+                AREP[APOS++] = fieldLabel;
                 AREP[APOS++] = fieldValue;
-                fieldNames.push(fieldName);
+                fieldLabels.push(fieldLabel);
             }
             else {
                 const apos = APOS;
                 if (!recordItem.expr())
                     return backtrack(APOSₒ, CPOSₒ);
                 for (let i = apos; i < APOS; i += 2) {
-                    const fieldName = AREP[i];
-                    if (fieldNames.includes(fieldName))
+                    const fieldLabel = AREP[i];
+                    if (fieldLabels.includes(fieldLabel))
                         return backtrack(APOSₒ, CPOSₒ);
-                    fieldNames.push(fieldName);
+                    fieldLabels.push(fieldLabel);
                 }
             }
         }
@@ -122,13 +122,13 @@ function printRecord(recordItems) {
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
-                    if (typeof recordItem.name !== 'string') {
+                    if (typeof recordItem.label !== 'string') {
                         APOS = i << 1;
-                        if (!printInner(recordItem.name, true))
+                        if (!printInner(recordItem.label, true))
                             continue;
                     }
                     else {
-                        if (propName !== recordItem.name)
+                        if (propName !== recordItem.label)
                             continue;
                     }
                     APOS = (i << 1) + 1;
@@ -961,7 +961,7 @@ const parse = (() => {
             Object_sub3ₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: String,
+                    label: String,
                     expr: Object_sub4
                 },
             ]);
@@ -1004,7 +1004,7 @@ const parse = (() => {
             Object_sub6ₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: Object_sub7,
+                    label: Object_sub7,
                     expr: Object_sub8
                 },
             ]);
@@ -1094,12 +1094,12 @@ const parse = (() => {
             Propertiesₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: String,
+                    label: String,
                     expr: Properties_sub1
                 },
                 {
                     kind: 'Splice',
-                    name: undefined,
+                    label: undefined,
                     expr: Properties_sub2
                 },
             ]);
@@ -2250,7 +2250,7 @@ const print = (() => {
             Object_sub3ₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: String,
+                    label: String,
                     expr: Object_sub4
                 },
             ]);
@@ -2289,7 +2289,7 @@ const print = (() => {
             Object_sub6ₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: Object_sub7,
+                    label: Object_sub7,
                     expr: Object_sub8
                 },
             ]);
@@ -2366,12 +2366,12 @@ const print = (() => {
             Propertiesₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: String,
+                    label: String,
                     expr: Properties_sub1
                 },
                 {
                     kind: 'Splice',
-                    name: undefined,
+                    label: undefined,
                     expr: Properties_sub2
                 },
             ]);

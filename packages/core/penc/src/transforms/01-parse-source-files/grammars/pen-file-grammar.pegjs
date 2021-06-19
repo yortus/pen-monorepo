@@ -144,11 +144,11 @@ FunctionExpression
 RecordExpression
     = "{"   __   items:RecordItems   __   "}"
     {
-        const names = new Set();
+        const labels = new Set();
         for (const item of items) {
-            if (item.kind !== 'RecordField' || typeof item.name !== 'string') continue;
-            if (names.has(item.name)) return error(`Duplicate field name '${name}'`);
-            names.add(item.name);
+            if (item.kind !== 'Field' || typeof item.label !== 'string') continue;
+            if (labels.has(item.label)) return error(`Duplicate field label '${label}'`);
+            labels.add(item.label);
         }
         return {kind: 'RecordExpression', items};
     }
@@ -210,11 +210,11 @@ RecordItems
 RecordItem
     = Splice
 
-    / "["   __   name:Expression   __   "]"   __   "="   __   expression:Expression
-    { return {kind: 'Field', name, expression}; }
+    / "["   __   label:Expression   __   "]"   __   "="   __   expression:Expression
+    { return {kind: 'Field', label, expression}; }
 
-    / name:IDENTIFIER   __   "="   __   expression:Expression
-    { return {kind: 'Field', name, expression}; }
+    / label:IDENTIFIER   __   "="   __   expression:Expression
+    { return {kind: 'Field', label, expression}; }
 
 ListItems
     = !","   head:ListItem?   tail:((__   ",")?   __   ListItem)*   (__   ",")?

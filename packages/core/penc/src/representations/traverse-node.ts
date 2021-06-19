@@ -13,7 +13,7 @@ export function traverseNode<V extends Version>(node: Node<V>, callback: (n: Nod
             case 'Binding': return rec(n.left), rec(n.right), cb(n);
             case 'BooleanLiteral': return cb(n);
             case 'ByteExpression': return cb(n);
-            case 'Field': return (typeof n.name === 'string' || rec(n.name)), rec(n.expression), cb(n);
+            case 'Field': return (typeof n.label === 'string' || rec(n.label)), rec(n.expression), cb(n);
             case 'FunctionExpression': return typeof n.param === 'string' ? n.param : rec(n.param), rec(n.body), cb(n);
             case 'FunctionParameter': return cb(n);
             case 'Identifier': return cb(n);

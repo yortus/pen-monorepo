@@ -313,9 +313,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             for (const item of expr.items) {
                 emit.down(1).text(`{
                     kind: '${item.kind}',
-                    name: ${item.kind === 'Splice'
+                    label: ${item.kind === 'Splice'
                         ? 'undefined'
-                        : typeof item.name === 'string' ? JSON.stringify(item.name) : item.name.name},
+                        : typeof item.label === 'string' ? JSON.stringify(item.label) : item.label.name},
                     expr: ${item.kind === 'Field' ? item.expression.name : item.expression.name}
                 },`);
             }

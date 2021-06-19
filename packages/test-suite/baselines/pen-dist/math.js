@@ -68,38 +68,38 @@ function parseRecord(recordItems) {
         const [APOSₒ, CPOSₒ] = savepoint();
         if (APOS === 0)
             AREP = [];
-        const fieldNames = [];
+        const fieldLabels = [];
         for (const recordItem of recordItems) {
             if (recordItem.kind === 'Field') {
-                let fieldName;
-                if (typeof recordItem.name === 'string') {
-                    fieldName = recordItem.name;
+                let fieldLabel;
+                if (typeof recordItem.label === 'string') {
+                    fieldLabel = recordItem.label;
                 }
                 else {
-                    if (!parseInner(recordItem.name, true))
+                    if (!parseInner(recordItem.label, true))
                         return backtrack(APOSₒ, CPOSₒ);
                     assert(ATYP === STRING);
                     APOS -= 1;
-                    fieldName = AREP[APOS];
+                    fieldLabel = AREP[APOS];
                 }
-                if (fieldNames.includes(fieldName))
+                if (fieldLabels.includes(fieldLabel))
                     return backtrack(APOSₒ, CPOSₒ);
                 if (!parseInner(recordItem.expr, true))
                     return backtrack(APOSₒ, CPOSₒ);
                 const fieldValue = AREP[--APOS];
-                AREP[APOS++] = fieldName;
+                AREP[APOS++] = fieldLabel;
                 AREP[APOS++] = fieldValue;
-                fieldNames.push(fieldName);
+                fieldLabels.push(fieldLabel);
             }
             else {
                 const apos = APOS;
                 if (!recordItem.expr())
                     return backtrack(APOSₒ, CPOSₒ);
                 for (let i = apos; i < APOS; i += 2) {
-                    const fieldName = AREP[i];
-                    if (fieldNames.includes(fieldName))
+                    const fieldLabel = AREP[i];
+                    if (fieldLabels.includes(fieldLabel))
                         return backtrack(APOSₒ, CPOSₒ);
-                    fieldNames.push(fieldName);
+                    fieldLabels.push(fieldLabel);
                 }
             }
         }
@@ -122,13 +122,13 @@ function printRecord(recordItems) {
                     const propBit = 1 << i;
                     if ((bitmask & propBit) !== 0)
                         continue;
-                    if (typeof recordItem.name !== 'string') {
+                    if (typeof recordItem.label !== 'string') {
                         APOS = i << 1;
-                        if (!printInner(recordItem.name, true))
+                        if (!printInner(recordItem.label, true))
                             continue;
                     }
                     else {
-                        if (propName !== recordItem.name)
+                        if (propName !== recordItem.label)
                             continue;
                     }
                     APOS = (i << 1) + 1;
@@ -753,17 +753,17 @@ const parse = (() => {
             addₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: add_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: expr
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: add_sub2
                 },
             ]);
@@ -811,17 +811,17 @@ const parse = (() => {
             subₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: sub_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: expr
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: sub_sub2
                 },
             ]);
@@ -890,17 +890,17 @@ const parse = (() => {
             mulₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: mul_sub1,
+                    label: mul_sub1,
                     expr: mul_sub2
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: term
                 },
                 {
                     kind: 'Field',
-                    name: mul_sub3,
+                    label: mul_sub3,
                     expr: mul_sub4
                 },
             ]);
@@ -962,17 +962,17 @@ const parse = (() => {
             divₘ = parseRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: div_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: term
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: div_sub2
                 },
             ]);
@@ -1373,17 +1373,17 @@ const print = (() => {
             addₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: add_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: expr
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: add_sub2
                 },
             ]);
@@ -1430,17 +1430,17 @@ const print = (() => {
             subₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: sub_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: expr
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: sub_sub2
                 },
             ]);
@@ -1508,17 +1508,17 @@ const print = (() => {
             mulₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: mul_sub1,
+                    label: mul_sub1,
                     expr: mul_sub2
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: term
                 },
                 {
                     kind: 'Field',
-                    name: mul_sub3,
+                    label: mul_sub3,
                     expr: mul_sub4
                 },
             ]);
@@ -1590,17 +1590,17 @@ const print = (() => {
             divₘ = printRecord([
                 {
                     kind: 'Field',
-                    name: "type",
+                    label: "type",
                     expr: div_sub1
                 },
                 {
                     kind: 'Field',
-                    name: "lhs",
+                    label: "lhs",
                     expr: term
                 },
                 {
                     kind: 'Field',
-                    name: "rhs",
+                    label: "rhs",
                     expr: div_sub2
                 },
             ]);

@@ -76,7 +76,7 @@ export function createNodeHasher() {
             case 'QuantifiedExpression': return setSig('QUANT', getSig(n.expression), n.quantifier);
             case 'RecordExpression': return setSig('RECORD', n.items.map(i => i.kind === 'Splice'
                 ? {k: i.kind, e: getSig(i.expression)}
-                : {k: i.kind, n: typeof i.name === 'string' ? i.name : getSig(i.name), e: getSig(i.expression)}
+                : {k: i.kind, l: typeof i.label === 'string' ? i.label : getSig(i.label), e: getSig(i.expression)}
             ));
             case 'SelectionExpression': return setSig('SEL', n.expressions.map(e => getSig(e)));
             case 'SequenceExpression': return setSig('SEQ', n.expressions.map(e => getSig(e)));

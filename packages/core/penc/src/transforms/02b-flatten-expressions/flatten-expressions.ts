@@ -68,7 +68,7 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                     case 'QuantifiedExpression': return setV(e, {expression: ref(e.expression), quantifier: e.quantifier});
                     case 'RecordExpression': return setV(e, {items: e.items.map(it => it.kind === 'Splice'
                         ? {...it, expression: ref(it.expression)}
-                        : {...it, name: typeof it.name === 'string' ? it.name : ref(it.name), expression: ref(it.expression)}
+                        : {...it, label: typeof it.label === 'string' ? it.label : ref(it.label), expression: ref(it.expression)}
                     )});
                     case 'SelectionExpression': return setV(e, {expressions: e.expressions.map(ref)});
                     case 'SequenceExpression': return setV(e, {expressions: e.expressions.map(ref)});

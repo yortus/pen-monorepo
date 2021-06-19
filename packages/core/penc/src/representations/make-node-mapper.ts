@@ -38,7 +38,7 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'ByteExpression': return n;
-            case 'Field': return {...n, name: typeof n.name === 'string' ? n.name : rec(n.name), expression: rec(n.expression)};
+            case 'Field': return {...n, label: typeof n.label === 'string' ? n.label : rec(n.label), expression: rec(n.expression)};
             case 'FunctionExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'FunctionParameter': return n;
             case 'Identifier': return n;

@@ -131,7 +131,7 @@ export type ByteExpression<V extends Version> = {
 
 export interface Field<V extends Version> {
     kind: 'Field';
-    name: string | Subexpression<V>;
+    label: string | Subexpression<V>;
     expression: Subexpression<V>;
 }
 
