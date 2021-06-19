@@ -158,7 +158,7 @@ Module
     { return {kind: 'Module', bindings}; }
 
 LetExpression
-    = "("   __   "->"   __   expression:Expression   __   bindings:BindingList   __   ")"
+    = "("   __   "->"   __   expression:Expression   (__   ",")?   __   bindings:BindingList   __   ")"
     { return {kind: 'LetExpression', expression, bindings}; }
 
 ParenthesisedExpression
