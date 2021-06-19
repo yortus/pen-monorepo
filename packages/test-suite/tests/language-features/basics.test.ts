@@ -4,18 +4,22 @@ import {compile} from 'penc';
 
 describe(`Language features: basics`, () => {
     const {parse, print} = compile({source: `
-        start = a (a b)* b
+        start = a *(a b) b ?c
         a = "a"
         b = "b"
+        c = "c"
     `}).eval();
 
     const tests = [
-        {text: 'abc', ast: Error, textᐟ: ''},
+        {text: 'abc', ast: 'abc'},
+        {text: 'abd', ast: Error, textᐟ: ''},
+        {text: 'abcd', ast: Error},
         {text: 'ab', ast: 'ab'},
         {text: 'aabb', ast: 'aabb'},
         {text: '', ast: Error},
         {text: 'abab', ast: Error},
         {text: 'aabababababb', ast: 'aabababababb'},
+        {text: 'aabababababbc', ast: 'aabababababbc'},
         {text: 'aaaaabbbb', ast: Error},
         {text: 'aaaabbbbb', ast: Error},
         {text: 'aababababababababababababababababababababb', ast: 'aababababababababababababababababababababb'},

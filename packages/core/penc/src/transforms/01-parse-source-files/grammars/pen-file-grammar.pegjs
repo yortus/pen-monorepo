@@ -110,7 +110,7 @@ NotExpression
     { return {kind: 'NotExpression', expression}; }
 
 QuantifiedExpression
-    = expression:Precedence5OrHigher   q:(__   ("?" / "*"))?
+    = q:(("?" / "*")   __)? expression:Precedence5OrHigher
     {
         if (!q) return expression;
         return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};

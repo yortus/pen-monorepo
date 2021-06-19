@@ -70,7 +70,7 @@ start = nested.REP(a = x)
 // start = floatString x a b c
 // 
 // x = (
-//     x1 = x.x1? "rest"
+//     x1 = ?x.x1 "rest"
 // )
 // 
 // a = "aaa"
