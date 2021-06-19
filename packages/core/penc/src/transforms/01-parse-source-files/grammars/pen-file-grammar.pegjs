@@ -42,7 +42,7 @@ ModulePatternName
 
     PRECEDENCE 6 (HIGHEST):
         FunctionExpression              a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
-        RecordExpression                {a=b   c=d   e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f}
+        RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
         Module                          (a=b c=d e=f)   (a=b)
         LetExpression                   (-> a b a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
@@ -204,8 +204,8 @@ ImportExpression
 
 // ====================   Clauses (eg record/list/string parts)   ====================
 RecordItems
-    = !","   head:RecordItem?   tail:((__   ",")?   __   RecordItem)*   (__   ",")?
-    { return (head ? [head] : []).concat(tail.map(el => el[2])); }
+    = !","   head:RecordItem?   tail:(__   ","   __   RecordItem)*   (__   ",")?
+    { return (head ? [head] : []).concat(tail.map(el => el[3])); }
 
 RecordItem
     = Splice
