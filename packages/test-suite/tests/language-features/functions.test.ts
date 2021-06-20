@@ -22,7 +22,7 @@ describe(`Language features: functions`, () => {
                 lp="("
                 rp=")"
             )
-            makeEncloser = (lp, rp) -> (x -> lp x rp)
+            makeEncloser = (lp, rp) -> x -> lp x rp
         )
     `}).eval();
 

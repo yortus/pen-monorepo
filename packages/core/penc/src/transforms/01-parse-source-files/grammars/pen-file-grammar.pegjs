@@ -23,97 +23,91 @@ ModulePatternName
 
 
 // ====================   Expressions   ====================
-/*
-    PRECEDENCE 1 (LOWEST)
-        SelectionExpression             a | b      | a | b | c
+/*  PRECEDENCE (1 = LOWEST)
+    1   FunctionExpression (body)       a -> a a   (a, b) -> a b   () -> "blah"
+                                             ^^^             ^^^         ^^^^^^
+    2   SelectionExpression             a | b      | a | b | c
 
-    PRECEDENCE 2
-        SequenceExpression              a b      a  b c                                                                 NB: whitespace between terms, else is application
+    3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
 
-    PRECEDENCE 3
-        NotExpression                   !a   !a(b)   !a.b   !{a: b}
+    4   UnaryExpression                 !a   ?a   *a(b)   ?a.b   !{a: b}
 
-    PRECEDENCE 4
-        QuantifiedExpression            a?   a(b)*   a.b?   {a: b}*
-
-    PRECEDENCE 5
-        ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+    5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
-    PRECEDENCE 6 (HIGHEST):
-        FunctionExpression              a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
-        RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
+    6   LetExpression                   (-> a b a=1 b=2)
         Module                          (a=b c=d e=f)   (a=b)
-        LetExpression                   (-> a b a=1 b=2)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
-        ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
-        StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
+        Identifier                      a   Rule1   MY_FOO_45   x32   __bar
         NullLiteral                     null
         BooleanLiteral                  false   true
         NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
-        Identifier                      a   Rule1   MY_FOO_45   x32   __bar
+        StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
+        RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
+        ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
         ImportExpression                import './foo'   import 'somelib'
+
+    7   FunctionExpression (head)       a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
+                                        ^^^^       ^^^^^^^^^       ^^^^^
 */
 
 Expression
     = Precedence1OrHigher
 
 Precedence1OrHigher
-    = SelectionExpression
+    = FunctionExpression
+    / Precedence2OrHigher
 
 Precedence2OrHigher
-    = SequenceExpression
+    = SelectionExpression
 
 Precedence3OrHigher
-    = NotExpression
-    / Precedence4OrHigher
+    = SequenceExpression
 
 Precedence4OrHigher
-    = QuantifiedExpression
+    = UnaryExpression
+    / Precedence5OrHigher
 
 Precedence5OrHigher
     = ApplicationOrMemberExpression
 
 Precedence6OrHigher
-    = PrimaryExpression
-
-PrimaryExpression
-    = FunctionExpression
-    / RecordExpression
+    = LetExpression
     / Module
-    / LetExpression
     / ParenthesisedExpression
-    / ListExpression
-    / StringExpression
+    / Identifier
     / NullLiteral
     / BooleanLiteral
     / NumericLiteral
-    / Identifier
+    / StringExpression
+    / RecordExpression
+    / ListExpression
     / ImportExpression
 
+FunctionExpression
+    = param:(Identifier / ModulePattern)   __   "->"   __   body:Precedence1OrHigher
+    { return {kind: 'FunctionExpression', param, body}; }
+
 SelectionExpression
-    = ("|"   __)?   head:Precedence2OrHigher   tail:(__   "|"   __   Precedence2OrHigher)*
+    = ("|"   __)?   head:Precedence3OrHigher   tail:(__   "|"   __   Precedence3OrHigher)*
     {
         if (tail.length === 0) return head;
         return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))};
     }
 
 SequenceExpression
-    = head:Precedence3OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence3OrHigher   !(__   "="))*
+    = head:Precedence4OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence4OrHigher   !(__   "="))*
     {
         if (tail.length === 0) return head;
         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
     }
 
-NotExpression
-    = "!"   __   expression:Precedence3OrHigher
-    { return {kind: 'NotExpression', expression}; }
-
-QuantifiedExpression
-    = q:(("?" / "*")   __)? expression:Precedence5OrHigher
+UnaryExpression
+    = op:(("!" / "?" / "*")   __)?   expression:Precedence5OrHigher
     {
-        if (!q) return expression;
-        return {kind: 'QuantifiedExpression', expression, quantifier: q[1]};
+        if (!op) return expression;
+        if (op[0] === '!') return {kind: 'NotExpression', expression};
+        return {kind: 'QuantifiedExpression', expression, quantifier: op[0]};
     }
 
 ApplicationOrMemberExpression
@@ -137,9 +131,42 @@ ApplicationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 
-FunctionExpression
-    = param:(Identifier / ModulePattern)   __   "->"   __   body:Expression
-    { return {kind: 'FunctionExpression', param, body}; }
+LetExpression
+    = "("   __   "->"   __   expression:Expression   (__   ",")?   __   bindings:BindingList   __   ")"
+    { return {kind: 'LetExpression', expression, bindings}; }
+
+Module
+    = "("   __   bindings:BindingList   __   ")"
+    { return {kind: 'Module', bindings}; }
+
+ParenthesisedExpression
+    = "("   __   expression:Expression   __   ")"
+    { return {kind: 'ParenthesisedExpression', expression}; }
+
+Identifier
+    = name:IDENTIFIER
+    { return {kind: 'Identifier', name}; }
+
+NullLiteral
+    = NULL   { return {kind: 'NullLiteral', value: null}; }
+
+BooleanLiteral
+    = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
+    / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
+
+NumericLiteral
+    = value:(DecimalLiteral / HexIntegerLiteral)
+    { return {kind: 'NumericLiteral', value}; }
+
+StringExpression
+    = "`"   items:StringItems   "`"
+    { return {kind: 'StringExpression', subkind: 'A', items}; }
+
+    / "'"   items:StringItems   "'"
+    { return {kind: 'StringExpression', subkind: 'C', items}; }
+
+    / '"'   items:StringItems   '"'
+    { return {kind: 'StringExpression', subkind: 'X', items}; }
 
 RecordExpression
     = "{"   __   items:RecordItems   __   "}"
@@ -153,46 +180,9 @@ RecordExpression
         return {kind: 'RecordExpression', items};
     }
 
-Module
-    = "("   __   bindings:BindingList   __   ")"
-    { return {kind: 'Module', bindings}; }
-
-LetExpression
-    = "("   __   "->"   __   expression:Expression   (__   ",")?   __   bindings:BindingList   __   ")"
-    { return {kind: 'LetExpression', expression, bindings}; }
-
-ParenthesisedExpression
-    = "("   __   expression:Expression   __   ")"
-    { return {kind: 'ParenthesisedExpression', expression}; }
-
 ListExpression
     = "["   __   items:ListItems   __   "]"
     { return {kind: 'ListExpression', items}; }
-
-StringExpression
-    = "`"   items:StringItems   "`"
-    { return {kind: 'StringExpression', subkind: 'A', items}; }
-
-    / "'"   items:StringItems   "'"
-    { return {kind: 'StringExpression', subkind: 'C', items}; }
-
-    / '"'   items:StringItems   '"'
-    { return {kind: 'StringExpression', subkind: 'X', items}; }
-
-NullLiteral
-    = NULL   { return {kind: 'NullLiteral', value: null}; }
-
-BooleanLiteral
-    = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
-    / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
-
-NumericLiteral
-    = value:(DecimalLiteral / HexIntegerLiteral)
-    { return {kind: 'NumericLiteral', value}; }
-
-Identifier
-    = name:IDENTIFIER
-    { return {kind: 'Identifier', name}; }
 
 ImportExpression
     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
