@@ -286,6 +286,20 @@ function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
+function lazy(init) {
+    let f;
+    return function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    };
+}
 
 
 
@@ -367,30 +381,11 @@ const parse = (() => {
     }
 
     // ListExpression
-    let myListₘ;
-    function myList(arg) {
-        try {
-            return myListₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('myListₘ is not a function')) throw err;
-            myListₘ = parseList([
-                {
-                    kind: 'Element',
-                    expr: digit
-                },
-                {
-                    kind: 'Element',
-                    expr: myList_sub1
-                },
-                {
-                    kind: 'Element',
-                    expr: myList_sub2
-                },
-            ]);
-            return myListₘ(arg);
-        }
-    }
+    const myList = lazy(() => parseList([
+        {kind: 'Element', expr: digit},
+        {kind: 'Element', expr: myList_sub1},
+        {kind: 'Element', expr: myList_sub2},
+    ]));
 
     // SequenceExpression
     function myList_sub1() {
@@ -677,30 +672,11 @@ const print = (() => {
     }
 
     // ListExpression
-    let myListₘ;
-    function myList(arg) {
-        try {
-            return myListₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('myListₘ is not a function')) throw err;
-            myListₘ = printList([
-                {
-                    kind: 'Element',
-                    expr: digit
-                },
-                {
-                    kind: 'Element',
-                    expr: myList_sub1
-                },
-                {
-                    kind: 'Element',
-                    expr: myList_sub2
-                },
-            ]);
-            return myListₘ(arg);
-        }
-    }
+    const myList = lazy(() => printList([
+        {kind: 'Element', expr: digit},
+        {kind: 'Element', expr: myList_sub1},
+        {kind: 'Element', expr: myList_sub2},
+    ]));
 
     // SequenceExpression
     function myList_sub1() {

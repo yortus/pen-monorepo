@@ -286,6 +286,20 @@ function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
+function lazy(init) {
+    let f;
+    return function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    };
+}
 
 
 
@@ -951,23 +965,9 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Object_sub3ₘ;
-    function Object_sub3(arg) {
-        try {
-            return Object_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub3ₘ is not a function')) throw err;
-            Object_sub3ₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: String,
-                    expr: Object_sub4
-                },
-            ]);
-            return Object_sub3ₘ(arg);
-        }
-    }
+    const Object_sub3 = lazy(() => parseRecord([
+        {kind: 'Field', label: String, expr: Object_sub4},
+    ]));
 
     // SequenceExpression
     function Object_sub4() {
@@ -994,23 +994,9 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Object_sub6ₘ;
-    function Object_sub6(arg) {
-        try {
-            return Object_sub6ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub6ₘ is not a function')) throw err;
-            Object_sub6ₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: Object_sub7,
-                    expr: Object_sub8
-                },
-            ]);
-            return Object_sub6ₘ(arg);
-        }
-    }
+    const Object_sub6 = lazy(() => parseRecord([
+        {kind: 'Field', label: Object_sub7, expr: Object_sub8},
+    ]));
 
     // SequenceExpression
     function Object_sub7() {
@@ -1037,17 +1023,7 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Object_sub9ₘ;
-    function Object_sub9(arg) {
-        try {
-            return Object_sub9ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub9ₘ is not a function')) throw err;
-            Object_sub9ₘ = parseRecord([]);
-            return Object_sub9ₘ(arg);
-        }
-    }
+    const Object_sub9 = lazy(() => parseRecord([]));
 
     // SequenceExpression
     function Object2() {
@@ -1071,41 +1047,13 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Object2_sub2ₘ;
-    function Object2_sub2(arg) {
-        try {
-            return Object2_sub2ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object2_sub2ₘ is not a function')) throw err;
-            Object2_sub2ₘ = parseRecord([]);
-            return Object2_sub2ₘ(arg);
-        }
-    }
+    const Object2_sub2 = lazy(() => parseRecord([]));
 
     // RecordExpression
-    let Propertiesₘ;
-    function Properties(arg) {
-        try {
-            return Propertiesₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Propertiesₘ is not a function')) throw err;
-            Propertiesₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: String,
-                    expr: Properties_sub1
-                },
-                {
-                    kind: 'Splice',
-                    label: undefined,
-                    expr: Properties_sub2
-                },
-            ]);
-            return Propertiesₘ(arg);
-        }
-    }
+    const Properties = lazy(() => parseRecord([
+        {kind: 'Field', label: String, expr: Properties_sub1},
+        {kind: 'Splice', label: undefined, expr: Properties_sub2},
+    ]));
 
     // SequenceExpression
     function Properties_sub1() {
@@ -1139,17 +1087,7 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let Properties_sub4ₘ;
-    function Properties_sub4(arg) {
-        try {
-            return Properties_sub4ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub4ₘ is not a function')) throw err;
-            Properties_sub4ₘ = parseRecord([]);
-            return Properties_sub4ₘ(arg);
-        }
-    }
+    const Properties_sub4 = lazy(() => parseRecord([]));
 
     // SequenceExpression
     function Array() {
@@ -1185,22 +1123,9 @@ const parse = (() => {
     }
 
     // ListExpression
-    let Array_sub3ₘ;
-    function Array_sub3(arg) {
-        try {
-            return Array_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub3ₘ is not a function')) throw err;
-            Array_sub3ₘ = parseList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-            ]);
-            return Array_sub3ₘ(arg);
-        }
-    }
+    const Array_sub3 = lazy(() => parseList([
+        {kind: 'Element', expr: Value},
+    ]));
 
     // QuantifiedExpression
     function Array_sub4() {
@@ -1215,22 +1140,9 @@ const parse = (() => {
     }
 
     // ListExpression
-    let Array_sub5ₘ;
-    function Array_sub5(arg) {
-        try {
-            return Array_sub5ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub5ₘ is not a function')) throw err;
-            Array_sub5ₘ = parseList([
-                {
-                    kind: 'Element',
-                    expr: Array_sub6
-                },
-            ]);
-            return Array_sub5ₘ(arg);
-        }
-    }
+    const Array_sub5 = lazy(() => parseList([
+        {kind: 'Element', expr: Array_sub6},
+    ]));
 
     // SequenceExpression
     function Array_sub6() {
@@ -1245,17 +1157,7 @@ const parse = (() => {
     }
 
     // ListExpression
-    let Array_sub7ₘ;
-    function Array_sub7(arg) {
-        try {
-            return Array_sub7ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub7ₘ is not a function')) throw err;
-            Array_sub7ₘ = parseList([]);
-            return Array_sub7ₘ(arg);
-        }
-    }
+    const Array_sub7 = lazy(() => parseList([]));
 
     // SequenceExpression
     function Array2() {
@@ -1279,39 +1181,13 @@ const parse = (() => {
     }
 
     // ListExpression
-    let Array2_sub2ₘ;
-    function Array2_sub2(arg) {
-        try {
-            return Array2_sub2ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array2_sub2ₘ is not a function')) throw err;
-            Array2_sub2ₘ = parseList([]);
-            return Array2_sub2ₘ(arg);
-        }
-    }
+    const Array2_sub2 = lazy(() => parseList([]));
 
     // ListExpression
-    let Elementsₘ;
-    function Elements(arg) {
-        try {
-            return Elementsₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elementsₘ is not a function')) throw err;
-            Elementsₘ = parseList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-                {
-                    kind: 'Splice',
-                    expr: Elements_sub1
-                },
-            ]);
-            return Elementsₘ(arg);
-        }
-    }
+    const Elements = lazy(() => parseList([
+        {kind: 'Element', expr: Value},
+        {kind: 'Splice', expr: Elements_sub1},
+    ]));
 
     // SelectionExpression
     function Elements_sub1() {
@@ -1333,17 +1209,7 @@ const parse = (() => {
     }
 
     // ListExpression
-    let Elements_sub3ₘ;
-    function Elements_sub3(arg) {
-        try {
-            return Elements_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elements_sub3ₘ is not a function')) throw err;
-            Elements_sub3ₘ = parseList([]);
-            return Elements_sub3ₘ(arg);
-        }
-    }
+    const Elements_sub3 = lazy(() => parseList([]));
 
     // Identifier
     function Number(arg) {
@@ -1832,17 +1698,7 @@ const parse = (() => {
     CHAR_sub39.constant = {value: "\\u"};
 
     // ApplicationExpression
-    let CHAR_sub40ₘ;
-    function CHAR_sub40(arg) {
-        try {
-            return CHAR_sub40ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub40ₘ is not a function')) throw err;
-            CHAR_sub40ₘ = unicode(CHAR_sub41);
-            return CHAR_sub40ₘ(arg);
-        }
-    }
+    const CHAR_sub40 = lazy(() => unicode(CHAR_sub41));
 
     // Module
     function CHAR_sub41(member) {
@@ -2240,23 +2096,9 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Object_sub3ₘ;
-    function Object_sub3(arg) {
-        try {
-            return Object_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub3ₘ is not a function')) throw err;
-            Object_sub3ₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: String,
-                    expr: Object_sub4
-                },
-            ]);
-            return Object_sub3ₘ(arg);
-        }
-    }
+    const Object_sub3 = lazy(() => printRecord([
+        {kind: 'Field', label: String, expr: Object_sub4},
+    ]));
 
     // SequenceExpression
     function Object_sub4() {
@@ -2279,23 +2121,9 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Object_sub6ₘ;
-    function Object_sub6(arg) {
-        try {
-            return Object_sub6ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub6ₘ is not a function')) throw err;
-            Object_sub6ₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: Object_sub7,
-                    expr: Object_sub8
-                },
-            ]);
-            return Object_sub6ₘ(arg);
-        }
-    }
+    const Object_sub6 = lazy(() => printRecord([
+        {kind: 'Field', label: Object_sub7, expr: Object_sub8},
+    ]));
 
     // SequenceExpression
     function Object_sub7() {
@@ -2314,17 +2142,7 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Object_sub9ₘ;
-    function Object_sub9(arg) {
-        try {
-            return Object_sub9ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object_sub9ₘ is not a function')) throw err;
-            Object_sub9ₘ = printRecord([]);
-            return Object_sub9ₘ(arg);
-        }
-    }
+    const Object_sub9 = lazy(() => printRecord([]));
 
     // SequenceExpression
     function Object2() {
@@ -2343,41 +2161,13 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Object2_sub2ₘ;
-    function Object2_sub2(arg) {
-        try {
-            return Object2_sub2ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Object2_sub2ₘ is not a function')) throw err;
-            Object2_sub2ₘ = printRecord([]);
-            return Object2_sub2ₘ(arg);
-        }
-    }
+    const Object2_sub2 = lazy(() => printRecord([]));
 
     // RecordExpression
-    let Propertiesₘ;
-    function Properties(arg) {
-        try {
-            return Propertiesₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Propertiesₘ is not a function')) throw err;
-            Propertiesₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: String,
-                    expr: Properties_sub1
-                },
-                {
-                    kind: 'Splice',
-                    label: undefined,
-                    expr: Properties_sub2
-                },
-            ]);
-            return Propertiesₘ(arg);
-        }
-    }
+    const Properties = lazy(() => printRecord([
+        {kind: 'Field', label: String, expr: Properties_sub1},
+        {kind: 'Splice', label: undefined, expr: Properties_sub2},
+    ]));
 
     // SequenceExpression
     function Properties_sub1() {
@@ -2403,17 +2193,7 @@ const print = (() => {
     }
 
     // RecordExpression
-    let Properties_sub4ₘ;
-    function Properties_sub4(arg) {
-        try {
-            return Properties_sub4ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Properties_sub4ₘ is not a function')) throw err;
-            Properties_sub4ₘ = printRecord([]);
-            return Properties_sub4ₘ(arg);
-        }
-    }
+    const Properties_sub4 = lazy(() => printRecord([]));
 
     // SequenceExpression
     function Array() {
@@ -2440,22 +2220,9 @@ const print = (() => {
     }
 
     // ListExpression
-    let Array_sub3ₘ;
-    function Array_sub3(arg) {
-        try {
-            return Array_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub3ₘ is not a function')) throw err;
-            Array_sub3ₘ = printList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-            ]);
-            return Array_sub3ₘ(arg);
-        }
-    }
+    const Array_sub3 = lazy(() => printList([
+        {kind: 'Element', expr: Value},
+    ]));
 
     // QuantifiedExpression
     function Array_sub4() {
@@ -2470,22 +2237,9 @@ const print = (() => {
     }
 
     // ListExpression
-    let Array_sub5ₘ;
-    function Array_sub5(arg) {
-        try {
-            return Array_sub5ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub5ₘ is not a function')) throw err;
-            Array_sub5ₘ = printList([
-                {
-                    kind: 'Element',
-                    expr: Array_sub6
-                },
-            ]);
-            return Array_sub5ₘ(arg);
-        }
-    }
+    const Array_sub5 = lazy(() => printList([
+        {kind: 'Element', expr: Array_sub6},
+    ]));
 
     // SequenceExpression
     function Array_sub6() {
@@ -2496,17 +2250,7 @@ const print = (() => {
     }
 
     // ListExpression
-    let Array_sub7ₘ;
-    function Array_sub7(arg) {
-        try {
-            return Array_sub7ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array_sub7ₘ is not a function')) throw err;
-            Array_sub7ₘ = printList([]);
-            return Array_sub7ₘ(arg);
-        }
-    }
+    const Array_sub7 = lazy(() => printList([]));
 
     // SequenceExpression
     function Array2() {
@@ -2525,39 +2269,13 @@ const print = (() => {
     }
 
     // ListExpression
-    let Array2_sub2ₘ;
-    function Array2_sub2(arg) {
-        try {
-            return Array2_sub2ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Array2_sub2ₘ is not a function')) throw err;
-            Array2_sub2ₘ = printList([]);
-            return Array2_sub2ₘ(arg);
-        }
-    }
+    const Array2_sub2 = lazy(() => printList([]));
 
     // ListExpression
-    let Elementsₘ;
-    function Elements(arg) {
-        try {
-            return Elementsₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elementsₘ is not a function')) throw err;
-            Elementsₘ = printList([
-                {
-                    kind: 'Element',
-                    expr: Value
-                },
-                {
-                    kind: 'Splice',
-                    expr: Elements_sub1
-                },
-            ]);
-            return Elementsₘ(arg);
-        }
-    }
+    const Elements = lazy(() => printList([
+        {kind: 'Element', expr: Value},
+        {kind: 'Splice', expr: Elements_sub1},
+    ]));
 
     // SelectionExpression
     function Elements_sub1() {
@@ -2575,17 +2293,7 @@ const print = (() => {
     }
 
     // ListExpression
-    let Elements_sub3ₘ;
-    function Elements_sub3(arg) {
-        try {
-            return Elements_sub3ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('Elements_sub3ₘ is not a function')) throw err;
-            Elements_sub3ₘ = printList([]);
-            return Elements_sub3ₘ(arg);
-        }
-    }
+    const Elements_sub3 = lazy(() => printList([]));
 
     // Identifier
     function Number(arg) {
@@ -3040,17 +2748,7 @@ const print = (() => {
     CHAR_sub39.constant = {value: "\\u"};
 
     // ApplicationExpression
-    let CHAR_sub40ₘ;
-    function CHAR_sub40(arg) {
-        try {
-            return CHAR_sub40ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('CHAR_sub40ₘ is not a function')) throw err;
-            CHAR_sub40ₘ = unicode(CHAR_sub41);
-            return CHAR_sub40ₘ(arg);
-        }
-    }
+    const CHAR_sub40 = lazy(() => unicode(CHAR_sub41));
 
     // Module
     function CHAR_sub41(member) {

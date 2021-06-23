@@ -286,6 +286,20 @@ function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
+function lazy(init) {
+    let f;
+    return function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    };
+}
 
 
 
@@ -464,17 +478,7 @@ const parse = (() => {
     }
 
     // ApplicationExpression
-    let start_2_sub1ₘ;
-    function start_2_sub1(arg) {
-        try {
-            return start_2_sub1ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2_sub1ₘ is not a function')) throw err;
-            start_2_sub1ₘ = REP(start_2_sub2);
-            return start_2_sub1ₘ(arg);
-        }
-    }
+    const start_2_sub1 = lazy(() => REP(start_2_sub2));
 
     // Module
     function start_2_sub2(member) {
@@ -681,17 +685,7 @@ const print = (() => {
     }
 
     // ApplicationExpression
-    let start_2_sub1ₘ;
-    function start_2_sub1(arg) {
-        try {
-            return start_2_sub1ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('start_2_sub1ₘ is not a function')) throw err;
-            start_2_sub1ₘ = REP(start_2_sub2);
-            return start_2_sub1ₘ(arg);
-        }
-    }
+    const start_2_sub1 = lazy(() => REP(start_2_sub2));
 
     // Module
     function start_2_sub2(member) {

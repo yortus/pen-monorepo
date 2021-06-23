@@ -286,6 +286,20 @@ function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
+function lazy(init) {
+    let f;
+    return function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    };
+}
 
 
 

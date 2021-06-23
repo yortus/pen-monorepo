@@ -215,3 +215,17 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
 }
+
+function lazy(init: () => (arg: unknown) => unknown) {
+    let f: (arg: unknown) => unknown;
+    return function LAZ(arg: unknown) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function')) throw err;
+            f = init();
+            return f(arg);
+        }
+    }
+}

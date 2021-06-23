@@ -286,6 +286,20 @@ function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
 }
+function lazy(init) {
+    let f;
+    return function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    };
+}
 
 
 
@@ -722,17 +736,7 @@ const parse = (() => {
     }
 
     // ApplicationExpression
-    let exprₘ;
-    function expr(arg) {
-        try {
-            return exprₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('exprₘ is not a function')) throw err;
-            exprₘ = memoise(expr_sub1);
-            return exprₘ(arg);
-        }
-    }
+    const expr = lazy(() => memoise(expr_sub1));
 
     // SelectionExpression
     function expr_sub1() {
@@ -743,33 +747,11 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let addₘ;
-    function add(arg) {
-        try {
-            return addₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('addₘ is not a function')) throw err;
-            addₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: add_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: expr
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: add_sub2
-                },
-            ]);
-            return addₘ(arg);
-        }
-    }
+    const add = lazy(() => parseRecord([
+        {kind: 'Field', label: "type", expr: add_sub1},
+        {kind: 'Field', label: "lhs", expr: expr},
+        {kind: 'Field', label: "rhs", expr: add_sub2},
+    ]));
 
     // StringLiteral
     function add_sub1() {
@@ -801,33 +783,11 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let subₘ;
-    function sub(arg) {
-        try {
-            return subₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('subₘ is not a function')) throw err;
-            subₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: sub_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: expr
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: sub_sub2
-                },
-            ]);
-            return subₘ(arg);
-        }
-    }
+    const sub = lazy(() => parseRecord([
+        {kind: 'Field', label: "type", expr: sub_sub1},
+        {kind: 'Field', label: "lhs", expr: expr},
+        {kind: 'Field', label: "rhs", expr: sub_sub2},
+    ]));
 
     // StringLiteral
     function sub_sub1() {
@@ -859,17 +819,7 @@ const parse = (() => {
     }
 
     // ApplicationExpression
-    let termₘ;
-    function term(arg) {
-        try {
-            return termₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('termₘ is not a function')) throw err;
-            termₘ = memoise(term_sub1);
-            return termₘ(arg);
-        }
-    }
+    const term = lazy(() => memoise(term_sub1));
 
     // SelectionExpression
     function term_sub1() {
@@ -880,33 +830,11 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let mulₘ;
-    function mul(arg) {
-        try {
-            return mulₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('mulₘ is not a function')) throw err;
-            mulₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: mul_sub1,
-                    expr: mul_sub2
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: term
-                },
-                {
-                    kind: 'Field',
-                    label: mul_sub3,
-                    expr: mul_sub4
-                },
-            ]);
-            return mulₘ(arg);
-        }
-    }
+    const mul = lazy(() => parseRecord([
+        {kind: 'Field', label: mul_sub1, expr: mul_sub2},
+        {kind: 'Field', label: "lhs", expr: term},
+        {kind: 'Field', label: mul_sub3, expr: mul_sub4},
+    ]));
 
     // StringLiteral
     function mul_sub1() {
@@ -952,33 +880,11 @@ const parse = (() => {
     }
 
     // RecordExpression
-    let divₘ;
-    function div(arg) {
-        try {
-            return divₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('divₘ is not a function')) throw err;
-            divₘ = parseRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: div_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: term
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: div_sub2
-                },
-            ]);
-            return divₘ(arg);
-        }
-    }
+    const div = lazy(() => parseRecord([
+        {kind: 'Field', label: "type", expr: div_sub1},
+        {kind: 'Field', label: "lhs", expr: term},
+        {kind: 'Field', label: "rhs", expr: div_sub2},
+    ]));
 
     // StringLiteral
     function div_sub1() {
@@ -1131,17 +1037,7 @@ const parse = (() => {
     factor_sub7.constant = {value: "0x"};
 
     // ApplicationExpression
-    let factor_sub8ₘ;
-    function factor_sub8(arg) {
-        try {
-            return factor_sub8ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub8ₘ is not a function')) throw err;
-            factor_sub8ₘ = intString(factor_sub9);
-            return factor_sub8ₘ(arg);
-        }
-    }
+    const factor_sub8 = lazy(() => intString(factor_sub9));
 
     // Module
     function factor_sub9(member) {
@@ -1175,17 +1071,7 @@ const parse = (() => {
     factor_sub11.constant = {value: "0b"};
 
     // ApplicationExpression
-    let factor_sub12ₘ;
-    function factor_sub12(arg) {
-        try {
-            return factor_sub12ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub12ₘ is not a function')) throw err;
-            factor_sub12ₘ = intString(factor_sub13);
-            return factor_sub12ₘ(arg);
-        }
-    }
+    const factor_sub12 = lazy(() => intString(factor_sub13));
 
     // Module
     function factor_sub13(member) {
@@ -1219,17 +1105,7 @@ const parse = (() => {
     }
 
     // ApplicationExpression
-    let factor_sub16ₘ;
-    function factor_sub16(arg) {
-        try {
-            return factor_sub16ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub16ₘ is not a function')) throw err;
-            factor_sub16ₘ = intString(factor_sub17);
-            return factor_sub16ₘ(arg);
-        }
-    }
+    const factor_sub16 = lazy(() => intString(factor_sub17));
 
     // Module
     function factor_sub17(member) {
@@ -1342,17 +1218,7 @@ const print = (() => {
     }
 
     // ApplicationExpression
-    let exprₘ;
-    function expr(arg) {
-        try {
-            return exprₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('exprₘ is not a function')) throw err;
-            exprₘ = memoise(expr_sub1);
-            return exprₘ(arg);
-        }
-    }
+    const expr = lazy(() => memoise(expr_sub1));
 
     // SelectionExpression
     function expr_sub1() {
@@ -1363,33 +1229,11 @@ const print = (() => {
     }
 
     // RecordExpression
-    let addₘ;
-    function add(arg) {
-        try {
-            return addₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('addₘ is not a function')) throw err;
-            addₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: add_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: expr
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: add_sub2
-                },
-            ]);
-            return addₘ(arg);
-        }
-    }
+    const add = lazy(() => printRecord([
+        {kind: 'Field', label: "type", expr: add_sub1},
+        {kind: 'Field', label: "lhs", expr: expr},
+        {kind: 'Field', label: "rhs", expr: add_sub2},
+    ]));
 
     // StringLiteral
     function add_sub1() {
@@ -1420,33 +1264,11 @@ const print = (() => {
     }
 
     // RecordExpression
-    let subₘ;
-    function sub(arg) {
-        try {
-            return subₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('subₘ is not a function')) throw err;
-            subₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: sub_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: expr
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: sub_sub2
-                },
-            ]);
-            return subₘ(arg);
-        }
-    }
+    const sub = lazy(() => printRecord([
+        {kind: 'Field', label: "type", expr: sub_sub1},
+        {kind: 'Field', label: "lhs", expr: expr},
+        {kind: 'Field', label: "rhs", expr: sub_sub2},
+    ]));
 
     // StringLiteral
     function sub_sub1() {
@@ -1477,17 +1299,7 @@ const print = (() => {
     }
 
     // ApplicationExpression
-    let termₘ;
-    function term(arg) {
-        try {
-            return termₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('termₘ is not a function')) throw err;
-            termₘ = memoise(term_sub1);
-            return termₘ(arg);
-        }
-    }
+    const term = lazy(() => memoise(term_sub1));
 
     // SelectionExpression
     function term_sub1() {
@@ -1498,33 +1310,11 @@ const print = (() => {
     }
 
     // RecordExpression
-    let mulₘ;
-    function mul(arg) {
-        try {
-            return mulₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('mulₘ is not a function')) throw err;
-            mulₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: mul_sub1,
-                    expr: mul_sub2
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: term
-                },
-                {
-                    kind: 'Field',
-                    label: mul_sub3,
-                    expr: mul_sub4
-                },
-            ]);
-            return mulₘ(arg);
-        }
-    }
+    const mul = lazy(() => printRecord([
+        {kind: 'Field', label: mul_sub1, expr: mul_sub2},
+        {kind: 'Field', label: "lhs", expr: term},
+        {kind: 'Field', label: mul_sub3, expr: mul_sub4},
+    ]));
 
     // StringLiteral
     function mul_sub1() {
@@ -1580,33 +1370,11 @@ const print = (() => {
     }
 
     // RecordExpression
-    let divₘ;
-    function div(arg) {
-        try {
-            return divₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('divₘ is not a function')) throw err;
-            divₘ = printRecord([
-                {
-                    kind: 'Field',
-                    label: "type",
-                    expr: div_sub1
-                },
-                {
-                    kind: 'Field',
-                    label: "lhs",
-                    expr: term
-                },
-                {
-                    kind: 'Field',
-                    label: "rhs",
-                    expr: div_sub2
-                },
-            ]);
-            return divₘ(arg);
-        }
-    }
+    const div = lazy(() => printRecord([
+        {kind: 'Field', label: "type", expr: div_sub1},
+        {kind: 'Field', label: "lhs", expr: term},
+        {kind: 'Field', label: "rhs", expr: div_sub2},
+    ]));
 
     // StringLiteral
     function div_sub1() {
@@ -1759,17 +1527,7 @@ const print = (() => {
     factor_sub7.constant = {value: "0x"};
 
     // ApplicationExpression
-    let factor_sub8ₘ;
-    function factor_sub8(arg) {
-        try {
-            return factor_sub8ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub8ₘ is not a function')) throw err;
-            factor_sub8ₘ = intString(factor_sub9);
-            return factor_sub8ₘ(arg);
-        }
-    }
+    const factor_sub8 = lazy(() => intString(factor_sub9));
 
     // Module
     function factor_sub9(member) {
@@ -1797,17 +1555,7 @@ const print = (() => {
     factor_sub11.constant = {value: "0b"};
 
     // ApplicationExpression
-    let factor_sub12ₘ;
-    function factor_sub12(arg) {
-        try {
-            return factor_sub12ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub12ₘ is not a function')) throw err;
-            factor_sub12ₘ = intString(factor_sub13);
-            return factor_sub12ₘ(arg);
-        }
-    }
+    const factor_sub12 = lazy(() => intString(factor_sub13));
 
     // Module
     function factor_sub13(member) {
@@ -1835,17 +1583,7 @@ const print = (() => {
     }
 
     // ApplicationExpression
-    let factor_sub16ₘ;
-    function factor_sub16(arg) {
-        try {
-            return factor_sub16ₘ(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('factor_sub16ₘ is not a function')) throw err;
-            factor_sub16ₘ = intString(factor_sub17);
-            return factor_sub16ₘ(arg);
-        }
-    }
+    const factor_sub16 = lazy(() => intString(factor_sub17));
 
     // Module
     function factor_sub17(member) {
