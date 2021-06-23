@@ -145,7 +145,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             if (mode === 'parse') {
                 emit.down(1).text(`emitScalar(${JSON.stringify(expr.value)});`);
             }
@@ -155,7 +155,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`APOS += 1;`);
             }
             emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('};');
             break;
         }
 
@@ -163,7 +163,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const hasInput = mode === 'parse' ? expr.subkind !== 'A' : expr.subkind !== 'C';
             const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             emit.down(1).text(`let cc;`);
             if (hasInput) {
                 if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
@@ -193,25 +193,25 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `CREP[CPOS++] = cc;`);
             }
             emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
             break;
         }
 
         // TODO: ...
         case 'FunctionExpression': {
-            emit.down(1).text(`function ${name}(${expr.param}) {`).indent();
+            emit.down(1).text(`const ${name} = (${expr.param}) => {`).indent();
             emitBindings(emit, expr.body.bindings, consts, mode);
             emit.down(2).text(`return ${expr.body.expression.name};`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
             break;
         }
 
         // TODO: ...
         case 'FunctionParameter':
         case 'Identifier': {
-            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text(`const ${name} = (arg) => {`).indent();
             emit.down(1).text(`return ${expr.name}(arg);`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
             break;
         }
 
@@ -229,41 +229,41 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'MemberExpression':  {
-            emit.down(1).text(`function ${name}(arg) {`).indent();
+            emit.down(1).text(`const ${name} = (arg) => {`).indent();
             emit.down(1).text(`return ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
-            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('};');
             break;
         }
 
         case 'Module': {
-            emit.down(1).text(`function ${name}(member) {`).indent();
+            emit.down(1).text(`const ${name} = (member) => {`).indent();
             emit.down(1).text(`switch (member) {`).indent();
             for (const [name, ref] of Object.entries(expr.bindings)) {
                 emit.down(1).text(`case '${name}': return ${ref.name};`);
             }
             emit.down(1).text(`default: return undefined;`);
             emit.dedent().down(1).text(`}`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
             break;
         }
 
         case 'NotExpression': {
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             emit.down(1).text(`const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;`);
             emit.down(1).text(`const result = !${expr.expression.name}();`);
             emit.down(1).text(`backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
             if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
             emit.down(1).text(`return result;`);
-            emit.dedent().down(1).text(`}`);
+            emit.dedent().down(1).text(`};`);
             break;
         }
 
         case 'QuantifiedExpression': {
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             if (expr.quantifier === '?') {
                 emit.down(1).text(`if (!${expr.expression.name}()) {`).indent();
                 if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
-                emit.dedent().down(1).text('}');
+                emit.dedent().down(1).text('};');
             }
             else /* expr.quantifier === '*' */ {
                 const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
@@ -302,19 +302,19 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'SelectionExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (${exprVars[i]}()) return true;`);
             }
             emit.down(1).text('return false;');
-            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('};');
             break;
         }
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
             if (mode === 'parse') {
                 emit.down(1).text('let seqType = NOTHING;');
@@ -325,7 +325,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 if (mode === 'parse') emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
             }
             emit.down(1).text('return true;');
-            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('};');
             break;
         }
 
@@ -334,7 +334,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
             const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
-            emit.down(1).text(`function ${name}() {`).indent();
+            emit.down(1).text(`const ${name} = () => {`).indent();
             if (hasInput) {
                 if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
                 emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
@@ -354,7 +354,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 }
             }
             emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('}');
+            emit.dedent().down(1).text('};');
             break;
         }
 

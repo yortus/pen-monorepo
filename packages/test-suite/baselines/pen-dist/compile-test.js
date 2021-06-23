@@ -315,7 +315,7 @@ const extensions = {
 const parse = (() => {
 
     // StringLiteral
-    function x() {
+    const x = () => {
         if (CPOS + 7 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x6f) return false;
         if (CREP[CPOS + 1] !== 0x75) return false;
@@ -327,19 +327,19 @@ const parse = (() => {
         CPOS += 7;
         emitBytes(0x6f, 0x75, 0x74, 0x65, 0x72, 0x20, 0x78);
         return true;
-    }
+    };
     x.constant = {value: "outer x"};
 
     // FunctionExpression
-    function REP(ℙ1) {
+    const REP = (ℙ1) => {
 
         // MemberExpression
-        function a(arg) {
+        const a = (arg) => {
             return ℙ1("a")(arg);
-        }
+        };
 
         // SequenceExpression
-        function 𝕊1() {
+        const 𝕊1 = () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             let seqType = NOTHING;
             ATYP = NOTHING;
@@ -350,21 +350,21 @@ const parse = (() => {
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             ATYP |= seqType;
             return true;
-        }
+        };
 
         return 𝕊1;
-    }
+    };
 
     // FunctionExpression
-    function FUN(ℙ2) {
+    const FUN = (ℙ2) => {
 
         // FunctionParameter
-        function x_2(arg) {
+        const x_2 = (arg) => {
             return ℙ2(arg);
-        }
+        };
 
         // SequenceExpression
-        function 𝕊2() {
+        const 𝕊2 = () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             let seqType = NOTHING;
             ATYP = NOTHING;
@@ -373,13 +373,13 @@ const parse = (() => {
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             ATYP |= seqType;
             return true;
-        }
+        };
 
         return 𝕊2;
-    }
+    };
 
     // StringLiteral
-    function x_3() {
+    const x_3 = () => {
         if (CPOS + 7 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x69) return false;
         if (CREP[CPOS + 1] !== 0x6e) return false;
@@ -391,18 +391,18 @@ const parse = (() => {
         CPOS += 7;
         emitBytes(0x69, 0x6e, 0x6e, 0x65, 0x72, 0x20, 0x78);
         return true;
-    }
+    };
     x_3.constant = {value: "inner x"};
 
     // NumericLiteral
-    function a_2() {
+    const a_2 = () => {
         emitScalar(42);
         return true;
-    }
+    };
     a_2.constant = {value: 42};
 
     // Module
-    function nested(member) {
+    const nested = (member) => {
         switch (member) {
             case 'REP': return REP;
             case 'FUN': return FUN;
@@ -410,10 +410,10 @@ const parse = (() => {
             case 'a': return a_2;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function lx() {
+    const lx = () => {
         if (CPOS + 7 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x69) return false;
         if (CREP[CPOS + 1] !== 0x6e) return false;
@@ -425,11 +425,11 @@ const parse = (() => {
         CPOS += 7;
         emitBytes(0x69, 0x6e, 0x6e, 0x65, 0x72, 0x20, 0x78);
         return true;
-    }
+    };
     lx.constant = {value: "inner x"};
 
     // StringLiteral
-    function ly() {
+    const ly = () => {
         if (CPOS + 3 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x2a) return false;
         if (CREP[CPOS + 1] !== 0x2a) return false;
@@ -437,11 +437,11 @@ const parse = (() => {
         CPOS += 3;
         emitBytes(0x2a, 0x2a, 0x2a);
         return true;
-    }
+    };
     ly.constant = {value: "***"};
 
     // SequenceExpression
-    function letexpr() {
+    const letexpr = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -452,10 +452,10 @@ const parse = (() => {
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function letexpr_sub1() {
+    const letexpr_sub1 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
@@ -463,33 +463,33 @@ const parse = (() => {
         CPOS += 1;
         emitByte(cc);
         return true;
-    }
+    };
 
     // Identifier
-    function a_3(arg) {
+    const a_3 = (arg) => {
         return x(arg);
-    }
+    };
 
     // SelectionExpression
-    function start_2() {
+    const start_2 = () => {
         if (start_2_sub1()) return true;
         if (letexpr()) return true;
         return false;
-    }
+    };
 
     // ApplicationExpression
     const start_2_sub1 = lazy(() => REP(start_2_sub2));
 
     // Module
-    function start_2_sub2(member) {
+    const start_2_sub2 = (member) => {
         switch (member) {
             case 'a': return a_3;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_compile_test(member) {
+    const Ɱ_compile_test = (member) => {
         switch (member) {
             case 'x': return x;
             case 'nested': return nested;
@@ -497,7 +497,7 @@ const parse = (() => {
             case 'start': return start_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();
@@ -509,7 +509,7 @@ const parse = (() => {
 const print = (() => {
 
     // StringLiteral
-    function x() {
+    const x = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 7 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x6f) return false;
@@ -528,50 +528,50 @@ const print = (() => {
         CREP[CPOS++] = 0x20;
         CREP[CPOS++] = 0x78;
         return true;
-    }
+    };
     x.constant = {value: "outer x"};
 
     // FunctionExpression
-    function REP(ℙ1) {
+    const REP = (ℙ1) => {
 
         // MemberExpression
-        function a(arg) {
+        const a = (arg) => {
             return ℙ1("a")(arg);
-        }
+        };
 
         // SequenceExpression
-        function 𝕊1() {
+        const 𝕊1 = () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
-        }
+        };
 
         return 𝕊1;
-    }
+    };
 
     // FunctionExpression
-    function FUN(ℙ2) {
+    const FUN = (ℙ2) => {
 
         // FunctionParameter
-        function x_2(arg) {
+        const x_2 = (arg) => {
             return ℙ2(arg);
-        }
+        };
 
         // SequenceExpression
-        function 𝕊2() {
+        const 𝕊2 = () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
-        }
+        };
 
         return 𝕊2;
-    }
+    };
 
     // StringLiteral
-    function x_3() {
+    const x_3 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 7 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x69) return false;
@@ -590,20 +590,20 @@ const print = (() => {
         CREP[CPOS++] = 0x20;
         CREP[CPOS++] = 0x78;
         return true;
-    }
+    };
     x_3.constant = {value: "inner x"};
 
     // NumericLiteral
-    function a_2() {
+    const a_2 = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== 42) return false;
         APOS += 1;
         return true;
-    }
+    };
     a_2.constant = {value: 42};
 
     // Module
-    function nested(member) {
+    const nested = (member) => {
         switch (member) {
             case 'REP': return REP;
             case 'FUN': return FUN;
@@ -611,10 +611,10 @@ const print = (() => {
             case 'a': return a_2;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function lx() {
+    const lx = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 7 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x69) return false;
@@ -633,11 +633,11 @@ const print = (() => {
         CREP[CPOS++] = 0x20;
         CREP[CPOS++] = 0x78;
         return true;
-    }
+    };
     lx.constant = {value: "inner x"};
 
     // StringLiteral
-    function ly() {
+    const ly = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x2a) return false;
@@ -648,20 +648,20 @@ const print = (() => {
         CREP[CPOS++] = 0x2a;
         CREP[CPOS++] = 0x2a;
         return true;
-    }
+    };
     ly.constant = {value: "***"};
 
     // SequenceExpression
-    function letexpr() {
+    const letexpr = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function letexpr_sub1() {
+    const letexpr_sub1 = () => {
         let cc;
         if (ATYP !== STRING) return false;
         if (APOS >= AREP.length) return false;
@@ -670,33 +670,33 @@ const print = (() => {
         APOS += 1;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // Identifier
-    function a_3(arg) {
+    const a_3 = (arg) => {
         return x(arg);
-    }
+    };
 
     // SelectionExpression
-    function start_2() {
+    const start_2 = () => {
         if (start_2_sub1()) return true;
         if (letexpr()) return true;
         return false;
-    }
+    };
 
     // ApplicationExpression
     const start_2_sub1 = lazy(() => REP(start_2_sub2));
 
     // Module
-    function start_2_sub2(member) {
+    const start_2_sub2 = (member) => {
         switch (member) {
             case 'a': return a_3;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_compile_test(member) {
+    const Ɱ_compile_test = (member) => {
         switch (member) {
             case 'x': return x;
             case 'nested': return nested;
@@ -704,7 +704,7 @@ const print = (() => {
             case 'start': return start_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();

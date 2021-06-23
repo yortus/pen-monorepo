@@ -315,27 +315,27 @@ const extensions = {
 const parse = (() => {
 
     // Identifier
-    function foo(arg) {
+    const foo = (arg) => {
         return f(arg);
-    }
+    };
 
     // Identifier
-    function bar(arg) {
+    const bar = (arg) => {
         return b_2(arg);
-    }
+    };
 
     // Identifier
-    function baz(arg) {
+    const baz = (arg) => {
         return baz_2(arg);
-    }
+    };
 
     // Identifier
-    function start_2(arg) {
+    const start_2 = (arg) => {
         return result(arg);
-    }
+    };
 
     // ByteExpression
-    function digit() {
+    const digit = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
@@ -343,10 +343,10 @@ const parse = (() => {
         CPOS += 1;
         emitByte(cc);
         return true;
-    }
+    };
 
     // ByteExpression
-    function alpha() {
+    const alpha = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
@@ -354,10 +354,10 @@ const parse = (() => {
         CPOS += 1;
         emitByte(cc);
         return true;
-    }
+    };
 
     // SequenceExpression
-    function result() {
+    const result = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -366,10 +366,10 @@ const parse = (() => {
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // SequenceExpression
-    function result_sub1() {
+    const result_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -378,7 +378,7 @@ const parse = (() => {
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ListExpression
     const myList = lazy(() => parseList([
@@ -388,7 +388,7 @@ const parse = (() => {
     ]));
 
     // SequenceExpression
-    function myList_sub1() {
+    const myList_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -397,10 +397,10 @@ const parse = (() => {
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // SequenceExpression
-    function myList_sub2() {
+    const myList_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -411,43 +411,43 @@ const parse = (() => {
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // StringLiteral
-    function b() {
+    const b = () => {
         emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
-    }
+    };
     b.constant = {value: "b thing"};
 
     // StringLiteral
-    function d() {
+    const d = () => {
         emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
         return true;
-    }
+    };
     d.constant = {value: "d thing"};
 
     // Module
-    function rec(member) {
+    const rec = (member) => {
         switch (member) {
             case 'b': return b;
             case 'd': return d;
             default: return undefined;
         }
-    }
+    };
 
     // Identifier
-    function r2(arg) {
+    const r2 = (arg) => {
         return rec(arg);
-    }
+    };
 
     // Identifier
-    function r2d(arg) {
+    const r2d = (arg) => {
         return d(arg);
-    }
+    };
 
     // Module
-    function Ɱ_import_graph(member) {
+    const Ɱ_import_graph = (member) => {
         switch (member) {
             case 'foo': return foo;
             case 'bar': return bar;
@@ -462,10 +462,10 @@ const parse = (() => {
             case 'r2d': return r2d;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function f() {
+    const f = () => {
         if (CPOS + 3 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x66) return false;
         if (CREP[CPOS + 1] !== 0x6f) return false;
@@ -473,11 +473,11 @@ const parse = (() => {
         CPOS += 3;
         emitBytes(0x66, 0x6f, 0x6f);
         return true;
-    }
+    };
     f.constant = {value: "foo"};
 
     // StringLiteral
-    function b_2() {
+    const b_2 = () => {
         if (CPOS + 3 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x62) return false;
         if (CREP[CPOS + 1] !== 0x61) return false;
@@ -485,11 +485,11 @@ const parse = (() => {
         CPOS += 3;
         emitBytes(0x62, 0x61, 0x72);
         return true;
-    }
+    };
     b_2.constant = {value: "bar"};
 
     // StringLiteral
-    function baz_2() {
+    const baz_2 = () => {
         if (CPOS + 3 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x62) return false;
         if (CREP[CPOS + 1] !== 0x61) return false;
@@ -497,69 +497,69 @@ const parse = (() => {
         CPOS += 3;
         emitBytes(0x62, 0x61, 0x7a);
         return true;
-    }
+    };
     baz_2.constant = {value: "baz"};
 
     // Module
-    function Ɱ_a(member) {
+    const Ɱ_a = (member) => {
         switch (member) {
             case 'f': return f;
             case 'b': return b_2;
             case 'baz': return baz_2;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_b(member) {
+    const Ɱ_b = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_c(member) {
+    const Ɱ_c = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_d(member) {
+    const Ɱ_d = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Identifier
-    function util1(arg) {
+    const util1 = (arg) => {
         return Ɱ_util1(arg);
-    }
+    };
 
     // Identifier
-    function util2(arg) {
+    const util2 = (arg) => {
         return Ɱ_util2(arg);
-    }
+    };
 
     // Module
-    function util(member) {
+    const util = (member) => {
         switch (member) {
             case 'util1': return util1;
             case 'util2': return util2;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_util(member) {
+    const Ɱ_util = (member) => {
         switch (member) {
             case 'util': return util;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function util1_2() {
+    const util1_2 = () => {
         if (CPOS + 5 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x75) return false;
         if (CREP[CPOS + 1] !== 0x74) return false;
@@ -569,19 +569,19 @@ const parse = (() => {
         CPOS += 5;
         emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
         return true;
-    }
+    };
     util1_2.constant = {value: "util1"};
 
     // Module
-    function Ɱ_util1(member) {
+    const Ɱ_util1 = (member) => {
         switch (member) {
             case 'util1': return util1_2;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function util2_2() {
+    const util2_2 = () => {
         if (CPOS + 5 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x75) return false;
         if (CREP[CPOS + 1] !== 0x74) return false;
@@ -591,16 +591,16 @@ const parse = (() => {
         CPOS += 5;
         emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
         return true;
-    }
+    };
     util2_2.constant = {value: "util2"};
 
     // Module
-    function Ɱ_util2(member) {
+    const Ɱ_util2 = (member) => {
         switch (member) {
             case 'util2': return util2_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();
@@ -612,27 +612,27 @@ const parse = (() => {
 const print = (() => {
 
     // Identifier
-    function foo(arg) {
+    const foo = (arg) => {
         return f(arg);
-    }
+    };
 
     // Identifier
-    function bar(arg) {
+    const bar = (arg) => {
         return b_2(arg);
-    }
+    };
 
     // Identifier
-    function baz(arg) {
+    const baz = (arg) => {
         return baz_2(arg);
-    }
+    };
 
     // Identifier
-    function start_2(arg) {
+    const start_2 = (arg) => {
         return result(arg);
-    }
+    };
 
     // ByteExpression
-    function digit() {
+    const digit = () => {
         let cc;
         if (ATYP !== STRING) return false;
         if (APOS >= AREP.length) return false;
@@ -641,10 +641,10 @@ const print = (() => {
         APOS += 1;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // ByteExpression
-    function alpha() {
+    const alpha = () => {
         let cc;
         if (ATYP !== STRING) return false;
         if (APOS >= AREP.length) return false;
@@ -653,23 +653,23 @@ const print = (() => {
         APOS += 1;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // SequenceExpression
-    function result() {
+    const result = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!foo()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!result_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // SequenceExpression
-    function result_sub1() {
+    const result_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!bar()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!baz()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ListExpression
     const myList = lazy(() => printList([
@@ -679,24 +679,24 @@ const print = (() => {
     ]));
 
     // SequenceExpression
-    function myList_sub1() {
+    const myList_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // SequenceExpression
-    function myList_sub2() {
+    const myList_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!digit()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // StringLiteral
-    function b() {
+    const b = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 7 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x62) return false;
@@ -708,11 +708,11 @@ const print = (() => {
         if (AREP[APOS + 6] !== 0x67) return false;
         APOS += 7;
         return true;
-    }
+    };
     b.constant = {value: "b thing"};
 
     // StringLiteral
-    function d() {
+    const d = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 7 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x64) return false;
@@ -724,30 +724,30 @@ const print = (() => {
         if (AREP[APOS + 6] !== 0x67) return false;
         APOS += 7;
         return true;
-    }
+    };
     d.constant = {value: "d thing"};
 
     // Module
-    function rec(member) {
+    const rec = (member) => {
         switch (member) {
             case 'b': return b;
             case 'd': return d;
             default: return undefined;
         }
-    }
+    };
 
     // Identifier
-    function r2(arg) {
+    const r2 = (arg) => {
         return rec(arg);
-    }
+    };
 
     // Identifier
-    function r2d(arg) {
+    const r2d = (arg) => {
         return d(arg);
-    }
+    };
 
     // Module
-    function Ɱ_import_graph(member) {
+    const Ɱ_import_graph = (member) => {
         switch (member) {
             case 'foo': return foo;
             case 'bar': return bar;
@@ -762,10 +762,10 @@ const print = (() => {
             case 'r2d': return r2d;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function f() {
+    const f = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x66) return false;
@@ -776,11 +776,11 @@ const print = (() => {
         CREP[CPOS++] = 0x6f;
         CREP[CPOS++] = 0x6f;
         return true;
-    }
+    };
     f.constant = {value: "foo"};
 
     // StringLiteral
-    function b_2() {
+    const b_2 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x62) return false;
@@ -791,11 +791,11 @@ const print = (() => {
         CREP[CPOS++] = 0x61;
         CREP[CPOS++] = 0x72;
         return true;
-    }
+    };
     b_2.constant = {value: "bar"};
 
     // StringLiteral
-    function baz_2() {
+    const baz_2 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x62) return false;
@@ -806,69 +806,69 @@ const print = (() => {
         CREP[CPOS++] = 0x61;
         CREP[CPOS++] = 0x7a;
         return true;
-    }
+    };
     baz_2.constant = {value: "baz"};
 
     // Module
-    function Ɱ_a(member) {
+    const Ɱ_a = (member) => {
         switch (member) {
             case 'f': return f;
             case 'b': return b_2;
             case 'baz': return baz_2;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_b(member) {
+    const Ɱ_b = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_c(member) {
+    const Ɱ_c = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_d(member) {
+    const Ɱ_d = (member) => {
         switch (member) {
             default: return undefined;
         }
-    }
+    };
 
     // Identifier
-    function util1(arg) {
+    const util1 = (arg) => {
         return Ɱ_util1(arg);
-    }
+    };
 
     // Identifier
-    function util2(arg) {
+    const util2 = (arg) => {
         return Ɱ_util2(arg);
-    }
+    };
 
     // Module
-    function util(member) {
+    const util = (member) => {
         switch (member) {
             case 'util1': return util1;
             case 'util2': return util2;
             default: return undefined;
         }
-    }
+    };
 
     // Module
-    function Ɱ_util(member) {
+    const Ɱ_util = (member) => {
         switch (member) {
             case 'util': return util;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function util1_2() {
+    const util1_2 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 5 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x75) return false;
@@ -883,19 +883,19 @@ const print = (() => {
         CREP[CPOS++] = 0x6c;
         CREP[CPOS++] = 0x31;
         return true;
-    }
+    };
     util1_2.constant = {value: "util1"};
 
     // Module
-    function Ɱ_util1(member) {
+    const Ɱ_util1 = (member) => {
         switch (member) {
             case 'util1': return util1_2;
             default: return undefined;
         }
-    }
+    };
 
     // StringLiteral
-    function util2_2() {
+    const util2_2 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 5 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x75) return false;
@@ -910,16 +910,16 @@ const print = (() => {
         CREP[CPOS++] = 0x6c;
         CREP[CPOS++] = 0x32;
         return true;
-    }
+    };
     util2_2.constant = {value: "util2"};
 
     // Module
-    function Ɱ_util2(member) {
+    const Ɱ_util2 = (member) => {
         switch (member) {
             case 'util2': return util2_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();

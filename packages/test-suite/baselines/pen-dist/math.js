@@ -716,35 +716,35 @@ const parse = (() => {
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
 
     // Identifier
-    function memoise(arg) {
+    const memoise = (arg) => {
         return memoise_2(arg);
-    }
+    };
 
     // Identifier
-    function floatString(arg) {
+    const floatString = (arg) => {
         return floatString_2(arg);
-    }
+    };
 
     // Identifier
-    function intString(arg) {
+    const intString = (arg) => {
         return intString_2(arg);
-    }
+    };
 
     // Identifier
-    function start_2(arg) {
+    const start_2 = (arg) => {
         return expr(arg);
-    }
+    };
 
     // ApplicationExpression
     const expr = lazy(() => memoise(expr_sub1));
 
     // SelectionExpression
-    function expr_sub1() {
+    const expr_sub1 = () => {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
         return false;
-    }
+    };
 
     // RecordExpression
     const add = lazy(() => parseRecord([
@@ -754,14 +754,14 @@ const parse = (() => {
     ]));
 
     // StringLiteral
-    function add_sub1() {
+    const add_sub1 = () => {
         emitBytes(0x61, 0x64, 0x64);
         return true;
-    }
+    };
     add_sub1.constant = {value: "add"};
 
     // SequenceExpression
-    function add_sub2() {
+    const add_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -770,17 +770,17 @@ const parse = (() => {
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function add_sub3() {
+    const add_sub3 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x2b) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // RecordExpression
     const sub = lazy(() => parseRecord([
@@ -790,14 +790,14 @@ const parse = (() => {
     ]));
 
     // StringLiteral
-    function sub_sub1() {
+    const sub_sub1 = () => {
         emitBytes(0x73, 0x75, 0x62);
         return true;
-    }
+    };
     sub_sub1.constant = {value: "sub"};
 
     // SequenceExpression
-    function sub_sub2() {
+    const sub_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -806,28 +806,28 @@ const parse = (() => {
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function sub_sub3() {
+    const sub_sub3 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x2d) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // ApplicationExpression
     const term = lazy(() => memoise(term_sub1));
 
     // SelectionExpression
-    function term_sub1() {
+    const term_sub1 = () => {
         if (mul()) return true;
         if (div()) return true;
         if (factor()) return true;
         return false;
-    }
+    };
 
     // RecordExpression
     const mul = lazy(() => parseRecord([
@@ -837,28 +837,28 @@ const parse = (() => {
     ]));
 
     // StringLiteral
-    function mul_sub1() {
+    const mul_sub1 = () => {
         emitBytes(0x74, 0x79, 0x70, 0x65);
         return true;
-    }
+    };
     mul_sub1.constant = {value: "type"};
 
     // StringLiteral
-    function mul_sub2() {
+    const mul_sub2 = () => {
         emitBytes(0x6d, 0x75, 0x6c);
         return true;
-    }
+    };
     mul_sub2.constant = {value: "mul"};
 
     // StringLiteral
-    function mul_sub3() {
+    const mul_sub3 = () => {
         emitBytes(0x72, 0x68, 0x73);
         return true;
-    }
+    };
     mul_sub3.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_sub4() {
+    const mul_sub4 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -867,17 +867,17 @@ const parse = (() => {
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function mul_sub5() {
+    const mul_sub5 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x2a) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // RecordExpression
     const div = lazy(() => parseRecord([
@@ -887,14 +887,14 @@ const parse = (() => {
     ]));
 
     // StringLiteral
-    function div_sub1() {
+    const div_sub1 = () => {
         emitBytes(0x64, 0x69, 0x76);
         return true;
-    }
+    };
     div_sub1.constant = {value: "div"};
 
     // SequenceExpression
-    function div_sub2() {
+    const div_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -903,65 +903,65 @@ const parse = (() => {
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function div_sub3() {
+    const div_sub3 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x2f) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // NumericLiteral
-    function base() {
+    const base = () => {
         emitScalar(16);
         return true;
-    }
+    };
     base.constant = {value: 16};
 
     // BooleanLiteral
-    function signed() {
+    const signed = () => {
         emitScalar(false);
         return true;
-    }
+    };
     signed.constant = {value: false};
 
     // NumericLiteral
-    function base_2() {
+    const base_2 = () => {
         emitScalar(2);
         return true;
-    }
+    };
     base_2.constant = {value: 2};
 
     // BooleanLiteral
-    function signed_2() {
+    const signed_2 = () => {
         emitScalar(false);
         return true;
-    }
+    };
     signed_2.constant = {value: false};
 
     // BooleanLiteral
-    function signed_3() {
+    const signed_3 = () => {
         emitScalar(false);
         return true;
-    }
+    };
     signed_3.constant = {value: false};
 
     // SelectionExpression
-    function factor() {
+    const factor = () => {
         if (factor_sub1()) return true;
         if (factor_sub6()) return true;
         if (factor_sub10()) return true;
         if (factor_sub14()) return true;
         if (factor_sub18()) return true;
         return false;
-    }
+    };
 
     // SequenceExpression
-    function factor_sub1() {
+    const factor_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -972,50 +972,50 @@ const parse = (() => {
         if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // NotExpression
-    function factor_sub2() {
+    const factor_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const result = !factor_sub3();
         backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP = NOTHING;
         return result;
-    }
+    };
 
     // StringLiteral
-    function factor_sub3() {
+    const factor_sub3 = () => {
         if (CPOS + 2 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x30) return false;
         if (CREP[CPOS + 1] !== 0x78) return false;
         CPOS += 2;
         emitBytes(0x30, 0x78);
         return true;
-    }
+    };
     factor_sub3.constant = {value: "0x"};
 
     // NotExpression
-    function factor_sub4() {
+    const factor_sub4 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const result = !factor_sub5();
         backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP = NOTHING;
         return result;
-    }
+    };
 
     // StringLiteral
-    function factor_sub5() {
+    const factor_sub5 = () => {
         if (CPOS + 2 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x30) return false;
         if (CREP[CPOS + 1] !== 0x62) return false;
         CPOS += 2;
         emitBytes(0x30, 0x62);
         return true;
-    }
+    };
     factor_sub5.constant = {value: "0b"};
 
     // SequenceExpression
-    function factor_sub6() {
+    const factor_sub6 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -1024,32 +1024,32 @@ const parse = (() => {
         if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // StringLiteral
-    function factor_sub7() {
+    const factor_sub7 = () => {
         if (CPOS + 2 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x30) return false;
         if (CREP[CPOS + 1] !== 0x78) return false;
         CPOS += 2;
         return true;
-    }
+    };
     factor_sub7.constant = {value: "0x"};
 
     // ApplicationExpression
     const factor_sub8 = lazy(() => intString(factor_sub9));
 
     // Module
-    function factor_sub9(member) {
+    const factor_sub9 = (member) => {
         switch (member) {
             case 'base': return base;
             case 'signed': return signed;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub10() {
+    const factor_sub10 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -1058,32 +1058,32 @@ const parse = (() => {
         if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // StringLiteral
-    function factor_sub11() {
+    const factor_sub11 = () => {
         if (CPOS + 2 > CREP.length) return false;
         if (CREP[CPOS + 0] !== 0x30) return false;
         if (CREP[CPOS + 1] !== 0x62) return false;
         CPOS += 2;
         return true;
-    }
+    };
     factor_sub11.constant = {value: "0b"};
 
     // ApplicationExpression
     const factor_sub12 = lazy(() => intString(factor_sub13));
 
     // Module
-    function factor_sub13(member) {
+    const factor_sub13 = (member) => {
         switch (member) {
             case 'base': return base_2;
             case 'signed': return signed_2;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub14() {
+    const factor_sub14 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -1092,31 +1092,31 @@ const parse = (() => {
         if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub15() {
+    const factor_sub15 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x69) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // ApplicationExpression
     const factor_sub16 = lazy(() => intString(factor_sub17));
 
     // Module
-    function factor_sub17(member) {
+    const factor_sub17 = (member) => {
         switch (member) {
             case 'signed': return signed_3;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub18() {
+    const factor_sub18 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         let seqType = NOTHING;
         ATYP = NOTHING;
@@ -1127,30 +1127,30 @@ const parse = (() => {
         if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         ATYP |= seqType;
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub19() {
+    const factor_sub19 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x28) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub20() {
+    const factor_sub20 = () => {
         let cc;
         if (CPOS >= CREP.length) return false;
         cc = CREP[CPOS];
         if (cc !== 0x29) return false;
         CPOS += 1;
         return true;
-    }
+    };
 
     // Module
-    function Ɱ_math(member) {
+    const Ɱ_math = (member) => {
         switch (member) {
             case 'memoise': return memoise;
             case 'floatString': return floatString;
@@ -1165,7 +1165,7 @@ const parse = (() => {
             case 'factor': return factor;
             default: return undefined;
         }
-    }
+    };
 
     // Intrinsic
 
@@ -1174,14 +1174,14 @@ const parse = (() => {
     // Intrinsic
 
     // Module
-    function Ɱ_std(member) {
+    const Ɱ_std = (member) => {
         switch (member) {
             case 'floatString': return floatString_2;
             case 'intString': return intString_2;
             case 'memoise': return memoise_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();
@@ -1198,35 +1198,35 @@ const print = (() => {
     const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
 
     // Identifier
-    function memoise(arg) {
+    const memoise = (arg) => {
         return memoise_2(arg);
-    }
+    };
 
     // Identifier
-    function floatString(arg) {
+    const floatString = (arg) => {
         return floatString_2(arg);
-    }
+    };
 
     // Identifier
-    function intString(arg) {
+    const intString = (arg) => {
         return intString_2(arg);
-    }
+    };
 
     // Identifier
-    function start_2(arg) {
+    const start_2 = (arg) => {
         return expr(arg);
-    }
+    };
 
     // ApplicationExpression
     const expr = lazy(() => memoise(expr_sub1));
 
     // SelectionExpression
-    function expr_sub1() {
+    const expr_sub1 = () => {
         if (add()) return true;
         if (sub()) return true;
         if (term()) return true;
         return false;
-    }
+    };
 
     // RecordExpression
     const add = lazy(() => printRecord([
@@ -1236,7 +1236,7 @@ const print = (() => {
     ]));
 
     // StringLiteral
-    function add_sub1() {
+    const add_sub1 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x61) return false;
@@ -1244,24 +1244,24 @@ const print = (() => {
         if (AREP[APOS + 2] !== 0x64) return false;
         APOS += 3;
         return true;
-    }
+    };
     add_sub1.constant = {value: "add"};
 
     // SequenceExpression
-    function add_sub2() {
+    const add_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function add_sub3() {
+    const add_sub3 = () => {
         let cc;
         cc = 0x2b;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // RecordExpression
     const sub = lazy(() => printRecord([
@@ -1271,7 +1271,7 @@ const print = (() => {
     ]));
 
     // StringLiteral
-    function sub_sub1() {
+    const sub_sub1 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x73) return false;
@@ -1279,35 +1279,35 @@ const print = (() => {
         if (AREP[APOS + 2] !== 0x62) return false;
         APOS += 3;
         return true;
-    }
+    };
     sub_sub1.constant = {value: "sub"};
 
     // SequenceExpression
-    function sub_sub2() {
+    const sub_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function sub_sub3() {
+    const sub_sub3 = () => {
         let cc;
         cc = 0x2d;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // ApplicationExpression
     const term = lazy(() => memoise(term_sub1));
 
     // SelectionExpression
-    function term_sub1() {
+    const term_sub1 = () => {
         if (mul()) return true;
         if (div()) return true;
         if (factor()) return true;
         return false;
-    }
+    };
 
     // RecordExpression
     const mul = lazy(() => printRecord([
@@ -1317,7 +1317,7 @@ const print = (() => {
     ]));
 
     // StringLiteral
-    function mul_sub1() {
+    const mul_sub1 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 4 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x74) return false;
@@ -1326,11 +1326,11 @@ const print = (() => {
         if (AREP[APOS + 3] !== 0x65) return false;
         APOS += 4;
         return true;
-    }
+    };
     mul_sub1.constant = {value: "type"};
 
     // StringLiteral
-    function mul_sub2() {
+    const mul_sub2 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x6d) return false;
@@ -1338,11 +1338,11 @@ const print = (() => {
         if (AREP[APOS + 2] !== 0x6c) return false;
         APOS += 3;
         return true;
-    }
+    };
     mul_sub2.constant = {value: "mul"};
 
     // StringLiteral
-    function mul_sub3() {
+    const mul_sub3 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x72) return false;
@@ -1350,24 +1350,24 @@ const print = (() => {
         if (AREP[APOS + 2] !== 0x73) return false;
         APOS += 3;
         return true;
-    }
+    };
     mul_sub3.constant = {value: "rhs"};
 
     // SequenceExpression
-    function mul_sub4() {
+    const mul_sub4 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function mul_sub5() {
+    const mul_sub5 = () => {
         let cc;
         cc = 0x2a;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // RecordExpression
     const div = lazy(() => printRecord([
@@ -1377,7 +1377,7 @@ const print = (() => {
     ]));
 
     // StringLiteral
-    function div_sub1() {
+    const div_sub1 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 3 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x64) return false;
@@ -1385,99 +1385,99 @@ const print = (() => {
         if (AREP[APOS + 2] !== 0x76) return false;
         APOS += 3;
         return true;
-    }
+    };
     div_sub1.constant = {value: "div"};
 
     // SequenceExpression
-    function div_sub2() {
+    const div_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function div_sub3() {
+    const div_sub3 = () => {
         let cc;
         cc = 0x2f;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // NumericLiteral
-    function base() {
+    const base = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== 16) return false;
         APOS += 1;
         return true;
-    }
+    };
     base.constant = {value: 16};
 
     // BooleanLiteral
-    function signed() {
+    const signed = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== false) return false;
         APOS += 1;
         return true;
-    }
+    };
     signed.constant = {value: false};
 
     // NumericLiteral
-    function base_2() {
+    const base_2 = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== 2) return false;
         APOS += 1;
         return true;
-    }
+    };
     base_2.constant = {value: 2};
 
     // BooleanLiteral
-    function signed_2() {
+    const signed_2 = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== false) return false;
         APOS += 1;
         return true;
-    }
+    };
     signed_2.constant = {value: false};
 
     // BooleanLiteral
-    function signed_3() {
+    const signed_3 = () => {
         if (ATYP !== SCALAR) return false;
         if (AREP[APOS] !== false) return false;
         APOS += 1;
         return true;
-    }
+    };
     signed_3.constant = {value: false};
 
     // SelectionExpression
-    function factor() {
+    const factor = () => {
         if (factor_sub1()) return true;
         if (factor_sub6()) return true;
         if (factor_sub10()) return true;
         if (factor_sub14()) return true;
         if (factor_sub18()) return true;
         return false;
-    }
+    };
 
     // SequenceExpression
-    function factor_sub1() {
+    const factor_sub1 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // NotExpression
-    function factor_sub2() {
+    const factor_sub2 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const result = !factor_sub3();
         backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return result;
-    }
+    };
 
     // StringLiteral
-    function factor_sub3() {
+    const factor_sub3 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 2 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x30) return false;
@@ -1486,19 +1486,19 @@ const print = (() => {
         CREP[CPOS++] = 0x30;
         CREP[CPOS++] = 0x78;
         return true;
-    }
+    };
     factor_sub3.constant = {value: "0x"};
 
     // NotExpression
-    function factor_sub4() {
+    const factor_sub4 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         const result = !factor_sub5();
         backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return result;
-    }
+    };
 
     // StringLiteral
-    function factor_sub5() {
+    const factor_sub5 = () => {
         if (ATYP !== STRING) return false;
         if (APOS + 2 > AREP.length) return false;
         if (AREP[APOS + 0] !== 0x30) return false;
@@ -1507,119 +1507,119 @@ const print = (() => {
         CREP[CPOS++] = 0x30;
         CREP[CPOS++] = 0x62;
         return true;
-    }
+    };
     factor_sub5.constant = {value: "0b"};
 
     // SequenceExpression
-    function factor_sub6() {
+    const factor_sub6 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // StringLiteral
-    function factor_sub7() {
+    const factor_sub7 = () => {
         CREP[CPOS++] = 0x30;
         CREP[CPOS++] = 0x78;
         return true;
-    }
+    };
     factor_sub7.constant = {value: "0x"};
 
     // ApplicationExpression
     const factor_sub8 = lazy(() => intString(factor_sub9));
 
     // Module
-    function factor_sub9(member) {
+    const factor_sub9 = (member) => {
         switch (member) {
             case 'base': return base;
             case 'signed': return signed;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub10() {
+    const factor_sub10 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // StringLiteral
-    function factor_sub11() {
+    const factor_sub11 = () => {
         CREP[CPOS++] = 0x30;
         CREP[CPOS++] = 0x62;
         return true;
-    }
+    };
     factor_sub11.constant = {value: "0b"};
 
     // ApplicationExpression
     const factor_sub12 = lazy(() => intString(factor_sub13));
 
     // Module
-    function factor_sub13(member) {
+    const factor_sub13 = (member) => {
         switch (member) {
             case 'base': return base_2;
             case 'signed': return signed_2;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub14() {
+    const factor_sub14 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub15() {
+    const factor_sub15 = () => {
         let cc;
         cc = 0x69;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // ApplicationExpression
     const factor_sub16 = lazy(() => intString(factor_sub17));
 
     // Module
-    function factor_sub17(member) {
+    const factor_sub17 = (member) => {
         switch (member) {
             case 'signed': return signed_3;
             default: return undefined;
         }
-    }
+    };
 
     // SequenceExpression
-    function factor_sub18() {
+    const factor_sub18 = () => {
         const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
         if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub19() {
+    const factor_sub19 = () => {
         let cc;
         cc = 0x28;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // ByteExpression
-    function factor_sub20() {
+    const factor_sub20 = () => {
         let cc;
         cc = 0x29;
         CREP[CPOS++] = cc;
         return true;
-    }
+    };
 
     // Module
-    function Ɱ_math(member) {
+    const Ɱ_math = (member) => {
         switch (member) {
             case 'memoise': return memoise;
             case 'floatString': return floatString;
@@ -1634,7 +1634,7 @@ const print = (() => {
             case 'factor': return factor;
             default: return undefined;
         }
-    }
+    };
 
     // Intrinsic
 
@@ -1643,14 +1643,14 @@ const print = (() => {
     // Intrinsic
 
     // Module
-    function Ɱ_std(member) {
+    const Ɱ_std = (member) => {
         switch (member) {
             case 'floatString': return floatString_2;
             case 'intString': return intString_2;
             case 'memoise': return memoise_2;
             default: return undefined;
         }
-    }
+    };
 
     return start_2;
 })();
