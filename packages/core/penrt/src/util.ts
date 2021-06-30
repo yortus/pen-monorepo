@@ -129,7 +129,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             value = (AREP as Buffer).toString('utf8', 0, APOS);
             break;
         case LIST:
-            if (AREP.length !== APOS) AREP.length === APOS;
+            if (AREP.length !== APOS) AREP.length = APOS;
             value = AREP;
             break;
         case RECORD:

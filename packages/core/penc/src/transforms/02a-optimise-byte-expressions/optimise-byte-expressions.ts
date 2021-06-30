@@ -11,6 +11,28 @@ export function optimiseByteExpressions(ast: V.AST<300>): V.AST<300> {
 
     const startᐟ = mapNode(ast.start, rec => ({
 
+        // `abstract` operator on string literal or byte expr: apply statically where possible
+        AbstractExpression: (ab): V.AbstractExpression<300> | V.ByteExpression<300> | V.StringLiteral<300> => {
+            const expr = rec(ab.expression);
+            if ((expr.kind === 'ByteExpression' || expr.kind === 'StringLiteral') && expr.subkind !== 'C') {
+                return {...expr, subkind: 'A'};
+            }
+            else {
+                return {...ab, expression: expr};
+            }
+        },
+
+        // `concrete` operator on string literal or byte expr: apply statically where possible
+        ConcreteExpression: (co): V.ConcreteExpression<300> | V.ByteExpression<300> | V.StringLiteral<300> => {
+            const expr = rec(co.expression);
+            if ((expr.kind === 'ByteExpression' || expr.kind === 'StringLiteral') && expr.subkind !== 'A') {
+                return {...expr, subkind: 'C'};
+            }
+            else {
+                return {...co, expression: expr};
+            }
+        },
+
         // One-byte string literals: convert to equivalent ByteExpression.
         StringLiteral: (str): V.StringLiteral<300> | V.ByteExpression<300> => {
             const buf = Buffer.from(str.value);

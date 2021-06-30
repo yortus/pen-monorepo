@@ -103,10 +103,9 @@ SequenceExpression
     }
 
 UnaryExpression
-    = op:((ABSTRACT / CONCRETE / "!" / "?" / "*")   __)?   expression:Precedence5OrHigher
+    = op:(ABSTRACT / CONCRETE / "!" / "?" / "*")   __   expression:Precedence4OrHigher
     {
-        if (!op) return expression;
-        switch (op[0]) {
+        switch (op) {
           case 'abstract': return {kind: 'AbstractExpression', expression};
           case 'concrete': return {kind: 'ConcreteExpression', expression};
           case '!': return {kind: 'NotExpression', expression};

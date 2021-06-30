@@ -322,7 +322,7 @@ function parseInner(rule, mustProduce) {
             break;
         case LIST:
             if (AREP.length !== APOS)
-                AREP.length === APOS;
+                AREP.length = APOS;
             value = AREP;
             break;
         case RECORD:
