@@ -74,9 +74,9 @@ function floatString({mode}: StaticOptions): Rule {
             return true;
         },
 
-        parseDefault: function FSTR() {
-            // TODO: implement...
-            throw new Error('Not implemented');
+        parseDefault: function ISTR() {
+            emitScalar(0);
+            return true;
         },
 
         print: function FSTR() {
@@ -97,8 +97,8 @@ function floatString({mode}: StaticOptions): Rule {
         },
 
         printDefault: function FSTR() {
-            // TODO: implement...
-            throw new Error('Not implemented');
+            CREP[CPOS++] = ZERO_DIGIT;
+            return true;
         },
     });
 }

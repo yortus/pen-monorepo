@@ -172,7 +172,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
     // Emit for list and record expressions (they need a lazy wrapper).
     switch (expr.kind) {
-            // TODO: parseDefault, printDefault... (in list.ts)
             case 'ListExpression': {
             emit.down(1).text(`const ${name} = lazy(() => createList(mode, [`).indent();
             for (const item of expr.items) {
@@ -186,7 +185,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'RecordExpression': {
-            // TODO: parseDefault, printDefault... (in record.ts)
             emit.down(1).text(`const ${name} = lazy(() => createRecord(mode, [`).indent();
             for (const item of expr.items) {
                 emit.down(1).text(`{kind: '${item.kind}', `);
@@ -226,15 +224,14 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ByteExpression': {
-            // TODO: parseDefault, printDefault...
-            for (const mode of ['parse', 'print'] as const) {
-                const hasInput = mode === 'parse' ? expr.subkind !== 'A' : expr.subkind !== 'C';
-                const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
-                const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+            for (const mode of ['parse', 'parseDefault', 'print', 'printDefault'] as const) {
+                const hasInput = mode === 'parse' ? expr.subkind !== 'A' : mode === 'print' ? expr.subkind !== 'C' : false;
+                const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : mode === 'print' ? expr.subkind !== 'A' : true;
+                const [IREP, IPOS] = mode.startsWith('parse') ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
                 emit.down(1).text(`${mode}: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING) return false;`);
                     emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
                     emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
                     for (const excl of expr.exclude || []) {
@@ -258,7 +255,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
                 }
                 if (hasOutput) {
-                    emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `CREP[CPOS++] = cc;`);
+                    emit.down(1).text(mode.startsWith('parse') ? `emitByte(cc);` : `CREP[CPOS++] = cc;`);
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text(`},`);
@@ -267,7 +264,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'NotExpression': {
-            // TODO: parseDefault, printDefault...
             for (const mode of ['parse', 'print'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
                 emit.down(1).text(`const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;`);
@@ -276,12 +272,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
                 emit.down(1).text(`return result;`);
                 emit.dedent().down(1).text(`},`);
+                emit.down(1).text(`${mode}Default: '${mode}',`);
             }
             break;
         }
 
         case 'QuantifiedExpression': {
-            // TODO: parseDefault, printDefault...
             for (const mode of ['parse', 'print'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
                 if (expr.quantifier === '?') {
@@ -303,6 +299,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
             }
+            emit.down(1).text(`parseDefault: () => true,`);
+            emit.down(1).text(`printDefault: () => true,`);
             break;
         }
 
@@ -347,37 +345,33 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'StringLiteral': {
-            // TODO: parseDefault, printDefault...
             const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
-            emit.down(1).text(`parse: function STR() {`).indent();
-            if (expr.subkind !== 'A') {
-                emit.down(1).text(`if (CPOS + ${bytes.length} > CREP.length) return false;`);
-                for (let i = 0; i < bytes.length; ++i) {
-                    emit.down(1).text(`if (CREP[CPOS + ${i}] !== ${bytes[i]}) return false;`);
+            for (const mode of ['parse', 'parseDefault', 'print', 'printDefault'] as const) {
+                const hasInput = mode === 'parse' ? expr.subkind !== 'A' : mode === 'print' ? expr.subkind !== 'C' : false;
+                const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : mode === 'print' ? expr.subkind !== 'A' : true;
+                const [IREP, IPOS] = mode.startsWith('parse') ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+                emit.down(1).text(`${mode}: function STR() {`).indent();
+                if (hasInput) {
+                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
+                    for (let i = 0; i < bytes.length; ++i) {
+                        emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
+                    }
+                    emit.down(1).text(`${IPOS} += ${bytes.length};`);
                 }
-                emit.down(1).text(`CPOS += ${bytes.length};`);
-            }
-            if (expr.subkind !== 'C') {
-                emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
-            }
-            emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`print: function STR() {`).indent();
-            if ( expr.subkind !== 'C') {
-                emit.down(1).text(`if (ATYP !== STRING) return false;`);
-                emit.down(1).text(`if (APOS + ${bytes.length} > AREP.length) return false;`);
-                for (let i = 0; i < bytes.length; ++i) {
-                    emit.down(1).text(`if (AREP[APOS + ${i}] !== ${bytes[i]}) return false;`);
+                if (hasOutput) {
+                    if (mode.startsWith('parse')) {
+                        emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
+                    }
+                    else {
+                        for (let i = 0; i < bytes.length; ++i) {
+                            emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                        }
+                    }
                 }
-                emit.down(1).text(`APOS += ${bytes.length};`);
+                emit.down(1).text(`return true;`);
+                emit.dedent().down(1).text('},');
             }
-            if (expr.subkind !== 'A') {
-                for (let i = 0; i < bytes.length; ++i) {
-                    emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
-                }
-            }
-            emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('},');
             break;
         }
 

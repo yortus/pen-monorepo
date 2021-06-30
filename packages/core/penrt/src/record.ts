@@ -45,9 +45,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
             return true;
         },
 
-        parseDefault: function LST() {
-            throw new Error('FIX_EMIT');
-        },
+        parseDefault: 'parse',
 
         print: function RCD() {
             if (ATYP !== RECORD) return false;
@@ -104,8 +102,26 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
             return true;
         },
 
-        printDefault: function LST() {
-            throw new Error('FIX_EMIT');
+        printDefault: function RCD() {
+            if (ATYP !== RECORD) return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    // Print field label
+                    if (typeof recordItem.label !== 'string') {
+                        // Dynamically-labelled field
+                        if (!printDefaultInner(recordItem.label)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    }
+
+                    // Print field value
+                    if (!printDefaultInner(recordItem.expr)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+                else /* item.kind === 'Splice' */ {
+                    ATYP = RECORD;
+                    if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+            }
+            return true;
         },
     });
 }

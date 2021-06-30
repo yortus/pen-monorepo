@@ -41,12 +41,9 @@ function isModule(_x: PenVal): _x is Module {
     return true; // TODO: implement runtime check
 }
 function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
-
-    // TODO: remove these when emit is fixed to always cover them:
-    impls.parseDefault ??= () => {throw new Error(`FIX_EMIT`)};
-    impls.print ??= () => {throw new Error(`FIX_EMIT`)};
-    impls.printDefault ??= () => {throw new Error(`FIX_EMIT`)};
-
+    if (!impls.parseDefault) throw new Error(`parseDefault method is missing`);
+    if (!impls.print) throw new Error(`print method is missing`);
+    if (!impls.printDefault) throw new Error(`printDefault method is missing`);
     const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
     let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
     if (dflt === 'print') dflt = impls.print;
@@ -63,21 +60,6 @@ interface RuleImpls {
 
 
 // TODO: next:
-// [x] 1. charAt -> charCodeAt, in prep for changing to Buffer/UInt8Array (except unicode)
-// [x] 2. change CREP from string to Buffer
-// [x] 3. perf profile - what are the hottest paths now where speedups would improve overall perf?
-// [x]    a. no obvious low-hanging fruit
-// [x]    b. most obvious 'smell': extremely deep call chains with LST and RCD. These are tail-recursive in json.pen. fn call/ret overheads dominating execution time?
-// [x]    c. can we (a) identify tail-recursion in lists and records? (b) lower it to iteration in a transform?
-// [x]    d. list/record sequences still work! These are iterative instead of recursive so don't have super-deep call chains
-// [x]    e. impl json.pen using (d) and profile again
-// [x]    f. now, most time is spend in the following 2 areas:
-// [x]       i) parseInner
-// [x]          - idea: in parseInner, set AREP = undefined, APOS = 0; rule that sets ATYP also sets AREP (to an array or buffer as reqd, using AREP ??= syntax )
-// [x]          - can reuse a single buffer program-wide, since there can only be one being parsed into at a time
-// [x]       ii) the CHAR rule, specifically the first arm: `!"\\"   !"\""    ascii(min=0x20 max=0x7f)`     DONE! optimisation works
-// [x]       iii) the WS rule, specifically four ByteExprs in a selection could be simplified? A: yes, done
-// [x] 4. common 'ArrayLike' interface with []-access, length, slice (remove casts where possible)
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
 // [ ] 7. restore LEN/CAP (capacity) checking
@@ -227,6 +209,14 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     }
     APOS += 1;
     return true;
+}
+
+function printDefaultInner(rule: Rule): boolean {
+    const ATYPₒ = ATYP;
+    ATYP = NOTHING;
+    const result = rule();
+    ATYP = ATYPₒ;
+    return result;
 }
 
 

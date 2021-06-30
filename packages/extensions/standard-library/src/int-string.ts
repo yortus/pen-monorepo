@@ -56,8 +56,8 @@ function intString({mode}: StaticOptions): Func {
             },
 
             parseDefault: function ISTR() {
-                // TODO: implement...
-                throw new Error('Not implemented');
+                emitScalar(0);
+                return true;
             },
 
             print: function ISTR() {
@@ -97,8 +97,8 @@ function intString({mode}: StaticOptions): Func {
             },
 
             printDefault: function ISTR() {
-                // TODO: implement...
-                throw new Error('Not implemented');
+                CREP[CPOS++] = CHAR_CODES[0];
+                return true;
             },
         });
     };

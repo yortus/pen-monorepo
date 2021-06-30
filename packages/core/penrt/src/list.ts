@@ -17,9 +17,7 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
             return true;
         },
 
-        parseDefault: function LST() {
-            throw new Error('FIX_EMIT');
-        },
+        parseDefault: 'parse',
 
         print: function LST() {
             if (ATYP !== LIST) return false;
@@ -37,7 +35,18 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
         },
 
         printDefault: function LST() {
-            throw new Error('FIX_EMIT');
+            if (ATYP !== LIST) return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            for (const listItem of listItems) {
+                if (listItem.kind === 'Element') {
+                    if (!printDefaultInner(listItem.expr)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+                else /* item.kind === 'Splice' */ {
+                    ATYP = LIST;
+                    if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+            }
+            return true;
         },
     });
 }

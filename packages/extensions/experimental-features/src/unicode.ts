@@ -40,7 +40,7 @@ function unicode({mode}: StaticOptions): Func {
 
             parseDefault: function UNI() {
                 // TODO: generate default value...
-                throw new Error('Not implemented');
+                throw new Error('unicode parseDefault: Not implemented');
             },
 
             print: function UNI() {
@@ -77,7 +77,7 @@ function unicode({mode}: StaticOptions): Func {
 
             printDefault: function UNI() {
                 // TODO: generate default value...
-                throw new Error('Not implemented');
+                throw new Error('unicode printDefault: Not implemented');
             },
         });
     };

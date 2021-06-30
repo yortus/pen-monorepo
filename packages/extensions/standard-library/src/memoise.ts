@@ -98,7 +98,7 @@ function memoise({mode}: StaticOptions): Func {
 
             parseDefault: function MEM() {
                 // TODO: implement...
-                throw new Error('Not implemented');
+                throw new Error('memoise parseDefault: Not implemented');
             },
     
             print: function MEM() {
@@ -183,7 +183,7 @@ function memoise({mode}: StaticOptions): Func {
 
             printDefault: function MEM() {
                 // TODO: implement...
-                throw new Error('Not implemented');
+                throw new Error('memoise printDefault: Not implemented');
             },
         });
     };

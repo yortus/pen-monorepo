@@ -44,9 +44,7 @@ function createList(mode, listItems) {
             ATYP = LIST;
             return true;
         },
-        parseDefault: function LST() {
-            throw new Error('FIX_EMIT');
-        },
+        parseDefault: 'parse',
         print: function LST() {
             if (ATYP !== LIST)
                 return false;
@@ -65,7 +63,21 @@ function createList(mode, listItems) {
             return true;
         },
         printDefault: function LST() {
-            throw new Error('FIX_EMIT');
+            if (ATYP !== LIST)
+                return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            for (const listItem of listItems) {
+                if (listItem.kind === 'Element') {
+                    if (!printDefaultInner(listItem.expr))
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+                else {
+                    ATYP = LIST;
+                    if (!listItem.expr())
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+            }
+            return true;
         },
     });
 }
@@ -113,9 +125,7 @@ function createRecord(mode, recordItems) {
             ATYP = RECORD;
             return true;
         },
-        parseDefault: function LST() {
-            throw new Error('FIX_EMIT');
-        },
+        parseDefault: 'parse',
         print: function RCD() {
             if (ATYP !== RECORD)
                 return false;
@@ -158,8 +168,26 @@ function createRecord(mode, recordItems) {
             APOS = bitmask;
             return true;
         },
-        printDefault: function LST() {
-            throw new Error('FIX_EMIT');
+        printDefault: function RCD() {
+            if (ATYP !== RECORD)
+                return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    if (typeof recordItem.label !== 'string') {
+                        if (!printDefaultInner(recordItem.label))
+                            return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    }
+                    if (!printDefaultInner(recordItem.expr))
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+                else {
+                    ATYP = RECORD;
+                    if (!recordItem.expr())
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+            }
+            return true;
         },
     });
 }
@@ -173,10 +201,12 @@ function isModule(_x) {
     return true;
 }
 function createRule(mode, impls) {
-    var _a, _b, _c;
-    (_a = impls.parseDefault) !== null && _a !== void 0 ? _a : (impls.parseDefault = () => { throw new Error(`FIX_EMIT`); });
-    (_b = impls.print) !== null && _b !== void 0 ? _b : (impls.print = () => { throw new Error(`FIX_EMIT`); });
-    (_c = impls.printDefault) !== null && _c !== void 0 ? _c : (impls.printDefault = () => { throw new Error(`FIX_EMIT`); });
+    if (!impls.parseDefault)
+        throw new Error(`parseDefault method is missing`);
+    if (!impls.print)
+        throw new Error(`print method is missing`);
+    if (!impls.printDefault)
+        throw new Error(`printDefault method is missing`);
     const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
     let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
     if (dflt === 'print')
@@ -307,6 +337,13 @@ function printInner(rule, mustConsume) {
     APOS += 1;
     return true;
 }
+function printDefaultInner(rule) {
+    const ATYPₒ = ATYP;
+    ATYP = NOTHING;
+    const result = rule();
+    ATYP = ATYPₒ;
+    return result;
+}
 function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
@@ -364,6 +401,12 @@ function create(mode) {
             emitByte(cc);
             return true;
         },
+        parseDefault: function BYT() {
+            let cc;
+            cc = 0x30;
+            emitByte(cc);
+            return true;
+        },
         print: function BYT() {
             let cc;
             if (ATYP !== STRING) return false;
@@ -371,6 +414,12 @@ function create(mode) {
             cc = AREP[APOS];
             if ((cc < 0x30 || cc > 0x39)) return false;
             APOS += 1;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+        printDefault: function BYT() {
+            let cc;
+            cc = 0x30;
             CREP[CPOS++] = cc;
             return true;
         },
@@ -387,6 +436,12 @@ function create(mode) {
             emitByte(cc);
             return true;
         },
+        parseDefault: function BYT() {
+            let cc;
+            cc = 0x61;
+            emitByte(cc);
+            return true;
+        },
         print: function BYT() {
             let cc;
             if (ATYP !== STRING) return false;
@@ -394,6 +449,12 @@ function create(mode) {
             cc = AREP[APOS];
             if ((cc < 0x61 || cc > 0x7a) && (cc < 0x41 || cc > 0x5a)) return false;
             APOS += 1;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+        printDefault: function BYT() {
+            let cc;
+            cc = 0x61;
             CREP[CPOS++] = cc;
             return true;
         },
@@ -503,6 +564,10 @@ function create(mode) {
             emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 7 > AREP.length) return false;
@@ -516,12 +581,26 @@ function create(mode) {
             APOS += 7;
             return true;
         },
+        printDefault: function STR() {
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x20;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x68;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6e;
+            CREP[CPOS++] = 0x67;
+            return true;
+        },
     });
     b.constant = {value: "b thing"};
 
     // StringLiteral
     const d = createRule(mode, {
         parse: function STR() {
+            emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+            return true;
+        },
+        parseDefault: function STR() {
             emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
             return true;
         },
@@ -536,6 +615,16 @@ function create(mode) {
             if (AREP[APOS + 5] !== 0x6e) return false;
             if (AREP[APOS + 6] !== 0x67) return false;
             APOS += 7;
+            return true;
+        },
+        printDefault: function STR() {
+            CREP[CPOS++] = 0x64;
+            CREP[CPOS++] = 0x20;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x68;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6e;
+            CREP[CPOS++] = 0x67;
             return true;
         },
     });
@@ -585,6 +674,10 @@ function create(mode) {
             emitBytes(0x66, 0x6f, 0x6f);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x66, 0x6f, 0x6f);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
@@ -592,6 +685,12 @@ function create(mode) {
             if (AREP[APOS + 1] !== 0x6f) return false;
             if (AREP[APOS + 2] !== 0x6f) return false;
             APOS += 3;
+            CREP[CPOS++] = 0x66;
+            CREP[CPOS++] = 0x6f;
+            CREP[CPOS++] = 0x6f;
+            return true;
+        },
+        printDefault: function STR() {
             CREP[CPOS++] = 0x66;
             CREP[CPOS++] = 0x6f;
             CREP[CPOS++] = 0x6f;
@@ -611,6 +710,10 @@ function create(mode) {
             emitBytes(0x62, 0x61, 0x72);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x62, 0x61, 0x72);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
@@ -618,6 +721,12 @@ function create(mode) {
             if (AREP[APOS + 1] !== 0x61) return false;
             if (AREP[APOS + 2] !== 0x72) return false;
             APOS += 3;
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x72;
+            return true;
+        },
+        printDefault: function STR() {
             CREP[CPOS++] = 0x62;
             CREP[CPOS++] = 0x61;
             CREP[CPOS++] = 0x72;
@@ -637,6 +746,10 @@ function create(mode) {
             emitBytes(0x62, 0x61, 0x7a);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x62, 0x61, 0x7a);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 3 > AREP.length) return false;
@@ -644,6 +757,12 @@ function create(mode) {
             if (AREP[APOS + 1] !== 0x61) return false;
             if (AREP[APOS + 2] !== 0x7a) return false;
             APOS += 3;
+            CREP[CPOS++] = 0x62;
+            CREP[CPOS++] = 0x61;
+            CREP[CPOS++] = 0x7a;
+            return true;
+        },
+        printDefault: function STR() {
             CREP[CPOS++] = 0x62;
             CREP[CPOS++] = 0x61;
             CREP[CPOS++] = 0x7a;
@@ -719,6 +838,10 @@ function create(mode) {
             emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 5 > AREP.length) return false;
@@ -728,6 +851,14 @@ function create(mode) {
             if (AREP[APOS + 3] !== 0x6c) return false;
             if (AREP[APOS + 4] !== 0x31) return false;
             APOS += 5;
+            CREP[CPOS++] = 0x75;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6c;
+            CREP[CPOS++] = 0x31;
+            return true;
+        },
+        printDefault: function STR() {
             CREP[CPOS++] = 0x75;
             CREP[CPOS++] = 0x74;
             CREP[CPOS++] = 0x69;
@@ -759,6 +890,10 @@ function create(mode) {
             emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
             return true;
         },
+        parseDefault: function STR() {
+            emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
+            return true;
+        },
         print: function STR() {
             if (ATYP !== STRING) return false;
             if (APOS + 5 > AREP.length) return false;
@@ -768,6 +903,14 @@ function create(mode) {
             if (AREP[APOS + 3] !== 0x6c) return false;
             if (AREP[APOS + 4] !== 0x32) return false;
             APOS += 5;
+            CREP[CPOS++] = 0x75;
+            CREP[CPOS++] = 0x74;
+            CREP[CPOS++] = 0x69;
+            CREP[CPOS++] = 0x6c;
+            CREP[CPOS++] = 0x32;
+            return true;
+        },
+        printDefault: function STR() {
             CREP[CPOS++] = 0x75;
             CREP[CPOS++] = 0x74;
             CREP[CPOS++] = 0x69;
