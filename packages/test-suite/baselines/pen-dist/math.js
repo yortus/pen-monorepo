@@ -44,7 +44,23 @@ function createList(mode, listItems) {
             ATYP = LIST;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: function LST() {
+            const APOSₒ = APOS;
+            if (APOS === 0)
+                AREP = [];
+            for (const listItem of listItems) {
+                if (listItem.kind === 'Element') {
+                    if (!parseInner(listItem.expr.default, true))
+                        return APOS = APOSₒ, false;
+                }
+                else {
+                    if (!listItem.expr.default())
+                        return APOS = APOSₒ, false;
+                }
+            }
+            ATYP = LIST;
+            return true;
+        },
         print: function LST() {
             if (ATYP !== LIST)
                 return false;
@@ -68,12 +84,12 @@ function createList(mode, listItems) {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!printDefaultInner(listItem.expr))
+                    if (!printDefaultInner(listItem.expr.default))
                         return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
                 }
                 else {
                     ATYP = LIST;
-                    if (!listItem.expr())
+                    if (!listItem.expr.default())
                         return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
                 }
             }
@@ -125,7 +141,48 @@ function createRecord(mode, recordItems) {
             ATYP = RECORD;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: function RCD() {
+            const APOSₒ = APOS;
+            if (APOS === 0)
+                AREP = [];
+            const fieldLabels = [];
+            for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    let fieldLabel;
+                    if (typeof recordItem.label === 'string') {
+                        fieldLabel = recordItem.label;
+                    }
+                    else {
+                        if (!parseInner(recordItem.label.default, true))
+                            return APOS = APOSₒ, false;
+                        assert(ATYP === STRING);
+                        APOS -= 1;
+                        fieldLabel = AREP[APOS];
+                    }
+                    if (fieldLabels.includes(fieldLabel))
+                        return APOS = APOSₒ, false;
+                    if (!parseInner(recordItem.expr.default, true))
+                        return APOS = APOSₒ, false;
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldLabel;
+                    AREP[APOS++] = fieldValue;
+                    fieldLabels.push(fieldLabel);
+                }
+                else {
+                    const apos = APOS;
+                    if (!recordItem.expr.default())
+                        return APOS = APOSₒ, false;
+                    for (let i = apos; i < APOS; i += 2) {
+                        const fieldLabel = AREP[i];
+                        if (fieldLabels.includes(fieldLabel))
+                            return APOS = APOSₒ, false;
+                        fieldLabels.push(fieldLabel);
+                    }
+                }
+            }
+            ATYP = RECORD;
+            return true;
+        },
         print: function RCD() {
             if (ATYP !== RECORD)
                 return false;
@@ -201,6 +258,8 @@ function isModule(_x) {
     return true;
 }
 function createRule(mode, impls) {
+    if (!impls.parse)
+        throw new Error(`parse method is missing`);
     if (!impls.parseDefault)
         throw new Error(`parseDefault method is missing`);
     if (!impls.print)
@@ -818,9 +877,19 @@ function create(mode) {
             if (term()) return true;
             return false;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            if (add.default()) return true;
+            if (sub.default()) return true;
+            if (term.default()) return true;
+            return false;
+        },
         print: 'parse',
-        printDefault: 'parse',
+        printDefault: () => {
+            if (add.default()) return true;
+            if (sub.default()) return true;
+            if (term.default()) return true;
+            return false;
+        },
     });
 
     // RecordExpression
@@ -870,14 +939,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!add_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!term.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!add_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!term.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression
@@ -957,14 +1040,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!sub_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!term.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!sub_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!term.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression
@@ -1008,9 +1105,19 @@ function create(mode) {
             if (factor()) return true;
             return false;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            if (mul.default()) return true;
+            if (div.default()) return true;
+            if (factor.default()) return true;
+            return false;
+        },
         print: 'parse',
-        printDefault: 'parse',
+        printDefault: () => {
+            if (mul.default()) return true;
+            if (div.default()) return true;
+            if (factor.default()) return true;
+            return false;
+        },
     });
 
     // RecordExpression
@@ -1118,14 +1225,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!mul_sub5.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!mul_sub5.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression
@@ -1205,14 +1326,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!div_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!div_sub3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression
@@ -1340,9 +1475,23 @@ function create(mode) {
             if (factor_sub18()) return true;
             return false;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            if (factor_sub1.default()) return true;
+            if (factor_sub6.default()) return true;
+            if (factor_sub10.default()) return true;
+            if (factor_sub14.default()) return true;
+            if (factor_sub18.default()) return true;
+            return false;
+        },
         print: 'parse',
-        printDefault: 'parse',
+        printDefault: () => {
+            if (factor_sub1.default()) return true;
+            if (factor_sub6.default()) return true;
+            if (factor_sub10.default()) return true;
+            if (factor_sub14.default()) return true;
+            if (factor_sub18.default()) return true;
+            return false;
+        },
     });
 
     // SequenceExpression
@@ -1359,7 +1508,18 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub4.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!floatString.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
@@ -1367,7 +1527,13 @@ function create(mode) {
             if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub4.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!floatString.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // NotExpression
@@ -1379,14 +1545,25 @@ function create(mode) {
             ATYP = NOTHING;
             return result;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub3.default();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP = NOTHING;
+            return result;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             const result = !factor_sub3();
             backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return result;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub3.default();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return result;
+        },
     });
 
     // StringLiteral
@@ -1430,14 +1607,25 @@ function create(mode) {
             ATYP = NOTHING;
             return result;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub5.default();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP = NOTHING;
+            return result;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             const result = !factor_sub5();
             backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return result;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub5.default();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return result;
+        },
     });
 
     // StringLiteral
@@ -1484,14 +1672,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub7.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub8.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub7.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub8.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // StringLiteral
@@ -1544,14 +1746,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub11.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub12.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub11.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub12.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // StringLiteral
@@ -1604,14 +1820,28 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub15.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub16.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub15.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub16.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression
@@ -1669,7 +1899,18 @@ function create(mode) {
             ATYP |= seqType;
             return true;
         },
-        parseDefault: 'parse',
+        parseDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub19.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!expr.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub20.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
         print: () => {
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
@@ -1677,7 +1918,13 @@ function create(mode) {
             if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
             return true;
         },
-        printDefault: 'print',
+        printDefault: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub19.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!expr.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub20.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
     });
 
     // ByteExpression

@@ -41,10 +41,12 @@ const allAstVersions = [100, 200, 300, 400];
 
 
 const allNodeKinds = [
+    'AbstractExpression',
     'ApplicationExpression',
     'Binding',
     'BooleanLiteral',
     'ByteExpression',
+    'ConcreteExpression',
     'Field',
     'FunctionExpression',
     'FunctionParameter',

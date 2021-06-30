@@ -30,7 +30,7 @@ ModulePatternName
 
     3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
 
-    4   UnaryExpression                 !a   ?a   *a(b)   ?a.b   !{a: b}
+    4   UnaryExpression                 !a   ?a   *a(b)   ?a.b   !{a: b}   abstract a   concrete b
 
     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
@@ -103,11 +103,15 @@ SequenceExpression
     }
 
 UnaryExpression
-    = op:(("!" / "?" / "*")   __)?   expression:Precedence5OrHigher
+    = op:((ABSTRACT / CONCRETE / "!" / "?" / "*")   __)?   expression:Precedence5OrHigher
     {
         if (!op) return expression;
-        if (op[0] === '!') return {kind: 'NotExpression', expression};
-        return {kind: 'QuantifiedExpression', expression, quantifier: op[0]};
+        switch (op[0]) {
+          case 'abstract': return {kind: 'AbstractExpression', expression};
+          case 'concrete': return {kind: 'ConcreteExpression', expression};
+          case '!': return {kind: 'NotExpression', expression};
+          default: return {kind: 'QuantifiedExpression', expression, quantifier: op[0]};
+        }
     }
 
 ApplicationOrMemberExpression
@@ -274,8 +278,10 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = !"__"   [a-zA-Z_]
 IDENTIFIER_PART         = [a-zA-Z_0-9]
-RESERVED 'RESERVED'     = AS / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
+RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
+ABSTRACT                = "abstract"   !IDENTIFIER_PART   { return text(); }
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
+CONCRETE                = "concrete"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }

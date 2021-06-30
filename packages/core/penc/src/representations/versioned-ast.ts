@@ -50,9 +50,11 @@ export type Node<V extends Version = Version> =
 
 /** Union of all node types that represent PEN expressions. */
 export type Expression<V extends Version = Version> =
+    | AbstractExpression<V>
     | ApplicationExpression<V>
     | BooleanLiteral
     | ByteExpression<V>
+    | ConcreteExpression<V>
     | FunctionExpression<V>
     | FunctionParameter
     | Identifier
@@ -104,6 +106,12 @@ export type Other<V extends Version = Version> =
 ;
 
 
+export interface AbstractExpression<V extends Version> {
+    kind: 'AbstractExpression';
+    expression: Subexpression<V>;
+}
+
+
 export interface ApplicationExpression<V extends Version> {
     kind: 'ApplicationExpression';
     function: Subexpression<V>;
@@ -127,6 +135,12 @@ export type ByteExpression<V extends Version> = {
         default: number;
     };
 }[V extends 100 ? 100 : 'rest']
+
+
+export interface ConcreteExpression<V extends Version> {
+    kind: 'ConcreteExpression';
+    expression: Subexpression<V>;
+}
 
 
 export interface Field<V extends Version> {

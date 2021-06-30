@@ -34,10 +34,12 @@ export function makeNodeMapper<V extends Version, Vᐟ extends Version>() {
 function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
     return (n: Node): Node => {
         switch (n.kind) {
+            case 'AbstractExpression': return {...n, expression: rec(n.expression)};
             case 'ApplicationExpression': return {...n, function: rec(n.function), argument: rec(n.argument)};
             case 'Binding': return {...n, left: rec(n.left), right: rec(n.right)};
             case 'BooleanLiteral': return n;
             case 'ByteExpression': return n;
+            case 'ConcreteExpression': return {...n, expression: rec(n.expression)};
             case 'Field': return {...n, label: typeof n.label === 'string' ? n.label : rec(n.label), expression: rec(n.expression)};
             case 'FunctionExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'FunctionParameter': return n;

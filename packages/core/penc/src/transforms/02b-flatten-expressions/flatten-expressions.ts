@@ -47,9 +47,11 @@ export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
                 }
         
                 switch (e.kind) {
+                    case 'AbstractExpression': return setV(e, {expression: ref(e.expression)});
                     case 'ApplicationExpression': return setV(e, {function: ref(e.function), argument: ref(e.argument)});
                     case 'BooleanLiteral': return setV(e);
                     case 'ByteExpression': return setV(e);
+                    case 'ConcreteExpression': return setV(e, {expression: ref(e.expression)});
                     // TODO: special... should not be encountered here, since each funexpr would be a separate context
                     case 'FunctionExpression': return setV(e); // TODO: explain... already in the right form
                     case 'FunctionParameter': return setV(e);

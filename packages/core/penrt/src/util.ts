@@ -20,7 +20,7 @@ interface StaticOptions {mode: 'parse' | 'print'; }
 type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
-    default: () => boolean;
+    default: Rule;
     constant?: {value: unknown}; // compile-time constant
 }
 interface Func {
@@ -41,6 +41,7 @@ function isModule(_x: PenVal): _x is Module {
     return true; // TODO: implement runtime check
 }
 function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
+    if (!impls.parse) throw new Error(`parse method is missing`);
     if (!impls.parseDefault) throw new Error(`parseDefault method is missing`);
     if (!impls.print) throw new Error(`print method is missing`);
     if (!impls.printDefault) throw new Error(`printDefault method is missing`);
@@ -48,7 +49,7 @@ function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
     let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
     if (dflt === 'print') dflt = impls.print;
     if (dflt === 'parse') dflt = impls.parse;
-    return Object.assign(impl, {default: Object.assign(dflt, {default: dflt})});
+    return Object.assign(impl, {default: Object.assign(dflt as any, {default: dflt})});
 }
 interface RuleImpls {
     parse: () => boolean;

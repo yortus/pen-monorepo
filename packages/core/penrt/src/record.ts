@@ -45,7 +45,48 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
             return true;
         },
 
-        parseDefault: 'parse',
+        parseDefault: function RCD() {
+            const APOSₒ = APOS;
+            if (APOS === 0) AREP = [];
+            const fieldLabels: string[] = [];
+            for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    // Parse field label
+                    let fieldLabel: string;
+                    if (typeof recordItem.label === 'string') {
+                        // Statically-labelled field
+                        fieldLabel = recordItem.label;
+                    }
+                    else {
+                        // Dynamically-labelled field
+                        if (!parseInner(recordItem.label.default, true)) return APOS = APOSₒ, false;
+                        assert(ATYP === STRING);
+                        APOS -= 1;
+                        fieldLabel = AREP[APOS] as string;
+                    }
+                    if (fieldLabels.includes(fieldLabel)) return APOS = APOSₒ, false;
+
+                    // Parse field value
+                    if (!parseInner(recordItem.expr.default, true)) return APOS = APOSₒ, false;
+
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldLabel;
+                    AREP[APOS++] = fieldValue;
+                    fieldLabels.push(fieldLabel); // keep track of field labels to support duplicate detection
+                }
+                else /* item.kind === 'Splice' */ {
+                    const apos = APOS;
+                    if (!recordItem.expr.default()) return APOS = APOSₒ, false;
+                    for (let i = apos; i < APOS; i += 2) {
+                        const fieldLabel = AREP[i] as string;
+                        if (fieldLabels.includes(fieldLabel)) return APOS = APOSₒ, false;
+                        fieldLabels.push(fieldLabel);
+                    }
+                }
+            }
+            ATYP = RECORD;
+            return true;
+        },
 
         print: function RCD() {
             if (ATYP !== RECORD) return false;

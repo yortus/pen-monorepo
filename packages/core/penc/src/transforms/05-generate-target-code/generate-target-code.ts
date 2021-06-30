@@ -205,6 +205,19 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
     // Emit all other expressions (these are all definitely Rules).
     emit.down(1).text(`const ${name} = createRule(mode, {`).indent();
     switch (expr.kind) {
+        case 'AbstractExpression': {
+            emit.down(1).text(`parse: () => ${expr.expression.name}.default(),`);
+            emit.down(1).text(`parseDefault: 'parse',`);
+            emit.down(1).text(`print: () => {`).indent();
+            emit.down(1).text(`const CPOSₒ = CPOS;`);
+            emit.down(1).text(`const result = ${expr.expression.name}();`);
+            emit.down(1).text(`CPOS = CPOSₒ;`);
+            emit.down(1).text(`return result;`);
+            emit.dedent().down(1).text(`},`);
+            emit.down(1).text(`printDefault: () => true,`);
+            break;
+        }
+
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
@@ -263,16 +276,29 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
+        case 'ConcreteExpression': {
+            emit.down(1).text(`parse: () => {`).indent();
+            emit.down(1).text(`const [APOSₒ, AREPₒ, ATYPₒ] = [APOS, AREP, ATYP];`);
+            emit.down(1).text(`const result = ${expr.expression.name}();`);
+            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, ATYP = ATYPₒ;`);
+            emit.down(1).text(`return result;`);
+            emit.dedent().down(1).text(`},`);
+            emit.down(1).text(`parseDefault: () => true,`);
+            emit.down(1).text(`print: () => ${expr.expression.name}.default(),`);
+            emit.down(1).text(`printDefault: 'print',`);
+            break;
+        }
+
         case 'NotExpression': {
-            for (const mode of ['parse', 'print'] as const) {
+            for (const mode of ['parse', 'parseDefault', 'print', 'printDefault'] as const) {
+                const hasInput = mode === 'parse' || mode === 'print';
                 emit.down(1).text(`${mode}: () => {`).indent();
                 emit.down(1).text(`const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;`);
-                emit.down(1).text(`const result = !${expr.expression.name}();`);
+                emit.down(1).text(`const result = !${expr.expression.name}${hasInput ? '' : '.default'}();`);
                 emit.down(1).text(`backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
-                if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
+                if (mode.startsWith('parse')) emit.down(1).text(`ATYP = NOTHING;`);
                 emit.down(1).text(`return result;`);
                 emit.dedent().down(1).text(`},`);
-                emit.down(1).text(`${mode}Default: '${mode}',`);
             }
             break;
         }
@@ -313,34 +339,46 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             }
             emit.down(1).text('return false;');
             emit.dedent().down(1).text('},');
-            emit.down(1).text(`parseDefault: 'parse',`);
+            emit.down(1).text(`parseDefault: () => {`).indent();
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (${exprVars[i]}.default()) return true;`);
+            }
+            emit.down(1).text('return false;');
+            emit.dedent().down(1).text('},');
             emit.down(1).text(`print: 'parse',`);
-            emit.down(1).text(`printDefault: 'parse',`);
+            emit.down(1).text(`printDefault: () => {`).indent();
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (${exprVars[i]}.default()) return true;`);
+            }
+            emit.down(1).text('return false;');
+            emit.dedent().down(1).text('},');
             break;
         }
 
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
-            emit.down(1).text(`parse: () => {`).indent();
-            emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
-            emit.down(1).text('let seqType = NOTHING;');
-            emit.down(1).text('ATYP = NOTHING;');
-            for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
-                emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
+            for (const mode of ['parse', 'parseDefault'] as const) {
+                emit.down(1).text(`${mode}: () => {`).indent();
+                emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+                emit.down(1).text('let seqType = NOTHING;');
+                emit.down(1).text('ATYP = NOTHING;');
+                for (let i = 0; i < arity; ++i) {
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                    emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
+                }
+                emit.down(1).text('return true;');
+                emit.dedent().down(1).text('},');
             }
-            emit.down(1).text('return true;');
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`parseDefault: 'parse',`);
-            emit.down(1).text(`print: () => {`).indent();
-            emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
-            for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+            for (const mode of ['print', 'printDefault'] as const) {
+                emit.down(1).text(`${mode}: () => {`).indent();
+                emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+                for (let i = 0; i < arity; ++i) {
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'print' ? '' : '.default'}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                }
+                emit.down(1).text('return true;');
+                emit.dedent().down(1).text('},');
             }
-            emit.down(1).text('return true;');
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`printDefault: 'print',`);
             break;
         }
 
