@@ -14,11 +14,8 @@ function unicode({mode}: StaticOptions): Func {
         const pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
         const regex = RegExp(pattern, 'i');
 
-        if (mode === 'parse') {
-            return function UNI() {
-
-                // TODO: respect VOID AREP/CREP...
-
+        return createRule(mode, {
+            parse: function UNI() {
                 const [APOSₒ, CPOSₒ] = savepoint();
                 const LEN = CREP.length;
                 const EOS = '';
@@ -39,11 +36,14 @@ function unicode({mode}: StaticOptions): Func {
                 // tslint:disable-next-line: no-eval
                 emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
                 return true;
-            };
-        }
+            },
 
-        else /* mode === 'print' */ {
-            return function UNI() {
+            parseDefault: function UNI() {
+                // TODO: generate default value...
+                throw new Error('Not implemented');
+            },
+
+            print: function UNI() {
 
                 // TODO: respect VOID AREP/CREP...
 
@@ -73,7 +73,12 @@ function unicode({mode}: StaticOptions): Func {
                 CREP.write(s, CPOS);
                 CPOS += s.length;
                 return true;
-            };
-        }
+            },
+
+            printDefault: function UNI() {
+                // TODO: generate default value...
+                throw new Error('Not implemented');
+            },
+        });
     };
 }

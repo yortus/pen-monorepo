@@ -8,8 +8,8 @@ function intString({mode}: StaticOptions): Func {
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
-        if (mode === 'parse') {
-            return function ISTR() {
+        return createRule(mode, {
+            parse: function ISTR() {
                 let num = 0;
                 const [APOSₒ, CPOSₒ] = savepoint();
 
@@ -53,11 +53,14 @@ function intString({mode}: StaticOptions): Func {
                 // Success
                 emitScalar(num);
                 return true;
-            };
-        }
+            },
 
-        else /* mode === 'print' */ {
-            return function ISTR() {
+            parseDefault: function ISTR() {
+                // TODO: implement...
+                throw new Error('Not implemented');
+            },
+
+            print: function ISTR() {
                 const digits = [] as number[];
                 if (ATYP !== SCALAR) return false;
                 let num = AREP[APOS] as number;
@@ -91,8 +94,13 @@ function intString({mode}: StaticOptions): Func {
                     CREP[CPOS++] = digits[i];
                 }
                 return true;
-            };
-        }
+            },
+
+            printDefault: function ISTR() {
+                // TODO: implement...
+                throw new Error('Not implemented');
+            },
+        });
     };
 }
 

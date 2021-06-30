@@ -1,8 +1,8 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
 function floatString({mode}: StaticOptions): Rule {
-    if (mode === 'parse') {
-        return function FSTR() {
+    return createRule(mode, {
+        parse: function FSTR() {
             let num = 0;
             const [APOSₒ, CPOSₒ] = savepoint();
             const LEN = CREP.length;
@@ -72,11 +72,14 @@ function floatString({mode}: StaticOptions): Rule {
             // Success
             emitScalar(num);
             return true;
-        };
-    }
+        },
 
-    else /* mode === 'print' */ {
-        return function FSTR() {
+        parseDefault: function FSTR() {
+            // TODO: implement...
+            throw new Error('Not implemented');
+        },
+
+        print: function FSTR() {
             let out = '0';
             // Ensure N is a number.
             if (ATYP !== SCALAR) return false;
@@ -91,8 +94,13 @@ function floatString({mode}: StaticOptions): Rule {
             // Success
             CPOS += CREP.write(out, CPOS, undefined, 'utf8');
             return true;
-        };
-    }
+        },
+
+        printDefault: function FSTR() {
+            // TODO: implement...
+            throw new Error('Not implemented');
+        },
+    });
 }
 
 

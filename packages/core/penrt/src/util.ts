@@ -20,6 +20,7 @@ interface StaticOptions {mode: 'parse' | 'print'; }
 type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
+    default: () => boolean;
     constant?: {value: unknown}; // compile-time constant
 }
 interface Func {
@@ -39,7 +40,25 @@ function isFunc(_x: PenVal): _x is Func {
 function isModule(_x: PenVal): _x is Module {
     return true; // TODO: implement runtime check
 }
+function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
 
+    // TODO: remove these when emit is fixed to always cover them:
+    impls.parseDefault ??= () => {throw new Error(`FIX_EMIT`)};
+    impls.print ??= () => {throw new Error(`FIX_EMIT`)};
+    impls.printDefault ??= () => {throw new Error(`FIX_EMIT`)};
+
+    const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
+    let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
+    if (dflt === 'print') dflt = impls.print;
+    if (dflt === 'parse') dflt = impls.parse;
+    return Object.assign(impl, {default: Object.assign(dflt, {default: dflt})});
+}
+interface RuleImpls {
+    parse: () => boolean;
+    parseDefault: (() => boolean) | 'parse';
+    print: (() => boolean) | 'parse';
+    printDefault: (() => boolean) | 'parse' | 'print';
+}
 
 
 

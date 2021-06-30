@@ -25,131 +25,143 @@ module.exports = {
 
 // ------------------------------ Runtime ------------------------------
 "use strict";
-function parseList(listItems) {
-    return function LST() {
-        const [APOSₒ, CPOSₒ] = savepoint();
-        if (APOS === 0)
-            AREP = [];
-        for (const listItem of listItems) {
-            if (listItem.kind === 'Element') {
-                if (!parseInner(listItem.expr, true))
-                    return backtrack(APOSₒ, CPOSₒ);
-            }
-            else {
-                if (!listItem.expr())
-                    return backtrack(APOSₒ, CPOSₒ);
-            }
-        }
-        ATYP = LIST;
-        return true;
-    };
-}
-function printList(listItems) {
-    return function LST() {
-        if (ATYP !== LIST)
-            return false;
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        for (const listItem of listItems) {
-            if (listItem.kind === 'Element') {
-                if (!printInner(listItem.expr, true))
-                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            }
-            else {
-                ATYP = LIST;
-                if (!listItem.expr())
-                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            }
-        }
-        return true;
-    };
-}
-function parseRecord(recordItems) {
-    return function RCD() {
-        const [APOSₒ, CPOSₒ] = savepoint();
-        if (APOS === 0)
-            AREP = [];
-        const fieldLabels = [];
-        for (const recordItem of recordItems) {
-            if (recordItem.kind === 'Field') {
-                let fieldLabel;
-                if (typeof recordItem.label === 'string') {
-                    fieldLabel = recordItem.label;
+function createList(mode, listItems) {
+    return createRule(mode, {
+        parse: function LST() {
+            const [APOSₒ, CPOSₒ] = savepoint();
+            if (APOS === 0)
+                AREP = [];
+            for (const listItem of listItems) {
+                if (listItem.kind === 'Element') {
+                    if (!parseInner(listItem.expr, true))
+                        return backtrack(APOSₒ, CPOSₒ);
                 }
                 else {
-                    if (!parseInner(recordItem.label, true))
+                    if (!listItem.expr())
                         return backtrack(APOSₒ, CPOSₒ);
-                    assert(ATYP === STRING);
-                    APOS -= 1;
-                    fieldLabel = AREP[APOS];
-                }
-                if (fieldLabels.includes(fieldLabel))
-                    return backtrack(APOSₒ, CPOSₒ);
-                if (!parseInner(recordItem.expr, true))
-                    return backtrack(APOSₒ, CPOSₒ);
-                const fieldValue = AREP[--APOS];
-                AREP[APOS++] = fieldLabel;
-                AREP[APOS++] = fieldValue;
-                fieldLabels.push(fieldLabel);
-            }
-            else {
-                const apos = APOS;
-                if (!recordItem.expr())
-                    return backtrack(APOSₒ, CPOSₒ);
-                for (let i = apos; i < APOS; i += 2) {
-                    const fieldLabel = AREP[i];
-                    if (fieldLabels.includes(fieldLabel))
-                        return backtrack(APOSₒ, CPOSₒ);
-                    fieldLabels.push(fieldLabel);
                 }
             }
-        }
-        ATYP = RECORD;
-        return true;
-    };
+            ATYP = LIST;
+            return true;
+        },
+        parseDefault: function LST() {
+            throw new Error('FIX_EMIT');
+        },
+        print: function LST() {
+            if (ATYP !== LIST)
+                return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            for (const listItem of listItems) {
+                if (listItem.kind === 'Element') {
+                    if (!printInner(listItem.expr, true))
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+                else {
+                    ATYP = LIST;
+                    if (!listItem.expr())
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                }
+            }
+            return true;
+        },
+        printDefault: function LST() {
+            throw new Error('FIX_EMIT');
+        },
+    });
 }
-function printRecord(recordItems) {
-    return function RCD() {
-        if (ATYP !== RECORD)
-            return false;
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const propList = AREP;
-        const propCount = AREP.length;
-        let bitmask = APOS;
-        outerLoop: for (const recordItem of recordItems) {
-            if (recordItem.kind === 'Field') {
-                for (let i = 0; i < propCount; ++i) {
-                    let propName = propList[i << 1];
-                    const propBit = 1 << i;
-                    if ((bitmask & propBit) !== 0)
-                        continue;
-                    if (typeof recordItem.label !== 'string') {
-                        APOS = i << 1;
-                        if (!printInner(recordItem.label, true))
-                            continue;
+function createRecord(mode, recordItems) {
+    return createRule(mode, {
+        parse: function RCD() {
+            const [APOSₒ, CPOSₒ] = savepoint();
+            if (APOS === 0)
+                AREP = [];
+            const fieldLabels = [];
+            for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    let fieldLabel;
+                    if (typeof recordItem.label === 'string') {
+                        fieldLabel = recordItem.label;
                     }
                     else {
-                        if (propName !== recordItem.label)
-                            continue;
+                        if (!parseInner(recordItem.label, true))
+                            return backtrack(APOSₒ, CPOSₒ);
+                        assert(ATYP === STRING);
+                        APOS -= 1;
+                        fieldLabel = AREP[APOS];
                     }
-                    APOS = (i << 1) + 1;
-                    if (!printInner(recordItem.expr, true))
-                        continue;
-                    bitmask += propBit;
-                    continue outerLoop;
+                    if (fieldLabels.includes(fieldLabel))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    if (!parseInner(recordItem.expr, true))
+                        return backtrack(APOSₒ, CPOSₒ);
+                    const fieldValue = AREP[--APOS];
+                    AREP[APOS++] = fieldLabel;
+                    AREP[APOS++] = fieldValue;
+                    fieldLabels.push(fieldLabel);
                 }
-                return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                else {
+                    const apos = APOS;
+                    if (!recordItem.expr())
+                        return backtrack(APOSₒ, CPOSₒ);
+                    for (let i = apos; i < APOS; i += 2) {
+                        const fieldLabel = AREP[i];
+                        if (fieldLabels.includes(fieldLabel))
+                            return backtrack(APOSₒ, CPOSₒ);
+                        fieldLabels.push(fieldLabel);
+                    }
+                }
             }
-            else {
-                APOS = bitmask;
-                ATYP = RECORD;
-                if (!recordItem.expr())
+            ATYP = RECORD;
+            return true;
+        },
+        parseDefault: function LST() {
+            throw new Error('FIX_EMIT');
+        },
+        print: function RCD() {
+            if (ATYP !== RECORD)
+                return false;
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const propList = AREP;
+            const propCount = AREP.length;
+            let bitmask = APOS;
+            outerLoop: for (const recordItem of recordItems) {
+                if (recordItem.kind === 'Field') {
+                    for (let i = 0; i < propCount; ++i) {
+                        let propName = propList[i << 1];
+                        const propBit = 1 << i;
+                        if ((bitmask & propBit) !== 0)
+                            continue;
+                        if (typeof recordItem.label !== 'string') {
+                            APOS = i << 1;
+                            if (!printInner(recordItem.label, true))
+                                continue;
+                        }
+                        else {
+                            if (propName !== recordItem.label)
+                                continue;
+                        }
+                        APOS = (i << 1) + 1;
+                        if (!printInner(recordItem.expr, true))
+                            continue;
+                        bitmask += propBit;
+                        continue outerLoop;
+                    }
                     return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                bitmask = APOS;
+                }
+                else {
+                    APOS = bitmask;
+                    ATYP = RECORD;
+                    if (!recordItem.expr())
+                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    bitmask = APOS;
+                }
             }
-        }
-        APOS = bitmask;
-        return true;
-    };
+            APOS = bitmask;
+            return true;
+        },
+        printDefault: function LST() {
+            throw new Error('FIX_EMIT');
+        },
+    });
 }
 function isRule(_x) {
     return true;
@@ -159,6 +171,19 @@ function isFunc(_x) {
 }
 function isModule(_x) {
     return true;
+}
+function createRule(mode, impls) {
+    var _a, _b, _c;
+    (_a = impls.parseDefault) !== null && _a !== void 0 ? _a : (impls.parseDefault = () => { throw new Error(`FIX_EMIT`); });
+    (_b = impls.print) !== null && _b !== void 0 ? _b : (impls.print = () => { throw new Error(`FIX_EMIT`); });
+    (_c = impls.printDefault) !== null && _c !== void 0 ? _c : (impls.printDefault = () => { throw new Error(`FIX_EMIT`); });
+    const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
+    let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
+    if (dflt === 'print')
+        dflt = impls.print;
+    if (dflt === 'parse')
+        dflt = impls.parse;
+    return Object.assign(impl, { default: Object.assign(dflt, { default: dflt }) });
 }
 let AREP;
 let APOS;
@@ -316,8 +341,8 @@ const extensions = {
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
         function floatString({ mode }) {
-            if (mode === 'parse') {
-                return function FSTR() {
+            return createRule(mode, {
+                parse: function FSTR() {
                     let num = 0;
                     const [APOSₒ, CPOSₒ] = savepoint();
                     const LEN = CREP.length;
@@ -383,10 +408,12 @@ const extensions = {
                     // Success
                     emitScalar(num);
                     return true;
-                };
-            }
-            else /* mode === 'print' */ {
-                return function FSTR() {
+                },
+                parseDefault: function FSTR() {
+                    // TODO: implement...
+                    throw new Error('Not implemented');
+                },
+                print: function FSTR() {
                     let out = '0';
                     // Ensure N is a number.
                     if (ATYP !== SCALAR)
@@ -401,8 +428,12 @@ const extensions = {
                     // Success
                     CPOS += CREP.write(out, CPOS, undefined, 'utf8');
                     return true;
-                };
-            }
+                },
+                printDefault: function FSTR() {
+                    // TODO: implement...
+                    throw new Error('Not implemented');
+                },
+            });
         }
         // These constants are used by the floatString rule.
         const PLUS_SIGN = '+'.charCodeAt(0);
@@ -422,8 +453,8 @@ const extensions = {
                 const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
-                if (mode === 'parse') {
-                    return function ISTR() {
+                return createRule(mode, {
+                    parse: function ISTR() {
                         let num = 0;
                         const [APOSₒ, CPOSₒ] = savepoint();
                         // Parse optional leading '-' sign (if signed)...
@@ -463,10 +494,12 @@ const extensions = {
                         // Success
                         emitScalar(num);
                         return true;
-                    };
-                }
-                else /* mode === 'print' */ {
-                    return function ISTR() {
+                    },
+                    parseDefault: function ISTR() {
+                        // TODO: implement...
+                        throw new Error('Not implemented');
+                    },
+                    print: function ISTR() {
                         const digits = [];
                         if (ATYP !== SCALAR)
                             return false;
@@ -502,8 +535,12 @@ const extensions = {
                             CREP[CPOS++] = digits[i];
                         }
                         return true;
-                    };
-                }
+                    },
+                    printDefault: function ISTR() {
+                        // TODO: implement...
+                        throw new Error('Not implemented');
+                    },
+                });
             };
         }
         // TODO: doc...
@@ -540,8 +577,8 @@ const extensions = {
             return function MEM_function(expr) {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
-                if (mode === 'parse') {
-                    return function MEM() {
+                return createRule(mode, {
+                    parse: function MEM() {
                         const APOSₒ = APOS, CPOSₒ = CPOS;
                         // Check whether the memo table already has an entry for the given initial state.
                         let memos2 = memos.get(CREP);
@@ -617,12 +654,12 @@ const extensions = {
                             AREP[APOS++] = memo.OREPᐞ[i];
                         }
                         return memo.result;
-                    };
-                }
-                else /* mode === 'print' */ {
-                    // TODO: the below function is exact copypasta of the above function, with AREP/APOS <-> CREP/CPOS
-                    // This is a case where it would be better to have IREP/IPOS+OREP/OPOS and have just one function here.
-                    return function MEM() {
+                    },
+                    parseDefault: function MEM() {
+                        // TODO: implement...
+                        throw new Error('Not implemented');
+                    },
+                    print: function MEM() {
                         const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                         // Check whether the memo table already has an entry for the given initial state.
                         let memos2 = memos.get(AREP);
@@ -696,8 +733,12 @@ const extensions = {
                         CPOS += memo.OREPᐞ.copy(CREP, CPOS);
                         ATYP = memo.ATYPᐟ;
                         return memo.result;
-                    };
-                }
+                    },
+                    printDefault: function MEM() {
+                        // TODO: implement...
+                        throw new Error('Not implemented');
+                    },
+                });
             };
         }
         return {floatString, intString, memoise};
@@ -707,333 +748,599 @@ const extensions = {
 
 
 
-// ------------------------------ PARSE ------------------------------
-const parse = (() => {
+// ------------------------------ Program ------------------------------
+const parse = create('parse');
+const print = create('print');
+function create(mode) {
 
     // Intrinsic
-    const floatString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode: 'parse'});
-    const intString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode: 'parse'});
-    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'parse'});
+    const floatString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode});
+    const intString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode});
+    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode});
 
     // Identifier
-    const memoise = (arg) => {
-        return memoise_2(arg);
-    };
+    const memoise = (arg) => memoise_2(arg);
 
     // Identifier
-    const floatString = (arg) => {
-        return floatString_2(arg);
-    };
+    const floatString = (arg) => floatString_2(arg);
 
     // Identifier
-    const intString = (arg) => {
-        return intString_2(arg);
-    };
+    const intString = (arg) => intString_2(arg);
 
     // Identifier
-    const start_2 = (arg) => {
-        return expr(arg);
-    };
+    const start_2 = (arg) => expr(arg);
 
     // ApplicationExpression
     const expr = lazy(() => memoise(expr_sub1));
 
     // SelectionExpression
-    const expr_sub1 = () => {
-        if (add()) return true;
-        if (sub()) return true;
-        if (term()) return true;
-        return false;
-    };
+    const expr_sub1 = createRule(mode, {
+        parse: () => {
+            if (add()) return true;
+            if (sub()) return true;
+            if (term()) return true;
+            return false;
+        },
+        parseDefault: 'parse',
+        print: 'parse',
+        printDefault: 'parse',
+    });
 
     // RecordExpression
-    const add = lazy(() => parseRecord([
+    const add = lazy(() => createRecord(mode, [
         {kind: 'Field', label: "type", expr: add_sub1},
         {kind: 'Field', label: "lhs", expr: expr},
         {kind: 'Field', label: "rhs", expr: add_sub2},
     ]));
 
     // StringLiteral
-    const add_sub1 = () => {
-        emitBytes(0x61, 0x64, 0x64);
-        return true;
-    };
+    const add_sub1 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x61, 0x64, 0x64);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x61) return false;
+            if (AREP[APOS + 1] !== 0x64) return false;
+            if (AREP[APOS + 2] !== 0x64) return false;
+            APOS += 3;
+            return true;
+        },
+    });
     add_sub1.constant = {value: "add"};
 
     // SequenceExpression
-    const add_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const add_sub2 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const add_sub3 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x2b) return false;
-        CPOS += 1;
-        return true;
-    };
+    const add_sub3 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2b) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x2b;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // RecordExpression
-    const sub = lazy(() => parseRecord([
+    const sub = lazy(() => createRecord(mode, [
         {kind: 'Field', label: "type", expr: sub_sub1},
         {kind: 'Field', label: "lhs", expr: expr},
         {kind: 'Field', label: "rhs", expr: sub_sub2},
     ]));
 
     // StringLiteral
-    const sub_sub1 = () => {
-        emitBytes(0x73, 0x75, 0x62);
-        return true;
-    };
+    const sub_sub1 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x73, 0x75, 0x62);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x73) return false;
+            if (AREP[APOS + 1] !== 0x75) return false;
+            if (AREP[APOS + 2] !== 0x62) return false;
+            APOS += 3;
+            return true;
+        },
+    });
     sub_sub1.constant = {value: "sub"};
 
     // SequenceExpression
-    const sub_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const sub_sub2 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const sub_sub3 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x2d) return false;
-        CPOS += 1;
-        return true;
-    };
+    const sub_sub3 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2d) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x2d;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // ApplicationExpression
     const term = lazy(() => memoise(term_sub1));
 
     // SelectionExpression
-    const term_sub1 = () => {
-        if (mul()) return true;
-        if (div()) return true;
-        if (factor()) return true;
-        return false;
-    };
+    const term_sub1 = createRule(mode, {
+        parse: () => {
+            if (mul()) return true;
+            if (div()) return true;
+            if (factor()) return true;
+            return false;
+        },
+        parseDefault: 'parse',
+        print: 'parse',
+        printDefault: 'parse',
+    });
 
     // RecordExpression
-    const mul = lazy(() => parseRecord([
+    const mul = lazy(() => createRecord(mode, [
         {kind: 'Field', label: mul_sub1, expr: mul_sub2},
         {kind: 'Field', label: "lhs", expr: term},
         {kind: 'Field', label: mul_sub3, expr: mul_sub4},
     ]));
 
     // StringLiteral
-    const mul_sub1 = () => {
-        emitBytes(0x74, 0x79, 0x70, 0x65);
-        return true;
-    };
+    const mul_sub1 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x74, 0x79, 0x70, 0x65);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 4 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x74) return false;
+            if (AREP[APOS + 1] !== 0x79) return false;
+            if (AREP[APOS + 2] !== 0x70) return false;
+            if (AREP[APOS + 3] !== 0x65) return false;
+            APOS += 4;
+            return true;
+        },
+    });
     mul_sub1.constant = {value: "type"};
 
     // StringLiteral
-    const mul_sub2 = () => {
-        emitBytes(0x6d, 0x75, 0x6c);
-        return true;
-    };
+    const mul_sub2 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x6d, 0x75, 0x6c);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x6d) return false;
+            if (AREP[APOS + 1] !== 0x75) return false;
+            if (AREP[APOS + 2] !== 0x6c) return false;
+            APOS += 3;
+            return true;
+        },
+    });
     mul_sub2.constant = {value: "mul"};
 
     // StringLiteral
-    const mul_sub3 = () => {
-        emitBytes(0x72, 0x68, 0x73);
-        return true;
-    };
+    const mul_sub3 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x72, 0x68, 0x73);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x72) return false;
+            if (AREP[APOS + 1] !== 0x68) return false;
+            if (AREP[APOS + 2] !== 0x73) return false;
+            APOS += 3;
+            return true;
+        },
+    });
     mul_sub3.constant = {value: "rhs"};
 
     // SequenceExpression
-    const mul_sub4 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const mul_sub4 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const mul_sub5 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x2a) return false;
-        CPOS += 1;
-        return true;
-    };
+    const mul_sub5 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2a) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x2a;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // RecordExpression
-    const div = lazy(() => parseRecord([
+    const div = lazy(() => createRecord(mode, [
         {kind: 'Field', label: "type", expr: div_sub1},
         {kind: 'Field', label: "lhs", expr: term},
         {kind: 'Field', label: "rhs", expr: div_sub2},
     ]));
 
     // StringLiteral
-    const div_sub1 = () => {
-        emitBytes(0x64, 0x69, 0x76);
-        return true;
-    };
+    const div_sub1 = createRule(mode, {
+        parse: function STR() {
+            emitBytes(0x64, 0x69, 0x76);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 3 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x64) return false;
+            if (AREP[APOS + 1] !== 0x69) return false;
+            if (AREP[APOS + 2] !== 0x76) return false;
+            APOS += 3;
+            return true;
+        },
+    });
     div_sub1.constant = {value: "div"};
 
     // SequenceExpression
-    const div_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const div_sub2 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const div_sub3 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x2f) return false;
-        CPOS += 1;
-        return true;
-    };
+    const div_sub3 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x2f) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x2f;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // NumericLiteral
-    const base = () => {
-        emitScalar(16);
-        return true;
-    };
+    const base = createRule(mode, {
+        parse: function LIT() {
+            emitScalar(16);
+            return true;
+        },
+        parseDefault: 'parse',
+        print: function LIT() {
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 16) return false;
+            APOS += 1;
+            return true;
+        },
+        printDefault: function LIT() { return true; },
+    });
     base.constant = {value: 16};
 
     // BooleanLiteral
-    const signed = () => {
-        emitScalar(false);
-        return true;
-    };
+    const signed = createRule(mode, {
+        parse: function LIT() {
+            emitScalar(false);
+            return true;
+        },
+        parseDefault: 'parse',
+        print: function LIT() {
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
+            return true;
+        },
+        printDefault: function LIT() { return true; },
+    });
     signed.constant = {value: false};
 
     // NumericLiteral
-    const base_2 = () => {
-        emitScalar(2);
-        return true;
-    };
+    const base_2 = createRule(mode, {
+        parse: function LIT() {
+            emitScalar(2);
+            return true;
+        },
+        parseDefault: 'parse',
+        print: function LIT() {
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== 2) return false;
+            APOS += 1;
+            return true;
+        },
+        printDefault: function LIT() { return true; },
+    });
     base_2.constant = {value: 2};
 
     // BooleanLiteral
-    const signed_2 = () => {
-        emitScalar(false);
-        return true;
-    };
+    const signed_2 = createRule(mode, {
+        parse: function LIT() {
+            emitScalar(false);
+            return true;
+        },
+        parseDefault: 'parse',
+        print: function LIT() {
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
+            return true;
+        },
+        printDefault: function LIT() { return true; },
+    });
     signed_2.constant = {value: false};
 
     // BooleanLiteral
-    const signed_3 = () => {
-        emitScalar(false);
-        return true;
-    };
+    const signed_3 = createRule(mode, {
+        parse: function LIT() {
+            emitScalar(false);
+            return true;
+        },
+        parseDefault: 'parse',
+        print: function LIT() {
+            if (ATYP !== SCALAR) return false;
+            if (AREP[APOS] !== false) return false;
+            APOS += 1;
+            return true;
+        },
+        printDefault: function LIT() { return true; },
+    });
     signed_3.constant = {value: false};
 
     // SelectionExpression
-    const factor = () => {
-        if (factor_sub1()) return true;
-        if (factor_sub6()) return true;
-        if (factor_sub10()) return true;
-        if (factor_sub14()) return true;
-        if (factor_sub18()) return true;
-        return false;
-    };
+    const factor = createRule(mode, {
+        parse: () => {
+            if (factor_sub1()) return true;
+            if (factor_sub6()) return true;
+            if (factor_sub10()) return true;
+            if (factor_sub14()) return true;
+            if (factor_sub18()) return true;
+            return false;
+        },
+        parseDefault: 'parse',
+        print: 'parse',
+        printDefault: 'parse',
+    });
 
     // SequenceExpression
-    const factor_sub1 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const factor_sub1 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // NotExpression
-    const factor_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !factor_sub3();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP = NOTHING;
-        return result;
-    };
+    const factor_sub2 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub3();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP = NOTHING;
+            return result;
+        },
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub3();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return result;
+        },
+    });
 
     // StringLiteral
-    const factor_sub3 = () => {
-        if (CPOS + 2 > CREP.length) return false;
-        if (CREP[CPOS + 0] !== 0x30) return false;
-        if (CREP[CPOS + 1] !== 0x78) return false;
-        CPOS += 2;
-        emitBytes(0x30, 0x78);
-        return true;
-    };
+    const factor_sub3 = createRule(mode, {
+        parse: function STR() {
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x30) return false;
+            if (CREP[CPOS + 1] !== 0x78) return false;
+            CPOS += 2;
+            emitBytes(0x30, 0x78);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x30) return false;
+            if (AREP[APOS + 1] !== 0x78) return false;
+            APOS += 2;
+            CREP[CPOS++] = 0x30;
+            CREP[CPOS++] = 0x78;
+            return true;
+        },
+    });
     factor_sub3.constant = {value: "0x"};
 
     // NotExpression
-    const factor_sub4 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !factor_sub5();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP = NOTHING;
-        return result;
-    };
+    const factor_sub4 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub5();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP = NOTHING;
+            return result;
+        },
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const result = !factor_sub5();
+            backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return result;
+        },
+    });
 
     // StringLiteral
-    const factor_sub5 = () => {
-        if (CPOS + 2 > CREP.length) return false;
-        if (CREP[CPOS + 0] !== 0x30) return false;
-        if (CREP[CPOS + 1] !== 0x62) return false;
-        CPOS += 2;
-        emitBytes(0x30, 0x62);
-        return true;
-    };
+    const factor_sub5 = createRule(mode, {
+        parse: function STR() {
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x30) return false;
+            if (CREP[CPOS + 1] !== 0x62) return false;
+            CPOS += 2;
+            emitBytes(0x30, 0x62);
+            return true;
+        },
+        print: function STR() {
+            if (ATYP !== STRING) return false;
+            if (APOS + 2 > AREP.length) return false;
+            if (AREP[APOS + 0] !== 0x30) return false;
+            if (AREP[APOS + 1] !== 0x62) return false;
+            APOS += 2;
+            CREP[CPOS++] = 0x30;
+            CREP[CPOS++] = 0x62;
+            return true;
+        },
+    });
     factor_sub5.constant = {value: "0b"};
 
     // SequenceExpression
-    const factor_sub6 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const factor_sub6 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // StringLiteral
-    const factor_sub7 = () => {
-        if (CPOS + 2 > CREP.length) return false;
-        if (CREP[CPOS + 0] !== 0x30) return false;
-        if (CREP[CPOS + 1] !== 0x78) return false;
-        CPOS += 2;
-        return true;
-    };
+    const factor_sub7 = createRule(mode, {
+        parse: function STR() {
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x30) return false;
+            if (CREP[CPOS + 1] !== 0x78) return false;
+            CPOS += 2;
+            return true;
+        },
+        print: function STR() {
+            CREP[CPOS++] = 0x30;
+            CREP[CPOS++] = 0x78;
+            return true;
+        },
+    });
     factor_sub7.constant = {value: "0x"};
 
     // ApplicationExpression
@@ -1049,25 +1356,42 @@ const parse = (() => {
     };
 
     // SequenceExpression
-    const factor_sub10 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const factor_sub10 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // StringLiteral
-    const factor_sub11 = () => {
-        if (CPOS + 2 > CREP.length) return false;
-        if (CREP[CPOS + 0] !== 0x30) return false;
-        if (CREP[CPOS + 1] !== 0x62) return false;
-        CPOS += 2;
-        return true;
-    };
+    const factor_sub11 = createRule(mode, {
+        parse: function STR() {
+            if (CPOS + 2 > CREP.length) return false;
+            if (CREP[CPOS + 0] !== 0x30) return false;
+            if (CREP[CPOS + 1] !== 0x62) return false;
+            CPOS += 2;
+            return true;
+        },
+        print: function STR() {
+            CREP[CPOS++] = 0x30;
+            CREP[CPOS++] = 0x62;
+            return true;
+        },
+    });
     factor_sub11.constant = {value: "0b"};
 
     // ApplicationExpression
@@ -1083,26 +1407,44 @@ const parse = (() => {
     };
 
     // SequenceExpression
-    const factor_sub14 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const factor_sub14 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const factor_sub15 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x69) return false;
-        CPOS += 1;
-        return true;
-    };
+    const factor_sub15 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x69) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x69;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // ApplicationExpression
     const factor_sub16 = lazy(() => intString(factor_sub17));
@@ -1116,38 +1458,65 @@ const parse = (() => {
     };
 
     // SequenceExpression
-    const factor_sub18 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        let seqType = NOTHING;
-        ATYP = NOTHING;
-        if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        seqType |= ATYP;
-        if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        ATYP |= seqType;
-        return true;
-    };
+    const factor_sub18 = createRule(mode, {
+        parse: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            let seqType = NOTHING;
+            ATYP = NOTHING;
+            if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            seqType |= ATYP;
+            if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            ATYP |= seqType;
+            return true;
+        },
+        parseDefault: 'parse',
+        print: () => {
+            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            return true;
+        },
+        printDefault: 'print',
+    });
 
     // ByteExpression
-    const factor_sub19 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x28) return false;
-        CPOS += 1;
-        return true;
-    };
+    const factor_sub19 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x28) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x28;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // ByteExpression
-    const factor_sub20 = () => {
-        let cc;
-        if (CPOS >= CREP.length) return false;
-        cc = CREP[CPOS];
-        if (cc !== 0x29) return false;
-        CPOS += 1;
-        return true;
-    };
+    const factor_sub20 = createRule(mode, {
+        parse: function BYT() {
+            let cc;
+            if (CPOS >= CREP.length) return false;
+            cc = CREP[CPOS];
+            if (cc !== 0x29) return false;
+            CPOS += 1;
+            return true;
+        },
+        print: function BYT() {
+            let cc;
+            cc = 0x29;
+            CREP[CPOS++] = cc;
+            return true;
+        },
+    });
 
     // Module
     const Ɱ_math = (member) => {
@@ -1167,12 +1536,6 @@ const parse = (() => {
         }
     };
 
-    // Intrinsic
-
-    // Intrinsic
-
-    // Intrinsic
-
     // Module
     const Ɱ_std = (member) => {
         switch (member) {
@@ -1184,473 +1547,4 @@ const parse = (() => {
     };
 
     return start_2;
-})();
-
-
-
-
-// ------------------------------ PRINT ------------------------------
-const print = (() => {
-
-    // Intrinsic
-    const floatString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode: 'print'});
-    const intString_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode: 'print'});
-    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode: 'print'});
-
-    // Identifier
-    const memoise = (arg) => {
-        return memoise_2(arg);
-    };
-
-    // Identifier
-    const floatString = (arg) => {
-        return floatString_2(arg);
-    };
-
-    // Identifier
-    const intString = (arg) => {
-        return intString_2(arg);
-    };
-
-    // Identifier
-    const start_2 = (arg) => {
-        return expr(arg);
-    };
-
-    // ApplicationExpression
-    const expr = lazy(() => memoise(expr_sub1));
-
-    // SelectionExpression
-    const expr_sub1 = () => {
-        if (add()) return true;
-        if (sub()) return true;
-        if (term()) return true;
-        return false;
-    };
-
-    // RecordExpression
-    const add = lazy(() => printRecord([
-        {kind: 'Field', label: "type", expr: add_sub1},
-        {kind: 'Field', label: "lhs", expr: expr},
-        {kind: 'Field', label: "rhs", expr: add_sub2},
-    ]));
-
-    // StringLiteral
-    const add_sub1 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 3 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x61) return false;
-        if (AREP[APOS + 1] !== 0x64) return false;
-        if (AREP[APOS + 2] !== 0x64) return false;
-        APOS += 3;
-        return true;
-    };
-    add_sub1.constant = {value: "add"};
-
-    // SequenceExpression
-    const add_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!add_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const add_sub3 = () => {
-        let cc;
-        cc = 0x2b;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // RecordExpression
-    const sub = lazy(() => printRecord([
-        {kind: 'Field', label: "type", expr: sub_sub1},
-        {kind: 'Field', label: "lhs", expr: expr},
-        {kind: 'Field', label: "rhs", expr: sub_sub2},
-    ]));
-
-    // StringLiteral
-    const sub_sub1 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 3 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x73) return false;
-        if (AREP[APOS + 1] !== 0x75) return false;
-        if (AREP[APOS + 2] !== 0x62) return false;
-        APOS += 3;
-        return true;
-    };
-    sub_sub1.constant = {value: "sub"};
-
-    // SequenceExpression
-    const sub_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!sub_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!term()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const sub_sub3 = () => {
-        let cc;
-        cc = 0x2d;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // ApplicationExpression
-    const term = lazy(() => memoise(term_sub1));
-
-    // SelectionExpression
-    const term_sub1 = () => {
-        if (mul()) return true;
-        if (div()) return true;
-        if (factor()) return true;
-        return false;
-    };
-
-    // RecordExpression
-    const mul = lazy(() => printRecord([
-        {kind: 'Field', label: mul_sub1, expr: mul_sub2},
-        {kind: 'Field', label: "lhs", expr: term},
-        {kind: 'Field', label: mul_sub3, expr: mul_sub4},
-    ]));
-
-    // StringLiteral
-    const mul_sub1 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 4 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x74) return false;
-        if (AREP[APOS + 1] !== 0x79) return false;
-        if (AREP[APOS + 2] !== 0x70) return false;
-        if (AREP[APOS + 3] !== 0x65) return false;
-        APOS += 4;
-        return true;
-    };
-    mul_sub1.constant = {value: "type"};
-
-    // StringLiteral
-    const mul_sub2 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 3 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x6d) return false;
-        if (AREP[APOS + 1] !== 0x75) return false;
-        if (AREP[APOS + 2] !== 0x6c) return false;
-        APOS += 3;
-        return true;
-    };
-    mul_sub2.constant = {value: "mul"};
-
-    // StringLiteral
-    const mul_sub3 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 3 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x72) return false;
-        if (AREP[APOS + 1] !== 0x68) return false;
-        if (AREP[APOS + 2] !== 0x73) return false;
-        APOS += 3;
-        return true;
-    };
-    mul_sub3.constant = {value: "rhs"};
-
-    // SequenceExpression
-    const mul_sub4 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!mul_sub5()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const mul_sub5 = () => {
-        let cc;
-        cc = 0x2a;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // RecordExpression
-    const div = lazy(() => printRecord([
-        {kind: 'Field', label: "type", expr: div_sub1},
-        {kind: 'Field', label: "lhs", expr: term},
-        {kind: 'Field', label: "rhs", expr: div_sub2},
-    ]));
-
-    // StringLiteral
-    const div_sub1 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 3 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x64) return false;
-        if (AREP[APOS + 1] !== 0x69) return false;
-        if (AREP[APOS + 2] !== 0x76) return false;
-        APOS += 3;
-        return true;
-    };
-    div_sub1.constant = {value: "div"};
-
-    // SequenceExpression
-    const div_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!div_sub3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const div_sub3 = () => {
-        let cc;
-        cc = 0x2f;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // NumericLiteral
-    const base = () => {
-        if (ATYP !== SCALAR) return false;
-        if (AREP[APOS] !== 16) return false;
-        APOS += 1;
-        return true;
-    };
-    base.constant = {value: 16};
-
-    // BooleanLiteral
-    const signed = () => {
-        if (ATYP !== SCALAR) return false;
-        if (AREP[APOS] !== false) return false;
-        APOS += 1;
-        return true;
-    };
-    signed.constant = {value: false};
-
-    // NumericLiteral
-    const base_2 = () => {
-        if (ATYP !== SCALAR) return false;
-        if (AREP[APOS] !== 2) return false;
-        APOS += 1;
-        return true;
-    };
-    base_2.constant = {value: 2};
-
-    // BooleanLiteral
-    const signed_2 = () => {
-        if (ATYP !== SCALAR) return false;
-        if (AREP[APOS] !== false) return false;
-        APOS += 1;
-        return true;
-    };
-    signed_2.constant = {value: false};
-
-    // BooleanLiteral
-    const signed_3 = () => {
-        if (ATYP !== SCALAR) return false;
-        if (AREP[APOS] !== false) return false;
-        APOS += 1;
-        return true;
-    };
-    signed_3.constant = {value: false};
-
-    // SelectionExpression
-    const factor = () => {
-        if (factor_sub1()) return true;
-        if (factor_sub6()) return true;
-        if (factor_sub10()) return true;
-        if (factor_sub14()) return true;
-        if (factor_sub18()) return true;
-        return false;
-    };
-
-    // SequenceExpression
-    const factor_sub1 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!factor_sub2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor_sub4()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!floatString()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // NotExpression
-    const factor_sub2 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !factor_sub3();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return result;
-    };
-
-    // StringLiteral
-    const factor_sub3 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 2 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x30) return false;
-        if (AREP[APOS + 1] !== 0x78) return false;
-        APOS += 2;
-        CREP[CPOS++] = 0x30;
-        CREP[CPOS++] = 0x78;
-        return true;
-    };
-    factor_sub3.constant = {value: "0x"};
-
-    // NotExpression
-    const factor_sub4 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        const result = !factor_sub5();
-        backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return result;
-    };
-
-    // StringLiteral
-    const factor_sub5 = () => {
-        if (ATYP !== STRING) return false;
-        if (APOS + 2 > AREP.length) return false;
-        if (AREP[APOS + 0] !== 0x30) return false;
-        if (AREP[APOS + 1] !== 0x62) return false;
-        APOS += 2;
-        CREP[CPOS++] = 0x30;
-        CREP[CPOS++] = 0x62;
-        return true;
-    };
-    factor_sub5.constant = {value: "0b"};
-
-    // SequenceExpression
-    const factor_sub6 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!factor_sub7()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor_sub8()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // StringLiteral
-    const factor_sub7 = () => {
-        CREP[CPOS++] = 0x30;
-        CREP[CPOS++] = 0x78;
-        return true;
-    };
-    factor_sub7.constant = {value: "0x"};
-
-    // ApplicationExpression
-    const factor_sub8 = lazy(() => intString(factor_sub9));
-
-    // Module
-    const factor_sub9 = (member) => {
-        switch (member) {
-            case 'base': return base;
-            case 'signed': return signed;
-            default: return undefined;
-        }
-    };
-
-    // SequenceExpression
-    const factor_sub10 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!factor_sub11()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor_sub12()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // StringLiteral
-    const factor_sub11 = () => {
-        CREP[CPOS++] = 0x30;
-        CREP[CPOS++] = 0x62;
-        return true;
-    };
-    factor_sub11.constant = {value: "0b"};
-
-    // ApplicationExpression
-    const factor_sub12 = lazy(() => intString(factor_sub13));
-
-    // Module
-    const factor_sub13 = (member) => {
-        switch (member) {
-            case 'base': return base_2;
-            case 'signed': return signed_2;
-            default: return undefined;
-        }
-    };
-
-    // SequenceExpression
-    const factor_sub14 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!factor_sub15()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor_sub16()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const factor_sub15 = () => {
-        let cc;
-        cc = 0x69;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // ApplicationExpression
-    const factor_sub16 = lazy(() => intString(factor_sub17));
-
-    // Module
-    const factor_sub17 = (member) => {
-        switch (member) {
-            case 'signed': return signed_3;
-            default: return undefined;
-        }
-    };
-
-    // SequenceExpression
-    const factor_sub18 = () => {
-        const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-        if (!factor_sub19()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        if (!factor_sub20()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-        return true;
-    };
-
-    // ByteExpression
-    const factor_sub19 = () => {
-        let cc;
-        cc = 0x28;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // ByteExpression
-    const factor_sub20 = () => {
-        let cc;
-        cc = 0x29;
-        CREP[CPOS++] = cc;
-        return true;
-    };
-
-    // Module
-    const Ɱ_math = (member) => {
-        switch (member) {
-            case 'memoise': return memoise;
-            case 'floatString': return floatString;
-            case 'intString': return intString;
-            case 'start': return start_2;
-            case 'expr': return expr;
-            case 'add': return add;
-            case 'sub': return sub;
-            case 'term': return term;
-            case 'mul': return mul;
-            case 'div': return div;
-            case 'factor': return factor;
-            default: return undefined;
-        }
-    };
-
-    // Intrinsic
-
-    // Intrinsic
-
-    // Intrinsic
-
-    // Module
-    const Ɱ_std = (member) => {
-        switch (member) {
-            case 'floatString': return floatString_2;
-            case 'intString': return intString_2;
-            case 'memoise': return memoise_2;
-            default: return undefined;
-        }
-    };
-
-    return start_2;
-})();
+}

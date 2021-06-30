@@ -13,8 +13,8 @@ function memoise({mode}: StaticOptions): Func {
             }>
         >();
 
-        if (mode === 'parse') {
-            return function MEM() {
+        return createRule(mode, {
+            parse: function MEM() {
                 const APOSₒ = APOS, CPOSₒ = CPOS;
 
                 // Check whether the memo table already has an entry for the given initial state.
@@ -94,12 +94,14 @@ function memoise({mode}: StaticOptions): Func {
                     AREP[APOS++] = memo.OREPᐞ[i];
                 }
                 return memo.result;
-            };
-        }
-        else /* mode === 'print' */{
-            // TODO: the below function is exact copypasta of the above function, with AREP/APOS <-> CREP/CPOS
-            // This is a case where it would be better to have IREP/IPOS+OREP/OPOS and have just one function here.
-            return function MEM() {
+            },
+
+            parseDefault: function MEM() {
+                // TODO: implement...
+                throw new Error('Not implemented');
+            },
+    
+            print: function MEM() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
 
                 // Check whether the memo table already has an entry for the given initial state.
@@ -177,7 +179,12 @@ function memoise({mode}: StaticOptions): Func {
                 CPOS += (memo.OREPᐞ as Buffer).copy(CREP, CPOS);
                 ATYP = memo.ATYPᐟ;
                 return memo.result;
-            };
-        }
+            },
+
+            printDefault: function MEM() {
+                // TODO: implement...
+                throw new Error('Not implemented');
+            },
+        });
     };
 }
