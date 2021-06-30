@@ -172,7 +172,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
     // Emit for list and record expressions (they need a lazy wrapper).
     switch (expr.kind) {
-        case 'ListExpression': {
+            // TODO: parseDefault, printDefault... (in list.ts)
+            case 'ListExpression': {
             emit.down(1).text(`const ${name} = lazy(() => createList(mode, [`).indent();
             for (const item of expr.items) {
                 emit.down(1).text(`{kind: '${item.kind === 'Splice' ? 'Splice' : 'Element'}', `);
@@ -185,6 +186,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'RecordExpression': {
+            // TODO: parseDefault, printDefault... (in record.ts)
             emit.down(1).text(`const ${name} = lazy(() => createRecord(mode, [`).indent();
             for (const item of expr.items) {
                 emit.down(1).text(`{kind: '${item.kind}', `);
@@ -212,16 +214,13 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.down(1).text(`emitScalar(${JSON.stringify(expr.value)});`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('},');
-
             emit.down(1).text(`parseDefault: 'parse',`);
-
             emit.down(1).text(`print: function LIT() {`).indent();
             emit.down(1).text(`if (ATYP !== SCALAR) return false;`);
             emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
             emit.down(1).text(`APOS += 1;`);
             emit.down(1).text(`return true;`);
             emit.dedent().down(1).text('},');
-
             emit.down(1).text(`printDefault: function LIT() { return true; },`);
             break;
         }
@@ -268,6 +267,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'NotExpression': {
+            // TODO: parseDefault, printDefault...
             for (const mode of ['parse', 'print'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
                 emit.down(1).text(`const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;`);
@@ -281,6 +281,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'QuantifiedExpression': {
+            // TODO: parseDefault, printDefault...
             for (const mode of ['parse', 'print'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
                 if (expr.quantifier === '?') {
@@ -323,52 +324,60 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
-            for (const mode of ['parse', 'print'] as const) {
-                emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
-                if (mode === 'parse') {
-                    emit.down(1).text('let seqType = NOTHING;');
-                    emit.down(1).text('ATYP = NOTHING;');
-                }
-                for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
-                    if (mode === 'parse') emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
-                }
-                emit.down(1).text('return true;');
-                emit.dedent().down(1).text('},');
-                emit.down(1).text(`${mode}Default: '${mode}',`);
+            emit.down(1).text(`parse: () => {`).indent();
+            emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+            emit.down(1).text('let seqType = NOTHING;');
+            emit.down(1).text('ATYP = NOTHING;');
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
             }
+            emit.down(1).text('return true;');
+            emit.dedent().down(1).text('},');
+            emit.down(1).text(`parseDefault: 'parse',`);
+            emit.down(1).text(`print: () => {`).indent();
+            emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+            for (let i = 0; i < arity; ++i) {
+                emit.down(1).text(`if (!${exprVars[i]}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+            }
+            emit.down(1).text('return true;');
+            emit.dedent().down(1).text('},');
+            emit.down(1).text(`printDefault: 'print',`);
             break;
         }
 
         case 'StringLiteral': {
-            for (const mode of ['parse', 'print'] as const) {
-                const hasInput = mode === 'parse' ? expr.subkind !== 'A' : expr.subkind !== 'C';
-                const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : expr.subkind !== 'A';
-                const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
-                const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
-                emit.down(1).text(`${mode}: function STR() {`).indent();
-                if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
-                    emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
-                    for (let i = 0; i < bytes.length; ++i) {
-                        emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
-                    }
-                    emit.down(1).text(`${IPOS} += ${bytes.length};`);
+            // TODO: parseDefault, printDefault...
+            const bytes = [...Buffer.from(expr.value).values()].map(b => `0x${b.toString(16).padStart(2, '0')}`);
+            emit.down(1).text(`parse: function STR() {`).indent();
+            if (expr.subkind !== 'A') {
+                emit.down(1).text(`if (CPOS + ${bytes.length} > CREP.length) return false;`);
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`if (CREP[CPOS + ${i}] !== ${bytes[i]}) return false;`);
                 }
-                if (hasOutput) {
-                    if (mode === 'parse') {
-                        emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
-                    }
-                    else {
-                        for (let i = 0; i < bytes.length; ++i) {
-                            emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
-                        }
-                    }
-                }
-                emit.down(1).text(`return true;`);
-                emit.dedent().down(1).text('},');
+                emit.down(1).text(`CPOS += ${bytes.length};`);
             }
+            if (expr.subkind !== 'C') {
+                emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
+            }
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('},');
+            emit.down(1).text(`print: function STR() {`).indent();
+            if ( expr.subkind !== 'C') {
+                emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                emit.down(1).text(`if (APOS + ${bytes.length} > AREP.length) return false;`);
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`if (AREP[APOS + ${i}] !== ${bytes[i]}) return false;`);
+                }
+                emit.down(1).text(`APOS += ${bytes.length};`);
+            }
+            if (expr.subkind !== 'A') {
+                for (let i = 0; i < bytes.length; ++i) {
+                    emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                }
+            }
+            emit.down(1).text(`return true;`);
+            emit.dedent().down(1).text('},');
             break;
         }
 
