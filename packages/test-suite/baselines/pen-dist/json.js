@@ -409,7 +409,7 @@ function assert(value) {
 }
 function lazy(init) {
     let f;
-    return function LAZ(arg) {
+    return Object.assign(function LAZ(arg) {
         try {
             return f(arg);
         }
@@ -419,7 +419,17 @@ function lazy(init) {
             f = init();
             return f(arg);
         }
-    };
+    }, {
+        default(arg) {
+            try {
+                return f.default(arg);
+            }
+            catch (err) {
+                f = init();
+                return f.default(arg);
+            }
+        }
+    });
 }
 
 
@@ -946,10 +956,16 @@ function create(mode) {
     const unicode_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/experiments.pen.js"].unicode({mode});
 
     // Identifier
-    const floatString = (arg) => floatString_2(arg);
+    const floatString = global.Object.assign(
+        arg => floatString_2(arg),
+        {default: arg => floatString_2.default(arg)},
+    );
 
     // Identifier
-    const unicode = (arg) => unicode_2(arg);
+    const unicode = global.Object.assign(
+        arg => unicode_2(arg),
+        {default: arg => unicode_2.default(arg)},
+    );
 
     // SequenceExpression
     const start_2 = createRule(mode, {
@@ -2001,7 +2017,10 @@ function create(mode) {
     const Elements_sub3 = lazy(() => createList(mode, []));
 
     // Identifier
-    const Number = (arg) => floatString(arg);
+    const Number = global.Object.assign(
+        arg => floatString(arg),
+        {default: arg => floatString.default(arg)},
+    );
 
     // SequenceExpression
     const String = createRule(mode, {

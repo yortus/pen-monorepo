@@ -148,7 +148,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'FunctionParameter':
         case 'Identifier': {
-            emit.down(1).text(`const ${name} = (arg) => ${expr.name}(arg);`);
+            emit.down(1).text(`const ${name} = global.Object.assign(`).indent();
+            emit.down(1).text(`arg => ${expr.name}(arg),`);
+            emit.down(1).text(`{default: arg => ${expr.name}.default(arg)},`);
+            emit.dedent().down(1).text(`);`);
             return;
         }
 

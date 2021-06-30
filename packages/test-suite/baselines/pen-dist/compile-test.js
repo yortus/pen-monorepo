@@ -409,7 +409,7 @@ function assert(value) {
 }
 function lazy(init) {
     let f;
-    return function LAZ(arg) {
+    return Object.assign(function LAZ(arg) {
         try {
             return f(arg);
         }
@@ -419,7 +419,17 @@ function lazy(init) {
             f = init();
             return f(arg);
         }
-    };
+    }, {
+        default(arg) {
+            try {
+                return f.default(arg);
+            }
+            catch (err) {
+                f = init();
+                return f.default(arg);
+            }
+        }
+    });
 }
 
 
@@ -544,7 +554,10 @@ function create(mode) {
     const FUN = (ℙ2) => {
 
         // FunctionParameter
-        const x_2 = (arg) => ℙ2(arg);
+        const x_2 = global.Object.assign(
+            arg => ℙ2(arg),
+            {default: arg => ℙ2.default(arg)},
+        );
 
         // SequenceExpression
         const 𝕊2 = createRule(mode, {
@@ -831,7 +844,10 @@ function create(mode) {
     });
 
     // Identifier
-    const a_3 = (arg) => x(arg);
+    const a_3 = global.Object.assign(
+        arg => x(arg),
+        {default: arg => x.default(arg)},
+    );
 
     // SelectionExpression
     const start_2 = createRule(mode, {

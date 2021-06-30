@@ -228,14 +228,28 @@ function assert(value: unknown): asserts value {
 
 function lazy(init: () => (arg: unknown) => unknown) {
     let f: (arg: unknown) => unknown;
-    return function LAZ(arg: unknown) {
-        try {
-            return f(arg);
+    return Object.assign(
+        function LAZ(arg: unknown) {
+            try {
+                return f(arg);
+            }
+            catch (err) {
+                if (!(err instanceof TypeError) || !err.message.includes('f is not a function')) throw err;
+                f = init();
+                return f(arg);
+            }
+        },
+        {
+            default(arg: unknown) {
+                try {
+                    return (f as any).default(arg);
+                }
+                catch (err) {
+                    // TODO: restore??? if (!(err instanceof TypeError) || !err.message.includes('is not a function')) throw err;
+                    f = init();
+                    return (f as any).default(arg);
+                }
+            }
         }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('f is not a function')) throw err;
-            f = init();
-            return f(arg);
-        }
-    }
+    );
 }

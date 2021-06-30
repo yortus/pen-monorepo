@@ -409,7 +409,7 @@ function assert(value) {
 }
 function lazy(init) {
     let f;
-    return function LAZ(arg) {
+    return Object.assign(function LAZ(arg) {
         try {
             return f(arg);
         }
@@ -419,7 +419,17 @@ function lazy(init) {
             f = init();
             return f(arg);
         }
-    };
+    }, {
+        default(arg) {
+            try {
+                return f.default(arg);
+            }
+            catch (err) {
+                f = init();
+                return f.default(arg);
+            }
+        }
+    });
 }
 
 
@@ -438,16 +448,28 @@ const print = create('print');
 function create(mode) {
 
     // Identifier
-    const foo = (arg) => f(arg);
+    const foo = global.Object.assign(
+        arg => f(arg),
+        {default: arg => f.default(arg)},
+    );
 
     // Identifier
-    const bar = (arg) => b_2(arg);
+    const bar = global.Object.assign(
+        arg => b_2(arg),
+        {default: arg => b_2.default(arg)},
+    );
 
     // Identifier
-    const baz = (arg) => baz_2(arg);
+    const baz = global.Object.assign(
+        arg => baz_2(arg),
+        {default: arg => baz_2.default(arg)},
+    );
 
     // Identifier
-    const start_2 = (arg) => result(arg);
+    const start_2 = global.Object.assign(
+        arg => result(arg),
+        {default: arg => result.default(arg)},
+    );
 
     // ByteExpression
     const digit = createRule(mode, {
@@ -758,10 +780,16 @@ function create(mode) {
     };
 
     // Identifier
-    const r2 = (arg) => rec(arg);
+    const r2 = global.Object.assign(
+        arg => rec(arg),
+        {default: arg => rec.default(arg)},
+    );
 
     // Identifier
-    const r2d = (arg) => d(arg);
+    const r2d = global.Object.assign(
+        arg => d(arg),
+        {default: arg => d.default(arg)},
+    );
 
     // Module
     const Ɱ_import_graph = (member) => {
@@ -921,10 +949,16 @@ function create(mode) {
     };
 
     // Identifier
-    const util1 = (arg) => Ɱ_util1(arg);
+    const util1 = global.Object.assign(
+        arg => Ɱ_util1(arg),
+        {default: arg => Ɱ_util1.default(arg)},
+    );
 
     // Identifier
-    const util2 = (arg) => Ɱ_util2(arg);
+    const util2 = global.Object.assign(
+        arg => Ɱ_util2(arg),
+        {default: arg => Ɱ_util2.default(arg)},
+    );
 
     // Module
     const util = (member) => {

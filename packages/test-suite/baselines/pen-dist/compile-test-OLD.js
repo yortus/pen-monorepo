@@ -409,7 +409,7 @@ function assert(value) {
 }
 function lazy(init) {
     let f;
-    return function LAZ(arg) {
+    return Object.assign(function LAZ(arg) {
         try {
             return f(arg);
         }
@@ -419,7 +419,17 @@ function lazy(init) {
             f = init();
             return f(arg);
         }
-    };
+    }, {
+        default(arg) {
+            try {
+                return f.default(arg);
+            }
+            catch (err) {
+                f = init();
+                return f.default(arg);
+            }
+        }
+    });
 }
 
 
@@ -438,7 +448,10 @@ const print = create('print');
 function create(mode) {
 
     // Identifier
-    const start_2 = (arg) => foo(arg);
+    const start_2 = global.Object.assign(
+        arg => foo(arg),
+        {default: arg => foo.default(arg)},
+    );
 
     // StringLiteral
     const foo = createRule(mode, {
@@ -513,7 +526,10 @@ function create(mode) {
     bar.constant = {value: "bar"};
 
     // Identifier
-    const a = (arg) => b(arg);
+    const a = global.Object.assign(
+        arg => b(arg),
+        {default: arg => b.default(arg)},
+    );
 
     // Module
     const expr = (member) => {
@@ -526,7 +542,10 @@ function create(mode) {
     };
 
     // Identifier
-    const a_2 = (arg) => b(arg);
+    const a_2 = global.Object.assign(
+        arg => b(arg),
+        {default: arg => b.default(arg)},
+    );
 
     // StringLiteral
     const b = createRule(mode, {
@@ -826,7 +845,10 @@ function create(mode) {
     };
 
     // Identifier
-    const refC = (arg) => c1(arg);
+    const refC = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // StringLiteral
     const c1 = createRule(mode, {
@@ -893,13 +915,22 @@ function create(mode) {
     c2.constant = {value: "c2"};
 
     // Identifier
-    const ref1 = (arg) => c1(arg);
+    const ref1 = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // Identifier
-    const ref2 = (arg) => c1(arg);
+    const ref2 = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // Identifier
-    const ref3 = (arg) => c1(arg);
+    const ref3 = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // Module
     const c = (member) => {
@@ -914,10 +945,16 @@ function create(mode) {
     };
 
     // Identifier
-    const ref5 = (arg) => c1(arg);
+    const ref5 = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // Identifier
-    const ref6 = (arg) => c1(arg);
+    const ref6 = global.Object.assign(
+        arg => c1(arg),
+        {default: arg => c1.default(arg)},
+    );
 
     // Module
     const defC = (member) => {

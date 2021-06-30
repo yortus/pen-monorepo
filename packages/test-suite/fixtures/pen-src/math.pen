@@ -14,24 +14,27 @@ start = expr
 
 
 expr = memoise(add | sub | term)
-add = {type = abstract "add", lhs = expr, rhs = concrete "+" term}
-sub = {type = abstract "sub", lhs = expr, rhs = concrete "-" term}
+add = {type = ab"add", lhs = expr, rhs = co"+" term}
+sub = {type = ab"sub", lhs = expr, rhs = co"-" term}
 
 term = memoise(mul | div | factor)
 mul = { // test both dynamic and static field names exprs
-    [abstract "type"] = abstract "mul",
+    [ab"type"] = ab"mul",
     lhs = term,
-    [abstract "rhs"] = concrete "*" factor
+    [ab"rhs"] = co"*" factor
 }
 div = {
-    type = abstract "div",
+    type = (ab)"div",
     lhs = term,
-    rhs = concrete "/" factor,
+    rhs = (co)"/" factor,
 }
 
 factor =
     | !"0x"   !"0b"   floatString
-    | concrete "0x"   intString(base=16 signed=false)
-    | concrete "0b"   intString(base=2 signed=false)
-    | concrete "i"    intString(signed=false)
-    | concrete "("   expr   concrete ")"
+    | (co)"0x"   intString(base=16 signed=false)
+    | (co)"0b"   intString(base=2 signed=false)
+    | (co)"i"    intString(signed=false)
+    | (co)"("   expr   (co)")"
+
+ab = expr -> abstract expr
+co = expr -> concrete expr
