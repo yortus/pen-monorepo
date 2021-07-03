@@ -48,7 +48,7 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
         },
 
         printDefault: function LST() {
-            if (ATYP !== LIST) return false;
+            if (ATYP !== LIST && ATYP !== NOTHING) return false;
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {

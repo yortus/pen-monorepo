@@ -34,7 +34,7 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`CPOS = 0;`);
     emit.down(1).text(`AREP = [];`);
     emit.down(1).text(`APOS = 0;`);
-    emit.down(1).text(`if (!parseInner(parse, true)) throw new Error('parse failed');`);
+    emit.down(1).text(`if (!parseInner(parse, false)) throw new Error('parse failed');`);
     emit.down(1).text(`if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');`);
     emit.down(1).text(`return AREP[0];`);
     emit.dedent().down(1).text(`},`);
@@ -44,7 +44,7 @@ export function generateTargetCode(program: Program) {
     emit.down(1).text(`APOS = 0;`);
     emit.down(1).text(`CREP = buf || Buffer.alloc(2 ** 22); // 4MB`);
     emit.down(1).text(`CPOS = 0;`);
-    emit.down(1).text(`if (!printInner(print, true)) throw new Error('print failed');`);
+    emit.down(1).text(`if (!printInner(print, false)) throw new Error('print failed');`);
     emit.down(1).text(`if (CPOS > CREP.length) throw new Error('output buffer too small');`);
     emit.down(1).text(`return buf ? CPOS : CREP.toString('utf8', 0, CPOS);`);
     emit.dedent().down(1).text(`},`);
@@ -247,7 +247,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`${mode}: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
-                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING${mode === 'printDefault' ? ' && ATYP !== NOTHING' : ''}) return false;`);
                     emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
                     emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
                     for (const excl of expr.exclude || []) {
@@ -393,7 +393,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 const [IREP, IPOS] = mode.startsWith('parse') ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
                 emit.down(1).text(`${mode}: function STR() {`).indent();
                 if (hasInput) {
-                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING${mode === 'printDefault' ? ' && ATYP !== NOTHING' : ''}) return false;`);
                     emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
                     for (let i = 0; i < bytes.length; ++i) {
                         emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);

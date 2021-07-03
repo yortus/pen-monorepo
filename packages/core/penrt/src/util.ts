@@ -117,7 +117,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     AREP = undefined as any; // TODO: fix cast
     APOS = 0;
     if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
 
     let value: unknown;
     switch (ATYP) {

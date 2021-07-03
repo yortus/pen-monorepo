@@ -5,7 +5,7 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        if (!parseInner(parse, true)) throw new Error('parse failed');
+        if (!parseInner(parse, false)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
@@ -14,7 +14,7 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        if (!printInner(print, true)) throw new Error('print failed');
+        if (!printInner(print, false)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
@@ -79,7 +79,7 @@ function createList(mode, listItems) {
             return true;
         },
         printDefault: function LST() {
-            if (ATYP !== LIST)
+            if (ATYP !== LIST && ATYP !== NOTHING)
                 return false;
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             for (const listItem of listItems) {
@@ -226,7 +226,7 @@ function createRecord(mode, recordItems) {
             return true;
         },
         printDefault: function RCD() {
-            if (ATYP !== RECORD)
+            if (ATYP !== RECORD && ATYP !== NOTHING)
                 return false;
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             for (const recordItem of recordItems) {
@@ -310,7 +310,7 @@ function parseInner(rule, mustProduce) {
     if (!rule())
         return AREP = AREPₒ, APOS = APOSₒ, false;
     if (ATYP === NOTHING)
-        return AREP = AREPₒ, APOS = APOSₒ, mustProduce;
+        return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
     let value;
     switch (ATYP) {
         case SCALAR:

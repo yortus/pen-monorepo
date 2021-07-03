@@ -144,7 +144,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
         },
 
         printDefault: function RCD() {
-            if (ATYP !== RECORD) return false;
+            if (ATYP !== RECORD && ATYP !== NOTHING) return false;
             const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
             for (const recordItem of recordItems) {
                 if (recordItem.kind === 'Field') {
