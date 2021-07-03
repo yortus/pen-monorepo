@@ -82,7 +82,7 @@ function floatString({mode}: StaticOptions): Rule {
         print: function FSTR() {
             let out = '0';
             // Ensure N is a number.
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             let num = AREP[APOS] as number;
             if (typeof num !== 'number') return false;
             APOS += 1;

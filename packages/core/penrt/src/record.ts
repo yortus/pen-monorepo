@@ -17,7 +17,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     else {
                         // Dynamically-labelled field
                         if (!parseInner(recordItem.label, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        assert(ATYP === STRING);
+                        assert(AW === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS] as string;
                     }
@@ -41,7 +41,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     }
                 }
             }
-            ATYP = RECORD;
+            AW = RECORD;
             return true;
         },
 
@@ -60,7 +60,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     else {
                         // Dynamically-labelled field
                         if (!parseInner(recordItem.label.default, true)) return APOS = APOSₒ, false;
-                        assert(ATYP === STRING);
+                        assert(AW === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS] as string;
                     }
@@ -84,13 +84,13 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     }
                 }
             }
-            ATYP = RECORD;
+            AW = RECORD;
             return true;
         },
 
         print: function RCD() {
-            if (ATYP !== RECORD) return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (AR !== RECORD) return false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             const propList = AREP;
             const propCount = AREP.length;
             let bitmask = APOS;
@@ -130,12 +130,12 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     }
 
                     // If we get here, no match... Ensure AREP is restored, since it may have been changed above.
-                    return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
                     APOS = bitmask;
-                    ATYP = RECORD;
-                    if (!recordItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    AR = RECORD;
+                    if (!recordItem.expr()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     bitmask = APOS;
                 }
             }
@@ -144,22 +144,22 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
         },
 
         printDefault: function RCD() {
-            if (ATYP !== RECORD && ATYP !== NOTHING) return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (AR !== RECORD && AR !== NOTHING) return false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const recordItem of recordItems) {
                 if (recordItem.kind === 'Field') {
                     // Print field label
                     if (typeof recordItem.label !== 'string') {
                         // Dynamically-labelled field
-                        if (!printDefaultInner(recordItem.label)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        if (!printDefaultInner(recordItem.label)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     }
 
                     // Print field value
-                    if (!printDefaultInner(recordItem.expr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    if (!printDefaultInner(recordItem.expr)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
-                    ATYP = RECORD;
-                    if (!recordItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    AR = RECORD;
+                    if (!recordItem.expr()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;

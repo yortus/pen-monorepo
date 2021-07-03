@@ -13,7 +13,7 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
                     if (!listItem.expr()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
             }
-            ATYP = LIST;
+            AW = LIST;
             return true;
         },
 
@@ -28,35 +28,35 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
                     if (!listItem.expr.default()) return APOS = APOSₒ, false;
                 }
             }
-            ATYP = LIST;
+            AW = LIST;
             return true;
         },
 
         print: function LST() {
-            if (ATYP !== LIST) return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (AR !== LIST) return false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!printInner(listItem.expr, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    if (!printInner(listItem.expr, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
-                    ATYP = LIST;
-                    if (!listItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    AR = LIST;
+                    if (!listItem.expr()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;
         },
 
         printDefault: function LST() {
-            if (ATYP !== LIST && ATYP !== NOTHING) return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (AR !== LIST && AR !== NOTHING) return false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!printDefaultInner(listItem.expr.default)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    if (!printDefaultInner(listItem.expr.default)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
-                    ATYP = LIST;
-                    if (!listItem.expr.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    AR = LIST;
+                    if (!listItem.expr.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;

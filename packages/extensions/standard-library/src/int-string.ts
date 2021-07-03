@@ -62,7 +62,7 @@ function intString({mode}: StaticOptions): Func {
 
             print: function ISTR() {
                 const digits = [] as number[];
-                if (ATYP !== SCALAR) return false;
+                if (AR !== SCALAR) return false;
                 let num = AREP[APOS] as number;
                 if (typeof num !== 'number') return false;
 

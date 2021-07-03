@@ -78,13 +78,14 @@ interface Arrayish<T> {
 
 
 
-// TODO: NEW VM (WIP):
-let AREP: Arrayish<unknown>;
-let APOS: number;
-let ATYP: ATYP;
+// VM REGISTERS - callee updates/restores
+let AREP: Arrayish<unknown> = [];
+let APOS: number = 0;
+let AW: ATYP = 0;
+let AR: ATYP = 0;
 
-let CREP: Buffer; //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
-let CPOS: number;
+let CREP: Buffer = Buffer.alloc(1); //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
+let CPOS: number = 0;
 
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
@@ -95,17 +96,17 @@ const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if 
 function emitScalar(value: number | boolean | null) {
     if (APOS === 0) AREP = theScalarArray;
     AREP[APOS++] = value;
-    ATYP = SCALAR;
+    AW = SCALAR;
 }
 function emitByte(value: number) {
     if (APOS === 0) AREP = theBuffer;
     AREP[APOS++] = value;
-    ATYP = STRING;
+    AW = STRING;
 }
 function emitBytes(...values: number[]) {
     if (APOS === 0) AREP = theBuffer;
     for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
-    ATYP = STRING;
+    AW = STRING;
 }
 
 
@@ -114,10 +115,10 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     AREP = undefined as any; // TODO: fix cast
     APOS = 0;
     if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
+    if (AW === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
 
     let value: unknown;
-    switch (ATYP) {
+    switch (AW) {
         case SCALAR:
             assert(APOS === 1);
             value = AREP[0];
@@ -135,7 +136,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
-            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+            ((aw: never): never => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
     }
     AREPₒ[APOSₒ] = value;
     AREP = AREPₒ;
@@ -144,25 +145,25 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
 }
 
 function printInner(rule: Rule, mustConsume: boolean): boolean {
-    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    const [AREPₒ, APOSₒ, ARₒ] = [AREP, APOS, AR];
     let value = AREP[APOS];
-    let atyp: ATYP;
+    let ar: ATYP;
 
     // Nothing case
     if (value === undefined) {
         if (mustConsume) return false;
-        ATYP = NOTHING;
+        AR = NOTHING;
         const result = rule();
-        ATYP = ATYPₒ;
+        AR = ARₒ;
         assert(APOS === APOSₒ);
         return result;
     }
 
     // Scalar case
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ATYP = SCALAR;
+        AR = SCALAR;
         const result = rule();
-        ATYP = ATYPₒ;
+        AR = ARₒ;
         assert(APOS - APOSₒ === 1);
         return result;
     }
@@ -170,11 +171,11 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     // Aggregate cases
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        atyp = ATYP = STRING;
+        ar = AR = STRING;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        atyp = ATYP = LIST;
+        ar = AR = LIST;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [] as unknown[];        
@@ -182,7 +183,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
         assert(keys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
         for (let i = 0; i < keys.length; ++i) arr.push(keys[i], (value as any)[keys[i]]);
         value = arr;
-        atyp = ATYP = RECORD;
+        ar = AR = RECORD;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -192,13 +193,13 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     APOS = 0;
     let result = rule();
 
-    // Restore AREP/APOS/ATYP
+    // Restore AREP/APOS/AR
     const [arep, apos] = [AREP, APOS];
-    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    AREP = AREPₒ, APOS = APOSₒ, AR = ARₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed
-    if (atyp === RECORD) {
+    if (ar === RECORD) {
         const keyCount = (value as any).length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
     }
@@ -210,10 +211,10 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
 }
 
 function printDefaultInner(rule: Rule): boolean {
-    const ATYPₒ = ATYP;
-    ATYP = NOTHING;
+    const ARₒ = AR;
+    AR = NOTHING;
     const result = rule();
-    ATYP = ATYPₒ;
+    AR = ARₒ;
     return result;
 }
 

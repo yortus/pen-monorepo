@@ -230,7 +230,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             emit.dedent().down(1).text('},');
             emit.down(1).text(`parseDefault: 'parse',`);
             emit.down(1).text(`print: function LIT() {`).indent();
-            emit.down(1).text(`if (ATYP !== SCALAR) return false;`);
+            emit.down(1).text(`if (AR !== SCALAR) return false;`);
             emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
             emit.down(1).text(`APOS += 1;`);
             emit.down(1).text(`return true;`);
@@ -247,7 +247,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`${mode}: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
-                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING${mode === 'printDefault' ? ' && ATYP !== NOTHING' : ''}) return false;`);
+                    if (mode.startsWith('print')) emit.down(1).text(`if (AR !== STRING${mode === 'printDefault' ? ' && AR !== NOTHING' : ''}) return false;`);
                     emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
                     emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
                     for (const excl of expr.exclude || []) {
@@ -281,9 +281,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'ConcreteExpression': {
             emit.down(1).text(`parse: () => {`).indent();
-            emit.down(1).text(`const [APOSₒ, AREPₒ, ATYPₒ] = [APOS, AREP, ATYP];`);
+            emit.down(1).text(`const [APOSₒ, AREPₒ, AWₒ] = [APOS, AREP, AW];`);
             emit.down(1).text(`const result = ${expr.expression.name}();`);
-            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, ATYP = ATYPₒ;`);
+            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, AW = AWₒ;`);
             emit.down(1).text(`return result;`);
             emit.dedent().down(1).text(`},`);
             emit.down(1).text(`parseDefault: () => true,`);
@@ -294,12 +294,13 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'NotExpression': {
             for (const mode of ['parse', 'parseDefault', 'print', 'printDefault'] as const) {
+                const ARW = mode.startsWith('parse') ? 'AW' : 'AR';
                 const hasInput = mode === 'parse' || mode === 'print';
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text(`const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];`);
+                emit.down(1).text(`const [APOSₒ, CPOSₒ, ${ARW}ₒ] = [APOS, CPOS, ${ARW}];`);
                 emit.down(1).text(`const result = !${expr.expression.name}${hasInput ? '' : '.default'}();`);
-                emit.down(1).text(`[APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
-                if (mode.startsWith('parse')) emit.down(1).text(`ATYP = NOTHING;`);
+                emit.down(1).text(`[APOS, CPOS, ${ARW}] = [APOSₒ, CPOSₒ, ${ARW}ₒ], false;`);
+                if (mode.startsWith('parse')) emit.down(1).text(`AW = NOTHING;`);
                 emit.down(1).text(`return result;`);
                 emit.dedent().down(1).text(`},`);
             }
@@ -311,7 +312,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`${mode}: () => {`).indent();
                 if (expr.quantifier === '?') {
                     emit.down(1).text(`if (!${expr.expression.name}()) {`).indent();
-                    if (mode === 'parse') emit.down(1).text(`ATYP = NOTHING;`);
+                    if (mode === 'parse') emit.down(1).text(`AW = NOTHING;`);
                     emit.dedent().down(1).text('}');
                 }
                 else /* expr.quantifier === '*' */ {
@@ -363,21 +364,21 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const exprVars = expr.expressions.map(e => e.name);
             for (const mode of ['parse', 'parseDefault'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];');
+                emit.down(1).text('const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];');
                 emit.down(1).text('let seqType = NOTHING;');
-                emit.down(1).text('ATYP = NOTHING;');
+                emit.down(1).text('AW = NOTHING;');
                 for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
-                    emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;`);
+                    emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
                 }
                 emit.down(1).text('return true;');
                 emit.dedent().down(1).text('},');
             }
             for (const mode of ['print', 'printDefault'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];');
+                emit.down(1).text('const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];');
                 for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'print' ? '' : '.default'}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'print' ? '' : '.default'}()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;`);
                 }
                 emit.down(1).text('return true;');
                 emit.dedent().down(1).text('},');
@@ -393,7 +394,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 const [IREP, IPOS] = mode.startsWith('parse') ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
                 emit.down(1).text(`${mode}: function STR() {`).indent();
                 if (hasInput) {
-                    if (mode.startsWith('print')) emit.down(1).text(`if (ATYP !== STRING${mode === 'printDefault' ? ' && ATYP !== NOTHING' : ''}) return false;`);
+                    if (mode.startsWith('print')) emit.down(1).text(`if (AR !== STRING${mode === 'printDefault' ? ' && AR !== NOTHING' : ''}) return false;`);
                     emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
                     for (let i = 0; i < bytes.length; ++i) {
                         emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);

@@ -41,7 +41,7 @@ function createList(mode, listItems) {
                         return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
             }
-            ATYP = LIST;
+            AW = LIST;
             return true;
         },
         parseDefault: function LST() {
@@ -58,39 +58,39 @@ function createList(mode, listItems) {
                         return APOS = APOSₒ, false;
                 }
             }
-            ATYP = LIST;
+            AW = LIST;
             return true;
         },
         print: function LST() {
-            if (ATYP !== LIST)
+            if (AR !== LIST)
                 return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
                     if (!printInner(listItem.expr, true))
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else {
-                    ATYP = LIST;
+                    AR = LIST;
                     if (!listItem.expr())
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;
         },
         printDefault: function LST() {
-            if (ATYP !== LIST && ATYP !== NOTHING)
+            if (AR !== LIST && AR !== NOTHING)
                 return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
                     if (!printDefaultInner(listItem.expr.default))
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else {
-                    ATYP = LIST;
+                    AR = LIST;
                     if (!listItem.expr.default())
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;
@@ -113,7 +113,7 @@ function createRecord(mode, recordItems) {
                     else {
                         if (!parseInner(recordItem.label, true))
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        assert(ATYP === STRING);
+                        assert(AW === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS];
                     }
@@ -138,7 +138,7 @@ function createRecord(mode, recordItems) {
                     }
                 }
             }
-            ATYP = RECORD;
+            AW = RECORD;
             return true;
         },
         parseDefault: function RCD() {
@@ -155,7 +155,7 @@ function createRecord(mode, recordItems) {
                     else {
                         if (!parseInner(recordItem.label.default, true))
                             return APOS = APOSₒ, false;
-                        assert(ATYP === STRING);
+                        assert(AW === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS];
                     }
@@ -180,13 +180,13 @@ function createRecord(mode, recordItems) {
                     }
                 }
             }
-            ATYP = RECORD;
+            AW = RECORD;
             return true;
         },
         print: function RCD() {
-            if (ATYP !== RECORD)
+            if (AR !== RECORD)
                 return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             const propList = AREP;
             const propCount = AREP.length;
             let bitmask = APOS;
@@ -212,13 +212,13 @@ function createRecord(mode, recordItems) {
                         bitmask += propBit;
                         continue outerLoop;
                     }
-                    return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                    return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else {
                     APOS = bitmask;
-                    ATYP = RECORD;
+                    AR = RECORD;
                     if (!recordItem.expr())
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     bitmask = APOS;
                 }
             }
@@ -226,22 +226,22 @@ function createRecord(mode, recordItems) {
             return true;
         },
         printDefault: function RCD() {
-            if (ATYP !== RECORD && ATYP !== NOTHING)
+            if (AR !== RECORD && AR !== NOTHING)
                 return false;
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
             for (const recordItem of recordItems) {
                 if (recordItem.kind === 'Field') {
                     if (typeof recordItem.label !== 'string') {
                         if (!printDefaultInner(recordItem.label))
-                            return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     }
                     if (!printDefaultInner(recordItem.expr))
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
                 else {
-                    ATYP = RECORD;
+                    AR = RECORD;
                     if (!recordItem.expr())
-                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 }
             }
             return true;
@@ -274,11 +274,12 @@ function createRule(mode, impls) {
         dflt = impls.parse;
     return Object.assign(impl, { default: Object.assign(dflt, { default: dflt }) });
 }
-let AREP;
-let APOS;
-let ATYP;
-let CREP;
-let CPOS;
+let AREP = [];
+let APOS = 0;
+let AW = 0;
+let AR = 0;
+let CREP = Buffer.alloc(1);
+let CPOS = 0;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
@@ -286,20 +287,20 @@ function emitScalar(value) {
     if (APOS === 0)
         AREP = theScalarArray;
     AREP[APOS++] = value;
-    ATYP = SCALAR;
+    AW = SCALAR;
 }
 function emitByte(value) {
     if (APOS === 0)
         AREP = theBuffer;
     AREP[APOS++] = value;
-    ATYP = STRING;
+    AW = STRING;
 }
 function emitBytes(...values) {
     if (APOS === 0)
         AREP = theBuffer;
     for (let i = 0; i < values.length; ++i)
         AREP[APOS++] = values[i];
-    ATYP = STRING;
+    AW = STRING;
 }
 function parseInner(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -307,10 +308,10 @@ function parseInner(rule, mustProduce) {
     APOS = 0;
     if (!rule())
         return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (ATYP === NOTHING)
+    if (AW === NOTHING)
         return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
     let value;
-    switch (ATYP) {
+    switch (AW) {
         case SCALAR:
             assert(APOS === 1);
             value = AREP[0];
@@ -329,7 +330,7 @@ function parseInner(rule, mustProduce) {
                 obj[AREP[i]] = AREP[i + 1];
             break;
         default:
-            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+            ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
     }
     AREPₒ[APOSₒ] = value;
     AREP = AREPₒ;
@@ -337,32 +338,32 @@ function parseInner(rule, mustProduce) {
     return true;
 }
 function printInner(rule, mustConsume) {
-    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    const [AREPₒ, APOSₒ, ARₒ] = [AREP, APOS, AR];
     let value = AREP[APOS];
-    let atyp;
+    let ar;
     if (value === undefined) {
         if (mustConsume)
             return false;
-        ATYP = NOTHING;
+        AR = NOTHING;
         const result = rule();
-        ATYP = ATYPₒ;
+        AR = ARₒ;
         assert(APOS === APOSₒ);
         return result;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ATYP = SCALAR;
+        AR = SCALAR;
         const result = rule();
-        ATYP = ATYPₒ;
+        AR = ARₒ;
         assert(APOS - APOSₒ === 1);
         return result;
     }
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        atyp = ATYP = STRING;
+        ar = AR = STRING;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        atyp = ATYP = LIST;
+        ar = AR = LIST;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [];
@@ -371,7 +372,7 @@ function printInner(rule, mustConsume) {
         for (let i = 0; i < keys.length; ++i)
             arr.push(keys[i], value[keys[i]]);
         value = arr;
-        atyp = ATYP = RECORD;
+        ar = AR = RECORD;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -379,10 +380,10 @@ function printInner(rule, mustConsume) {
     APOS = 0;
     let result = rule();
     const [arep, apos] = [AREP, APOS];
-    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    AREP = AREPₒ, APOS = APOSₒ, AR = ARₒ;
     if (!result)
         return false;
-    if (atyp === RECORD) {
+    if (ar === RECORD) {
         const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
@@ -395,10 +396,10 @@ function printInner(rule, mustConsume) {
     return true;
 }
 function printDefaultInner(rule) {
-    const ATYPₒ = ATYP;
-    ATYP = NOTHING;
+    const ARₒ = AR;
+    AR = NOTHING;
     const result = rule();
-    ATYP = ATYPₒ;
+    AR = ARₒ;
     return result;
 }
 function assert(value) {
@@ -520,7 +521,7 @@ const extensions = {
                 print: function FSTR() {
                     let out = '0';
                     // Ensure N is a number.
-                    if (ATYP !== SCALAR)
+                    if (AR !== SCALAR)
                         return false;
                     let num = AREP[APOS];
                     if (typeof num !== 'number')
@@ -605,7 +606,7 @@ const extensions = {
                     },
                     print: function ISTR() {
                         const digits = [];
-                        if (ATYP !== SCALAR)
+                        if (AR !== SCALAR)
                             return false;
                         let num = AREP[APOS];
                         if (typeof num !== 'number')
@@ -706,7 +707,7 @@ const extensions = {
                                 memo.result = true;
                                 memo.IPOSᐟ = CPOS;
                                 memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                                memo.ATYPᐟ = ATYP;
+                                memo.ATYPᐟ = AW;
                             }
                             memo.resolved = true;
                             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
@@ -735,7 +736,7 @@ const extensions = {
                                 // if (!isInputFullyConsumed()) break;
                                 memo.IPOSᐟ = CPOS;
                                 memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                                memo.ATYPᐟ = ATYP;
+                                memo.ATYPᐟ = AW;
                             }
                         }
                         else if (!memo.resolved) {
@@ -750,8 +751,8 @@ const extensions = {
                         }
                         // We have a resolved memo, so the result of the rule application for the given initial state has
                         // already been computed. Return it from the memo.
-                        ATYP = memo.ATYPᐟ;
-                        AREP !== null && AREP !== void 0 ? AREP : (AREP = ATYP === STRING ? theBuffer : []);
+                        AW = memo.ATYPᐟ;
+                        AREP !== null && AREP !== void 0 ? AREP : (AREP = AW === STRING ? theBuffer : []);
                         APOS = APOSₒ;
                         CPOS = memo.IPOSᐟ;
                         for (let i = 0; i < memo.OREPᐞ.length; ++i) {
@@ -787,7 +788,7 @@ const extensions = {
                                 memo.result = true;
                                 memo.IPOSᐟ = APOS;
                                 memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                                memo.ATYPᐟ = ATYP;
+                                memo.ATYPᐟ = AR;
                             }
                             memo.resolved = true;
                             // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
@@ -817,7 +818,7 @@ const extensions = {
                                 // if (!isInputFullyConsumed()) break;
                                 memo.IPOSᐟ = APOS;
                                 memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                                memo.ATYPᐟ = ATYP;
+                                memo.ATYPᐟ = AR;
                             }
                         }
                         else if (!memo.resolved) {
@@ -835,7 +836,7 @@ const extensions = {
                         APOS = memo.IPOSᐟ;
                         CPOS = CPOSₒ;
                         CPOS += memo.OREPᐞ.copy(CREP, CPOS);
-                        ATYP = memo.ATYPᐟ;
+                        AR = memo.ATYPᐟ;
                         return memo.result;
                     },
                     printDefault: function MEM() {
@@ -896,7 +897,7 @@ const extensions = {
                     },
                     print: function UNI() {
                         // TODO: respect VOID AREP/CREP...
-                        if (ATYP !== STRING)
+                        if (AR !== STRING)
                             return false;
                         const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                         const bytes = AREP;
@@ -968,41 +969,41 @@ function create(mode) {
     // SequenceExpression
     const start_2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1045,35 +1046,35 @@ function create(mode) {
     // SequenceExpression
     const False = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!False_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!False_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!False_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!False_sub2()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!False_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!False_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!False_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!False_sub2.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!False_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!False_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!False_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!False_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!False_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!False_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!False_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!False_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1121,7 +1122,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== false) return false;
             APOS += 1;
             return true;
@@ -1133,35 +1134,35 @@ function create(mode) {
     // SequenceExpression
     const Null = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Null_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Null_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Null_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Null_sub2()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Null_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Null_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Null_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Null_sub2.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Null_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Null_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Null_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Null_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Null_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Null_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Null_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Null_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1206,7 +1207,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== null) return false;
             APOS += 1;
             return true;
@@ -1218,35 +1219,35 @@ function create(mode) {
     // SequenceExpression
     const True = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!True_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!True_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!True_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!True_sub2()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!True_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!True_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!True_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!True_sub2.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!True_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!True_sub2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!True_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!True_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!True_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!True_sub2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!True_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!True_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1291,7 +1292,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== true) return false;
             APOS += 1;
             return true;
@@ -1303,41 +1304,41 @@ function create(mode) {
     // SequenceExpression
     const Object = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1365,35 +1366,35 @@ function create(mode) {
     // SequenceExpression
     const Object_sub2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Object_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object_sub5()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Object_sub3()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object_sub5()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Object_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object_sub5.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Object_sub3.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object_sub5.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Object_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object_sub5()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Object_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object_sub5()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Object_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object_sub5.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Object_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object_sub5.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1406,35 +1407,35 @@ function create(mode) {
     // SequenceExpression
     const Object_sub4 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1473,35 +1474,35 @@ function create(mode) {
     // SequenceExpression
     const Object_sub7 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!String()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!String()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!String.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!String.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!String()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!String()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!String.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!String.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1509,35 +1510,35 @@ function create(mode) {
     // SequenceExpression
     const Object_sub8 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1548,41 +1549,41 @@ function create(mode) {
     // SequenceExpression
     const Object2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object2_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object2_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Object2_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Object2_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object2_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Object2_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Object2_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1619,35 +1620,35 @@ function create(mode) {
     // SequenceExpression
     const Properties_sub1 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COLON.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COLON.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1675,35 +1676,35 @@ function create(mode) {
     // SequenceExpression
     const Properties_sub3 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Properties()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Properties()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Properties.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Properties.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Properties()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Properties()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Properties.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Properties.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1714,41 +1715,41 @@ function create(mode) {
     // SequenceExpression
     const Array = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACKET()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACKET.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1776,35 +1777,35 @@ function create(mode) {
     // SequenceExpression
     const Array_sub2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Array_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array_sub4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Array_sub3()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array_sub4()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!Array_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array_sub4.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!Array_sub3.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array_sub4.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Array_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array_sub4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Array_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!Array_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array_sub4.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!Array_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array_sub4.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1848,35 +1849,35 @@ function create(mode) {
     // SequenceExpression
     const Array_sub6 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Value.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Value.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1887,41 +1888,41 @@ function create(mode) {
     // SequenceExpression
     const Array2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array2_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACKET()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array2_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!LBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Array2_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!LBRACKET.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Array2_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array2_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!LBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Array2_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!LBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Array2_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -1978,35 +1979,35 @@ function create(mode) {
     // SequenceExpression
     const Elements_sub2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Elements()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Elements()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!Elements.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!COMMA.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!Elements.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Elements()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Elements()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!COMMA.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!Elements.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!Elements.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2023,41 +2024,41 @@ function create(mode) {
     // SequenceExpression
     const String = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!String_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!String_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!String_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!String_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!String_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!String_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!String_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!String_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2096,7 +2097,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== 16) return false;
             APOS += 1;
             return true;
@@ -2113,7 +2114,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== 4) return false;
             APOS += 1;
             return true;
@@ -2130,7 +2131,7 @@ function create(mode) {
         },
         parseDefault: 'parse',
         print: function LIT() {
-            if (ATYP !== SCALAR) return false;
+            if (AR !== SCALAR) return false;
             if (AREP[APOS] !== 4) return false;
             APOS += 1;
             return true;
@@ -2213,7 +2214,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc === 0x5c) return false;
@@ -2234,35 +2235,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub3()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub4()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub4.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub3.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub4.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub4.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub4.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2286,7 +2287,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0xc0 || cc > 0xdf)) return false;
@@ -2321,7 +2322,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2340,41 +2341,41 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub5 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub6()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub7()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub8()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub6()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub7()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub8()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub6.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub7.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub8.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub6.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub7.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub8.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub6()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub7()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub8()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub6()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub7()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub8()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub6.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub7.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub8.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub6.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub7.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub8.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2398,7 +2399,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0xe0 || cc > 0xef)) return false;
@@ -2433,7 +2434,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2468,7 +2469,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2487,47 +2488,47 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub9 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub10()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub11()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub12()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub13()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub10()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub11()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub12()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub13()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub10.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub11.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub12.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub13.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub10.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub11.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub12.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub13.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub10()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub11()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub12()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub13()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub10()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub11()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub12()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub13()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub10.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub11.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub12.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub13.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub10.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub11.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub12.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub13.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2551,7 +2552,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0xf0 || cc > 0xf7)) return false;
@@ -2586,7 +2587,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2621,7 +2622,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2656,7 +2657,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if ((cc < 0x80 || cc > 0xbf)) return false;
@@ -2675,35 +2676,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub14 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub15()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub16()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub15()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub16()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub15.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub16.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub15.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub16.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub15()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub16()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub15()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub16()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub15.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub16.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub15.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub16.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2750,7 +2751,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x22) return false;
@@ -2768,35 +2769,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub17 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub18()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub19()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub18()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub19()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub18.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub19.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub18.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub19.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub18()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub19()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub18()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub19()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub18.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub19.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub18.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub19.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2843,7 +2844,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x5c) return false;
@@ -2861,35 +2862,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub20 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub21()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub22()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub21()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub22()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub21.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub22.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub21.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub22.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub21()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub22()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub21()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub22()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub21.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub22.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub21.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub22.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -2936,7 +2937,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x2f) return false;
@@ -2954,35 +2955,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub23 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub24()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub25()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub24()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub25()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub24.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub25.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub24.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub25.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub24()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub25()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub24()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub25()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub24.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub25.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub24.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub25.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3029,7 +3030,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x08) return false;
@@ -3047,35 +3048,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub26 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub27()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub28()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub27()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub28()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub27.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub28.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub27.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub28.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub27()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub28()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub27()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub28()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub27.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub28.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub27.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub28.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3122,7 +3123,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x0c) return false;
@@ -3140,35 +3141,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub29 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub30()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub31()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub30()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub31()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub30.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub31.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub30.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub31.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub30()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub31()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub30()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub31()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub30.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub31.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub30.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub31.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3215,7 +3216,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x0a) return false;
@@ -3233,35 +3234,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub32 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub33()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub34()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub33()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub34()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub33.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub34.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub33.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub34.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub33()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub34()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub33()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub34()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub33.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub34.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub33.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub34.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3308,7 +3309,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x0d) return false;
@@ -3326,35 +3327,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub35 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub36()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub37()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub36()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub37()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub36.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub37.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub36.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub37.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub36()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub37()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub36()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub37()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub36.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub37.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub36.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub37.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3401,7 +3402,7 @@ function create(mode) {
         },
         print: function BYT() {
             let cc;
-            if (ATYP !== STRING) return false;
+            if (AR !== STRING) return false;
             if (APOS >= AREP.length) return false;
             cc = AREP[APOS];
             if (cc !== 0x09) return false;
@@ -3419,35 +3420,35 @@ function create(mode) {
     // SequenceExpression
     const CHAR_sub38 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub39()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub40()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub39()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub40()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!CHAR_sub39.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!CHAR_sub40.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!CHAR_sub39.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!CHAR_sub40.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub39()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub40()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub39()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub40()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!CHAR_sub39.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!CHAR_sub40.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!CHAR_sub39.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!CHAR_sub40.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3494,41 +3495,41 @@ function create(mode) {
     // SequenceExpression
     const LBRACE = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!LBRACE_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!LBRACE_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!LBRACE_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!LBRACE_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!LBRACE_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!LBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!LBRACE_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!LBRACE_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3566,41 +3567,41 @@ function create(mode) {
     // SequenceExpression
     const RBRACE = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACE_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACE_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACE_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACE_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3638,41 +3639,41 @@ function create(mode) {
     // SequenceExpression
     const LBRACKET = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!LBRACKET_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!LBRACKET_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!LBRACKET_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!LBRACKET_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!LBRACKET_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!LBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!LBRACKET_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!LBRACKET_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3710,41 +3711,41 @@ function create(mode) {
     // SequenceExpression
     const RBRACKET = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!RBRACKET_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!RBRACKET_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!RBRACKET_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!RBRACKET_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3782,41 +3783,41 @@ function create(mode) {
     // SequenceExpression
     const COLON = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!COLON_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!COLON_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!COLON_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!COLON_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!COLON_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!COLON_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!COLON_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!COLON_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
@@ -3854,41 +3855,41 @@ function create(mode) {
     // SequenceExpression
     const COMMA = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!COMMA_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!COMMA_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
             let seqType = NOTHING;
-            ATYP = NOTHING;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!COMMA_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            seqType |= ATYP;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            ATYP |= seqType;
+            AW = NOTHING;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!COMMA_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            seqType |= AW;
+            if (!WS.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            AW |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!COMMA_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!COMMA_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!COMMA_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-            if (!WS.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!COMMA_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
             return true;
         },
     });
