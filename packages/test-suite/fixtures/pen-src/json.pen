@@ -76,6 +76,8 @@ COLON           = WS   concrete ":"   WS
 COMMA           = WS   concrete ","   WS
 DOUBLE_QUOTE    = concrete "\""
 WS              = *(concrete " " | concrete "\t" | concrete "\n" | concrete "\r")
+// TODO: below is equivalent to above, but blows out bench time ~2.5x!!! Optimise?
+// WS              = concrete *(" " | "\t" | "\n" | "\r")
 
 
 
