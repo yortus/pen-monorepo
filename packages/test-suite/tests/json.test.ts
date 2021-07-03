@@ -56,10 +56,7 @@ describe(`Compiling and executing the 'json.pen' program`, () => {
             ast: {foo: 'bar', baz: [1, null, 57, 'abc.def', {x: {x1: 0, x2: {eee: []}}}]},
         },
 
-        // NB: currently only ASCII is supported...
-        // TODO: restore utf8 support (and other encodings?)
         // TODO: add more unicode escapes in strings, corner cases (eg surrogate pairs - do they work in JSON?)
-        // TODO: should (and did once) work, now fails due to only ascii char support {text: '"\\u0041+\\s\\u2368"', ast: 'A+ ⍨'},
     ];
 
     for (const test of tests) {
