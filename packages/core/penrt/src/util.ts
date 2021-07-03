@@ -81,8 +81,8 @@ interface Arrayish<T> {
 // VM REGISTERS - callee updates/restores
 let AREP: Arrayish<unknown> = [];
 let APOS: number = 0;
-let AW: ATYP = 0;
-let AR: ATYP = 0;
+let AW: ATYP = 0; // NB: Parsers _must_ set this when returning true. Parsers _may_ restore this when returning false.
+let AR: ATYP = 0; // NB: Printers _may_ check/validate this on entry. Printers _must_ return with the same value in AR.
 
 let CREP: Buffer = Buffer.alloc(1); //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
 let CPOS: number = 0;

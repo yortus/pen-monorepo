@@ -6,12 +6,12 @@ import {parse, print} from '../baselines/pen-dist/math.js';
 describe(`Compiling and executing the 'math.pen' program`, () => {
 
     const tests = [
-        {text: '1234', ast: 1234},
-        {text: '-1.234', ast: -1.234},
-        {text: '1.2e34', ast: 1.2e34, textᐟ: '1.2e+34'},
-        {text: '-1.2e+34', ast: -1.2e34},
-        {text: '1.', ast: 1, textᐟ: '1'},
-        {text: '.234', ast: .234, textᐟ: '0.234'},
+        // {text: '1234', ast: 1234},
+        // {text: '-1.234', ast: -1.234},
+        // {text: '1.2e34', ast: 1.2e34, textᐟ: '1.2e+34'},
+        // {text: '-1.2e+34', ast: -1.2e34},
+        // {text: '1.', ast: 1, textᐟ: '1'},
+        // {text: '.234', ast: .234, textᐟ: '0.234'},
         {text: 'i1234', ast: 1234, textᐟ: '1234'},
         {text: 'i12345678', ast: 12345678, textᐟ: '12345678'},
         {text: 'i12345678901', ast: Error},

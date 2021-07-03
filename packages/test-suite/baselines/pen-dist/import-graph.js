@@ -543,22 +543,20 @@ function create(mode) {
     // SequenceExpression
     const result = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!foo()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!foo()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!result_sub1()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!result_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!foo.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!foo.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!result_sub1.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!result_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
@@ -579,22 +577,20 @@ function create(mode) {
     // SequenceExpression
     const result_sub1 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!bar()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!bar()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!baz()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!baz()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!bar.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!bar.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!baz.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!baz.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
@@ -622,22 +618,20 @@ function create(mode) {
     // SequenceExpression
     const myList_sub1 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!digit()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!digit.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!digit.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
@@ -658,26 +652,24 @@ function create(mode) {
     // SequenceExpression
     const myList_sub2 = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!digit()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
-            let seqType = NOTHING;
-            AW = NOTHING;
-            if (!digit.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            let seqType = AW = NOTHING;
+            if (!digit.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             seqType |= AW;
-            if (!digit.default()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
+            if (!digit.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             AW |= seqType;
             return true;
         },

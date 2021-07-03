@@ -281,12 +281,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'ConcreteExpression': {
             emit.down(1).text(`parse: () => {`).indent();
-            emit.down(1).text(`const [APOSₒ, AREPₒ, AWₒ] = [APOS, AREP, AW];`);
+            emit.down(1).text(`const [APOSₒ, AREPₒ] = [APOS, AREP];`);
             emit.down(1).text(`const result = ${expr.expression.name}();`);
-            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, AW = AWₒ;`);
+            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, AW = NOTHING;`);
             emit.down(1).text(`return result;`);
             emit.dedent().down(1).text(`},`);
-            emit.down(1).text(`parseDefault: () => true,`);
+            emit.down(1).text(`parseDefault: () => (AW = NOTHING, true),`);
             emit.down(1).text(`print: () => ${expr.expression.name}.default(),`);
             emit.down(1).text(`printDefault: 'print',`);
             break;
@@ -314,22 +314,24 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     emit.down(1).text(`if (!${expr.expression.name}()) {`).indent();
                     if (mode === 'parse') emit.down(1).text(`AW = NOTHING;`);
                     emit.dedent().down(1).text('}');
+                    emit.down(1).text(`return true;`);
                 }
                 else /* expr.quantifier === '*' */ {
                     const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
                     const OPOS = mode === 'parse' ? 'APOS' : 'CPOS';
                     emit.down(1).text(`let [${IPOS}ᐟ, ${OPOS}ᐟ] = [${IPOS}, ${OPOS}];`);
-                    emit.down(1).text(`do {`).indent();
-                    emit.down(1).text(`if (!${expr.expression.name}()) break;`);
-                    emit.down(1).text(`if (${IPOS} <= ${IPOS}ᐟ) break;`);
+                    if (mode === 'parse') emit.down(1).text(`let seqType = AW = NOTHING;`);
+                    emit.down(1).text(`while (true) {`).indent();
+                    emit.down(1).text(`if (!${expr.expression.name}() || ${IPOS} <= ${IPOS}ᐟ) break;`);
+                    if (mode === 'parse') emit.down(1).text(`seqType |= AW;`);
                     emit.down(1).text(`${IPOS}ᐟ = ${IPOS}, ${OPOS}ᐟ = ${OPOS};`);
-                    emit.dedent().down(1).text(`} while (true);`);
-                    emit.down(1).text(`${IPOS} = ${IPOS}ᐟ, ${OPOS} = ${OPOS}ᐟ;`);
+                    emit.dedent().down(1).text(`}`);
+                    emit.down(1).text(`${IPOS} = ${IPOS}ᐟ, ${OPOS} = ${OPOS}ᐟ${mode === 'parse' ? ', AW = seqType' : ''};`);
+                    emit.down(1).text(`return true;`);
                 }
-                emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
             }
-            emit.down(1).text(`parseDefault: () => true,`);
+            emit.down(1).text(`parseDefault: () => (AW = NOTHING, true),`);
             emit.down(1).text(`printDefault: () => true,`);
             break;
         }
@@ -364,11 +366,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const exprVars = expr.expressions.map(e => e.name);
             for (const mode of ['parse', 'parseDefault'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];');
-                emit.down(1).text('let seqType = NOTHING;');
-                emit.down(1).text('AW = NOTHING;');
+                emit.down(1).text('const [APOSₒ, CPOSₒ] = [APOS, CPOS];');
+                emit.down(1).text('let seqType = AW = NOTHING;');
                 for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;`);
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`);
                     emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
                 }
                 emit.down(1).text('return true;');

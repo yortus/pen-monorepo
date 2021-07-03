@@ -31,7 +31,7 @@ describe(`Language features: abstract/concrete operators`, () => {
     `}).eval();
 
     const tests = [
-        {text: 'abc', ast: Error, textᐟ: ''},
+        // {text: 'abc', ast: Error, textᐟ: ''},
         // {text: '[]', ast: Error},
         // {text: '[ab]', ast: '[]'},
         // {text: '[abc]', ast: '[]', textᐟ: '[ab]'},
@@ -62,7 +62,7 @@ describe(`Language features: abstract/concrete operators`, () => {
         // {text: 'L6 a', ast: Error},
         // {text: 'L6 ', ast: ['L6 ', ['a']], textᐟ: Error},
         // {text: 'L7 a', ast: Error},
-        {text: 'L7 ', ast: ['L7 ', undefined]}, // TODO: <==== why does this throw in the parser? 'cannot call .toString of undefined'
+        {text: 'L7 ', ast: ['L7 ', undefined], textᐟ: 'L7 '}, // TODO: <==== why does this throw in the parser? 'cannot call .toString of undefined'
     ];
 
     for (const test of tests) {
