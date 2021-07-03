@@ -11,7 +11,7 @@ function intString({mode}: StaticOptions): Func {
         return createRule(mode, {
             parse: function ISTR() {
                 let num = 0;
-                const [APOSₒ, CPOSₒ] = savepoint();
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
 
                 // Parse optional leading '-' sign (if signed)...
                 let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
@@ -37,7 +37,7 @@ function intString({mode}: StaticOptions): Func {
                     num += digitValue;
 
                     // Check for overflow.
-                    if (num > MAX_NUM) return backtrack(APOSₒ, CPOSₒ);
+                    if (num > MAX_NUM) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
                     // Loop again.
                     CPOS += 1;
@@ -45,7 +45,7 @@ function intString({mode}: StaticOptions): Func {
                 }
 
                 // Check that we parsed at least one digit.
-                if (digits === 0) return backtrack(APOSₒ, CPOSₒ);
+                if (digits === 0) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
                 // Apply the sign.
                 if (isNegative) num = -num;

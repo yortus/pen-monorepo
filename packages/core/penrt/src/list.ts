@@ -3,14 +3,14 @@
 function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
     return createRule(mode, {
         parse: function LST() {
-            const [APOSₒ, CPOSₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
             if (APOS === 0) AREP = [];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!parseInner(listItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
+                    if (!parseInner(listItem.expr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
-                    if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ);
+                    if (!listItem.expr()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
             }
             ATYP = LIST;
@@ -34,14 +34,14 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
 
         print: function LST() {
             if (ATYP !== LIST) return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!printInner(listItem.expr, true)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!printInner(listItem.expr, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
                     ATYP = LIST;
-                    if (!listItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!listItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;
@@ -49,14 +49,14 @@ function createList(mode: 'parse' | 'print', listItems: ListItem[]) {
 
         printDefault: function LST() {
             if (ATYP !== LIST && ATYP !== NOTHING) return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
-                    if (!printDefaultInner(listItem.expr.default)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!printDefaultInner(listItem.expr.default)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
                     ATYP = LIST;
-                    if (!listItem.expr.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!listItem.expr.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;

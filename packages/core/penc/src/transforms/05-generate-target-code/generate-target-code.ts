@@ -296,9 +296,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             for (const mode of ['parse', 'parseDefault', 'print', 'printDefault'] as const) {
                 const hasInput = mode === 'parse' || mode === 'print';
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text(`const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;`);
+                emit.down(1).text(`const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];`);
                 emit.down(1).text(`const result = !${expr.expression.name}${hasInput ? '' : '.default'}();`);
-                emit.down(1).text(`backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                emit.down(1).text(`[APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
                 if (mode.startsWith('parse')) emit.down(1).text(`ATYP = NOTHING;`);
                 emit.down(1).text(`return result;`);
                 emit.dedent().down(1).text(`},`);
@@ -363,11 +363,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const exprVars = expr.expressions.map(e => e.name);
             for (const mode of ['parse', 'parseDefault'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+                emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];');
                 emit.down(1).text('let seqType = NOTHING;');
                 emit.down(1).text('ATYP = NOTHING;');
                 for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'parse' ? '' : '.default'}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
                     emit.down(1).text(i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;');
                 }
                 emit.down(1).text('return true;');
@@ -375,9 +375,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             }
             for (const mode of ['print', 'printDefault'] as const) {
                 emit.down(1).text(`${mode}: () => {`).indent();
-                emit.down(1).text('const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;');
+                emit.down(1).text('const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];');
                 for (let i = 0; i < arity; ++i) {
-                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'print' ? '' : '.default'}()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);`);
+                    emit.down(1).text(`if (!${exprVars[i]}${mode === 'print' ? '' : '.default'}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`);
                 }
                 emit.down(1).text('return true;');
                 emit.dedent().down(1).text('},');

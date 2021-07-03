@@ -28,17 +28,17 @@ module.exports = {
 function createList(mode, listItems) {
     return createRule(mode, {
         parse: function LST() {
-            const [APOSₒ, CPOSₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
             if (APOS === 0)
                 AREP = [];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
                     if (!parseInner(listItem.expr, true))
-                        return backtrack(APOSₒ, CPOSₒ);
+                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
                 else {
                     if (!listItem.expr())
-                        return backtrack(APOSₒ, CPOSₒ);
+                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 }
             }
             ATYP = LIST;
@@ -64,16 +64,16 @@ function createList(mode, listItems) {
         print: function LST() {
             if (ATYP !== LIST)
                 return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
                     if (!printInner(listItem.expr, true))
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else {
                     ATYP = LIST;
                     if (!listItem.expr())
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;
@@ -81,16 +81,16 @@ function createList(mode, listItems) {
         printDefault: function LST() {
             if (ATYP !== LIST && ATYP !== NOTHING)
                 return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const listItem of listItems) {
                 if (listItem.kind === 'Element') {
                     if (!printDefaultInner(listItem.expr.default))
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else {
                     ATYP = LIST;
                     if (!listItem.expr.default())
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;
@@ -100,7 +100,7 @@ function createList(mode, listItems) {
 function createRecord(mode, recordItems) {
     return createRule(mode, {
         parse: function RCD() {
-            const [APOSₒ, CPOSₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
             if (APOS === 0)
                 AREP = [];
             const fieldLabels = [];
@@ -112,15 +112,15 @@ function createRecord(mode, recordItems) {
                     }
                     else {
                         if (!parseInner(recordItem.label, true))
-                            return backtrack(APOSₒ, CPOSₒ);
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                         assert(ATYP === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS];
                     }
                     if (fieldLabels.includes(fieldLabel))
-                        return backtrack(APOSₒ, CPOSₒ);
+                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     if (!parseInner(recordItem.expr, true))
-                        return backtrack(APOSₒ, CPOSₒ);
+                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     const fieldValue = AREP[--APOS];
                     AREP[APOS++] = fieldLabel;
                     AREP[APOS++] = fieldValue;
@@ -129,11 +129,11 @@ function createRecord(mode, recordItems) {
                 else {
                     const apos = APOS;
                     if (!recordItem.expr())
-                        return backtrack(APOSₒ, CPOSₒ);
+                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     for (let i = apos; i < APOS; i += 2) {
                         const fieldLabel = AREP[i];
                         if (fieldLabels.includes(fieldLabel))
-                            return backtrack(APOSₒ, CPOSₒ);
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                         fieldLabels.push(fieldLabel);
                     }
                 }
@@ -186,7 +186,7 @@ function createRecord(mode, recordItems) {
         print: function RCD() {
             if (ATYP !== RECORD)
                 return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             const propList = AREP;
             const propCount = AREP.length;
             let bitmask = APOS;
@@ -212,13 +212,13 @@ function createRecord(mode, recordItems) {
                         bitmask += propBit;
                         continue outerLoop;
                     }
-                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else {
                     APOS = bitmask;
                     ATYP = RECORD;
                     if (!recordItem.expr())
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                     bitmask = APOS;
                 }
             }
@@ -228,20 +228,20 @@ function createRecord(mode, recordItems) {
         printDefault: function RCD() {
             if (ATYP !== RECORD && ATYP !== NOTHING)
                 return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const recordItem of recordItems) {
                 if (recordItem.kind === 'Field') {
                     if (typeof recordItem.label !== 'string') {
                         if (!printDefaultInner(recordItem.label))
-                            return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                            return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                     }
                     if (!printDefaultInner(recordItem.expr))
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else {
                     ATYP = RECORD;
                     if (!recordItem.expr())
-                        return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;
@@ -280,8 +280,6 @@ let ATYP;
 let CREP;
 let CPOS;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
-const savepoint = () => [APOS, CPOS];
-const backtrack = (APOSₒ, CPOSₒ, ATYPₒ) => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ !== null && ATYPₒ !== void 0 ? ATYPₒ : NOTHING, false);
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
@@ -508,41 +506,41 @@ function create(mode) {
         // SequenceExpression
         const 𝕊1 = createRule(mode, {
             parse: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 let seqType = NOTHING;
                 ATYP = NOTHING;
-                if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!a()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!a()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 ATYP |= seqType;
                 return true;
             },
             parseDefault: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 let seqType = NOTHING;
                 ATYP = NOTHING;
-                if (!a.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!a.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!x_3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!a.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!a.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 ATYP |= seqType;
                 return true;
             },
             print: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-                if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!x_3()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!a()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!a()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!x_3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!a()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             printDefault: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-                if (!a.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!x_3.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!a.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!a.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!x_3.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!a.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
         });
@@ -562,35 +560,35 @@ function create(mode) {
         // SequenceExpression
         const 𝕊2 = createRule(mode, {
             parse: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 let seqType = NOTHING;
                 ATYP = NOTHING;
-                if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 ATYP |= seqType;
                 return true;
             },
             parseDefault: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 let seqType = NOTHING;
                 ATYP = NOTHING;
-                if (!x_2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 seqType |= ATYP;
-                if (!x_2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                if (!x_2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 ATYP |= seqType;
                 return true;
             },
             print: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-                if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!x_2()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!x_2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!x_2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             printDefault: () => {
-                const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-                if (!x_2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-                if (!x_2.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!x_2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!x_2.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
         });
@@ -769,41 +767,41 @@ function create(mode) {
     // SequenceExpression
     const letexpr = createRule(mode, {
         parse: () => {
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             let seqType = NOTHING;
             ATYP = NOTHING;
-            if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!lx()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             seqType |= ATYP;
-            if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!letexpr_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             seqType |= ATYP;
-            if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!lx()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             ATYP |= seqType;
             return true;
         },
         parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             let seqType = NOTHING;
             ATYP = NOTHING;
-            if (!lx.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!lx.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             seqType |= ATYP;
-            if (!letexpr_sub1.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!letexpr_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             seqType |= ATYP;
-            if (!lx.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            if (!lx.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             ATYP |= seqType;
             return true;
         },
         print: () => {
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-            if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            if (!letexpr_sub1()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            if (!lx()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (!lx()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            if (!letexpr_sub1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            if (!lx()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             return true;
         },
         printDefault: () => {
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
-            if (!lx.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            if (!letexpr_sub1.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
-            if (!lx.default()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+            if (!lx.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            if (!letexpr_sub1.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+            if (!lx.default()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
             return true;
         },
     });

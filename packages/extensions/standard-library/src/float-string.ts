@@ -4,7 +4,7 @@ function floatString({mode}: StaticOptions): Rule {
     return createRule(mode, {
         parse: function FSTR() {
             let num = 0;
-            const [APOSₒ, CPOSₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
             const LEN = CREP.length;
             const EOS = 0;
             let digitCount = 0;
@@ -39,7 +39,7 @@ function floatString({mode}: StaticOptions): Rule {
             }
 
             // Ensure we have parsed at least one significant digit
-            if (digitCount === 0) return backtrack(APOSₒ, CPOSₒ);
+            if (digitCount === 0) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
             // Parse optional exponent
             if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
@@ -60,14 +60,14 @@ function floatString({mode}: StaticOptions): Rule {
                     CPOS += 1;
                     cc = CPOS < LEN ? CREP[CPOS] : EOS;
                 }
-                if (digitCount === 0) return backtrack(APOSₒ, CPOSₒ);
+                if (digitCount === 0) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
             }
 
             // There is a syntactically valid float. Delegate parsing to the JS runtime.
             // Reject the number if it parses to Infinity or Nan.
             // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
             num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
-            if (!Number.isFinite(num)) return backtrack(APOSₒ, CPOSₒ);
+            if (!Number.isFinite(num)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
             // Success
             emitScalar(num);

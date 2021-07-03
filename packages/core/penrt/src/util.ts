@@ -89,9 +89,6 @@ let CPOS: number;
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
 
-const savepoint = (): [APOS: number, CPOS: number] => [APOS, CPOS];
-const backtrack = (APOSₒ: number, CPOSₒ: number, ATYPₒ?: ATYP): false => (APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ ?? NOTHING, false);
-
 // TODO: temp testing...
 const theScalarArray: unknown[] = [];
 const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?

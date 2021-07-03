@@ -3,7 +3,7 @@
 function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
     return createRule(mode, {
         parse: function RCD() {
-            const [APOSₒ, CPOSₒ] = savepoint();
+            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
             if (APOS === 0) AREP = [];
             const fieldLabels: string[] = [];
             for (const recordItem of recordItems) {
@@ -16,15 +16,15 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     }
                     else {
                         // Dynamically-labelled field
-                        if (!parseInner(recordItem.label, true)) return backtrack(APOSₒ, CPOSₒ);
+                        if (!parseInner(recordItem.label, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                         assert(ATYP === STRING);
                         APOS -= 1;
                         fieldLabel = AREP[APOS] as string;
                     }
-                    if (fieldLabels.includes(fieldLabel)) return backtrack(APOSₒ, CPOSₒ);
+                    if (fieldLabels.includes(fieldLabel)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
                     // Parse field value
-                    if (!parseInner(recordItem.expr, true)) return backtrack(APOSₒ, CPOSₒ);
+                    if (!parseInner(recordItem.expr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
                     const fieldValue = AREP[--APOS];
                     AREP[APOS++] = fieldLabel;
@@ -33,10 +33,10 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                 }
                 else /* item.kind === 'Splice' */ {
                     const apos = APOS;
-                    if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ);
+                    if (!recordItem.expr()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     for (let i = apos; i < APOS; i += 2) {
                         const fieldLabel = AREP[i] as string;
-                        if (fieldLabels.includes(fieldLabel)) return backtrack(APOSₒ, CPOSₒ);
+                        if (fieldLabels.includes(fieldLabel)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                         fieldLabels.push(fieldLabel);
                     }
                 }
@@ -90,7 +90,7 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
 
         print: function RCD() {
             if (ATYP !== RECORD) return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             const propList = AREP;
             const propCount = AREP.length;
             let bitmask = APOS;
@@ -130,12 +130,12 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
                     }
 
                     // If we get here, no match... Ensure AREP is restored, since it may have been changed above.
-                    return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
                     APOS = bitmask;
                     ATYP = RECORD;
-                    if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!recordItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                     bitmask = APOS;
                 }
             }
@@ -145,21 +145,21 @@ function createRecord(mode: 'parse' | 'print', recordItems: RecordItem[]) {
 
         printDefault: function RCD() {
             if (ATYP !== RECORD && ATYP !== NOTHING) return false;
-            const [APOSₒ, CPOSₒ] = savepoint(), ATYPₒ = ATYP;
+            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
             for (const recordItem of recordItems) {
                 if (recordItem.kind === 'Field') {
                     // Print field label
                     if (typeof recordItem.label !== 'string') {
                         // Dynamically-labelled field
-                        if (!printDefaultInner(recordItem.label)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                        if (!printDefaultInner(recordItem.label)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                     }
 
                     // Print field value
-                    if (!printDefaultInner(recordItem.expr)) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!printDefaultInner(recordItem.expr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
                 else /* item.kind === 'Splice' */ {
                     ATYP = RECORD;
-                    if (!recordItem.expr()) return backtrack(APOSₒ, CPOSₒ, ATYPₒ);
+                    if (!recordItem.expr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 }
             }
             return true;
