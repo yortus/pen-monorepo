@@ -1,0 +1,126 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Pen",
+	"patterns": [
+		{"include": "#comment"},
+		{"include": "#module"}
+	],
+	"repository": {
+		"comment": {
+            "patterns": [
+                {
+                    "begin": "/\\*",
+                    "end": "\\*/",
+                    "name": "comment.block.pen"
+                },
+                {
+                    "match": "//.*$\\n?",
+                    "name": "comment.line.double-slash.pen"
+                }
+            ]
+        },
+		"module": {
+			"patterns": [
+				{"include": "#comment"},
+
+				{"include": "#bindingPattern"},
+				{"include": "#bindingName"},
+
+				{"include": "#string"},
+				{"include": "#literal"},
+				{"include": "#moduleSpec"},
+				{"include": "#keyword"},
+				{"include": "#operator"},
+				{"include": "#identifier"}
+			]
+		},
+		"bindingPattern": {
+			"begin": "\\((?=[^)]*\\)\\s*(?:\\=|\\-\\>))",
+			"end": "\\)(?=\\s*(?:\\=|\\-\\>))",
+			"patterns": [
+				{"include": "#comment"},
+				{"include": "#keyword"},
+				{
+					"match": "(\\w+)(?=\\s+as)",
+					"captures": {
+						"1": {"name": "entity.name.variable.pen"}
+					}
+				},
+				{
+					"match": "\\w+",
+					"name": "variable.other.constant.pen"
+				}
+
+			]
+        },
+		"bindingName": {
+			"match": "(\\w+)(?=\\s*(?:\\=|\\-\\>))",
+			"captures": {
+				"1": {"name": "variable.other.constant.pen"}
+			}
+        },
+		"string": {
+			"begin": "\"",
+			"end": "\"",
+			"name": "string.quoted.double.pen",
+			"patterns": [
+				{
+					"match": "\\\\x[0-9a-fA-F]+(?:-[0-9a-fA-F]+)?",
+					"name": "constant.numeric.pen"
+				},
+				{
+					"match": "\\\\[0-9]+(?:-[0-9]+)?",
+					"name": "constant.numeric.pen"
+				},
+				{
+					"match": "\\\\.",
+					"name": "constant.character.escape.pen"
+				},
+				{
+					"begin": "\\{",
+					"end": "\\}",
+					"beginCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.begin.pen"}
+					},
+					"endCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.begin.pen"}
+					},
+					"patterns": [
+						{"include": "#module"}
+					]
+				}
+			]
+		},
+		"literal": {
+			"patterns": [
+				{
+					"match": "[+-]?(?:(?:[0-9]+(?:[.][0-9]*)?(?:[eE][+-]?[0-9]+)?)|(?:[.][0-9]+(?:[eE][+-]?[0-9]+)?))",
+					"name": "constant.numeric.pen"
+				},
+				{
+					"match": "\\b(false|null|true)\\b",
+					"name": "constant.character.pen"
+				}
+			]
+		},
+		"moduleSpec": {
+			"match": "(?<=import\\s*)'[^']*'",
+			"name": "string.quoted.single.pen"
+		},
+		"keyword": {
+			"patterns": [{
+				"match": "\\b(abstract|as|concrete|import)\\b",
+				"name": "keyword.control.pen"
+			}]
+		},
+		"operator": {
+			"match": "[=|!?*]|\\-\\>",
+			"name": "keyword.operator.pen"
+        },
+		"identifier": {
+            "match": "\\w+",
+            "name": "entity.name.variable.pen"
+        }
+	},
+	"scopeName": "source.pen"
+}

@@ -7,7 +7,7 @@
  */
 
 
-(memoise, floatString, intString) = import 'std'
+(memoise, floatString as float, intString as int) = import 'std'
 
 
 start = expr
@@ -30,10 +30,10 @@ div = {
 }
 
 factor =
-    | !"0x"   !"0b"   floatString
-    | (co)"0x"   intString(base=16 signed=false)
-    | (co)"0b"   intString(base=2 signed=false)
-    | (co)"i"    intString(signed=false)
+    | !"0x"   !"0b"   float
+    | (co)"0x"   int(base=16 signed=false)
+    | (co)"0b"   int(base=2 signed=false)
+    | (co)"i"    int(signed=false)
     | (co)"("   expr   (co)")"
 
 ab = expr -> abstract expr
