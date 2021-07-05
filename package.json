@@ -23,7 +23,8 @@
         "parse-1mb": "node packages/test-suite/scripts/parse-1mb.js",
         "parse-1mb-opt": "node --trace-opt packages/test-suite/scripts/parse-1mb.js",
         "parse-1mb-deopt": "node --trace-deopt packages/test-suite/scripts/parse-1mb.js",
-        "parse-1mb-x": "node --trace-ic packages/test-suite/scripts/parse-1mb.js"
+        "parse-1mb-x": "node --trace-ic packages/test-suite/scripts/parse-1mb.js",
+        "vsce": "lerna run package --scope vscode-pen"
     },
     "devDependencies": {
         "@types/chai": "^4.2.0",

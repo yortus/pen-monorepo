@@ -3,8 +3,13 @@
     "displayName": "Pen",
     "description": "Syntax highlighting for pen",
     "version": "0.0.1",
-	"publisher": "yortus",
-    "repository": {"url": ""},
+    "scripts": {
+        "package": "vsce package"
+    },
+    "publisher": "yortus",
+    "repository": {
+        "url": ""
+    },
     "engines": {
         "vscode": "^1.57.0"
     },
@@ -12,16 +17,28 @@
         "Programming Languages"
     ],
     "contributes": {
-        "languages": [{
-            "id": "pen",
-            "aliases": ["Pen", "pen"],
-            "extensions": [".pen"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "pen",
-            "scopeName": "source.pen",
-            "path": "./syntaxes/pen.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "pen",
+                "aliases": [
+                    "Pen",
+                    "pen"
+                ],
+                "extensions": [
+                    ".pen"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "pen",
+                "scopeName": "source.pen",
+                "path": "./syntaxes/pen.tmLanguage.json"
+            }
+        ]
+    },
+    "devDependencies": {
+        "vsce": "^1.95.0"
     }
 }
