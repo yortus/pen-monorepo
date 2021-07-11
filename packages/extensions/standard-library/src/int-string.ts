@@ -9,96 +9,96 @@ function intString({mode}: StaticOptions): Func {
         assert(typeof signed === 'boolean');
 
         return createRule(mode, {
-            parse: function ISTR() {
-                let num = 0;
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+            parse: {
+                full: function ISTR() {
+                    let num = 0;
+                    const [APOSₒ, CPOSₒ] = [APOS, CPOS];
 
-                // Parse optional leading '-' sign (if signed)...
-                let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                let isNegative = false;
-                if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
-                    isNegative = true;
-                    MAX_NUM = 0x80000000;
-                    CPOS += 1;
-                }
+                    // Parse optional leading '-' sign (if signed)...
+                    let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                    let isNegative = false;
+                    if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
+                        isNegative = true;
+                        MAX_NUM = 0x80000000;
+                        CPOS += 1;
+                    }
 
-                // ...followed by one or more decimal digits. (NB: no exponents).
-                let digits = 0;
-                while (CPOS < CREP.length) {
+                    // ...followed by one or more decimal digits. (NB: no exponents).
+                    let digits = 0;
+                    while (CPOS < CREP.length) {
 
-                    // Read a digit.
-                    let c = CREP[CPOS];
-                    if (c >= 256) break;
-                    const digitValue = DIGIT_VALUES[c];
-                    if (digitValue >= base) break;
+                        // Read a digit.
+                        let c = CREP[CPOS];
+                        if (c >= 256) break;
+                        const digitValue = DIGIT_VALUES[c];
+                        if (digitValue >= base) break;
 
-                    // Update parsed number.
-                    num *= base;
-                    num += digitValue;
+                        // Update parsed number.
+                        num *= base;
+                        num += digitValue;
 
-                    // Check for overflow.
-                    if (num > MAX_NUM) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        // Check for overflow.
+                        if (num > MAX_NUM) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
-                    // Loop again.
-                    CPOS += 1;
-                    digits += 1;
-                }
+                        // Loop again.
+                        CPOS += 1;
+                        digits += 1;
+                    }
 
-                // Check that we parsed at least one digit.
-                if (digits === 0) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    // Check that we parsed at least one digit.
+                    if (digits === 0) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
 
-                // Apply the sign.
-                if (isNegative) num = -num;
+                    // Apply the sign.
+                    if (isNegative) num = -num;
 
-                // Success
-                emitScalar(num);
-                return true;
+                    // Success
+                    emitScalar(num);
+                    return true;
+                },
+
+                infer: function ISTR() {
+                    emitScalar(0);
+                },
             },
+            print: {
+                full: function ISTR() {
+                    const digits = [] as number[];
+                    if (AR !== SCALAR) return false;
+                    let num = AREP[APOS] as number;
+                    if (typeof num !== 'number') return false;
 
-            parseDefault: function ISTR() {
-                emitScalar(0);
-                return true;
-            },
+                    // Determine the number's sign and ensure it is in range.
+                    let isNegative = false;
+                    let MAX_NUM = 0x7FFFFFFF;
+                    if (num < 0) {
+                        if (!signed) return false;
+                        isNegative = true;
+                        num = -num;
+                        MAX_NUM = 0x80000000;
+                    }
+                    if (num > MAX_NUM) return false;
 
-            print: function ISTR() {
-                const digits = [] as number[];
-                if (AR !== SCALAR) return false;
-                let num = AREP[APOS] as number;
-                if (typeof num !== 'number') return false;
+                    // Extract the digits.
+                    while (true) {
+                        const d = num % base;
+                        num = (num / base) | 0;
+                        digits.push(CHAR_CODES[d]);
+                        if (num === 0) break;
+                    }
 
-                // Determine the number's sign and ensure it is in range.
-                let isNegative = false;
-                let MAX_NUM = 0x7FFFFFFF;
-                if (num < 0) {
-                    if (!signed) return false;
-                    isNegative = true;
-                    num = -num;
-                    MAX_NUM = 0x80000000;
-                }
-                if (num > MAX_NUM) return false;
+                    // Compute the final string.
+                    APOS += 1;
+                    if (isNegative) digits.push(HYPHEN);
 
-                // Extract the digits.
-                while (true) {
-                    const d = num % base;
-                    num = (num / base) | 0;
-                    digits.push(CHAR_CODES[d]);
-                    if (num === 0) break;
-                }
-
-                // Compute the final string.
-                APOS += 1;
-                if (isNegative) digits.push(HYPHEN);
-
-                // Success
-                for (let i = 0; i < digits.length; ++i) {
-                    CREP[CPOS++] = digits[i];
-                }
-                return true;
-            },
-
-            printDefault: function ISTR() {
-                CREP[CPOS++] = CHAR_CODES[0];
-                return true;
+                    // Success
+                    for (let i = 0; i < digits.length; ++i) {
+                        CREP[CPOS++] = digits[i];
+                    }
+                    return true;
+                },
+                infer: function ISTR() {
+                    CREP[CPOS++] = CHAR_CODES[0];
+                },
             },
         });
     };

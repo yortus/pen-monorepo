@@ -20,7 +20,7 @@ interface StaticOptions {mode: 'parse' | 'print'; }
 type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
-    default: Rule;
+    infer: () => void;
     constant?: {value: unknown}; // compile-time constant
 }
 interface Func {
@@ -41,21 +41,21 @@ function isModule(_x: PenVal): _x is Module {
     return true; // TODO: implement runtime check
 }
 function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
-    if (!impls.parse) throw new Error(`parse method is missing`);
-    if (!impls.parseDefault) throw new Error(`parseDefault method is missing`);
-    if (!impls.print) throw new Error(`print method is missing`);
-    if (!impls.printDefault) throw new Error(`printDefault method is missing`);
-    const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
-    let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
-    if (dflt === 'print') dflt = impls.print;
-    if (dflt === 'parse') dflt = impls.parse;
-    return Object.assign(impl, {default: Object.assign(dflt as any, {default: dflt})});
+    if (!impls[mode]) throw new Error(`${mode} object is missing`);
+    if (!impls[mode].full) throw new Error(`${mode}._ function is missing`);
+    if (!impls[mode].infer) throw new Error(`${mode}.infer function is missing`);
+    const {full, infer} = impls[mode];
+    return Object.assign(full, {infer});
 }
 interface RuleImpls {
-    parse: () => boolean;
-    parseDefault: (() => boolean) | 'parse';
-    print: (() => boolean) | 'parse';
-    printDefault: (() => boolean) | 'parse' | 'print';
+    parse: {
+        full: () => boolean;
+        infer: () => void;
+    };
+    print: {
+        full: () => boolean;
+        infer: () => void;
+    };
 }
 
 
@@ -143,6 +143,38 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     APOS = APOSₒ + 1;
     return true;
 }
+function parseInferInner(infer: () => void): void {
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined as any; // TODO: fix cast
+    APOS = 0;
+    infer();
+    if (AW === NOTHING) return;
+
+    let value: unknown;
+    switch (AW) {
+        case SCALAR:
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
+        case STRING:
+            value = (AREP as Buffer).toString('utf8', 0, APOS);
+            break;
+        case LIST:
+            if (AREP.length !== APOS) AREP.length = APOS;
+            value = AREP;
+            break;
+        case RECORD:
+            const obj = value = {} as Record<string, unknown>;
+            for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            break;
+        default:
+            // Ensure all cases have been handled, both at compile time and at runtime.
+            ((aw: never): never => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
+    }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+}
 
 function printInner(rule: Rule, mustConsume: boolean): boolean {
     const [AREPₒ, APOSₒ, ARₒ] = [AREP, APOS, AR];
@@ -210,12 +242,11 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     return true;
 }
 
-function printDefaultInner(rule: Rule): boolean {
+function printInferInner(infer: () => void): void {
     const ARₒ = AR;
     AR = NOTHING;
-    const result = rule();
+    infer();
     AR = ARₒ;
-    return result;
 }
 
 
@@ -238,14 +269,14 @@ function lazy(init: () => (arg: unknown) => unknown) {
             }
         },
         {
-            default(arg: unknown) {
+            infer(arg: unknown) {
                 try {
-                    return (f as any).default(arg);
+                    return (f as any).infer(arg);
                 }
                 catch (err) {
                     // TODO: restore??? if (!(err instanceof TypeError) || !err.message.includes('is not a function')) throw err;
                     f = init();
-                    return (f as any).default(arg);
+                    return (f as any).infer(arg);
                 }
             }
         }

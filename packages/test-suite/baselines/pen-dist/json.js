@@ -27,224 +27,215 @@ module.exports = {
 "use strict";
 function createList(mode, listItems) {
     return createRule(mode, {
-        parse: function LST() {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            if (APOS === 0)
-                AREP = [];
-            for (const listItem of listItems) {
-                if (listItem.kind === 'Element') {
-                    if (!parseInner(listItem.expr, true))
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0)
+                    AREP = [];
+                for (const listItem of listItems) {
+                    if (listItem.kind === 'Element') {
+                        if (!parseInner(listItem.expr, true))
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    }
+                    else {
+                        if (!listItem.expr())
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    }
                 }
-                else {
-                    if (!listItem.expr())
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0)
+                    AREP = [];
+                for (const listItem of listItems) {
+                    if (listItem.kind === 'Element') {
+                        parseInferInner(listItem.expr.infer);
+                    }
+                    else {
+                        listItem.expr.infer();
+                    }
                 }
-            }
-            AW = LIST;
-            return true;
+                AW = LIST;
+            },
         },
-        parseDefault: function LST() {
-            const APOSₒ = APOS;
-            if (APOS === 0)
-                AREP = [];
-            for (const listItem of listItems) {
-                if (listItem.kind === 'Element') {
-                    if (!parseInner(listItem.expr.default, true))
-                        return APOS = APOSₒ, false;
+        print: {
+            full: function LST() {
+                if (AR !== LIST)
+                    return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                for (const listItem of listItems) {
+                    if (listItem.kind === 'Element') {
+                        if (!printInner(listItem.expr, true))
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    }
+                    else {
+                        AR = LIST;
+                        if (!listItem.expr())
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    }
                 }
-                else {
-                    if (!listItem.expr.default())
-                        return APOS = APOSₒ, false;
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING)
+                    return false;
+                for (const listItem of listItems) {
+                    if (listItem.kind === 'Element') {
+                        printInferInner(listItem.expr.infer);
+                    }
+                    else {
+                        AR = LIST;
+                        listItem.expr.infer();
+                    }
                 }
-            }
-            AW = LIST;
-            return true;
-        },
-        print: function LST() {
-            if (AR !== LIST)
-                return false;
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            for (const listItem of listItems) {
-                if (listItem.kind === 'Element') {
-                    if (!printInner(listItem.expr, true))
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                }
-                else {
-                    AR = LIST;
-                    if (!listItem.expr())
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                }
-            }
-            return true;
-        },
-        printDefault: function LST() {
-            if (AR !== LIST && AR !== NOTHING)
-                return false;
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            for (const listItem of listItems) {
-                if (listItem.kind === 'Element') {
-                    if (!printDefaultInner(listItem.expr.default))
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                }
-                else {
-                    AR = LIST;
-                    if (!listItem.expr.default())
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                }
-            }
-            return true;
+            },
         },
     });
 }
 function createRecord(mode, recordItems) {
     return createRule(mode, {
-        parse: function RCD() {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            if (APOS === 0)
-                AREP = [];
-            const fieldLabels = [];
-            for (const recordItem of recordItems) {
-                if (recordItem.kind === 'Field') {
-                    let fieldLabel;
-                    if (typeof recordItem.label === 'string') {
-                        fieldLabel = recordItem.label;
-                    }
-                    else {
-                        if (!parseInner(recordItem.label, true))
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        assert(AW === STRING);
-                        APOS -= 1;
-                        fieldLabel = AREP[APOS];
-                    }
-                    if (fieldLabels.includes(fieldLabel))
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    if (!parseInner(recordItem.expr, true))
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    const fieldValue = AREP[--APOS];
-                    AREP[APOS++] = fieldLabel;
-                    AREP[APOS++] = fieldValue;
-                    fieldLabels.push(fieldLabel);
-                }
-                else {
-                    const apos = APOS;
-                    if (!recordItem.expr())
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    for (let i = apos; i < APOS; i += 2) {
-                        const fieldLabel = AREP[i];
-                        if (fieldLabels.includes(fieldLabel))
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        fieldLabels.push(fieldLabel);
-                    }
-                }
-            }
-            AW = RECORD;
-            return true;
-        },
-        parseDefault: function RCD() {
-            const APOSₒ = APOS;
-            if (APOS === 0)
-                AREP = [];
-            const fieldLabels = [];
-            for (const recordItem of recordItems) {
-                if (recordItem.kind === 'Field') {
-                    let fieldLabel;
-                    if (typeof recordItem.label === 'string') {
-                        fieldLabel = recordItem.label;
-                    }
-                    else {
-                        if (!parseInner(recordItem.label.default, true))
-                            return APOS = APOSₒ, false;
-                        assert(AW === STRING);
-                        APOS -= 1;
-                        fieldLabel = AREP[APOS];
-                    }
-                    if (fieldLabels.includes(fieldLabel))
-                        return APOS = APOSₒ, false;
-                    if (!parseInner(recordItem.expr.default, true))
-                        return APOS = APOSₒ, false;
-                    const fieldValue = AREP[--APOS];
-                    AREP[APOS++] = fieldLabel;
-                    AREP[APOS++] = fieldValue;
-                    fieldLabels.push(fieldLabel);
-                }
-                else {
-                    const apos = APOS;
-                    if (!recordItem.expr.default())
-                        return APOS = APOSₒ, false;
-                    for (let i = apos; i < APOS; i += 2) {
-                        const fieldLabel = AREP[i];
-                        if (fieldLabels.includes(fieldLabel))
-                            return APOS = APOSₒ, false;
-                        fieldLabels.push(fieldLabel);
-                    }
-                }
-            }
-            AW = RECORD;
-            return true;
-        },
-        print: function RCD() {
-            if (AR !== RECORD)
-                return false;
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            const propList = AREP;
-            const propCount = AREP.length;
-            let bitmask = APOS;
-            outerLoop: for (const recordItem of recordItems) {
-                if (recordItem.kind === 'Field') {
-                    for (let i = 0; i < propCount; ++i) {
-                        let propName = propList[i << 1];
-                        const propBit = 1 << i;
-                        if ((bitmask & propBit) !== 0)
-                            continue;
-                        if (typeof recordItem.label !== 'string') {
-                            APOS = i << 1;
-                            if (!printInner(recordItem.label, true))
-                                continue;
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0)
+                    AREP = [];
+                const fieldLabels = [];
+                for (const recordItem of recordItems) {
+                    if (recordItem.kind === 'Field') {
+                        let fieldLabel;
+                        if (typeof recordItem.label === 'string') {
+                            fieldLabel = recordItem.label;
                         }
                         else {
-                            if (propName !== recordItem.label)
-                                continue;
+                            if (!parseInner(recordItem.label, true))
+                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            assert(AW === STRING);
+                            APOS -= 1;
+                            fieldLabel = AREP[APOS];
                         }
-                        APOS = (i << 1) + 1;
-                        if (!printInner(recordItem.expr, true))
-                            continue;
-                        bitmask += propBit;
-                        continue outerLoop;
+                        if (fieldLabels.includes(fieldLabel))
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        if (!parseInner(recordItem.expr, true))
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        const fieldValue = AREP[--APOS];
+                        AREP[APOS++] = fieldLabel;
+                        AREP[APOS++] = fieldValue;
+                        fieldLabels.push(fieldLabel);
                     }
-                    return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    else {
+                        const apos = APOS;
+                        if (!recordItem.expr())
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        for (let i = apos; i < APOS; i += 2) {
+                            const fieldLabel = AREP[i];
+                            if (fieldLabels.includes(fieldLabel))
+                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            fieldLabels.push(fieldLabel);
+                        }
+                    }
                 }
-                else {
-                    APOS = bitmask;
-                    AR = RECORD;
-                    if (!recordItem.expr())
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                    bitmask = APOS;
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0)
+                    AREP = [];
+                const fieldLabels = [];
+                for (const recordItem of recordItems) {
+                    if (recordItem.kind === 'Field') {
+                        let fieldLabel;
+                        if (typeof recordItem.label === 'string') {
+                            fieldLabel = recordItem.label;
+                        }
+                        else {
+                            parseInferInner(recordItem.label.infer);
+                            assert(AW === STRING);
+                            APOS -= 1;
+                            fieldLabel = AREP[APOS];
+                        }
+                        if (fieldLabels.includes(fieldLabel))
+                            return APOS = APOSₒ, false;
+                        parseInferInner(recordItem.expr.infer);
+                        const fieldValue = AREP[--APOS];
+                        AREP[APOS++] = fieldLabel;
+                        AREP[APOS++] = fieldValue;
+                        fieldLabels.push(fieldLabel);
+                    }
+                    else {
+                        const apos = APOS;
+                        recordItem.expr.infer();
+                        for (let i = apos; i < APOS; i += 2) {
+                            const fieldLabel = AREP[i];
+                            if (fieldLabels.includes(fieldLabel))
+                                throw new Error(`duplicate field label`);
+                            fieldLabels.push(fieldLabel);
+                        }
+                    }
                 }
-            }
-            APOS = bitmask;
-            return true;
+                AW = RECORD;
+            },
         },
-        printDefault: function RCD() {
-            if (AR !== RECORD && AR !== NOTHING)
-                return false;
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            for (const recordItem of recordItems) {
-                if (recordItem.kind === 'Field') {
-                    if (typeof recordItem.label !== 'string') {
-                        if (!printDefaultInner(recordItem.label))
-                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD)
+                    return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length;
+                let bitmask = APOS;
+                outerLoop: for (const recordItem of recordItems) {
+                    if (recordItem.kind === 'Field') {
+                        for (let i = 0; i < propCount; ++i) {
+                            let propName = propList[i << 1];
+                            const propBit = 1 << i;
+                            if ((bitmask & propBit) !== 0)
+                                continue;
+                            if (typeof recordItem.label !== 'string') {
+                                APOS = i << 1;
+                                if (!printInner(recordItem.label, true))
+                                    continue;
+                            }
+                            else {
+                                if (propName !== recordItem.label)
+                                    continue;
+                            }
+                            APOS = (i << 1) + 1;
+                            if (!printInner(recordItem.expr, true))
+                                continue;
+                            bitmask += propBit;
+                            continue outerLoop;
+                        }
+                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     }
-                    if (!printDefaultInner(recordItem.expr))
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    else {
+                        APOS = bitmask;
+                        AR = RECORD;
+                        if (!recordItem.expr())
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        bitmask = APOS;
+                    }
                 }
-                else {
-                    AR = RECORD;
-                    if (!recordItem.expr())
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING)
+                    return false;
+                for (const recordItem of recordItems) {
+                    if (recordItem.kind === 'Field') {
+                        if (typeof recordItem.label !== 'string') {
+                            printInferInner(recordItem.label.infer);
+                        }
+                        printInferInner(recordItem.expr.infer);
+                    }
+                    else {
+                        AR = RECORD;
+                        recordItem.expr.infer();
+                    }
                 }
-            }
-            return true;
+            },
         },
     });
 }
@@ -258,21 +249,14 @@ function isModule(_x) {
     return true;
 }
 function createRule(mode, impls) {
-    if (!impls.parse)
-        throw new Error(`parse method is missing`);
-    if (!impls.parseDefault)
-        throw new Error(`parseDefault method is missing`);
-    if (!impls.print)
-        throw new Error(`print method is missing`);
-    if (!impls.printDefault)
-        throw new Error(`printDefault method is missing`);
-    const impl = mode === 'parse' ? impls.parse : impls.print === 'parse' ? impls.parse : impls.print;
-    let dflt = mode === 'parse' ? impls.parseDefault : impls.printDefault;
-    if (dflt === 'print')
-        dflt = impls.print;
-    if (dflt === 'parse')
-        dflt = impls.parse;
-    return Object.assign(impl, { default: Object.assign(dflt, { default: dflt }) });
+    if (!impls[mode])
+        throw new Error(`${mode} object is missing`);
+    if (!impls[mode].full)
+        throw new Error(`${mode}._ function is missing`);
+    if (!impls[mode].infer)
+        throw new Error(`${mode}.infer function is missing`);
+    const { full, infer } = impls[mode];
+    return Object.assign(full, { infer });
 }
 let AREP = [];
 let APOS = 0;
@@ -337,6 +321,39 @@ function parseInner(rule, mustProduce) {
     APOS = APOSₒ + 1;
     return true;
 }
+function parseInferInner(infer) {
+    const [AREPₒ, APOSₒ] = [AREP, APOS];
+    AREP = undefined;
+    APOS = 0;
+    infer();
+    if (AW === NOTHING)
+        return;
+    let value;
+    switch (AW) {
+        case SCALAR:
+            assert(APOS === 1);
+            value = AREP[0];
+            break;
+        case STRING:
+            value = AREP.toString('utf8', 0, APOS);
+            break;
+        case LIST:
+            if (AREP.length !== APOS)
+                AREP.length = APOS;
+            value = AREP;
+            break;
+        case RECORD:
+            const obj = value = {};
+            for (let i = 0; i < APOS; i += 2)
+                obj[AREP[i]] = AREP[i + 1];
+            break;
+        default:
+            ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
+    }
+    AREPₒ[APOSₒ] = value;
+    AREP = AREPₒ;
+    APOS = APOSₒ + 1;
+}
 function printInner(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ARₒ] = [AREP, APOS, AR];
     let value = AREP[APOS];
@@ -395,12 +412,11 @@ function printInner(rule, mustConsume) {
     APOS += 1;
     return true;
 }
-function printDefaultInner(rule) {
+function printInferInner(infer) {
     const ARₒ = AR;
     AR = NOTHING;
-    const result = rule();
+    infer();
     AR = ARₒ;
-    return result;
 }
 function assert(value) {
     if (!value)
@@ -419,13 +435,13 @@ function lazy(init) {
             return f(arg);
         }
     }, {
-        default(arg) {
+        infer(arg) {
             try {
-                return f.default(arg);
+                return f.infer(arg);
             }
             catch (err) {
                 f = init();
-                return f.default(arg);
+                return f.infer(arg);
             }
         }
     });
@@ -447,53 +463,20 @@ const extensions = {
         // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
         function floatString({ mode }) {
             return createRule(mode, {
-                parse: function FSTR() {
-                    let num = 0;
-                    const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                    const LEN = CREP.length;
-                    const EOS = 0;
-                    let digitCount = 0;
-                    // Parse optional '+' or '-' sign
-                    let cc = CREP[CPOS];
-                    if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
-                        CPOS += 1;
-                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        CPOS += 1;
-                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
-                    }
-                    // Parse optional '.'
-                    if (cc === DECIMAL_POINT) {
-                        CPOS += 1;
-                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
-                    }
-                    // Parse 0..M digits
-                    while (true) {
-                        if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
-                            break;
-                        digitCount += 1;
-                        CPOS += 1;
-                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
-                    }
-                    // Ensure we have parsed at least one significant digit
-                    if (digitCount === 0)
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    // Parse optional exponent
-                    if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
-                        CPOS += 1;
-                        cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                parse: {
+                    full: function FSTR() {
+                        let num = 0;
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const LEN = CREP.length;
+                        const EOS = 0;
+                        let digitCount = 0;
                         // Parse optional '+' or '-' sign
+                        let cc = CREP[CPOS];
                         if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                             CPOS += 1;
                             cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
-                        // Parse 1..M digits
-                        digitCount = 0;
+                        // Parse 0..M digits
                         while (true) {
                             if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
@@ -501,42 +484,77 @@ const extensions = {
                             CPOS += 1;
                             cc = CPOS < LEN ? CREP[CPOS] : EOS;
                         }
+                        // Parse optional '.'
+                        if (cc === DECIMAL_POINT) {
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                        }
+                        // Parse 0..M digits
+                        while (true) {
+                            if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
+                                break;
+                            digitCount += 1;
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                        }
+                        // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    }
-                    // There is a syntactically valid float. Delegate parsing to the JS runtime.
-                    // Reject the number if it parses to Infinity or Nan.
-                    // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                    num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
-                    if (!Number.isFinite(num))
-                        return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                    // Success
-                    emitScalar(num);
-                    return true;
+                        // Parse optional exponent
+                        if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
+                            CPOS += 1;
+                            cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                            // Parse optional '+' or '-' sign
+                            if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
+                                CPOS += 1;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                            }
+                            // Parse 1..M digits
+                            digitCount = 0;
+                            while (true) {
+                                if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
+                                    break;
+                                digitCount += 1;
+                                CPOS += 1;
+                                cc = CPOS < LEN ? CREP[CPOS] : EOS;
+                            }
+                            if (digitCount === 0)
+                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        }
+                        // There is a syntactically valid float. Delegate parsing to the JS runtime.
+                        // Reject the number if it parses to Infinity or Nan.
+                        // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
+                        num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
+                        if (!Number.isFinite(num))
+                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        // Success
+                        emitScalar(num);
+                        return true;
+                    },
+                    infer: function ISTR() {
+                        emitScalar(0);
+                    },
                 },
-                parseDefault: function ISTR() {
-                    emitScalar(0);
-                    return true;
-                },
-                print: function FSTR() {
-                    let out = '0';
-                    // Ensure N is a number.
-                    if (AR !== SCALAR)
-                        return false;
-                    let num = AREP[APOS];
-                    if (typeof num !== 'number')
-                        return false;
-                    APOS += 1;
-                    // Delegate unparsing to the JS runtime.
-                    // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                    out = String(num);
-                    // Success
-                    CPOS += CREP.write(out, CPOS, undefined, 'utf8');
-                    return true;
-                },
-                printDefault: function FSTR() {
-                    CREP[CPOS++] = ZERO_DIGIT;
-                    return true;
+                print: {
+                    full: function FSTR() {
+                        let out = '0';
+                        // Ensure N is a number.
+                        if (AR !== SCALAR)
+                            return false;
+                        let num = AREP[APOS];
+                        if (typeof num !== 'number')
+                            return false;
+                        APOS += 1;
+                        // Delegate unparsing to the JS runtime.
+                        // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
+                        out = String(num);
+                        // Success
+                        CPOS += CREP.write(out, CPOS, undefined, 'utf8');
+                        return true;
+                    },
+                    infer: function FSTR() {
+                        CREP[CPOS++] = ZERO_DIGIT;
+                    },
                 },
             });
         }
@@ -559,91 +577,93 @@ const extensions = {
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 return createRule(mode, {
-                    parse: function ISTR() {
-                        let num = 0;
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        // Parse optional leading '-' sign (if signed)...
-                        let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
-                        let isNegative = false;
-                        if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
-                            isNegative = true;
-                            MAX_NUM = 0x80000000;
-                            CPOS += 1;
-                        }
-                        // ...followed by one or more decimal digits. (NB: no exponents).
-                        let digits = 0;
-                        while (CPOS < CREP.length) {
-                            // Read a digit.
-                            let c = CREP[CPOS];
-                            if (c >= 256)
-                                break;
-                            const digitValue = DIGIT_VALUES[c];
-                            if (digitValue >= base)
-                                break;
-                            // Update parsed number.
-                            num *= base;
-                            num += digitValue;
-                            // Check for overflow.
-                            if (num > MAX_NUM)
+                    parse: {
+                        full: function ISTR() {
+                            let num = 0;
+                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            // Parse optional leading '-' sign (if signed)...
+                            let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
+                            let isNegative = false;
+                            if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
+                                isNegative = true;
+                                MAX_NUM = 0x80000000;
+                                CPOS += 1;
+                            }
+                            // ...followed by one or more decimal digits. (NB: no exponents).
+                            let digits = 0;
+                            while (CPOS < CREP.length) {
+                                // Read a digit.
+                                let c = CREP[CPOS];
+                                if (c >= 256)
+                                    break;
+                                const digitValue = DIGIT_VALUES[c];
+                                if (digitValue >= base)
+                                    break;
+                                // Update parsed number.
+                                num *= base;
+                                num += digitValue;
+                                // Check for overflow.
+                                if (num > MAX_NUM)
+                                    return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                // Loop again.
+                                CPOS += 1;
+                                digits += 1;
+                            }
+                            // Check that we parsed at least one digit.
+                            if (digits === 0)
                                 return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                            // Loop again.
-                            CPOS += 1;
-                            digits += 1;
-                        }
-                        // Check that we parsed at least one digit.
-                        if (digits === 0)
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        // Apply the sign.
-                        if (isNegative)
-                            num = -num;
-                        // Success
-                        emitScalar(num);
-                        return true;
+                            // Apply the sign.
+                            if (isNegative)
+                                num = -num;
+                            // Success
+                            emitScalar(num);
+                            return true;
+                        },
+                        infer: function ISTR() {
+                            emitScalar(0);
+                        },
                     },
-                    parseDefault: function ISTR() {
-                        emitScalar(0);
-                        return true;
-                    },
-                    print: function ISTR() {
-                        const digits = [];
-                        if (AR !== SCALAR)
-                            return false;
-                        let num = AREP[APOS];
-                        if (typeof num !== 'number')
-                            return false;
-                        // Determine the number's sign and ensure it is in range.
-                        let isNegative = false;
-                        let MAX_NUM = 0x7FFFFFFF;
-                        if (num < 0) {
-                            if (!signed)
+                    print: {
+                        full: function ISTR() {
+                            const digits = [];
+                            if (AR !== SCALAR)
                                 return false;
-                            isNegative = true;
-                            num = -num;
-                            MAX_NUM = 0x80000000;
-                        }
-                        if (num > MAX_NUM)
-                            return false;
-                        // Extract the digits.
-                        while (true) {
-                            const d = num % base;
-                            num = (num / base) | 0;
-                            digits.push(CHAR_CODES[d]);
-                            if (num === 0)
-                                break;
-                        }
-                        // Compute the final string.
-                        APOS += 1;
-                        if (isNegative)
-                            digits.push(HYPHEN);
-                        // Success
-                        for (let i = 0; i < digits.length; ++i) {
-                            CREP[CPOS++] = digits[i];
-                        }
-                        return true;
-                    },
-                    printDefault: function ISTR() {
-                        CREP[CPOS++] = CHAR_CODES[0];
-                        return true;
+                            let num = AREP[APOS];
+                            if (typeof num !== 'number')
+                                return false;
+                            // Determine the number's sign and ensure it is in range.
+                            let isNegative = false;
+                            let MAX_NUM = 0x7FFFFFFF;
+                            if (num < 0) {
+                                if (!signed)
+                                    return false;
+                                isNegative = true;
+                                num = -num;
+                                MAX_NUM = 0x80000000;
+                            }
+                            if (num > MAX_NUM)
+                                return false;
+                            // Extract the digits.
+                            while (true) {
+                                const d = num % base;
+                                num = (num / base) | 0;
+                                digits.push(CHAR_CODES[d]);
+                                if (num === 0)
+                                    break;
+                            }
+                            // Compute the final string.
+                            APOS += 1;
+                            if (isNegative)
+                                digits.push(HYPHEN);
+                            // Success
+                            for (let i = 0; i < digits.length; ++i) {
+                                CREP[CPOS++] = digits[i];
+                            }
+                            return true;
+                        },
+                        infer: function ISTR() {
+                            CREP[CPOS++] = CHAR_CODES[0];
+                        },
                     },
                 });
             };
@@ -683,165 +703,169 @@ const extensions = {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
                 return createRule(mode, {
-                    parse: function MEM() {
-                        const APOSₒ = APOS, CPOSₒ = CPOS;
-                        // Check whether the memo table already has an entry for the given initial state.
-                        let memos2 = memos.get(CREP);
-                        if (memos2 === undefined) {
-                            memos2 = new Map();
-                            memos.set(CREP, memos2);
-                        }
-                        let memo = memos2.get(CPOS);
-                        if (!memo) {
-                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                            // this initial state. The first thing we do is create a memo table entry, which is marked as
-                            // *unresolved*. All future applications of this rule with the same initial state will find this
-                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                            // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: CPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
-                            memos2.set(CPOS, memo);
-                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                            // At this point, any left-recursive paths encountered during application are guaranteed to have
-                            // been noted and aborted (see below).
-                            if (expr()) { // TODO: fix cast
-                                memo.result = true;
-                                memo.IPOSᐟ = CPOS;
-                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                                memo.ATYPᐟ = AW;
+                    parse: {
+                        full: function MEM() {
+                            const APOSₒ = APOS, CPOSₒ = CPOS;
+                            // Check whether the memo table already has an entry for the given initial state.
+                            let memos2 = memos.get(CREP);
+                            if (memos2 === undefined) {
+                                memos2 = new Map();
+                                memos.set(CREP, memos2);
                             }
-                            memo.resolved = true;
-                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                            // final.
-                            if (!memo.isLeftRecursive) {
-                                // No-op. Fall through to exit code.
+                            let memo = memos2.get(CPOS);
+                            if (!memo) {
+                                // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                                // this initial state. The first thing we do is create a memo table entry, which is marked as
+                                // *unresolved*. All future applications of this rule with the same initial state will find this
+                                // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                                // left-recursion.
+                                memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: CPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                                memos2.set(CPOS, memo);
+                                // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                                // At this point, any left-recursive paths encountered during application are guaranteed to have
+                                // been noted and aborted (see below).
+                                if (expr()) { // TODO: fix cast
+                                    memo.result = true;
+                                    memo.IPOSᐟ = CPOS;
+                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                    memo.ATYPᐟ = AW;
+                                }
+                                memo.resolved = true;
+                                // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                                // final.
+                                if (!memo.isLeftRecursive) {
+                                    // No-op. Fall through to exit code.
+                                }
+                                // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                                // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                                // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                                // the same rule with the same initial state. We continue to iterate as long as the application
+                                // succeeds and consumes more input than the previous iteration did, in which case we update the
+                                // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                                // does not consume more input, at which point we take the result of the previous iteration as
+                                // final.
+                                while (memo.result === true) {
+                                    APOS = APOSₒ, CPOS = CPOSₒ;
+                                    // TODO: break cases for UNPARSING:
+                                    // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                    // some node --> some different non-empty node (assert: should never happen!)
+                                    if (!expr())
+                                        break; // TODO: fix cast
+                                    if (CPOS <= memo.IPOSᐟ)
+                                        break;
+                                    // TODO: was for unparse... comment above says should never happen...
+                                    // if (!isInputFullyConsumed()) break;
+                                    memo.IPOSᐟ = CPOS;
+                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                    memo.ATYPᐟ = AW;
+                                }
                             }
-                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                            // the same rule with the same initial state. We continue to iterate as long as the application
-                            // succeeds and consumes more input than the previous iteration did, in which case we update the
-                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                            // does not consume more input, at which point we take the result of the previous iteration as
-                            // final.
-                            while (memo.result === true) {
-                                APOS = APOSₒ, CPOS = CPOSₒ;
-                                // TODO: break cases for UNPARSING:
-                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                                // some node --> some different non-empty node (assert: should never happen!)
-                                if (!expr())
-                                    break; // TODO: fix cast
-                                if (CPOS <= memo.IPOSᐟ)
-                                    break;
-                                // TODO: was for unparse... comment above says should never happen...
-                                // if (!isInputFullyConsumed()) break;
-                                memo.IPOSᐟ = CPOS;
-                                memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                                memo.ATYPᐟ = AW;
+                            else if (!memo.resolved) {
+                                // If we get here, then we have already applied the rule with this initial state, but not yet
+                                // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                                // note that the rule application encountered left-recursion, and return with failure. This means
+                                // that the initial application of the rule for this initial state can only possibly succeed along a
+                                // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                                // left-recursive rules.
+                                memo.isLeftRecursive = true;
+                                return false;
                             }
-                        }
-                        else if (!memo.resolved) {
-                            // If we get here, then we have already applied the rule with this initial state, but not yet
-                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                            // note that the rule application encountered left-recursion, and return with failure. This means
-                            // that the initial application of the rule for this initial state can only possibly succeed along a
-                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                            // left-recursive rules.
-                            memo.isLeftRecursive = true;
-                            return false;
-                        }
-                        // We have a resolved memo, so the result of the rule application for the given initial state has
-                        // already been computed. Return it from the memo.
-                        AW = memo.ATYPᐟ;
-                        AREP !== null && AREP !== void 0 ? AREP : (AREP = AW === STRING ? theBuffer : []);
-                        APOS = APOSₒ;
-                        CPOS = memo.IPOSᐟ;
-                        for (let i = 0; i < memo.OREPᐞ.length; ++i) {
-                            AREP[APOS++] = memo.OREPᐞ[i];
-                        }
-                        return memo.result;
+                            // We have a resolved memo, so the result of the rule application for the given initial state has
+                            // already been computed. Return it from the memo.
+                            AW = memo.ATYPᐟ;
+                            AREP !== null && AREP !== void 0 ? AREP : (AREP = AW === STRING ? theBuffer : []);
+                            APOS = APOSₒ;
+                            CPOS = memo.IPOSᐟ;
+                            for (let i = 0; i < memo.OREPᐞ.length; ++i) {
+                                AREP[APOS++] = memo.OREPᐞ[i];
+                            }
+                            return memo.result;
+                        },
+                        infer: function MEM() {
+                            // TODO: implement...
+                            throw new Error('memoise parseDefault: Not implemented');
+                        },
                     },
-                    parseDefault: function MEM() {
-                        // TODO: implement...
-                        throw new Error('memoise parseDefault: Not implemented');
-                    },
-                    print: function MEM() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        // Check whether the memo table already has an entry for the given initial state.
-                        let memos2 = memos.get(AREP);
-                        if (memos2 === undefined) {
-                            memos2 = new Map();
-                            memos.set(AREP, memos2);
-                        }
-                        let memo = memos2.get(APOS);
-                        if (!memo) {
-                            // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
-                            // this initial state. The first thing we do is create a memo table entry, which is marked as
-                            // *unresolved*. All future applications of this rule with the same initial state will find this
-                            // memo. If a future application finds the memo still unresolved, then we know we have encountered
-                            // left-recursion.
-                            memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: APOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
-                            memos2.set(APOS, memo);
-                            // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
-                            // At this point, any left-recursive paths encountered during application are guaranteed to have
-                            // been noted and aborted (see below).
-                            if (expr()) { // TODO: fix cast
-                                memo.result = true;
-                                memo.IPOSᐟ = APOS;
-                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                                memo.ATYPᐟ = AR;
+                    print: {
+                        full: function MEM() {
+                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            // Check whether the memo table already has an entry for the given initial state.
+                            let memos2 = memos.get(AREP);
+                            if (memos2 === undefined) {
+                                memos2 = new Map();
+                                memos.set(AREP, memos2);
                             }
-                            memo.resolved = true;
-                            // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
-                            // final.
-                            if (!memo.isLeftRecursive) {
-                                // No-op. Fall through to exit code.
+                            let memo = memos2.get(APOS);
+                            if (!memo) {
+                                // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
+                                // this initial state. The first thing we do is create a memo table entry, which is marked as
+                                // *unresolved*. All future applications of this rule with the same initial state will find this
+                                // memo. If a future application finds the memo still unresolved, then we know we have encountered
+                                // left-recursion.
+                                memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: APOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
+                                memos2.set(APOS, memo);
+                                // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
+                                // At this point, any left-recursive paths encountered during application are guaranteed to have
+                                // been noted and aborted (see below).
+                                if (expr()) { // TODO: fix cast
+                                    memo.result = true;
+                                    memo.IPOSᐟ = APOS;
+                                    memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
+                                    memo.ATYPᐟ = AR;
+                                }
+                                memo.resolved = true;
+                                // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
+                                // final.
+                                if (!memo.isLeftRecursive) {
+                                    // No-op. Fall through to exit code.
+                                }
+                                // If we get here, then the above application of the rule invoked itself left-recursively, but we
+                                // aborted the left-recursive paths (see below). That means that the result is either failure, or
+                                // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
+                                // the same rule with the same initial state. We continue to iterate as long as the application
+                                // succeeds and consumes more input than the previous iteration did, in which case we update the
+                                // memo with the new result. We thus 'grow' the result, stopping when application either fails or
+                                // does not consume more input, at which point we take the result of the previous iteration as
+                                // final.
+                                while (memo.result === true) {
+                                    APOS = APOSₒ;
+                                    CPOS = CPOSₒ;
+                                    // TODO: break cases for UNPARSING:
+                                    // anything --> same thing (covers all string cases, since they can only be same or shorter)
+                                    // some node --> some different non-empty node (assert: should never happen!)
+                                    if (!expr())
+                                        break; // TODO: fix cast
+                                    if (APOS <= memo.IPOSᐟ)
+                                        break;
+                                    // TODO: was for unparse... comment above says should never happen...
+                                    // if (!isInputFullyConsumed()) break;
+                                    memo.IPOSᐟ = APOS;
+                                    memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
+                                    memo.ATYPᐟ = AR;
+                                }
                             }
-                            // If we get here, then the above application of the rule invoked itself left-recursively, but we
-                            // aborted the left-recursive paths (see below). That means that the result is either failure, or
-                            // success via a non-left-recursive path through the rule. We now iterate, repeatedly re-applying
-                            // the same rule with the same initial state. We continue to iterate as long as the application
-                            // succeeds and consumes more input than the previous iteration did, in which case we update the
-                            // memo with the new result. We thus 'grow' the result, stopping when application either fails or
-                            // does not consume more input, at which point we take the result of the previous iteration as
-                            // final.
-                            while (memo.result === true) {
-                                APOS = APOSₒ;
-                                CPOS = CPOSₒ;
-                                // TODO: break cases for UNPARSING:
-                                // anything --> same thing (covers all string cases, since they can only be same or shorter)
-                                // some node --> some different non-empty node (assert: should never happen!)
-                                if (!expr())
-                                    break; // TODO: fix cast
-                                if (APOS <= memo.IPOSᐟ)
-                                    break;
-                                // TODO: was for unparse... comment above says should never happen...
-                                // if (!isInputFullyConsumed()) break;
-                                memo.IPOSᐟ = APOS;
-                                memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                                memo.ATYPᐟ = AR;
+                            else if (!memo.resolved) {
+                                // If we get here, then we have already applied the rule with this initial state, but not yet
+                                // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
+                                // note that the rule application encountered left-recursion, and return with failure. This means
+                                // that the initial application of the rule for this initial state can only possibly succeed along a
+                                // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
+                                // left-recursive rules.
+                                memo.isLeftRecursive = true;
+                                return false;
                             }
-                        }
-                        else if (!memo.resolved) {
-                            // If we get here, then we have already applied the rule with this initial state, but not yet
-                            // resolved it. That means we must have entered a left-recursive path of the rule. All we do here is
-                            // note that the rule application encountered left-recursion, and return with failure. This means
-                            // that the initial application of the rule for this initial state can only possibly succeed along a
-                            // non-left-recursive path. More importantly, it means the parser will never loop endlessly on
-                            // left-recursive rules.
-                            memo.isLeftRecursive = true;
-                            return false;
-                        }
-                        // We have a resolved memo, so the result of the rule application for the given initial state has
-                        // already been computed. Return it from the memo.
-                        APOS = memo.IPOSᐟ;
-                        CPOS = CPOSₒ;
-                        CPOS += memo.OREPᐞ.copy(CREP, CPOS);
-                        AR = memo.ATYPᐟ;
-                        return memo.result;
-                    },
-                    printDefault: function MEM() {
-                        // TODO: implement...
-                        throw new Error('memoise printDefault: Not implemented');
+                            // We have a resolved memo, so the result of the rule application for the given initial state has
+                            // already been computed. Return it from the memo.
+                            APOS = memo.IPOSᐟ;
+                            CPOS = CPOSₒ;
+                            CPOS += memo.OREPᐞ.copy(CREP, CPOS);
+                            AR = memo.ATYPᐟ;
+                            return memo.result;
+                        },
+                        infer: function MEM() {
+                            // TODO: implement...
+                            throw new Error('memoise printDefault: Not implemented');
+                        },
                     },
                 });
             };
@@ -868,70 +892,74 @@ const extensions = {
                 const pattern = `[0-${base < 10 ? base - 1 : 9}${base > 10 ? `a-${String.fromCharCode('a'.charCodeAt(0) + base - 11)}` : ''}]`;
                 const regex = RegExp(pattern, 'i');
                 return createRule(mode, {
-                    parse: function UNI() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        const LEN = CREP.length;
-                        const EOS = '';
-                        let len = 0;
-                        let num = ''; // TODO: fix this - should actually keep count
-                        let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
-                        while (true) {
-                            if (!regex.test(c))
-                                break;
-                            num += c;
-                            CPOS += 1;
-                            len += 1;
-                            if (len === maxDigits)
-                                break;
-                            c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
-                        }
-                        if (len < minDigits)
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        // tslint:disable-next-line: no-eval
-                        emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
-                        return true;
-                    },
-                    parseDefault: function UNI() {
-                        // TODO: generate default value...
-                        throw new Error('unicode parseDefault: Not implemented');
-                    },
-                    print: function UNI() {
-                        // TODO: respect VOID AREP/CREP...
-                        if (AR !== STRING)
-                            return false;
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        const bytes = AREP;
-                        let c = bytes[APOS++];
-                        if (c < 128) {
-                            // no-op
-                        }
-                        else if (c > 191 && c < 224) {
-                            if (APOS >= bytes.length)
+                    parse: {
+                        full: function UNI() {
+                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            const LEN = CREP.length;
+                            const EOS = '';
+                            let len = 0;
+                            let num = ''; // TODO: fix this - should actually keep count
+                            let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
+                            while (true) {
+                                if (!regex.test(c))
+                                    break;
+                                num += c;
+                                CPOS += 1;
+                                len += 1;
+                                if (len === maxDigits)
+                                    break;
+                                c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
+                            }
+                            if (len < minDigits)
                                 return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                            c = (c & 31) << 6 | bytes[APOS++] & 63;
-                        }
-                        else if (c > 223 && c < 240) {
-                            if (APOS + 1 >= bytes.length)
-                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                            c = (c & 15) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
-                        }
-                        else if (c > 239 && c < 248) {
-                            if (APOS + 2 >= bytes.length)
-                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                            c = (c & 7) << 18 | (bytes[APOS++] & 63) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
-                        }
-                        else
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        const s = c.toString(base).padStart(minDigits, '0');
-                        if (s.length > maxDigits)
-                            return false;
-                        CREP.write(s, CPOS);
-                        CPOS += s.length;
-                        return true;
+                            // tslint:disable-next-line: no-eval
+                            emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
+                            return true;
+                        },
+                        infer: function UNI() {
+                            // TODO: generate default value...
+                            throw new Error('unicode parseDefault: Not implemented');
+                        },
                     },
-                    printDefault: function UNI() {
-                        // TODO: generate default value...
-                        throw new Error('unicode printDefault: Not implemented');
+                    print: {
+                        full: function UNI() {
+                            // TODO: respect VOID AREP/CREP...
+                            if (AR !== STRING)
+                                return false;
+                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            const bytes = AREP;
+                            let c = bytes[APOS++];
+                            if (c < 128) {
+                                // no-op
+                            }
+                            else if (c > 191 && c < 224) {
+                                if (APOS >= bytes.length)
+                                    return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                c = (c & 31) << 6 | bytes[APOS++] & 63;
+                            }
+                            else if (c > 223 && c < 240) {
+                                if (APOS + 1 >= bytes.length)
+                                    return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                c = (c & 15) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
+                            }
+                            else if (c > 239 && c < 248) {
+                                if (APOS + 2 >= bytes.length)
+                                    return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                c = (c & 7) << 18 | (bytes[APOS++] & 63) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
+                            }
+                            else
+                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            const s = c.toString(base).padStart(minDigits, '0');
+                            if (s.length > maxDigits)
+                                return false;
+                            CREP.write(s, CPOS);
+                            CPOS += s.length;
+                            return true;
+                        },
+                        infer: function UNI() {
+                            // TODO: generate default value...
+                            throw new Error('unicode printDefault: Not implemented');
+                        },
                     },
                 });
             };
@@ -957,433 +985,408 @@ function create(mode) {
     // Identifier
     const floatString = global.Object.assign(
         arg => floatString_2(arg),
-        {default: arg => floatString_2.default(arg)},
+        {infer: arg => floatString_2.infer(arg)},
     );
 
     // Identifier
     const unicode = global.Object.assign(
         arg => unicode_2(arg),
-        {default: arg => unicode_2.default(arg)},
+        {infer: arg => unicode_2.infer(arg)},
     );
 
     // SequenceExpression
     const start_2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                Value.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                Value.infer();
+                WS.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Value = createRule(mode, {
-        parse: () => {
-            if (False()) return true;
-            if (Null()) return true;
-            if (True()) return true;
-            if (Object()) return true;
-            if (Array()) return true;
-            if (Number()) return true;
-            if (String()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return False() || Null() || True() || Object() || Array() || Number() || String(); },
+            infer: () => False.infer(),
         },
-        parseDefault: () => {
-            if (False.default()) return true;
-            if (Null.default()) return true;
-            if (True.default()) return true;
-            if (Object.default()) return true;
-            if (Array.default()) return true;
-            if (Number.default()) return true;
-            if (String.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (False.default()) return true;
-            if (Null.default()) return true;
-            if (True.default()) return true;
-            if (Object.default()) return true;
-            if (Array.default()) return true;
-            if (Number.default()) return true;
-            if (String.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return False() || Null() || True() || Object() || Array() || Number() || String(); },
+            infer: () => False.infer(),
         },
     });
 
     // SequenceExpression
     const False = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!False_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!False_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!False_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!False_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                False_sub1.infer();
+                seqType |= AW;
+                False_sub2.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!False_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!False_sub2.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!False_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!False_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!False_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!False_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!False_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!False_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                False_sub1.infer();
+                False_sub2.infer();
+            },
         },
     });
 
     // StringLiteral
     const False_sub1 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 5 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x66) return false;
-            if (CREP[CPOS + 1] !== 0x61) return false;
-            if (CREP[CPOS + 2] !== 0x6c) return false;
-            if (CREP[CPOS + 3] !== 0x73) return false;
-            if (CREP[CPOS + 4] !== 0x65) return false;
-            CPOS += 5;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 5 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x66) return false;
+                if (CREP[CPOS + 1] !== 0x61) return false;
+                if (CREP[CPOS + 2] !== 0x6c) return false;
+                if (CREP[CPOS + 3] !== 0x73) return false;
+                if (CREP[CPOS + 4] !== 0x65) return false;
+                CPOS += 5;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x66, 0x61, 0x6c, 0x73, 0x65);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x66;
-            CREP[CPOS++] = 0x61;
-            CREP[CPOS++] = 0x6c;
-            CREP[CPOS++] = 0x73;
-            CREP[CPOS++] = 0x65;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x66;
-            CREP[CPOS++] = 0x61;
-            CREP[CPOS++] = 0x6c;
-            CREP[CPOS++] = 0x73;
-            CREP[CPOS++] = 0x65;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x66;
+                CREP[CPOS++] = 0x61;
+                CREP[CPOS++] = 0x6c;
+                CREP[CPOS++] = 0x73;
+                CREP[CPOS++] = 0x65;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x66;
+                CREP[CPOS++] = 0x61;
+                CREP[CPOS++] = 0x6c;
+                CREP[CPOS++] = 0x73;
+                CREP[CPOS++] = 0x65;
+            },
         },
     });
     False_sub1.constant = {value: "false"};
 
     // BooleanLiteral
     const False_sub2 = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(false);
-            return true;
+        parse: {
+            full: () => (emitScalar(false), true),
+            infer: () => emitScalar(false),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== false) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== false) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     False_sub2.constant = {value: false};
 
     // SequenceExpression
     const Null = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Null_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Null_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!Null_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Null_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                Null_sub1.infer();
+                seqType |= AW;
+                Null_sub2.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Null_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Null_sub2.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Null_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Null_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Null_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Null_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!Null_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Null_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                Null_sub1.infer();
+                Null_sub2.infer();
+            },
         },
     });
 
     // StringLiteral
     const Null_sub1 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 4 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x6e) return false;
-            if (CREP[CPOS + 1] !== 0x75) return false;
-            if (CREP[CPOS + 2] !== 0x6c) return false;
-            if (CREP[CPOS + 3] !== 0x6c) return false;
-            CPOS += 4;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 4 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x6e) return false;
+                if (CREP[CPOS + 1] !== 0x75) return false;
+                if (CREP[CPOS + 2] !== 0x6c) return false;
+                if (CREP[CPOS + 3] !== 0x6c) return false;
+                CPOS += 4;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x6e, 0x75, 0x6c, 0x6c);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x6e;
-            CREP[CPOS++] = 0x75;
-            CREP[CPOS++] = 0x6c;
-            CREP[CPOS++] = 0x6c;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x6e;
-            CREP[CPOS++] = 0x75;
-            CREP[CPOS++] = 0x6c;
-            CREP[CPOS++] = 0x6c;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x6e;
+                CREP[CPOS++] = 0x75;
+                CREP[CPOS++] = 0x6c;
+                CREP[CPOS++] = 0x6c;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x6e;
+                CREP[CPOS++] = 0x75;
+                CREP[CPOS++] = 0x6c;
+                CREP[CPOS++] = 0x6c;
+            },
         },
     });
     Null_sub1.constant = {value: "null"};
 
     // NullLiteral
     const Null_sub2 = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(null);
-            return true;
+        parse: {
+            full: () => (emitScalar(null), true),
+            infer: () => emitScalar(null),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== null) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== null) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     Null_sub2.constant = {value: null};
 
     // SequenceExpression
     const True = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!True_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!True_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!True_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!True_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                True_sub1.infer();
+                seqType |= AW;
+                True_sub2.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!True_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!True_sub2.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!True_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!True_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!True_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!True_sub2.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!True_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!True_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                True_sub1.infer();
+                True_sub2.infer();
+            },
         },
     });
 
     // StringLiteral
     const True_sub1 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 4 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x74) return false;
-            if (CREP[CPOS + 1] !== 0x72) return false;
-            if (CREP[CPOS + 2] !== 0x75) return false;
-            if (CREP[CPOS + 3] !== 0x65) return false;
-            CPOS += 4;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 4 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x74) return false;
+                if (CREP[CPOS + 1] !== 0x72) return false;
+                if (CREP[CPOS + 2] !== 0x75) return false;
+                if (CREP[CPOS + 3] !== 0x65) return false;
+                CPOS += 4;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x74, 0x72, 0x75, 0x65);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x74;
-            CREP[CPOS++] = 0x72;
-            CREP[CPOS++] = 0x75;
-            CREP[CPOS++] = 0x65;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x74;
-            CREP[CPOS++] = 0x72;
-            CREP[CPOS++] = 0x75;
-            CREP[CPOS++] = 0x65;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x74;
+                CREP[CPOS++] = 0x72;
+                CREP[CPOS++] = 0x75;
+                CREP[CPOS++] = 0x65;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x74;
+                CREP[CPOS++] = 0x72;
+                CREP[CPOS++] = 0x75;
+                CREP[CPOS++] = 0x65;
+            },
         },
     });
     True_sub1.constant = {value: "true"};
 
     // BooleanLiteral
     const True_sub2 = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(true);
-            return true;
+        parse: {
+            full: () => (emitScalar(true), true),
+            infer: () => emitScalar(true),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== true) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== true) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     True_sub2.constant = {value: true};
 
     // SequenceExpression
     const Object = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!LBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Object_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                LBRACE.infer();
+                seqType |= AW;
+                Object_sub1.infer();
+                seqType |= AW;
+                RBRACE.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Object_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                LBRACE.infer();
+                Object_sub1.infer();
+                RBRACE.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Object_sub1 = createRule(mode, {
-        parse: () => {
-            if (Object_sub2()) return true;
-            if (Object_sub9()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Object_sub2() || Object_sub9(); },
+            infer: () => Object_sub2.infer(),
         },
-        parseDefault: () => {
-            if (Object_sub2.default()) return true;
-            if (Object_sub9.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Object_sub2.default()) return true;
-            if (Object_sub9.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Object_sub2() || Object_sub9(); },
+            infer: () => Object_sub2.infer(),
         },
     });
 
     // SequenceExpression
     const Object_sub2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Object_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object_sub5()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!Object_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Object_sub5()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                Object_sub3.infer();
+                seqType |= AW;
+                Object_sub5.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Object_sub3.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object_sub5.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Object_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object_sub5()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Object_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object_sub5.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!Object_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Object_sub5()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                Object_sub3.infer();
+                Object_sub5.infer();
+            },
         },
     });
 
@@ -1394,62 +1397,66 @@ function create(mode) {
 
     // SequenceExpression
     const Object_sub4 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COLON.infer();
+                seqType |= AW;
+                Value.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COLON.infer();
+                Value.infer();
+            },
         },
     });
 
     // QuantifiedExpression
     const Object_sub5 = createRule(mode, {
-        parse: () => {
-            let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
-            let seqType = AW = NOTHING;
-            while (true) {
-                if (!Object_sub6() || CPOS <= CPOSᐟ) break;
-                seqType |= AW;
-                CPOSᐟ = CPOS, APOSᐟ = APOS;
-            }
-            CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
-            return true;
+        parse: {
+            full: function QUA() {
+                let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+                let seqType = AW = NOTHING;
+                while (true) {
+                    if (!Object_sub6() || CPOS <= CPOSᐟ) break;
+                    seqType |= AW;
+                    CPOSᐟ = CPOS, APOSᐟ = APOS;
+                }
+                CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
+                return true;
+            },
+            infer: () => (AW = NOTHING),
         },
-        print: () => {
-            let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
-            while (true) {
-                if (!Object_sub6() || APOS <= APOSᐟ) break;
-                APOSᐟ = APOS, CPOSᐟ = CPOS;
-            }
-            APOS = APOSᐟ, CPOS = CPOSᐟ;
-            return true;
+        print: {
+            full: function QUA() {
+                let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+                while (true) {
+                    if (!Object_sub6() || APOS <= APOSᐟ) break;
+                    APOSᐟ = APOS, CPOSᐟ = CPOS;
+                }
+                APOS = APOSᐟ, CPOS = CPOSᐟ;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: () => (AW = NOTHING, true),
-        printDefault: () => true,
     });
 
     // RecordExpression
@@ -1459,69 +1466,69 @@ function create(mode) {
 
     // SequenceExpression
     const Object_sub7 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!String()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!String()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COMMA.infer();
+                seqType |= AW;
+                String.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!String.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!String()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!String.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!String()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COMMA.infer();
+                String.infer();
+            },
         },
     });
 
     // SequenceExpression
     const Object_sub8 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COLON.infer();
+                seqType |= AW;
+                Value.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COLON.infer();
+                Value.infer();
+            },
         },
     });
 
@@ -1530,61 +1537,53 @@ function create(mode) {
 
     // SequenceExpression
     const Object2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object2_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!LBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Object2_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                LBRACE.infer();
+                seqType |= AW;
+                Object2_sub1.infer();
+                seqType |= AW;
+                RBRACE.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Object2_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Object2_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!LBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Object2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                LBRACE.infer();
+                Object2_sub1.infer();
+                RBRACE.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Object2_sub1 = createRule(mode, {
-        parse: () => {
-            if (Properties()) return true;
-            if (Object2_sub2()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Properties() || Object2_sub2(); },
+            infer: () => Properties.infer(),
         },
-        parseDefault: () => {
-            if (Properties.default()) return true;
-            if (Object2_sub2.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Properties.default()) return true;
-            if (Object2_sub2.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Properties() || Object2_sub2(); },
+            infer: () => Properties.infer(),
         },
     });
 
@@ -1599,89 +1598,81 @@ function create(mode) {
 
     // SequenceExpression
     const Properties_sub1 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COLON()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COLON.infer();
+                seqType |= AW;
+                Value.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COLON.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COLON.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COLON()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COLON.infer();
+                Value.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Properties_sub2 = createRule(mode, {
-        parse: () => {
-            if (Properties_sub3()) return true;
-            if (Properties_sub4()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Properties_sub3() || Properties_sub4(); },
+            infer: () => Properties_sub3.infer(),
         },
-        parseDefault: () => {
-            if (Properties_sub3.default()) return true;
-            if (Properties_sub4.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Properties_sub3.default()) return true;
-            if (Properties_sub4.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Properties_sub3() || Properties_sub4(); },
+            infer: () => Properties_sub3.infer(),
         },
     });
 
     // SequenceExpression
     const Properties_sub3 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Properties()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Properties()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COMMA.infer();
+                seqType |= AW;
+                Properties.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Properties.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Properties()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Properties.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Properties()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COMMA.infer();
+                Properties.infer();
+            },
         },
     });
 
@@ -1690,95 +1681,87 @@ function create(mode) {
 
     // SequenceExpression
     const Array = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!LBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Array_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                LBRACKET.infer();
+                seqType |= AW;
+                Array_sub1.infer();
+                seqType |= AW;
+                RBRACKET.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACKET.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Array_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                LBRACKET.infer();
+                Array_sub1.infer();
+                RBRACKET.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Array_sub1 = createRule(mode, {
-        parse: () => {
-            if (Array_sub2()) return true;
-            if (Array_sub7()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Array_sub2() || Array_sub7(); },
+            infer: () => Array_sub2.infer(),
         },
-        parseDefault: () => {
-            if (Array_sub2.default()) return true;
-            if (Array_sub7.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Array_sub2.default()) return true;
-            if (Array_sub7.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Array_sub2() || Array_sub7(); },
+            infer: () => Array_sub2.infer(),
         },
     });
 
     // SequenceExpression
     const Array_sub2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Array_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array_sub4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!Array_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Array_sub4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                Array_sub3.infer();
+                seqType |= AW;
+                Array_sub4.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!Array_sub3.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array_sub4.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Array_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!Array_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array_sub4.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!Array_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Array_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                Array_sub3.infer();
+                Array_sub4.infer();
+            },
         },
     });
 
@@ -1789,28 +1772,32 @@ function create(mode) {
 
     // QuantifiedExpression
     const Array_sub4 = createRule(mode, {
-        parse: () => {
-            let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
-            let seqType = AW = NOTHING;
-            while (true) {
-                if (!Array_sub5() || CPOS <= CPOSᐟ) break;
-                seqType |= AW;
-                CPOSᐟ = CPOS, APOSᐟ = APOS;
-            }
-            CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
-            return true;
+        parse: {
+            full: function QUA() {
+                let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+                let seqType = AW = NOTHING;
+                while (true) {
+                    if (!Array_sub5() || CPOS <= CPOSᐟ) break;
+                    seqType |= AW;
+                    CPOSᐟ = CPOS, APOSᐟ = APOS;
+                }
+                CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
+                return true;
+            },
+            infer: () => (AW = NOTHING),
         },
-        print: () => {
-            let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
-            while (true) {
-                if (!Array_sub5() || APOS <= APOSᐟ) break;
-                APOSᐟ = APOS, CPOSᐟ = CPOS;
-            }
-            APOS = APOSᐟ, CPOS = CPOSᐟ;
-            return true;
+        print: {
+            full: function QUA() {
+                let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+                while (true) {
+                    if (!Array_sub5() || APOS <= APOSᐟ) break;
+                    APOSᐟ = APOS, CPOSᐟ = CPOS;
+                }
+                APOS = APOSᐟ, CPOS = CPOSᐟ;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: () => (AW = NOTHING, true),
-        printDefault: () => true,
     });
 
     // ListExpression
@@ -1820,35 +1807,35 @@ function create(mode) {
 
     // SequenceExpression
     const Array_sub6 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Value()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COMMA.infer();
+                seqType |= AW;
+                Value.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Value.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Value.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Value()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COMMA.infer();
+                Value.infer();
+            },
         },
     });
 
@@ -1857,61 +1844,53 @@ function create(mode) {
 
     // SequenceExpression
     const Array2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array2_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!LBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Array2_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACKET()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                LBRACKET.infer();
+                seqType |= AW;
+                Array2_sub1.infer();
+                seqType |= AW;
+                RBRACKET.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!LBRACKET.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Array2_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!LBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Array2_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!LBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Array2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACKET()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                LBRACKET.infer();
+                Array2_sub1.infer();
+                RBRACKET.infer();
+            },
         },
     });
 
     // SelectionExpression
     const Array2_sub1 = createRule(mode, {
-        parse: () => {
-            if (Elements()) return true;
-            if (Array2_sub2()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Elements() || Array2_sub2(); },
+            infer: () => Elements.infer(),
         },
-        parseDefault: () => {
-            if (Elements.default()) return true;
-            if (Array2_sub2.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Elements.default()) return true;
-            if (Array2_sub2.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Elements() || Array2_sub2(); },
+            infer: () => Elements.infer(),
         },
     });
 
@@ -1926,55 +1905,47 @@ function create(mode) {
 
     // SelectionExpression
     const Elements_sub1 = createRule(mode, {
-        parse: () => {
-            if (Elements_sub2()) return true;
-            if (Elements_sub3()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return Elements_sub2() || Elements_sub3(); },
+            infer: () => Elements_sub2.infer(),
         },
-        parseDefault: () => {
-            if (Elements_sub2.default()) return true;
-            if (Elements_sub3.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (Elements_sub2.default()) return true;
-            if (Elements_sub3.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return Elements_sub2() || Elements_sub3(); },
+            infer: () => Elements_sub2.infer(),
         },
     });
 
     // SequenceExpression
     const Elements_sub2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Elements()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!COMMA()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!Elements()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                COMMA.infer();
+                seqType |= AW;
+                Elements.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!COMMA.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!Elements.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Elements()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!COMMA.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!Elements.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!COMMA()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!Elements()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                COMMA.infer();
+                Elements.infer();
+            },
         },
     });
 
@@ -1984,1437 +1955,1360 @@ function create(mode) {
     // Identifier
     const Number = global.Object.assign(
         arg => floatString(arg),
-        {default: arg => floatString.default(arg)},
+        {infer: arg => floatString.infer(arg)},
     );
 
     // SequenceExpression
     const String = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!String_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!DOUBLE_QUOTE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!String_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!DOUBLE_QUOTE()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                DOUBLE_QUOTE.infer();
+                seqType |= AW;
+                String_sub1.infer();
+                seqType |= AW;
+                DOUBLE_QUOTE.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!String_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!String_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!String_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!DOUBLE_QUOTE.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!String_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!DOUBLE_QUOTE()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                DOUBLE_QUOTE.infer();
+                String_sub1.infer();
+                DOUBLE_QUOTE.infer();
+            },
         },
     });
 
     // QuantifiedExpression
     const String_sub1 = createRule(mode, {
-        parse: () => {
-            let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
-            let seqType = AW = NOTHING;
-            while (true) {
-                if (!CHAR() || CPOS <= CPOSᐟ) break;
-                seqType |= AW;
-                CPOSᐟ = CPOS, APOSᐟ = APOS;
-            }
-            CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
-            return true;
+        parse: {
+            full: function QUA() {
+                let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+                let seqType = AW = NOTHING;
+                while (true) {
+                    if (!CHAR() || CPOS <= CPOSᐟ) break;
+                    seqType |= AW;
+                    CPOSᐟ = CPOS, APOSᐟ = APOS;
+                }
+                CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
+                return true;
+            },
+            infer: () => (AW = NOTHING),
         },
-        print: () => {
-            let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
-            while (true) {
-                if (!CHAR() || APOS <= APOSᐟ) break;
-                APOSᐟ = APOS, CPOSᐟ = CPOS;
-            }
-            APOS = APOSᐟ, CPOS = CPOSᐟ;
-            return true;
+        print: {
+            full: function QUA() {
+                let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+                while (true) {
+                    if (!CHAR() || APOS <= APOSᐟ) break;
+                    APOSᐟ = APOS, CPOSᐟ = CPOS;
+                }
+                APOS = APOSᐟ, CPOS = CPOSᐟ;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: () => (AW = NOTHING, true),
-        printDefault: () => true,
     });
 
     // NumericLiteral
     const base = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(16);
-            return true;
+        parse: {
+            full: () => (emitScalar(16), true),
+            infer: () => emitScalar(16),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== 16) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== 16) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     base.constant = {value: 16};
 
     // NumericLiteral
     const minDigits = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(4);
-            return true;
+        parse: {
+            full: () => (emitScalar(4), true),
+            infer: () => emitScalar(4),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== 4) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== 4) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     minDigits.constant = {value: 4};
 
     // NumericLiteral
     const maxDigits = createRule(mode, {
-        parse: function LIT() {
-            emitScalar(4);
-            return true;
+        parse: {
+            full: () => (emitScalar(4), true),
+            infer: () => emitScalar(4),
         },
-        parseDefault: 'parse',
-        print: function LIT() {
-            if (AR !== SCALAR) return false;
-            if (AREP[APOS] !== 4) return false;
-            APOS += 1;
-            return true;
+        print: {
+            full: function LIT() {
+                if (AR !== SCALAR) return false;
+                if (AREP[APOS] !== 4) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        printDefault: function LIT() { return true; },
     });
     maxDigits.constant = {value: 4};
 
     // SelectionExpression
     const CHAR = createRule(mode, {
-        parse: () => {
-            if (CHAR_sub1()) return true;
-            if (CHAR_sub2()) return true;
-            if (CHAR_sub5()) return true;
-            if (CHAR_sub9()) return true;
-            if (CHAR_sub14()) return true;
-            if (CHAR_sub17()) return true;
-            if (CHAR_sub20()) return true;
-            if (CHAR_sub23()) return true;
-            if (CHAR_sub26()) return true;
-            if (CHAR_sub29()) return true;
-            if (CHAR_sub32()) return true;
-            if (CHAR_sub35()) return true;
-            if (CHAR_sub38()) return true;
-            return false;
+        parse: {
+            full: function SEL() { return CHAR_sub1() || CHAR_sub2() || CHAR_sub5() || CHAR_sub9() || CHAR_sub14() || CHAR_sub17() || CHAR_sub20() || CHAR_sub23() || CHAR_sub26() || CHAR_sub29() || CHAR_sub32() || CHAR_sub35() || CHAR_sub38(); },
+            infer: () => CHAR_sub1.infer(),
         },
-        parseDefault: () => {
-            if (CHAR_sub1.default()) return true;
-            if (CHAR_sub2.default()) return true;
-            if (CHAR_sub5.default()) return true;
-            if (CHAR_sub9.default()) return true;
-            if (CHAR_sub14.default()) return true;
-            if (CHAR_sub17.default()) return true;
-            if (CHAR_sub20.default()) return true;
-            if (CHAR_sub23.default()) return true;
-            if (CHAR_sub26.default()) return true;
-            if (CHAR_sub29.default()) return true;
-            if (CHAR_sub32.default()) return true;
-            if (CHAR_sub35.default()) return true;
-            if (CHAR_sub38.default()) return true;
-            return false;
-        },
-        print: 'parse',
-        printDefault: () => {
-            if (CHAR_sub1.default()) return true;
-            if (CHAR_sub2.default()) return true;
-            if (CHAR_sub5.default()) return true;
-            if (CHAR_sub9.default()) return true;
-            if (CHAR_sub14.default()) return true;
-            if (CHAR_sub17.default()) return true;
-            if (CHAR_sub20.default()) return true;
-            if (CHAR_sub23.default()) return true;
-            if (CHAR_sub26.default()) return true;
-            if (CHAR_sub29.default()) return true;
-            if (CHAR_sub32.default()) return true;
-            if (CHAR_sub35.default()) return true;
-            if (CHAR_sub38.default()) return true;
-            return false;
+        print: {
+            full: function SEL() { return CHAR_sub1() || CHAR_sub2() || CHAR_sub5() || CHAR_sub9() || CHAR_sub14() || CHAR_sub17() || CHAR_sub20() || CHAR_sub23() || CHAR_sub26() || CHAR_sub29() || CHAR_sub32() || CHAR_sub35() || CHAR_sub38(); },
+            infer: () => CHAR_sub1.infer(),
         },
     });
 
     // ByteExpression
     const CHAR_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc === 0x5c) return false;
-            if (cc === 0x22) return false;
-            if ((cc < 0x20 || cc > 0x7f)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc === 0x5c) return false;
+                if (cc === 0x22) return false;
+                if ((cc < 0x20 || cc > 0x7f)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x20);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x20;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc === 0x5c) return false;
-            if (cc === 0x22) return false;
-            if ((cc < 0x20 || cc > 0x7f)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x20;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc === 0x5c) return false;
+                if (cc === 0x22) return false;
+                if ((cc < 0x20 || cc > 0x7f)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x20;
+            },
         },
     });
 
     // SequenceExpression
     const CHAR_sub2 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub3.infer();
+                seqType |= AW;
+                CHAR_sub4.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub3.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub4.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub3.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub4.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub3.infer();
+                CHAR_sub4.infer();
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub3 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0xc0 || cc > 0xdf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0xc0 || cc > 0xdf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0xc0);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0xc0;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0xc0 || cc > 0xdf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0xc0;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0xc0 || cc > 0xdf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0xc0;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub4 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // SequenceExpression
     const CHAR_sub5 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub6()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub7()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub8()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub6()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub7()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub8()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub6.infer();
+                seqType |= AW;
+                CHAR_sub7.infer();
+                seqType |= AW;
+                CHAR_sub8.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub6.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub7.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub8.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub6()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub7()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub8()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub6.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub7.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub8.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub6()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub7()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub8()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub6.infer();
+                CHAR_sub7.infer();
+                CHAR_sub8.infer();
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub6 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0xe0 || cc > 0xef)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0xe0 || cc > 0xef)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0xe0);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0xe0;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0xe0 || cc > 0xef)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0xe0;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0xe0 || cc > 0xef)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0xe0;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub7 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub8 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // SequenceExpression
     const CHAR_sub9 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub10()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub11()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub12()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub13()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub10()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub11()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub12()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub13()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub10.infer();
+                seqType |= AW;
+                CHAR_sub11.infer();
+                seqType |= AW;
+                CHAR_sub12.infer();
+                seqType |= AW;
+                CHAR_sub13.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub10.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub11.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub12.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub13.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub10()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub11()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub12()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub13()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub10.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub11.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub12.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub13.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub10()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub11()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub12()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub13()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub10.infer();
+                CHAR_sub11.infer();
+                CHAR_sub12.infer();
+                CHAR_sub13.infer();
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub10 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0xf0 || cc > 0xf7)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0xf0 || cc > 0xf7)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0xf0);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0xf0;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0xf0 || cc > 0xf7)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0xf0;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0xf0 || cc > 0xf7)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0xf0;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub11 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub12 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // ByteExpression
     const CHAR_sub13 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            CPOS += 1;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                CPOS += 1;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x80);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if ((cc < 0x80 || cc > 0xbf)) return false;
-            APOS += 1;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x80;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if ((cc < 0x80 || cc > 0xbf)) return false;
+                APOS += 1;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x80;
+            },
         },
     });
 
     // SequenceExpression
     const CHAR_sub14 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub15()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub16()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub15()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub16()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub15.infer();
+                seqType |= AW;
+                CHAR_sub16.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub15.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub16.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub15()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub16()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub15.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub16.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub15()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub16()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub15.infer();
+                CHAR_sub16.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub15 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x22) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x22) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x22);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x22;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x22;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x22;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x22;
+            },
         },
     });
     CHAR_sub15.constant = {value: "\\\""};
 
     // ByteExpression
     const CHAR_sub16 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x22;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x22;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x22);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x22;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x22) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x22;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x22) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub17 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub18()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub19()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub18()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub19()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub18.infer();
+                seqType |= AW;
+                CHAR_sub19.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub18.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub19.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub18()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub19()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub18.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub19.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub18()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub19()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub18.infer();
+                CHAR_sub19.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub18 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x5c) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x5c) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x5c);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x5c;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x5c;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x5c;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x5c;
+            },
         },
     });
     CHAR_sub18.constant = {value: "\\\\"};
 
     // ByteExpression
     const CHAR_sub19 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x5c;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x5c;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x5c);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x5c;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x5c) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x5c;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x5c) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub20 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub21()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub22()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub21()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub22()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub21.infer();
+                seqType |= AW;
+                CHAR_sub22.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub21.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub22.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub21()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub22()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub21.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub22.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub21()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub22()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub21.infer();
+                CHAR_sub22.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub21 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x2f) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x2f) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x2f);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x2f;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x2f;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x2f;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x2f;
+            },
         },
     });
     CHAR_sub21.constant = {value: "\\/"};
 
     // ByteExpression
     const CHAR_sub22 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x2f;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x2f;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x2f);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x2f;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x2f) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x2f;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x2f) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub23 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub24()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub25()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub24()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub25()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub24.infer();
+                seqType |= AW;
+                CHAR_sub25.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub24.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub25.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub24()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub25()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub24.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub25.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub24()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub25()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub24.infer();
+                CHAR_sub25.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub24 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x62) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x62) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x62);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x62;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x62;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x62;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x62;
+            },
         },
     });
     CHAR_sub24.constant = {value: "\\b"};
 
     // ByteExpression
     const CHAR_sub25 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x08;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x08;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x08);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x08;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x08) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x08;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x08) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub26 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub27()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub28()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub27()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub28()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub27.infer();
+                seqType |= AW;
+                CHAR_sub28.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub27.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub28.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub27()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub28()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub27.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub28.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub27()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub28()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub27.infer();
+                CHAR_sub28.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub27 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x66) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x66) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x66);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x66;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x66;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x66;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x66;
+            },
         },
     });
     CHAR_sub27.constant = {value: "\\f"};
 
     // ByteExpression
     const CHAR_sub28 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x0c;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x0c;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x0c);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x0c;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x0c) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x0c;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x0c) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub29 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub30()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub31()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub30()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub31()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub30.infer();
+                seqType |= AW;
+                CHAR_sub31.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub30.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub31.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub30()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub31()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub30.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub31.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub30()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub31()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub30.infer();
+                CHAR_sub31.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub30 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x6e) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x6e) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x6e);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x6e;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x6e;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x6e;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x6e;
+            },
         },
     });
     CHAR_sub30.constant = {value: "\\n"};
 
     // ByteExpression
     const CHAR_sub31 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x0a;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x0a;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x0a);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x0a;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x0a) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x0a;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x0a) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub32 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub33()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub34()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub33()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub34()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub33.infer();
+                seqType |= AW;
+                CHAR_sub34.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub33.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub34.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub33()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub34()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub33.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub34.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub33()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub34()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub33.infer();
+                CHAR_sub34.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub33 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x72) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x72) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x72);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x72;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x72;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x72;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x72;
+            },
         },
     });
     CHAR_sub33.constant = {value: "\\r"};
 
     // ByteExpression
     const CHAR_sub34 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x0d;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x0d;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x0d);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x0d;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x0d) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x0d;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x0d) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub35 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub36()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub37()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub36()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub37()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub36.infer();
+                seqType |= AW;
+                CHAR_sub37.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub36.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub37.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub36()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub37()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub36.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub37.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub36()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub37()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub36.infer();
+                CHAR_sub37.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub36 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x74) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x74) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x74);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x74;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x74;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x74;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x74;
+            },
         },
     });
     CHAR_sub36.constant = {value: "\\t"};
 
     // ByteExpression
     const CHAR_sub37 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            cc = 0x09;
-            emitByte(cc);
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x09;
+                emitByte(cc);
+                return true;
+            },
+            infer: () => {
+                emitByte(0x09);
+            },
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x09;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            if (AR !== STRING) return false;
-            if (APOS >= AREP.length) return false;
-            cc = AREP[APOS];
-            if (cc !== 0x09) return false;
-            APOS += 1;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x09;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                if (AR !== STRING) return false;
+                if (APOS >= AREP.length) return false;
+                cc = AREP[APOS];
+                if (cc !== 0x09) return false;
+                APOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
     });
 
     // SequenceExpression
     const CHAR_sub38 = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub39()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub40()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!CHAR_sub39()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!CHAR_sub40()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                CHAR_sub39.infer();
+                seqType |= AW;
+                CHAR_sub40.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!CHAR_sub39.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!CHAR_sub40.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub39()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub40()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!CHAR_sub39.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!CHAR_sub40.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!CHAR_sub39()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!CHAR_sub40()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                CHAR_sub39.infer();
+                CHAR_sub40.infer();
+            },
         },
     });
 
     // StringLiteral
     const CHAR_sub39 = createRule(mode, {
-        parse: function STR() {
-            if (CPOS + 2 > CREP.length) return false;
-            if (CREP[CPOS + 0] !== 0x5c) return false;
-            if (CREP[CPOS + 1] !== 0x75) return false;
-            CPOS += 2;
-            return true;
+        parse: {
+            full: function STR() {
+                if (CPOS + 2 > CREP.length) return false;
+                if (CREP[CPOS + 0] !== 0x5c) return false;
+                if (CREP[CPOS + 1] !== 0x75) return false;
+                CPOS += 2;
+                return true;
+            },
+            infer: function STR() {
+            },
         },
-        parseDefault: function STR() {
-            emitBytes(0x5c, 0x75);
-            return true;
-        },
-        print: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x75;
-            return true;
-        },
-        printDefault: function STR() {
-            CREP[CPOS++] = 0x5c;
-            CREP[CPOS++] = 0x75;
-            return true;
+        print: {
+            full: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x75;
+                return true;
+            },
+            infer: function STR() {
+                CREP[CPOS++] = 0x5c;
+                CREP[CPOS++] = 0x75;
+            },
         },
     });
     CHAR_sub39.constant = {value: "\\u"};
@@ -3434,507 +3328,479 @@ function create(mode) {
 
     // SequenceExpression
     const LBRACE = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!LBRACE_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!LBRACE_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                LBRACE_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!LBRACE_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!LBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!LBRACE_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!LBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                LBRACE_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const LBRACE_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x7b) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x7b) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x7b;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x7b;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x7b;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x7b;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x7b;
+            },
         },
     });
 
     // SequenceExpression
     const RBRACE = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACE_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                RBRACE_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACE_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACE_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACE_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                RBRACE_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const RBRACE_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x7d) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x7d) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x7d;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x7d;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x7d;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x7d;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x7d;
+            },
         },
     });
 
     // SequenceExpression
     const LBRACKET = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!LBRACKET_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!LBRACKET_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                LBRACKET_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!LBRACKET_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!LBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!LBRACKET_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!LBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                LBRACKET_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const LBRACKET_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x5b) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x5b) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x5b;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x5b;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x5b;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x5b;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x5b;
+            },
         },
     });
 
     // SequenceExpression
     const RBRACKET = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!RBRACKET_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                RBRACKET_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!RBRACKET_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!RBRACKET_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!RBRACKET_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                RBRACKET_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const RBRACKET_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x5d) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x5d) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x5d;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x5d;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x5d;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x5d;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x5d;
+            },
         },
     });
 
     // SequenceExpression
     const COLON = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!COLON_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!COLON_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                COLON_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!COLON_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!COLON_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!COLON_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!COLON_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                COLON_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const COLON_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x3a) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x3a) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x3a;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x3a;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x3a;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x3a;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x3a;
+            },
         },
     });
 
     // SequenceExpression
     const COMMA = createRule(mode, {
-        parse: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!COMMA_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
+        parse: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                let seqType = AW = NOTHING;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!COMMA_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                seqType |= AW;
+                if (!WS()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW |= seqType;
+                return true;
+            },
+            infer: () => {
+                let seqType = AW = NOTHING;
+                WS.infer();
+                seqType |= AW;
+                COMMA_sub1.infer();
+                seqType |= AW;
+                WS.infer();
+                AW |= seqType;
+            },
         },
-        parseDefault: () => {
-            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-            let seqType = AW = NOTHING;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!COMMA_sub1.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            seqType |= AW;
-            if (!WS.default()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-            AW |= seqType;
-            return true;
-        },
-        print: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!COMMA_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
-        },
-        printDefault: () => {
-            const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!COMMA_sub1.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            if (!WS.default()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-            return true;
+        print: {
+            full: function SEQ() {
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!COMMA_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!WS()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: () => {
+                WS.infer();
+                COMMA_sub1.infer();
+                WS.infer();
+            },
         },
     });
 
     // ByteExpression
     const COMMA_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x2c) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x2c) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x2c;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x2c;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x2c;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x2c;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x2c;
+            },
         },
     });
 
     // ByteExpression
     const DOUBLE_QUOTE = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x22) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x22) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x22;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x22;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x22;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x22;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x22;
+            },
         },
     });
 
     // QuantifiedExpression
     const WS = createRule(mode, {
-        parse: () => {
-            let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
-            let seqType = AW = NOTHING;
-            while (true) {
-                if (!WS_sub1() || CPOS <= CPOSᐟ) break;
-                seqType |= AW;
-                CPOSᐟ = CPOS, APOSᐟ = APOS;
-            }
-            CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
-            return true;
+        parse: {
+            full: function QUA() {
+                let [CPOSᐟ, APOSᐟ] = [CPOS, APOS];
+                let seqType = AW = NOTHING;
+                while (true) {
+                    if (!WS_sub1() || CPOS <= CPOSᐟ) break;
+                    seqType |= AW;
+                    CPOSᐟ = CPOS, APOSᐟ = APOS;
+                }
+                CPOS = CPOSᐟ, APOS = APOSᐟ, AW = seqType;
+                return true;
+            },
+            infer: () => (AW = NOTHING),
         },
-        print: () => {
-            let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
-            while (true) {
-                if (!WS_sub1() || APOS <= APOSᐟ) break;
-                APOSᐟ = APOS, CPOSᐟ = CPOS;
-            }
-            APOS = APOSᐟ, CPOS = CPOSᐟ;
-            return true;
+        print: {
+            full: function QUA() {
+                let [APOSᐟ, CPOSᐟ] = [APOS, CPOS];
+                while (true) {
+                    if (!WS_sub1() || APOS <= APOSᐟ) break;
+                    APOSᐟ = APOS, CPOSᐟ = CPOS;
+                }
+                APOS = APOSᐟ, CPOS = CPOSᐟ;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: () => (AW = NOTHING, true),
-        printDefault: () => true,
     });
 
     // ByteExpression
     const WS_sub1 = createRule(mode, {
-        parse: function BYT() {
-            let cc;
-            if (CPOS >= CREP.length) return false;
-            cc = CREP[CPOS];
-            if (cc !== 0x20 && cc !== 0x09 && cc !== 0x0a && cc !== 0x0d) return false;
-            CPOS += 1;
-            return true;
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (CPOS >= CREP.length) return false;
+                cc = CREP[CPOS];
+                if (cc !== 0x20 && cc !== 0x09 && cc !== 0x0a && cc !== 0x0d) return false;
+                CPOS += 1;
+                return true;
+            },
+            infer: () => {},
         },
-        parseDefault: function BYT() {
-            let cc;
-            cc = 0x20;
-            emitByte(cc);
-            return true;
-        },
-        print: function BYT() {
-            let cc;
-            cc = 0x20;
-            CREP[CPOS++] = cc;
-            return true;
-        },
-        printDefault: function BYT() {
-            let cc;
-            cc = 0x20;
-            CREP[CPOS++] = cc;
-            return true;
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x20;
+                CREP[CPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                CREP[CPOS++] = 0x20;
+            },
         },
     });
 
