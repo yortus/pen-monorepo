@@ -3,6 +3,7 @@ export interface Emitter {
     indent(): this;
     dedent(): this;
     text(s: string): this;
+    lines(s: string):this;
     toString(): string;
 }
 
@@ -27,6 +28,17 @@ export function makeEmitter() {
         text(s: string) {
             parts.push(s);
             return emitter;
+        },
+        lines(s: string) {
+            const lines = s.split(/\r\n|\r|\n/).map(line => line.trim());
+            if (lines[0] === '') lines.shift();
+            if (lines[lines.length - 1] === '') lines.pop();
+            for (const line of lines) {
+                if ('}])'.includes(line[0])) this.dedent();
+                this.down(1).text(line);
+                if ('{[('.includes(line[line.length - 1])) this.indent();
+            }
+            return this;
         },
         toString() {
             return parts.join('');

@@ -134,7 +134,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
     // Emit expressions that may not be Rules
     switch (expr.kind) {
         case 'ApplicationExpression': {
-            emit.down(1).text(`const ${name} = lazy(() => ${expr.function.name}(${expr.argument.name}));`);
+            emit.lines(`const ${name} = lazy(() => ${expr.function.name}(${expr.argument.name}));`);
             return;
         }
 
@@ -148,27 +148,32 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'FunctionParameter':
         case 'Identifier': {
-            emit.down(1).text(`const ${name} = global.Object.assign(`).indent();
-            emit.down(1).text(`arg => ${expr.name}(arg),`);
-            emit.down(1).text(`{infer: arg => ${expr.name}.infer(arg)},`);
-            emit.dedent().down(1).text(`);`);
+            emit.lines(`
+                const ${name} = global.Object.assign(
+                    arg => ${expr.name}(arg),
+                    {infer: arg => ${expr.name}.infer(arg)},
+                );
+            `);
             return;
         }
 
         case 'MemberExpression':  {
-            emit.down(1).text(`const ${name} = (arg) => ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
+            emit.lines(`const ${name} = (arg) => ${expr.module.name}(${JSON.stringify(expr.member)})(arg);`);
             return;
         }
 
         case 'Module': {
-            emit.down(1).text(`const ${name} = (member) => {`).indent();
-            emit.down(1).text(`switch (member) {`).indent();
-            for (const [name, ref] of Object.entries(expr.bindings)) {
-                emit.down(1).text(`case '${name}': return ${ref.name};`);
-            }
-            emit.down(1).text(`default: return undefined;`);
-            emit.dedent().down(1).text(`}`);
-            emit.dedent().down(1).text(`};`);
+            emit.lines(`
+                const ${name} = (member) => {
+                    switch (member) {
+                        ${Object.entries(expr.bindings)
+                            .map(([name, ref]) => `case '${name}': return ${ref.name};`)
+                            .join('\n')
+                            || '// no members'}
+                        default: return undefined;
+                    }
+                };
+            `);
             return;
         }
     }
@@ -209,38 +214,42 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
     emit.down(1).text(`const ${name} = createRule(mode, {`).indent();
     switch (expr.kind) {
         case 'AbstractExpression': {
-            emit.down(1).text(`parse: {`).indent();
-            emit.down(1).text(`full: () => (${expr.expression.name}.infer(), true),`);
-            emit.down(1).text(`infer: () => ${expr.expression.name}.infer(),`);
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`print: {`).indent();
-            emit.down(1).text(`full: () => {`).indent();
-            emit.down(1).text(`const CPOSₒ = CPOS;`);
-            emit.down(1).text(`const result = ${expr.expression.name}();`);
-            emit.down(1).text(`CPOS = CPOSₒ;`);
-            emit.down(1).text(`return result;`);
-            emit.dedent().down(1).text(`},`);
-            emit.down(1).text(`infer: () => {},`);
-            emit.dedent().down(1).text('},');
+            emit.lines(`
+                parse: {
+                    full: () => (${expr.expression.name}.infer(), true),
+                    infer: () => ${expr.expression.name}.infer(),
+                },
+                print: {
+                    full: () => {
+                        const CPOSₒ = CPOS;
+                        const result = ${expr.expression.name}();
+                        CPOS = CPOSₒ;
+                        return result;
+                    },
+                    infer: () => {},
+                },
+            `);
             break;
         }
 
         case 'BooleanLiteral':
         case 'NullLiteral':
         case 'NumericLiteral': {
-            emit.down(1).text(`parse: {`).indent();
-            emit.down(1).text(`full: () => (emitScalar(${JSON.stringify(expr.value)}), true),`);
-            emit.down(1).text(`infer: () => emitScalar(${JSON.stringify(expr.value)}),`);
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`print: {`).indent();
-            emit.down(1).text(`full: function LIT() {`).indent();
-            emit.down(1).text(`if (AR !== SCALAR) return false;`);
-            emit.down(1).text(`if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false;`); // TODO: need to ensure APOS<ALEN too, also elsewhere similar...
-            emit.down(1).text(`APOS += 1;`);
-            emit.down(1).text(`return true;`);
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`infer: () => {},`);
-            emit.dedent().down(1).text('},');
+            emit.lines(`
+                parse: {
+                    full: () => (emitScalar(${JSON.stringify(expr.value)}), true),
+                    infer: () => emitScalar(${JSON.stringify(expr.value)}),
+                },
+                print: {
+                    full: function LIT() {
+                        if (AR !== SCALAR) return false;
+                        if (AREP[APOS] !== ${JSON.stringify(expr.value)}) return false; ${/* TODO: need to ensure APOS<ALEN too, also elsewhere similar... */''}
+                        APOS += 1;
+                        return true;
+                    },
+                    infer: () => {},
+                },
+            `);
             break;
         }
 
@@ -297,19 +306,21 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         }
 
         case 'ConcreteExpression': {
-            emit.down(1).text(`parse: {`).indent();
-            emit.down(1).text(`full: () => {`).indent();
-            emit.down(1).text(`const [APOSₒ, AREPₒ] = [APOS, AREP];`);
-            emit.down(1).text(`const result = ${expr.expression.name}();`);
-            emit.down(1).text(`APOS = APOSₒ, AREP = AREPₒ, AW = NOTHING;`);
-            emit.down(1).text(`return result;`);
-            emit.dedent().down(1).text(`},`);
-            emit.down(1).text(`infer: () => (AW = NOTHING),`);
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`print: {`).indent();
-            emit.down(1).text(`full: () => (${expr.expression.name}.infer(), true),`);
-            emit.down(1).text(`infer: () => ${expr.expression.name}.infer(),`);
-            emit.dedent().down(1).text(`},`);
+            emit.lines(`
+                parse: {
+                    full: () => {
+                        const [APOSₒ, AREPₒ] = [APOS, AREP];
+                        const result = ${expr.expression.name}();
+                        APOS = APOSₒ, AREP = AREPₒ, AW = NOTHING;
+                        return result;
+                    },
+                    infer: () => (AW = NOTHING),
+                },
+                print: {
+                    full: () => (${expr.expression.name}.infer(), true),
+                    infer: () => ${expr.expression.name}.infer(),
+                },
+            `);
             break;
         }
 
@@ -317,16 +328,17 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             // TODO: infer always succeeds, both for `not x` and `not not x`. Seems logically inconsistent. Implications? Alternatives?
             for (const mode of ['parse', 'print'] as const) {
                 const ARW = mode === 'parse' ? 'AW' : 'AR';
-                emit.down(1).text(`${mode}: {`).indent();
-                emit.down(1).text(`full: function NOT() {`).indent();
-                emit.down(1).text(`const [APOSₒ, CPOSₒ, ${ARW}ₒ] = [APOS, CPOS, ${ARW}];`);
-                emit.down(1).text(`const result = !${expr.expression.name}();`);
-                emit.down(1).text(`[APOS, CPOS, ${ARW}] = [APOSₒ, CPOSₒ, ${ARW}ₒ], false;`);
-                if (mode === 'parse') emit.down(1).text(`AW = NOTHING;`);
-                emit.down(1).text(`return result;`);
-                emit.dedent().down(1).text(`},`);
-                emit.down(1).text(`infer: () => ${mode === 'parse' ? '(AW = NOTHING)' : '{}'},`);
-                emit.dedent().down(1).text(`},`);
+                emit.lines(`
+                    ${mode}: {
+                        full: function NOT() {
+                            const [APOSₒ, CPOSₒ, ${ARW}ₒ] = [APOS, CPOS, ${ARW}];
+                            const result = !${expr.expression.name}();
+                            [APOS, CPOS, ${ARW}] = [APOSₒ, CPOSₒ, ${mode === 'parse' ? 'NOTHING' : `${ARW}ₒ`}];
+                            return result;
+                        },
+                        infer: () => ${mode === 'parse' ? '(AW = NOTHING)' : '{}'},
+                    },
+                `);
             }
             break;
         }
@@ -336,12 +348,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.down(1).text(`${mode}: {`).indent();
                 emit.down(1).text(`full: function QUA() {`).indent();
                 if (expr.quantifier === '?') {
-                    if (mode === 'parse') {
-                        emit.down(1).text(`if (!${expr.expression.name}()) AW = NOTHING;`);
-                    }
-                    else {
-                        emit.down(1).text(`${expr.expression.name}();`);
-                    }
+                    const call = `${expr.expression.name}()`;
+                    emit.lines(mode === 'parse' ? `if (!${call}) AW = NOTHING;` : `${call};`);
                     emit.down(1).text(`return true;`);
                 }
                 else /* expr.quantifier === '*' */ {
@@ -368,10 +376,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
             for (const mode of ['parse', 'print'] as const) {
-                emit.down(1).text(`${mode}: {`).indent();
-                emit.down(1).text(`full: function SEL() { return ${exprVars.map(n => `${n}()`).join(' || ') || 'false'}; },`);
-                emit.down(1).text(`infer: () => ${arity ? `${exprVars[0]}.infer()` : mode === 'parse' ? '(AW = NOTHING)' : '{}'},`);
-                emit.dedent().down(1).text('},');
+                emit.lines(`
+                    ${mode}: {
+                        full: function SEL() { return ${exprVars.map(n => `${n}()`).join(' || ') || 'false'}; },
+                        infer: () => ${arity ? `${exprVars[0]}.infer()` : mode === 'parse' ? '(AW = NOTHING)' : '{}'},
+                    },
+                `);
             }
             break;
         }
@@ -379,36 +389,40 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
         case 'SequenceExpression': {
             const arity = expr.expressions.length;
             const exprVars = expr.expressions.map(e => e.name);
-            emit.down(1).text(`parse: {`).indent();
-            emit.down(1).text(`full: function SEQ() {`).indent();
-            emit.down(1).text('const [APOSₒ, CPOSₒ] = [APOS, CPOS];');
-            emit.down(1).text('let seqType = AW = NOTHING;');
+            emit.lines(`
+                parse: {
+                    full: function SEQ() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        let seqType = AW = NOTHING;
+            `);
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`if (!${exprVars[i]}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`);
                 emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
             }
-            emit.down(1).text('return true;');
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`infer: () => {`).indent();
-            emit.down(1).text('let seqType = AW = NOTHING;');
+            emit.lines(`
+                        return true;
+                    },
+                    infer: () => {
+                        let seqType = AW = NOTHING;
+            `);
             for (let i = 0; i < arity; ++i) {
                 emit.down(1).text(`${exprVars[i]}.infer();`);
                 emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
             }
-            emit.dedent().down(1).text('},');
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`print: {`).indent();
-            emit.down(1).text(`full: function SEQ() {`).indent();
-            emit.down(1).text('const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];');
-            for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`if (!${exprVars[i]}()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;`);
-            }
-            emit.down(1).text('return true;');
-            emit.dedent().down(1).text('},');
-            emit.down(1).text(`infer: () => {`).indent();
-            for (let i = 0; i < arity; ++i) emit.down(1).text(`${exprVars[i]}.infer();`);
-            emit.dedent().down(1).text('},');
-            emit.dedent().down(1).text('},');
+            emit.lines(`
+                    },
+                },
+                print: {
+                    full: function SEQ() {
+                        const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                        ${exprVars.map(ev => `if (!${ev}()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;`).join('\n')}
+                        return true;
+                    },
+                    infer: () => {
+                        ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
+                    },
+                },
+            `);
             break;
         }
 

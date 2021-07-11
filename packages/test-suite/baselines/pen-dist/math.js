@@ -1647,8 +1647,7 @@ function create(mode) {
             full: function NOT() {
                 const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
                 const result = !factor_sub3();
-                [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
-                AW = NOTHING;
+                [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, NOTHING];
                 return result;
             },
             infer: () => (AW = NOTHING),
@@ -1657,7 +1656,7 @@ function create(mode) {
             full: function NOT() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
                 const result = !factor_sub3();
-                [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ];
                 return result;
             },
             infer: () => {},
@@ -1704,8 +1703,7 @@ function create(mode) {
             full: function NOT() {
                 const [APOSₒ, CPOSₒ, AWₒ] = [APOS, CPOS, AW];
                 const result = !factor_sub5();
-                [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, AWₒ], false;
-                AW = NOTHING;
+                [APOS, CPOS, AW] = [APOSₒ, CPOSₒ, NOTHING];
                 return result;
             },
             infer: () => (AW = NOTHING),
@@ -1714,7 +1712,7 @@ function create(mode) {
             full: function NOT() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
                 const result = !factor_sub5();
-                [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ];
                 return result;
             },
             infer: () => {},
