@@ -1,6 +1,7 @@
+
 // ------------------------------ Main exports ------------------------------
 module.exports = {
-    parse(strOrBuf) { // expects buf to be utf8 encoded
+    parse(strOrBuf) {
         CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
         CPOS = 0;
         AREP = [];

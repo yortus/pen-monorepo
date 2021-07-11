@@ -26,30 +26,29 @@ export function generateTargetCode(program: Program) {
     const emit = makeEmitter();
 
     // TODO: Emit main exports...
-    emit.down(0).text(`// ------------------------------ Main exports ------------------------------`);
-    emit.down(1).text(`module.exports = {`).indent();
-
-    emit.down(1).text(`parse(strOrBuf) { // expects buf to be utf8 encoded`).indent();
-    emit.down(1).text(`CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');`);
-    emit.down(1).text(`CPOS = 0;`);
-    emit.down(1).text(`AREP = [];`);
-    emit.down(1).text(`APOS = 0;`);
-    emit.down(1).text(`if (!parseInner(parse, false)) throw new Error('parse failed');`);
-    emit.down(1).text(`if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');`);
-    emit.down(1).text(`return AREP[0];`);
-    emit.dedent().down(1).text(`},`);
-
-    emit.down(1).text(`print(node, buf) {`).indent();
-    emit.down(1).text(`AREP = [node];`);
-    emit.down(1).text(`APOS = 0;`);
-    emit.down(1).text(`CREP = buf || Buffer.alloc(2 ** 22); // 4MB`);
-    emit.down(1).text(`CPOS = 0;`);
-    emit.down(1).text(`if (!printInner(print, false)) throw new Error('print failed');`);
-    emit.down(1).text(`if (CPOS > CREP.length) throw new Error('output buffer too small');`);
-    emit.down(1).text(`return buf ? CPOS : CREP.toString('utf8', 0, CPOS);`);
-    emit.dedent().down(1).text(`},`);
-
-    emit.dedent().down(1).text(`};`);
+    emit.lines(`
+        // ------------------------------ Main exports ------------------------------
+        module.exports = {
+            parse(strOrBuf) {${/* expects buf to be utf8 encoded */''}
+                CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
+                CPOS = 0;
+                AREP = [];
+                APOS = 0;
+                if (!parseInner(parse, false)) throw new Error('parse failed');
+                if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
+                return AREP[0];
+            },
+            print(node, buf) {
+                AREP = [node];
+                APOS = 0;
+                CREP = buf || Buffer.alloc(2 ** 22); // 4MB
+                CPOS = 0;
+                if (!printInner(print, false)) throw new Error('print failed');
+                if (CPOS > CREP.length) throw new Error('output buffer too small');
+                return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
+            },
+        };
+    `);
 
     // TODO: Emit runtime... penrt.js is copied into the dist/ dir as part of the postbuild script
     emit.down(5).text(`// ------------------------------ Runtime ------------------------------`);
