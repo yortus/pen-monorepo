@@ -43,7 +43,10 @@ function createRule(mode, impls) {
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];
-    return Object.assign(full, { infer });
+    const result = Object.assign(full, { infer });
+    if (impls.hasOwnProperty('constant'))
+        result.constant = impls.constant;
+    return result;
 }
 let AREP = [];
 let APOS = 0;
@@ -302,8 +305,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x78;
             },
         },
+        constant: "outer x",
     });
-    x.constant = {value: "outer x"};
 
     // FunctionExpression
     const REP = (ℙ1) => {
@@ -451,8 +454,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x78;
             },
         },
+        constant: "inner x",
     });
-    x_3.constant = {value: "inner x"};
 
     // NumericLiteral
     const a_2 = createRule(mode, {
@@ -469,8 +472,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 42,
     });
-    a_2.constant = {value: 42};
 
     // Module
     const nested = (member) => {
@@ -534,8 +537,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x78;
             },
         },
+        constant: "inner x",
     });
-    lx.constant = {value: "inner x"};
 
     // StringLiteral
     const ly = createRule(mode, {
@@ -572,8 +575,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x2a;
             },
         },
+        constant: "***",
     });
-    ly.constant = {value: "***"};
 
     // SequenceExpression
     const letexpr = createRule(mode, {

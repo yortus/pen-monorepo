@@ -43,7 +43,10 @@ function createRule(mode, impls) {
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];
-    return Object.assign(full, { infer });
+    const result = Object.assign(full, { infer });
+    if (impls.hasOwnProperty('constant'))
+        result.constant = impls.constant;
+    return result;
 }
 let AREP = [];
 let APOS = 0;
@@ -292,8 +295,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x6f;
             },
         },
+        constant: "foo",
     });
-    foo.constant = {value: "foo"};
 
     // StringLiteral
     const bar = createRule(mode, {
@@ -330,8 +333,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x72;
             },
         },
+        constant: "bar",
     });
-    bar.constant = {value: "bar"};
 
     // Identifier
     const a = global.Object.assign(
@@ -386,8 +389,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x32;
             },
         },
+        constant: "b2",
     });
-    b.constant = {value: "b2"};
 
     // StringLiteral
     const baz = createRule(mode, {
@@ -424,8 +427,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x7a;
             },
         },
+        constant: "baz",
     });
-    baz.constant = {value: "baz"};
 
     // StringLiteral
     const mem = createRule(mode, {
@@ -474,8 +477,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x72;
             },
         },
+        constant: "member",
     });
-    mem.constant = {value: "member"};
 
     // SelectionExpression
     const modExprMem = createRule(mode, {
@@ -676,8 +679,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x31;
             },
         },
+        constant: "c1",
     });
-    c1.constant = {value: "c1"};
 
     // StringLiteral
     const c2 = createRule(mode, {
@@ -710,8 +713,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x32;
             },
         },
+        constant: "c2",
     });
-    c2.constant = {value: "c2"};
 
     // Identifier
     const ref1 = global.Object.assign(

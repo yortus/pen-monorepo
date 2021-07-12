@@ -3,9 +3,9 @@
 function unicode(mode: 'parse' | 'print'): Func {
     return function UNI_function(expr) {
         assert(isModule(expr));
-        const base = expr('base')?.constant?.value as number;
-        const minDigits = expr('minDigits')?.constant?.value as number;
-        const maxDigits = expr('maxDigits')?.constant?.value as number;
+        const base = expr('base')?.constant;
+        const minDigits = expr('minDigits')?.constant;
+        const maxDigits = expr('maxDigits')?.constant;
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
         assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);

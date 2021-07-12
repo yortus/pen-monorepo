@@ -43,7 +43,10 @@ function createRule(mode, impls) {
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];
-    return Object.assign(full, { infer });
+    const result = Object.assign(full, { infer });
+    if (impls.hasOwnProperty('constant'))
+        result.constant = impls.constant;
+    return result;
 }
 let AREP = [];
 let APOS = 0;
@@ -359,10 +362,10 @@ const extensions = {
         // TODO: revise/document range of ints that can be parsed/printed by this rule
         function intString(mode) {
             return function ISTR_function(expr) {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d;
                 assert(isModule(expr));
-                const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
-                const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+                const base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) !== null && _b !== void 0 ? _b : 10;
+                const signed = (_d = (_c = expr('signed')) === null || _c === void 0 ? void 0 : _c.constant) !== null && _d !== void 0 ? _d : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 return createRule(mode, {
@@ -669,11 +672,11 @@ const extensions = {
         // see https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330 for encode/decode algo in js
         function unicode(mode) {
             return function UNI_function(expr) {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c;
                 assert(isModule(expr));
-                const base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value;
-                const minDigits = (_d = (_c = expr('minDigits')) === null || _c === void 0 ? void 0 : _c.constant) === null || _d === void 0 ? void 0 : _d.value;
-                const maxDigits = (_f = (_e = expr('maxDigits')) === null || _e === void 0 ? void 0 : _e.constant) === null || _f === void 0 ? void 0 : _f.value;
+                const base = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant;
+                const minDigits = (_b = expr('minDigits')) === null || _b === void 0 ? void 0 : _b.constant;
+                const maxDigits = (_c = expr('maxDigits')) === null || _c === void 0 ? void 0 : _c.constant;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof minDigits === 'number' && minDigits >= 1 && minDigits <= 8);
                 assert(typeof maxDigits === 'number' && maxDigits >= minDigits && maxDigits <= 8);
@@ -896,8 +899,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x65;
             },
         },
+        constant: "false",
     });
-    False_sub1.constant = {value: "false"};
 
     // BooleanLiteral
     const False_sub2 = createRule(mode, {
@@ -914,8 +917,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: false,
     });
-    False_sub2.constant = {value: false};
 
     // SequenceExpression
     const Null = createRule(mode, {
@@ -981,8 +984,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x6c;
             },
         },
+        constant: "null",
     });
-    Null_sub1.constant = {value: "null"};
 
     // NullLiteral
     const Null_sub2 = createRule(mode, {
@@ -999,8 +1002,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: null,
     });
-    Null_sub2.constant = {value: null};
 
     // SequenceExpression
     const True = createRule(mode, {
@@ -1066,8 +1069,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x65;
             },
         },
+        constant: "true",
     });
-    True_sub1.constant = {value: "true"};
 
     // BooleanLiteral
     const True_sub2 = createRule(mode, {
@@ -1084,8 +1087,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: true,
     });
-    True_sub2.constant = {value: true};
 
     // SequenceExpression
     const Object = createRule(mode, {
@@ -2188,8 +2191,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 16,
     });
-    base.constant = {value: 16};
 
     // NumericLiteral
     const minDigits = createRule(mode, {
@@ -2206,8 +2209,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 4,
     });
-    minDigits.constant = {value: 4};
 
     // NumericLiteral
     const maxDigits = createRule(mode, {
@@ -2224,8 +2227,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 4,
     });
-    maxDigits.constant = {value: 4};
 
     // SelectionExpression
     const CHAR = createRule(mode, {
@@ -2751,8 +2754,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x22;
             },
         },
+        constant: "\\\"",
     });
-    CHAR_sub15.constant = {value: "\\\""};
 
     // ByteExpression
     const CHAR_sub16 = createRule(mode, {
@@ -2839,8 +2842,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x5c;
             },
         },
+        constant: "\\\\",
     });
-    CHAR_sub18.constant = {value: "\\\\"};
 
     // ByteExpression
     const CHAR_sub19 = createRule(mode, {
@@ -2927,8 +2930,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x2f;
             },
         },
+        constant: "\\/",
     });
-    CHAR_sub21.constant = {value: "\\/"};
 
     // ByteExpression
     const CHAR_sub22 = createRule(mode, {
@@ -3015,8 +3018,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x62;
             },
         },
+        constant: "\\b",
     });
-    CHAR_sub24.constant = {value: "\\b"};
 
     // ByteExpression
     const CHAR_sub25 = createRule(mode, {
@@ -3103,8 +3106,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x66;
             },
         },
+        constant: "\\f",
     });
-    CHAR_sub27.constant = {value: "\\f"};
 
     // ByteExpression
     const CHAR_sub28 = createRule(mode, {
@@ -3191,8 +3194,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x6e;
             },
         },
+        constant: "\\n",
     });
-    CHAR_sub30.constant = {value: "\\n"};
 
     // ByteExpression
     const CHAR_sub31 = createRule(mode, {
@@ -3279,8 +3282,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x72;
             },
         },
+        constant: "\\r",
     });
-    CHAR_sub33.constant = {value: "\\r"};
 
     // ByteExpression
     const CHAR_sub34 = createRule(mode, {
@@ -3367,8 +3370,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x74;
             },
         },
+        constant: "\\t",
     });
-    CHAR_sub36.constant = {value: "\\t"};
 
     // ByteExpression
     const CHAR_sub37 = createRule(mode, {
@@ -3455,8 +3458,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x75;
             },
         },
+        constant: "\\u",
     });
-    CHAR_sub39.constant = {value: "\\u"};
 
     // ApplicationExpression
     const CHAR_sub40 = lazy(() => unicode(CHAR_sub41));

@@ -43,7 +43,10 @@ function createRule(mode, impls) {
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];
-    return Object.assign(full, { infer });
+    const result = Object.assign(full, { infer });
+    if (impls.hasOwnProperty('constant'))
+        result.constant = impls.constant;
+    return result;
 }
 let AREP = [];
 let APOS = 0;
@@ -359,10 +362,10 @@ const extensions = {
         // TODO: revise/document range of ints that can be parsed/printed by this rule
         function intString(mode) {
             return function ISTR_function(expr) {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d;
                 assert(isModule(expr));
-                const base = (_c = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 10;
-                const signed = (_f = (_e = (_d = expr('signed')) === null || _d === void 0 ? void 0 : _d.constant) === null || _e === void 0 ? void 0 : _e.value) !== null && _f !== void 0 ? _f : true;
+                const base = (_b = (_a = expr('base')) === null || _a === void 0 ? void 0 : _a.constant) !== null && _b !== void 0 ? _b : 10;
+                const signed = (_d = (_c = expr('signed')) === null || _c === void 0 ? void 0 : _c.constant) !== null && _d !== void 0 ? _d : true;
                 assert(typeof base === 'number' && base >= 2 && base <= 36);
                 assert(typeof signed === 'boolean');
                 return createRule(mode, {
@@ -807,8 +810,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x64;
             },
         },
+        constant: "add",
     });
-    add_sub2.constant = {value: "add"};
 
     // SequenceExpression
     const add_sub3 = createRule(mode, {
@@ -977,8 +980,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x62;
             },
         },
+        constant: "sub",
     });
-    sub_sub2.constant = {value: "sub"};
 
     // SequenceExpression
     const sub_sub3 = createRule(mode, {
@@ -1172,8 +1175,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x65;
             },
         },
+        constant: "type",
     });
-    mul_sub2.constant = {value: "type"};
 
     // ApplicationExpression
     const mul_sub3 = lazy(() => ab(mul_sub4));
@@ -1213,8 +1216,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x6c;
             },
         },
+        constant: "mul",
     });
-    mul_sub4.constant = {value: "mul"};
 
     // ApplicationExpression
     const mul_sub5 = lazy(() => ab(mul_sub6));
@@ -1254,8 +1257,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x73;
             },
         },
+        constant: "rhs",
     });
-    mul_sub6.constant = {value: "rhs"};
 
     // SequenceExpression
     const mul_sub7 = createRule(mode, {
@@ -1424,8 +1427,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x76;
             },
         },
+        constant: "div",
     });
-    div_sub2.constant = {value: "div"};
 
     // SequenceExpression
     const div_sub3 = createRule(mode, {
@@ -1512,8 +1515,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 16,
     });
-    base.constant = {value: 16};
 
     // BooleanLiteral
     const signed = createRule(mode, {
@@ -1530,8 +1533,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: false,
     });
-    signed.constant = {value: false};
 
     // NumericLiteral
     const base_2 = createRule(mode, {
@@ -1548,8 +1551,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: 2,
     });
-    base_2.constant = {value: 2};
 
     // BooleanLiteral
     const signed_2 = createRule(mode, {
@@ -1566,8 +1569,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: false,
     });
-    signed_2.constant = {value: false};
 
     // BooleanLiteral
     const signed_3 = createRule(mode, {
@@ -1584,8 +1587,8 @@ function create(mode) {
             },
             infer: () => {},
         },
+        constant: false,
     });
-    signed_3.constant = {value: false};
 
     // SelectionExpression
     const factor = createRule(mode, {
@@ -1692,8 +1695,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x78;
             },
         },
+        constant: "0x",
     });
-    factor_sub3.constant = {value: "0x"};
 
     // NotExpression
     const factor_sub4 = createRule(mode, {
@@ -1748,8 +1751,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x62;
             },
         },
+        constant: "0b",
     });
-    factor_sub5.constant = {value: "0b"};
 
     // SequenceExpression
     const factor_sub6 = createRule(mode, {
@@ -1819,8 +1822,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x78;
             },
         },
+        constant: "0x",
     });
-    factor_sub8.constant = {value: "0x"};
 
     // ApplicationExpression
     const factor_sub9 = lazy(() => int(factor_sub10));
@@ -1902,8 +1905,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x62;
             },
         },
+        constant: "0b",
     });
-    factor_sub13.constant = {value: "0b"};
 
     // ApplicationExpression
     const factor_sub14 = lazy(() => int(factor_sub15));

@@ -6,19 +6,12 @@ import {Emitter, makeEmitter} from './emitter';
 
 
 
-// TODO: is this a representation? Move out...
-export interface Program {
-    ast: V.AST<400>;
-    consts: Record<string, {value: unknown}>;
-}
-
-
 // TODO: jsdoc...
-export function generateTargetCode(program: Program) {
+export function generateTargetCode(ast: V.AST<400>) {
 
     // TODO: validate AST... move this to validate-ast.ts
-    assert(program.ast.start.expression.kind === 'Identifier');
-    assert(program.ast.start.expression.name.startsWith('start'));
+    assert(ast.start.expression.kind === 'Identifier');
+    assert(ast.start.expression.name.startsWith('start'));
 
 
 
@@ -57,17 +50,17 @@ export function generateTargetCode(program: Program) {
     content.split(/[\r\n]+/).filter(line => !!line.trim()).forEach(line => emit.down(1).text(line));
 
     // TODO: Emit extensions...
-    emitIntrinsics(emit, program);
+    emitIntrinsics(emit, ast);
 
     // TODO: Emit parse() and print() fns
-    emitProgram(emit, program);
+    emitProgram(emit, ast);
 
     // All done.
     return emit.down(1).toString();
 }
 
 
-function emitIntrinsics(emit: Emitter, {ast}: Program) {
+function emitIntrinsics(emit: Emitter, ast: V.AST<400>) {
     const {bindings} = ast.start;
     const isIntrinsic = (e: V.Expression<400>): e is V.Intrinsic => e.kind === 'Intrinsic';
     const extExprs = Object.keys(bindings).map(id => bindings[id]).filter(isIntrinsic);
@@ -86,8 +79,7 @@ function emitIntrinsics(emit: Emitter, {ast}: Program) {
 }
 
 
-function emitProgram(emit: Emitter, program: Program) {
-    const {consts, ast} = program;
+function emitProgram(emit: Emitter, ast: V.AST<400>) {
     const {bindings} = ast.start;
 
     // TODO: emit prolog...
@@ -97,24 +89,22 @@ function emitProgram(emit: Emitter, program: Program) {
     emit.down(1).text(`function create(mode) {`).indent();
 
     // TODO: emit top-level bindings
-    emitBindings(emit, bindings, consts);
+    emitBindings(emit, bindings);
 
     // TODO: emit epilog...
-    emit.down(2).text(`return ${program.ast.start.expression.name};`);
+    emit.down(2).text(`return ${ast.start.expression.name};`);
     emit.dedent().down(1).text('}');
 }
 
 
-function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record<string, {value: unknown}>) {
+function emitBindings(emit: Emitter, bindings: V.BindingMap<400>) {
     for (const [name, value] of Object.entries(bindings)) {
-        emitBinding(emit, name, value, consts);
-        if (consts[name] === undefined) continue;
-        emitConstant(emit, name, consts[name].value);
+        emitBinding(emit, name, value);
     }
 }
 
 
-function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, consts: Record<string, {value: unknown}>) {
+function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
     emit.down(2).text(`// ${expr.kind}`);
 
     // Emit expressions that may not be Rules
@@ -126,7 +116,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
 
         case 'FunctionExpression': {
             emit.down(1).text(`const ${name} = (${expr.param}) => {`).indent();
-            emitBindings(emit, expr.body.bindings, consts);
+            emitBindings(emit, expr.body.bindings);
             emit.down(2).text(`return ${expr.body.expression.name};`);
             emit.dedent().down(1).text(`};`);
             return;
@@ -208,6 +198,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     },
                     infer: () => {},
                 },
+                constant: ${JSON.stringify(expr.value)},
             `);
             break;
         }
@@ -578,6 +569,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 emit.dedent().down(1).text('},');
                 emit.dedent().down(1).text('},');
             }
+            emit.down(1).text(`constant: ${JSON.stringify(expr.value)},`);
             break;
         }
 
@@ -588,21 +580,4 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             // throw new Error('Internal Error'); // TODO...
     }
     emit.dedent().down(1).text(`});`);
-}
-
-
-// TODO: helper function
-function emitConstant(emit: Emitter, name: string, value: unknown) {
-    emit.down(1).text(`${name}.constant = {value: `);
-    if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
-        emit.text(String(value));
-    }
-    else if (typeof value === 'string') {
-        emit.text(JSON.stringify(value));
-    }
-    else {
-        // TODO: revisit when more const types exist
-        throw new Error(`Unsupported constant type '${typeof value}'`);
-    }
-    emit.text(`};`);
 }

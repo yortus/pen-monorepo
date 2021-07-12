@@ -11,7 +11,6 @@ import {resolveSymbols} from './transforms';
 import {optimiseByteExpressions} from './transforms';
 import {flattenExpressions} from './transforms';
 import {dedupeExpressions} from './transforms';
-import {resolveConstantValues} from './transforms';
 import {generateTargetCode} from './transforms';
 import {AbsPath} from './utils';
 
@@ -54,8 +53,7 @@ export function compile(options: CompilerOptions): CompilerResult {
     const ast3a = optimiseByteExpressions(ast2);
     const ast2b = flattenExpressions(ast3a);
     const ast2c = dedupeExpressions(ast2b);
-    const consts = resolveConstantValues(ast2c);
-    const targetCode = generateTargetCode({ast: ast2c, consts});
+    const targetCode = generateTargetCode(ast2c);
     return {
         eval() {
             let module = {} as {exports: ReturnType<CompilerResult['eval']>};

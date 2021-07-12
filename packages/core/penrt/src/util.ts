@@ -2,15 +2,15 @@ type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
     infer: () => void;
-    constant?: {value: unknown}; // compile-time constant
+    constant?: unknown; // compile-time constant
 }
 interface Func {
     (arg: PenVal): PenVal; // function
-    constant?: {value: unknown}; // compile-time constant
+    constant?: unknown; // compile-time constant
 }
 interface Module {
     (name: string): PenVal | undefined; // module
-    constant?: {value: unknown}; // compile-time constant
+    constant?: unknown; // compile-time constant
 }
 function isRule(_x: PenVal): _x is Rule {
     return true; // TODO: implement runtime check
@@ -26,7 +26,9 @@ function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
     if (!impls[mode].full) throw new Error(`${mode}._ function is missing`);
     if (!impls[mode].infer) throw new Error(`${mode}.infer function is missing`);
     const {full, infer} = impls[mode];
-    return Object.assign(full, {infer});
+    const result: Rule = Object.assign(full, {infer});
+    if (impls.hasOwnProperty('constant')) result.constant = impls.constant;
+    return result;
 }
 interface RuleImpls {
     parse: {
@@ -37,6 +39,7 @@ interface RuleImpls {
         full: () => boolean;
         infer: () => void;
     };
+    constant?: unknown;
 }
 
 

@@ -43,7 +43,10 @@ function createRule(mode, impls) {
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];
-    return Object.assign(full, { infer });
+    const result = Object.assign(full, { infer });
+    if (impls.hasOwnProperty('constant'))
+        result.constant = impls.constant;
+    return result;
 }
 let AREP = [];
 let APOS = 0;
@@ -549,8 +552,8 @@ function create(mode) {
             infer: function STR() {
             },
         },
+        constant: "b thing",
     });
-    b.constant = {value: "b thing"};
 
     // StringLiteral
     const d = createRule(mode, {
@@ -580,8 +583,8 @@ function create(mode) {
             infer: function STR() {
             },
         },
+        constant: "d thing",
     });
-    d.constant = {value: "d thing"};
 
     // Module
     const rec = (member) => {
@@ -657,8 +660,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x6f;
             },
         },
+        constant: "foo",
     });
-    f.constant = {value: "foo"};
 
     // StringLiteral
     const b_2 = createRule(mode, {
@@ -695,8 +698,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x72;
             },
         },
+        constant: "bar",
     });
-    b_2.constant = {value: "bar"};
 
     // StringLiteral
     const baz_2 = createRule(mode, {
@@ -733,8 +736,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x7a;
             },
         },
+        constant: "baz",
     });
-    baz_2.constant = {value: "baz"};
 
     // Module
     const Ɱ_a = (member) => {
@@ -839,8 +842,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x31;
             },
         },
+        constant: "util1",
     });
-    util1_2.constant = {value: "util1"};
 
     // Module
     const Ɱ_util1 = (member) => {
@@ -893,8 +896,8 @@ function create(mode) {
                 CREP[CPOS++] = 0x32;
             },
         },
+        constant: "util2",
     });
-    util2_2.constant = {value: "util2"};
 
     // Module
     const Ɱ_util2 = (member) => {

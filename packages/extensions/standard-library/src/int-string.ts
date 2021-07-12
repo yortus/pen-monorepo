@@ -3,8 +3,8 @@
 function intString(mode: 'parse' | 'print'): Func {
     return function ISTR_function(expr) {
         assert(isModule(expr));
-        const base = expr('base')?.constant?.value as number | undefined ?? 10;
-        const signed = expr('signed')?.constant?.value as boolean | undefined ?? true;
+        const base = expr('base')?.constant ?? 10;
+        const signed = expr('signed')?.constant ?? true;
         assert(typeof base === 'number' && base >= 2 && base <= 36);
         assert(typeof signed === 'boolean');
 
