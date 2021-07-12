@@ -168,43 +168,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                         ${Object.entries(expr.bindings)
                             .map(([name, ref]) => `case '${name}': return ${ref.name};`)
                             .join('\n')
-                            || '// no members'}
+                        }
                         default: return undefined;
                     }
                 };
             `);
-            return;
-        }
-    }
-
-    // Emit for list and record expressions (they need a lazy wrapper).
-    switch (expr.kind) {
-            case 'ListExpression': {
-            emit.down(1).text(`const ${name} = lazy(() => createList(mode, [`).indent();
-            for (const item of expr.items) {
-                emit.down(1).text(`{kind: '${item.kind === 'Splice' ? 'Splice' : 'Element'}', `);
-                emit.text(`expr: ${item.kind === 'Splice' ? item.expression.name : item.name}},`);
-            }
-            emit.dedent();
-            if (expr.items.length > 0) emit.down(1);
-            emit.text(`]));`);
-            return;
-        }
-
-        case 'RecordExpression': {
-            emit.down(1).text(`const ${name} = lazy(() => createRecord(mode, [`).indent();
-            for (const item of expr.items) {
-                emit.down(1).text(`{kind: '${item.kind}', `);
-                emit.text(`label: ${item.kind === 'Splice'
-                    ? 'undefined'
-                    : typeof item.label === 'string'
-                        ? JSON.stringify(item.label)
-                        : item.label.name}, `);
-                emit.text(`expr: ${item.kind === 'Field' ? item.expression.name : item.expression.name}},`);
-            }
-            emit.dedent();
-            if (expr.items.length > 0) emit.down(1);
-            emit.text(`]));`);
             return;
         }
     }
@@ -323,6 +291,58 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
             break;
         }
 
+        case 'ListExpression': {
+            emit.lines(`
+                parse: {
+                    full: function LST() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        if (APOS === 0) AREP = [];
+                        ${expr.items
+                            .map(item => item.kind === 'Splice'
+                                ? `if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`
+                                : `if (!parseInner(${item.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
+                            .join('\n')
+                        }
+                        AW = LIST;
+                        return true;
+                    },
+                    infer: function LST() {
+                        if (APOS === 0) AREP = [];
+                        ${expr.items
+                            .map(item => item.kind === 'Splice'
+                                ? `${item.expression.name}.infer();`
+                                : `parseInferInner(${item.name}.infer);`)
+                            .join('\n')
+                        }
+                        AW = LIST;
+                    },
+                },
+                print: {
+                    full: function LST() {
+                        if (AR !== LIST) return false;
+                        const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                        ${expr.items
+                            .map(item => item.kind === 'Splice'
+                                ? `AR = LIST;\nif (!${item.expression.name}()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;`
+                                : `if (!printInner(${item.name}, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;`)
+                            .join('\n')
+                        }
+                        return true;
+                    },
+                    infer: function LST() {
+                        if (AR !== LIST && AR !== NOTHING) return false;
+                        ${expr.items
+                            .map(item => item.kind === 'Splice'
+                                ? `AR = LIST;\n${item.expression.name}.infer();`
+                                : `printInferInner(${item.name}.infer);`)
+                            .join('\n')
+                        }
+                    },
+                },
+            `);
+            break;
+        }
+
         case 'NotExpression': {
             // TODO: infer always succeeds, both for `not x` and `not not x`. Seems logically inconsistent. Implications? Alternatives?
             for (const mode of ['parse', 'print'] as const) {
@@ -349,7 +369,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                 if (expr.quantifier === '?') {
                     const call = `${expr.expression.name}()`;
                     emit.lines(mode === 'parse' ? `if (!${call}) AW = NOTHING;` : `${call};`);
-                    emit.down(1).text(`return true;`);
                 }
                 else /* expr.quantifier === '*' */ {
                     const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
@@ -362,12 +381,114 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     emit.down(1).text(`${IPOS}ᐟ = ${IPOS}, ${OPOS}ᐟ = ${OPOS};`);
                     emit.dedent().down(1).text(`}`);
                     emit.down(1).text(`${IPOS} = ${IPOS}ᐟ, ${OPOS} = ${OPOS}ᐟ${mode === 'parse' ? ', AW = seqType' : ''};`);
-                    emit.down(1).text(`return true;`);
                 }
+                emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
                 emit.down(1).text(`infer: () => ${mode === 'parse' ? '(AW = NOTHING)' : '{}'},`);
                 emit.dedent().down(1).text('},');
             }
+            break;
+        }
+
+        case 'RecordExpression': {
+            // TODO: restore the duplication detection logic below (`fieldLabels` checks)
+            emit.lines(`
+                parse: {
+                    full: function RCD() {
+                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        if (APOS === 0) AREP = [];
+                        ${expr.items.map(item => `
+                            ${item.kind === 'Field' ? `
+                                ${/* Parse field label */ ''}
+                                ${typeof item.label === 'string' ? `
+                                    AREP[APOS++] = ${JSON.stringify(item.label)};
+                                ` : `
+                                    if (!parseInner(${item.label.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                    assert(AW === STRING);
+                                `}
+
+                                ${/* Parse field value */''}
+                                if (!parseInner(${item.expression.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            ` : /* item.kind === 'Splice' */ `
+                                const apos = APOS;
+                                if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            `}
+                        `).join('\n')}
+                        AW = RECORD;
+                        return true;
+                    },
+                    infer: function RCD() {
+                        const APOSₒ = APOS;
+                        if (APOS === 0) AREP = [];
+                        ${expr.items.map(item => `
+                            ${item.kind === 'Field' ? `
+                                ${/* Parse field label */''}
+                                ${typeof item.label === 'string' ? `
+                                    AREP[APOS++] = ${JSON.stringify(item.label)};
+                                ` : `
+                                    parseInferInner(${item.label.name}.infer);
+                                    assert(AW === STRING);
+                                `}
+
+                                ${/* Parse field value */ ''}
+                                parseInferInner(${item.expression.name}.infer);
+                            ` : /* item.kind === 'Splice' */ `
+                                const apos = APOS;
+                                ${item.expression.name}.infer();
+                            `}
+                        `).join('\n')}
+                        AW = RECORD;
+                    },
+                },
+                print: {
+                    full: function RCD() {
+                        if (AR !== RECORD) return false;
+                        const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                        const propList = AREP;
+                        const propCount = AREP.length >> 1;
+                        let bitmask = APOS;
+                        let i;
+                        ${expr.items.map(item => `
+                            ${item.kind === 'Field' ? `
+                                ${/* Print field label */ ''}
+                                ${typeof item.label === 'string' ? `
+                                    for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== ${JSON.stringify(item.label)}; ++i, APOS += 2) ;
+                                    if (i >= propCount) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                                ` : `
+                                    for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
+                                    if (i >= propCount || !printInner(${item.label.name}, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                                `}
+        
+                                ${/* Print field value */ ''}
+                                if (!printInner(${item.expression.name}, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                                bitmask += (1 << i);
+                            ` : /* item.kind === 'Splice' */ `
+                                APOS = bitmask;
+                                AR = RECORD;
+                                if (!${item.expression.name}()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                                bitmask = APOS;
+                            `}
+                        `).join('\n')}
+                        APOS = bitmask;
+                        return true;
+                    },
+                    infer: function RCD() {
+                        if (AR !== RECORD && AR !== NOTHING) return false;
+                        ${expr.items.map(item => `
+                            ${item.kind === 'Field' ? `
+                                ${/* Print field label */ ''}
+                                ${typeof item.label === 'string' ? '' : `printInferInner(${item.label.name}.infer);`}
+        
+                                ${/* Print field value */ ''}
+                                printInferInner(${item.expression.name}.infer);
+                            ` : /* item.kind === 'Splice' */ `
+                                AR = RECORD;
+                                ${item.expression.name}.infer();
+                            `}
+                        `).join('\n')}
+                    },
+                },
+            `);
             break;
         }
 
@@ -393,22 +514,24 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     full: function SEQ() {
                         const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                         let seqType = AW = NOTHING;
-            `);
-            for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`if (!${exprVars[i]}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`);
-                emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
-            }
-            emit.lines(`
+                        ${exprVars
+                            .map((ev, i) => `
+                                if (!${ev}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                ${i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;'}
+                            `)
+                            .join('\n')
+                        }
                         return true;
                     },
                     infer: () => {
                         let seqType = AW = NOTHING;
-            `);
-            for (let i = 0; i < arity; ++i) {
-                emit.down(1).text(`${exprVars[i]}.infer();`);
-                emit.down(1).text(i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;');
-            }
-            emit.lines(`
+                        ${exprVars
+                            .map((ev, i) => `
+                                ${ev}.infer();
+                                ${i < arity - 1 ? 'seqType |= AW;' : 'AW |= seqType;'}
+                            `)
+                            .join('\n')
+                        }
                     },
                 },
                 print: {

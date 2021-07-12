@@ -104,25 +104,19 @@ function createRecord(mode, recordItems) {
                 const fieldLabels = [];
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        let fieldLabel;
                         if (typeof recordItem.label === 'string') {
-                            fieldLabel = recordItem.label;
+                            AREP[APOS++] = recordItem.label;
                         }
                         else {
                             if (!parseInner(recordItem.label, true))
                                 return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                             assert(AW === STRING);
-                            APOS -= 1;
-                            fieldLabel = AREP[APOS];
                         }
-                        if (fieldLabels.includes(fieldLabel))
+                        if (fieldLabels.includes(AREP[APOS - 1]))
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        fieldLabels.push(AREP[APOS - 1]);
                         if (!parseInner(recordItem.expr, true))
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        const fieldValue = AREP[--APOS];
-                        AREP[APOS++] = fieldLabel;
-                        AREP[APOS++] = fieldValue;
-                        fieldLabels.push(fieldLabel);
                     }
                     else {
                         const apos = APOS;
@@ -146,23 +140,17 @@ function createRecord(mode, recordItems) {
                 const fieldLabels = [];
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        let fieldLabel;
                         if (typeof recordItem.label === 'string') {
-                            fieldLabel = recordItem.label;
+                            AREP[APOS++] = recordItem.label;
                         }
                         else {
                             parseInferInner(recordItem.label.infer);
                             assert(AW === STRING);
-                            APOS -= 1;
-                            fieldLabel = AREP[APOS];
                         }
-                        if (fieldLabels.includes(fieldLabel))
+                        if (fieldLabels.includes(AREP[APOS - 1]))
                             return APOS = APOSₒ, false;
+                        fieldLabels.push(AREP[APOS - 1]);
                         parseInferInner(recordItem.expr.infer);
-                        const fieldValue = AREP[--APOS];
-                        AREP[APOS++] = fieldLabel;
-                        AREP[APOS++] = fieldValue;
-                        fieldLabels.push(fieldLabel);
                     }
                     else {
                         const apos = APOS;
@@ -184,31 +172,26 @@ function createRecord(mode, recordItems) {
                     return false;
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
                 const propList = AREP;
-                const propCount = AREP.length;
+                const propCount = AREP.length >> 1;
                 let bitmask = APOS;
-                outerLoop: for (const recordItem of recordItems) {
+                let i;
+                for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        for (let i = 0; i < propCount; ++i) {
-                            let propName = propList[i << 1];
-                            const propBit = 1 << i;
-                            if ((bitmask & propBit) !== 0)
-                                continue;
-                            if (typeof recordItem.label !== 'string') {
-                                APOS = i << 1;
-                                if (!printInner(recordItem.label, true))
-                                    continue;
-                            }
-                            else {
-                                if (propName !== recordItem.label)
-                                    continue;
-                            }
-                            APOS = (i << 1) + 1;
-                            if (!printInner(recordItem.expr, true))
-                                continue;
-                            bitmask += propBit;
-                            continue outerLoop;
+                        if (typeof recordItem.label === 'string') {
+                            for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && recordItem.label !== propList[i << 1]; ++i, APOS += 2)
+                                ;
+                            if (i >= propCount)
+                                return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                         }
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        else {
+                            for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2)
+                                ;
+                            if (i >= propCount || !printInner(recordItem.label, true))
+                                return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        }
+                        if (!printInner(recordItem.expr, true))
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        bitmask += (1 << i);
                     }
                     else {
                         APOS = bitmask;
@@ -226,9 +209,8 @@ function createRecord(mode, recordItems) {
                     return false;
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        if (typeof recordItem.label !== 'string') {
+                        if (typeof recordItem.label !== 'string')
                             printInferInner(recordItem.label.infer);
-                        }
                         printInferInner(recordItem.expr.infer);
                     }
                     else {
@@ -313,6 +295,8 @@ function parseInner(rule, mustProduce) {
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
+            if (Object.keys(obj).length * 2 < APOS)
+                throw new Error(`Duplicate labels in record`);
             break;
         default:
             ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
@@ -1392,9 +1376,48 @@ function create(mode) {
     });
 
     // RecordExpression
-    const Object_sub3 = lazy(() => createRecord(mode, [
-        {kind: 'Field', label: String, expr: Object_sub4},
-    ]));
+    const Object_sub3 = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(String, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                assert(AW === STRING);
+                if (!parseInner(Object_sub4, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                parseInferInner(String.infer);
+                assert(AW === STRING);
+                parseInferInner(Object_sub4.infer);
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
+                if (i >= propCount || !printInner(String, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(Object_sub4, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                bitmask += (1 << i);
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+                printInferInner(String.infer);
+                printInferInner(Object_sub4.infer);
+            },
+        },
+    });
 
     // SequenceExpression
     const Object_sub4 = createRule(mode, {
@@ -1461,9 +1484,48 @@ function create(mode) {
     });
 
     // RecordExpression
-    const Object_sub6 = lazy(() => createRecord(mode, [
-        {kind: 'Field', label: Object_sub7, expr: Object_sub8},
-    ]));
+    const Object_sub6 = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(Object_sub7, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                assert(AW === STRING);
+                if (!parseInner(Object_sub8, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                parseInferInner(Object_sub7.infer);
+                assert(AW === STRING);
+                parseInferInner(Object_sub8.infer);
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
+                if (i >= propCount || !printInner(Object_sub7, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(Object_sub8, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                bitmask += (1 << i);
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+                printInferInner(Object_sub7.infer);
+                printInferInner(Object_sub8.infer);
+            },
+        },
+    });
 
     // SequenceExpression
     const Object_sub7 = createRule(mode, {
@@ -1534,7 +1596,36 @@ function create(mode) {
     });
 
     // RecordExpression
-    const Object_sub9 = lazy(() => createRecord(mode, []));
+    const Object_sub9 = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // SequenceExpression
     const Object2 = createRule(mode, {
@@ -1589,13 +1680,90 @@ function create(mode) {
     });
 
     // RecordExpression
-    const Object2_sub2 = lazy(() => createRecord(mode, []));
+    const Object2_sub2 = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // RecordExpression
-    const Properties = lazy(() => createRecord(mode, [
-        {kind: 'Field', label: String, expr: Properties_sub1},
-        {kind: 'Splice', label: undefined, expr: Properties_sub2},
-    ]));
+    const Properties = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(String, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                assert(AW === STRING);
+                if (!parseInner(Properties_sub1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                const apos = APOS;
+                if (!Properties_sub2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                parseInferInner(String.infer);
+                assert(AW === STRING);
+                parseInferInner(Properties_sub1.infer);
+                const apos = APOS;
+                Properties_sub2.infer();
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
+                if (i >= propCount || !printInner(String, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(Properties_sub1, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                bitmask += (1 << i);
+                APOS = bitmask;
+                AR = RECORD;
+                if (!Properties_sub2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                bitmask = APOS;
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+                printInferInner(String.infer);
+                printInferInner(Properties_sub1.infer);
+                AR = RECORD;
+                Properties_sub2.infer();
+            },
+        },
+    });
 
     // SequenceExpression
     const Properties_sub1 = createRule(mode, {
@@ -1678,7 +1846,36 @@ function create(mode) {
     });
 
     // RecordExpression
-    const Properties_sub4 = lazy(() => createRecord(mode, []));
+    const Properties_sub4 = createRule(mode, {
+        parse: {
+            full: function RCD() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+                return true;
+            },
+            infer: function RCD() {
+                const APOSₒ = APOS;
+                if (APOS === 0) AREP = [];
+                AW = RECORD;
+            },
+        },
+        print: {
+            full: function RCD() {
+                if (AR !== RECORD) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                const propList = AREP;
+                const propCount = AREP.length >> 1;
+                let bitmask = APOS;
+                let i;
+                APOS = bitmask;
+                return true;
+            },
+            infer: function RCD() {
+                if (AR !== RECORD && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // SequenceExpression
     const Array = createRule(mode, {
@@ -1767,9 +1964,34 @@ function create(mode) {
     });
 
     // ListExpression
-    const Array_sub3 = lazy(() => createList(mode, [
-        {kind: 'Element', expr: Value},
-    ]));
+    const Array_sub3 = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(Value, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                parseInferInner(Value.infer);
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!printInner(Value, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+                printInferInner(Value.infer);
+            },
+        },
+    });
 
     // QuantifiedExpression
     const Array_sub4 = createRule(mode, {
@@ -1802,9 +2024,34 @@ function create(mode) {
     });
 
     // ListExpression
-    const Array_sub5 = lazy(() => createList(mode, [
-        {kind: 'Element', expr: Array_sub6},
-    ]));
+    const Array_sub5 = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(Array_sub6, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                parseInferInner(Array_sub6.infer);
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!printInner(Array_sub6, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+                printInferInner(Array_sub6.infer);
+            },
+        },
+    });
 
     // SequenceExpression
     const Array_sub6 = createRule(mode, {
@@ -1841,7 +2088,30 @@ function create(mode) {
     });
 
     // ListExpression
-    const Array_sub7 = lazy(() => createList(mode, []));
+    const Array_sub7 = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // SequenceExpression
     const Array2 = createRule(mode, {
@@ -1896,13 +2166,66 @@ function create(mode) {
     });
 
     // ListExpression
-    const Array2_sub2 = lazy(() => createList(mode, []));
+    const Array2_sub2 = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // ListExpression
-    const Elements = lazy(() => createList(mode, [
-        {kind: 'Element', expr: Value},
-        {kind: 'Splice', expr: Elements_sub1},
-    ]));
+    const Elements = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                if (!parseInner(Value, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!Elements_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                parseInferInner(Value.infer);
+                Elements_sub1.infer();
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                if (!printInner(Value, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                AR = LIST;
+                if (!Elements_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+                printInferInner(Value.infer);
+                AR = LIST;
+                Elements_sub1.infer();
+            },
+        },
+    });
 
     // SelectionExpression
     const Elements_sub1 = createRule(mode, {
@@ -1951,7 +2274,30 @@ function create(mode) {
     });
 
     // ListExpression
-    const Elements_sub3 = lazy(() => createList(mode, []));
+    const Elements_sub3 = createRule(mode, {
+        parse: {
+            full: function LST() {
+                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+                return true;
+            },
+            infer: function LST() {
+                if (APOS === 0) AREP = [];
+                AW = LIST;
+            },
+        },
+        print: {
+            full: function LST() {
+                if (AR !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
+                return true;
+            },
+            infer: function LST() {
+                if (AR !== LIST && AR !== NOTHING) return false;
+            },
+        },
+    });
 
     // Identifier
     const Number = global.Object.assign(

@@ -133,6 +133,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
         case RECORD:
             const obj = value = {} as Record<string, unknown>;
             for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            if (Object.keys(obj).length * 2 < APOS) throw new Error(`Duplicate labels in record`);
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.

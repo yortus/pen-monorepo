@@ -30,9 +30,7 @@ export function makeEmitter() {
             return emitter;
         },
         lines(s: string) {
-            const lines = s.split(/\r\n|\r|\n/).map(line => line.trim());
-            if (lines[0] === '') lines.shift();
-            if (lines[lines.length - 1] === '') lines.pop();
+            const lines = s.split(/\r\n|\r|\n/).map(line => line.trim()).filter(line => line.length > 0);
             for (const line of lines) {
                 if ('}])'.includes(line[0])) this.dedent();
                 this.down(1).text(line);

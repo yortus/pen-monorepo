@@ -104,25 +104,19 @@ function createRecord(mode, recordItems) {
                 const fieldLabels = [];
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        let fieldLabel;
                         if (typeof recordItem.label === 'string') {
-                            fieldLabel = recordItem.label;
+                            AREP[APOS++] = recordItem.label;
                         }
                         else {
                             if (!parseInner(recordItem.label, true))
                                 return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                             assert(AW === STRING);
-                            APOS -= 1;
-                            fieldLabel = AREP[APOS];
                         }
-                        if (fieldLabels.includes(fieldLabel))
+                        if (fieldLabels.includes(AREP[APOS - 1]))
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        fieldLabels.push(AREP[APOS - 1]);
                         if (!parseInner(recordItem.expr, true))
                             return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                        const fieldValue = AREP[--APOS];
-                        AREP[APOS++] = fieldLabel;
-                        AREP[APOS++] = fieldValue;
-                        fieldLabels.push(fieldLabel);
                     }
                     else {
                         const apos = APOS;
@@ -146,23 +140,17 @@ function createRecord(mode, recordItems) {
                 const fieldLabels = [];
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        let fieldLabel;
                         if (typeof recordItem.label === 'string') {
-                            fieldLabel = recordItem.label;
+                            AREP[APOS++] = recordItem.label;
                         }
                         else {
                             parseInferInner(recordItem.label.infer);
                             assert(AW === STRING);
-                            APOS -= 1;
-                            fieldLabel = AREP[APOS];
                         }
-                        if (fieldLabels.includes(fieldLabel))
+                        if (fieldLabels.includes(AREP[APOS - 1]))
                             return APOS = APOSₒ, false;
+                        fieldLabels.push(AREP[APOS - 1]);
                         parseInferInner(recordItem.expr.infer);
-                        const fieldValue = AREP[--APOS];
-                        AREP[APOS++] = fieldLabel;
-                        AREP[APOS++] = fieldValue;
-                        fieldLabels.push(fieldLabel);
                     }
                     else {
                         const apos = APOS;
@@ -184,31 +172,26 @@ function createRecord(mode, recordItems) {
                     return false;
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
                 const propList = AREP;
-                const propCount = AREP.length;
+                const propCount = AREP.length >> 1;
                 let bitmask = APOS;
-                outerLoop: for (const recordItem of recordItems) {
+                let i;
+                for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        for (let i = 0; i < propCount; ++i) {
-                            let propName = propList[i << 1];
-                            const propBit = 1 << i;
-                            if ((bitmask & propBit) !== 0)
-                                continue;
-                            if (typeof recordItem.label !== 'string') {
-                                APOS = i << 1;
-                                if (!printInner(recordItem.label, true))
-                                    continue;
-                            }
-                            else {
-                                if (propName !== recordItem.label)
-                                    continue;
-                            }
-                            APOS = (i << 1) + 1;
-                            if (!printInner(recordItem.expr, true))
-                                continue;
-                            bitmask += propBit;
-                            continue outerLoop;
+                        if (typeof recordItem.label === 'string') {
+                            for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && recordItem.label !== propList[i << 1]; ++i, APOS += 2)
+                                ;
+                            if (i >= propCount)
+                                return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                         }
-                        return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        else {
+                            for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2)
+                                ;
+                            if (i >= propCount || !printInner(recordItem.label, true))
+                                return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        }
+                        if (!printInner(recordItem.expr, true))
+                            return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                        bitmask += (1 << i);
                     }
                     else {
                         APOS = bitmask;
@@ -226,9 +209,8 @@ function createRecord(mode, recordItems) {
                     return false;
                 for (const recordItem of recordItems) {
                     if (recordItem.kind === 'Field') {
-                        if (typeof recordItem.label !== 'string') {
+                        if (typeof recordItem.label !== 'string')
                             printInferInner(recordItem.label.infer);
-                        }
                         printInferInner(recordItem.expr.infer);
                     }
                     else {
@@ -313,6 +295,8 @@ function parseInner(rule, mustProduce) {
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
+            if (Object.keys(obj).length * 2 < APOS)
+                throw new Error(`Duplicate labels in record`);
             break;
         default:
             ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
