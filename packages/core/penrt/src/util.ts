@@ -1,22 +1,3 @@
-// TODO: modes...
-// type Mode = 2 | 3 | 4 | 5 | 6 | 7;
-// const PARSE = 6;
-// const PRINT = 7;
-// const COVAL = 4;
-// const COGEN = 5;
-// const ABGEN = 2;
-// const ABVAL = 3;
-// const isParse = (mode: Mode) => (mode & 1) === 0;
-// const isPrint = (mode: Mode) => (mode & 1) !== 0;
-// const hasConcreteForm = (mode: Mode) => (mode & 4) !== 0;
-// const hasAbstractForm = (mode: Mode) => (mode & 2) !== 0;
-// const hasInput = (mode: Mode) => isParse(mode) ? hasConcreteForm(mode) : hasAbstractForm(mode);
-// const hasOutput = (mode: Mode) => isParse(mode) ? hasAbstractForm(mode) : hasConcreteForm(mode);
-interface StaticOptions {mode: 'parse' | 'print'; }
-
-
-
-
 type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule

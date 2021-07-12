@@ -250,7 +250,7 @@ const extensions = {
         } */
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
-        function floatString({ mode }) {
+        function floatString(mode) {
             return createRule(mode, {
                 parse: {
                     full: function FSTR() {
@@ -357,7 +357,7 @@ const extensions = {
         const UPPERCASE_E = 'E'.charCodeAt(0);
         // TODO: doc... has both 'txt' and 'ast' representation
         // TODO: revise/document range of ints that can be parsed/printed by this rule
-        function intString({ mode }) {
+        function intString(mode) {
             return function ISTR_function(expr) {
                 var _a, _b, _c, _d, _e, _f;
                 assert(isModule(expr));
@@ -487,7 +487,7 @@ const extensions = {
             0x57, 0x58, 0x59, 0x5a, // 32-35    WXYZ
         ];
         const HYPHEN = 0x2d;
-        function memoise({ mode }) {
+        function memoise(mode) {
             return function MEM_function(expr) {
                 // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
@@ -670,11 +670,6 @@ const extensions = {
 const parse = create('parse');
 const print = create('print');
 function create(mode) {
-
-    // Intrinsic
-    const floatString = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString({mode});
-    const intString = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString({mode});
-    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise({mode});
 
     // Identifier
     const memoise = global.Object.assign(
@@ -2192,6 +2187,15 @@ function create(mode) {
             default: return undefined;
         }
     };
+
+    // Intrinsic
+    const floatString = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].floatString(mode);
+
+    // Intrinsic
+    const intString = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].intString(mode);
+
+    // Intrinsic
+    const memoise_2 = extensions["V:/projects/oss/pen-monorepo/packages/core/penc/dist/deps/std.pen.js"].memoise(mode);
 
     // Module
     const Ɱ_std = (member) => {

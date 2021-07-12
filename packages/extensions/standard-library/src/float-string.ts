@@ -1,6 +1,6 @@
 // TODO: doc... has both 'txt' and 'ast' representation
 // TODO: revise/document range and precision of floats that can be parsed/printed by this rule
-function floatString({mode}: StaticOptions): Rule {
+function floatString(mode: 'parse' | 'print'): Rule {
     return createRule(mode, {
         parse: {
             full: function FSTR() {

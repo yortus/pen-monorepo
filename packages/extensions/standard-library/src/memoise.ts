@@ -1,4 +1,4 @@
-function memoise({mode}: StaticOptions): Func {
+function memoise(mode: 'parse' | 'print'): Func {
     return function MEM_function(expr) {
         // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
         const memos = new Map<

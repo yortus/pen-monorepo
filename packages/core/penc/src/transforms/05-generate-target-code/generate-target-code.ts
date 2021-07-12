@@ -106,16 +106,6 @@ function emitProgram(emit: Emitter, program: Program) {
 
 
 function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record<string, {value: unknown}>) {
-
-    // Emit extension exports before anything else (if any)
-    const extExprIds = Object.keys(bindings).filter(name => bindings[name].kind === 'Intrinsic');
-    if (extExprIds.length > 0) emit.down(2).text(`// Intrinsic`);
-    for (const id of extExprIds) {
-        const extExpr = bindings[id] as V.Intrinsic;
-        emit.down(1).text(`const ${id} = extensions[${JSON.stringify(extExpr.path)}].${extExpr.name}({mode});`);
-    }
-
-    // TODO: emit each binding...
     for (const [name, value] of Object.entries(bindings)) {
         emitBinding(emit, name, value, consts);
         if (consts[name] === undefined) continue;
@@ -125,9 +115,6 @@ function emitBindings(emit: Emitter, bindings: V.BindingMap<400>, consts: Record
 
 
 function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, consts: Record<string, {value: unknown}>) {
-    // Skip Intrinsic nodes - they have already been handled by emitProgram.
-    if (expr.kind === 'Intrinsic') return;
-
     emit.down(2).text(`// ${expr.kind}`);
 
     // Emit expressions that may not be Rules
@@ -153,6 +140,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>, const
                     {infer: arg => ${expr.name}.infer(arg)},
                 );
             `);
+            return;
+        }
+
+        case 'Intrinsic': {
+            emit.lines(`const ${name} = extensions[${JSON.stringify(expr.path)}].${expr.name}(mode);`);
             return;
         }
 

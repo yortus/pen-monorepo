@@ -1,6 +1,6 @@
 // see https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330 for encode/decode algo in js
 
-function unicode({mode}: StaticOptions): Func {
+function unicode(mode: 'parse' | 'print'): Func {
     return function UNI_function(expr) {
         assert(isModule(expr));
         const base = expr('base')?.constant?.value as number;
