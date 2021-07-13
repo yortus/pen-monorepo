@@ -30,7 +30,7 @@ div = {
 }
 
 factor =
-    | !"0x"   !"0b"   float
+    | not "0x"   not "0b"   float
     | (co)"0x"   int(base=16 signed=false)
     | (co)"0b"   int(base=2 signed=false)
     | (co)"i"    int(signed=false)

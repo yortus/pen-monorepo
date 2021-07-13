@@ -30,7 +30,7 @@ ModulePatternName
 
     3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
 
-    4   UnaryExpression                 !a   ?a   *a(b)   ?a.b   !{a: b}   abstract a   concrete b
+    4   UnaryExpression                 not a   ?a   *a(b)   ?a.b   not {a: b}   abstract a   concrete b
 
     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
@@ -103,12 +103,12 @@ SequenceExpression
     }
 
 UnaryExpression
-    = op:(ABSTRACT / CONCRETE / "!" / "?" / "*")   __   expression:Precedence4OrHigher
+    = op:(ABSTRACT / CONCRETE / NOT / "?" / "*")   __   expression:Precedence4OrHigher
     {
         switch (op) {
           case 'abstract': return {kind: 'AbstractExpression', expression};
           case 'concrete': return {kind: 'ConcreteExpression', expression};
-          case '!': return {kind: 'NotExpression', expression};
+          case 'not': return {kind: 'NotExpression', expression};
           default: return {kind: 'QuantifiedExpression', expression, quantifier: op[0]};
         }
     }
@@ -277,12 +277,13 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = ![ꐚː]   [a-zA-Z_]    // NB: ids containing [ꐚː] (U+A41A, U+02D0) are reserved for internal use
 IDENTIFIER_PART         = ![ꐚː]   [a-zA-Z_0-9] // by the pen compiler . Currently not allowed anyway, but may be in future.
-RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
+RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE / IMPORT / NOT / NULL / TRUE / UNDERSCORE
 ABSTRACT                = "abstract"   !IDENTIFIER_PART   { return text(); }
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 CONCRETE                = "concrete"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
+NOT                     = "not"   !IDENTIFIER_PART   { return text(); }
 NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
 TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
 UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }

@@ -51,7 +51,7 @@ String = DOUBLE_QUOTE   *CHAR   DOUBLE_QUOTE
 //       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
 // TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
-    |   !"\\"   !"\""   "\x20-7F"                                   // any ASCII char except '\', '"', or control char
+    |   not "\\"   not "\""   "\x20-7F"                             // any ASCII char except '\', '"', or control char
     |   "\xC0-DF\x80-BF"                                            // any 2-byte utf8 char
     |   "\xE0-EF\x80-BF\x80-BF"                                     // any 3-byte utf8 char
     |   "\xF0-F7\x80-BF\x80-BF\x80-BF"                              // any 4-byte utf8 char
@@ -61,7 +61,7 @@ CHAR =
     |   concrete "\\b"   abstract "\b"                              // backspace
     |   concrete "\\f"   abstract "\f"                              // formfeed
     |   concrete "\\n"   abstract "\n"                              // newline
-    |   concrete "\\r"   abstract "\r"                               // carriage return
+    |   concrete "\\r"   abstract "\r"                              // carriage return
     |   concrete "\\t"   abstract "\t"                              // horizontal tab
     |   concrete "\\u"   unicode(base=16 minDigits=4 maxDigits=4)   // unicode escape sequence
 
