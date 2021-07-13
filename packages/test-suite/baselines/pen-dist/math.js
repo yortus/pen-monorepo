@@ -724,7 +724,7 @@ function create(mode) {
                 AREP[APOS++] = "lhs";
                 if (!parseInner(ꐚexpr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
-                if (!parseInner(ꐚaddᱻ3, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseInner(ꐚaddᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW = RECORD;
                 return true;
             },
@@ -736,7 +736,7 @@ function create(mode) {
                 AREP[APOS++] = "lhs";
                 parseInferInner(ꐚexpr.infer);
                 AREP[APOS++] = "rhs";
-                parseInferInner(ꐚaddᱻ3.infer);
+                parseInferInner(ꐚaddᱻ2.infer);
                 AW = RECORD;
             },
         },
@@ -758,7 +758,7 @@ function create(mode) {
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(ꐚaddᱻ3, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(ꐚaddᱻ2, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -767,23 +767,15 @@ function create(mode) {
                 if (AR !== RECORD && AR !== NOTHING) return false;
                 printInferInner(ꐚaddᱻ1.infer);
                 printInferInner(ꐚexpr.infer);
-                printInferInner(ꐚaddᱻ3.infer);
+                printInferInner(ꐚaddᱻ2.infer);
             },
         },
     });
 
-    // ApplicationExpression
-    const ꐚaddᱻ1 = lazy(() => ꐚab(ꐚaddᱻ2));
-
     // StringLiteral
-    const ꐚaddᱻ2 = createRule(mode, {
+    const ꐚaddᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 3 > CREP.length) return false;
-                if (CREP[CPOS + 0] !== 0x61) return false;
-                if (CREP[CPOS + 1] !== 0x64) return false;
-                if (CREP[CPOS + 2] !== 0x64) return false;
-                CPOS += 3;
                 emitBytes(0x61, 0x64, 0x64);
                 return true;
             },
@@ -799,27 +791,21 @@ function create(mode) {
                 if (AREP[APOS + 1] !== 0x64) return false;
                 if (AREP[APOS + 2] !== 0x64) return false;
                 APOS += 3;
-                CREP[CPOS++] = 0x61;
-                CREP[CPOS++] = 0x64;
-                CREP[CPOS++] = 0x64;
                 return true;
             },
             infer: function STR() {
-                CREP[CPOS++] = 0x61;
-                CREP[CPOS++] = 0x64;
-                CREP[CPOS++] = 0x64;
             },
         },
         constant: "add",
     });
 
     // SequenceExpression
-    const ꐚaddᱻ3 = createRule(mode, {
+    const ꐚaddᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!ꐚaddᱻ4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚaddᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
                 if (!ꐚterm()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
@@ -827,7 +813,7 @@ function create(mode) {
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                ꐚaddᱻ4.infer();
+                ꐚaddᱻ3.infer();
                 seqType |= AW;
                 ꐚterm.infer();
                 AW |= seqType;
@@ -836,22 +822,19 @@ function create(mode) {
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚaddᱻ4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚaddᱻ3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 if (!ꐚterm()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                ꐚaddᱻ4.infer();
+                ꐚaddᱻ3.infer();
                 ꐚterm.infer();
             },
         },
     });
 
-    // ApplicationExpression
-    const ꐚaddᱻ4 = lazy(() => ꐚco(ꐚaddᱻ5));
-
     // ByteExpression
-    const ꐚaddᱻ5 = createRule(mode, {
+    const ꐚaddᱻ3 = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -859,21 +842,14 @@ function create(mode) {
                 cc = CREP[CPOS];
                 if (cc !== 0x2b) return false;
                 CPOS += 1;
-                emitByte(cc);
                 return true;
             },
-            infer: () => {
-                emitByte(0x2b);
-            },
+            infer: () => {},
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (AR !== STRING) return false;
-                if (APOS >= AREP.length) return false;
-                cc = AREP[APOS];
-                if (cc !== 0x2b) return false;
-                APOS += 1;
+                cc = 0x2b;
                 CREP[CPOS++] = cc;
                 return true;
             },
@@ -894,7 +870,7 @@ function create(mode) {
                 AREP[APOS++] = "lhs";
                 if (!parseInner(ꐚexpr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
-                if (!parseInner(ꐚsubᱻ3, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseInner(ꐚsubᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW = RECORD;
                 return true;
             },
@@ -906,7 +882,7 @@ function create(mode) {
                 AREP[APOS++] = "lhs";
                 parseInferInner(ꐚexpr.infer);
                 AREP[APOS++] = "rhs";
-                parseInferInner(ꐚsubᱻ3.infer);
+                parseInferInner(ꐚsubᱻ2.infer);
                 AW = RECORD;
             },
         },
@@ -928,7 +904,7 @@ function create(mode) {
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(ꐚsubᱻ3, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(ꐚsubᱻ2, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -937,23 +913,15 @@ function create(mode) {
                 if (AR !== RECORD && AR !== NOTHING) return false;
                 printInferInner(ꐚsubᱻ1.infer);
                 printInferInner(ꐚexpr.infer);
-                printInferInner(ꐚsubᱻ3.infer);
+                printInferInner(ꐚsubᱻ2.infer);
             },
         },
     });
 
-    // ApplicationExpression
-    const ꐚsubᱻ1 = lazy(() => ꐚab(ꐚsubᱻ2));
-
     // StringLiteral
-    const ꐚsubᱻ2 = createRule(mode, {
+    const ꐚsubᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 3 > CREP.length) return false;
-                if (CREP[CPOS + 0] !== 0x73) return false;
-                if (CREP[CPOS + 1] !== 0x75) return false;
-                if (CREP[CPOS + 2] !== 0x62) return false;
-                CPOS += 3;
                 emitBytes(0x73, 0x75, 0x62);
                 return true;
             },
@@ -969,27 +937,21 @@ function create(mode) {
                 if (AREP[APOS + 1] !== 0x75) return false;
                 if (AREP[APOS + 2] !== 0x62) return false;
                 APOS += 3;
-                CREP[CPOS++] = 0x73;
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x62;
                 return true;
             },
             infer: function STR() {
-                CREP[CPOS++] = 0x73;
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x62;
             },
         },
         constant: "sub",
     });
 
     // SequenceExpression
-    const ꐚsubᱻ3 = createRule(mode, {
+    const ꐚsubᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!ꐚsubᱻ4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚsubᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
                 if (!ꐚterm()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
@@ -997,7 +959,7 @@ function create(mode) {
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                ꐚsubᱻ4.infer();
+                ꐚsubᱻ3.infer();
                 seqType |= AW;
                 ꐚterm.infer();
                 AW |= seqType;
@@ -1006,22 +968,19 @@ function create(mode) {
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚsubᱻ4()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚsubᱻ3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 if (!ꐚterm()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                ꐚsubᱻ4.infer();
+                ꐚsubᱻ3.infer();
                 ꐚterm.infer();
             },
         },
     });
 
-    // ApplicationExpression
-    const ꐚsubᱻ4 = lazy(() => ꐚco(ꐚsubᱻ5));
-
     // ByteExpression
-    const ꐚsubᱻ5 = createRule(mode, {
+    const ꐚsubᱻ3 = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -1029,21 +988,14 @@ function create(mode) {
                 cc = CREP[CPOS];
                 if (cc !== 0x2d) return false;
                 CPOS += 1;
-                emitByte(cc);
                 return true;
             },
-            infer: () => {
-                emitByte(0x2d);
-            },
+            infer: () => {},
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (AR !== STRING) return false;
-                if (APOS >= AREP.length) return false;
-                cc = AREP[APOS];
-                if (cc !== 0x2d) return false;
-                APOS += 1;
+                cc = 0x2d;
                 CREP[CPOS++] = cc;
                 return true;
             },

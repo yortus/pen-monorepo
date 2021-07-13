@@ -198,10 +198,10 @@ RecordItems
 RecordItem
     = Splice
 
-    / "["   __   label:Expression   __   "]"   __   "="   __   expression:Expression
+    / "["   __   label:Expression   __   "]"   __   ":"   __   expression:Expression
     { return {kind: 'Field', label, expression}; }
 
-    / label:IDENTIFIER   __   "="   __   expression:Expression
+    / label:IDENTIFIER   __   ":"   __   expression:Expression
     { return {kind: 'Field', label, expression}; }
 
 ListItems

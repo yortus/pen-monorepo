@@ -4,7 +4,7 @@ import {compile} from 'penc';
 
 describe(`Language features: record splicing`, () => {
     const {parse, print} = compile({source: `
-        start = {[alpha]=digit, ...start} | {}
+        start = {[alpha]: digit, ...start} | {}
         alpha = 'a' | 'b' | 'c' | 'd'
         digit = '1' | '2' | '3' | '4'
     `}).eval();

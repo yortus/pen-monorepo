@@ -16,8 +16,8 @@ describe(`Language features: abstract/concrete operators`, () => {
 
         L2 = ['L2 ']   [abstract [a, b] concrete [b, c]]
         L3 = ['L3 ']   [concrete [a, b] abstract [b, c]]
-        L4 = ['L4 ']   [abstract {a='A', b='B', c='C'}]
-        L5 = ['L5 ']   [concrete {a='A', b='B', c='C'}]
+        L4 = ['L4 ']   [abstract {a:'A', b:'B', c:'C'}]
+        L5 = ['L5 ']   [concrete {a:'A', b:'B', c:'C'}]
         L6 = ['L6 ']   [abstract abstract a b]
         L7 = ['L7 ']   [abstract concrete a b]
         L8 = ['L8 ']   [concrete abstract a b]
