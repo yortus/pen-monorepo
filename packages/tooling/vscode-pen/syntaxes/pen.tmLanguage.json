@@ -60,9 +60,9 @@
 			}
         },
 		"string": {
-			"begin": "\"",
-			"end": "\"",
-			"name": "string.quoted.double.pen",
+			"begin": "'",
+			"end": "'",
+			"name": "string.quoted.single.pen",
 			"patterns": [
 				{
 					"match": "\\\\x[0-9a-fA-F]+(?:-[0-9a-fA-F]+)?",

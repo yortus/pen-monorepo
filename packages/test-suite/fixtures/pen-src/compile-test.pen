@@ -1,16 +1,16 @@
-x = "outer x"
+x = 'outer x'
 
 nested = (
     REP = (a) -> a x a
     FUN = x -> x x
-    x = "inner x"
+    x = 'inner x'
     a = 42
 )
 
 letexpr = (
-    -> lx "-" lx
-    lx = "inner x"
-    ly = "***"
+    -> lx '-' lx
+    lx = 'inner x'
+    ly = '***'
 )
 
 start = nested.REP(a = x)
@@ -36,7 +36,7 @@ start = nested.REP(a = x)
 //     //f3 = (a, b) -> a b
 //     //f4 = () -> ()
 // 
-//     one = "=== ONE ==="
+//     one = '=== ONE ==='
 // )
 // 
 // 
@@ -68,12 +68,12 @@ start = nested.REP(a = x)
 // start = floatString x a b c
 // 
 // x = (
-//     x1 = ?x.x1 "rest"
+//     x1 = ?x.x1 'rest'
 // )
 // 
-// a = "aaa"
-// b = "pre" c
-// c = "pre" b
+// a = 'aaa'
+// b = 'pre' c
+// c = 'pre' b
 // //e = f   // NB: illegal circular def
 // //f = e   // NB: illegal circular def
 // //g = g   // NB: illegal circular def

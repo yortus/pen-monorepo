@@ -5,9 +5,9 @@ import {compile} from 'penc';
 describe(`Language features: basics`, () => {
     const {parse, print} = compile({source: `
         start = a   0..m(a b)   b   0..1 c
-        a = "a"
-        b = "b"
-        c = "c"
+        a = 'a'
+        b = 'b'
+        c = 'c'
     `}).eval();
 
     const tests = [

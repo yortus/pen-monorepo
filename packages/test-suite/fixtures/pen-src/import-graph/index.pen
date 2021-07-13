@@ -3,16 +3,16 @@
 
 start = result
 
-digit = "\x30-39"               // 0-9
-alpha = "\x61-7a" | "\x41-5a"   // a-ZA-Z
+digit = '\x30-39'               // 0-9
+alpha = '\x61-7a' | '\x41-5a'   // a-ZA-Z
 
 result = foo (bar baz)
 
 myList = [digit, digit digit, digit digit digit]
 
 rec = (
-    b = `b thing`
-    d = `d thing`
+    b = abstract 'b thing'
+    d = abstract 'd thing'
 )
 
 r2 = rec
