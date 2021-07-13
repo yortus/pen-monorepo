@@ -7,30 +7,28 @@ import {assert} from '../../utils';
 export function flattenExpressions(ast: V.AST<300>): V.AST<400> {
     validateAST(ast);
 
-    // TODO: ...
-    let counter = 0;
+    // TODO: doc...
     const startᐟ = mapNode(ast.start, rec => ({
         LetExpression: (le): V.LetExpression<400> => {
-            // TODO: ...
+            // TODO: doc...
             const bindings: V.BindingMap<400> = {};
             for (const [name, value] of Object.entries(le.bindings)) addBinding(name, rec(value));
 
-            // TODO: ...
+            // TODO: doc...
             let expression = rec(le.expression);
             if (expression.kind !== 'Identifier' && expression.kind !== 'FunctionParameter') {
-                let name = `𝕊${++counter}`;
-                name = addBinding(name, expression); // TODO: ensure name can't ever clash with program identifier
+                const name = addBinding('ꐚLET', expression);
                 expression = {kind: 'Identifier', name};
             }
 
-            // TODO: ...
+            // TODO: doc...
             return {...le, expression, bindings};
 
             // TODO: flatten each binding value (recursive)
             // TODO: inlined for now, but should be moved elsewhere
             function addBinding(baseName: string, e: V.Expression<400>): string {
                 let [name, counter] = [baseName, 0];
-                while (bindings.hasOwnProperty(name)) name = `${baseName}_sub${++counter}`;
+                while (bindings.hasOwnProperty(name)) name = `${baseName}ᱻ${++counter}`;
 
                 // TODO: explain... reserve the name so recursive calls don't claim it first
                 bindings[name] = e;

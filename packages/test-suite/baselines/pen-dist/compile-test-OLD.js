@@ -255,13 +255,13 @@ const print = create('print');
 function create(mode) {
 
     // Identifier
-    const start_2 = global.Object.assign(
-        arg => foo(arg),
-        {infer: arg => foo.infer(arg)},
+    const ꐚstartᱻ2 = Object.assign(
+        arg => ꐚfoo(arg),
+        {infer: arg => ꐚfoo.infer(arg)},
     );
 
     // StringLiteral
-    const foo = createRule(mode, {
+    const ꐚfoo = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -299,7 +299,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const bar = createRule(mode, {
+    const ꐚbar = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -337,29 +337,29 @@ function create(mode) {
     });
 
     // Identifier
-    const a = global.Object.assign(
-        arg => b(arg),
-        {infer: arg => b.infer(arg)},
+    const ꐚa = Object.assign(
+        arg => ꐚb(arg),
+        {infer: arg => ꐚb.infer(arg)},
     );
 
     // Module
-    const expr = (member) => {
+    const ꐚexpr = (member) => {
         switch (member) {
-            case 'foo': return foo;
-            case 'bar': return bar;
-            case 'a': return a;
+            case 'foo': return ꐚfoo;
+            case 'bar': return ꐚbar;
+            case 'a': return ꐚa;
             default: return undefined;
         }
     };
 
     // Identifier
-    const a_2 = global.Object.assign(
-        arg => b(arg),
-        {infer: arg => b.infer(arg)},
+    const ꐚaᱻ2 = Object.assign(
+        arg => ꐚb(arg),
+        {infer: arg => ꐚb.infer(arg)},
     );
 
     // StringLiteral
-    const b = createRule(mode, {
+    const ꐚb = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 2 > CREP.length) return false;
@@ -393,7 +393,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const baz = createRule(mode, {
+    const ꐚbaz = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -431,7 +431,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const mem = createRule(mode, {
+    const ꐚmem = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 6 > CREP.length) return false;
@@ -481,53 +481,53 @@ function create(mode) {
     });
 
     // SelectionExpression
-    const modExprMem = createRule(mode, {
+    const ꐚmodExprMem = createRule(mode, {
         parse: {
-            full: function SEL() { return foo() || mem() || baz(); },
-            infer: () => foo.infer(),
+            full: function SEL() { return ꐚfoo() || ꐚmem() || ꐚbaz(); },
+            infer: () => ꐚfoo.infer(),
         },
         print: {
-            full: function SEL() { return foo() || mem() || baz(); },
-            infer: () => foo.infer(),
+            full: function SEL() { return ꐚfoo() || ꐚmem() || ꐚbaz(); },
+            infer: () => ꐚfoo.infer(),
         },
     });
 
     // SequenceExpression
-    const a_3 = createRule(mode, {
+    const ꐚaᱻ3 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!a_3_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚaᱻ3ᱻ1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!b_2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚbᱻ2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                a_3_sub1.infer();
+                ꐚaᱻ3ᱻ1.infer();
                 seqType |= AW;
-                b_2.infer();
+                ꐚbᱻ2.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!a_3_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!b_2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚaᱻ3ᱻ1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚbᱻ2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                a_3_sub1.infer();
-                b_2.infer();
+                ꐚaᱻ3ᱻ1.infer();
+                ꐚbᱻ2.infer();
             },
         },
     });
 
     // ByteExpression
-    const a_3_sub1 = createRule(mode, {
+    const ꐚaᱻ3ᱻ1 = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -560,49 +560,49 @@ function create(mode) {
     });
 
     // Module
-    const recA = (member) => {
+    const ꐚrecA = (member) => {
         switch (member) {
-            case 'a': return a_3;
+            case 'a': return ꐚaᱻ3;
             default: return undefined;
         }
     };
 
     // SequenceExpression
-    const b_2 = createRule(mode, {
+    const ꐚbᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!b_2_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚbᱻ2ᱻ1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!a_3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚaᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                b_2_sub1.infer();
+                ꐚbᱻ2ᱻ1.infer();
                 seqType |= AW;
-                a_3.infer();
+                ꐚaᱻ3.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!b_2_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!a_3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚbᱻ2ᱻ1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚaᱻ3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                b_2_sub1.infer();
-                a_3.infer();
+                ꐚbᱻ2ᱻ1.infer();
+                ꐚaᱻ3.infer();
             },
         },
     });
 
     // ByteExpression
-    const b_2_sub1 = createRule(mode, {
+    const ꐚbᱻ2ᱻ1 = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -635,21 +635,21 @@ function create(mode) {
     });
 
     // Module
-    const recB = (member) => {
+    const ꐚrecB = (member) => {
         switch (member) {
-            case 'b': return b_2;
+            case 'b': return ꐚbᱻ2;
             default: return undefined;
         }
     };
 
     // Identifier
-    const refC = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚrefC = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // StringLiteral
-    const c1 = createRule(mode, {
+    const ꐚc1 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 2 > CREP.length) return false;
@@ -683,7 +683,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const c2 = createRule(mode, {
+    const ꐚc2 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 2 > CREP.length) return false;
@@ -717,73 +717,73 @@ function create(mode) {
     });
 
     // Identifier
-    const ref1 = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚref1 = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // Identifier
-    const ref2 = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚref2 = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // Identifier
-    const ref3 = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚref3 = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // Module
-    const c = (member) => {
+    const ꐚc = (member) => {
         switch (member) {
-            case 'c1': return c1;
-            case 'c2': return c2;
-            case 'ref1': return ref1;
-            case 'ref2': return ref2;
-            case 'ref3': return ref3;
+            case 'c1': return ꐚc1;
+            case 'c2': return ꐚc2;
+            case 'ref1': return ꐚref1;
+            case 'ref2': return ꐚref2;
+            case 'ref3': return ꐚref3;
             default: return undefined;
         }
     };
 
     // Identifier
-    const ref5 = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚref5 = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // Identifier
-    const ref6 = global.Object.assign(
-        arg => c1(arg),
-        {infer: arg => c1.infer(arg)},
+    const ꐚref6 = Object.assign(
+        arg => ꐚc1(arg),
+        {infer: arg => ꐚc1.infer(arg)},
     );
 
     // Module
-    const defC = (member) => {
+    const ꐚdefC = (member) => {
         switch (member) {
-            case 'c': return c;
-            case 'ref5': return ref5;
-            case 'ref6': return ref6;
+            case 'c': return ꐚc;
+            case 'ref5': return ꐚref5;
+            case 'ref6': return ꐚref6;
             default: return undefined;
         }
     };
 
     // Module
-    const Ɱ_compile_test_OLD = (member) => {
+    const ꐚMODːcompile_test_OLD = (member) => {
         switch (member) {
-            case 'start': return start_2;
-            case 'expr': return expr;
-            case 'a': return a_2;
-            case 'b': return b;
-            case 'baz': return baz;
-            case 'modExprMem': return modExprMem;
-            case 'recA': return recA;
-            case 'recB': return recB;
-            case 'refC': return refC;
-            case 'defC': return defC;
+            case 'start': return ꐚstartᱻ2;
+            case 'expr': return ꐚexpr;
+            case 'a': return ꐚaᱻ2;
+            case 'b': return ꐚb;
+            case 'baz': return ꐚbaz;
+            case 'modExprMem': return ꐚmodExprMem;
+            case 'recA': return ꐚrecA;
+            case 'recB': return ꐚrecB;
+            case 'refC': return ꐚrefC;
+            case 'defC': return ꐚdefC;
             default: return undefined;
         }
     };
 
-    return start_2;
+    return ꐚstartᱻ2;
 }

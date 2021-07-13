@@ -255,7 +255,7 @@ const print = create('print');
 function create(mode) {
 
     // StringLiteral
-    const x = createRule(mode, {
+    const ꐚx = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 7 > CREP.length) return false;
@@ -309,102 +309,102 @@ function create(mode) {
     });
 
     // FunctionExpression
-    const REP = (ℙ1) => {
+    const ꐚREP = (PARAMː1) => {
 
         // MemberExpression
-        const a = (arg) => ℙ1("a")(arg);
+        const ꐚa = (arg) => PARAMː1("a")(arg);
 
         // SequenceExpression
-        const 𝕊1 = createRule(mode, {
+        const ꐚLET = createRule(mode, {
             parse: {
                 full: function SEQ() {
                     const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                     let seqType = AW = NOTHING;
-                    if (!a()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (!ꐚa()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     seqType |= AW;
-                    if (!x_3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (!ꐚxᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     seqType |= AW;
-                    if (!a()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (!ꐚa()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     AW |= seqType;
                     return true;
                 },
                 infer: () => {
                     let seqType = AW = NOTHING;
-                    a.infer();
+                    ꐚa.infer();
                     seqType |= AW;
-                    x_3.infer();
+                    ꐚxᱻ3.infer();
                     seqType |= AW;
-                    a.infer();
+                    ꐚa.infer();
                     AW |= seqType;
                 },
             },
             print: {
                 full: function SEQ() {
                     const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                    if (!a()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                    if (!x_3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                    if (!a()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    if (!ꐚa()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    if (!ꐚxᱻ3()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    if (!ꐚa()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     return true;
                 },
                 infer: () => {
-                    a.infer();
-                    x_3.infer();
-                    a.infer();
+                    ꐚa.infer();
+                    ꐚxᱻ3.infer();
+                    ꐚa.infer();
                 },
             },
         });
 
-        return 𝕊1;
+        return ꐚLET;
     };
 
     // FunctionExpression
-    const FUN = (ℙ2) => {
+    const ꐚFUN = (PARAMː2) => {
 
         // FunctionParameter
-        const x_2 = global.Object.assign(
-            arg => ℙ2(arg),
-            {infer: arg => ℙ2.infer(arg)},
+        const ꐚxᱻ2 = Object.assign(
+            arg => PARAMː2(arg),
+            {infer: arg => PARAMː2.infer(arg)},
         );
 
         // SequenceExpression
-        const 𝕊2 = createRule(mode, {
+        const ꐚLET = createRule(mode, {
             parse: {
                 full: function SEQ() {
                     const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                     let seqType = AW = NOTHING;
-                    if (!x_2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (!ꐚxᱻ2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     seqType |= AW;
-                    if (!x_2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (!ꐚxᱻ2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                     AW |= seqType;
                     return true;
                 },
                 infer: () => {
                     let seqType = AW = NOTHING;
-                    x_2.infer();
+                    ꐚxᱻ2.infer();
                     seqType |= AW;
-                    x_2.infer();
+                    ꐚxᱻ2.infer();
                     AW |= seqType;
                 },
             },
             print: {
                 full: function SEQ() {
                     const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                    if (!x_2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                    if (!x_2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    if (!ꐚxᱻ2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                    if (!ꐚxᱻ2()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                     return true;
                 },
                 infer: () => {
-                    x_2.infer();
-                    x_2.infer();
+                    ꐚxᱻ2.infer();
+                    ꐚxᱻ2.infer();
                 },
             },
         });
 
-        return 𝕊2;
+        return ꐚLET;
     };
 
     // StringLiteral
-    const x_3 = createRule(mode, {
+    const ꐚxᱻ3 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 7 > CREP.length) return false;
@@ -458,7 +458,7 @@ function create(mode) {
     });
 
     // NumericLiteral
-    const a_2 = createRule(mode, {
+    const ꐚaᱻ2 = createRule(mode, {
         parse: {
             full: () => (emitScalar(42), true),
             infer: () => emitScalar(42),
@@ -476,18 +476,18 @@ function create(mode) {
     });
 
     // Module
-    const nested = (member) => {
+    const ꐚnested = (member) => {
         switch (member) {
-            case 'REP': return REP;
-            case 'FUN': return FUN;
-            case 'x': return x_3;
-            case 'a': return a_2;
+            case 'REP': return ꐚREP;
+            case 'FUN': return ꐚFUN;
+            case 'x': return ꐚxᱻ3;
+            case 'a': return ꐚaᱻ2;
             default: return undefined;
         }
     };
 
     // StringLiteral
-    const lx = createRule(mode, {
+    const ꐚlx = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 7 > CREP.length) return false;
@@ -541,7 +541,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const ly = createRule(mode, {
+    const ꐚly = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -579,47 +579,47 @@ function create(mode) {
     });
 
     // SequenceExpression
-    const letexpr = createRule(mode, {
+    const ꐚletexpr = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!lx()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚlx()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!letexpr_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚletexprᱻ1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!lx()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚlx()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                lx.infer();
+                ꐚlx.infer();
                 seqType |= AW;
-                letexpr_sub1.infer();
+                ꐚletexprᱻ1.infer();
                 seqType |= AW;
-                lx.infer();
+                ꐚlx.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!lx()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!letexpr_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!lx()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚlx()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚletexprᱻ1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚlx()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                lx.infer();
-                letexpr_sub1.infer();
-                lx.infer();
+                ꐚlx.infer();
+                ꐚletexprᱻ1.infer();
+                ꐚlx.infer();
             },
         },
     });
 
     // ByteExpression
-    const letexpr_sub1 = createRule(mode, {
+    const ꐚletexprᱻ1 = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -652,44 +652,44 @@ function create(mode) {
     });
 
     // Identifier
-    const a_3 = global.Object.assign(
-        arg => x(arg),
-        {infer: arg => x.infer(arg)},
+    const ꐚaᱻ3 = Object.assign(
+        arg => ꐚx(arg),
+        {infer: arg => ꐚx.infer(arg)},
     );
 
     // SelectionExpression
-    const start_2 = createRule(mode, {
+    const ꐚstartᱻ2 = createRule(mode, {
         parse: {
-            full: function SEL() { return start_2_sub1() || letexpr(); },
-            infer: () => start_2_sub1.infer(),
+            full: function SEL() { return ꐚstartᱻ2ᱻ1() || ꐚletexpr(); },
+            infer: () => ꐚstartᱻ2ᱻ1.infer(),
         },
         print: {
-            full: function SEL() { return start_2_sub1() || letexpr(); },
-            infer: () => start_2_sub1.infer(),
+            full: function SEL() { return ꐚstartᱻ2ᱻ1() || ꐚletexpr(); },
+            infer: () => ꐚstartᱻ2ᱻ1.infer(),
         },
     });
 
     // ApplicationExpression
-    const start_2_sub1 = lazy(() => REP(start_2_sub2));
+    const ꐚstartᱻ2ᱻ1 = lazy(() => ꐚREP(ꐚstartᱻ2ᱻ2));
 
     // Module
-    const start_2_sub2 = (member) => {
+    const ꐚstartᱻ2ᱻ2 = (member) => {
         switch (member) {
-            case 'a': return a_3;
+            case 'a': return ꐚaᱻ3;
             default: return undefined;
         }
     };
 
     // Module
-    const Ɱ_compile_test = (member) => {
+    const ꐚMODːcompile_test = (member) => {
         switch (member) {
-            case 'x': return x;
-            case 'nested': return nested;
-            case 'letexpr': return letexpr;
-            case 'start': return start_2;
+            case 'x': return ꐚx;
+            case 'nested': return ꐚnested;
+            case 'letexpr': return ꐚletexpr;
+            case 'start': return ꐚstartᱻ2;
             default: return undefined;
         }
     };
 
-    return start_2;
+    return ꐚstartᱻ2;
 }

@@ -11,7 +11,7 @@ export function generateTargetCode(ast: V.AST<400>) {
 
     // TODO: validate AST... move this to validate-ast.ts
     assert(ast.start.expression.kind === 'Identifier');
-    assert(ast.start.expression.name.startsWith('start'));
+    assert(ast.start.expression.name.startsWith('ꐚstart'));
 
 
 
@@ -125,7 +125,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
         case 'FunctionParameter':
         case 'Identifier': {
             emit.lines(`
-                const ${name} = global.Object.assign(
+                const ${name} = Object.assign(
                     arg => ${expr.name}(arg),
                     {infer: arg => ${expr.name}.infer(arg)},
                 );

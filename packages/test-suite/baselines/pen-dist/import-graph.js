@@ -255,31 +255,31 @@ const print = create('print');
 function create(mode) {
 
     // Identifier
-    const foo = global.Object.assign(
-        arg => f(arg),
-        {infer: arg => f.infer(arg)},
+    const ꐚfoo = Object.assign(
+        arg => ꐚf(arg),
+        {infer: arg => ꐚf.infer(arg)},
     );
 
     // Identifier
-    const bar = global.Object.assign(
-        arg => b_2(arg),
-        {infer: arg => b_2.infer(arg)},
+    const ꐚbar = Object.assign(
+        arg => ꐚbᱻ2(arg),
+        {infer: arg => ꐚbᱻ2.infer(arg)},
     );
 
     // Identifier
-    const baz = global.Object.assign(
-        arg => baz_2(arg),
-        {infer: arg => baz_2.infer(arg)},
+    const ꐚbaz = Object.assign(
+        arg => ꐚbazᱻ2(arg),
+        {infer: arg => ꐚbazᱻ2.infer(arg)},
     );
 
     // Identifier
-    const start_2 = global.Object.assign(
-        arg => result(arg),
-        {infer: arg => result.infer(arg)},
+    const ꐚstartᱻ2 = Object.assign(
+        arg => ꐚresult(arg),
+        {infer: arg => ꐚresult.infer(arg)},
     );
 
     // ByteExpression
-    const digit = createRule(mode, {
+    const ꐚdigit = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -312,7 +312,7 @@ function create(mode) {
     });
 
     // ByteExpression
-    const alpha = createRule(mode, {
+    const ꐚalpha = createRule(mode, {
         parse: {
             full: function BYT() {
                 let cc;
@@ -345,90 +345,90 @@ function create(mode) {
     });
 
     // SequenceExpression
-    const result = createRule(mode, {
+    const ꐚresult = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!foo()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfoo()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!result_sub1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚresultᱻ1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                foo.infer();
+                ꐚfoo.infer();
                 seqType |= AW;
-                result_sub1.infer();
+                ꐚresultᱻ1.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!foo()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!result_sub1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚfoo()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚresultᱻ1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                foo.infer();
-                result_sub1.infer();
+                ꐚfoo.infer();
+                ꐚresultᱻ1.infer();
             },
         },
     });
 
     // SequenceExpression
-    const result_sub1 = createRule(mode, {
+    const ꐚresultᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!bar()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚbar()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!baz()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚbaz()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                bar.infer();
+                ꐚbar.infer();
                 seqType |= AW;
-                baz.infer();
+                ꐚbaz.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!bar()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!baz()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚbar()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚbaz()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                bar.infer();
-                baz.infer();
+                ꐚbar.infer();
+                ꐚbaz.infer();
             },
         },
     });
 
     // ListExpression
-    const myList = createRule(mode, {
+    const ꐚmyList = createRule(mode, {
         parse: {
             full: function LST() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
-                if (!parseInner(digit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseInner(myList_sub1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseInner(myList_sub2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseInner(ꐚdigit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseInner(ꐚmyListᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseInner(ꐚmyListᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW = LIST;
                 return true;
             },
             infer: function LST() {
                 if (APOS === 0) AREP = [];
-                parseInferInner(digit.infer);
-                parseInferInner(myList_sub1.infer);
-                parseInferInner(myList_sub2.infer);
+                parseInferInner(ꐚdigit.infer);
+                parseInferInner(ꐚmyListᱻ1.infer);
+                parseInferInner(ꐚmyListᱻ2.infer);
                 AW = LIST;
             },
         },
@@ -436,96 +436,96 @@ function create(mode) {
             full: function LST() {
                 if (AR !== LIST) return false;
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!printInner(digit, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(myList_sub1, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(myList_sub2, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(ꐚdigit, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(ꐚmyListᱻ1, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!printInner(ꐚmyListᱻ2, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: function LST() {
                 if (AR !== LIST && AR !== NOTHING) return false;
-                printInferInner(digit.infer);
-                printInferInner(myList_sub1.infer);
-                printInferInner(myList_sub2.infer);
+                printInferInner(ꐚdigit.infer);
+                printInferInner(ꐚmyListᱻ1.infer);
+                printInferInner(ꐚmyListᱻ2.infer);
             },
         },
     });
 
     // SequenceExpression
-    const myList_sub1 = createRule(mode, {
+    const ꐚmyListᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                digit.infer();
+                ꐚdigit.infer();
                 seqType |= AW;
-                digit.infer();
+                ꐚdigit.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!digit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!digit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                digit.infer();
-                digit.infer();
+                ꐚdigit.infer();
+                ꐚdigit.infer();
             },
         },
     });
 
     // SequenceExpression
-    const myList_sub2 = createRule(mode, {
+    const ꐚmyListᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 let seqType = AW = NOTHING;
-                if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 seqType |= AW;
-                if (!digit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AW |= seqType;
                 return true;
             },
             infer: () => {
                 let seqType = AW = NOTHING;
-                digit.infer();
+                ꐚdigit.infer();
                 seqType |= AW;
-                digit.infer();
+                ꐚdigit.infer();
                 seqType |= AW;
-                digit.infer();
+                ꐚdigit.infer();
                 AW |= seqType;
             },
         },
         print: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!digit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!digit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!digit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
                 return true;
             },
             infer: () => {
-                digit.infer();
-                digit.infer();
-                digit.infer();
+                ꐚdigit.infer();
+                ꐚdigit.infer();
+                ꐚdigit.infer();
             },
         },
     });
 
     // StringLiteral
-    const b = createRule(mode, {
+    const ꐚb = createRule(mode, {
         parse: {
             full: function STR() {
                 emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
@@ -556,7 +556,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const d = createRule(mode, {
+    const ꐚd = createRule(mode, {
         parse: {
             full: function STR() {
                 emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
@@ -587,46 +587,46 @@ function create(mode) {
     });
 
     // Module
-    const rec = (member) => {
+    const ꐚrec = (member) => {
         switch (member) {
-            case 'b': return b;
-            case 'd': return d;
+            case 'b': return ꐚb;
+            case 'd': return ꐚd;
             default: return undefined;
         }
     };
 
     // Identifier
-    const r2 = global.Object.assign(
-        arg => rec(arg),
-        {infer: arg => rec.infer(arg)},
+    const ꐚr2 = Object.assign(
+        arg => ꐚrec(arg),
+        {infer: arg => ꐚrec.infer(arg)},
     );
 
     // Identifier
-    const r2d = global.Object.assign(
-        arg => d(arg),
-        {infer: arg => d.infer(arg)},
+    const ꐚr2d = Object.assign(
+        arg => ꐚd(arg),
+        {infer: arg => ꐚd.infer(arg)},
     );
 
     // Module
-    const Ɱ_import_graph = (member) => {
+    const ꐚMODːimport_graph = (member) => {
         switch (member) {
-            case 'foo': return foo;
-            case 'bar': return bar;
-            case 'baz': return baz;
-            case 'start': return start_2;
-            case 'digit': return digit;
-            case 'alpha': return alpha;
-            case 'result': return result;
-            case 'myList': return myList;
-            case 'rec': return rec;
-            case 'r2': return r2;
-            case 'r2d': return r2d;
+            case 'foo': return ꐚfoo;
+            case 'bar': return ꐚbar;
+            case 'baz': return ꐚbaz;
+            case 'start': return ꐚstartᱻ2;
+            case 'digit': return ꐚdigit;
+            case 'alpha': return ꐚalpha;
+            case 'result': return ꐚresult;
+            case 'myList': return ꐚmyList;
+            case 'rec': return ꐚrec;
+            case 'r2': return ꐚr2;
+            case 'r2d': return ꐚr2d;
             default: return undefined;
         }
     };
 
     // StringLiteral
-    const f = createRule(mode, {
+    const ꐚf = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -664,7 +664,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const b_2 = createRule(mode, {
+    const ꐚbᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -702,7 +702,7 @@ function create(mode) {
     });
 
     // StringLiteral
-    const baz_2 = createRule(mode, {
+    const ꐚbazᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 3 > CREP.length) return false;
@@ -740,67 +740,67 @@ function create(mode) {
     });
 
     // Module
-    const Ɱ_a = (member) => {
+    const ꐚMODːa = (member) => {
         switch (member) {
-            case 'f': return f;
-            case 'b': return b_2;
-            case 'baz': return baz_2;
+            case 'f': return ꐚf;
+            case 'b': return ꐚbᱻ2;
+            case 'baz': return ꐚbazᱻ2;
             default: return undefined;
         }
     };
 
     // Module
-    const Ɱ_b = (member) => {
-        switch (member) {
-            default: return undefined;
-        }
-    };
-
-    // Module
-    const Ɱ_c = (member) => {
+    const ꐚMODːb = (member) => {
         switch (member) {
             default: return undefined;
         }
     };
 
     // Module
-    const Ɱ_d = (member) => {
+    const ꐚMODːc = (member) => {
+        switch (member) {
+            default: return undefined;
+        }
+    };
+
+    // Module
+    const ꐚMODːd = (member) => {
         switch (member) {
             default: return undefined;
         }
     };
 
     // Identifier
-    const util1 = global.Object.assign(
-        arg => Ɱ_util1(arg),
-        {infer: arg => Ɱ_util1.infer(arg)},
+    const ꐚutil1 = Object.assign(
+        arg => ꐚMODːutil1(arg),
+        {infer: arg => ꐚMODːutil1.infer(arg)},
     );
 
     // Identifier
-    const util2 = global.Object.assign(
-        arg => Ɱ_util2(arg),
-        {infer: arg => Ɱ_util2.infer(arg)},
+    const ꐚutil2 = Object.assign(
+        arg => ꐚMODːutil2(arg),
+        {infer: arg => ꐚMODːutil2.infer(arg)},
     );
 
     // Module
-    const util = (member) => {
+    const ꐚutil = (member) => {
         switch (member) {
-            case 'util1': return util1;
-            case 'util2': return util2;
+            case 'util1': return ꐚutil1;
+            case 'util2': return ꐚutil2;
             default: return undefined;
         }
     };
 
     // Module
-    const Ɱ_util = (member) => {
+    const ꐚMODːutil = (member) => {
         switch (member) {
-            case 'util': return util;
+            case 'util': return ꐚutil;
             default: return undefined;
         }
     };
 
     // StringLiteral
-    const util1_2 = createRule(mode, {
+    const ꐚutil1ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 5 > CREP.length) return false;
@@ -846,15 +846,15 @@ function create(mode) {
     });
 
     // Module
-    const Ɱ_util1 = (member) => {
+    const ꐚMODːutil1 = (member) => {
         switch (member) {
-            case 'util1': return util1_2;
+            case 'util1': return ꐚutil1ᱻ2;
             default: return undefined;
         }
     };
 
     // StringLiteral
-    const util2_2 = createRule(mode, {
+    const ꐚutil2ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
                 if (CPOS + 5 > CREP.length) return false;
@@ -900,12 +900,12 @@ function create(mode) {
     });
 
     // Module
-    const Ɱ_util2 = (member) => {
+    const ꐚMODːutil2 = (member) => {
         switch (member) {
-            case 'util2': return util2_2;
+            case 'util2': return ꐚutil2ᱻ2;
             default: return undefined;
         }
     };
 
-    return start_2;
+    return ꐚstartᱻ2;
 }

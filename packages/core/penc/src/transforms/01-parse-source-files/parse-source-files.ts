@@ -59,10 +59,9 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
 
                 // for all FunctionExpression#param: replace Identifer|Pattern --> string
                 FunctionExpression: ({param, body}): V.FunctionExpression<200> => {
-                    // Use parameter names like 'ℙnnn' to ensure no clash with program identifiers.
-                    // TODO: but that could be a valid id in future... ensure *can't* clash
-                    // TODO: doc... param name also must be unique across all funexprs in the program
-                    const paramName = `ℙ${++functionParameterCounter}`;
+                    // Use parameter names like 'PARAMːnnn' to ensure there is never a clash with a program identifier.
+                    // TODO: doc... param name is also unique across all funexprs in the program. (But why is this?)
+                    const paramName = `PARAMː${++functionParameterCounter}`;
                     return {
                         kind: 'FunctionExpression',
                         param: paramName,

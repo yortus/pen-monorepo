@@ -275,8 +275,8 @@ HEX_DIGIT = [0-9a-fA-F]
 
 // ====================   Identifiers and Keywords   ====================
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
-IDENTIFIER_START        = !"__"   [a-zA-Z_]
-IDENTIFIER_PART         = [a-zA-Z_0-9]
+IDENTIFIER_START        = ![ꐚː]   [a-zA-Z_]    // NB: ids containing [ꐚː] (U+A41A, U+02D0) are reserved for internal use
+IDENTIFIER_PART         = ![ꐚː]   [a-zA-Z_0-9] // by the pen compiler . Currently not allowed anyway, but may be in future.
 RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE / IMPORT / NULL / TRUE / UNDERSCORE
 ABSTRACT                = "abstract"   !IDENTIFIER_PART   { return text(); }
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
