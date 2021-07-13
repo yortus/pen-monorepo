@@ -26,10 +26,10 @@
 				{"include": "#bindingPattern"},
 				{"include": "#bindingName"},
 
+				{"include": "#keyword"},
 				{"include": "#string"},
 				{"include": "#literal"},
 				{"include": "#moduleSpec"},
-				{"include": "#keyword"},
 				{"include": "#identifier"},
 				{"include": "#operator"}
 			]
@@ -109,7 +109,7 @@
 		},
 		"keyword": {
 			"patterns": [{
-				"match": "\\b(abstract|as|concrete|import|not|repeat)\\b",
+				"match": "\\b(abstract|as|concrete|import|not|0\\.\\.1|0\\.\\.m)\\b",
 				"name": "keyword.control.pen"
 			}]
 		},

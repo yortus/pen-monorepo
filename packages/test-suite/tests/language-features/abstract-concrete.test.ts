@@ -9,7 +9,7 @@ describe(`Language features: abstract/concrete operators`, () => {
             | "<" abstract expr ">"
             | L2 | L3 | L4
             | L5 | L6 | L7 | L8 | L9
-        expr = a *(a b) b ?c
+        expr = a   0..m(a b)   b   0..1 c
         a = "a"
         b = "b"
         c = "c"

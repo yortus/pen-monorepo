@@ -31,13 +31,13 @@ Null    = concrete "null"   null
 True    = concrete "true"   true
 
 // ---------- Objects ----------
-Object      = LBRACE   ({[String] = COLON Value}   *{[COMMA String] = COLON Value}   |   {})   RBRACE
+Object      = LBRACE   ({[String] = COLON Value}   0..m {[COMMA String] = COLON Value}   |   {})   RBRACE
 // Equivalent expression but using tail-recursive splice:
 Object2     = LBRACE   (Properties | {})   RBRACE
 Properties  = {[String] = COLON Value, ...(COMMA Properties | {})}   // NB: tail-recursive form - impl efficient handling
 
 // ---------- Arrays ----------
-Array       = LBRACKET   (([Value]   *[COMMA Value]) | [])   RBRACKET
+Array       = LBRACKET   (([Value]   0..m [COMMA Value]) | [])   RBRACKET
 // Equivalent expression but using tail-recursive splice:
 Array2      = LBRACKET   (Elements | [])   RBRACKET
 Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-recursive form - impl efficient handling
@@ -46,7 +46,7 @@ Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-
 Number = floatString
 
 // ---------- Strings ----------
-String = DOUBLE_QUOTE   *CHAR   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   0..m CHAR   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents? (in NODE)
 //       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
 // TODO: should support wider charset than ascii - this is not full JSON
@@ -75,7 +75,7 @@ RBRACKET        = WS   concrete "]"   WS
 COLON           = WS   concrete ":"   WS
 COMMA           = WS   concrete ","   WS
 DOUBLE_QUOTE    = concrete "\""
-WS              = *(concrete " " | concrete "\t" | concrete "\n" | concrete "\r")
+WS              = 0..m (concrete " " | concrete "\t" | concrete "\n" | concrete "\r")
 // TODO: below is equivalent to above, but blows out bench time ~2.5x!!! Optimise?
 // WS              = concrete *(" " | "\t" | "\n" | "\r")
 
