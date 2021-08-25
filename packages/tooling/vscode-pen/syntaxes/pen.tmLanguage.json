@@ -22,11 +22,11 @@
 		"module": {
 			"patterns": [
 				{"include": "#comment"},
+				{"include": "#keyword"},
 
 				{"include": "#bindingPattern"},
 				{"include": "#bindingName"},
 
-				{"include": "#keyword"},
 				{"include": "#stringX"},
 				{"include": "#stringA"},
 				{"include": "#stringC"},
@@ -175,7 +175,7 @@
 		},
 		"keyword": {
 			"patterns": [{
-				"match": "\\b(abstract|as|concrete|import|not|0\\.\\.1|0\\.\\.m)\\b",
+				"match": "\\b(abstract|as|concrete|export|import|not|0\\.\\.1|0\\.\\.m)\\b",
 				"name": "keyword.control.pen"
 			}]
 		},
