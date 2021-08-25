@@ -1,37 +1,50 @@
 // ====================   Top-level SourceFile node   ====================
-SourceFile = __   {
-    kind: abstract 'Module',
-    bindings: BindingList
-}   __   END_OF_FILE
-
+SourceFile =
+    WS
+    {
+        kind: 'Module',
+        bindings: BindingList
+    }
+    WS
+    END_OF_FILE
 
 // ====================   Bindings and patterns   ====================
-BindingList = (
-    not concrete ','                // can't start with ',' (TODO: why need this?)
-    [Binding]                       // starts with a Binding
-    0..m [                          // followed by 0..M of:
-        0..1 (__   concrete ',')    //     optional comma
-        __
-        Binding                     //     another Binding
+BindingList =               // ========== recursive form (currently slower / not TC-optimised) ==========
+    | [Binding, ...(WS ","? WS BindingList)]
+    | []
+
+BindingList2 = (            // ========== iterative form (faster but more complex to look at) ==========
+    not ","                 // can't start with comma (TODO: why need this?)
+    [Binding]               // starts with a Binding
+    0..m [                  // followed by 0..M of:
+        0..1 (WS ",")       //     optional comma
+        WS
+        Binding             //     another Binding
     ]
-    0..1 (__   concrete ',')        // ends with an optional comma
-) | []                              // if not matched above, *always* match with an empty list and unchanged buffer
+    0..1 (WS ",")           // ends with an optional comma
+) | []                      // if not matched above, *always* match with an empty list and unchanged buffer
 
 Binding = {
-    kind: abstract 'Binding',
-    left: (Identifier | ModulePattern)   __   concrete '='   __,
+    kind: 'Binding',
+    left: (Identifier | ModulePattern) WS "=" WS,
     right: Expression,
 }
 
-ModulePattern = concrete '('   __   not concrete ',' {
-    kind: abstract 'ModulePattern',
-    names: (
-        M
-    )
-}
+ModulePattern =
+    "("
+    WS
+    not ","
+    {
+        kind: 'ModulePattern',
+        names: (
+            // M
+            // TODO: ...
+        )
+    }
+    // TODO: ...
 
- = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
- { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
+//  = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
+//  { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
 
 // ModulePatternName
 //     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
@@ -304,12 +317,12 @@ ModulePattern = concrete '('   __   not concrete ',' {
 // UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
 
 
-// // ====================   Whitespace and lexical markers   ====================
-// __                      = WHITESPACE?
-// WHITESPACE 'WHITESPACE' = WHITESPACE_ITEM+   { return text(); }
-// WHITESPACE_ITEM         = SINGLE_LINE_COMMENT / MULTILINE_COMMENT / HORITONTAL_WHITESPACE / END_OF_LINE
-// SINGLE_LINE_COMMENT     = "//"   (!END_OF_LINE .)*
+// ====================   Whitespace and lexical markers   ====================
+// WS                      = WHITESPACE?
+// WHITESPACE              = WHITESPACE_ITEM+   { return text(); }
+// WHITESPACE_ITEM         = SINGLE_LINE_COMMENT | MULTILINE_COMMENT | HORITONTAL_WHITESPACE | END_OF_LINE
+// SINGLE_LINE_COMMENT     = "//"   0..m (!END_OF_LINE .)
 // MULTILINE_COMMENT       = "/*"   (!"*/" .)*   "*/"
-// HORITONTAL_WHITESPACE   = [ \t]
+// HORITONTAL_WHITESPACE   = " " | "\t"
 // END_OF_LINE             = "\r\n" / "\r" / "\n"
 // END_OF_FILE             = !.
