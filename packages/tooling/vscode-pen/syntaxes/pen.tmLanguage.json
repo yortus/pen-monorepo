@@ -118,9 +118,17 @@
 			"name": "keyword.operator.pen"
         },
 		"identifier": {
-            "match": "\\w+",
-            "name": "variable.other.pen"
-        }
+			"patterns": [
+				{
+					"match": "[_A-Z][_A-Z0-9]*(?!\\w)",
+					"name": "string.quoted.pen"
+	        	},
+				{
+					"match": "\\w+",
+					"name": "variable.other.pen"
+	        	}
+			]
+		}
 	},
 	"scopeName": "source.pen"
 }
