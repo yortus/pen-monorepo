@@ -15,8 +15,8 @@ describe(`Language features: functions`, () => {
 
     const L2 = compile({source: `
         start = fun(\`hi\`)
-        fun = r -> (-> start
-            start = rDash rDash
+        fun = r -> (
+            export rDash rDash
             rDash = enclose(r)
             enclose = makeEncloser(
                 lp=\`(\`

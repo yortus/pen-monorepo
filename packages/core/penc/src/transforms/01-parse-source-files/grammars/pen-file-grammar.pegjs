@@ -35,7 +35,7 @@ ModulePatternName
     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
-    6   LetExpression                   (-> a b a=1 b=2)
+    6   LetExpression                   (export a b a=1 b=2)
         Module                          (a=b c=d e=f)   (a=b)
         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
@@ -72,8 +72,7 @@ Precedence5OrHigher
     = ApplicationOrMemberExpression
 
 Precedence6OrHigher
-    = LetExpression
-    / Module
+    = ModuleOrLetExpression
     / ParenthesisedExpression
     / Identifier
     / NullLiteral
@@ -135,13 +134,12 @@ ApplicationArgument
     = arg:Precedence6OrHigher
     { return {arg}; }
 
-LetExpression
-    = "("   __   "->"   __   expression:Expression   (__   ",")?   __   bindings:BindingList   __   ")"
-    { return {kind: 'LetExpression', expression, bindings}; }
-
-Module
-    = "("   __   bindings:BindingList   __   ")"
-    { return {kind: 'Module', bindings}; }
+ModuleOrLetExpression
+    = "("   __   head:BindingList   __   tail:(ExportClause   (__   ",")?   __   BindingList)?   __   ")"
+    {
+        if (!tail) return {kind: 'Module', bindings: head};
+        return {kind: 'LetExpression', expression: tail[0], bindings: head.concat(tail[3])};
+    }
 
 ParenthesisedExpression
     = "("   __   expression:Expression   __   ")"
@@ -197,6 +195,10 @@ ImportExpression
 
 
 // ====================   Clauses (eg record/list/string parts)   ====================
+ExportClause
+    = EXPORT   __   expr:Expression
+    { return expr; }
+
 RecordItems
     = !","   head:RecordItem?   tail:(__   ","   __   RecordItem)*   (__   ",")?
     { return (head ? [head] : []).concat(tail.map(el => el[3])); }
@@ -278,12 +280,13 @@ HEX_DIGIT = [0-9a-fA-F]
 IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
 IDENTIFIER_START        = ![ꐚː]   [a-zA-Z_]    // NB: ids containing [ꐚː] (U+A41A, U+02D0) are reserved for internal use
 IDENTIFIER_PART         = ![ꐚː]   [a-zA-Z_0-9] // by the pen compiler . Currently not allowed anyway, but may be in future.
-RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE
-                        / IMPORT / NOT / NULL / QUANT_0__1
-                        / QUANT_0__M / TRUE / UNDERSCORE
+RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / EXPORT
+                        / FALSE / IMPORT / NOT / NULL
+                        / QUANT_0__1 / QUANT_0__M / TRUE / UNDERSCORE
 ABSTRACT                = "abstract"   !IDENTIFIER_PART   { return text(); }
 AS                      = "as"   !IDENTIFIER_PART   { return text(); }
 CONCRETE                = "concrete"   !IDENTIFIER_PART   { return text(); }
+EXPORT                  = "export"   !IDENTIFIER_PART   { return text(); }
 FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
 IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
 NOT                     = "not"   !IDENTIFIER_PART   { return text(); }

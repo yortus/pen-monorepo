@@ -64,7 +64,7 @@ ModulePattern =
 //     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
 //         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
 
-//     6   LetExpression                   (-> a b a=1 b=2)
+//     6   LetExpression                   (export a b a=1 b=2)
 //         Module                          (a=b c=d e=f)   (a=b)
 //         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
 //         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
