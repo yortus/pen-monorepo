@@ -803,13 +803,6 @@ function create(mode) {
     const ꐚutil1ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 5 > CREP.length) return false;
-                if (CREP[CPOS + 0] !== 0x75) return false;
-                if (CREP[CPOS + 1] !== 0x74) return false;
-                if (CREP[CPOS + 2] !== 0x69) return false;
-                if (CREP[CPOS + 3] !== 0x6c) return false;
-                if (CREP[CPOS + 4] !== 0x31) return false;
-                CPOS += 5;
                 emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
                 return true;
             },
@@ -827,19 +820,9 @@ function create(mode) {
                 if (AREP[APOS + 3] !== 0x6c) return false;
                 if (AREP[APOS + 4] !== 0x31) return false;
                 APOS += 5;
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x74;
-                CREP[CPOS++] = 0x69;
-                CREP[CPOS++] = 0x6c;
-                CREP[CPOS++] = 0x31;
                 return true;
             },
             infer: function STR() {
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x74;
-                CREP[CPOS++] = 0x69;
-                CREP[CPOS++] = 0x6c;
-                CREP[CPOS++] = 0x31;
             },
         },
         constant: "util1",
@@ -857,13 +840,6 @@ function create(mode) {
     const ꐚutil2ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 5 > CREP.length) return false;
-                if (CREP[CPOS + 0] !== 0x75) return false;
-                if (CREP[CPOS + 1] !== 0x74) return false;
-                if (CREP[CPOS + 2] !== 0x69) return false;
-                if (CREP[CPOS + 3] !== 0x6c) return false;
-                if (CREP[CPOS + 4] !== 0x32) return false;
-                CPOS += 5;
                 emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
                 return true;
             },
@@ -881,19 +857,9 @@ function create(mode) {
                 if (AREP[APOS + 3] !== 0x6c) return false;
                 if (AREP[APOS + 4] !== 0x32) return false;
                 APOS += 5;
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x74;
-                CREP[CPOS++] = 0x69;
-                CREP[CPOS++] = 0x6c;
-                CREP[CPOS++] = 0x32;
                 return true;
             },
             infer: function STR() {
-                CREP[CPOS++] = 0x75;
-                CREP[CPOS++] = 0x74;
-                CREP[CPOS++] = 0x69;
-                CREP[CPOS++] = 0x6c;
-                CREP[CPOS++] = 0x32;
             },
         },
         constant: "util2",

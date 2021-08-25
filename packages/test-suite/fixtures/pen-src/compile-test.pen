@@ -8,7 +8,7 @@ nested = (
 )
 
 letexpr = (
-    -> lx `-` lx
+    export lx `-` lx
     lx = `inner x`
     ly = `***`
 )
