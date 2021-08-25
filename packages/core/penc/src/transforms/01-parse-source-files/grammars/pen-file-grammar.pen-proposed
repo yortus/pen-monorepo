@@ -1,0 +1,317 @@
+// ====================   Top-level SourceFile node   ====================
+SourceFile = WS {
+    kind: 'Module',
+    bindings: BindingList
+} WS END_OF_FILE
+
+
+// ====================   Bindings and patterns   ====================
+BindingList =                       // recursive form (currently slower / not TC-optimised)
+    | [Binding, ...(WS COMMA? WS BindingList)]
+    | []
+
+BindingList = (                     // iterative form (faster but more complex to look at)
+    [Binding]                       // starts with a Binding
+    0..m [                          // followed by 0..M of:
+        optional (WS ",")           //     optional comma
+        WS Binding                  //     another Binding
+    ]
+    optional (WS ",")               // ends with an optional comma
+) | []                              // if not matched above, *always* match with an empty list and unchanged buffer
+
+Binding = {
+    kind: 'Binding',
+    left: (Identifier | ModulePattern) WS EQUALS WS,
+    right: Expression,
+}
+
+ModulePattern = "("   WS   !"," {
+    kind: 'ModulePattern',
+    names: (
+        M
+    )
+}
+
+ = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
+ { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
+
+// ModulePatternName
+//     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
+//     { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
+
+
+// // ====================   Expressions   ====================
+// /*  PRECEDENCE (1 = LOWEST)
+//     1   FunctionExpression (body)       a -> a a   (a, b) -> a b   () -> "blah"
+//                                              ^^^             ^^^         ^^^^^^
+//     2   SelectionExpression             a | b      | a | b | c
+
+//     3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
+
+//     4   UnaryExpression                 not a   0..1 a   0..m a(b)   0..1 a.b   not {a: b}   abstract a   concrete b
+
+//     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+//         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
+
+//     6   LetExpression                   (-> a b a=1 b=2)
+//         Module                          (a=b c=d e=f)   (a=b)
+//         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
+//         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
+//         NullLiteral                     null
+//         BooleanLiteral                  false   true
+//         NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
+//         StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
+//         RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
+//         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
+//         ImportExpression                import './foo'   import 'somelib'
+
+//     7   FunctionExpression (head)       a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
+//                                         ^^^^       ^^^^^^^^^       ^^^^^
+// */
+
+// Expression
+//     = Precedence1OrHigher
+
+// Precedence1OrHigher
+//     = FunctionExpression
+//     / Precedence2OrHigher
+
+// Precedence2OrHigher
+//     = SelectionExpression
+
+// Precedence3OrHigher
+//     = SequenceExpression
+
+// Precedence4OrHigher
+//     = UnaryExpression
+//     / Precedence5OrHigher
+
+// Precedence5OrHigher
+//     = ApplicationOrMemberExpression
+
+// Precedence6OrHigher
+//     = LetExpression
+//     / Module
+//     / ParenthesisedExpression
+//     / Identifier
+//     / NullLiteral
+//     / BooleanLiteral
+//     / NumericLiteral
+//     / StringExpression
+//     / RecordExpression
+//     / ListExpression
+//     / ImportExpression
+
+// FunctionExpression
+//     = param:(Identifier / ModulePattern)   __   "->"   __   body:Precedence1OrHigher
+//     { return {kind: 'FunctionExpression', param, body}; }
+
+// SelectionExpression
+//     = ("|"   __)?   head:Precedence3OrHigher   tail:(__   "|"   __   Precedence3OrHigher)*
+//     {
+//         if (tail.length === 0) return head;
+//         return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))};
+//     }
+
+// SequenceExpression
+//     = head:Precedence4OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence4OrHigher   !(__   "="))*
+//     {
+//         if (tail.length === 0) return head;
+//         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
+//     }
+
+// UnaryExpression
+//     = op:(ABSTRACT / CONCRETE / NOT / QUANT_0__1 / QUANT_0__M)   __   expression:Precedence4OrHigher
+//     {
+//         switch (op) {
+//           case 'abstract': return {kind: 'AbstractExpression', expression};
+//           case 'concrete': return {kind: 'ConcreteExpression', expression};
+//           case 'not': return {kind: 'NotExpression', expression};
+//           case '0..1': return {kind: 'QuantifiedExpression', expression, quantifier: '?'};
+//           case '0..m': return {kind: 'QuantifiedExpression', expression, quantifier: '*'};
+//         }
+//     }
+
+// ApplicationOrMemberExpression
+//     = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)*
+//     {
+//         if (tail.length === 0) return head;
+//         return tail.reduce(
+//             (lhs, rhs) => (rhs.name
+//                 ? {kind: 'MemberExpression', module: lhs, member: rhs.name}
+//                 : {kind: 'ApplicationExpression', function: lhs, argument: rhs.arg}
+//             ),
+//             head
+//         );
+//     }
+
+// MemberLookup
+//     = "."   /* NO WHITESPACE */   name:IDENTIFIER
+//     { return {name}; }
+
+// ApplicationArgument
+//     = arg:Precedence6OrHigher
+//     { return {arg}; }
+
+// LetExpression
+//     = "("   __   "->"   __   expression:Expression   (__   ",")?   __   bindings:BindingList   __   ")"
+//     { return {kind: 'LetExpression', expression, bindings}; }
+
+// Module
+//     = "("   __   bindings:BindingList   __   ")"
+//     { return {kind: 'Module', bindings}; }
+
+// ParenthesisedExpression
+//     = "("   __   expression:Expression   __   ")"
+//     { return {kind: 'ParenthesisedExpression', expression}; }
+
+// Identifier
+//     = name:IDENTIFIER
+//     { return {kind: 'Identifier', name}; }
+
+// NullLiteral
+//     = NULL   { return {kind: 'NullLiteral', value: null}; }
+
+// BooleanLiteral
+//     = TRUE   { return {kind: 'BooleanLiteral', value: true}; }
+//     / FALSE   { return {kind: 'BooleanLiteral', value: false}; }
+
+// NumericLiteral
+//     = value:(DecimalLiteral / HexIntegerLiteral)
+//     { return {kind: 'NumericLiteral', value}; }
+
+// StringExpression
+//     = "'"   items:StringItems   "'"
+//     { return {kind: 'StringExpression', subkind: 'X', items}; }
+
+// RecordExpression
+//     = "{"   __   items:RecordItems   __   "}"
+//     {
+//         const labels = new Set();
+//         for (const item of items) {
+//             if (item.kind !== 'Field' || typeof item.label !== 'string') continue;
+//             if (labels.has(item.label)) return error(`Duplicate field label '${label}'`);
+//             labels.add(item.label);
+//         }
+//         return {kind: 'RecordExpression', items};
+//     }
+
+// ListExpression
+//     = "["   __   items:ListItems   __   "]"
+//     { return {kind: 'ListExpression', items}; }
+
+// ImportExpression
+//     = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
+//     {
+//         const moduleSpecifier = specifierChars.map(el => el[1]).join('');
+//         return {kind: 'ImportExpression', moduleSpecifier};
+//     }
+
+
+// // ====================   Clauses (eg record/list/string parts)   ====================
+// RecordItems
+//     = !","   head:RecordItem?   tail:(__   ","   __   RecordItem)*   (__   ",")?
+//     { return (head ? [head] : []).concat(tail.map(el => el[3])); }
+
+// RecordItem
+//     = Splice
+
+//     / "["   __   label:Expression   __   "]"   __   ":"   __   expression:Expression
+//     { return {kind: 'Field', label, expression}; }
+
+//     / label:IDENTIFIER   __   ":"   __   expression:Expression
+//     { return {kind: 'Field', label, expression}; }
+
+// ListItems
+//     = !","   head:ListItem?   tail:((__   ",")?   __   ListItem)*   (__   ",")?
+//     { return (head ? [head] : []).concat(tail.map(el => el[2])); }
+
+// ListItem
+//     = Splice / Expression
+
+// Splice
+//     = "..."   __   expression:Expression
+//     { return {kind: 'Splice', expression}; }
+
+// StringItems
+//     = items:StringItem*
+
+// StringItem
+//     = chars:CHARACTER+   { return chars.join(''); }
+//     / "{"   expr:Expression   "}"   { return expr; }
+//     / "\\(x"   value:ByteRangeHex   ")"   { return value; }
+//     / "\\x"   value:ByteRangeHex   { return value; }
+//     / "\\("   value:ByteRangeDec   ")"   { return value; }
+//     / "\\"   value:ByteRangeDec   { return value; }
+
+// ByteRangeDec
+//     = min:([0-9]+   {return parseInt(text(), 10)})   max:("-"   ([0-9]+   {return parseInt(text(), 10)}))?
+//     { max = max ? max[1] : min; if (min > max || max > 255) error(`invalid byte range: ${min}-${max}`); else return [min, max]; }
+
+// ByteRangeHex
+//     = min:(HEX_DIGIT+   {return parseInt(text(), 16)})   max:("-"   (HEX_DIGIT+   {return parseInt(text(), 16)}))?
+//     { max = max ? max[1] : min; if (min > max || max > 255) error(`invalid byte range: ${min}-${max}`); else return [min, max]; }
+
+
+// // ====================   Numeric literal parts   ====================
+// DecimalLiteral
+//     = !"0x"   [+-]?   ([0-9]+ ("." [0-9]*)?   /   "." [0-9]+)   ExponentPart?   ![a-zA-Z]
+//     {
+//         // TODO: also ensure exact representation, aka safenum?
+//         const n = parseFloat(text());
+//         if (!Number.isFinite(n)) error('cannot represent numeric literal');
+//         return n;
+//     }
+
+// ExponentPart
+//     = [eE]   [+-]?   [0-9]+
+
+// HexIntegerLiteral
+//     = "0x"    HEX_DIGIT+   ![a-zA-Z]
+//     {
+//         // TODO: also ensure exact representation, aka safenum?
+//         const n = parseInt(text());
+//         if (!Number.isFinite(n)) error('cannot represent numeric literal');
+//         return n;
+//     }
+
+
+// // ====================   Literal characters and escape sequences   ====================
+// CHARACTER
+//     = ![\x00-\x1F]   ![\\'"`{]   .   { return text(); }
+//     / "\\"   c:[bfnrtv'"`{\\]   { return eval(`"${text()}"`); }
+//     / "\\u"   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   HEX_DIGIT   { return eval(`"${text()}"`); }
+//     / "\\u{"   d:HEX_DIGIT+   "}"   { return eval(`"${text()}"`); }
+
+// HEX_DIGIT = [0-9a-fA-F]
+
+
+// // ====================   Identifiers and Keywords   ====================
+// IDENTIFIER 'IDENTIFIER' = &IDENTIFIER_START   !RESERVED   IDENTIFIER_START   IDENTIFIER_PART*   { return text(); }
+// IDENTIFIER_START        = ![ꐚː]   [a-zA-Z_]    // NB: ids containing [ꐚː] (U+A41A, U+02D0) are reserved for internal use
+// IDENTIFIER_PART         = ![ꐚː]   [a-zA-Z_0-9] // by the pen compiler . Currently not allowed anyway, but may be in future.
+// RESERVED 'RESERVED'     = ABSTRACT / AS / CONCRETE / FALSE
+//                         / IMPORT / NOT / NULL / QUANT_0__1
+//                         / QUANT_0__M / TRUE / UNDERSCORE
+// ABSTRACT                = "abstract"   !IDENTIFIER_PART   { return text(); }
+// AS                      = "as"   !IDENTIFIER_PART   { return text(); }
+// CONCRETE                = "concrete"   !IDENTIFIER_PART   { return text(); }
+// FALSE                   = "false"   !IDENTIFIER_PART   { return text(); }
+// IMPORT                  = "import"   !IDENTIFIER_PART   { return text(); }
+// NOT                     = "not"   !IDENTIFIER_PART   { return text(); }
+// NULL                    = "null"   !IDENTIFIER_PART   { return text(); }
+// QUANT_0__1              = "0..1"   !IDENTIFIER_PART   { return text(); }
+// QUANT_0__M              = "0..m"   !IDENTIFIER_PART   { return text(); }
+// TRUE                    = "true"   !IDENTIFIER_PART   { return text(); }
+// UNDERSCORE              = "_"   !IDENTIFIER_PART   { return text(); }
+
+
+// // ====================   Whitespace and lexical markers   ====================
+// __                      = WHITESPACE?
+// WHITESPACE 'WHITESPACE' = WHITESPACE_ITEM+   { return text(); }
+// WHITESPACE_ITEM         = SINGLE_LINE_COMMENT / MULTILINE_COMMENT / HORITONTAL_WHITESPACE / END_OF_LINE
+// SINGLE_LINE_COMMENT     = "//"   (!END_OF_LINE .)*
+// MULTILINE_COMMENT       = "/*"   (!"*/" .)*   "*/"
+// HORITONTAL_WHITESPACE   = [ \t]
+// END_OF_LINE             = "\r\n" / "\r" / "\n"
+// END_OF_FILE             = !.
