@@ -27,7 +27,9 @@
 				{"include": "#bindingName"},
 
 				{"include": "#keyword"},
-				{"include": "#string"},
+				{"include": "#stringX"},
+				{"include": "#stringA"},
+				{"include": "#stringC"},
 				{"include": "#literal"},
 				{"include": "#moduleSpec"},
 				{"include": "#identifier"},
@@ -59,10 +61,74 @@
 				"1": {"name": "variable.other.constant.pen"}
 			}
         },
-		"string": {
+		"stringX": {
+			"begin": "`",
+			"end": "`",
+			"name": "variable.other.pen",
+			"patterns": [
+				{
+					"match": "\\\\x[0-9a-fA-F]+(?:-[0-9a-fA-F]+)?",
+					"name": "variable.other.pen"
+				},
+				{
+					"match": "\\\\[0-9]+(?:-[0-9]+)?",
+					"name": "variable.other.pen"
+				},
+				{
+					"match": "\\\\.",
+					"name": "variable.other.pen"
+				},
+				{
+					"begin": "\\{",
+					"end": "\\}",
+					"beginCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.begin.pen"}
+					},
+					"endCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.end.pen"}
+					},
+					"patterns": [
+						{"include": "#module"}
+					]
+				}
+			]
+		},
+		"stringA": {
 			"begin": "'",
 			"end": "'",
-			"name": "string.quoted.single.pen",
+			"name": "support.function.pen",
+			"patterns": [
+				{
+					"match": "\\\\x[0-9a-fA-F]+(?:-[0-9a-fA-F]+)?",
+					"name": "support.function.pen"
+				},
+				{
+					"match": "\\\\[0-9]+(?:-[0-9]+)?",
+					"name": "support.function.pen"
+				},
+				{
+					"match": "\\\\.",
+					"name": "support.function.pen"
+				},
+				{
+					"begin": "\\{",
+					"end": "\\}",
+					"beginCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.begin.pen"}
+					},
+					"endCaptures": {
+						"0": {"name": "punctuation.definition.template-expression.end.pen"}
+					},
+					"patterns": [
+						{"include": "#module"}
+					]
+				}
+			]
+		},
+		"stringC": {
+			"begin": "\"",
+			"end": "\"",
+			"name": "string.quoted.pen",
 			"patterns": [
 				{
 					"match": "\\\\x[0-9a-fA-F]+(?:-[0-9a-fA-F]+)?",
@@ -95,17 +161,17 @@
 			"patterns": [
 				{
 					"match": "[+-]?(?:(?:[0-9]+(?:[.][0-9]*)?(?:[eE][+-]?[0-9]+)?)|(?:[.][0-9]+(?:[eE][+-]?[0-9]+)?))",
-					"name": "constant.numeric.pen"
+					"name": "support.function.pen"
 				},
 				{
 					"match": "\\b(false|null|true)\\b",
-					"name": "constant.language.pen"
+					"name": "support.function.pen"
 				}
 			]
 		},
 		"moduleSpec": {
 			"match": "(?<=import\\s*)'[^']*'",
-			"name": "string.quoted.single.pen"
+			"name": "string.quoted.pen"
 		},
 		"keyword": {
 			"patterns": [{
@@ -114,14 +180,26 @@
 			}]
 		},
 		"operator": {
-			"match": "[=|.!?*]|\\-\\>",
-			"name": "keyword.operator.pen"
+			"patterns": [
+				{
+					"match": "[\\{\\}\\[\\]:,]|\\.\\.\\.",
+					"name": "support.function.pen"
+				},
+				{
+					"match": "[=|.!?*]|\\-\\>",
+					"name": "keyword.operator.pen"
+				}
+			]
         },
 		"identifier": {
 			"patterns": [
 				{
 					"match": "[_A-Z][_A-Z0-9]*(?!\\w)",
 					"name": "string.quoted.pen"
+	        	},
+				{
+					"match": "\\w+(?=\\s*:)",
+					"name": "support.function.pen"
 	        	},
 				{
 					"match": "\\w+",

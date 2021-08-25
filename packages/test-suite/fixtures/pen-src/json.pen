@@ -26,9 +26,9 @@ Value =
     |   String
 
 // ---------- Primitive values ----------
-False   = concrete 'false'   false
-Null    = concrete 'null'   null
-True    = concrete 'true'   true
+False   = "false"   false
+Null    = "null"   null
+True    = "true"   true
 
 // ---------- Objects ----------
 Object      = LBRACE   ({[String]: COLON Value}   0..m {[COMMA String]: COLON Value}   |   {})   RBRACE
@@ -51,40 +51,40 @@ String = DOUBLE_QUOTE   0..m CHAR   DOUBLE_QUOTE
 //       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
 // TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
-    |   not '\\'   not '\"'   '\x20-7F'                             // any ASCII char except '\', '"', or control char
-    |   '\xC0-DF\x80-BF'                                            // any 2-byte utf8 char
-    |   '\xE0-EF\x80-BF\x80-BF'                                     // any 3-byte utf8 char
-    |   '\xF0-F7\x80-BF\x80-BF\x80-BF'                              // any 4-byte utf8 char
-    |   concrete '\\\"'   abstract '\"'                             // quotation mark
-    |   concrete '\\\\'   abstract '\\'                             // reverse solidus
-    |   concrete '\\/'   abstract '/'                               // solidus
-    |   concrete '\\b'   abstract '\b'                              // backspace
-    |   concrete '\\f'   abstract '\f'                              // formfeed
-    |   concrete '\\n'   abstract '\n'                              // newline
-    |   concrete '\\r'   abstract '\r'                              // carriage return
-    |   concrete '\\t'   abstract '\t'                              // horizontal tab
-    |   concrete '\\u'   unicode(base=16 minDigits=4 maxDigits=4)   // unicode escape sequence
+    |   not `\\`   not `\"`   `\x20-7F`                             // any ASCII char except '\', '"', or control char
+    |   `\xC0-DF\x80-BF`                                            // any 2-byte utf8 char
+    |   `\xE0-EF\x80-BF\x80-BF`                                     // any 3-byte utf8 char
+    |   `\xF0-F7\x80-BF\x80-BF\x80-BF`                              // any 4-byte utf8 char
+    |   "\\\""   '\"'                                               // quotation mark
+    |   "\\\\"   '\\'                                               // reverse solidus
+    |   "\\/"   '/'                                                 // solidus
+    |   "\\b"   '\b'                                                // backspace
+    |   "\\f"   '\f'                                                // formfeed
+    |   "\\n"   '\n'                                                // newline
+    |   "\\r"   '\r'                                                // carriage return
+    |   "\\t"   '\t'                                                // horizontal tab
+    |   "\\u"   unicode(base=16 minDigits=4 maxDigits=4)            // unicode escape sequence
 
 // ---------- Literal characters ----------
 
-LBRACE          = WS   concrete '\{'   WS
-RBRACE          = WS   concrete '}'   WS
-LBRACKET        = WS   concrete '['   WS
+LBRACE          = WS   "\{"   WS
+RBRACE          = WS   "}"   WS
+LBRACKET        = WS   "["   WS
 
-RBRACKET        = WS   concrete ']'   WS
-COLON           = WS   concrete ':'   WS
-COMMA           = WS   concrete ','   WS
-DOUBLE_QUOTE    = concrete '\"'
-WS              = 0..m (concrete ' ' | concrete '\t' | concrete '\n' | concrete '\r')
+RBRACKET        = WS   "]"   WS
+COLON           = WS   ":"   WS
+COMMA           = WS   ","   WS
+DOUBLE_QUOTE    = "\""
+WS              = 0..m (" " | "\t" | "\n" | "\r")
 // TODO: below is equivalent to above, but blows out bench time ~2.5x!!! Optimise?
-// WS              = concrete *(' ' | '\t' | '\n' | '\r')
+// WS              = concrete *(` ` | `\t` | `\n` | `\r`)
 
 
 
 
 /* syntax ideas...
 CHAR =
-    |   ifnot   ('\x00-\x1f' | '\"' | '\\')   then   anyChar        // any char except control char, " or \
+    |   ifnot   (`\x00-\x1f` | `\"` | `\\`)   then   anyChar        // any char except control char, " or \
     |   ...
 
 WS              = repeat (` ` | `\t` | `\n` | `\r`)

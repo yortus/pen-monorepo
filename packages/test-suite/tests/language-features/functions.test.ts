@@ -4,23 +4,23 @@ import {compile} from 'penc';
 
 describe(`Language features: functions`, () => {
     const L1 = compile({source: `
-        x = 'OUTER'
+        x = \`OUTER\`
         ns = (
             fun = (a) -> [a, x, a]
-            x = 'INNER'
-            a = 'FURPHY'
+            x = \`INNER\`
+            a = \`FURPHY\`
         )
         start = ns.fun(a = x)
     `}).eval();
 
     const L2 = compile({source: `
-        start = fun('hi')
+        start = fun(\`hi\`)
         fun = r -> (-> start
             start = rDash rDash
             rDash = enclose(r)
             enclose = makeEncloser(
-                lp='('
-                rp=')'
+                lp=\`(\`
+                rp=\`)\`
             )
             makeEncloser = (lp, rp) -> x -> lp x rp
         )

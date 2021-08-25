@@ -163,8 +163,14 @@ NumericLiteral
     { return {kind: 'NumericLiteral', value}; }
 
 StringExpression
-    = "'"   items:StringItems   "'"
+    = '`'   items:StringItems   '`'
     { return {kind: 'StringExpression', subkind: 'X', items}; }
+
+    / "'"   items:StringItems   "'"
+    { return {kind: 'StringExpression', subkind: 'A', items}; }
+
+    / '"'   items:StringItems   '"'
+    { return {kind: 'StringExpression', subkind: 'C', items}; }
 
 RecordExpression
     = "{"   __   items:RecordItems   __   "}"

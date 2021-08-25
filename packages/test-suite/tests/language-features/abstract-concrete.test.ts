@@ -5,23 +5,23 @@ import {compile} from 'penc';
 describe(`Language features: abstract/concrete operators`, () => {
     const {parse, print} = compile({source: `
         start =
-            | '[' concrete expr ']'
-            | '<' abstract expr '>'
+            | \`[\` concrete expr \`]\`
+            | \`<\` abstract expr \`>\`
             | L2 | L3 | L4
             | L5 | L6 | L7 | L8 | L9
         expr = a   0..m(a b)   b   0..1 c
-        a = 'a'
-        b = 'b'
-        c = 'c'
+        a = \`a\`
+        b = \`b\`
+        c = \`c\`
 
-        L2 = ['L2 ']   [abstract [a, b] concrete [b, c]]
-        L3 = ['L3 ']   [concrete [a, b] abstract [b, c]]
-        L4 = ['L4 ']   [abstract {a:'A', b:'B', c:'C'}]
-        L5 = ['L5 ']   [concrete {a:'A', b:'B', c:'C'}]
-        L6 = ['L6 ']   [abstract abstract a b]
-        L7 = ['L7 ']   [abstract concrete a b]
-        L8 = ['L8 ']   [concrete abstract a b]
-        L9 = ['L9 ']   [concrete concrete a b]
+        L2 = [\`L2 \`]   [abstract [a, b] concrete [b, c]]
+        L3 = [\`L3 \`]   [concrete [a, b] abstract [b, c]]
+        L4 = [\`L4 \`]   [abstract {a:\`A\`, b:\`B\`, c:\`C\`}]
+        L5 = [\`L5 \`]   [concrete {a:\`A\`, b:\`B\`, c:\`C\`}]
+        L6 = [\`L6 \`]   [abstract abstract a b]
+        L7 = [\`L7 \`]   [abstract concrete a b]
+        L8 = [\`L8 \`]   [concrete abstract a b]
+        L9 = [\`L9 \`]   [concrete concrete a b]
     `}).eval();
 
     const tests = [

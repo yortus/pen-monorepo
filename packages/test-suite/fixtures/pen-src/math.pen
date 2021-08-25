@@ -14,31 +14,31 @@ start = expr
 
 
 expr = memoise(add | sub | term)
-add = {type: abstract 'add', lhs: expr, rhs: concrete '+' term}
+add = {type: 'add', lhs: expr, rhs: "+" term}
 sub = {
-    type: abstract 'sub',
+    type: 'sub',
     lhs: expr,
-    rhs: concrete '-' term,
+    rhs: "-" term,
 }
 
 term = memoise(mul | div | factor)
 mul = { // test both dynamic and static field labels
-    [ab'type']: ab'mul',
+    [ab`type`]: ab`mul`,
     lhs: term,
-    [ab'rhs']: co'*' factor
+    [ab`rhs`]: co`*` factor
 }
 div = {
-    type: (ab)'div',
+    type: (ab)`div`,
     lhs: term,
-    rhs: (co)'/' factor,
+    rhs: (co)`/` factor,
 }
 
 factor =
-    | not '0x'   not '0b'   float
-    | (co)'0x'   int(base=16 signed=false)
-    | (co)'0b'   int(base=2 signed=false)
-    | (co)'i'    int(signed=false)
-    | (co)'('   expr   (co)')'
+    | not `0x`   not `0b`   float
+    | (co)`0x`   int(base=16 signed=false)
+    | (co)`0b`   int(base=2 signed=false)
+    | (co)`i`    int(signed=false)
+    | (co)`(`   expr   (co)`)`
 
 ab = expr -> abstract expr
 co = expr -> concrete expr

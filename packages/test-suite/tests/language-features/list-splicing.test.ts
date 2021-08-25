@@ -7,9 +7,9 @@ describe(`Language features: list splicing`, () => {
         start = l1 | l2
         l1 = [a, a, b]
         l2 = [b, ...start, ...l3]
-        l3 = ['-', l1] | []
-        a = 'a'
-        b = 'b'
+        l3 = [\`-\`, l1] | []
+        a = \`a\`
+        b = \`b\`
     `}).eval();
 
     const tests = [
