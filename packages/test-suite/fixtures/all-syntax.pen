@@ -1,0 +1,29 @@
+import './foo' as foo
+import './bar' as (b1, b2)
+import 'std' as (intString)
+
+export foo
+
+n01 = a | b | c
+n02 = a b c
+
+n10 = if a
+n11 = a then b
+n12 = a else b
+
+
+n20 = not a
+
+
+n30 = a -> b
+n31 = a -> b | c -> d
+
+
+n40 = {a=b, c=d}
+n41 = a.b
+
+n50 = [a, b, c]
+
+
+
+
