@@ -37,29 +37,62 @@
 			]
 		},
 		"bindingPattern": {
-			"begin": "(?<!\\=\\s*)\\((?=[^)]*\\)\\s*(?:\\=|\\-\\>))",
-			"end": "\\)(?=\\s*(?:\\=|\\-\\>))",
 			"patterns": [
-				{"include": "#comment"},
-				{"include": "#keyword"},
 				{
-					"match": "(\\w+)(?=\\s+as)",
+					"begin": "(?<!\\=\\s*)\\((?=[^)]*\\)\\s*(?:\\=|\\-\\>))",
+					"end": "\\)(?=\\s*(?:\\=|\\-\\>))",
+					"patterns": [
+						{"include": "#comment"},
+						{"include": "#keyword"},
+						{
+							"match": "(\\w+)(?=\\s+as)",
+							"captures": {
+								"1": {"name": "variable.other.pen"}
+							}
+						},
+						{
+							"match": "\\w+",
+							"name": "variable.other.constant.pen"
+						}
+
+					]
+				},
+				{
+					"begin": "(?<=as\\s*)\\((?=[^)]*\\))",
+					"end": "\\)",
+					"patterns": [
+						{"include": "#comment"},
+						{"include": "#keyword"},
+						{
+							"match": "(\\w+)(?=\\s+as)",
+							"captures": {
+								"1": {"name": "variable.other.pen"}
+							}
+						},
+						{
+							"match": "\\w+",
+							"name": "variable.other.constant.pen"
+						}
+
+					]
+				}
+			]
+		},
+		"bindingName": {
+			"patterns": [
+				{
+					"match": "(\\w+)(?=\\s*(?:\\=|\\-\\>))",
 					"captures": {
-						"1": {"name": "variable.other.pen"}
+						"1": {"name": "variable.other.constant.pen"}
 					}
 				},
 				{
-					"match": "\\w+",
-					"name": "variable.other.constant.pen"
+					"match": "(?<=as\\s*)(\\w+)",
+					"captures": {
+						"1": {"name": "variable.other.constant.pen"}
+					}
 				}
-
 			]
-        },
-		"bindingName": {
-			"match": "(\\w+)(?=\\s*(?:\\=|\\-\\>))",
-			"captures": {
-				"1": {"name": "variable.other.constant.pen"}
-			}
         },
 		"stringX": {
 			"begin": "`",

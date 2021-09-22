@@ -1,5 +1,5 @@
-(f as foo, b as bar, baz) = import './a'
-() = import './b.pen'
+import './a' as (f as foo, b as bar, baz)
+import './b.pen' as ()
 
 start = result
 

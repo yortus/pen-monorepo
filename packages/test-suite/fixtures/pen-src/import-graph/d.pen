@@ -1,2 +1,2 @@
-//() = import 'pen'
-() = import './util'
+//import 'pen' as ()
+import './util' as ()

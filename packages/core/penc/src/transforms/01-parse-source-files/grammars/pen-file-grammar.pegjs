@@ -1,8 +1,23 @@
 // ====================   Top-level SourceFile node   ====================
 SourceFile
-    = __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'Module', bindings}; }
+    = __   imports:ImportList   __   bindings:BindingList   __   END_OF_FILE
+    { return {kind: 'Module', bindings: [...imports, ...bindings]}; }
 
+ImportList
+    = head:Import?   tail:(__   Import)*
+    { return (head ? [head] : []).concat(tail.map(el => el[1])); }
+
+Import
+    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"   __   AS   __   pat:(Identifier / ModulePattern)
+    {
+        const moduleSpecifier = specifierChars.map(el => el[1]).join('');
+        // TODO: desugar to Binding for now
+        return {
+            kind: 'Binding',
+            left: pat,
+            right: {kind: 'ImportExpression', moduleSpecifier},
+        };
+    }
 
 // ====================   Bindings and patterns   ====================
 BindingList

@@ -7,8 +7,7 @@
  */
 
 
-(memoise, floatString as float, intString as int) = import 'std'
-
+import 'std' as (memoise, floatString as float, intString as int)
 
 start = expr
 
