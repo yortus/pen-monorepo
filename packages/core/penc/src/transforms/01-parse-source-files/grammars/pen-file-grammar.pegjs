@@ -1,22 +1,17 @@
 // ====================   Top-level SourceFile node   ====================
 SourceFile
     = __   imports:ImportList   __   bindings:BindingList   __   END_OF_FILE
-    { return {kind: 'Module', bindings: [...imports, ...bindings]}; }
+    { return {kind: 'Module', imports, bindings}; }
 
 ImportList
     = head:Import?   tail:(__   Import)*
     { return (head ? [head] : []).concat(tail.map(el => el[1])); }
 
 Import
-    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"   __   AS   __   pat:(Identifier / ModulePattern)
+    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"   __   AS   __   pattern:(Identifier / ModulePattern)
     {
         const moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        // TODO: desugar to Binding for now
-        return {
-            kind: 'Binding',
-            left: pat,
-            right: {kind: 'ImportExpression', moduleSpecifier},
-        };
+        return {kind: 'Import', moduleSpecifier, pattern};
     }
 
 // ====================   Bindings and patterns   ====================
@@ -60,7 +55,6 @@ ModulePatternName
         StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
         RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
-        ImportExpression                import './foo'   import 'somelib'
 
     7   FunctionExpression (head)       a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
                                         ^^^^       ^^^^^^^^^       ^^^^^
@@ -96,7 +90,6 @@ Precedence6OrHigher
     / StringExpression
     / RecordExpression
     / ListExpression
-    / ImportExpression
 
 FunctionExpression
     = param:(Identifier / ModulePattern)   __   "->"   __   body:Precedence1OrHigher
@@ -152,7 +145,7 @@ ApplicationArgument
 ModuleOrLetExpression
     = "("   __   head:BindingList   __   tail:(ExportClause   (__   ",")?   __   BindingList)?   __   ")"
     {
-        if (!tail) return {kind: 'Module', bindings: head};
+        if (!tail) return {kind: 'Module', imports: [], bindings: head};
         return {kind: 'LetExpression', expression: tail[0], bindings: head.concat(tail[3])};
     }
 
@@ -200,13 +193,6 @@ RecordExpression
 ListExpression
     = "["   __   items:ListItems   __   "]"
     { return {kind: 'ListExpression', items}; }
-
-ImportExpression
-    = IMPORT   __   "'"   specifierChars:(!"'"   CHARACTER)*   "'"
-    {
-        const moduleSpecifier = specifierChars.map(el => el[1]).join('');
-        return {kind: 'ImportExpression', moduleSpecifier};
-    }
 
 
 // ====================   Clauses (eg record/list/string parts)   ====================

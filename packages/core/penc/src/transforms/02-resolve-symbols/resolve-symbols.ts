@@ -95,7 +95,7 @@ export function resolveSymbols(ast: V.AST<200>): V.AST<300> {
 
             // Pop back out to the surrounding scope before returning.
             env = env.surroundingScope;
-            return {kind: 'Module', bindings};
+            return {kind: 'Module', imports: [], bindings};
         },
     }));
 

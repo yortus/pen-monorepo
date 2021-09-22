@@ -44,12 +44,12 @@ function makeDefaultMappers(rec: <N extends Node>(n: N) => N) {
             case 'FunctionExpression': return typeof n.param === 'string' ? {...n, body: rec(n.body) as any} : {...n, param: rec(n.param), body: rec(n.body)}; // TODO: fix any cast
             case 'FunctionParameter': return n;
             case 'Identifier': return n;
-            case 'ImportExpression': return n;
+            case 'Import': return {...n, pattern: rec(n.pattern)};
             case 'Intrinsic': return n;
             case 'LetExpression': return {...n, expression: rec(n.expression), bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
             case 'ListExpression': return {...n, items: n.items.map(rec)};
             case 'MemberExpression': return {...n, module: rec(n.module)};
-            case 'Module': return {...n, bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)};
+            case 'Module': return {...n, imports: n.imports.map(rec) as any, bindings: Array.isArray(n.bindings) ? n.bindings.map(rec) : mapObj(n.bindings, rec)}; // TODO: fix any cast
             case 'ModulePattern': return n;
             case 'NotExpression': return {...n, expression: rec(n.expression)};
             case 'NullLiteral': return n;

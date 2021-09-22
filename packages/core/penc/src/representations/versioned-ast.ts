@@ -58,7 +58,6 @@ export type Expression<V extends Version = Version> =
     | FunctionExpression<V>
     | FunctionParameter
     | Identifier
-    | ImportExpression<V>
     | Intrinsic
     | LetExpression<V>
     | ListExpression<V>
@@ -102,6 +101,7 @@ export type Binding<V extends Version> = {
 /** Union of all node types not included elsewhere (eg clauses). */
 export type Other<V extends Version = Version> =
     | Field<V>
+    | Import<V>
     | Splice<V>
 ;
 
@@ -176,10 +176,11 @@ export interface Identifier {
 }
 
 
-export type ImportExpression<V extends Version> = {
+export type Import<V extends Version> = {
     100: {
-        kind: 'ImportExpression';
+        kind: 'Import';
         moduleSpecifier: string;
+        pattern: Identifier | Pattern<V>;
     };
     rest: never;
 }[V extends 100 ? 100 : 'rest'];
@@ -220,6 +221,10 @@ export interface MemberExpression<V extends Version> {
 
 export interface Module<V extends Version, Value extends Expression<V> = Expression<V>> {
     kind: 'Module';
+    imports: {
+        100: Array<Import<V>>;
+        rest: never[];
+    }[V extends 100 ? 100 : 'rest'];
     bindings: {
         100: BindingList<V>;
         200: BindingMap<V, Value>;

@@ -1,4 +1,7 @@
+import './util1' as u1
+import './util2' as u2
+
 util = (
-    import './util1' as util1
-    import './util2' as util2
+    util1 = u1
+    util2 = u2
 )

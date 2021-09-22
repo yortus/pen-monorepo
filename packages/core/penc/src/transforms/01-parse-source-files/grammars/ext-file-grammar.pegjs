@@ -4,6 +4,7 @@ SourceFile
     {
         return {
             kind: 'Module',
+            imports: [],
             bindings: exportedNames.map(name => ({
                 kind: 'Binding',
                 left: {kind: 'Identifier', name},

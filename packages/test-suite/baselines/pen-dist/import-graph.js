@@ -771,15 +771,27 @@ function create(mode) {
     };
 
     // Identifier
-    const ꐚutil1 = Object.assign(
+    const ꐚu1 = Object.assign(
         arg => ꐚMODːutil1(arg),
         {infer: arg => ꐚMODːutil1.infer(arg)},
     );
 
     // Identifier
-    const ꐚutil2 = Object.assign(
+    const ꐚu2 = Object.assign(
         arg => ꐚMODːutil2(arg),
         {infer: arg => ꐚMODːutil2.infer(arg)},
+    );
+
+    // Identifier
+    const ꐚutil1 = Object.assign(
+        arg => ꐚu1(arg),
+        {infer: arg => ꐚu1.infer(arg)},
+    );
+
+    // Identifier
+    const ꐚutil2 = Object.assign(
+        arg => ꐚu2(arg),
+        {infer: arg => ꐚu2.infer(arg)},
     );
 
     // Module
@@ -794,6 +806,8 @@ function create(mode) {
     // Module
     const ꐚMODːutil = (member) => {
         switch (member) {
+            case 'u1': return ꐚu1;
+            case 'u2': return ꐚu2;
             case 'util': return ꐚutil;
             default: return undefined;
         }

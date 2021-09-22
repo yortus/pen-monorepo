@@ -21,7 +21,7 @@ export function validateAST(ast: AST<Version>) {
         }
 
         if (ast.version === 200 || ast.version === 300) {
-            if (['Binding', 'ImportExpression', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
+            if (['Binding', 'Import', 'ModulePattern', 'ParenthesisedExpression'].includes(n.kind)) {
                 throw new Error(`Node kind '${n.kind}' is not permitted in AST v${ast.version}`);
             }
             if (n.kind === 'Module' || n.kind === 'LetExpression') {
@@ -51,7 +51,7 @@ const allNodeKinds = [
     'FunctionExpression',
     'FunctionParameter',
     'Identifier',
-    'ImportExpression',
+    'Import',
     'Intrinsic',
     'LetExpression',
     'ListExpression',

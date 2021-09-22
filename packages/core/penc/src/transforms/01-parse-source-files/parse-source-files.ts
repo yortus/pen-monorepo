@@ -42,9 +42,9 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
         validateAST({version: 100, start: sourceFileModule});
         sourceFileModulesByPath[sourceFilePath] = sourceFileModule;
 
-        // Visit every ImportExpression, adding the imported path to `unprocessedPaths`.
+        // Visit every Import node, adding the imported path to `unprocessedPaths`.
         traverseNode(sourceFileModule, n => {
-            if (n.kind !== 'ImportExpression') return;
+            if (n.kind !== 'Import') return;
             const importPath = resolveModuleSpecifier(n.moduleSpecifier, sourceFilePath);
             unprocessedPaths.push(importPath);
         });
@@ -77,12 +77,6 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                     };
                 },
 
-                // for all ImportExpression: replace ImportExpression --> Identifier
-                ImportExpression: ({moduleSpecifier}): V.Identifier => {
-                    const path = resolveModuleSpecifier(moduleSpecifier, sourceFilePath);
-                    return {kind: 'Identifier', name: moduleNamesBySourceFilePath[path]};
-                },
-
                 // for all LetExpression#bindings: replace BindingList --> BindingMap
                 LetExpression: (le): V.LetExpression<200> => ({
                     kind: 'LetExpression',
@@ -90,11 +84,24 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                     bindings: bindingListToBindingMap(le.bindings, rec),
                 }),
 
-                // for all Module#bindings: replace BindingList --> BindingMap
-                Module: (mod): V.Module<200> => ({
-                    kind: 'Module',
-                    bindings: bindingListToBindingMap(mod.bindings, rec),
-                }),
+                // for all Modules:
+                // (a) move all imports to BindingList
+                // (b) replace BindingList with BindingMap
+                Module: (mod): V.Module<200> => {
+                    const importBindings = mod.imports.map(({pattern, moduleSpecifier}): V.Binding<100> => ({
+                        kind: 'Binding',
+                        left: pattern,
+                        right: {
+                            kind: 'Identifier',
+                            name: moduleNamesBySourceFilePath[resolveModuleSpecifier(moduleSpecifier, sourceFilePath)],
+                        },
+                    }));
+                    return {
+                        kind: 'Module',
+                        imports: [],
+                        bindings: bindingListToBindingMap([...importBindings, ...mod.bindings], rec),
+                    };
+                },
 
                 // for all ParenthesisedExpression: remove parens
                 ParenthesisedExpression: par => rec(par.expression),
@@ -135,6 +142,7 @@ export function parseSourceFiles(options: {main: AbsPath} | {text: string}): V.A
                 kind: 'MemberExpression',
                 module: {
                     kind: 'Module',
+                    imports: [],
                     bindings: sourceFileModulesByModuleName,
                 },
                 member: mainModuleName,
