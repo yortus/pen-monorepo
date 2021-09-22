@@ -9,139 +9,120 @@ SourceFile =
     END_OF_FILE
 
 // ====================   Bindings and patterns   ====================
-BindingList =               // ========== recursive form (currently slower / not TC-optimised) ==========
-    | [Binding, ...(WS ","? WS BindingList)]
+BindingList =
+    | SeparatedItems(Separator=COMMA, Item=[Binding]) 0..1(WS COMMA)
     | []
-
-BindingList2 = (            // ========== iterative form (faster but more complex to look at) ==========
-    not ","                 // can't start with comma (TODO: why need this?)
-    [Binding]               // starts with a Binding
-    0..m [                  // followed by 0..M of:
-        0..1 (WS ",")       //     optional comma
-        WS
-        Binding             //     another Binding
-    ]
-    0..1 (WS ",")           // ends with an optional comma
-) | []                      // if not matched above, *always* match with an empty list and unchanged buffer
 
 Binding = {
     kind: 'Binding',
-    left: (Identifier | ModulePattern) WS "=" WS,
+    left: (Identifier | ModulePattern) WS EQUAL WS,
     right: Expression,
 }
 
-ModulePattern =
-    "("
-    WS
-    not ","
-    {
-        kind: 'ModulePattern',
-        names: (
-            // M
-            // TODO: ...
-        )
+ModulePattern = LP WS {
+    kind: 'ModulePattern',
+    names:
+        | SeparatedItems(Separator=COMMA, Item=[ModulePatternName]) 0..1(WS COMMA)
+        | []
+} WS RP
+
+ModulePatternName =
+    | {name: Identifier, alias: WS AS WS Identifier} // TODO: allow optional fields - ie alias?: ...
+    | {name: Identifier}
+
+// ====================   Expressions   ====================
+/*  PRECEDENCE (1 = LOWEST)
+    1   FunctionExpression (body)       a -> a a   (a, b) -> a b   () -> "blah"
+                                             ^^^             ^^^         ^^^^^^
+    2   SelectionExpression             a | b      | a | b | c
+
+    3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
+
+    4   UnaryExpression                 not a   0..1 a   0..m a(b)   0..1 a.b   not {a: b}   abstract a   concrete b
+
+    5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
+        MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
+
+    6   LetExpression                   (export a b a=1 b=2)
+        Module                          (a=b c=d e=f)   (a=b)
+        ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
+        Identifier                      a   Rule1   MY_FOO_45   x32   __bar
+        NullLiteral                     null
+        BooleanLiteral                  false   true
+        NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
+        StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
+        RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
+        ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
+        ImportExpression                import './foo'   import 'somelib'
+
+    7   FunctionExpression (head)       a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
+                                        ^^^^       ^^^^^^^^^       ^^^^^
+*/
+
+Expression =
+    | Precedence1OrHigher
+
+Precedence1OrHigher =
+    | FunctionExpression
+    | Precedence2OrHigher
+
+Precedence2OrHigher =
+    | SelectionExpression
+
+Precedence3OrHigher =
+    | SequenceExpression
+
+Precedence4OrHigher =
+    | UnaryExpression
+    | Precedence5OrHigher
+
+Precedence5OrHigher =
+    | ApplicationOrMemberExpression
+
+Precedence6OrHigher =
+    | LetExpression
+    | Module
+    | ParenthesisedExpression
+    | Identifier
+    | NullLiteral
+    | BooleanLiteral
+    | NumericLiteral
+    | StringExpression
+    | RecordExpression
+    | ListExpression
+    | ImportExpression
+
+FunctionExpression = {
+    kind: 'FunctionExpression',
+    param: (Identifier | ModulePattern) WS ARROW WS,
+    body: Precedence1OrHigher
+}
+
+SelectionExpression = 0..1(PIPE WS) (
+    | Precedence3OrHigher not(WS PIPE)
+    | {
+        kind: 'SelectionExpression',
+        expressions: SeparatedItems(Separator=PIPE, Item=[Precedence3OrHigher])
     }
-    // TODO: ...
+)
 
-//  = "("   __   !","   head:ModulePatternName?   tail:((__   ",")?   __   ModulePatternName)*   (__   ",")?   __   ")"
-//  { return {kind: 'ModulePattern', names: (head ? [head] : []).concat(tail.map(el => el[2]))}; }
+SequenceExpression = { // TODO: not right - will create a SeqExpr even when just falls through. Need a shader? Or do like SelExpr?
+    kind: 'SequenceExpression',
+    expressions:
+        Precedence4OrHigher
+        0..m(
+            /*MANDATORY*/ WHITESPACE
+            Precedence4OrHigher
+            not(WS EQUAL)
+        )
+} | Precedence4OrHigher
 
-// ModulePatternName
-//     = name:IDENTIFIER   alias:(__   AS   __   IDENTIFIER)?
-//     { return Object.assign({name}, alias ? {alias: alias[3]} : {}); }
-
-
-// // ====================   Expressions   ====================
-// /*  PRECEDENCE (1 = LOWEST)
-//     1   FunctionExpression (body)       a -> a a   (a, b) -> a b   () -> "blah"
-//                                              ^^^             ^^^         ^^^^^^
-//     2   SelectionExpression             a | b      | a | b | c
-
-//     3   SequenceExpression              a b      a  b c                                                                 NB: whitespace required between terms, else is application
-
-//     4   UnaryExpression                 not a   0..1 a   0..m a(b)   0..1 a.b   not {a: b}   abstract a   concrete b
-
-//     5   ApplicationExpression           a(b)   (a)b   a'blah'   a(b=c)                                                  NB: no whitespace between terms, else is sequence
-//         MemberExpression                a.b   a.b   (a b).e   (foo=f).foo                                               NB: no whitespace between terms, may relax later
-
-//     6   LetExpression                   (export a b a=1 b=2)
-//         Module                          (a=b c=d e=f)   (a=b)
-//         ParenthesisedExpression         (a)   ({a: b})   (((("foo" "bar"))))
-//         Identifier                      a   Rule1   MY_FOO_45   x32   __bar
-//         NullLiteral                     null
-//         BooleanLiteral                  false   true
-//         NumericLiteral                  123   3.14   -0.1   5.7e-53   0x0   0xff   0x00BADDAD
-//         StringExpression                "abc"   'a{rule}b'   `a\x42c`   "[\0-255\x0-7f{a}]"   'abc-\(32-127)-def'
-//         RecordExpression                {a=b, c=d, e=f}   {a=b}   {}   {[a]=b, ...c, ...d, e=f,}
-//         ListExpression                  [a, b, c]   [a]   []   [a, ...b, ...c, d]
-//         ImportExpression                import './foo'   import 'somelib'
-
-//     7   FunctionExpression (head)       a -> a a   (a, b) -> a b   () -> "blah"                                         NB: param is just like Binding#left
-//                                         ^^^^       ^^^^^^^^^       ^^^^^
-// */
-
-// Expression
-//     = Precedence1OrHigher
-
-// Precedence1OrHigher
-//     = FunctionExpression
-//     / Precedence2OrHigher
-
-// Precedence2OrHigher
-//     = SelectionExpression
-
-// Precedence3OrHigher
-//     = SequenceExpression
-
-// Precedence4OrHigher
-//     = UnaryExpression
-//     / Precedence5OrHigher
-
-// Precedence5OrHigher
-//     = ApplicationOrMemberExpression
-
-// Precedence6OrHigher
-//     = LetExpression
-//     / Module
-//     / ParenthesisedExpression
-//     / Identifier
-//     / NullLiteral
-//     / BooleanLiteral
-//     / NumericLiteral
-//     / StringExpression
-//     / RecordExpression
-//     / ListExpression
-//     / ImportExpression
-
-// FunctionExpression
-//     = param:(Identifier / ModulePattern)   __   "->"   __   body:Precedence1OrHigher
-//     { return {kind: 'FunctionExpression', param, body}; }
-
-// SelectionExpression
-//     = ("|"   __)?   head:Precedence3OrHigher   tail:(__   "|"   __   Precedence3OrHigher)*
-//     {
-//         if (tail.length === 0) return head;
-//         return {kind: 'SelectionExpression', expressions: [head].concat(tail.map(el => el[3]))};
-//     }
-
-// SequenceExpression
-//     = head:Precedence4OrHigher   tail:(/*MANDATORY*/ WHITESPACE   Precedence4OrHigher   !(__   "="))*
-//     {
-//         if (tail.length === 0) return head;
-//         return {kind: 'SequenceExpression', expressions: [head].concat(tail.map(el => el[1]))};
-//     }
-
-// UnaryExpression
-//     = op:(ABSTRACT / CONCRETE / NOT / QUANT_0__1 / QUANT_0__M)   __   expression:Precedence4OrHigher
-//     {
-//         switch (op) {
-//           case 'abstract': return {kind: 'AbstractExpression', expression};
-//           case 'concrete': return {kind: 'ConcreteExpression', expression};
-//           case 'not': return {kind: 'NotExpression', expression};
-//           case '0..1': return {kind: 'QuantifiedExpression', expression, quantifier: '?'};
-//           case '0..m': return {kind: 'QuantifiedExpression', expression, quantifier: '*'};
-//         }
-//     }
+UnaryExpression =
+    | ABSTRACT WS {kind: 'AbstractExpression', expression: Precedence4OrHigher}
+    | CONCRETE WS {kind: 'ConcreteExpression', expression: Precedence4OrHigher}
+    | NOT WS {kind: 'NotExpression', expression: Precedence4OrHigher}
+    | QUANT_0__1 WS {kind: 'QuantifiedExpression', expression: Precedence4OrHigher, quantifier: '?'}
+    | QUANT_0__M WS {kind: 'QuantifiedExpression', expression: Precedence4OrHigher, quantifier: '*'}
 
 // ApplicationOrMemberExpression
 //     = head:Precedence6OrHigher   tail:(/* NO WHITESPACE */   MemberLookup / ApplicationArgument)*
@@ -326,3 +307,18 @@ ModulePattern =
 // HORITONTAL_WHITESPACE   = " " | "\t"
 // END_OF_LINE             = "\r\n" / "\r" / "\n"
 // END_OF_FILE             = !.
+
+
+
+// TODO: ==================== added for pen version: =========================
+SeparatedItems = (Separator, Item) -> (
+    Item
+    0..m(WS Separator WS Item)
+)
+
+ARROW = "->"
+COMMA = ","
+EQUAL = "="
+PIPE = "|"
+LP = "("
+RP = ")"
