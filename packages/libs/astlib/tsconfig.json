@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "target": "es2019",
+        "module": "commonjs",
+        "lib": ["es2019"],
+        "types": ["node"],
+
+        "rootDir": "src",
+        "outDir": "dist",
+        "removeComments": false,
+        "sourceMap": true,
+        "declaration": true,
+
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+    },
+    "include": ["src/"],
+    "references": []
+}

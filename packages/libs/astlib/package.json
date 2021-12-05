@@ -1,0 +1,21 @@
+{
+    "name": "astlib",
+    "version": "0.0.1",
+    "description": "AST helper library",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Troy Gerwien",
+            "email": "yortus@gmail.com",
+            "url": "http://github.com/yortus/"
+        }
+    ],
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "scripts": {
+    },
+    "devDependencies": {
+    },
+    "dependencies": {
+    }
+}

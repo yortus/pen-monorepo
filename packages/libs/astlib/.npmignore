@@ -1,0 +1,12 @@
+.vscode/
+scripts/
+src/
+test/
+extras/
+*.ts
+!*.d.ts
+*.js.map
+*.log
+tsconfig.json
+tslint.json
+TODO
