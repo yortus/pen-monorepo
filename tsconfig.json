@@ -5,7 +5,7 @@
         { "path": "packages/core/penrt" },
         { "path": "packages/extensions/experimental-features" },
         { "path": "packages/extensions/standard-library" },
-        { "path": "packages/libs/astlib" },
+        //{ "path": "packages/libs/astlib" },
         { "path": "packages/test-suite" },
     ]
 }
