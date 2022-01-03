@@ -27,7 +27,7 @@ export function generateTargetCode(ast: V.AST<400>) {
                 CPOS = 0;
                 AREP = [];
                 APOS = 0;
-                if (!parseInner(parse, false)) throw new Error('parse failed');
+                if (!parseValue(parse, false)) throw new Error('parse failed');
                 if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
                 return AREP[0];
             },
@@ -36,7 +36,7 @@ export function generateTargetCode(ast: V.AST<400>) {
                 APOS = 0;
                 CREP = buf || Buffer.alloc(2 ** 22); // 4MB
                 CPOS = 0;
-                if (!printInner(print, false)) throw new Error('print failed');
+                if (!printValue(print, false)) throw new Error('print failed');
                 if (CPOS > CREP.length) throw new Error('output buffer too small');
                 return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
             },
@@ -283,7 +283,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`
-                                : `if (!parseInner(${item.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
+                                : `if (!parseValue(${item.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
                             .join('\n')
                         }
                         ATYP = LIST;
@@ -294,7 +294,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `${item.expression.name}.infer();`
-                                : `parseInferInner(${item.name}.infer);`)
+                                : `parseInferValue(${item.name}.infer);`)
                             .join('\n')
                         }
                         ATYP = LIST;
@@ -307,7 +307,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `ATYP = LIST;\nif (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`
-                                : `if (!printInner(${item.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
+                                : `if (!printValue(${item.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
                             .join('\n')
                         }
                         return true;
@@ -317,7 +317,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `ATYP = LIST;\n${item.expression.name}.infer();`
-                                : `printInferInner(${item.name}.infer);`)
+                                : `printInferValue(${item.name}.infer);`)
                             .join('\n')
                         }
                     },
@@ -385,12 +385,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${typeof item.label === 'string' ? `
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    if (!parseInner(${item.label.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                    if (!parseValue(${item.label.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                                     assert(ATYP === STRING);
                                 `}
 
                                 ${/* Parse field value */''}
-                                if (!parseInner(${item.expression.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                if (!parseValue(${item.expression.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                             ` : /* item.kind === 'Splice' */ `
                                 const apos = APOS;
                                 if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
@@ -408,12 +408,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${typeof item.label === 'string' ? `
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    parseInferInner(${item.label.name}.infer);
+                                parseInferValue(${item.label.name}.infer);
                                     assert(ATYP === STRING);
                                 `}
 
                                 ${/* Parse field value */ ''}
-                                parseInferInner(${item.expression.name}.infer);
+                                parseInferValue(${item.expression.name}.infer);
                             ` : /* item.kind === 'Splice' */ `
                                 const apos = APOS;
                                 ${item.expression.name}.infer();
@@ -438,11 +438,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                     if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 ` : `
                                     for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                                    if (i >= propCount || !printInner(${item.label.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                    if (i >= propCount || !printValue(${item.label.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 `}
         
                                 ${/* Print field value */ ''}
-                                if (!printInner(${item.expression.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                if (!printValue(${item.expression.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 bitmask += (1 << i);
                             ` : /* item.kind === 'Splice' */ `
                                 APOS = bitmask;
@@ -459,10 +459,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Print field label */ ''}
-                                ${typeof item.label === 'string' ? '' : `printInferInner(${item.label.name}.infer);`}
+                                ${typeof item.label === 'string' ? '' : `printInferValue(${item.label.name}.infer);`}
         
                                 ${/* Print field value */ ''}
-                                printInferInner(${item.expression.name}.infer);
+                                printInferValue(${item.expression.name}.infer);
                             ` : /* item.kind === 'Splice' */ `
                             ATYP = RECORD;
                                 ${item.expression.name}.infer();

@@ -6,7 +6,7 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        if (!parseInner(parse, false)) throw new Error('parse failed');
+        if (!parseValue(parse, false)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
@@ -15,7 +15,7 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        if (!printInner(print, false)) throw new Error('print failed');
+        if (!printValue(print, false)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
@@ -75,7 +75,7 @@ function emitBytes(...values) {
         AREP[APOS++] = values[i];
     ATYP = STRING;
 }
-function parseInner(rule, mustProduce) {
+function parseValue(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
@@ -112,7 +112,7 @@ function parseInner(rule, mustProduce) {
     APOS = APOSₒ + 1;
     return true;
 }
-function parseInferInner(infer) {
+function parseInferValue(infer) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
@@ -145,7 +145,7 @@ function parseInferInner(infer) {
     AREP = AREPₒ;
     APOS = APOSₒ + 1;
 }
-function printInner(rule, mustConsume) {
+function printValue(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
@@ -203,7 +203,7 @@ function printInner(rule, mustConsume) {
     APOS += 1;
     return true;
 }
-function printInferInner(infer) {
+function printInferValue(infer) {
     const ATYPₒ = ATYP;
     ATYP = NOTHING;
     infer();

@@ -6,7 +6,7 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        if (!parseInner(parse, false)) throw new Error('parse failed');
+        if (!parseValue(parse, false)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
@@ -15,7 +15,7 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        if (!printInner(print, false)) throw new Error('print failed');
+        if (!printValue(print, false)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
@@ -75,7 +75,7 @@ function emitBytes(...values) {
         AREP[APOS++] = values[i];
     ATYP = STRING;
 }
-function parseInner(rule, mustProduce) {
+function parseValue(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
@@ -112,7 +112,7 @@ function parseInner(rule, mustProduce) {
     APOS = APOSₒ + 1;
     return true;
 }
-function parseInferInner(infer) {
+function parseInferValue(infer) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
@@ -145,7 +145,7 @@ function parseInferInner(infer) {
     AREP = AREPₒ;
     APOS = APOSₒ + 1;
 }
-function printInner(rule, mustConsume) {
+function printValue(rule, mustConsume) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
@@ -203,7 +203,7 @@ function printInner(rule, mustConsume) {
     APOS += 1;
     return true;
 }
-function printInferInner(infer) {
+function printInferValue(infer) {
     const ATYPₒ = ATYP;
     ATYP = NOTHING;
     infer();
@@ -417,17 +417,17 @@ function create(mode) {
             full: function LST() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
-                if (!parseInner(ꐚdigit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseInner(ꐚmyListᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseInner(ꐚmyListᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdigit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmyListᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmyListᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = LIST;
                 return true;
             },
             infer: function LST() {
                 if (APOS === 0) AREP = [];
-                parseInferInner(ꐚdigit.infer);
-                parseInferInner(ꐚmyListᱻ1.infer);
-                parseInferInner(ꐚmyListᱻ2.infer);
+                parseInferValue(ꐚdigit.infer);
+                parseInferValue(ꐚmyListᱻ1.infer);
+                parseInferValue(ꐚmyListᱻ2.infer);
                 ATYP = LIST;
             },
         },
@@ -435,16 +435,16 @@ function create(mode) {
             full: function LST() {
                 if (ATYP !== LIST) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!printInner(ꐚdigit, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printInner(ꐚmyListᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printInner(ꐚmyListᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚdigit, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmyListᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmyListᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: function LST() {
                 if (ATYP !== LIST && ATYP !== NOTHING) return false;
-                printInferInner(ꐚdigit.infer);
-                printInferInner(ꐚmyListᱻ1.infer);
-                printInferInner(ꐚmyListᱻ2.infer);
+                printInferValue(ꐚdigit.infer);
+                printInferValue(ꐚmyListᱻ1.infer);
+                printInferValue(ꐚmyListᱻ2.infer);
             },
         },
     });

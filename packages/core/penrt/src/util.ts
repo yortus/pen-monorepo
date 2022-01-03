@@ -48,7 +48,7 @@ interface RuleImpls {
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
 // [ ] 7. restore LEN/CAP (capacity) checking
-// [ ]    a. eg printInner for STRING always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
+// [ ]    a. eg printValue for STRING always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
 
 interface Arrayish<T> {
@@ -94,7 +94,7 @@ function emitBytes(...values: number[]) {
 }
 
 
-function parseInner(rule: Rule, mustProduce: boolean): boolean {
+function parseValue(rule: Rule, mustProduce: boolean): boolean {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined as any; // TODO: fix cast
     APOS = 0;
@@ -128,7 +128,7 @@ function parseInner(rule: Rule, mustProduce: boolean): boolean {
     APOS = APOSₒ + 1;
     return true;
 }
-function parseInferInner(infer: () => void): void {
+function parseInferValue(infer: () => void): void {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined as any; // TODO: fix cast
     APOS = 0;
@@ -161,7 +161,7 @@ function parseInferInner(infer: () => void): void {
     APOS = APOSₒ + 1;
 }
 
-function printInner(rule: Rule, mustConsume: boolean): boolean {
+function printValue(rule: Rule, mustConsume: boolean): boolean {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp: ATYP;
@@ -227,7 +227,7 @@ function printInner(rule: Rule, mustConsume: boolean): boolean {
     return true;
 }
 
-function printInferInner(infer: () => void): void {
+function printInferValue(infer: () => void): void {
     const ATYPₒ = ATYP;
     ATYP = NOTHING;
     infer();
