@@ -23,7 +23,7 @@ function isModule(_x: PenVal): _x is Module {
 }
 function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
     if (!impls[mode]) throw new Error(`${mode} object is missing`);
-    if (!impls[mode].full) throw new Error(`${mode}._ function is missing`);
+    if (!impls[mode].full) throw new Error(`${mode}.full function is missing`);
     if (!impls[mode].infer) throw new Error(`${mode}.infer function is missing`);
     const {full, infer} = impls[mode];
     const result: Rule = Object.assign(full, {infer});
