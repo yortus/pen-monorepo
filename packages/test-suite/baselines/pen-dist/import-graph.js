@@ -39,7 +39,7 @@ function createRule(mode, impls) {
     if (!impls[mode])
         throw new Error(`${mode} object is missing`);
     if (!impls[mode].full)
-        throw new Error(`${mode}._ function is missing`);
+        throw new Error(`${mode}.full function is missing`);
     if (!impls[mode].infer)
         throw new Error(`${mode}.infer function is missing`);
     const { full, infer } = impls[mode];

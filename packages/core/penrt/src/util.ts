@@ -74,9 +74,20 @@ let CPOS: number = 0;
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
 
+
+
+
 // TODO: temp testing...
+// OCTETS: Buffer
+// VALUES: unknown[]
+// LABELS: string[], or alternatively:
+// FIELDS: Array<[string, unknown]>
 const theScalarArray: unknown[] = [];
 const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
+
+
+
+
 function emitScalar(value: number | boolean | null) {
     if (APOS === 0) AREP = theScalarArray;
     AREP[APOS++] = value;
