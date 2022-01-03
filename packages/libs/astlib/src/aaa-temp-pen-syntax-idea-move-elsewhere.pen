@@ -1,0 +1,13 @@
+
+
+
+// TODO: move elsewhere...
+
+fn1 =
+    | (rule: Rule = ?, count = 0) -> ()
+    | (rule: Rule = ?, count: Nat = ?) -> rule fn1(rule = ^rule, count = ^count - 1)
+
+
+fn1(rule=foo, count=3)
+
+
