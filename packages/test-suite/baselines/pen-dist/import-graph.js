@@ -50,8 +50,7 @@ function createRule(mode, impls) {
 }
 let AREP = [];
 let APOS = 0;
-let AW = 0;
-let AR = 0;
+let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
 const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
@@ -61,20 +60,20 @@ function emitScalar(value) {
     if (APOS === 0)
         AREP = theScalarArray;
     AREP[APOS++] = value;
-    AW = SCALAR;
+    ATYP = SCALAR;
 }
 function emitByte(value) {
     if (APOS === 0)
         AREP = theBuffer;
     AREP[APOS++] = value;
-    AW = STRING;
+    ATYP = STRING;
 }
 function emitBytes(...values) {
     if (APOS === 0)
         AREP = theBuffer;
     for (let i = 0; i < values.length; ++i)
         AREP[APOS++] = values[i];
-    AW = STRING;
+    ATYP = STRING;
 }
 function parseInner(rule, mustProduce) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -82,10 +81,10 @@ function parseInner(rule, mustProduce) {
     APOS = 0;
     if (!rule())
         return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (AW === NOTHING)
+    if (ATYP === NOTHING)
         return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
     let value;
-    switch (AW) {
+    switch (ATYP) {
         case SCALAR:
             assert(APOS === 1);
             value = AREP[0];
@@ -106,7 +105,7 @@ function parseInner(rule, mustProduce) {
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
-            ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
     AREPₒ[APOSₒ] = value;
     AREP = AREPₒ;
@@ -118,10 +117,10 @@ function parseInferInner(infer) {
     AREP = undefined;
     APOS = 0;
     infer();
-    if (AW === NOTHING)
+    if (ATYP === NOTHING)
         return;
     let value;
-    switch (AW) {
+    switch (ATYP) {
         case SCALAR:
             assert(APOS === 1);
             value = AREP[0];
@@ -140,39 +139,39 @@ function parseInferInner(infer) {
                 obj[AREP[i]] = AREP[i + 1];
             break;
         default:
-            ((aw) => { throw new Error(`Unhandled abstract type ${aw}`); })(AW);
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
     AREPₒ[APOSₒ] = value;
     AREP = AREPₒ;
     APOS = APOSₒ + 1;
 }
 function printInner(rule, mustConsume) {
-    const [AREPₒ, APOSₒ, ARₒ] = [AREP, APOS, AR];
+    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
-    let ar;
+    let atyp;
     if (value === undefined) {
         if (mustConsume)
             return false;
-        AR = NOTHING;
+        ATYP = NOTHING;
         const result = rule();
-        AR = ARₒ;
+        ATYP = ATYPₒ;
         assert(APOS === APOSₒ);
         return result;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        AR = SCALAR;
+        ATYP = SCALAR;
         const result = rule();
-        AR = ARₒ;
+        ATYP = ATYPₒ;
         assert(APOS - APOSₒ === 1);
         return result;
     }
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        ar = AR = STRING;
+        atyp = ATYP = STRING;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        ar = AR = LIST;
+        atyp = ATYP = LIST;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [];
@@ -181,7 +180,7 @@ function printInner(rule, mustConsume) {
         for (let i = 0; i < keys.length; ++i)
             arr.push(keys[i], value[keys[i]]);
         value = arr;
-        ar = AR = RECORD;
+        atyp = ATYP = RECORD;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -189,10 +188,10 @@ function printInner(rule, mustConsume) {
     APOS = 0;
     let result = rule();
     const [arep, apos] = [AREP, APOS];
-    AREP = AREPₒ, APOS = APOSₒ, AR = ARₒ;
+    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
-    if (ar === RECORD) {
+    if (atyp === RECORD) {
         const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
@@ -205,10 +204,10 @@ function printInner(rule, mustConsume) {
     return true;
 }
 function printInferInner(infer) {
-    const ARₒ = AR;
-    AR = NOTHING;
+    const ATYPₒ = ATYP;
+    ATYP = NOTHING;
     infer();
-    AR = ARₒ;
+    ATYP = ATYPₒ;
 }
 function assert(value) {
     if (!value)
@@ -297,7 +296,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if ((cc < 0x30 || cc > 0x39)) return false;
@@ -330,7 +329,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if ((cc < 0x61 || cc > 0x7a) && (cc < 0x41 || cc > 0x5a)) return false;
@@ -349,26 +348,26 @@ function create(mode) {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 if (!ꐚfoo()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                seqType |= AW;
+                seqType |= ATYP;
                 if (!ꐚresultᱻ1()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                AW |= seqType;
+                ATYP |= seqType;
                 return true;
             },
             infer: () => {
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 ꐚfoo.infer();
-                seqType |= AW;
+                seqType |= ATYP;
                 ꐚresultᱻ1.infer();
-                AW |= seqType;
+                ATYP |= seqType;
             },
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚfoo()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!ꐚresultᱻ1()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!ꐚfoo()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!ꐚresultᱻ1()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: () => {
@@ -383,26 +382,26 @@ function create(mode) {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 if (!ꐚbar()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                seqType |= AW;
+                seqType |= ATYP;
                 if (!ꐚbaz()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                AW |= seqType;
+                ATYP |= seqType;
                 return true;
             },
             infer: () => {
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 ꐚbar.infer();
-                seqType |= AW;
+                seqType |= ATYP;
                 ꐚbaz.infer();
-                AW |= seqType;
+                ATYP |= seqType;
             },
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚbar()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!ꐚbaz()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!ꐚbar()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!ꐚbaz()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: () => {
@@ -421,7 +420,7 @@ function create(mode) {
                 if (!parseInner(ꐚdigit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 if (!parseInner(ꐚmyListᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 if (!parseInner(ꐚmyListᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                AW = LIST;
+                ATYP = LIST;
                 return true;
             },
             infer: function LST() {
@@ -429,20 +428,20 @@ function create(mode) {
                 parseInferInner(ꐚdigit.infer);
                 parseInferInner(ꐚmyListᱻ1.infer);
                 parseInferInner(ꐚmyListᱻ2.infer);
-                AW = LIST;
+                ATYP = LIST;
             },
         },
         print: {
             full: function LST() {
-                if (AR !== LIST) return false;
-                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!printInner(ꐚdigit, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(ꐚmyListᱻ1, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!printInner(ꐚmyListᱻ2, true)) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                if (ATYP !== LIST) return false;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!printInner(ꐚdigit, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printInner(ꐚmyListᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printInner(ꐚmyListᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: function LST() {
-                if (AR !== LIST && AR !== NOTHING) return false;
+                if (ATYP !== LIST && ATYP !== NOTHING) return false;
                 printInferInner(ꐚdigit.infer);
                 printInferInner(ꐚmyListᱻ1.infer);
                 printInferInner(ꐚmyListᱻ2.infer);
@@ -455,26 +454,26 @@ function create(mode) {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                seqType |= AW;
+                seqType |= ATYP;
                 if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                AW |= seqType;
+                ATYP |= seqType;
                 return true;
             },
             infer: () => {
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 ꐚdigit.infer();
-                seqType |= AW;
+                seqType |= ATYP;
                 ꐚdigit.infer();
-                AW |= seqType;
+                ATYP |= seqType;
             },
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!ꐚdigit()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: () => {
@@ -489,31 +488,31 @@ function create(mode) {
         parse: {
             full: function SEQ() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                seqType |= AW;
+                seqType |= ATYP;
                 if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                seqType |= AW;
+                seqType |= ATYP;
                 if (!ꐚdigit()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                AW |= seqType;
+                ATYP |= seqType;
                 return true;
             },
             infer: () => {
-                let seqType = AW = NOTHING;
+                let seqType = ATYP = NOTHING;
                 ꐚdigit.infer();
-                seqType |= AW;
+                seqType |= ATYP;
                 ꐚdigit.infer();
-                seqType |= AW;
+                seqType |= ATYP;
                 ꐚdigit.infer();
-                AW |= seqType;
+                ATYP |= seqType;
             },
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ARₒ] = [APOS, CPOS, AR];
-                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
-                if (!ꐚdigit()) return [APOS, CPOS, AR] = [APOSₒ, CPOSₒ, ARₒ], false;
+                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                if (!ꐚdigit()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!ꐚdigit()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: () => {
@@ -537,7 +536,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 7 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x20) return false;
@@ -568,7 +567,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 7 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x64) return false;
                 if (AREP[APOS + 1] !== 0x20) return false;
@@ -643,7 +642,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x66) return false;
                 if (AREP[APOS + 1] !== 0x6f) return false;
@@ -681,7 +680,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x61) return false;
@@ -719,7 +718,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x61) return false;
@@ -826,7 +825,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 5 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x75) return false;
                 if (AREP[APOS + 1] !== 0x74) return false;
@@ -863,7 +862,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (AR !== STRING) return false;
+                if (ATYP !== STRING) return false;
                 if (APOS + 5 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x75) return false;
                 if (AREP[APOS + 1] !== 0x74) return false;

@@ -41,7 +41,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             memo.result = true;
                             memo.IPOSᐟ = CPOS;
                             memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                            memo.ATYPᐟ = AW;
+                            memo.ATYPᐟ = ATYP;
                         }
                         memo.resolved = true;
 
@@ -71,7 +71,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             // if (!isInputFullyConsumed()) break;
                             memo.IPOSᐟ = CPOS;
                             memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
-                            memo.ATYPᐟ = AW;
+                            memo.ATYPᐟ = ATYP;
                         }
                     }
                     else if (!memo.resolved) {
@@ -87,8 +87,8 @@ function memoise(mode: 'parse' | 'print'): Func {
 
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
-                    AW = memo.ATYPᐟ;
-                    AREP ??= (AW === STRING ? theBuffer : []);
+                    ATYP = memo.ATYPᐟ;
+                    AREP ??= (ATYP === STRING ? theBuffer : []);
                     APOS = APOSₒ;
                     CPOS = memo.IPOSᐟ;
                     for (let i = 0; i < memo.OREPᐞ.length; ++i) {
@@ -128,7 +128,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             memo.result = true;
                             memo.IPOSᐟ = APOS;
                             memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                            memo.ATYPᐟ = AR;
+                            memo.ATYPᐟ = ATYP;
                         }
                         memo.resolved = true;
 
@@ -159,7 +159,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             // if (!isInputFullyConsumed()) break;
                             memo.IPOSᐟ = APOS;
                             memo.OREPᐞ = Uint8Array.prototype.slice.call(CREP, CPOSₒ, CPOS);
-                            memo.ATYPᐟ = AR;
+                            memo.ATYPᐟ = ATYP;
                         }
                     }
                     else if (!memo.resolved) {
@@ -178,7 +178,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                     APOS = memo.IPOSᐟ;
                     CPOS = CPOSₒ;
                     CPOS += (memo.OREPᐞ as Buffer).copy(CREP, CPOS);
-                    AR = memo.ATYPᐟ;
+                    ATYP = memo.ATYPᐟ;
                     return memo.result;
                 },
                 infer: function MEM() {
