@@ -6,7 +6,7 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        if (!parseValue(parse, false)) throw new Error('parse failed');
+        if (!parseValue(parse)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
@@ -15,7 +15,7 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        if (!printValue(print, false)) throw new Error('print failed');
+        if (!printValue(print)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
@@ -75,14 +75,14 @@ function emitBytes(...values) {
         AREP[APOS++] = values[i];
     ATYP = STRING;
 }
-function parseValue(rule, mustProduce) {
+function parseValue(rule) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
     if (!rule())
         return AREP = AREPₒ, APOS = APOSₒ, false;
     if (ATYP === NOTHING)
-        return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
+        return AREP = AREPₒ, APOS = APOSₒ, false;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -145,18 +145,12 @@ function parseInferValue(infer) {
     AREP = AREPₒ;
     APOS = APOSₒ + 1;
 }
-function printValue(rule, mustConsume) {
+function printValue(rule) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
     if (value === undefined) {
-        if (mustConsume)
-            return false;
-        ATYP = NOTHING;
-        const result = rule();
-        ATYP = ATYPₒ;
-        assert(APOS === APOSₒ);
-        return result;
+        return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
@@ -417,9 +411,9 @@ function create(mode) {
             full: function LST() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
-                if (!parseValue(ꐚdigit, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseValue(ꐚmyListᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseValue(ꐚmyListᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdigit)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmyListᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmyListᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = LIST;
                 return true;
             },
@@ -435,9 +429,9 @@ function create(mode) {
             full: function LST() {
                 if (ATYP !== LIST) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!printValue(ꐚdigit, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmyListᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmyListᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚdigit)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmyListᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmyListᱻ2)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 return true;
             },
             infer: function LST() {

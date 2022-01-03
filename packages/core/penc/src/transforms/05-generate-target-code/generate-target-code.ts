@@ -27,7 +27,7 @@ export function generateTargetCode(ast: V.AST<400>) {
                 CPOS = 0;
                 AREP = [];
                 APOS = 0;
-                if (!parseValue(parse, false)) throw new Error('parse failed');
+                if (!parseValue(parse)) throw new Error('parse failed');
                 if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
                 return AREP[0];
             },
@@ -36,7 +36,7 @@ export function generateTargetCode(ast: V.AST<400>) {
                 APOS = 0;
                 CREP = buf || Buffer.alloc(2 ** 22); // 4MB
                 CPOS = 0;
-                if (!printValue(print, false)) throw new Error('print failed');
+                if (!printValue(print)) throw new Error('print failed');
                 if (CPOS > CREP.length) throw new Error('output buffer too small');
                 return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
             },
@@ -283,7 +283,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`
-                                : `if (!parseValue(${item.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
+                                : `if (!parseValue(${item.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
                             .join('\n')
                         }
                         ATYP = LIST;
@@ -307,7 +307,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `ATYP = LIST;\nif (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`
-                                : `if (!printValue(${item.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
+                                : `if (!printValue(${item.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
                             .join('\n')
                         }
                         return true;
@@ -385,12 +385,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${typeof item.label === 'string' ? `
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    if (!parseValue(${item.label.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                    if (!parseValue(${item.label.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                                     assert(ATYP === STRING);
                                 `}
 
                                 ${/* Parse field value */''}
-                                if (!parseValue(${item.expression.name}, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                if (!parseValue(${item.expression.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                             ` : /* item.kind === 'Splice' */ `
                                 const apos = APOS;
                                 if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
@@ -438,11 +438,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                     if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 ` : `
                                     for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                                    if (i >= propCount || !printValue(${item.label.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                    if (i >= propCount || !printValue(${item.label.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 `}
         
                                 ${/* Print field value */ ''}
-                                if (!printValue(${item.expression.name}, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                if (!printValue(${item.expression.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 bitmask += (1 << i);
                             ` : /* item.kind === 'Splice' */ `
                                 APOS = bitmask;

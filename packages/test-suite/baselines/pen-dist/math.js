@@ -6,7 +6,7 @@ module.exports = {
         CPOS = 0;
         AREP = [];
         APOS = 0;
-        if (!parseValue(parse, false)) throw new Error('parse failed');
+        if (!parseValue(parse)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
         return AREP[0];
     },
@@ -15,7 +15,7 @@ module.exports = {
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
-        if (!printValue(print, false)) throw new Error('print failed');
+        if (!printValue(print)) throw new Error('print failed');
         if (CPOS > CREP.length) throw new Error('output buffer too small');
         return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
     },
@@ -75,14 +75,14 @@ function emitBytes(...values) {
         AREP[APOS++] = values[i];
     ATYP = STRING;
 }
-function parseValue(rule, mustProduce) {
+function parseValue(rule) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined;
     APOS = 0;
     if (!rule())
         return AREP = AREPₒ, APOS = APOSₒ, false;
     if (ATYP === NOTHING)
-        return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
+        return AREP = AREPₒ, APOS = APOSₒ, false;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -145,18 +145,12 @@ function parseInferValue(infer) {
     AREP = AREPₒ;
     APOS = APOSₒ + 1;
 }
-function printValue(rule, mustConsume) {
+function printValue(rule) {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp;
     if (value === undefined) {
-        if (mustConsume)
-            return false;
-        ATYP = NOTHING;
-        const result = rule();
-        ATYP = ATYPₒ;
-        assert(APOS === APOSₒ);
-        return result;
+        return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
         ATYP = SCALAR;
@@ -719,11 +713,11 @@ function create(mode) {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚaddᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚaddᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚaddᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚaddᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = RECORD;
                 return true;
             },
@@ -749,15 +743,15 @@ function create(mode) {
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚaddᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚaddᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚexpr, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚexpr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚaddᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚaddᱻ2)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -865,11 +859,11 @@ function create(mode) {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚsubᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚsubᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚsubᱻ2, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚsubᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = RECORD;
                 return true;
             },
@@ -895,15 +889,15 @@ function create(mode) {
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚsubᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚsubᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚexpr, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚexpr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚsubᱻ2, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚsubᱻ2)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -1025,14 +1019,14 @@ function create(mode) {
             full: function RCD() {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
-                if (!parseValue(ꐚmulᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 assert(ATYP === STRING);
-                if (!parseValue(ꐚmulᱻ3, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚterm, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseValue(ꐚmulᱻ5, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ5)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 assert(ATYP === STRING);
-                if (!parseValue(ꐚmulᱻ7, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ7)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = RECORD;
                 return true;
             },
@@ -1059,16 +1053,16 @@ function create(mode) {
                 let bitmask = APOS;
                 let i;
                 for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmulᱻ3, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount || !printValue(ꐚmulᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmulᱻ3)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚterm, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚterm)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ5, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmulᱻ7, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount || !printValue(ꐚmulᱻ5)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚmulᱻ7)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -1288,11 +1282,11 @@ function create(mode) {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚdivᱻ1, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdivᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚterm, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚdivᱻ3, true)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdivᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 ATYP = RECORD;
                 return true;
             },
@@ -1318,15 +1312,15 @@ function create(mode) {
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚdivᱻ1, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚdivᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚterm, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚterm)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
                 if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚdivᱻ3, true)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (!printValue(ꐚdivᱻ3)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;

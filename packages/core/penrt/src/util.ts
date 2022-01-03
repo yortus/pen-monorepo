@@ -94,12 +94,12 @@ function emitBytes(...values: number[]) {
 }
 
 
-function parseValue(rule: Rule, mustProduce: boolean): boolean {
+function parseValue(rule: Rule): boolean {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
     AREP = undefined as any; // TODO: fix cast
     APOS = 0;
     if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, !mustProduce;
+    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, false;
 
     let value: unknown;
     switch (ATYP) {
@@ -161,19 +161,14 @@ function parseInferValue(infer: () => void): void {
     APOS = APOSₒ + 1;
 }
 
-function printValue(rule: Rule, mustConsume: boolean): boolean {
+function printValue(rule: Rule): boolean {
     const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
     let value = AREP[APOS];
     let atyp: ATYP;
 
     // Nothing case
     if (value === undefined) {
-        if (mustConsume) return false;
-        ATYP = NOTHING;
-        const result = rule();
-        ATYP = ATYPₒ;
-        assert(APOS === APOSₒ);
-        return result;
+        return false;
     }
 
     // Scalar case
