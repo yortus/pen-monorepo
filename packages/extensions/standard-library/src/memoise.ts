@@ -103,7 +103,7 @@ function memoise(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function MEM() {
-                    const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                    const APOSₒ = APOS, CPOSₒ = CPOS;
 
                     // Check whether the memo table already has an entry for the given initial state.
                     let memos2 = memos.get(AREP);

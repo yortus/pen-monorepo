@@ -161,7 +161,7 @@ function parseInferValue(infer: () => void): void {
 }
 
 function printValue(rule: Rule): boolean {
-    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
     let value = AREP[APOS];
     let atyp: ATYP;
 
@@ -205,7 +205,7 @@ function printValue(rule: Rule): boolean {
     let result = rule();
 
     // Restore AREP/APOS/ATYP
-    const [arep, apos] = [AREP, APOS];
+    const arep = AREP, apos = APOS;
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result) return false;
 

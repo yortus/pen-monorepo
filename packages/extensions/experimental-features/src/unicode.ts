@@ -17,7 +17,7 @@ function unicode(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function UNI() {
-                    const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                    const APOSₒ = APOS, CPOSₒ = CPOS;
                     const LEN = CREP.length;
                     const EOS = '';
 
@@ -33,7 +33,7 @@ function unicode(mode: 'parse' | 'print'): Func {
                         c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
                     }
 
-                    if (len < minDigits) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    if (len < minDigits) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                     // tslint:disable-next-line: no-eval
                     emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
                     return true;
@@ -49,25 +49,25 @@ function unicode(mode: 'parse' | 'print'): Func {
                     // TODO: respect VOID AREP/CREP...
 
                     if (ATYP !== STRING_CHARS) return false;
-                    const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                    const APOSₒ = APOS, CPOSₒ = CPOS;
                     const bytes = AREP as Buffer;
                     let c = bytes[APOS++];
                     if (c < 128) {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (APOS >= bytes.length) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        if (APOS >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 31) << 6 | bytes[APOS++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (APOS + 1 >= bytes.length) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        if (APOS + 1 >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 15) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (APOS + 2 >= bytes.length) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                        if (APOS + 2 >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 7) << 18 | (bytes[APOS++] & 63) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
                     }
-                    else return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                    else return APOS = APOSₒ, CPOS = CPOSₒ, false;
 
                     const s = c.toString(base).padStart(minDigits, '0');
                     if (s.length > maxDigits) return false;

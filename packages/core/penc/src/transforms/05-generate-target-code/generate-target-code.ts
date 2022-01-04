@@ -278,11 +278,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: function LST() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`
-                                : `if (!parseValue(${item.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
+                                ? `if (!${item.expression.name}()) return APOS = APOSₒ, CPOS = CPOSₒ, false;`
+                                : `if (!parseValue(${item.name})) return APOS = APOSₒ, CPOS = CPOSₒ, false;`)
                             .join('\n')
                         }
                         ATYP = LIST_ELEMENTS;
@@ -301,11 +301,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 print: {
                     full: function LST() {
                         if (ATYP !== LIST_ELEMENTS) return false;
-                        const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                        const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `ATYP = LIST_ELEMENTS;\nif (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`
-                                : `if (!printValue(${item.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
+                                ? `ATYP = LIST_ELEMENTS;\nif (!${item.expression.name}()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;`
+                                : `if (!printValue(${item.name})) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;`)
                             .join('\n')
                         }
                         return true;
@@ -330,9 +330,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.lines(`
                     ${mode}: {
                         full: function NOT() {
-                            const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                            const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                             const result = !${expr.expression.name}();
-                            [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ${mode === 'parse' ? 'NOTHING' : `ATYPₒ`}];
+                            APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ${mode === 'parse' ? 'NOTHING' : `ATYPₒ`};
                             return result;
                         },
                         infer: () => ${mode === 'parse' ? '(ATYP = NOTHING)' : '{}'},
@@ -353,7 +353,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 else /* expr.quantifier === '*' */ {
                     const IPOS = mode === 'parse' ? 'CPOS' : 'APOS';
                     const OPOS = mode === 'parse' ? 'APOS' : 'CPOS';
-                    emit.down(1).text(`let [${IPOS}ᐟ, ${OPOS}ᐟ] = [${IPOS}, ${OPOS}];`);
+                    emit.down(1).text(`let ${IPOS}ᐟ = ${IPOS}, ${OPOS}ᐟ = ${OPOS};`);
                     if (mode === 'parse') emit.down(1).text(`let seqType = ATYP = NOTHING;`);
                     emit.down(1).text(`while (true) {`).indent();
                     emit.down(1).text(`if (!${expr.expression.name}() || ${IPOS} <= ${IPOS}ᐟ) break;`);
@@ -375,22 +375,22 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: function RCD() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */ ''}
                                 ${typeof item.label === 'string' ? `
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    if (!parseValue(${item.label.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                    if (!parseValue(${item.label.name})) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                                     assert(ATYP === STRING_CHARS);
                                 `}
 
                                 ${/* Parse field value */''}
-                                if (!parseValue(${item.expression.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                if (!parseValue(${item.expression.name})) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                             ` : /* item.kind === 'Splice' */ `
                                 const apos = APOS;
-                                if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                if (!${item.expression.name}()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                             `}
                         `).join('\n')}
                         ATYP = RECORD_FIELDS;
@@ -421,7 +421,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 print: {
                     full: function RCD() {
                         if (ATYP !== RECORD_FIELDS) return false;
-                        const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                        const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                         const propList = AREP;
                         const propCount = AREP.length >> 1;
                         let bitmask = APOS;
@@ -431,19 +431,19 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${/* Print field label */ ''}
                                 ${typeof item.label === 'string' ? `
                                     for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== ${JSON.stringify(item.label)}; ++i, APOS += 2) ;
-                                    if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                    if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                                 ` : `
                                     for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                                    if (i >= propCount || !printValue(${item.label.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                    if (i >= propCount || !printValue(${item.label.name})) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                                 `}
         
                                 ${/* Print field value */ ''}
-                                if (!printValue(${item.expression.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                if (!printValue(${item.expression.name})) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                                 bitmask += (1 << i);
                             ` : /* item.kind === 'Splice' */ `
                                 APOS = bitmask;
                                 ATYP = RECORD_FIELDS;
-                                if (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                                if (!${item.expression.name}()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                                 bitmask = APOS;
                             `}
                         `).join('\n')}
@@ -490,11 +490,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: function SEQ() {
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
                         let seqType = ATYP = NOTHING;
                         ${exprVars
                             .map((ev, i) => `
-                                if (!${ev}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                if (!${ev}()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                                 ${i < arity - 1 ? 'seqType |= ATYP;' : 'ATYP |= seqType;'}
                             `)
                             .join('\n')
@@ -514,8 +514,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 },
                 print: {
                     full: function SEQ() {
-                        const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                        ${exprVars.map(ev => `if (!${ev}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`).join('\n')}
+                        const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                        ${exprVars.map(ev => `if (!${ev}()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;`).join('\n')}
                         return true;
                     },
                     infer: () => {

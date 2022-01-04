@@ -129,7 +129,7 @@ function parseInferValue(infer) {
     APOS = APOSₒ + 1;
 }
 function printValue(rule) {
-    const [AREPₒ, APOSₒ, ATYPₒ] = [AREP, APOS, ATYP];
+    const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
     let value = AREP[APOS];
     let atyp;
     if (value === undefined) {
@@ -164,7 +164,7 @@ function printValue(rule) {
     }
     APOS = 0;
     let result = rule();
-    const [arep, apos] = [AREP, APOS];
+    const arep = AREP, apos = APOS;
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
@@ -234,7 +234,7 @@ const extensions = {
                 parse: {
                     full: function FSTR() {
                         let num = 0;
-                        const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                        const APOSₒ = APOS, CPOSₒ = CPOS;
                         const LEN = CREP.length;
                         const EOS = 0;
                         let digitCount = 0;
@@ -267,7 +267,7 @@ const extensions = {
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         // Parse optional exponent
                         if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                             CPOS += 1;
@@ -287,14 +287,14 @@ const extensions = {
                                 cc = CPOS < LEN ? CREP[CPOS] : EOS;
                             }
                             if (digitCount === 0)
-                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         }
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
                         num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
                         if (!Number.isFinite(num))
-                            return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                            return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         // Success
                         emitScalar(num);
                         return true;
@@ -348,7 +348,7 @@ const extensions = {
                     parse: {
                         full: function ISTR() {
                             let num = 0;
-                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            const APOSₒ = APOS, CPOSₒ = CPOS;
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
@@ -372,14 +372,14 @@ const extensions = {
                                 num += digitValue;
                                 // Check for overflow.
                                 if (num > MAX_NUM)
-                                    return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                    return APOS = APOSₒ, CPOS = CPOSₒ, false;
                                 // Loop again.
                                 CPOS += 1;
                                 digits += 1;
                             }
                             // Check that we parsed at least one digit.
                             if (digits === 0)
-                                return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                                return APOS = APOSₒ, CPOS = CPOSₒ, false;
                             // Apply the sign.
                             if (isNegative)
                                 num = -num;
@@ -556,7 +556,7 @@ const extensions = {
                     },
                     print: {
                         full: function MEM() {
-                            const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                            const APOSₒ = APOS, CPOSₒ = CPOS;
                             // Check whether the memo table already has an entry for the given initial state.
                             let memos2 = memos.get(AREP);
                             if (memos2 === undefined) {
@@ -693,13 +693,13 @@ function create(mode) {
     const ꐚadd = createRule(mode, {
         parse: {
             full: function RCD() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚaddᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚaddᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚaddᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚaddᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP = RECORD_FIELDS;
                 return true;
             },
@@ -717,22 +717,22 @@ function create(mode) {
         print: {
             full: function RCD() {
                 if (ATYP !== RECORD_FIELDS) return false;
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
                 let bitmask = APOS;
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚaddᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚaddᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚexpr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚaddᱻ2)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚaddᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -777,11 +777,11 @@ function create(mode) {
     const ꐚaddᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚaddᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚaddᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚterm()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -795,9 +795,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚaddᱻ3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚterm()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚaddᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -837,13 +837,13 @@ function create(mode) {
     const ꐚsub = createRule(mode, {
         parse: {
             full: function RCD() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚsubᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚsubᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚsubᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚsubᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP = RECORD_FIELDS;
                 return true;
             },
@@ -861,22 +861,22 @@ function create(mode) {
         print: {
             full: function RCD() {
                 if (ATYP !== RECORD_FIELDS) return false;
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
                 let bitmask = APOS;
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚsubᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚsubᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚexpr)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚsubᱻ2)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚsubᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -921,11 +921,11 @@ function create(mode) {
     const ꐚsubᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚsubᱻ3()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚsubᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚterm()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -939,9 +939,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚsubᱻ3()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚterm()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚsubᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -996,15 +996,15 @@ function create(mode) {
     const ꐚmul = createRule(mode, {
         parse: {
             full: function RCD() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                if (!parseValue(ꐚmulᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS;
+                if (!parseValue(ꐚmulᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 assert(ATYP === STRING_CHARS);
-                if (!parseValue(ꐚmulᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                if (!parseValue(ꐚmulᱻ5)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚmulᱻ5)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 assert(ATYP === STRING_CHARS);
-                if (!parseValue(ꐚmulᱻ7)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚmulᱻ7)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP = RECORD_FIELDS;
                 return true;
             },
@@ -1024,22 +1024,22 @@ function create(mode) {
         print: {
             full: function RCD() {
                 if (ATYP !== RECORD_FIELDS) return false;
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
                 let bitmask = APOS;
                 let i;
                 for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmulᱻ3)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount || !printValue(ꐚmulᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚmulᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚterm)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = APOS = 0; (bitmask & (1 << i)) !== 0; ++i, APOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ5)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚmulᱻ7)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount || !printValue(ꐚmulᱻ5)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚmulᱻ7)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -1186,11 +1186,11 @@ function create(mode) {
     const ꐚmulᱻ7 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚmulᱻ8()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚmulᱻ8()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactor()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1204,9 +1204,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚmulᱻ8()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactor()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚmulᱻ8()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1256,13 +1256,13 @@ function create(mode) {
     const ꐚdiv = createRule(mode, {
         parse: {
             full: function RCD() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 AREP[APOS++] = "type";
-                if (!parseValue(ꐚdivᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdivᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 AREP[APOS++] = "rhs";
-                if (!parseValue(ꐚdivᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!parseValue(ꐚdivᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP = RECORD_FIELDS;
                 return true;
             },
@@ -1280,22 +1280,22 @@ function create(mode) {
         print: {
             full: function RCD() {
                 if (ATYP !== RECORD_FIELDS) return false;
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
                 let bitmask = APOS;
                 let i;
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚdivᱻ1)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚdivᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚterm)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 for (i = 0, APOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, APOS += 2) ;
-                if (i >= propCount) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!printValue(ꐚdivᱻ3)) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                if (i >= propCount) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!printValue(ꐚdivᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 bitmask += (1 << i);
                 APOS = bitmask;
                 return true;
@@ -1354,11 +1354,11 @@ function create(mode) {
     const ꐚdivᱻ3 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚdivᱻ4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚdivᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactor()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1372,9 +1372,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚdivᱻ4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactor()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚdivᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1526,13 +1526,13 @@ function create(mode) {
     const ꐚfactorᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ2()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ2()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactorᱻ4()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfloat()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfloat()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1548,10 +1548,10 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚfactorᱻ2()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactorᱻ4()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfloat()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ2()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfloat()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1566,18 +1566,18 @@ function create(mode) {
     const ꐚfactorᱻ2 = createRule(mode, {
         parse: {
             full: function NOT() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ3();
-                [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, NOTHING];
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = NOTHING;
                 return result;
             },
             infer: () => (ATYP = NOTHING),
         },
         print: {
             full: function NOT() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ3();
-                [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ];
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
                 return result;
             },
             infer: () => {},
@@ -1622,18 +1622,18 @@ function create(mode) {
     const ꐚfactorᱻ4 = createRule(mode, {
         parse: {
             full: function NOT() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ5();
-                [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, NOTHING];
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = NOTHING;
                 return result;
             },
             infer: () => (ATYP = NOTHING),
         },
         print: {
             full: function NOT() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ5();
-                [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ];
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
                 return result;
             },
             infer: () => {},
@@ -1678,11 +1678,11 @@ function create(mode) {
     const ꐚfactorᱻ6 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ7()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ7()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactorᱻ9()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ9()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1696,9 +1696,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚfactorᱻ7()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactorᱻ9()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ7()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ9()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1761,11 +1761,11 @@ function create(mode) {
     const ꐚfactorᱻ11 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ12()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ12()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactorᱻ14()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ14()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1779,9 +1779,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚfactorᱻ12()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactorᱻ14()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ12()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ14()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1844,11 +1844,11 @@ function create(mode) {
     const ꐚfactorᱻ16 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ17()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ17()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactorᱻ19()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ19()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1862,9 +1862,9 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚfactorᱻ17()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactorᱻ19()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ17()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ19()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
@@ -1925,13 +1925,13 @@ function create(mode) {
     const ꐚfactorᱻ21 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ] = [APOS, CPOS];
+                const APOSₒ = APOS, CPOSₒ = CPOS;
                 let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ22()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ22()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚexpr()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚexpr()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 seqType |= ATYP;
-                if (!ꐚfactorᱻ24()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
+                if (!ꐚfactorᱻ24()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                 ATYP |= seqType;
                 return true;
             },
@@ -1947,10 +1947,10 @@ function create(mode) {
         },
         print: {
             full: function SEQ() {
-                const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
-                if (!ꐚfactorᱻ22()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚexpr()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
-                if (!ꐚfactorᱻ24()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ22()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚexpr()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ24()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
