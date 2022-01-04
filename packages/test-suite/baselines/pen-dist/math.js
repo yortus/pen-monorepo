@@ -53,7 +53,7 @@ let APOS = 0;
 let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
+const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
@@ -66,14 +66,14 @@ function emitByte(value) {
     if (APOS === 0)
         AREP = theBuffer;
     AREP[APOS++] = value;
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 function emitBytes(...values) {
     if (APOS === 0)
         AREP = theBuffer;
     for (let i = 0; i < values.length; ++i)
         AREP[APOS++] = values[i];
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 function parseValue(rule) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -89,15 +89,15 @@ function parseValue(rule) {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = AREP.toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS)
                 AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
@@ -125,15 +125,15 @@ function parseInferValue(infer) {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = AREP.toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS)
                 AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
@@ -161,11 +161,11 @@ function printValue(rule) {
     }
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        atyp = ATYP = STRING;
+        atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        atyp = ATYP = LIST;
+        atyp = ATYP = LIST_ELEMENTS;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [];
@@ -174,7 +174,7 @@ function printValue(rule) {
         for (let i = 0; i < keys.length; ++i)
             arr.push(keys[i], value[keys[i]]);
         value = arr;
-        atyp = ATYP = RECORD;
+        atyp = ATYP = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -185,7 +185,7 @@ function printValue(rule) {
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
-    if (atyp === RECORD) {
+    if (atyp === RECORD_FIELDS) {
         const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
@@ -558,7 +558,7 @@ const extensions = {
                             // We have a resolved memo, so the result of the rule application for the given initial state has
                             // already been computed. Return it from the memo.
                             ATYP = memo.ATYPᐟ;
-                            AREP !== null && AREP !== void 0 ? AREP : (AREP = ATYP === STRING ? theBuffer : []);
+                            AREP !== null && AREP !== void 0 ? AREP : (AREP = ATYP === STRING_CHARS ? theBuffer : []);
                             APOS = APOSₒ;
                             CPOS = memo.IPOSᐟ;
                             for (let i = 0; i < memo.OREPᐞ.length; ++i) {
@@ -718,7 +718,7 @@ function create(mode) {
                 if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
                 if (!parseValue(ꐚaddᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -730,12 +730,12 @@ function create(mode) {
                 parseInferValue(ꐚexpr.infer);
                 AREP[APOS++] = "rhs";
                 parseInferValue(ꐚaddᱻ2.infer);
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD) return false;
+                if (ATYP !== RECORD_FIELDS) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
@@ -757,7 +757,7 @@ function create(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD && ATYP !== NOTHING) return false;
+                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                 printInferValue(ꐚaddᱻ1.infer);
                 printInferValue(ꐚexpr.infer);
                 printInferValue(ꐚaddᱻ2.infer);
@@ -778,7 +778,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x61) return false;
                 if (AREP[APOS + 1] !== 0x64) return false;
@@ -864,7 +864,7 @@ function create(mode) {
                 if (!parseValue(ꐚexpr)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
                 if (!parseValue(ꐚsubᱻ2)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -876,12 +876,12 @@ function create(mode) {
                 parseInferValue(ꐚexpr.infer);
                 AREP[APOS++] = "rhs";
                 parseInferValue(ꐚsubᱻ2.infer);
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD) return false;
+                if (ATYP !== RECORD_FIELDS) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
@@ -903,7 +903,7 @@ function create(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD && ATYP !== NOTHING) return false;
+                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                 printInferValue(ꐚsubᱻ1.infer);
                 printInferValue(ꐚexpr.infer);
                 printInferValue(ꐚsubᱻ2.infer);
@@ -924,7 +924,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x73) return false;
                 if (AREP[APOS + 1] !== 0x75) return false;
@@ -1020,33 +1020,33 @@ function create(mode) {
                 const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                 if (APOS === 0) AREP = [];
                 if (!parseValue(ꐚmulᱻ1)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                assert(ATYP === STRING);
+                assert(ATYP === STRING_CHARS);
                 if (!parseValue(ꐚmulᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "lhs";
                 if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 if (!parseValue(ꐚmulᱻ5)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                assert(ATYP === STRING);
+                assert(ATYP === STRING_CHARS);
                 if (!parseValue(ꐚmulᱻ7)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
                 const APOSₒ = APOS;
                 if (APOS === 0) AREP = [];
                 parseInferValue(ꐚmulᱻ1.infer);
-                assert(ATYP === STRING);
+                assert(ATYP === STRING_CHARS);
                 parseInferValue(ꐚmulᱻ3.infer);
                 AREP[APOS++] = "lhs";
                 parseInferValue(ꐚterm.infer);
                 parseInferValue(ꐚmulᱻ5.infer);
-                assert(ATYP === STRING);
+                assert(ATYP === STRING_CHARS);
                 parseInferValue(ꐚmulᱻ7.infer);
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD) return false;
+                if (ATYP !== RECORD_FIELDS) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
@@ -1068,7 +1068,7 @@ function create(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD && ATYP !== NOTHING) return false;
+                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                 printInferValue(ꐚmulᱻ1.infer);
                 printInferValue(ꐚmulᱻ3.infer);
                 printInferValue(ꐚterm.infer);
@@ -1100,7 +1100,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 4 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x74) return false;
                 if (AREP[APOS + 1] !== 0x79) return false;
@@ -1144,7 +1144,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x6d) return false;
                 if (AREP[APOS + 1] !== 0x75) return false;
@@ -1185,7 +1185,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x72) return false;
                 if (AREP[APOS + 1] !== 0x68) return false;
@@ -1261,7 +1261,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x2a) return false;
@@ -1287,7 +1287,7 @@ function create(mode) {
                 if (!parseValue(ꐚterm)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                 AREP[APOS++] = "rhs";
                 if (!parseValue(ꐚdivᱻ3)) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -1299,12 +1299,12 @@ function create(mode) {
                 parseInferValue(ꐚterm.infer);
                 AREP[APOS++] = "rhs";
                 parseInferValue(ꐚdivᱻ3.infer);
-                ATYP = RECORD;
+                ATYP = RECORD_FIELDS;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD) return false;
+                if (ATYP !== RECORD_FIELDS) return false;
                 const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                 const propList = AREP;
                 const propCount = AREP.length >> 1;
@@ -1326,7 +1326,7 @@ function create(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD && ATYP !== NOTHING) return false;
+                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                 printInferValue(ꐚdivᱻ1.infer);
                 printInferValue(ꐚterm.infer);
                 printInferValue(ꐚdivᱻ3.infer);
@@ -1355,7 +1355,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x64) return false;
                 if (AREP[APOS + 1] !== 0x69) return false;
@@ -1431,7 +1431,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x2f) return false;
@@ -1626,7 +1626,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 2 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x30) return false;
                 if (AREP[APOS + 1] !== 0x78) return false;
@@ -1682,7 +1682,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 2 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x30) return false;
                 if (AREP[APOS + 1] !== 0x62) return false;
@@ -1753,7 +1753,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 2 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x30) return false;
                 if (AREP[APOS + 1] !== 0x78) return false;
@@ -1836,7 +1836,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 2 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x30) return false;
                 if (AREP[APOS + 1] !== 0x62) return false;
@@ -1921,7 +1921,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x69) return false;
@@ -2008,7 +2008,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x28) return false;
@@ -2044,7 +2044,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x29) return false;

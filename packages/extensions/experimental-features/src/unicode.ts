@@ -48,7 +48,7 @@ function unicode(mode: 'parse' | 'print'): Func {
 
                     // TODO: respect VOID AREP/CREP...
 
-                    if (ATYP !== STRING) return false;
+                    if (ATYP !== STRING_CHARS) return false;
                     const [APOSₒ, CPOSₒ] = [APOS, CPOS];
                     const bytes = AREP as Buffer;
                     let c = bytes[APOS++];

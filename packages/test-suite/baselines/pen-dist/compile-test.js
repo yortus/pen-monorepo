@@ -53,7 +53,7 @@ let APOS = 0;
 let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8];
+const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 const theScalarArray = [];
 const theBuffer = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
@@ -66,14 +66,14 @@ function emitByte(value) {
     if (APOS === 0)
         AREP = theBuffer;
     AREP[APOS++] = value;
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 function emitBytes(...values) {
     if (APOS === 0)
         AREP = theBuffer;
     for (let i = 0; i < values.length; ++i)
         AREP[APOS++] = values[i];
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 function parseValue(rule) {
     const [AREPₒ, APOSₒ] = [AREP, APOS];
@@ -89,15 +89,15 @@ function parseValue(rule) {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = AREP.toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS)
                 AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
@@ -125,15 +125,15 @@ function parseInferValue(infer) {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = AREP.toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS)
                 AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {};
             for (let i = 0; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
@@ -161,11 +161,11 @@ function printValue(rule) {
     }
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        atyp = ATYP = STRING;
+        atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        atyp = ATYP = LIST;
+        atyp = ATYP = LIST_ELEMENTS;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [];
@@ -174,7 +174,7 @@ function printValue(rule) {
         for (let i = 0; i < keys.length; ++i)
             arr.push(keys[i], value[keys[i]]);
         value = arr;
-        atyp = ATYP = RECORD;
+        atyp = ATYP = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -185,7 +185,7 @@ function printValue(rule) {
     AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
-    if (atyp === RECORD) {
+    if (atyp === RECORD_FIELDS) {
         const keyCount = value.length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
@@ -269,7 +269,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 7 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x6f) return false;
                 if (AREP[APOS + 1] !== 0x75) return false;
@@ -418,7 +418,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 7 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x69) return false;
                 if (AREP[APOS + 1] !== 0x6e) return false;
@@ -501,7 +501,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 7 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x69) return false;
                 if (AREP[APOS + 1] !== 0x6e) return false;
@@ -551,7 +551,7 @@ function create(mode) {
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS + 3 > AREP.length) return false;
                 if (AREP[APOS + 0] !== 0x2a) return false;
                 if (AREP[APOS + 1] !== 0x2a) return false;
@@ -630,7 +630,7 @@ function create(mode) {
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING) return false;
+                if (ATYP !== STRING_CHARS) return false;
                 if (APOS >= AREP.length) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x2d) return false;

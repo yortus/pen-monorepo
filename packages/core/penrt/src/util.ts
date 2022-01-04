@@ -48,7 +48,7 @@ interface RuleImpls {
 // [ ] 5. A/C --> I/O (leave ATYP for now)
 // [ ] 6. ATYP handling?
 // [ ] 7. restore LEN/CAP (capacity) checking
-// [ ]    a. eg printValue for STRING always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
+// [ ]    a. eg printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
 
 interface Arrayish<T> {
@@ -71,8 +71,8 @@ let ATYP: ATYP = 0; // NB: Parsers _must_ set this when returning true. Parsers 
 let CREP: Buffer = Buffer.alloc(1); //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
 let CPOS: number = 0;
 
-type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING | typeof LIST | typeof RECORD;
-const [NOTHING, SCALAR, STRING, LIST, RECORD] = [0, 1, 2, 4, 8] as const;
+type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING_CHARS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS;
+const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
 
 
 
@@ -96,12 +96,12 @@ function emitScalar(value: number | boolean | null) {
 function emitByte(value: number) {
     if (APOS === 0) AREP = theBuffer;
     AREP[APOS++] = value;
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 function emitBytes(...values: number[]) {
     if (APOS === 0) AREP = theBuffer;
     for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
-    ATYP = STRING;
+    ATYP = STRING_CHARS;
 }
 
 
@@ -118,14 +118,14 @@ function parseValue(rule: Rule): boolean {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = (AREP as Buffer).toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS) AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
             for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
             if (Object.keys(obj).length * 2 < APOS) throw new Error(`Duplicate labels in record`);
@@ -152,14 +152,14 @@ function parseInferValue(infer: () => void): void {
             assert(APOS === 1);
             value = AREP[0];
             break;
-        case STRING:
+        case STRING_CHARS:
             value = (AREP as Buffer).toString('utf8', 0, APOS);
             break;
-        case LIST:
+        case LIST_ELEMENTS:
             if (AREP.length !== APOS) AREP.length = APOS;
             value = AREP;
             break;
-        case RECORD:
+        case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
             for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
             break;
@@ -194,11 +194,11 @@ function printValue(rule: Rule): boolean {
     // Aggregate cases
     if (typeof value === 'string') {
         AREP = theBuffer.slice(0, theBuffer.write(value, 0));
-        atyp = ATYP = STRING;
+        atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         AREP = value;
-        atyp = ATYP = LIST;
+        atyp = ATYP = LIST_ELEMENTS;
     }
     else if (typeof value === 'object') {
         const arr = AREP = [] as unknown[];        
@@ -206,7 +206,7 @@ function printValue(rule: Rule): boolean {
         assert(keys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
         for (let i = 0; i < keys.length; ++i) arr.push(keys[i], (value as any)[keys[i]]);
         value = arr;
-        atyp = ATYP = RECORD;
+        atyp = ATYP = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -222,11 +222,11 @@ function printValue(rule: Rule): boolean {
     if (!result) return false;
 
     // Ensure input was fully consumed
-    if (atyp === RECORD) {
+    if (atyp === RECORD_FIELDS) {
         const keyCount = (value as any).length >> 1;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
     }
-    else /* STRING | LIST */ {
+    else /* STRING_CHARS | LIST_ELEMENTS */ {
         if (apos !== arep.length) return false;
     }
     APOS += 1;

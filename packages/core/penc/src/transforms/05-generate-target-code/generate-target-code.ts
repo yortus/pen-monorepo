@@ -212,7 +212,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`full: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING_CHARS) return false;`);
                     emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
                     emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
                     for (const excl of expr.exclude || []) {
@@ -286,7 +286,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 : `if (!parseValue(${item.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`)
                             .join('\n')
                         }
-                        ATYP = LIST;
+                        ATYP = LIST_ELEMENTS;
                         return true;
                     },
                     infer: function LST() {
@@ -297,26 +297,26 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 : `parseInferValue(${item.name}.infer);`)
                             .join('\n')
                         }
-                        ATYP = LIST;
+                        ATYP = LIST_ELEMENTS;
                     },
                 },
                 print: {
                     full: function LST() {
-                        if (ATYP !== LIST) return false;
+                        if (ATYP !== LIST_ELEMENTS) return false;
                         const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `ATYP = LIST;\nif (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`
+                                ? `ATYP = LIST_ELEMENTS;\nif (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`
                                 : `if (!printValue(${item.name})) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;`)
                             .join('\n')
                         }
                         return true;
                     },
                     infer: function LST() {
-                        if (ATYP !== LIST && ATYP !== NOTHING) return false;
+                        if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `ATYP = LIST;\n${item.expression.name}.infer();`
+                                ? `ATYP = LIST_ELEMENTS;\n${item.expression.name}.infer();`
                                 : `printInferValue(${item.name}.infer);`)
                             .join('\n')
                         }
@@ -386,7 +386,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
                                     if (!parseValue(${item.label.name})) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
-                                    assert(ATYP === STRING);
+                                    assert(ATYP === STRING_CHARS);
                                 `}
 
                                 ${/* Parse field value */''}
@@ -396,7 +396,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;
                             `}
                         `).join('\n')}
-                        ATYP = RECORD;
+                        ATYP = RECORD_FIELDS;
                         return true;
                     },
                     infer: function RCD() {
@@ -408,8 +408,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${typeof item.label === 'string' ? `
                                     AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                parseInferValue(${item.label.name}.infer);
-                                    assert(ATYP === STRING);
+                                    parseInferValue(${item.label.name}.infer);
+                                    assert(ATYP === STRING_CHARS);
                                 `}
 
                                 ${/* Parse field value */ ''}
@@ -419,12 +419,12 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${item.expression.name}.infer();
                             `}
                         `).join('\n')}
-                        ATYP = RECORD;
+                        ATYP = RECORD_FIELDS;
                     },
                 },
                 print: {
                     full: function RCD() {
-                        if (ATYP !== RECORD) return false;
+                        if (ATYP !== RECORD_FIELDS) return false;
                         const [APOSₒ, CPOSₒ, ATYPₒ] = [APOS, CPOS, ATYP];
                         const propList = AREP;
                         const propCount = AREP.length >> 1;
@@ -446,7 +446,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 bitmask += (1 << i);
                             ` : /* item.kind === 'Splice' */ `
                                 APOS = bitmask;
-                                ATYP = RECORD;
+                                ATYP = RECORD_FIELDS;
                                 if (!${item.expression.name}()) return [APOS, CPOS, ATYP] = [APOSₒ, CPOSₒ, ATYPₒ], false;
                                 bitmask = APOS;
                             `}
@@ -455,7 +455,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         return true;
                     },
                     infer: function RCD() {
-                        if (ATYP !== RECORD && ATYP !== NOTHING) return false;
+                        if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Print field label */ ''}
@@ -464,7 +464,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${/* Print field value */ ''}
                                 printInferValue(${item.expression.name}.infer);
                             ` : /* item.kind === 'Splice' */ `
-                            ATYP = RECORD;
+                                ATYP = RECORD_FIELDS;
                                 ${item.expression.name}.infer();
                             `}
                         `).join('\n')}
@@ -539,7 +539,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`${mode}: {`).indent();
                 emit.down(1).text(`full: function STR() {`).indent();
                 if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING) return false;`);
+                    if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING_CHARS) return false;`);
                     emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
                     for (let i = 0; i < bytes.length; ++i) {
                         emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
