@@ -45,6 +45,18 @@ interface RuleImpls {
 
 
 // TODO: next:
+// [ ] OCTETS is only used for parsing, and never changes (const array instance)
+//     - well almost.... print uses it internally to buffer chars but exposes only through AREP - see L#187 in printValue
+//     - print could have it's own private buffer instance for that purpose (ie not part of VM's exposed api)
+// [ ] VALUES is only used for parsing, and never changes (const array instance)
+// [ ] AREP is only used for printing, and changes as various AST nodes are read
+// ======= ideas for above =======
+// - use OCTETS in print as an exposed thing, same as for parse. Then can remove Arrayish interface
+// - rename VALUES to OUTVALS? SINK? PARSE_VALUES
+// - rename AREP to INVALS? SOURCE? PRINT_VALUES
+// - rename CREP to ???
+// - rename OCTETS to ???
+
 // [ ] parseValue writes to VALUE, printValue reads from VALUE
 // [ ] ATYP handling?
 // [ ] restore LEN/CAP (capacity) checking
@@ -63,7 +75,7 @@ interface Arrayish<T> {
 
 
 // VM REGISTERS - callee updates/restores
-let AREP: Arrayish<unknown> = [];
+let AREP: Arrayish<unknown>;
 let APOS: number = 0;
 let ATYP: ATYP = 0; // NB: Parsers _must_ set this when returning true. Parsers _may_ restore this when returning false.
                     // NB: Printers _may_ check/validate this on entry. Printers _must_ return with the same value in ATYP.
@@ -82,13 +94,15 @@ const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 
 // VALUES: unknown[]
 // LABELS: string[], or alternatively:
 // FIELDS: Array<[string, unknown]>
-const OCTETS = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
+const OCTETS = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
+const VALUES: unknown[] = [];
 
 
 
 
+// These are only used in parsing, not printing
 function emitScalar(value: number | boolean | null) {
-    AREP[APOS++] = value;
+    VALUES[APOS++] = value;
     ATYP = SCALAR;
 }
 function emitByte(value: number) {
@@ -110,24 +124,24 @@ function parseValue(rule: Rule): boolean {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            value = VALUES[APOSₒ];
             break;
         case STRING_CHARS:
             value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = VALUES.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            for (let i = APOSₒ; i < APOS; i += 2) obj[VALUES[i] as string] = VALUES[i + 1];
             if (Object.keys(obj).length * 2 < (APOS - APOSₒ)) throw new Error(`Duplicate labels in record`);
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
+    VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
     return true;
 }
@@ -140,23 +154,23 @@ function parseInferValue(infer: () => void): void {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            value = VALUES[APOSₒ];
             break;
         case STRING_CHARS:
             value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = VALUES.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            for (let i = APOSₒ; i < APOS; i += 2) obj[VALUES[i] as string] = VALUES[i + 1];
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
+    VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
 }
 
@@ -175,7 +189,7 @@ function printValue(rule: Rule): boolean {
         ATYP = SCALAR;
         const result = rule();
         ATYP = ATYPₒ;
-        assert(APOS - APOSₒ === 1);
+        assert(APOS === APOSₒ + 1);
         return result;
     }
 

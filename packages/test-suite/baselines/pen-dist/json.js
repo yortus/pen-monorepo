@@ -4,14 +4,14 @@ module.exports = {
     parse(strOrBuf) {
         CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
         CPOS = 0;
-        AREP = [];
         APOS = 0;
         if (!parseValue(parse)) throw new Error('parse failed');
         if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
-        return AREP[0];
+        if (APOS !== 1) throw new Error('parse didn\'t produce a singular value');
+        return VALUES[0];
     },
     print(node, buf) {
-        AREP = [node];
+        AREP = [node]; // TODO: we must use a new AREP array per print call, otehrwise the MEMO rule has invalid cached memos across print calls. Fix!!
         APOS = 0;
         CREP = buf || Buffer.alloc(2 ** 22); // 4MB
         CPOS = 0;
@@ -48,15 +48,16 @@ function createRule(mode, impls) {
         result.constant = impls.constant;
     return result;
 }
-let AREP = [];
+let AREP;
 let APOS = 0;
 let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
-const OCTETS = Buffer.alloc(2 ** 10);
+const OCTETS = Buffer.alloc(2 ** 16);
+const VALUES = [];
 function emitScalar(value) {
-    AREP[APOS++] = value;
+    VALUES[APOS++] = value;
     ATYP = SCALAR;
 }
 function emitByte(value) {
@@ -78,25 +79,25 @@ function parseValue(rule) {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            value = VALUES[APOSₒ];
             break;
         case STRING_CHARS:
             value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = VALUES.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
             for (let i = APOSₒ; i < APOS; i += 2)
-                obj[AREP[i]] = AREP[i + 1];
+                obj[VALUES[i]] = VALUES[i + 1];
             if (Object.keys(obj).length * 2 < (APOS - APOSₒ))
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
+    VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
     return true;
 }
@@ -109,23 +110,23 @@ function parseInferValue(infer) {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            value = VALUES[APOSₒ];
             break;
         case STRING_CHARS:
             value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = VALUES.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
             for (let i = APOSₒ; i < APOS; i += 2)
-                obj[AREP[i]] = AREP[i + 1];
+                obj[VALUES[i]] = VALUES[i + 1];
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
+    VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
 }
 function printValue(rule) {
@@ -139,7 +140,7 @@ function printValue(rule) {
         ATYP = SCALAR;
         const result = rule();
         ATYP = ATYPₒ;
-        assert(APOS - APOSₒ === 1);
+        assert(APOS === APOSₒ + 1);
         return result;
     }
     if (typeof value === 'string') {
@@ -495,7 +496,7 @@ const extensions = {
                                 if (expr()) { // TODO: fix cast
                                     memo.result = true;
                                     memo.IPOSᐟ = CPOS;
-                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                    memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
                                     memo.ATYPᐟ = ATYP;
                                 }
                                 memo.resolved = true;
@@ -524,7 +525,7 @@ const extensions = {
                                     // TODO: was for unparse... comment above says should never happen...
                                     // if (!isInputFullyConsumed()) break;
                                     memo.IPOSᐟ = CPOS;
-                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                                    memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
                                     memo.ATYPᐟ = ATYP;
                                 }
                             }
@@ -541,7 +542,7 @@ const extensions = {
                             // We have a resolved memo, so the result of the rule application for the given initial state has
                             // already been computed. Return it from the memo.
                             ATYP = memo.ATYPᐟ;
-                            const arep = (ATYP === STRING_CHARS ? OCTETS : AREP);
+                            const arep = (ATYP === STRING_CHARS ? OCTETS : VALUES);
                             APOS = APOSₒ;
                             CPOS = memo.IPOSᐟ;
                             for (let i = 0; i < memo.OREPᐞ.length; ++i) {

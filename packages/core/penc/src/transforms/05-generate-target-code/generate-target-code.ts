@@ -25,14 +25,14 @@ export function generateTargetCode(ast: V.AST<400>) {
             parse(strOrBuf) {${/* expects buf to be utf8 encoded */''}
                 CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
                 CPOS = 0;
-                AREP = [];
                 APOS = 0;
                 if (!parseValue(parse)) throw new Error('parse failed');
                 if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
-                return AREP[0];
+                if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
+                return VALUES[0];
             },
             print(node, buf) {
-                AREP = [node];
+                AREP = [node]; // TODO: we must use a new AREP array per print call, otehrwise the MEMO rule has invalid cached memos across print calls. Fix!!
                 APOS = 0;
                 CREP = buf || Buffer.alloc(2 ** 22); // 4MB
                 CPOS = 0;
@@ -380,7 +380,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */ ''}
                                 ${typeof item.label === 'string' ? `
-                                    AREP[APOS++] = ${JSON.stringify(item.label)};
+                                    VALUES[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
                                     if (!parseValue(${item.label.name})) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                                     assert(ATYP === STRING_CHARS);
@@ -402,7 +402,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */''}
                                 ${typeof item.label === 'string' ? `
-                                    AREP[APOS++] = ${JSON.stringify(item.label)};
+                                    VALUES[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
                                     parseInferValue(${item.label.name}.infer);
                                     assert(ATYP === STRING_CHARS);
