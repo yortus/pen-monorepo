@@ -45,10 +45,10 @@ interface RuleImpls {
 
 
 // TODO: next:
-// [ ] 5. A/C --> I/O (leave ATYP for now)
-// [ ] 6. ATYP handling?
-// [ ] 7. restore LEN/CAP (capacity) checking
-// [ ]    a. eg printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
+// [ ] parseValue writes to VALUE, printValue reads from VALUE
+// [ ] ATYP handling?
+// [ ] restore LEN/CAP (capacity) checking
+// [ ]   printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
 
 interface Arrayish<T> {
@@ -82,93 +82,81 @@ const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 
 // VALUES: unknown[]
 // LABELS: string[], or alternatively:
 // FIELDS: Array<[string, unknown]>
-const theScalarArray: unknown[] = [];
-const theBuffer = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
+const OCTETS = Buffer.alloc(2 ** 10); // TODO: how big to make this? What if it's ever too small?
 
 
 
 
 function emitScalar(value: number | boolean | null) {
-    if (APOS === 0) AREP = theScalarArray;
     AREP[APOS++] = value;
     ATYP = SCALAR;
 }
 function emitByte(value: number) {
-    if (APOS === 0) AREP = theBuffer;
-    AREP[APOS++] = value;
+    OCTETS[APOS++] = value;
     ATYP = STRING_CHARS;
 }
 function emitBytes(...values: number[]) {
-    if (APOS === 0) AREP = theBuffer;
-    for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
+    for (let i = 0; i < values.length; ++i) OCTETS[APOS++] = values[i];
     ATYP = STRING_CHARS;
 }
 
 
 function parseValue(rule: Rule): boolean {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
-    AREP = undefined as any; // TODO: fix cast
-    APOS = 0;
-    if (!rule()) return AREP = AREPₒ, APOS = APOSₒ, false;
-    if (ATYP === NOTHING) return AREP = AREPₒ, APOS = APOSₒ, false;
+    const APOSₒ = APOS;
+    if (!rule()) return APOS = APOSₒ, false;
+    if (ATYP === NOTHING) return APOS = APOSₒ, false;
 
     let value: unknown;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === 1);
-            value = AREP[0];
+            assert(APOS === APOSₒ + 1);
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = (AREP as Buffer).toString('utf8', 0, APOS);
+            value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            if (AREP.length !== APOS) AREP.length = APOS;
-            value = AREP;
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
-            if (Object.keys(obj).length * 2 < APOS) throw new Error(`Duplicate labels in record`);
+            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            if (Object.keys(obj).length * 2 < (APOS - APOSₒ)) throw new Error(`Duplicate labels in record`);
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREPₒ[APOSₒ] = value;
-    AREP = AREPₒ;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     return true;
 }
 function parseInferValue(infer: () => void): void {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
-    AREP = undefined as any; // TODO: fix cast
-    APOS = 0;
+    const APOSₒ = APOS;
     infer();
     if (ATYP === NOTHING) return;
 
     let value: unknown;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === 1);
-            value = AREP[0];
+            assert(APOS === APOSₒ + 1);
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = (AREP as Buffer).toString('utf8', 0, APOS);
+            value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            if (AREP.length !== APOS) AREP.length = APOS;
-            value = AREP;
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = 0; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREPₒ[APOSₒ] = value;
-    AREP = AREPₒ;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
 }
 
@@ -193,7 +181,7 @@ function printValue(rule: Rule): boolean {
 
     // Aggregate cases
     if (typeof value === 'string') {
-        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
+        AREP = OCTETS.slice(0, OCTETS.write(value, 0));
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {

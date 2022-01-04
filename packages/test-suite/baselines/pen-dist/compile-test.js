@@ -54,95 +54,78 @@ let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
-const theScalarArray = [];
-const theBuffer = Buffer.alloc(2 ** 10);
+const OCTETS = Buffer.alloc(2 ** 10);
 function emitScalar(value) {
-    if (APOS === 0)
-        AREP = theScalarArray;
     AREP[APOS++] = value;
     ATYP = SCALAR;
 }
 function emitByte(value) {
-    if (APOS === 0)
-        AREP = theBuffer;
-    AREP[APOS++] = value;
+    OCTETS[APOS++] = value;
     ATYP = STRING_CHARS;
 }
 function emitBytes(...values) {
-    if (APOS === 0)
-        AREP = theBuffer;
     for (let i = 0; i < values.length; ++i)
-        AREP[APOS++] = values[i];
+        OCTETS[APOS++] = values[i];
     ATYP = STRING_CHARS;
 }
 function parseValue(rule) {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
-    AREP = undefined;
-    APOS = 0;
+    const APOSₒ = APOS;
     if (!rule())
-        return AREP = AREPₒ, APOS = APOSₒ, false;
+        return APOS = APOSₒ, false;
     if (ATYP === NOTHING)
-        return AREP = AREPₒ, APOS = APOSₒ, false;
+        return APOS = APOSₒ, false;
     let value;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === 1);
-            value = AREP[0];
+            assert(APOS === APOSₒ + 1);
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = AREP.toString('utf8', 0, APOS);
+            value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            if (AREP.length !== APOS)
-                AREP.length = APOS;
-            value = AREP;
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
-            for (let i = 0; i < APOS; i += 2)
+            for (let i = APOSₒ; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
-            if (Object.keys(obj).length * 2 < APOS)
+            if (Object.keys(obj).length * 2 < (APOS - APOSₒ))
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREPₒ[APOSₒ] = value;
-    AREP = AREPₒ;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     return true;
 }
 function parseInferValue(infer) {
-    const [AREPₒ, APOSₒ] = [AREP, APOS];
-    AREP = undefined;
-    APOS = 0;
+    const APOSₒ = APOS;
     infer();
     if (ATYP === NOTHING)
         return;
     let value;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === 1);
-            value = AREP[0];
+            assert(APOS === APOSₒ + 1);
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = AREP.toString('utf8', 0, APOS);
+            value = OCTETS.toString('utf8', APOSₒ, APOS);
             break;
         case LIST_ELEMENTS:
-            if (AREP.length !== APOS)
-                AREP.length = APOS;
-            value = AREP;
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
-            for (let i = 0; i < APOS; i += 2)
+            for (let i = APOSₒ; i < APOS; i += 2)
                 obj[AREP[i]] = AREP[i + 1];
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREPₒ[APOSₒ] = value;
-    AREP = AREPₒ;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
 }
 function printValue(rule) {
@@ -160,7 +143,7 @@ function printValue(rule) {
         return result;
     }
     if (typeof value === 'string') {
-        AREP = theBuffer.slice(0, theBuffer.write(value, 0));
+        AREP = OCTETS.slice(0, OCTETS.write(value, 0));
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {

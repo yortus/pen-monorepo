@@ -88,11 +88,11 @@ function memoise(mode: 'parse' | 'print'): Func {
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
                     ATYP = memo.ATYPᐟ;
-                    AREP ??= (ATYP === STRING_CHARS ? theBuffer : []);
+                    const arep = (ATYP === STRING_CHARS ? OCTETS : AREP);
                     APOS = APOSₒ;
                     CPOS = memo.IPOSᐟ;
                     for (let i = 0; i < memo.OREPᐞ.length; ++i) {
-                        AREP[APOS++] = memo.OREPᐞ[i];
+                        arep[APOS++] = memo.OREPᐞ[i];
                     }
                     return memo.result;
                 },

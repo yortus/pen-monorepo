@@ -259,9 +259,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: () => {
-                        const [APOSₒ, AREPₒ] = [APOS, AREP];
+                        const APOSₒ = APOS;
                         const result = ${expr.expression.name}();
-                        APOS = APOSₒ, AREP = AREPₒ, ATYP = NOTHING;
+                        APOS = APOSₒ, ATYP = NOTHING;
                         return result;
                     },
                     infer: () => (ATYP = NOTHING),
@@ -279,7 +279,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 parse: {
                     full: function LST() {
                         const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        if (APOS === 0) AREP = [];
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `if (!${item.expression.name}()) return [APOS, CPOS] = [APOSₒ, CPOSₒ], false;`
@@ -290,7 +289,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         return true;
                     },
                     infer: function LST() {
-                        if (APOS === 0) AREP = [];
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `${item.expression.name}.infer();`
@@ -378,7 +376,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 parse: {
                     full: function RCD() {
                         const [APOSₒ, CPOSₒ] = [APOS, CPOS];
-                        if (APOS === 0) AREP = [];
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */ ''}
@@ -401,7 +398,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     },
                     infer: function RCD() {
                         const APOSₒ = APOS;
-                        if (APOS === 0) AREP = [];
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */''}
