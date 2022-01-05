@@ -1,23 +1,11 @@
 
 // ------------------------------ Main exports ------------------------------
 module.exports = {
-    parse(strOrBuf) {
-        CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
-        CPOS = 0;
-        APOS = 0;
-        if (!parseValue(parse)) throw new Error('parse failed');
-        if (CPOS !== CREP.length) throw new Error('parse didn\'t consume entire input');
-        if (APOS !== 1) throw new Error('parse didn\'t produce a singular value');
-        return VALUES[0];
+    parse(stringOrBuffer) {
+        return parse(parseStartRule, stringOrBuffer);
     },
-    print(node, buf) {
-        AREP = [node]; // TODO: we must use a new AREP array per print call, otehrwise the MEMO rule has invalid cached memos across print calls. Fix!!
-        APOS = 0;
-        CREP = buf || Buffer.alloc(2 ** 22); // 4MB
-        CPOS = 0;
-        if (!printValue(print)) throw new Error('print failed');
-        if (CPOS > CREP.length) throw new Error('output buffer too small');
-        return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
+    print(value, buffer) {
+        return print(printStartRule, value, buffer);
     },
 };
 
@@ -56,6 +44,29 @@ let CPOS = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 const OCTETS = Buffer.alloc(2 ** 16);
 const VALUES = [];
+function parse(startRule, stringOrBuffer) {
+    CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
+    CPOS = 0;
+    APOS = 0;
+    if (!parseValue(startRule))
+        throw new Error('parse failed');
+    if (CPOS !== CREP.length)
+        throw new Error('parse didn\\\'t consume entire input');
+    if (APOS !== 1)
+        throw new Error('parse didn\\\'t produce a singular value');
+    return VALUES[0];
+}
+function print(startRule, value, buffer) {
+    AREP = [value];
+    APOS = 0;
+    CREP = buffer || Buffer.alloc(2 ** 22);
+    CPOS = 0;
+    if (!printValue(startRule))
+        throw new Error('print failed');
+    if (CPOS > CREP.length)
+        throw new Error('output buffer too small');
+    return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
+}
 function emitScalar(value) {
     VALUES[APOS++] = value;
     ATYP = SCALAR;
@@ -227,8 +238,8 @@ const extensions = {
 
 
 // ------------------------------ Program ------------------------------
-const parse = create('parse');
-const print = create('print');
+const parseStartRule = create('parse');
+const printStartRule = create('print');
 function create(mode) {
 
     // StringLiteral

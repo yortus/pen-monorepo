@@ -45,6 +45,8 @@ interface RuleImpls {
 
 
 // TODO: next:
+// [ ] move the generates module exports parse/print function definitions into utils here, or most of them
+
 // [ ] OCTETS is only used for parsing, and never changes (const array instance)
 //     - well almost.... print uses it internally to buffer chars but exposes only through AREP - see L#187 in printValue
 //     - print could have it's own private buffer instance for that purpose (ie not part of VM's exposed api)
@@ -52,8 +54,8 @@ interface RuleImpls {
 // [ ] AREP is only used for printing, and changes as various AST nodes are read
 // ======= ideas for above =======
 // - use OCTETS in print as an exposed thing, same as for parse. Then can remove Arrayish interface
-// - rename VALUES to OUTVALS? SINK? PARSE_VALUES
-// - rename AREP to INVALS? SOURCE? PRINT_VALUES
+// - rename VALUES to OUTVALS? SINK? PARSE_VALUES? OPARTS? PARSE_TARGETS? PARSED_ITEMS?
+// - rename AREP to INVALS? SOURCE? PRINT_VALUES? IPARTS? PRINT_SOURCE? ITEMS_TO_PRINT?
 // - rename CREP to ???
 // - rename OCTETS to ???
 
@@ -96,6 +98,30 @@ const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 
 // FIELDS: Array<[string, unknown]>
 const OCTETS = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
 const VALUES: unknown[] = [];
+
+
+
+
+// Top-level parse/print functions - these set up the VM for each parse/print run
+// TODO: doc: expects buf to be utf8 encoded
+function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
+    CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
+    CPOS = 0;
+    APOS = 0;
+    if (!parseValue(startRule)) throw new Error('parse failed');
+    if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
+    if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
+    return VALUES[0];
+}
+function print(startRule: Rule, value: unknown, buffer?: Buffer) {
+    AREP = [value]; // TODO: we must use a new AREP array per print call, otherwise the MEMO rule has invalid cached memos across print calls. Fix!!
+    APOS = 0;
+    CREP = buffer || Buffer.alloc(2 ** 22); // 4MB
+    CPOS = 0;
+    if (!printValue(startRule)) throw new Error('print failed');
+    if (CPOS > CREP.length) throw new Error('output buffer too small');
+    return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
+}
 
 
 

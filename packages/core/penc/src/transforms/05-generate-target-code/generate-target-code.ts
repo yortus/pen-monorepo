@@ -22,23 +22,11 @@ export function generateTargetCode(ast: V.AST<400>) {
     emit.lines(`
         // ------------------------------ Main exports ------------------------------
         module.exports = {
-            parse(strOrBuf) {${/* expects buf to be utf8 encoded */''}
-                CREP = Buffer.isBuffer(strOrBuf) ? strOrBuf : Buffer.from(strOrBuf, 'utf8');
-                CPOS = 0;
-                APOS = 0;
-                if (!parseValue(parse)) throw new Error('parse failed');
-                if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
-                if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
-                return VALUES[0];
+            parse(stringOrBuffer) {${/* expects buffer to be utf8 encoded */''}
+                return parse(parseStartRule, stringOrBuffer);
             },
-            print(node, buf) {
-                AREP = [node]; // TODO: we must use a new AREP array per print call, otehrwise the MEMO rule has invalid cached memos across print calls. Fix!!
-                APOS = 0;
-                CREP = buf || Buffer.alloc(2 ** 22); // 4MB
-                CPOS = 0;
-                if (!printValue(print)) throw new Error('print failed');
-                if (CPOS > CREP.length) throw new Error('output buffer too small');
-                return buf ? CPOS : CREP.toString('utf8', 0, CPOS);
+            print(value, buffer) {
+                return print(printStartRule, value, buffer);
             },
         };
     `);
@@ -84,8 +72,8 @@ function emitProgram(emit: Emitter, ast: V.AST<400>) {
 
     // TODO: emit prolog...
     emit.down(5).text(`// ------------------------------ Program ------------------------------`);
-    emit.down(1).text(`const parse = create('parse');`);
-    emit.down(1).text(`const print = create('print');`);
+    emit.down(1).text(`const parseStartRule = create('parse');`);
+    emit.down(1).text(`const printStartRule = create('print');`);
     emit.down(1).text(`function create(mode) {`).indent();
 
     // TODO: emit top-level bindings
