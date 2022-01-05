@@ -69,23 +69,24 @@ function print(startRule, value, buffer) {
 }
 function emitScalar(value) {
     VALUES[APOS++] = value;
-    ATYP = SCALAR;
+    ATYP |= SCALAR;
 }
 function emitByte(value) {
     OCTETS[APOS++] = value;
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 function emitBytes(...values) {
     for (let i = 0; i < values.length; ++i)
         OCTETS[APOS++] = values[i];
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 function parseValue(rule) {
-    const APOSₒ = APOS;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
     if (!rule())
-        return APOS = APOSₒ, false;
+        return ATYP = ATYPₒ, false;
     if (ATYP === NOTHING)
-        return APOS = APOSₒ, false;
+        return APOS = APOSₒ, ATYP = ATYPₒ, false;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -110,13 +111,15 @@ function parseValue(rule) {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
     return true;
 }
 function parseInferValue(infer) {
-    const APOSₒ = APOS;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
     infer();
     if (ATYP === NOTHING)
-        return;
+        return APOS = APOSₒ, ATYP = ATYPₒ, undefined;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -139,6 +142,7 @@ function parseInferValue(infer) {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
 }
 function printValue(rule) {
     const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
@@ -336,20 +340,14 @@ function createStartRule(mode) {
     const ꐚresult = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfoo()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚresultᱻ1()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfoo()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚresultᱻ1()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfoo.infer();
-                seqType |= ATYP;
                 ꐚresultᱻ1.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -370,20 +368,14 @@ function createStartRule(mode) {
     const ꐚresultᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚbar()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚbaz()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚbar()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚbaz()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚbar.infer();
-                seqType |= ATYP;
                 ꐚbaz.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -404,18 +396,18 @@ function createStartRule(mode) {
     const ꐚmyList = createRule(mode, {
         parse: {
             full: function LST() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                if (!parseValue(ꐚdigit)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                if (!parseValue(ꐚmyListᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                if (!parseValue(ꐚmyListᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP = LIST_ELEMENTS;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!parseValue(ꐚdigit)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!parseValue(ꐚmyListᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!parseValue(ꐚmyListᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                ATYP |= LIST_ELEMENTS;
                 return true;
             },
             infer: function LST() {
                 parseInferValue(ꐚdigit.infer);
                 parseInferValue(ꐚmyListᱻ1.infer);
                 parseInferValue(ꐚmyListᱻ2.infer);
-                ATYP = LIST_ELEMENTS;
+                ATYP |= LIST_ELEMENTS;
             },
         },
         print: {
@@ -440,20 +432,14 @@ function createStartRule(mode) {
     const ꐚmyListᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚdigit.infer();
-                seqType |= ATYP;
                 ꐚdigit.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -474,24 +460,16 @@ function createStartRule(mode) {
     const ꐚmyListᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚdigit()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚdigit.infer();
-                seqType |= ATYP;
                 ꐚdigit.infer();
-                seqType |= ATYP;
                 ꐚdigit.infer();
-                ATYP |= seqType;
             },
         },
         print: {

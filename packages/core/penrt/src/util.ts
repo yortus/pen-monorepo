@@ -60,7 +60,6 @@ interface RuleImpls {
 // - rename OCTETS to ???
 
 // [ ] parseValue writes to VALUE, printValue reads from VALUE
-// [ ] ATYP handling?
 // [ ] restore LEN/CAP (capacity) checking
 // [ ]   printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
@@ -79,7 +78,7 @@ interface Arrayish<T> {
 // VM REGISTERS - callee updates/restores
 let AREP: Arrayish<unknown>;
 let APOS: number = 0;
-let ATYP: ATYP = 0; // NB: Parsers _must_ set this when returning true. Parsers _may_ restore this when returning false.
+let ATYP: ATYP = 0; // NB: Parsers _must_ logical-OR this when returning true. Parsers _must not_ change this when returning false.
                     // NB: Printers _may_ check/validate this on entry. Printers _must_ return with the same value in ATYP.
 
 let CREP: Buffer = Buffer.alloc(1); //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
@@ -129,22 +128,24 @@ function print(startRule: Rule, value: unknown, buffer?: Buffer) {
 // These are only used in parsing, not printing
 function emitScalar(value: number | boolean | null) {
     VALUES[APOS++] = value;
-    ATYP = SCALAR;
+    ATYP |= SCALAR;
 }
 function emitByte(value: number) {
     OCTETS[APOS++] = value;
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 function emitBytes(...values: number[]) {
     for (let i = 0; i < values.length; ++i) OCTETS[APOS++] = values[i];
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 
 
+// NB: for successful calls: APOS is incremented, AREP[APOS-1] contains the new value, ATYP is unchanged
 function parseValue(rule: Rule): boolean {
-    const APOSₒ = APOS;
-    if (!rule()) return APOS = APOSₒ, false;
-    if (ATYP === NOTHING) return APOS = APOSₒ, false;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
+    if (!rule()) return ATYP = ATYPₒ, false;
+    if (ATYP === NOTHING) return APOS = APOSₒ, ATYP = ATYPₒ, false;
 
     let value: unknown;
     switch (ATYP) {
@@ -169,12 +170,14 @@ function parseValue(rule: Rule): boolean {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
     return true;
 }
 function parseInferValue(infer: () => void): void {
-    const APOSₒ = APOS;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
     infer();
-    if (ATYP === NOTHING) return;
+    if (ATYP === NOTHING) return APOS = APOSₒ, ATYP = ATYPₒ, undefined;
 
     let value: unknown;
     switch (ATYP) {
@@ -198,8 +201,10 @@ function parseInferValue(infer: () => void): void {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
 }
 
+// NB: for successful calls: APOS is incremented, AREP is unchanged, ATYP is unchanged
 function printValue(rule: Rule): boolean {
     const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
     let value = AREP[APOS];

@@ -69,23 +69,24 @@ function print(startRule, value, buffer) {
 }
 function emitScalar(value) {
     VALUES[APOS++] = value;
-    ATYP = SCALAR;
+    ATYP |= SCALAR;
 }
 function emitByte(value) {
     OCTETS[APOS++] = value;
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 function emitBytes(...values) {
     for (let i = 0; i < values.length; ++i)
         OCTETS[APOS++] = values[i];
-    ATYP = STRING_CHARS;
+    ATYP |= STRING_CHARS;
 }
 function parseValue(rule) {
-    const APOSₒ = APOS;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
     if (!rule())
-        return APOS = APOSₒ, false;
+        return ATYP = ATYPₒ, false;
     if (ATYP === NOTHING)
-        return APOS = APOSₒ, false;
+        return APOS = APOSₒ, ATYP = ATYPₒ, false;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -110,13 +111,15 @@ function parseValue(rule) {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
     return true;
 }
 function parseInferValue(infer) {
-    const APOSₒ = APOS;
+    const APOSₒ = APOS, ATYPₒ = ATYP;
+    ATYP = NOTHING;
     infer();
     if (ATYP === NOTHING)
-        return;
+        return APOS = APOSₒ, ATYP = ATYPₒ, undefined;
     let value;
     switch (ATYP) {
         case SCALAR:
@@ -139,6 +142,7 @@ function parseInferValue(infer) {
     }
     VALUES[APOSₒ] = value;
     APOS = APOSₒ + 1;
+    ATYP = ATYPₒ;
 }
 function printValue(rule) {
     const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
@@ -485,7 +489,7 @@ const extensions = {
                 return createRule(mode, {
                     parse: {
                         full: function MEM() {
-                            const APOSₒ = APOS, CPOSₒ = CPOS;
+                            const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                             // Check whether the memo table already has an entry for the given initial state.
                             let memos2 = memos.get(CREP);
                             if (memos2 === undefined) {
@@ -525,7 +529,7 @@ const extensions = {
                                 // does not consume more input, at which point we take the result of the previous iteration as
                                 // final.
                                 while (memo.result === true) {
-                                    APOS = APOSₒ, CPOS = CPOSₒ;
+                                    APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
                                     // TODO: break cases for UNPARSING:
                                     // anything --> same thing (covers all string cases, since they can only be same or shorter)
                                     // some node --> some different non-empty node (assert: should never happen!)
@@ -705,14 +709,14 @@ function createStartRule(mode) {
     const ꐚadd = createRule(mode, {
         parse: {
             full: function RCD() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 VALUES[APOS++] = "type";
-                if (!parseValue(ꐚaddᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚaddᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "rhs";
-                if (!parseValue(ꐚaddᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP = RECORD_FIELDS;
+                if (!parseValue(ꐚaddᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                ATYP |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -723,7 +727,7 @@ function createStartRule(mode) {
                 parseInferValue(ꐚexpr.infer);
                 VALUES[APOS++] = "rhs";
                 parseInferValue(ꐚaddᱻ2.infer);
-                ATYP = RECORD_FIELDS;
+                ATYP |= RECORD_FIELDS;
             },
         },
         print: {
@@ -789,20 +793,14 @@ function createStartRule(mode) {
     const ꐚaddᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚaddᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚaddᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚaddᱻ3.infer();
-                seqType |= ATYP;
                 ꐚterm.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -849,14 +847,14 @@ function createStartRule(mode) {
     const ꐚsub = createRule(mode, {
         parse: {
             full: function RCD() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 VALUES[APOS++] = "type";
-                if (!parseValue(ꐚsubᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚsubᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚexpr)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "rhs";
-                if (!parseValue(ꐚsubᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP = RECORD_FIELDS;
+                if (!parseValue(ꐚsubᱻ2)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                ATYP |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -867,7 +865,7 @@ function createStartRule(mode) {
                 parseInferValue(ꐚexpr.infer);
                 VALUES[APOS++] = "rhs";
                 parseInferValue(ꐚsubᱻ2.infer);
-                ATYP = RECORD_FIELDS;
+                ATYP |= RECORD_FIELDS;
             },
         },
         print: {
@@ -933,20 +931,14 @@ function createStartRule(mode) {
     const ꐚsubᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚsubᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚsubᱻ3()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚterm()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚsubᱻ3.infer();
-                seqType |= ATYP;
                 ꐚterm.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1008,29 +1000,29 @@ function createStartRule(mode) {
     const ꐚmul = createRule(mode, {
         parse: {
             full: function RCD() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                if (!parseValue(ꐚmulᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                assert(ATYP === STRING_CHARS);
-                if (!parseValue(ꐚmulᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!parseValue(ꐚmulᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                assert(typeof VALUES[APOS - 1] === 'string');
+                if (!parseValue(ꐚmulᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                if (!parseValue(ꐚmulᱻ5)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                assert(ATYP === STRING_CHARS);
-                if (!parseValue(ꐚmulᱻ7)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP = RECORD_FIELDS;
+                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!parseValue(ꐚmulᱻ5)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                assert(typeof VALUES[APOS - 1] === 'string');
+                if (!parseValue(ꐚmulᱻ7)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                ATYP |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
                 const APOSₒ = APOS;
                 parseInferValue(ꐚmulᱻ1.infer);
-                assert(ATYP === STRING_CHARS);
+                assert(typeof VALUES[APOS - 1] === 'string');
                 parseInferValue(ꐚmulᱻ3.infer);
                 VALUES[APOS++] = "lhs";
                 parseInferValue(ꐚterm.infer);
                 parseInferValue(ꐚmulᱻ5.infer);
-                assert(ATYP === STRING_CHARS);
+                assert(typeof VALUES[APOS - 1] === 'string');
                 parseInferValue(ꐚmulᱻ7.infer);
-                ATYP = RECORD_FIELDS;
+                ATYP |= RECORD_FIELDS;
             },
         },
         print: {
@@ -1198,20 +1190,14 @@ function createStartRule(mode) {
     const ꐚmulᱻ7 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚmulᱻ8()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚmulᱻ8()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚmulᱻ8.infer();
-                seqType |= ATYP;
                 ꐚfactor.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1268,14 +1254,14 @@ function createStartRule(mode) {
     const ꐚdiv = createRule(mode, {
         parse: {
             full: function RCD() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 VALUES[APOS++] = "type";
-                if (!parseValue(ꐚdivᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚdivᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (!parseValue(ꐚterm)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 VALUES[APOS++] = "rhs";
-                if (!parseValue(ꐚdivᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP = RECORD_FIELDS;
+                if (!parseValue(ꐚdivᱻ3)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                ATYP |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
@@ -1286,7 +1272,7 @@ function createStartRule(mode) {
                 parseInferValue(ꐚterm.infer);
                 VALUES[APOS++] = "rhs";
                 parseInferValue(ꐚdivᱻ3.infer);
-                ATYP = RECORD_FIELDS;
+                ATYP |= RECORD_FIELDS;
             },
         },
         print: {
@@ -1366,20 +1352,14 @@ function createStartRule(mode) {
     const ꐚdivᱻ3 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚdivᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚdivᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactor()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚdivᱻ4.infer();
-                seqType |= ATYP;
                 ꐚfactor.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1538,24 +1518,16 @@ function createStartRule(mode) {
     const ꐚfactorᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ2()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactorᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfloat()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ2()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ4()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfloat()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfactorᱻ2.infer();
-                seqType |= ATYP;
                 ꐚfactorᱻ4.infer();
-                seqType |= ATYP;
                 ꐚfloat.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1580,10 +1552,10 @@ function createStartRule(mode) {
             full: function NOT() {
                 const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ3();
-                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = NOTHING;
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
                 return result;
             },
-            infer: () => (ATYP = NOTHING),
+            infer: () => {},
         },
         print: {
             full: function NOT() {
@@ -1636,10 +1608,10 @@ function createStartRule(mode) {
             full: function NOT() {
                 const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 const result = !ꐚfactorᱻ5();
-                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = NOTHING;
+                APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
                 return result;
             },
-            infer: () => (ATYP = NOTHING),
+            infer: () => {},
         },
         print: {
             full: function NOT() {
@@ -1690,20 +1662,14 @@ function createStartRule(mode) {
     const ꐚfactorᱻ6 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ7()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactorᱻ9()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ7()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ9()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfactorᱻ7.infer();
-                seqType |= ATYP;
                 ꐚfactorᱻ9.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1773,20 +1739,14 @@ function createStartRule(mode) {
     const ꐚfactorᱻ11 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ12()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactorᱻ14()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ12()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ14()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfactorᱻ12.infer();
-                seqType |= ATYP;
                 ꐚfactorᱻ14.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1856,20 +1816,14 @@ function createStartRule(mode) {
     const ꐚfactorᱻ16 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ17()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactorᱻ19()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ17()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ19()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfactorᱻ17.infer();
-                seqType |= ATYP;
                 ꐚfactorᱻ19.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -1937,24 +1891,16 @@ function createStartRule(mode) {
     const ꐚfactorᱻ21 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const APOSₒ = APOS, CPOSₒ = CPOS;
-                let seqType = ATYP = NOTHING;
-                if (!ꐚfactorᱻ22()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚexpr()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                seqType |= ATYP;
-                if (!ꐚfactorᱻ24()) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                ATYP |= seqType;
+                const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                if (!ꐚfactorᱻ22()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚexpr()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚfactorᱻ24()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
-                let seqType = ATYP = NOTHING;
                 ꐚfactorᱻ22.infer();
-                seqType |= ATYP;
                 ꐚexpr.infer();
-                seqType |= ATYP;
                 ꐚfactorᱻ24.infer();
-                ATYP |= seqType;
             },
         },
         print: {
@@ -2087,12 +2033,12 @@ function createStartRule(mode) {
         const ꐚLET = createRule(mode, {
             parse: {
                 full: () => {
-                    const APOSₒ = APOS;
+                    const APOSₒ = APOS, ATYPₒ = ATYP;
                     const result = ꐚexprᱻ3();
-                    APOS = APOSₒ, ATYP = NOTHING;
+                    APOS = APOSₒ, ATYP = ATYPₒ;
                     return result;
                 },
-                infer: () => (ATYP = NOTHING),
+                infer: () => {},
             },
             print: {
                 full: () => (ꐚexprᱻ3.infer(), true),
