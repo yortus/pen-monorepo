@@ -238,9 +238,9 @@ const extensions = {
 
 
 // ------------------------------ Program ------------------------------
-const parseStartRule = create('parse');
-const printStartRule = create('print');
-function create(mode) {
+const parseStartRule = createStartRule('parse');
+const printStartRule = createStartRule('print');
+function createStartRule(mode) {
 
     // Identifier
     const ꐚstartᱻ2 = Object.assign(

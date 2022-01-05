@@ -72,9 +72,9 @@ function emitProgram(emit: Emitter, ast: V.AST<400>) {
 
     // TODO: emit prolog...
     emit.down(5).text(`// ------------------------------ Program ------------------------------`);
-    emit.down(1).text(`const parseStartRule = create('parse');`);
-    emit.down(1).text(`const printStartRule = create('print');`);
-    emit.down(1).text(`function create(mode) {`).indent();
+    emit.down(1).text(`const parseStartRule = createStartRule('parse');`);
+    emit.down(1).text(`const printStartRule = createStartRule('print');`);
+    emit.down(1).text(`function createStartRule(mode) {`).indent();
 
     // TODO: emit top-level bindings
     emitBindings(emit, bindings);
