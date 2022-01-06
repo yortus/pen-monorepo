@@ -12,23 +12,23 @@ function intString(mode: 'parse' | 'print'): Func {
             parse: {
                 full: function ISTR() {
                     let num = 0;
-                    const APOSₒ = APOS, CPOSₒ = CPOS;
+                    const OPOSₒ = OPOS, IPOSₒ = IPOS;
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && CPOS < ILEN && CREP[CPOS] === HYPHEN) {
+                    if (signed && IPOS < ILEN && IREP[IPOS] === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
-                        CPOS += 1;
+                        IPOS += 1;
                     }
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let digits = 0;
-                    while (CPOS < ILEN) {
+                    while (IPOS < ILEN) {
 
                         // Read a digit.
-                        let c = CREP[CPOS];
+                        let c = IREP[IPOS] as number;
                         if (c >= 256) break;
                         const digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -38,27 +38,27 @@ function intString(mode: 'parse' | 'print'): Func {
                         num += digitValue;
 
                         // Check for overflow.
-                        if (num > MAX_NUM) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                        if (num > MAX_NUM) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
 
                         // Loop again.
-                        CPOS += 1;
+                        IPOS += 1;
                         digits += 1;
                     }
 
                     // Check that we parsed at least one digit.
-                    if (digits === 0) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                    if (digits === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
 
                     // Apply the sign.
                     if (isNegative) num = -num;
 
                     // Success
-                    AREP[APOS++] = num;
+                    OREP[OPOS++] = num;
                     ATYP |= SCALAR;
                     return true;
                 },
 
                 infer: function ISTR() {
-                    AREP[APOS++] = 0;
+                    OREP[OPOS++] = 0;
                     ATYP |= SCALAR;
                 },
             },
@@ -66,7 +66,7 @@ function intString(mode: 'parse' | 'print'): Func {
                 full: function ISTR() {
                     const digits = [] as number[];
                     if (ATYP !== SCALAR) return false;
-                    let num = AREP[APOS] as number;
+                    let num = IREP[IPOS] as number;
                     if (typeof num !== 'number') return false;
 
                     // Determine the number's sign and ensure it is in range.
@@ -89,17 +89,17 @@ function intString(mode: 'parse' | 'print'): Func {
                     }
 
                     // Compute the final string.
-                    APOS += 1;
+                    IPOS += 1;
                     if (isNegative) digits.push(HYPHEN);
 
                     // Success
                     for (let i = 0; i < digits.length; ++i) {
-                        CREP[CPOS++] = digits[i];
+                        OREP[OPOS++] = digits[i];
                     }
                     return true;
                 },
                 infer: function ISTR() {
-                    CREP[CPOS++] = CHAR_CODES[0];
+                    OREP[OPOS++] = CHAR_CODES[0];
                 },
             },
         });

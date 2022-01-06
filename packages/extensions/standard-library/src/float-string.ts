@@ -5,51 +5,51 @@ function floatString(mode: 'parse' | 'print'): Rule {
         parse: {
             full: function FSTR() {
                 let num = 0;
-                const APOSₒ = APOS, CPOSₒ = CPOS;
+                const OPOSₒ = OPOS, IPOSₒ = IPOS;
                 const EOS = 0;
                 let digitCount = 0;
 
                 // Parse optional '+' or '-' sign
-                let cc = CREP[CPOS];
+                let cc = IREP[IPOS] as number;
                 if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
-                    CPOS += 1;
-                    cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                    IPOS += 1;
+                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                 }
 
                 // Parse 0..M digits
                 while (true) {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
-                    CPOS += 1;
-                    cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                    IPOS += 1;
+                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                 }
 
                 // Parse optional '.'
                 if (cc === DECIMAL_POINT) {
-                    CPOS += 1;
-                    cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                    IPOS += 1;
+                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                 }
 
                 // Parse 0..M digits
                 while (true) {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
-                    CPOS += 1;
-                    cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                    IPOS += 1;
+                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                 }
 
                 // Ensure we have parsed at least one significant digit
-                if (digitCount === 0) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                if (digitCount === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
 
                 // Parse optional exponent
                 if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
-                    CPOS += 1;
-                    cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                    IPOS += 1;
+                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
 
                     // Parse optional '+' or '-' sign
                     if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
-                        CPOS += 1;
-                        cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                        IPOS += 1;
+                        cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                     }
 
                     // Parse 1..M digits
@@ -57,25 +57,25 @@ function floatString(mode: 'parse' | 'print'): Rule {
                     while (true) {
                         if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                         digitCount += 1;
-                        CPOS += 1;
-                        cc = CPOS < ILEN ? CREP[CPOS] : EOS;
+                        IPOS += 1;
+                        cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
                     }
-                    if (digitCount === 0) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                    if (digitCount === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
                 }
 
                 // There is a syntactically valid float. Delegate parsing to the JS runtime.
                 // Reject the number if it parses to Infinity or Nan.
                 // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                num = Number.parseFloat(CREP.toString('utf8', CPOSₒ, CPOS));
-                if (!Number.isFinite(num)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                num = Number.parseFloat((IREP as Buffer).toString('utf8', IPOSₒ, IPOS));
+                if (!Number.isFinite(num)) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
 
                 // Success
-                AREP[APOS++] = num;
+                OREP[OPOS++] = num;
                 ATYP |= SCALAR;
                 return true;
             },
             infer: function ISTR() {
-                AREP[APOS++] = 0;
+                OREP[OPOS++] = 0;
                 ATYP |= SCALAR;
             },
         },
@@ -84,20 +84,20 @@ function floatString(mode: 'parse' | 'print'): Rule {
                 let out = '0';
                 // Ensure N is a number.
                 if (ATYP !== SCALAR) return false;
-                let num = AREP[APOS] as number;
+                let num = IREP[IPOS] as number;
                 if (typeof num !== 'number') return false;
-                APOS += 1;
+                IPOS += 1;
 
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
                 out = String(num);
 
                 // Success
-                CPOS += CREP.write(out, CPOS, undefined, 'utf8');
+                OPOS += (OREP as Buffer).write(out, OPOS, undefined, 'utf8');
                 return true;
             },
             infer: function FSTR() {
-                CREP[CPOS++] = ZERO_DIGIT;
+                OREP[OPOS++] = ZERO_DIGIT;
             },
         },
     });

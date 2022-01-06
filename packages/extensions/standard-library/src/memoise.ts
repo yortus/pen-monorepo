@@ -16,31 +16,31 @@ function memoise(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function MEM() {
-                    const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
+                    const OPOSₒ = OPOS, IPOSₒ = IPOS, ATYPₒ = ATYP;
 
                     // Check whether the memo table already has an entry for the given initial state.
-                    let memos2 = memos.get(CREP);
+                    let memos2 = memos.get(IREP);
                     if (memos2 === undefined) {
                         memos2 = new Map();
-                        memos.set(CREP, memos2);
+                        memos.set(IREP, memos2);
                     }
-                    let memo = memos2.get(CPOS);
+                    let memo = memos2.get(IPOS);
                     if (!memo) {
                         // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                         // this initial state. The first thing we do is create a memo table entry, which is marked as
                         // *unresolved*. All future applications of this rule with the same initial state will find this
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
-                        memo = {resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: CPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING};
-                        memos2.set(CPOS, memo);
+                        memo = {resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: IPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING};
+                        memos2.set(IPOS, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                         // At this point, any left-recursive paths encountered during application are guaranteed to have
                         // been noted and aborted (see below).
                         if ((expr as Rule)()) { // TODO: fix cast
                             memo.result = true;
-                            memo.IPOSᐟ = CPOS;
-                            memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                            memo.IPOSᐟ = IPOS;
+                            memo.OREPᐞ = OREP.slice(OPOSₒ, OPOS);
                             memo.ATYPᐟ = ATYP;
                         }
                         memo.resolved = true;
@@ -60,17 +60,17 @@ function memoise(mode: 'parse' | 'print'): Func {
                         // does not consume more input, at which point we take the result of the previous iteration as
                         // final.
                         while (memo.result === true) {
-                            APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ;
+                            OPOS = OPOSₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
 
                             // TODO: break cases for UNPARSING:
                             // anything --> same thing (covers all string cases, since they can only be same or shorter)
                             // some node --> some different non-empty node (assert: should never happen!)
                             if (!(expr as Rule)()) break; // TODO: fix cast
-                            if (CPOS <= memo.IPOSᐟ) break;
+                            if (IPOS <= memo.IPOSᐟ) break;
                             // TODO: was for unparse... comment above says should never happen...
                             // if (!isInputFullyConsumed()) break;
-                            memo.IPOSᐟ = CPOS;
-                            memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
+                            memo.IPOSᐟ = IPOS;
+                            memo.OREPᐞ = OREP.slice(OPOSₒ, OPOS);
                             memo.ATYPᐟ = ATYP;
                         }
                     }
@@ -88,9 +88,9 @@ function memoise(mode: 'parse' | 'print'): Func {
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
                     ATYP = memo.ATYPᐟ;
-                    APOS = APOSₒ;
-                    CPOS = memo.IPOSᐟ;
-                    for (let i = 0; i < memo.OREPᐞ.length; ++i) AREP[APOS++] = memo.OREPᐞ[i];
+                    OPOS = OPOSₒ;
+                    IPOS = memo.IPOSᐟ;
+                    for (let i = 0; i < memo.OREPᐞ.length; ++i) OREP[OPOS++] = memo.OREPᐞ[i];
                     return memo.result;
                 },
                 infer: function MEM() {

@@ -17,25 +17,25 @@ function unicode(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function UNI() {
-                    const APOSₒ = APOS, CPOSₒ = CPOS;
+                    const OPOSₒ = OPOS, IPOSₒ = IPOS;
                     const EOS = '';
 
                     let len = 0;
                     let num = ''; // TODO: fix this - should actually keep count
-                    let c = CPOS < ILEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
+                    let c = IPOS < ILEN ? String.fromCharCode(IREP[IPOS] as number) : EOS; // TODO: convoluted - simplify whole method
                     while (true) {
                         if (!regex.test(c)) break;
                         num += c;
-                        CPOS += 1;
+                        IPOS += 1;
                         len += 1;
                         if (len === maxDigits) break;
-                        c = CPOS < ILEN ? String.fromCharCode(CREP[CPOS]) : EOS;
+                        c = IPOS < ILEN ? String.fromCharCode(IREP[IPOS] as number) : EOS;
                     }
 
-                    if (len < minDigits) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                    if (len < minDigits) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
                     // tslint:disable-next-line: no-eval
                     const buf = Buffer.from(eval(`"\\u{${num}}"`)); // TODO: hacky... fix when we have a charCode
-                    for (let i = 0; i < buf.length; ++i) AREP[APOS++] = buf[i];
+                    for (let i = 0; i < buf.length; ++i) OREP[OPOS++] = buf[i];
                     ATYP |= STRING_CHARS;
                     return true;
                 },
@@ -46,34 +46,31 @@ function unicode(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function UNI() {
-
-                    // TODO: respect VOID AREP/CREP...
-
-                    if (ATYP !== STRING_CHARS || APOS >= ILEN) return false;
-                    const APOSₒ = APOS, CPOSₒ = CPOS;
-                    const bytes = AREP as Buffer;
-                    let c = bytes[APOS++];
+                    if (ATYP !== STRING_CHARS || IPOS >= ILEN) return false;
+                    const IPOSₒ = IPOS, OPOSₒ = OPOS;
+                    const bytes = IREP as Buffer;
+                    let c = bytes[IPOS++];
                     if (c < 128) {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (APOS >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                        c = (c & 31) << 6 | bytes[APOS++] & 63;
+                        if (IPOS >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        c = (c & 31) << 6 | bytes[IPOS++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (APOS + 1 >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                        c = (c & 15) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
+                        if (IPOS + 1 >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        c = (c & 15) << 12 | (bytes[IPOS++] & 63) << 6 | bytes[IPOS++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (APOS + 2 >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
-                        c = (c & 7) << 18 | (bytes[APOS++] & 63) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
+                        if (IPOS + 2 >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        c = (c & 7) << 18 | (bytes[IPOS++] & 63) << 12 | (bytes[IPOS++] & 63) << 6 | bytes[IPOS++] & 63;
                     }
-                    else return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                    else return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
 
                     const s = c.toString(base).padStart(minDigits, '0');
                     if (s.length > maxDigits) return false;
-                    CREP.write(s, CPOS);
-                    CPOS += s.length;
+                    (OREP as Buffer).write(s, OPOS);
+                    OPOS += s.length;
                     return true;
                 },
                 infer: function UNI() {

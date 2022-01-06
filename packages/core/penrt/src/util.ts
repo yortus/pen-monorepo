@@ -63,20 +63,16 @@ interface Arrayish<T> {
 
 
 // VM REGISTERS - callee updates/restores
-let AREP: Arrayish<unknown>;
-let APOS: number = 0;
+let IREP: Arrayish<unknown>;
+let IPOS: number = 0;
+let ILEN = 0;
+let OREP: Arrayish<unknown>;
+let OPOS: number = 0;
 let ATYP: ATYP = 0; // NB: Parsers _must_ logical-OR this when returning true. Parsers _must not_ change this when returning false.
                     // NB: Printers _may_ check/validate this on entry. Printers _must_ return with the same value in ATYP.
 
-let CREP: Buffer = Buffer.alloc(1); //Arrayish<string>; // TODO: not working yet - changing back to `string` works for now
-let CPOS: number = 0;
-
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING_CHARS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
-
-// TODO: temp testing...
-let ILEN = 0;
-
 
 // Used internally by the VM
 const internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
@@ -87,102 +83,102 @@ const internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make
 // Top-level parse/print functions - these set up the VM for each parse/print run
 // TODO: doc: expects buf to be utf8 encoded
 function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
-    CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
-    CPOS = 0;
-    ILEN = CREP.length;
-    AREP = [];
-    APOS = 0;
+    IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
+    IPOS = 0;
+    ILEN = IREP.length;
+    OREP = [];
+    OPOS = 0;
     if (!parseValue(startRule)) throw new Error('parse failed');
-    if (CPOS !== ILEN) throw new Error('parse didn\\\'t consume entire input');
-    if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
-    return AREP[0];
+    if (IPOS !== ILEN) throw new Error('parse didn\\\'t consume entire input');
+    if (OPOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
+    return OREP[0];
 }
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
-    AREP = [value]; // TODO: we must use a new AREP array per print call, otherwise the MEMO rule has invalid cached memos across print calls. Fix!!
-    APOS = 0;
+    IREP = [value];
+    IPOS = 0;
     ILEN = 1;
-    CREP = buffer || Buffer.alloc(2 ** 22); // 4MB
-    CPOS = 0;
+    OREP = buffer || Buffer.alloc(2 ** 22); // 4MB
+    OPOS = 0;
     if (!printValue(startRule)) throw new Error('print failed');
-    if (CPOS > CREP.length) throw new Error('output buffer too small');
-    return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
+    if (OPOS > OREP.length) throw new Error('output buffer too small');
+    return buffer ? OPOS : (OREP as Buffer).toString('utf8', 0, OPOS);
 }
 
 
 
 
-// NB: for successful calls: APOS is incremented, AREP[APOS-1] contains the new value, ATYP is unchanged
+// NB: for successful calls: OPOS is incremented, OREP[OPOS-1] contains the new value, ATYP is unchanged
 function parseValue(rule: Rule): boolean {
-    const APOSₒ = APOS, ATYPₒ = ATYP;
+    const OPOSₒ = OPOS, ATYPₒ = ATYP;
     ATYP = NOTHING;
     if (!rule()) return ATYP = ATYPₒ, false;
-    if (ATYP === NOTHING) return APOS = APOSₒ, ATYP = ATYPₒ, false;
+    if (ATYP === NOTHING) return OPOS = OPOSₒ, ATYP = ATYPₒ, false;
 
     let value: unknown;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            assert(OPOS === OPOSₒ + 1);
+            value = OREP[OPOSₒ];
             break;
         case STRING_CHARS:
-            const len = APOS - APOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = AREP[APOSₒ + i] as number;
+            const len = OPOS - OPOSₒ;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = OREP.slice(OPOSₒ, OPOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
-            if (Object.keys(obj).length * 2 < (APOS - APOSₒ)) throw new Error(`Duplicate labels in record`);
+            for (let i = OPOSₒ; i < OPOS; i += 2) obj[OREP[i] as string] = OREP[i + 1];
+            if (Object.keys(obj).length * 2 < (OPOS - OPOSₒ)) throw new Error(`Duplicate labels in record`);
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
-    APOS = APOSₒ + 1;
+    OREP[OPOSₒ] = value;
+    OPOS = OPOSₒ + 1;
     ATYP = ATYPₒ;
     return true;
 }
 function parseInferValue(infer: () => void): void {
-    const APOSₒ = APOS, ATYPₒ = ATYP;
+    const OPOSₒ = OPOS, ATYPₒ = ATYP;
     ATYP = NOTHING;
     infer();
-    if (ATYP === NOTHING) return APOS = APOSₒ, ATYP = ATYPₒ, undefined;
+    if (ATYP === NOTHING) return OPOS = OPOSₒ, ATYP = ATYPₒ, undefined;
 
     let value: unknown;
     switch (ATYP) {
         case SCALAR:
-            assert(APOS === APOSₒ + 1);
-            value = AREP[APOSₒ];
+            assert(OPOS === OPOSₒ + 1);
+            value = OREP[OPOSₒ];
             break;
         case STRING_CHARS:
-            const len = APOS - APOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = AREP[APOSₒ + i] as number;
+            const len = OPOS - OPOSₒ;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = AREP.slice(APOSₒ, APOS);
+            value = OREP.slice(OPOSₒ, OPOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
+            for (let i = OPOSₒ; i < OPOS; i += 2) obj[OREP[i] as string] = OREP[i + 1];
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    AREP[APOSₒ] = value;
-    APOS = APOSₒ + 1;
+    OREP[OPOSₒ] = value;
+    OPOS = OPOSₒ + 1;
     ATYP = ATYPₒ;
 }
 
-// NB: for successful calls: APOS is incremented, AREP is unchanged, ATYP is unchanged
+// NB: for successful calls: IPOS is incremented, IREP is unchanged, ATYP is unchanged
 function printValue(rule: Rule): boolean {
-    const APOSₒ = APOS, AREPₒ = AREP, ILENₒ = ILEN, ATYPₒ = ATYP;
-    let value = AREP[APOS];
+    const IPOSₒ = IPOS, IREPₒ = IREP, ILENₒ = ILEN, ATYPₒ = ATYP;
+    let value = IREP[IPOS];
     let atyp: ATYP;
     let objKeys: string[] | undefined;
 
@@ -196,23 +192,23 @@ function printValue(rule: Rule): boolean {
         ILEN = 1, ATYP = SCALAR;
         const result = rule();
         ILEN = ILENₒ, ATYP = ATYPₒ;
-        assert(APOS === APOSₒ + 1);
+        assert(IPOS === IPOSₒ + 1);
         return result;
     }
 
     // Aggregate cases
     if (typeof value === 'string') {
-        AREP = internalBuffer;
+        IREP = internalBuffer;
         ILEN = internalBuffer.write(value, 0, undefined, 'utf8');
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
-        AREP = value;
+        IREP = value;
         ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
     else if (typeof value === 'object' && value !== null) {
-        const arr = AREP = [] as unknown[];
+        const arr = IREP = [] as unknown[];
         objKeys = Object.keys(value); // TODO: doc reliance on prop order and what this means
         assert(objKeys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
         for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], (value as any)[objKeys[i]]);
@@ -224,23 +220,23 @@ function printValue(rule: Rule): boolean {
     }
 
     // Do the thing
-    APOS = 0;
+    IPOS = 0;
     let result = rule();
 
-    // Restore AREP/APOS/ILEN/ATYP
-    const apos = APOS, ilen = ILEN;
-    AREP = AREPₒ, APOS = APOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
+    // Restore IREP/IPOS/ILEN/ATYP
+    const ipos = IPOS, ilen = ILEN;
+    IREP = IREPₒ, IPOS = IPOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed
     if (atyp === RECORD_FIELDS) {
         const keyCount = objKeys!.length;
-        if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
+        if (keyCount > 0 && (ipos !== -1 >>> (32 - keyCount))) return false;
     }
     else /* STRING_CHARS | LIST_ELEMENTS */ {
-        if (apos !== ilen) return false;
+        if (ipos !== ilen) return false;
     }
-    APOS += 1;
+    IPOS += 1;
     return true;
 }
 
