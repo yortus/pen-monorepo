@@ -165,7 +165,7 @@ function printValue(rule) {
         ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
-    else if (typeof value === 'object' && value !== null) {
+    else if (isObject(value)) {
         const arr = IREP = [];
         objKeys = Object.keys(value);
         assert(objKeys.length < 32);
@@ -204,6 +204,9 @@ function printInferValue(infer) {
 function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
+}
+function isObject(value) {
+    return value !== null && typeof value === 'object';
 }
 function lazy(init) {
     let f;

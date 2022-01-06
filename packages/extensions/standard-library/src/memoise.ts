@@ -16,7 +16,7 @@ function memoise(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function MEM() {
-                    const OPOSₒ = OPOS, IPOSₒ = IPOS, ATYPₒ = ATYP;
+                    const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
 
                     // Check whether the memo table already has an entry for the given initial state.
                     let memos2 = memos.get(IREP);
@@ -60,7 +60,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                         // does not consume more input, at which point we take the result of the previous iteration as
                         // final.
                         while (memo.result === true) {
-                            OPOS = OPOSₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
+                            IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
 
                             // TODO: break cases for UNPARSING:
                             // anything --> same thing (covers all string cases, since they can only be same or shorter)

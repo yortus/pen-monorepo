@@ -165,7 +165,7 @@ function printValue(rule) {
         ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
-    else if (typeof value === 'object' && value !== null) {
+    else if (isObject(value)) {
         const arr = IREP = [];
         objKeys = Object.keys(value);
         assert(objKeys.length < 32);
@@ -204,6 +204,9 @@ function printInferValue(infer) {
 function assert(value) {
     if (!value)
         throw new Error(`Assertion failed`);
+}
+function isObject(value) {
+    return value !== null && typeof value === 'object';
 }
 function lazy(init) {
     let f;
@@ -248,15 +251,15 @@ const extensions = {
             return createRule(mode, {
                 parse: {
                     full: function FSTR() {
-                        let num = 0;
-                        const OPOSₒ = OPOS, IPOSₒ = IPOS;
+                        const IPOSₒ = IPOS, OPOSₒ = OPOS;
+                        const irep = IREP; // IREP is always a Buffer when parsing
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
-                        let cc = IREP[IPOS];
+                        let cc = irep[IPOS];
                         if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
@@ -264,12 +267,12 @@ const extensions = {
                                 break;
                             digitCount += 1;
                             IPOS += 1;
-                            cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
                         }
                         // Parse optional '.'
                         if (cc === DECIMAL_POINT) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
@@ -277,19 +280,19 @@ const extensions = {
                                 break;
                             digitCount += 1;
                             IPOS += 1;
-                            cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
-                            return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                            return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         // Parse optional exponent
                         if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
                             // Parse optional '+' or '-' sign
                             if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                                 IPOS += 1;
-                                cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                                cc = IPOS < ILEN ? irep[IPOS] : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
@@ -298,17 +301,17 @@ const extensions = {
                                     break;
                                 digitCount += 1;
                                 IPOS += 1;
-                                cc = IPOS < ILEN ? IREP[IPOS] : EOS;
+                                cc = IPOS < ILEN ? irep[IPOS] : EOS;
                             }
                             if (digitCount === 0)
-                                return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                                return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         }
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                        num = Number.parseFloat(IREP.toString('utf8', IPOSₒ, IPOS));
+                        const num = Number.parseFloat(irep.toString('utf8', IPOSₒ, IPOS));
                         if (!Number.isFinite(num))
-                            return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                            return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         // Success
                         OREP[OPOS++] = num;
                         ATYP |= SCALAR;
@@ -325,7 +328,7 @@ const extensions = {
                         // Ensure N is a number.
                         if (ATYP !== SCALAR)
                             return false;
-                        let num = IREP[IPOS];
+                        const num = IREP[IPOS];
                         if (typeof num !== 'number')
                             return false;
                         IPOS += 1;
@@ -363,8 +366,8 @@ const extensions = {
                 return createRule(mode, {
                     parse: {
                         full: function ISTR() {
-                            let num = 0;
-                            const OPOSₒ = OPOS, IPOSₒ = IPOS;
+                            const IPOSₒ = IPOS, OPOSₒ = OPOS;
+                            const irep = IREP; // IREP is always a Buffer when parsing
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
@@ -374,10 +377,11 @@ const extensions = {
                                 IPOS += 1;
                             }
                             // ...followed by one or more decimal digits. (NB: no exponents).
+                            let num = 0;
                             let digits = 0;
                             while (IPOS < ILEN) {
                                 // Read a digit.
-                                let c = IREP[IPOS];
+                                let c = irep[IPOS];
                                 if (c >= 256)
                                     break;
                                 const digitValue = DIGIT_VALUES[c];
@@ -388,14 +392,14 @@ const extensions = {
                                 num += digitValue;
                                 // Check for overflow.
                                 if (num > MAX_NUM)
-                                    return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                                    return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                                 // Loop again.
                                 IPOS += 1;
                                 digits += 1;
                             }
                             // Check that we parsed at least one digit.
                             if (digits === 0)
-                                return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                                return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                             // Apply the sign.
                             if (isNegative)
                                 num = -num;
@@ -491,7 +495,7 @@ const extensions = {
                 return createRule(mode, {
                     parse: {
                         full: function MEM() {
-                            const OPOSₒ = OPOS, IPOSₒ = IPOS, ATYPₒ = ATYP;
+                            const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                             // Check whether the memo table already has an entry for the given initial state.
                             let memos2 = memos.get(IREP);
                             if (memos2 === undefined) {
@@ -531,7 +535,7 @@ const extensions = {
                                 // does not consume more input, at which point we take the result of the previous iteration as
                                 // final.
                                 while (memo.result === true) {
-                                    OPOS = OPOSₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
+                                    IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
                                     // TODO: break cases for UNPARSING:
                                     // anything --> same thing (covers all string cases, since they can only be same or shorter)
                                     // some node --> some different non-empty node (assert: should never happen!)

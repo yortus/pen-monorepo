@@ -4,16 +4,16 @@ function floatString(mode: 'parse' | 'print'): Rule {
     return createRule(mode, {
         parse: {
             full: function FSTR() {
-                let num = 0;
-                const OPOSₒ = OPOS, IPOSₒ = IPOS;
+                const IPOSₒ = IPOS, OPOSₒ = OPOS;
+                const irep = IREP as Buffer; // IREP is always a Buffer when parsing
                 const EOS = 0;
                 let digitCount = 0;
 
                 // Parse optional '+' or '-' sign
-                let cc = IREP[IPOS] as number;
+                let cc = irep[IPOS];
                 if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
                 }
 
                 // Parse 0..M digits
@@ -21,13 +21,13 @@ function floatString(mode: 'parse' | 'print'): Rule {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     IPOS += 1;
-                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
                 }
 
                 // Parse optional '.'
                 if (cc === DECIMAL_POINT) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
                 }
 
                 // Parse 0..M digits
@@ -35,21 +35,21 @@ function floatString(mode: 'parse' | 'print'): Rule {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     IPOS += 1;
-                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
                 }
 
                 // Ensure we have parsed at least one significant digit
-                if (digitCount === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                if (digitCount === 0) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
 
                 // Parse optional exponent
                 if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
 
                     // Parse optional '+' or '-' sign
                     if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                         IPOS += 1;
-                        cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                        cc = IPOS < ILEN ? irep[IPOS] : EOS;
                     }
 
                     // Parse 1..M digits
@@ -58,16 +58,16 @@ function floatString(mode: 'parse' | 'print'): Rule {
                         if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                         digitCount += 1;
                         IPOS += 1;
-                        cc = IPOS < ILEN ? IREP[IPOS] as number : EOS;
+                        cc = IPOS < ILEN ? irep[IPOS] : EOS;
                     }
-                    if (digitCount === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                    if (digitCount === 0) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                 }
 
                 // There is a syntactically valid float. Delegate parsing to the JS runtime.
                 // Reject the number if it parses to Infinity or Nan.
                 // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                num = Number.parseFloat((IREP as Buffer).toString('utf8', IPOSₒ, IPOS));
-                if (!Number.isFinite(num)) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                const num = Number.parseFloat(irep.toString('utf8', IPOSₒ, IPOS));
+                if (!Number.isFinite(num)) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
 
                 // Success
                 OREP[OPOS++] = num;
@@ -84,7 +84,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
                 let out = '0';
                 // Ensure N is a number.
                 if (ATYP !== SCALAR) return false;
-                let num = IREP[IPOS] as number;
+                const num = IREP[IPOS];
                 if (typeof num !== 'number') return false;
                 IPOS += 1;
 

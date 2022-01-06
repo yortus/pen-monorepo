@@ -122,14 +122,14 @@ function parseValue(rule: Rule): boolean {
             break;
         case STRING_CHARS:
             const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = (OREP as Buffer)[OPOSₒ + i];
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
             value = OREP.slice(OPOSₒ, OPOS);
             break;
         case RECORD_FIELDS:
-            const obj = value = {} as Record<string, unknown>;
+            const obj: Record<string, unknown> = value = {};
             for (let i = OPOSₒ; i < OPOS; i += 2) obj[OREP[i] as string] = OREP[i + 1];
             if (Object.keys(obj).length * 2 < (OPOS - OPOSₒ)) throw new Error(`Duplicate labels in record`);
             break;
@@ -156,14 +156,14 @@ function parseInferValue(infer: () => void): void {
             break;
         case STRING_CHARS:
             const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = (OREP as Buffer)[OPOSₒ + i];
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
             value = OREP.slice(OPOSₒ, OPOS);
             break;
         case RECORD_FIELDS:
-            const obj = value = {} as Record<string, unknown>;
+            const obj: Record<string, unknown> = value = {};
             for (let i = OPOSₒ; i < OPOS; i += 2) obj[OREP[i] as string] = OREP[i + 1];
             break;
         default:
@@ -207,11 +207,11 @@ function printValue(rule: Rule): boolean {
         ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
-    else if (typeof value === 'object' && value !== null) {
-        const arr = IREP = [] as unknown[];
+    else if (isObject(value)) {
+        const arr: unknown[] = IREP = [];
         objKeys = Object.keys(value); // TODO: doc reliance on prop order and what this means
         assert(objKeys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
-        for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], (value as any)[objKeys[i]]);
+        for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], value[objKeys[i]]);
         ILEN = arr.length;
         atyp = ATYP = RECORD_FIELDS;
     }
@@ -251,6 +251,10 @@ function printInferValue(infer: () => void): void {
 // TODO: doc... helper...
 function assert(value: unknown): asserts value {
     if (!value) throw new Error(`Assertion failed`);
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object';
 }
 
 function lazy(init: () => (arg: unknown) => unknown) {

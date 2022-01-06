@@ -11,8 +11,8 @@ function intString(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function ISTR() {
-                    let num = 0;
-                    const OPOSₒ = OPOS, IPOSₒ = IPOS;
+                    const IPOSₒ = IPOS, OPOSₒ = OPOS;
+                    const irep = IREP as Buffer; // IREP is always a Buffer when parsing
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
@@ -24,11 +24,12 @@ function intString(mode: 'parse' | 'print'): Func {
                     }
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
+                    let num = 0;
                     let digits = 0;
                     while (IPOS < ILEN) {
 
                         // Read a digit.
-                        let c = IREP[IPOS] as number;
+                        let c = irep[IPOS];
                         if (c >= 256) break;
                         const digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -38,7 +39,7 @@ function intString(mode: 'parse' | 'print'): Func {
                         num += digitValue;
 
                         // Check for overflow.
-                        if (num > MAX_NUM) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                        if (num > MAX_NUM) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
 
                         // Loop again.
                         IPOS += 1;
@@ -46,7 +47,7 @@ function intString(mode: 'parse' | 'print'): Func {
                     }
 
                     // Check that we parsed at least one digit.
-                    if (digits === 0) return OPOS = OPOSₒ, IPOS = IPOSₒ, false;
+                    if (digits === 0) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
 
                     // Apply the sign.
                     if (isNegative) num = -num;
@@ -64,7 +65,7 @@ function intString(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function ISTR() {
-                    const digits = [] as number[];
+                    const digits: number[] = [];
                     if (ATYP !== SCALAR) return false;
                     let num = IREP[IPOS] as number;
                     if (typeof num !== 'number') return false;
