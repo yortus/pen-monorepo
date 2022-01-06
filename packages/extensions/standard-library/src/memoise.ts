@@ -40,7 +40,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                         if ((expr as Rule)()) { // TODO: fix cast
                             memo.result = true;
                             memo.IPOSᐟ = CPOS;
-                            memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
+                            memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                             memo.ATYPᐟ = ATYP;
                         }
                         memo.resolved = true;
@@ -70,7 +70,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             // TODO: was for unparse... comment above says should never happen...
                             // if (!isInputFullyConsumed()) break;
                             memo.IPOSᐟ = CPOS;
-                            memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
+                            memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                             memo.ATYPᐟ = ATYP;
                         }
                     }
@@ -88,12 +88,9 @@ function memoise(mode: 'parse' | 'print'): Func {
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
                     ATYP = memo.ATYPᐟ;
-                    const arep = (ATYP === STRING_CHARS ? OCTETS : VALUES);
                     APOS = APOSₒ;
                     CPOS = memo.IPOSᐟ;
-                    for (let i = 0; i < memo.OREPᐞ.length; ++i) {
-                        arep[APOS++] = memo.OREPᐞ[i];
-                    }
+                    for (let i = 0; i < memo.OREPᐞ.length; ++i) AREP[APOS++] = memo.OREPᐞ[i];
                     return memo.result;
                 },
                 infer: function MEM() {

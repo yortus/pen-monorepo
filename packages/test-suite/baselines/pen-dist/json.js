@@ -42,11 +42,11 @@ let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
-const OCTETS = Buffer.alloc(2 ** 16);
-const VALUES = [];
+const internalBuffer = Buffer.alloc(2 ** 16);
 function parse(startRule, stringOrBuffer) {
     CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     CPOS = 0;
+    AREP = [];
     APOS = 0;
     if (!parseValue(startRule))
         throw new Error('parse failed');
@@ -54,7 +54,7 @@ function parse(startRule, stringOrBuffer) {
         throw new Error('parse didn\\\'t consume entire input');
     if (APOS !== 1)
         throw new Error('parse didn\\\'t produce a singular value');
-    return VALUES[0];
+    return AREP[0];
 }
 function print(startRule, value, buffer) {
     AREP = [value];
@@ -68,16 +68,16 @@ function print(startRule, value, buffer) {
     return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
 }
 function emitScalar(value) {
-    VALUES[APOS++] = value;
+    AREP[APOS++] = value;
     ATYP |= SCALAR;
 }
 function emitByte(value) {
-    OCTETS[APOS++] = value;
+    AREP[APOS++] = value;
     ATYP |= STRING_CHARS;
 }
 function emitBytes(...values) {
     for (let i = 0; i < values.length; ++i)
-        OCTETS[APOS++] = values[i];
+        AREP[APOS++] = values[i];
     ATYP |= STRING_CHARS;
 }
 function parseValue(rule) {
@@ -91,25 +91,28 @@ function parseValue(rule) {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = VALUES[APOSₒ];
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = OCTETS.toString('utf8', APOSₒ, APOS);
+            const len = APOS - APOSₒ;
+            for (let i = 0; i < len; ++i)
+                internalBuffer[i] = AREP[APOSₒ + i];
+            value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = VALUES.slice(APOSₒ, APOS);
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
             for (let i = APOSₒ; i < APOS; i += 2)
-                obj[VALUES[i]] = VALUES[i + 1];
+                obj[AREP[i]] = AREP[i + 1];
             if (Object.keys(obj).length * 2 < (APOS - APOSₒ))
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    VALUES[APOSₒ] = value;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     ATYP = ATYPₒ;
     return true;
@@ -124,23 +127,26 @@ function parseInferValue(infer) {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = VALUES[APOSₒ];
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = OCTETS.toString('utf8', APOSₒ, APOS);
+            const len = APOS - APOSₒ;
+            for (let i = 0; i < len; ++i)
+                internalBuffer[i] = AREP[APOSₒ + i];
+            value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = VALUES.slice(APOSₒ, APOS);
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
             for (let i = APOSₒ; i < APOS; i += 2)
-                obj[VALUES[i]] = VALUES[i + 1];
+                obj[AREP[i]] = AREP[i + 1];
             break;
         default:
             ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    VALUES[APOSₒ] = value;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     ATYP = ATYPₒ;
 }
@@ -159,7 +165,7 @@ function printValue(rule) {
         return result;
     }
     if (typeof value === 'string') {
-        AREP = OCTETS.slice(0, OCTETS.write(value, 0));
+        AREP = internalBuffer.slice(0, internalBuffer.write(value, 0));
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
@@ -511,7 +517,7 @@ const extensions = {
                                 if (expr()) { // TODO: fix cast
                                     memo.result = true;
                                     memo.IPOSᐟ = CPOS;
-                                    memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
+                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                                     memo.ATYPᐟ = ATYP;
                                 }
                                 memo.resolved = true;
@@ -540,7 +546,7 @@ const extensions = {
                                     // TODO: was for unparse... comment above says should never happen...
                                     // if (!isInputFullyConsumed()) break;
                                     memo.IPOSᐟ = CPOS;
-                                    memo.OREPᐞ = (ATYP === STRING_CHARS ? OCTETS : VALUES).slice(APOSₒ, APOS);
+                                    memo.OREPᐞ = AREP.slice(APOSₒ, APOS);
                                     memo.ATYPᐟ = ATYP;
                                 }
                             }
@@ -557,12 +563,10 @@ const extensions = {
                             // We have a resolved memo, so the result of the rule application for the given initial state has
                             // already been computed. Return it from the memo.
                             ATYP = memo.ATYPᐟ;
-                            const arep = (ATYP === STRING_CHARS ? OCTETS : VALUES);
                             APOS = APOSₒ;
                             CPOS = memo.IPOSᐟ;
-                            for (let i = 0; i < memo.OREPᐞ.length; ++i) {
-                                arep[APOS++] = memo.OREPᐞ[i];
-                            }
+                            for (let i = 0; i < memo.OREPᐞ.length; ++i)
+                                AREP[APOS++] = memo.OREPᐞ[i];
                             return memo.result;
                         },
                         infer: function MEM() {
@@ -1134,7 +1138,7 @@ function createStartRule(mode) {
             full: function RCD() {
                 const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 if (!parseValue(ꐚString)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 if (!parseValue(ꐚObjectᱻ4)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 ATYP |= RECORD_FIELDS;
                 return true;
@@ -1142,7 +1146,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const APOSₒ = APOS;
                 parseInferValue(ꐚString.infer);
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 parseInferValue(ꐚObjectᱻ4.infer);
                 ATYP |= RECORD_FIELDS;
             },
@@ -1232,7 +1236,7 @@ function createStartRule(mode) {
             full: function RCD() {
                 const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 if (!parseValue(ꐚObjectᱻ7)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 if (!parseValue(ꐚObjectᱻ8)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 ATYP |= RECORD_FIELDS;
                 return true;
@@ -1240,7 +1244,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const APOSₒ = APOS;
                 parseInferValue(ꐚObjectᱻ7.infer);
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 parseInferValue(ꐚObjectᱻ8.infer);
                 ATYP |= RECORD_FIELDS;
             },
@@ -1434,7 +1438,7 @@ function createStartRule(mode) {
             full: function RCD() {
                 const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                 if (!parseValue(ꐚString)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 if (!parseValue(ꐚPropertiesᱻ1)) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 if (!ꐚPropertiesᱻ2()) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
                 ATYP |= RECORD_FIELDS;
@@ -1443,7 +1447,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const APOSₒ = APOS;
                 parseInferValue(ꐚString.infer);
-                assert(typeof VALUES[APOS - 1] === 'string');
+                assert(typeof AREP[APOS - 1] === 'string');
                 parseInferValue(ꐚPropertiesᱻ1.infer);
                 ꐚPropertiesᱻ2.infer();
                 ATYP |= RECORD_FIELDS;

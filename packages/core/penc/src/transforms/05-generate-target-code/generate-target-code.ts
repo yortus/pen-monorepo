@@ -365,10 +365,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */ ''}
                                 ${typeof item.label === 'string' ? `
-                                    VALUES[APOS++] = ${JSON.stringify(item.label)};
+                                    AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
                                     if (!parseValue(${item.label.name})) return APOS = APOSₒ, CPOS = CPOSₒ, ATYP = ATYPₒ, false;
-                                    assert(typeof VALUES[APOS - 1] === 'string');
+                                    assert(typeof AREP[APOS - 1] === 'string');
                                 `}
 
                                 ${/* Parse field value */''}
@@ -386,10 +386,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */''}
                                 ${typeof item.label === 'string' ? `
-                                    VALUES[APOS++] = ${JSON.stringify(item.label)};
+                                AREP[APOS++] = ${JSON.stringify(item.label)};
                                 ` : `
                                     parseInferValue(${item.label.name}.infer);
-                                    assert(typeof VALUES[APOS - 1] === 'string');
+                                    assert(typeof AREP[APOS - 1] === 'string');
                                 `}
 
                                 ${/* Parse field value */ ''}

@@ -45,20 +45,7 @@ interface RuleImpls {
 
 
 // TODO: next:
-// [ ] move the generates module exports parse/print function definitions into utils here, or most of them
-
-// [ ] OCTETS is only used for parsing, and never changes (const array instance)
-//     - well almost.... print uses it internally to buffer chars but exposes only through AREP - see L#187 in printValue
-//     - print could have it's own private buffer instance for that purpose (ie not part of VM's exposed api)
-// [ ] VALUES is only used for parsing, and never changes (const array instance)
-// [ ] AREP is only used for printing, and changes as various AST nodes are read
-// ======= ideas for above =======
-// - use OCTETS in print as an exposed thing, same as for parse. Then can remove Arrayish interface
-// - rename VALUES to OUTVALS? SINK? PARSE_VALUES? OPARTS? PARSE_TARGETS? PARSED_ITEMS?
-// - rename AREP to INVALS? SOURCE? PRINT_VALUES? IPARTS? PRINT_SOURCE? ITEMS_TO_PRINT?
-// - rename CREP to ???
-// - rename OCTETS to ???
-
+// [ ] get rid of arrayish? Or use it more?
 // [ ] parseValue writes to VALUE, printValue reads from VALUE
 // [ ] restore LEN/CAP (capacity) checking
 // [ ]   printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
@@ -89,14 +76,8 @@ const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 
 
 
 
-
-// TODO: temp testing...
-// OCTETS: Buffer
-// VALUES: unknown[]
-// LABELS: string[], or alternatively:
-// FIELDS: Array<[string, unknown]>
-const OCTETS = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
-const VALUES: unknown[] = [];
+// Used internally by the VM
+const internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
 
 
 
@@ -106,11 +87,12 @@ const VALUES: unknown[] = [];
 function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
     CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     CPOS = 0;
+    AREP = [];
     APOS = 0;
     if (!parseValue(startRule)) throw new Error('parse failed');
     if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
     if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
-    return VALUES[0];
+    return AREP[0];
 }
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
     AREP = [value]; // TODO: we must use a new AREP array per print call, otherwise the MEMO rule has invalid cached memos across print calls. Fix!!
@@ -127,15 +109,15 @@ function print(startRule: Rule, value: unknown, buffer?: Buffer) {
 
 // These are only used in parsing, not printing
 function emitScalar(value: number | boolean | null) {
-    VALUES[APOS++] = value;
+    AREP[APOS++] = value;
     ATYP |= SCALAR;
 }
 function emitByte(value: number) {
-    OCTETS[APOS++] = value;
+    AREP[APOS++] = value;
     ATYP |= STRING_CHARS;
 }
 function emitBytes(...values: number[]) {
-    for (let i = 0; i < values.length; ++i) OCTETS[APOS++] = values[i];
+    for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
     ATYP |= STRING_CHARS;
 }
 
@@ -151,24 +133,26 @@ function parseValue(rule: Rule): boolean {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = VALUES[APOSₒ];
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = OCTETS.toString('utf8', APOSₒ, APOS);
+            const len = APOS - APOSₒ;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = AREP[APOSₒ + i] as number;
+            value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = VALUES.slice(APOSₒ, APOS);
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[VALUES[i] as string] = VALUES[i + 1];
+            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
             if (Object.keys(obj).length * 2 < (APOS - APOSₒ)) throw new Error(`Duplicate labels in record`);
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    VALUES[APOSₒ] = value;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     ATYP = ATYPₒ;
     return true;
@@ -183,23 +167,25 @@ function parseInferValue(infer: () => void): void {
     switch (ATYP) {
         case SCALAR:
             assert(APOS === APOSₒ + 1);
-            value = VALUES[APOSₒ];
+            value = AREP[APOSₒ];
             break;
         case STRING_CHARS:
-            value = OCTETS.toString('utf8', APOSₒ, APOS);
+            const len = APOS - APOSₒ;
+            for (let i = 0; i < len; ++i) internalBuffer[i] = AREP[APOSₒ + i] as number;
+            value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = VALUES.slice(APOSₒ, APOS);
+            value = AREP.slice(APOSₒ, APOS);
             break;
         case RECORD_FIELDS:
             const obj = value = {} as Record<string, unknown>;
-            for (let i = APOSₒ; i < APOS; i += 2) obj[VALUES[i] as string] = VALUES[i + 1];
+            for (let i = APOSₒ; i < APOS; i += 2) obj[AREP[i] as string] = AREP[i + 1];
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
             ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
     }
-    VALUES[APOSₒ] = value;
+    AREP[APOSₒ] = value;
     APOS = APOSₒ + 1;
     ATYP = ATYPₒ;
 }
@@ -226,7 +212,7 @@ function printValue(rule: Rule): boolean {
 
     // Aggregate cases
     if (typeof value === 'string') {
-        AREP = OCTETS.slice(0, OCTETS.write(value, 0));
+        AREP = internalBuffer.slice(0, internalBuffer.write(value, 0));
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
