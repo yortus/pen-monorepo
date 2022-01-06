@@ -67,19 +67,6 @@ function print(startRule, value, buffer) {
         throw new Error('output buffer too small');
     return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
 }
-function emitScalar(value) {
-    AREP[APOS++] = value;
-    ATYP |= SCALAR;
-}
-function emitByte(value) {
-    AREP[APOS++] = value;
-    ATYP |= STRING_CHARS;
-}
-function emitBytes(...values) {
-    for (let i = 0; i < values.length; ++i)
-        AREP[APOS++] = values[i];
-    ATYP |= STRING_CHARS;
-}
 function parseValue(rule) {
     const APOSₒ = APOS, ATYPₒ = ATYP;
     ATYP = NOTHING;
@@ -318,11 +305,13 @@ const extensions = {
                         if (!Number.isFinite(num))
                             return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         // Success
-                        emitScalar(num);
+                        AREP[APOS++] = num;
+                        ATYP |= SCALAR;
                         return true;
                     },
                     infer: function ISTR() {
-                        emitScalar(0);
+                        AREP[APOS++] = 0;
+                        ATYP |= SCALAR;
                     },
                 },
                 print: {
@@ -406,11 +395,13 @@ const extensions = {
                             if (isNegative)
                                 num = -num;
                             // Success
-                            emitScalar(num);
+                            AREP[APOS++] = num;
+                            ATYP |= SCALAR;
                             return true;
                         },
                         infer: function ISTR() {
-                            emitScalar(0);
+                            AREP[APOS++] = 0;
+                            ATYP |= SCALAR;
                         },
                     },
                     print: {
@@ -701,7 +692,10 @@ const extensions = {
                             if (len < minDigits)
                                 return APOS = APOSₒ, CPOS = CPOSₒ, false;
                             // tslint:disable-next-line: no-eval
-                            emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
+                            const buf = Buffer.from(eval(`"\\u{${num}}"`)); // TODO: hacky... fix when we have a charCode
+                            for (let i = 0; i < buf.length; ++i)
+                                AREP[APOS++] = buf[i];
+                            ATYP |= STRING_CHARS;
                             return true;
                         },
                         infer: function UNI() {
@@ -887,8 +881,15 @@ function createStartRule(mode) {
     // BooleanLiteral
     const ꐚFalseᱻ2 = createRule(mode, {
         parse: {
-            full: () => (emitScalar(false), true),
-            infer: () => emitScalar(false),
+            full: () => {
+                AREP[APOS++] = false;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = false;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -966,8 +967,15 @@ function createStartRule(mode) {
     // NullLiteral
     const ꐚNullᱻ2 = createRule(mode, {
         parse: {
-            full: () => (emitScalar(null), true),
-            infer: () => emitScalar(null),
+            full: () => {
+                AREP[APOS++] = null;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = null;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -1045,8 +1053,15 @@ function createStartRule(mode) {
     // BooleanLiteral
     const ꐚTrueᱻ2 = createRule(mode, {
         parse: {
-            full: () => (emitScalar(true), true),
-            infer: () => emitScalar(true),
+            full: () => {
+                AREP[APOS++] = true;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = true;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -2019,8 +2034,15 @@ function createStartRule(mode) {
     // NumericLiteral
     const ꐚbase = createRule(mode, {
         parse: {
-            full: () => (emitScalar(16), true),
-            infer: () => emitScalar(16),
+            full: () => {
+                AREP[APOS++] = 16;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = 16;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -2037,8 +2059,15 @@ function createStartRule(mode) {
     // NumericLiteral
     const ꐚminDigits = createRule(mode, {
         parse: {
-            full: () => (emitScalar(4), true),
-            infer: () => emitScalar(4),
+            full: () => {
+                AREP[APOS++] = 4;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = 4;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -2055,8 +2084,15 @@ function createStartRule(mode) {
     // NumericLiteral
     const ꐚmaxDigits = createRule(mode, {
         parse: {
-            full: () => (emitScalar(4), true),
-            infer: () => emitScalar(4),
+            full: () => {
+                AREP[APOS++] = 4;
+                ATYP |= SCALAR;
+                return true;
+            },
+            infer: () => {
+                AREP[APOS++] = 4;
+                ATYP != SCALAR;
+            },
         },
         print: {
             full: function LIT() {
@@ -2093,11 +2129,13 @@ function createStartRule(mode) {
                 if (cc === 0x22) return false;
                 if ((cc < 0x20 || cc > 0x7f)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x20);
+                AREP[APOS++] = 0x20;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2156,11 +2194,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0xc0 || cc > 0xdf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0xc0);
+                AREP[APOS++] = 0xc0;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2189,11 +2229,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2254,11 +2296,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0xe0 || cc > 0xef)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0xe0);
+                AREP[APOS++] = 0xe0;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2287,11 +2331,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2320,11 +2366,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2389,11 +2437,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0xf0 || cc > 0xf7)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0xf0);
+                AREP[APOS++] = 0xf0;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2422,11 +2472,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2455,11 +2507,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2488,11 +2542,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x80);
+                AREP[APOS++] = 0x80;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2573,11 +2629,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x22;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x22);
+                AREP[APOS++] = 0x22;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2655,11 +2713,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x5c;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x5c);
+                AREP[APOS++] = 0x5c;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2737,11 +2797,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x2f;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x2f);
+                AREP[APOS++] = 0x2f;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2819,11 +2881,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x08;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x08);
+                AREP[APOS++] = 0x08;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2901,11 +2965,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x0c;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x0c);
+                AREP[APOS++] = 0x0c;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -2983,11 +3049,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x0a;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x0a);
+                AREP[APOS++] = 0x0a;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -3065,11 +3133,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x0d;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x0d);
+                AREP[APOS++] = 0x0d;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -3147,11 +3217,13 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x09;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x09);
+                AREP[APOS++] = 0x09;
+                ATYP |= STRING_CHARS
             },
         },
         print: {

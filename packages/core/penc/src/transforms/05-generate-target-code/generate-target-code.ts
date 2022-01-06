@@ -174,8 +174,15 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
         case 'NumericLiteral': {
             emit.lines(`
                 parse: {
-                    full: () => (emitScalar(${JSON.stringify(expr.value)}), true),
-                    infer: () => emitScalar(${JSON.stringify(expr.value)}),
+                    full: () => {
+                        AREP[APOS++] = ${JSON.stringify(expr.value)};
+                        ATYP |= SCALAR;
+                        return true;
+                    },
+                    infer: () => {
+                        AREP[APOS++] = ${JSON.stringify(expr.value)};
+                        ATYP != SCALAR;
+                    },
                 },
                 print: {
                     full: function LIT() {
@@ -196,6 +203,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 const hasInput = mode === 'parse' ? expr.subkind !== 'A' : mode === 'print' ? expr.subkind !== 'C' : false;
                 const hasOutput = mode === 'parse' ? expr.subkind !== 'C' : mode === 'print' ? expr.subkind !== 'A' : true;
                 const [IREP, IPOS] = mode === 'parse' ? ['CREP', 'CPOS'] : ['AREP', 'APOS'];
+                const [OREP, OPOS] = mode === 'parse' ? ['AREP', 'APOS'] : ['CREP', 'CPOS'];
                 emit.down(1).text(`${mode}: {`).indent();
                 emit.down(1).text(`full: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
@@ -224,7 +232,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     emit.down(1).text(`cc = 0x${expr.default.toString(16).padStart(2, '0')};`);
                 }
                 if (hasOutput) {
-                    emit.down(1).text(mode === 'parse' ? `emitByte(cc);` : `CREP[CPOS++] = cc;`);
+                    emit.down(1).text(`${OREP}[${OPOS}++] = cc;`);
+                    if (mode === 'parse') emit.down(1).text(`ATYP |= STRING_CHARS`);
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text(`},`);
@@ -233,9 +242,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 }
                 else {
                     emit.down(1).text(`infer: () => {`).indent();
-                    const pre = mode === 'parse' ? 'emitByte(' : 'CREP[CPOS++] = ';
-                    const post = mode === 'parse' ? ');' : ';';
-                    emit.down(1).text(`${pre}0x${expr.default.toString(16).padStart(2, '0')}${post}`);
+                    emit.down(1).text(`${OREP}[${OPOS}++] = 0x${expr.default.toString(16).padStart(2, '0')};`);
+                    if (mode === 'parse') emit.down(1).text(`ATYP |= STRING_CHARS`);
                     emit.dedent().down(1).text('},');
                 }
                 emit.dedent().down(1).text('},');
@@ -513,10 +521,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 }
                 if (hasOutput) {
                     if (mode === 'parse') {
-                        emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
+                        for (const byte of bytes) emit.down(1).text(`AREP[APOS++] = ${byte};`);
+                        emit.down(1).text(`ATYP |= STRING_CHARS;`);
                     }
                     else {
-                        for (let i = 0; i < bytes.length; ++i) emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                        for (const byte of bytes) emit.down(1).text(`CREP[CPOS++] = ${byte};`);
                     }
                 }
                 emit.down(1).text(`return true;`);
@@ -524,10 +533,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`infer: function STR() {`).indent();
                 if (hasOutput) {
                     if (mode === 'parse') {
-                        emit.down(1).text(bytes.length === 1 ? `emitByte(${bytes[0]});` : `emitBytes(${bytes.join(', ')});`);
+                        for (const byte of bytes) emit.down(1).text(`AREP[APOS++] = ${byte};`);
+                        emit.down(1).text(`ATYP |= STRING_CHARS;`);
                     }
                     else {
-                        for (let i = 0; i < bytes.length; ++i) emit.down(1).text(`CREP[CPOS++] = ${bytes[i]};`);
+                        for (const byte of bytes) emit.down(1).text(`CREP[CPOS++] = ${byte};`);
                     }
                 }
                 emit.dedent().down(1).text('},');

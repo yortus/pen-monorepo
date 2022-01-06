@@ -35,7 +35,9 @@ function unicode(mode: 'parse' | 'print'): Func {
 
                     if (len < minDigits) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                     // tslint:disable-next-line: no-eval
-                    emitBytes(...Buffer.from(eval(`"\\u{${num}}"`)).values()); // TODO: hacky... fix when we have a charCode
+                    const buf = Buffer.from(eval(`"\\u{${num}}"`)); // TODO: hacky... fix when we have a charCode
+                    for (let i = 0; i < buf.length; ++i) AREP[APOS++] = buf[i];
+                    ATYP |= STRING_CHARS;
                     return true;
                 },
                 infer: function UNI() {

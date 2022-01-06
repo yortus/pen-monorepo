@@ -52,12 +52,14 @@ function intString(mode: 'parse' | 'print'): Func {
                     if (isNegative) num = -num;
 
                     // Success
-                    emitScalar(num);
+                    AREP[APOS++] = num;
+                    ATYP |= SCALAR;
                     return true;
                 },
 
                 infer: function ISTR() {
-                    emitScalar(0);
+                    AREP[APOS++] = 0;
+                    ATYP |= SCALAR;
                 },
             },
             print: {

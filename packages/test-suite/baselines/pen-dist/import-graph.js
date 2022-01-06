@@ -67,19 +67,6 @@ function print(startRule, value, buffer) {
         throw new Error('output buffer too small');
     return buffer ? CPOS : CREP.toString('utf8', 0, CPOS);
 }
-function emitScalar(value) {
-    AREP[APOS++] = value;
-    ATYP |= SCALAR;
-}
-function emitByte(value) {
-    AREP[APOS++] = value;
-    ATYP |= STRING_CHARS;
-}
-function emitBytes(...values) {
-    for (let i = 0; i < values.length; ++i)
-        AREP[APOS++] = values[i];
-    ATYP |= STRING_CHARS;
-}
 function parseValue(rule) {
     const APOSₒ = APOS, ATYPₒ = ATYP;
     ATYP = NOTHING;
@@ -285,11 +272,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x30 || cc > 0x39)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x30);
+                AREP[APOS++] = 0x30;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -318,11 +307,13 @@ function createStartRule(mode) {
                 cc = CREP[CPOS];
                 if ((cc < 0x61 || cc > 0x7a) && (cc < 0x41 || cc > 0x5a)) return false;
                 CPOS += 1;
-                emitByte(cc);
+                AREP[APOS++] = cc;
+                ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                emitByte(0x61);
+                AREP[APOS++] = 0x61;
+                ATYP |= STRING_CHARS
             },
         },
         print: {
@@ -498,11 +489,25 @@ function createStartRule(mode) {
     const ꐚb = createRule(mode, {
         parse: {
             full: function STR() {
-                emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x20;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x68;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6e;
+                AREP[APOS++] = 0x67;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x62, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x20;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x68;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6e;
+                AREP[APOS++] = 0x67;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -529,11 +534,25 @@ function createStartRule(mode) {
     const ꐚd = createRule(mode, {
         parse: {
             full: function STR() {
-                emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+                AREP[APOS++] = 0x64;
+                AREP[APOS++] = 0x20;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x68;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6e;
+                AREP[APOS++] = 0x67;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x64, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67);
+                AREP[APOS++] = 0x64;
+                AREP[APOS++] = 0x20;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x68;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6e;
+                AREP[APOS++] = 0x67;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -604,11 +623,17 @@ function createStartRule(mode) {
                 if (CREP[CPOS + 1] !== 0x6f) return false;
                 if (CREP[CPOS + 2] !== 0x6f) return false;
                 CPOS += 3;
-                emitBytes(0x66, 0x6f, 0x6f);
+                AREP[APOS++] = 0x66;
+                AREP[APOS++] = 0x6f;
+                AREP[APOS++] = 0x6f;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x66, 0x6f, 0x6f);
+                AREP[APOS++] = 0x66;
+                AREP[APOS++] = 0x6f;
+                AREP[APOS++] = 0x6f;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -642,11 +667,17 @@ function createStartRule(mode) {
                 if (CREP[CPOS + 1] !== 0x61) return false;
                 if (CREP[CPOS + 2] !== 0x72) return false;
                 CPOS += 3;
-                emitBytes(0x62, 0x61, 0x72);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x61;
+                AREP[APOS++] = 0x72;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x62, 0x61, 0x72);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x61;
+                AREP[APOS++] = 0x72;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -680,11 +711,17 @@ function createStartRule(mode) {
                 if (CREP[CPOS + 1] !== 0x61) return false;
                 if (CREP[CPOS + 2] !== 0x7a) return false;
                 CPOS += 3;
-                emitBytes(0x62, 0x61, 0x7a);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x61;
+                AREP[APOS++] = 0x7a;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x62, 0x61, 0x7a);
+                AREP[APOS++] = 0x62;
+                AREP[APOS++] = 0x61;
+                AREP[APOS++] = 0x7a;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -787,11 +824,21 @@ function createStartRule(mode) {
     const ꐚutil1ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
+                AREP[APOS++] = 0x75;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6c;
+                AREP[APOS++] = 0x31;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x75, 0x74, 0x69, 0x6c, 0x31);
+                AREP[APOS++] = 0x75;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6c;
+                AREP[APOS++] = 0x31;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {
@@ -824,11 +871,21 @@ function createStartRule(mode) {
     const ꐚutil2ᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
+                AREP[APOS++] = 0x75;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6c;
+                AREP[APOS++] = 0x32;
+                ATYP |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                emitBytes(0x75, 0x74, 0x69, 0x6c, 0x32);
+                AREP[APOS++] = 0x75;
+                AREP[APOS++] = 0x74;
+                AREP[APOS++] = 0x69;
+                AREP[APOS++] = 0x6c;
+                AREP[APOS++] = 0x32;
+                ATYP |= STRING_CHARS;
             },
         },
         print: {

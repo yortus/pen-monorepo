@@ -71,11 +71,13 @@ function floatString(mode: 'parse' | 'print'): Rule {
                 if (!Number.isFinite(num)) return APOS = APOSₒ, CPOS = CPOSₒ, false;
 
                 // Success
-                emitScalar(num);
+                AREP[APOS++] = num;
+                ATYP |= SCALAR;
                 return true;
             },
             infer: function ISTR() {
-                emitScalar(0);
+                AREP[APOS++] = 0;
+                ATYP |= SCALAR;
             },
         },
         print: {

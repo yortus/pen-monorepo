@@ -107,21 +107,6 @@ function print(startRule: Rule, value: unknown, buffer?: Buffer) {
 
 
 
-// These are only used in parsing, not printing
-function emitScalar(value: number | boolean | null) {
-    AREP[APOS++] = value;
-    ATYP |= SCALAR;
-}
-function emitByte(value: number) {
-    AREP[APOS++] = value;
-    ATYP |= STRING_CHARS;
-}
-function emitBytes(...values: number[]) {
-    for (let i = 0; i < values.length; ++i) AREP[APOS++] = values[i];
-    ATYP |= STRING_CHARS;
-}
-
-
 // NB: for successful calls: APOS is incremented, AREP[APOS-1] contains the new value, ATYP is unchanged
 function parseValue(rule: Rule): boolean {
     const APOSₒ = APOS, ATYPₒ = ATYP;
