@@ -17,7 +17,7 @@ function intString(mode: 'parse' | 'print'): Func {
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && CPOS < CREP.length && CREP[CPOS] === HYPHEN) {
+                    if (signed && CPOS < ILEN && CREP[CPOS] === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
                         CPOS += 1;
@@ -25,7 +25,7 @@ function intString(mode: 'parse' | 'print'): Func {
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let digits = 0;
-                    while (CPOS < CREP.length) {
+                    while (CPOS < ILEN) {
 
                         // Read a digit.
                         let c = CREP[CPOS];

@@ -74,6 +74,8 @@ let CPOS: number = 0;
 type ATYP = typeof NOTHING | typeof SCALAR | typeof STRING_CHARS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
 
+// TODO: temp testing...
+let ILEN = 0;
 
 
 // Used internally by the VM
@@ -87,16 +89,18 @@ const internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make
 function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
     CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     CPOS = 0;
+    ILEN = CREP.length;
     AREP = [];
     APOS = 0;
     if (!parseValue(startRule)) throw new Error('parse failed');
-    if (CPOS !== CREP.length) throw new Error('parse didn\\\'t consume entire input');
+    if (CPOS !== ILEN) throw new Error('parse didn\\\'t consume entire input');
     if (APOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
     return AREP[0];
 }
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
     AREP = [value]; // TODO: we must use a new AREP array per print call, otherwise the MEMO rule has invalid cached memos across print calls. Fix!!
     APOS = 0;
+    ILEN = 1;
     CREP = buffer || Buffer.alloc(2 ** 22); // 4MB
     CPOS = 0;
     if (!printValue(startRule)) throw new Error('print failed');
@@ -177,9 +181,10 @@ function parseInferValue(infer: () => void): void {
 
 // NB: for successful calls: APOS is incremented, AREP is unchanged, ATYP is unchanged
 function printValue(rule: Rule): boolean {
-    const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
+    const APOSₒ = APOS, AREPₒ = AREP, ILENₒ = ILEN, ATYPₒ = ATYP;
     let value = AREP[APOS];
     let atyp: ATYP;
+    let objKeys: string[] | undefined;
 
     // Nothing case
     if (value === undefined) {
@@ -188,28 +193,30 @@ function printValue(rule: Rule): boolean {
 
     // Scalar case
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ATYP = SCALAR;
+        ILEN = 1, ATYP = SCALAR;
         const result = rule();
-        ATYP = ATYPₒ;
+        ILEN = ILENₒ, ATYP = ATYPₒ;
         assert(APOS === APOSₒ + 1);
         return result;
     }
 
     // Aggregate cases
     if (typeof value === 'string') {
-        AREP = internalBuffer.slice(0, internalBuffer.write(value, 0));
+        AREP = internalBuffer;
+        ILEN = internalBuffer.write(value, 0, undefined, 'utf8');
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         AREP = value;
+        ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
-    else if (typeof value === 'object') {
-        const arr = AREP = [] as unknown[];        
-        const keys = Object.keys(value!); // TODO: doc reliance on prop order and what this means
-        assert(keys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
-        for (let i = 0; i < keys.length; ++i) arr.push(keys[i], (value as any)[keys[i]]);
-        value = arr;
+    else if (typeof value === 'object' && value !== null) {
+        const arr = AREP = [] as unknown[];
+        objKeys = Object.keys(value); // TODO: doc reliance on prop order and what this means
+        assert(objKeys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
+        for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], (value as any)[objKeys[i]]);
+        ILEN = arr.length;
         atyp = ATYP = RECORD_FIELDS;
     }
     else {
@@ -220,18 +227,18 @@ function printValue(rule: Rule): boolean {
     APOS = 0;
     let result = rule();
 
-    // Restore AREP/APOS/ATYP
-    const arep = AREP, apos = APOS;
-    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    // Restore AREP/APOS/ILEN/ATYP
+    const apos = APOS, ilen = ILEN;
+    AREP = AREPₒ, APOS = APOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed
     if (atyp === RECORD_FIELDS) {
-        const keyCount = (value as any).length >> 1;
+        const keyCount = objKeys!.length;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount))) return false;
     }
     else /* STRING_CHARS | LIST_ELEMENTS */ {
-        if (apos !== arep.length) return false;
+        if (apos !== ilen) return false;
     }
     APOS += 1;
     return true;

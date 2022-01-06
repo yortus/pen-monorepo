@@ -209,7 +209,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
                     if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING_CHARS) return false;`);
-                    emit.down(1).text(`if (${IPOS} >= ${IREP}.length) return false;`);
+                    emit.down(1).text(`if (${IPOS} >= ILEN) return false;`);
                     emit.down(1).text(`cc = ${IREP}[${IPOS}];`);
                     for (const excl of expr.exclude || []) {
                         const [lo, hi, isRange] = Array.isArray(excl) ? [...excl, true] : [excl, -1, false];
@@ -414,7 +414,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         if (ATYP !== RECORD_FIELDS) return false;
                         const APOSₒ = APOS, CPOSₒ = CPOS, ATYPₒ = ATYP;
                         const propList = AREP;
-                        const propCount = AREP.length >> 1;
+                        const propCount = ILEN >> 1;
                         let bitmask = APOS;
                         let i;
                         ${expr.items.map(item => `
@@ -513,7 +513,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`full: function STR() {`).indent();
                 if (hasInput) {
                     if (mode === 'print') emit.down(1).text(`if (ATYP !== STRING_CHARS) return false;`);
-                    emit.down(1).text(`if (${IPOS} + ${bytes.length} > ${IREP}.length) return false;`);
+                    emit.down(1).text(`if (${IPOS} + ${bytes.length} > ILEN) return false;`);
                     for (let i = 0; i < bytes.length; ++i) {
                         emit.down(1).text(`if (${IREP}[${IPOS} + ${i}] !== ${bytes[i]}) return false;`);
                     }

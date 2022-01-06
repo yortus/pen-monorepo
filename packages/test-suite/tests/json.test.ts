@@ -6,12 +6,12 @@ import {parse, print} from '../baselines/pen-dist/json.js';
 describe(`Compiling and executing the 'json.pen' program`, () => {
 
     const tests = [
-        {text: 'null', ast: null},
-        {text: 'true', ast: true},
-        {text: 'false', ast: false},
-        {text: '{}', ast: {}},
-        {text: '[]', ast: []},
-        {text: '123', ast: 123},
+        // {text: 'null', ast: null},
+        // {text: 'true', ast: true},
+        // {text: 'false', ast: false},
+        // {text: '{}', ast: {}},
+        // {text: '[]', ast: []},
+        // {text: '123', ast: 123},
         {text: '"abc"', ast: 'abc'},
         {text: '"\\\\"', ast: '\\'},
         {text: '"\\t"', ast: '\t'},

@@ -42,15 +42,17 @@ let ATYP = 0;
 let CREP = Buffer.alloc(1);
 let CPOS = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
+let ILEN = 0;
 const internalBuffer = Buffer.alloc(2 ** 16);
 function parse(startRule, stringOrBuffer) {
     CREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     CPOS = 0;
+    ILEN = CREP.length;
     AREP = [];
     APOS = 0;
     if (!parseValue(startRule))
         throw new Error('parse failed');
-    if (CPOS !== CREP.length)
+    if (CPOS !== ILEN)
         throw new Error('parse didn\\\'t consume entire input');
     if (APOS !== 1)
         throw new Error('parse didn\\\'t produce a singular value');
@@ -59,6 +61,7 @@ function parse(startRule, stringOrBuffer) {
 function print(startRule, value, buffer) {
     AREP = [value];
     APOS = 0;
+    ILEN = 1;
     CREP = buffer || Buffer.alloc(2 ** 22);
     CPOS = 0;
     if (!printValue(startRule))
@@ -138,34 +141,37 @@ function parseInferValue(infer) {
     ATYP = ATYPₒ;
 }
 function printValue(rule) {
-    const APOSₒ = APOS, AREPₒ = AREP, ATYPₒ = ATYP;
+    const APOSₒ = APOS, AREPₒ = AREP, ILENₒ = ILEN, ATYPₒ = ATYP;
     let value = AREP[APOS];
     let atyp;
+    let objKeys;
     if (value === undefined) {
         return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ATYP = SCALAR;
+        ILEN = 1, ATYP = SCALAR;
         const result = rule();
-        ATYP = ATYPₒ;
+        ILEN = ILENₒ, ATYP = ATYPₒ;
         assert(APOS === APOSₒ + 1);
         return result;
     }
     if (typeof value === 'string') {
-        AREP = internalBuffer.slice(0, internalBuffer.write(value, 0));
+        AREP = internalBuffer;
+        ILEN = internalBuffer.write(value, 0, undefined, 'utf8');
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         AREP = value;
+        ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
-    else if (typeof value === 'object') {
+    else if (typeof value === 'object' && value !== null) {
         const arr = AREP = [];
-        const keys = Object.keys(value);
-        assert(keys.length < 32);
-        for (let i = 0; i < keys.length; ++i)
-            arr.push(keys[i], value[keys[i]]);
-        value = arr;
+        objKeys = Object.keys(value);
+        assert(objKeys.length < 32);
+        for (let i = 0; i < objKeys.length; ++i)
+            arr.push(objKeys[i], value[objKeys[i]]);
+        ILEN = arr.length;
         atyp = ATYP = RECORD_FIELDS;
     }
     else {
@@ -173,17 +179,17 @@ function printValue(rule) {
     }
     APOS = 0;
     let result = rule();
-    const arep = AREP, apos = APOS;
-    AREP = AREPₒ, APOS = APOSₒ, ATYP = ATYPₒ;
+    const apos = APOS, ilen = ILEN;
+    AREP = AREPₒ, APOS = APOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
     if (atyp === RECORD_FIELDS) {
-        const keyCount = value.length >> 1;
+        const keyCount = objKeys.length;
         if (keyCount > 0 && (apos !== -1 >>> (32 - keyCount)))
             return false;
     }
     else {
-        if (apos !== arep.length)
+        if (apos !== ilen)
             return false;
     }
     APOS += 1;
@@ -249,7 +255,7 @@ function createStartRule(mode) {
     const ꐚfoo = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 3 > CREP.length) return false;
+                if (CPOS + 3 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x66) return false;
                 if (CREP[CPOS + 1] !== 0x6f) return false;
                 if (CREP[CPOS + 2] !== 0x6f) return false;
@@ -270,7 +276,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 3 > AREP.length) return false;
+                if (APOS + 3 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x66) return false;
                 if (AREP[APOS + 1] !== 0x6f) return false;
                 if (AREP[APOS + 2] !== 0x6f) return false;
@@ -293,7 +299,7 @@ function createStartRule(mode) {
     const ꐚbar = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 3 > CREP.length) return false;
+                if (CPOS + 3 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x62) return false;
                 if (CREP[CPOS + 1] !== 0x61) return false;
                 if (CREP[CPOS + 2] !== 0x72) return false;
@@ -314,7 +320,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 3 > AREP.length) return false;
+                if (APOS + 3 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x61) return false;
                 if (AREP[APOS + 2] !== 0x72) return false;
@@ -359,7 +365,7 @@ function createStartRule(mode) {
     const ꐚb = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 2 > CREP.length) return false;
+                if (CPOS + 2 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x62) return false;
                 if (CREP[CPOS + 1] !== 0x32) return false;
                 CPOS += 2;
@@ -377,7 +383,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 2 > AREP.length) return false;
+                if (APOS + 2 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x32) return false;
                 APOS += 2;
@@ -397,7 +403,7 @@ function createStartRule(mode) {
     const ꐚbaz = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 3 > CREP.length) return false;
+                if (CPOS + 3 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x62) return false;
                 if (CREP[CPOS + 1] !== 0x61) return false;
                 if (CREP[CPOS + 2] !== 0x7a) return false;
@@ -418,7 +424,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 3 > AREP.length) return false;
+                if (APOS + 3 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x62) return false;
                 if (AREP[APOS + 1] !== 0x61) return false;
                 if (AREP[APOS + 2] !== 0x7a) return false;
@@ -441,7 +447,7 @@ function createStartRule(mode) {
     const ꐚmem = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 6 > CREP.length) return false;
+                if (CPOS + 6 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x6d) return false;
                 if (CREP[CPOS + 1] !== 0x65) return false;
                 if (CREP[CPOS + 2] !== 0x6d) return false;
@@ -471,7 +477,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 6 > AREP.length) return false;
+                if (APOS + 6 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x6d) return false;
                 if (AREP[APOS + 1] !== 0x65) return false;
                 if (AREP[APOS + 2] !== 0x6d) return false;
@@ -544,7 +550,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (CPOS >= CREP.length) return false;
+                if (CPOS >= ILEN) return false;
                 cc = CREP[CPOS];
                 if (cc !== 0x61) return false;
                 CPOS += 1;
@@ -561,7 +567,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS >= AREP.length) return false;
+                if (APOS >= ILEN) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x61) return false;
                 APOS += 1;
@@ -615,7 +621,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (CPOS >= CREP.length) return false;
+                if (CPOS >= ILEN) return false;
                 cc = CREP[CPOS];
                 if (cc !== 0x62) return false;
                 CPOS += 1;
@@ -632,7 +638,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS >= AREP.length) return false;
+                if (APOS >= ILEN) return false;
                 cc = AREP[APOS];
                 if (cc !== 0x62) return false;
                 APOS += 1;
@@ -663,7 +669,7 @@ function createStartRule(mode) {
     const ꐚc1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 2 > CREP.length) return false;
+                if (CPOS + 2 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x63) return false;
                 if (CREP[CPOS + 1] !== 0x31) return false;
                 CPOS += 2;
@@ -681,7 +687,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 2 > AREP.length) return false;
+                if (APOS + 2 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x63) return false;
                 if (AREP[APOS + 1] !== 0x31) return false;
                 APOS += 2;
@@ -701,7 +707,7 @@ function createStartRule(mode) {
     const ꐚc2 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (CPOS + 2 > CREP.length) return false;
+                if (CPOS + 2 > ILEN) return false;
                 if (CREP[CPOS + 0] !== 0x63) return false;
                 if (CREP[CPOS + 1] !== 0x32) return false;
                 CPOS += 2;
@@ -719,7 +725,7 @@ function createStartRule(mode) {
         print: {
             full: function STR() {
                 if (ATYP !== STRING_CHARS) return false;
-                if (APOS + 2 > AREP.length) return false;
+                if (APOS + 2 > ILEN) return false;
                 if (AREP[APOS + 0] !== 0x63) return false;
                 if (AREP[APOS + 1] !== 0x32) return false;
                 APOS += 2;

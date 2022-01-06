@@ -18,19 +18,18 @@ function unicode(mode: 'parse' | 'print'): Func {
             parse: {
                 full: function UNI() {
                     const APOSₒ = APOS, CPOSₒ = CPOS;
-                    const LEN = CREP.length;
                     const EOS = '';
 
                     let len = 0;
                     let num = ''; // TODO: fix this - should actually keep count
-                    let c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
+                    let c = CPOS < ILEN ? String.fromCharCode(CREP[CPOS]) : EOS; // TODO: convoluted - simplify whole method
                     while (true) {
                         if (!regex.test(c)) break;
                         num += c;
                         CPOS += 1;
                         len += 1;
                         if (len === maxDigits) break;
-                        c = CPOS < LEN ? String.fromCharCode(CREP[CPOS]) : EOS;
+                        c = CPOS < ILEN ? String.fromCharCode(CREP[CPOS]) : EOS;
                     }
 
                     if (len < minDigits) return APOS = APOSₒ, CPOS = CPOSₒ, false;
@@ -50,7 +49,7 @@ function unicode(mode: 'parse' | 'print'): Func {
 
                     // TODO: respect VOID AREP/CREP...
 
-                    if (ATYP !== STRING_CHARS) return false;
+                    if (ATYP !== STRING_CHARS || APOS >= ILEN) return false;
                     const APOSₒ = APOS, CPOSₒ = CPOS;
                     const bytes = AREP as Buffer;
                     let c = bytes[APOS++];
@@ -58,15 +57,15 @@ function unicode(mode: 'parse' | 'print'): Func {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (APOS >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                        if (APOS >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 31) << 6 | bytes[APOS++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (APOS + 1 >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                        if (APOS + 1 >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 15) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (APOS + 2 >= bytes.length) return APOS = APOSₒ, CPOS = CPOSₒ, false;
+                        if (APOS + 2 >= ILEN) return APOS = APOSₒ, CPOS = CPOSₒ, false;
                         c = (c & 7) << 18 | (bytes[APOS++] & 63) << 12 | (bytes[APOS++] & 63) << 6 | bytes[APOS++] & 63;
                     }
                     else return APOS = APOSₒ, CPOS = CPOSₒ, false;
