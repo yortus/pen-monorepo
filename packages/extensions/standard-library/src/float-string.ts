@@ -81,19 +81,18 @@ function floatString(mode: 'parse' | 'print'): Rule {
         },
         print: {
             full: function FSTR() {
-                let out = '0';
-                // Ensure N is a number.
                 if (ATYP !== SCALAR) return false;
+                const orep = OREP as Buffer; // OREP is always a Buffer when printing
                 const num = IREP[IPOS];
                 if (typeof num !== 'number') return false;
                 IPOS += 1;
 
                 // Delegate unparsing to the JS runtime.
                 // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                out = String(num);
+                const out = String(num);
 
                 // Success
-                OPOS += (OREP as Buffer).write(out, OPOS, undefined, 'utf8');
+                OPOS += orep.write(out, OPOS, undefined, 'utf8');
                 return true;
             },
             infer: function FSTR() {

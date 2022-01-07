@@ -62,13 +62,13 @@ function print(startRule, value, buffer) {
     IREP = [value];
     IPOS = 0;
     ILEN = 1;
-    OREP = buffer || Buffer.alloc(2 ** 22);
+    const buf = OREP = buffer !== null && buffer !== void 0 ? buffer : Buffer.alloc(2 ** 22);
     OPOS = 0;
     if (!printValue(startRule))
         throw new Error('print failed');
     if (OPOS > OREP.length)
         throw new Error('output buffer too small');
-    return buffer ? OPOS : OREP.toString('utf8', 0, OPOS);
+    return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
 }
 function parseValue(rule) {
     const OPOSₒ = OPOS, ATYPₒ = ATYP;
@@ -201,9 +201,9 @@ function printInferValue(infer) {
     infer();
     ATYP = ATYPₒ;
 }
-function assert(value) {
+function assert(value, message) {
     if (!value)
-        throw new Error(`Assertion failed`);
+        throw new Error(`Assertion failed: ${message !== null && message !== void 0 ? message : 'no further details'}`);
 }
 function isObject(value) {
     return value !== null && typeof value === 'object';

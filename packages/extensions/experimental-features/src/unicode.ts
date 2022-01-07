@@ -50,6 +50,7 @@ function unicode(mode: 'parse' | 'print'): Func {
                     if (ATYP !== STRING_CHARS || IPOS >= ILEN) return false;
                     const IPOSₒ = IPOS, OPOSₒ = OPOS;
                     const irep = IREP as Buffer; // IREP is a Buffer when ATYP === STRING_CHARS
+                    const orep = OREP as Buffer; // OREP is always a Buffer when printing
                     let c = irep[IPOS++];
                     if (c < 128) {
                         // no-op
@@ -70,7 +71,7 @@ function unicode(mode: 'parse' | 'print'): Func {
 
                     const s = c.toString(base).padStart(minDigits, '0');
                     if (s.length > maxDigits) return false;
-                    (OREP as Buffer).write(s, OPOS);
+                    orep.write(s, OPOS);
                     OPOS += s.length;
                     return true;
                 },

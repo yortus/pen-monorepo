@@ -62,13 +62,13 @@ function print(startRule, value, buffer) {
     IREP = [value];
     IPOS = 0;
     ILEN = 1;
-    OREP = buffer || Buffer.alloc(2 ** 22);
+    const buf = OREP = buffer !== null && buffer !== void 0 ? buffer : Buffer.alloc(2 ** 22);
     OPOS = 0;
     if (!printValue(startRule))
         throw new Error('print failed');
     if (OPOS > OREP.length)
         throw new Error('output buffer too small');
-    return buffer ? OPOS : OREP.toString('utf8', 0, OPOS);
+    return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
 }
 function parseValue(rule) {
     const OPOSₒ = OPOS, ATYPₒ = ATYP;
@@ -201,9 +201,9 @@ function printInferValue(infer) {
     infer();
     ATYP = ATYPₒ;
 }
-function assert(value) {
+function assert(value, message) {
     if (!value)
-        throw new Error(`Assertion failed`);
+        throw new Error(`Assertion failed: ${message !== null && message !== void 0 ? message : 'no further details'}`);
 }
 function isObject(value) {
     return value !== null && typeof value === 'object';
@@ -324,19 +324,18 @@ const extensions = {
                 },
                 print: {
                     full: function FSTR() {
-                        let out = '0';
-                        // Ensure N is a number.
                         if (ATYP !== SCALAR)
                             return false;
+                        const orep = OREP; // OREP is always a Buffer when printing
                         const num = IREP[IPOS];
                         if (typeof num !== 'number')
                             return false;
                         IPOS += 1;
                         // Delegate unparsing to the JS runtime.
                         // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
-                        out = String(num);
+                        const out = String(num);
                         // Success
-                        OPOS += OREP.write(out, OPOS, undefined, 'utf8');
+                        OPOS += orep.write(out, OPOS, undefined, 'utf8');
                         return true;
                     },
                     infer: function FSTR() {
@@ -415,7 +414,6 @@ const extensions = {
                     },
                     print: {
                         full: function ISTR() {
-                            const digits = [];
                             if (ATYP !== SCALAR)
                                 return false;
                             let num = IREP[IPOS];
@@ -434,6 +432,7 @@ const extensions = {
                             if (num > MAX_NUM)
                                 return false;
                             // Extract the digits.
+                            const digits = [];
                             while (true) {
                                 const d = num % base;
                                 num = (num / base) | 0;
@@ -648,6 +647,7 @@ const extensions = {
                                 return false;
                             const IPOSₒ = IPOS, OPOSₒ = OPOS;
                             const irep = IREP; // IREP is a Buffer when ATYP === STRING_CHARS
+                            const orep = OREP; // OREP is always a Buffer when printing
                             let c = irep[IPOS++];
                             if (c < 128) {
                                 // no-op
@@ -672,7 +672,7 @@ const extensions = {
                             const s = c.toString(base).padStart(minDigits, '0');
                             if (s.length > maxDigits)
                                 return false;
-                            OREP.write(s, OPOS);
+                            orep.write(s, OPOS);
                             OPOS += s.length;
                             return true;
                         },

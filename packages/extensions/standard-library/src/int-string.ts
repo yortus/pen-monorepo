@@ -65,7 +65,6 @@ function intString(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function ISTR() {
-                    const digits: number[] = [];
                     if (ATYP !== SCALAR) return false;
                     let num = IREP[IPOS] as number;
                     if (typeof num !== 'number') return false;
@@ -82,6 +81,7 @@ function intString(mode: 'parse' | 'print'): Func {
                     if (num > MAX_NUM) return false;
 
                     // Extract the digits.
+                    const digits: number[] = [];
                     while (true) {
                         const d = num % base;
                         num = (num / base) | 0;

@@ -105,11 +105,11 @@ function print(startRule: Rule, value: unknown, buffer?: Buffer) {
     IREP = [value];
     IPOS = 0;
     ILEN = 1;
-    OREP = buffer || Buffer.alloc(2 ** 22); // 4MB
+    const buf = OREP = buffer ?? Buffer.alloc(2 ** 22); // 4MB
     OPOS = 0;
     if (!printValue(startRule)) throw new Error('print failed');
     if (OPOS > OREP.length) throw new Error('output buffer too small');
-    return buffer ? OPOS : (OREP as Buffer).toString('utf8', 0, OPOS);
+    return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
 }
 
 
