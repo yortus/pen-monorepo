@@ -475,36 +475,24 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
 
         case 'SequenceExpression': {
             const exprVars = expr.expressions.map(e => e.name);
-            emit.lines(`
-                parse: {
-                    full: function SEQ() {
-                        const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                        ${exprVars
-                            .map(ev => `if (!${ev}()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;`)
-                            .join('\n')
-                        }
-                        return true;
+            for (const mode of ['parse', 'print'] as const) {
+                emit.lines(`
+                    ${mode}: {
+                        full: function SEQ() {
+                            const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                            ${exprVars
+                                .map(ev => `if (!${ev}()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;`)
+                                .join('\n')
+                            }
+                            return true;
+                        },
+                        infer: () => {
+                            ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
+                            return true;
+                        },
                     },
-                    infer: () => {
-                        ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
-                        return true;
-                    },
-                },
-                print: {
-                    full: function SEQ() {
-                        const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                        ${exprVars
-                            .map(ev => `if (!${ev}()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;`)
-                            .join('\n')
-                        }
-                        return true;
-                    },
-                    infer: () => {
-                        ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
-                        return true;
-                    },
-                },
-            `);
+                `);
+            }
             break;
         }
 
