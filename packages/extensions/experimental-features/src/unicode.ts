@@ -42,7 +42,7 @@ function unicode(mode: 'parse' | 'print'): Func {
                 },
                 infer: function UNI() {
                     // TODO: generate default value...
-                    throw new Error('unicode parseDefault: Not implemented');
+                    throw new Error('unicode parse.infer: Not implemented');
                 },
             },
             print: {
@@ -77,7 +77,7 @@ function unicode(mode: 'parse' | 'print'): Func {
                 },
                 infer: function UNI() {
                     // TODO: generate default value...
-                    throw new Error('unicode printDefault: Not implemented');
+                    throw new Error('unicode print.infer: Not implemented');
                 },
             },
         });

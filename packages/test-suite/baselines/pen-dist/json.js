@@ -107,39 +107,6 @@ function parseValue(rule) {
     ATYP = ATYPₒ;
     return true;
 }
-function parseInferValue(infer) {
-    const OPOSₒ = OPOS, ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    if (ATYP === NOTHING)
-        return OPOS = OPOSₒ, ATYP = ATYPₒ, undefined;
-    let value;
-    switch (ATYP) {
-        case SCALAR:
-            assert(OPOS === OPOSₒ + 1);
-            value = OREP[OPOSₒ];
-            break;
-        case STRING_CHARS:
-            const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i)
-                internalBuffer[i] = OREP[OPOSₒ + i];
-            value = internalBuffer.toString('utf8', 0, len);
-            break;
-        case LIST_ELEMENTS:
-            value = OREP.slice(OPOSₒ, OPOS);
-            break;
-        case RECORD_FIELDS:
-            const obj = value = {};
-            for (let i = OPOSₒ; i < OPOS; i += 2)
-                obj[OREP[i]] = OREP[i + 1];
-            break;
-        default:
-            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
-    }
-    OREP[OPOSₒ] = value;
-    OPOS = OPOSₒ + 1;
-    ATYP = ATYPₒ;
-}
 function printValue(rule) {
     const IPOSₒ = IPOS, IREPₒ = IREP, ILENₒ = ILEN, ATYPₒ = ATYP;
     let value = IREP[IPOS];
@@ -194,12 +161,6 @@ function printValue(rule) {
     }
     IPOS += 1;
     return true;
-}
-function printInferValue(infer) {
-    const ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    ATYP = ATYPₒ;
 }
 function assert(value, message) {
     if (!value)
@@ -320,6 +281,7 @@ const extensions = {
                     infer: function ISTR() {
                         OREP[OPOS++] = 0;
                         ATYP |= SCALAR;
+                        return true;
                     },
                 },
                 print: {
@@ -340,6 +302,7 @@ const extensions = {
                     },
                     infer: function FSTR() {
                         OREP[OPOS++] = ZERO_DIGIT;
+                        return true;
                     },
                 },
             });
@@ -410,6 +373,7 @@ const extensions = {
                         infer: function ISTR() {
                             OREP[OPOS++] = 0;
                             ATYP |= SCALAR;
+                            return true;
                         },
                     },
                     print: {
@@ -452,6 +416,7 @@ const extensions = {
                         },
                         infer: function ISTR() {
                             OREP[OPOS++] = CHAR_CODES[0];
+                            return true;
                         },
                     },
                 });
@@ -570,7 +535,7 @@ const extensions = {
                         },
                         infer: function MEM() {
                             // TODO: implement...
-                            throw new Error('memoise parseDefault: Not implemented');
+                            throw new Error('memoise parse.infer: Not implemented');
                         },
                     },
                     print: {
@@ -581,7 +546,7 @@ const extensions = {
                         },
                         infer: function MEM() {
                             // TODO: implement...
-                            throw new Error('memoise printDefault: Not implemented');
+                            throw new Error('memoise print.infer: Not implemented');
                         },
                     },
                 });
@@ -638,7 +603,7 @@ const extensions = {
                         },
                         infer: function UNI() {
                             // TODO: generate default value...
-                            throw new Error('unicode parseDefault: Not implemented');
+                            throw new Error('unicode parse.infer: Not implemented');
                         },
                     },
                     print: {
@@ -678,7 +643,7 @@ const extensions = {
                         },
                         infer: function UNI() {
                             // TODO: generate default value...
-                            throw new Error('unicode printDefault: Not implemented');
+                            throw new Error('unicode print.infer: Not implemented');
                         },
                     },
                 });
@@ -722,6 +687,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚValue.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -736,6 +702,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚValue.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -764,6 +731,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚFalseᱻ1.infer();
                 ꐚFalseᱻ2.infer();
+                return true;
             },
         },
         print: {
@@ -776,6 +744,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚFalseᱻ1.infer();
                 ꐚFalseᱻ2.infer();
+                return true;
             },
         },
     });
@@ -794,6 +763,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -811,6 +781,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6c;
                 OREP[OPOS++] = 0x73;
                 OREP[OPOS++] = 0x65;
+                return true;
             },
         },
         constant: "false",
@@ -827,6 +798,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = false;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -836,7 +808,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: false,
     });
@@ -853,6 +825,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚNullᱻ1.infer();
                 ꐚNullᱻ2.infer();
+                return true;
             },
         },
         print: {
@@ -865,6 +838,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚNullᱻ1.infer();
                 ꐚNullᱻ2.infer();
+                return true;
             },
         },
     });
@@ -882,6 +856,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -897,6 +872,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x75;
                 OREP[OPOS++] = 0x6c;
                 OREP[OPOS++] = 0x6c;
+                return true;
             },
         },
         constant: "null",
@@ -913,6 +889,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = null;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -922,7 +899,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: null,
     });
@@ -939,6 +916,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚTrueᱻ1.infer();
                 ꐚTrueᱻ2.infer();
+                return true;
             },
         },
         print: {
@@ -951,6 +929,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚTrueᱻ1.infer();
                 ꐚTrueᱻ2.infer();
+                return true;
             },
         },
     });
@@ -968,6 +947,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -983,6 +963,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x72;
                 OREP[OPOS++] = 0x75;
                 OREP[OPOS++] = 0x65;
+                return true;
             },
         },
         constant: "true",
@@ -999,6 +980,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = true;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -1008,7 +990,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: true,
     });
@@ -1027,6 +1009,7 @@ function createStartRule(mode) {
                 ꐚLBRACE.infer();
                 ꐚObjectᱻ1.infer();
                 ꐚRBRACE.infer();
+                return true;
             },
         },
         print: {
@@ -1041,6 +1024,7 @@ function createStartRule(mode) {
                 ꐚLBRACE.infer();
                 ꐚObjectᱻ1.infer();
                 ꐚRBRACE.infer();
+                return true;
             },
         },
     });
@@ -1069,6 +1053,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚObjectᱻ3.infer();
                 ꐚObjectᱻ5.infer();
+                return true;
             },
         },
         print: {
@@ -1081,6 +1066,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚObjectᱻ3.infer();
                 ꐚObjectᱻ5.infer();
+                return true;
             },
         },
     });
@@ -1098,10 +1084,11 @@ function createStartRule(mode) {
             },
             infer: function RCD() {
                 const OPOSₒ = OPOS;
-                parseInferValue(ꐚString.infer);
+                parseValue(ꐚString.infer);
                 assert(typeof OREP[OPOS - 1] === 'string');
-                parseInferValue(ꐚObjectᱻ4.infer);
+                parseValue(ꐚObjectᱻ4.infer);
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1120,9 +1107,9 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚString.infer);
-                printInferValue(ꐚObjectᱻ4.infer);
+                ꐚString.infer();
+                ꐚObjectᱻ4.infer();
+                return true;
             },
         },
     });
@@ -1139,6 +1126,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
         print: {
@@ -1151,6 +1139,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
     });
@@ -1167,7 +1156,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function QUA() {
@@ -1179,7 +1168,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -1196,10 +1185,11 @@ function createStartRule(mode) {
             },
             infer: function RCD() {
                 const OPOSₒ = OPOS;
-                parseInferValue(ꐚObjectᱻ7.infer);
+                parseValue(ꐚObjectᱻ7.infer);
                 assert(typeof OREP[OPOS - 1] === 'string');
-                parseInferValue(ꐚObjectᱻ8.infer);
+                parseValue(ꐚObjectᱻ8.infer);
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1218,9 +1208,9 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚObjectᱻ7.infer);
-                printInferValue(ꐚObjectᱻ8.infer);
+                ꐚObjectᱻ7.infer();
+                ꐚObjectᱻ8.infer();
+                return true;
             },
         },
     });
@@ -1237,6 +1227,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚString.infer();
+                return true;
             },
         },
         print: {
@@ -1249,6 +1240,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚString.infer();
+                return true;
             },
         },
     });
@@ -1265,6 +1257,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
         print: {
@@ -1277,6 +1270,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
     });
@@ -1292,6 +1286,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const OPOSₒ = OPOS;
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1306,7 +1301,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1325,6 +1320,7 @@ function createStartRule(mode) {
                 ꐚLBRACE.infer();
                 ꐚObject2ᱻ1.infer();
                 ꐚRBRACE.infer();
+                return true;
             },
         },
         print: {
@@ -1339,6 +1335,7 @@ function createStartRule(mode) {
                 ꐚLBRACE.infer();
                 ꐚObject2ᱻ1.infer();
                 ꐚRBRACE.infer();
+                return true;
             },
         },
     });
@@ -1366,6 +1363,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const OPOSₒ = OPOS;
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1380,7 +1378,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1399,11 +1397,12 @@ function createStartRule(mode) {
             },
             infer: function RCD() {
                 const OPOSₒ = OPOS;
-                parseInferValue(ꐚString.infer);
+                parseValue(ꐚString.infer);
                 assert(typeof OREP[OPOS - 1] === 'string');
-                parseInferValue(ꐚPropertiesᱻ1.infer);
+                parseValue(ꐚPropertiesᱻ1.infer);
                 ꐚPropertiesᱻ2.infer();
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1425,10 +1424,10 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚString.infer);
-                printInferValue(ꐚPropertiesᱻ1.infer);
+                ꐚString.infer();
+                ꐚPropertiesᱻ1.infer();
                 ꐚPropertiesᱻ2.infer();
+                return true;
             },
         },
     });
@@ -1445,6 +1444,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
         print: {
@@ -1457,6 +1457,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOLON.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
     });
@@ -1485,6 +1486,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚProperties.infer();
+                return true;
             },
         },
         print: {
@@ -1497,6 +1499,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚProperties.infer();
+                return true;
             },
         },
     });
@@ -1512,6 +1515,7 @@ function createStartRule(mode) {
             infer: function RCD() {
                 const OPOSₒ = OPOS;
                 ATYP |= RECORD_FIELDS;
+                return true;
             },
         },
         print: {
@@ -1526,7 +1530,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function RCD() {
-                if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1545,6 +1549,7 @@ function createStartRule(mode) {
                 ꐚLBRACKET.infer();
                 ꐚArrayᱻ1.infer();
                 ꐚRBRACKET.infer();
+                return true;
             },
         },
         print: {
@@ -1559,6 +1564,7 @@ function createStartRule(mode) {
                 ꐚLBRACKET.infer();
                 ꐚArrayᱻ1.infer();
                 ꐚRBRACKET.infer();
+                return true;
             },
         },
     });
@@ -1587,6 +1593,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚArrayᱻ3.infer();
                 ꐚArrayᱻ4.infer();
+                return true;
             },
         },
         print: {
@@ -1599,6 +1606,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚArrayᱻ3.infer();
                 ꐚArrayᱻ4.infer();
+                return true;
             },
         },
     });
@@ -1613,8 +1621,9 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                parseInferValue(ꐚValue.infer);
+                parseValue(ꐚValue.infer);
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1625,8 +1634,8 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚValue.infer);
+                ꐚValue.infer();
+                return true;
             },
         },
     });
@@ -1643,7 +1652,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function QUA() {
@@ -1655,7 +1664,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -1669,8 +1678,9 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                parseInferValue(ꐚArrayᱻ6.infer);
+                parseValue(ꐚArrayᱻ6.infer);
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1681,8 +1691,8 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚArrayᱻ6.infer);
+                ꐚArrayᱻ6.infer();
+                return true;
             },
         },
     });
@@ -1699,6 +1709,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
         print: {
@@ -1711,6 +1722,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚValue.infer();
+                return true;
             },
         },
     });
@@ -1725,6 +1737,7 @@ function createStartRule(mode) {
             },
             infer: function LST() {
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1734,7 +1747,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1753,6 +1766,7 @@ function createStartRule(mode) {
                 ꐚLBRACKET.infer();
                 ꐚArray2ᱻ1.infer();
                 ꐚRBRACKET.infer();
+                return true;
             },
         },
         print: {
@@ -1767,6 +1781,7 @@ function createStartRule(mode) {
                 ꐚLBRACKET.infer();
                 ꐚArray2ᱻ1.infer();
                 ꐚRBRACKET.infer();
+                return true;
             },
         },
     });
@@ -1793,6 +1808,7 @@ function createStartRule(mode) {
             },
             infer: function LST() {
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1802,7 +1818,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1818,9 +1834,10 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                parseInferValue(ꐚValue.infer);
+                parseValue(ꐚValue.infer);
                 ꐚElementsᱻ1.infer();
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1832,9 +1849,9 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚValue.infer);
+                ꐚValue.infer();
                 ꐚElementsᱻ1.infer();
+                return true;
             },
         },
     });
@@ -1863,6 +1880,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚElements.infer();
+                return true;
             },
         },
         print: {
@@ -1875,6 +1893,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCOMMA.infer();
                 ꐚElements.infer();
+                return true;
             },
         },
     });
@@ -1889,6 +1908,7 @@ function createStartRule(mode) {
             },
             infer: function LST() {
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -1898,7 +1918,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
+                return true;
             },
         },
     });
@@ -1923,6 +1943,7 @@ function createStartRule(mode) {
                 ꐚDOUBLE_QUOTE.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
+                return true;
             },
         },
         print: {
@@ -1937,6 +1958,7 @@ function createStartRule(mode) {
                 ꐚDOUBLE_QUOTE.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
+                return true;
             },
         },
     });
@@ -1953,7 +1975,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function QUA() {
@@ -1965,7 +1987,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -1980,6 +2002,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 16;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -1989,7 +2012,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: 16,
     });
@@ -2005,6 +2028,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 4;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -2014,7 +2038,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: 4,
     });
@@ -2030,6 +2054,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 4;
                 ATYP != SCALAR;
+                return true;
             },
         },
         print: {
@@ -2039,7 +2064,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         constant: 4,
     });
@@ -2074,6 +2099,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x20;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2091,6 +2117,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x20;
+                return true;
             },
         },
     });
@@ -2107,6 +2134,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ3.infer();
                 ꐚCHARᱻ4.infer();
+                return true;
             },
         },
         print: {
@@ -2119,6 +2147,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ3.infer();
                 ꐚCHARᱻ4.infer();
+                return true;
             },
         },
     });
@@ -2139,6 +2168,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0xc0;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2154,6 +2184,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0xc0;
+                return true;
             },
         },
     });
@@ -2174,6 +2205,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2189,6 +2221,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2207,6 +2240,7 @@ function createStartRule(mode) {
                 ꐚCHARᱻ6.infer();
                 ꐚCHARᱻ7.infer();
                 ꐚCHARᱻ8.infer();
+                return true;
             },
         },
         print: {
@@ -2221,6 +2255,7 @@ function createStartRule(mode) {
                 ꐚCHARᱻ6.infer();
                 ꐚCHARᱻ7.infer();
                 ꐚCHARᱻ8.infer();
+                return true;
             },
         },
     });
@@ -2241,6 +2276,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0xe0;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2256,6 +2292,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0xe0;
+                return true;
             },
         },
     });
@@ -2276,6 +2313,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2291,6 +2329,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2311,6 +2350,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2326,6 +2366,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2346,6 +2387,7 @@ function createStartRule(mode) {
                 ꐚCHARᱻ11.infer();
                 ꐚCHARᱻ12.infer();
                 ꐚCHARᱻ13.infer();
+                return true;
             },
         },
         print: {
@@ -2362,6 +2404,7 @@ function createStartRule(mode) {
                 ꐚCHARᱻ11.infer();
                 ꐚCHARᱻ12.infer();
                 ꐚCHARᱻ13.infer();
+                return true;
             },
         },
     });
@@ -2382,6 +2425,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0xf0;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2397,6 +2441,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0xf0;
+                return true;
             },
         },
     });
@@ -2417,6 +2462,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2432,6 +2478,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2452,6 +2499,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2467,6 +2515,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2487,6 +2536,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x80;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2502,6 +2552,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x80;
+                return true;
             },
         },
     });
@@ -2518,6 +2569,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ15.infer();
                 ꐚCHARᱻ16.infer();
+                return true;
             },
         },
         print: {
@@ -2530,6 +2582,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ15.infer();
                 ꐚCHARᱻ16.infer();
+                return true;
             },
         },
     });
@@ -2545,6 +2598,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2556,6 +2610,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x22;
+                return true;
             },
         },
         constant: "\\\"",
@@ -2574,6 +2629,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x22;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2586,7 +2642,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -2602,6 +2658,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ18.infer();
                 ꐚCHARᱻ19.infer();
+                return true;
             },
         },
         print: {
@@ -2614,6 +2671,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ18.infer();
                 ꐚCHARᱻ19.infer();
+                return true;
             },
         },
     });
@@ -2629,6 +2687,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2640,6 +2699,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x5c;
+                return true;
             },
         },
         constant: "\\\\",
@@ -2658,6 +2718,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x5c;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2670,7 +2731,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -2686,6 +2747,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ21.infer();
                 ꐚCHARᱻ22.infer();
+                return true;
             },
         },
         print: {
@@ -2698,6 +2760,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ21.infer();
                 ꐚCHARᱻ22.infer();
+                return true;
             },
         },
     });
@@ -2713,6 +2776,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2724,6 +2788,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x2f;
+                return true;
             },
         },
         constant: "\\/",
@@ -2742,6 +2807,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x2f;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2754,7 +2820,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -2770,6 +2836,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ24.infer();
                 ꐚCHARᱻ25.infer();
+                return true;
             },
         },
         print: {
@@ -2782,6 +2849,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ24.infer();
                 ꐚCHARᱻ25.infer();
+                return true;
             },
         },
     });
@@ -2797,6 +2865,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2808,6 +2877,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x62;
+                return true;
             },
         },
         constant: "\\b",
@@ -2826,6 +2896,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x08;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2838,7 +2909,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -2854,6 +2925,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ27.infer();
                 ꐚCHARᱻ28.infer();
+                return true;
             },
         },
         print: {
@@ -2866,6 +2938,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ27.infer();
                 ꐚCHARᱻ28.infer();
+                return true;
             },
         },
     });
@@ -2881,6 +2954,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2892,6 +2966,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x66;
+                return true;
             },
         },
         constant: "\\f",
@@ -2910,6 +2985,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x0c;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -2922,7 +2998,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -2938,6 +3014,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ30.infer();
                 ꐚCHARᱻ31.infer();
+                return true;
             },
         },
         print: {
@@ -2950,6 +3027,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ30.infer();
                 ꐚCHARᱻ31.infer();
+                return true;
             },
         },
     });
@@ -2965,6 +3043,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -2976,6 +3055,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x6e;
+                return true;
             },
         },
         constant: "\\n",
@@ -2994,6 +3074,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x0a;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -3006,7 +3087,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -3022,6 +3103,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ33.infer();
                 ꐚCHARᱻ34.infer();
+                return true;
             },
         },
         print: {
@@ -3034,6 +3116,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ33.infer();
                 ꐚCHARᱻ34.infer();
+                return true;
             },
         },
     });
@@ -3049,6 +3132,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -3060,6 +3144,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x72;
+                return true;
             },
         },
         constant: "\\r",
@@ -3078,6 +3163,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x0d;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -3090,7 +3176,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -3106,6 +3192,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ36.infer();
                 ꐚCHARᱻ37.infer();
+                return true;
             },
         },
         print: {
@@ -3118,6 +3205,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ36.infer();
                 ꐚCHARᱻ37.infer();
+                return true;
             },
         },
     });
@@ -3133,6 +3221,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -3144,6 +3233,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x74;
+                return true;
             },
         },
         constant: "\\t",
@@ -3162,6 +3252,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x09;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -3174,7 +3265,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -3190,6 +3281,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ39.infer();
                 ꐚCHARᱻ40.infer();
+                return true;
             },
         },
         print: {
@@ -3202,6 +3294,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚCHARᱻ39.infer();
                 ꐚCHARᱻ40.infer();
+                return true;
             },
         },
     });
@@ -3217,6 +3310,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         print: {
@@ -3228,6 +3322,7 @@ function createStartRule(mode) {
             infer: function STR() {
                 OREP[OPOS++] = 0x5c;
                 OREP[OPOS++] = 0x75;
+                return true;
             },
         },
         constant: "\\u",
@@ -3260,6 +3355,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚLBRACEᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3274,6 +3370,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚLBRACEᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3289,7 +3386,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3300,6 +3397,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x7b;
+                return true;
             },
         },
     });
@@ -3318,6 +3416,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚRBRACEᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3332,6 +3431,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚRBRACEᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3347,7 +3447,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3358,6 +3458,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x7d;
+                return true;
             },
         },
     });
@@ -3376,6 +3477,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚLBRACKETᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3390,6 +3492,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚLBRACKETᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3405,7 +3508,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3416,6 +3519,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x5b;
+                return true;
             },
         },
     });
@@ -3434,6 +3538,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚRBRACKETᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3448,6 +3553,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚRBRACKETᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3463,7 +3569,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3474,6 +3580,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x5d;
+                return true;
             },
         },
     });
@@ -3492,6 +3599,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚCOLONᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3506,6 +3614,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚCOLONᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3521,7 +3630,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3532,6 +3641,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x3a;
+                return true;
             },
         },
     });
@@ -3550,6 +3660,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚCOMMAᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
         print: {
@@ -3564,6 +3675,7 @@ function createStartRule(mode) {
                 ꐚWS.infer();
                 ꐚCOMMAᱻ1.infer();
                 ꐚWS.infer();
+                return true;
             },
         },
     });
@@ -3579,7 +3691,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3590,6 +3702,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x2c;
+                return true;
             },
         },
     });
@@ -3605,7 +3718,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3616,6 +3729,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x22;
+                return true;
             },
         },
     });
@@ -3632,7 +3746,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function QUA() {
@@ -3644,7 +3758,7 @@ function createStartRule(mode) {
                 IPOS = IPOSᐟ, OPOS = OPOSᐟ;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
     });
 
@@ -3659,7 +3773,7 @@ function createStartRule(mode) {
                 IPOS += 1;
                 return true;
             },
-            infer: () => {},
+            infer: () => true,
         },
         print: {
             full: function BYT() {
@@ -3670,6 +3784,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x20;
+                return true;
             },
         },
     });

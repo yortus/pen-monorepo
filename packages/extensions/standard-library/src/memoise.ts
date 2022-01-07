@@ -95,7 +95,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                 },
                 infer: function MEM() {
                     // TODO: implement...
-                    throw new Error('memoise parseDefault: Not implemented');
+                    throw new Error('memoise parse.infer: Not implemented');
                 },
             },
             print: {
@@ -106,7 +106,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                 },
                 infer: function MEM() {
                     // TODO: implement...
-                    throw new Error('memoise printDefault: Not implemented');
+                    throw new Error('memoise print.infer: Not implemented');
                 },
             },
         });

@@ -107,39 +107,6 @@ function parseValue(rule) {
     ATYP = ATYPₒ;
     return true;
 }
-function parseInferValue(infer) {
-    const OPOSₒ = OPOS, ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    if (ATYP === NOTHING)
-        return OPOS = OPOSₒ, ATYP = ATYPₒ, undefined;
-    let value;
-    switch (ATYP) {
-        case SCALAR:
-            assert(OPOS === OPOSₒ + 1);
-            value = OREP[OPOSₒ];
-            break;
-        case STRING_CHARS:
-            const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i)
-                internalBuffer[i] = OREP[OPOSₒ + i];
-            value = internalBuffer.toString('utf8', 0, len);
-            break;
-        case LIST_ELEMENTS:
-            value = OREP.slice(OPOSₒ, OPOS);
-            break;
-        case RECORD_FIELDS:
-            const obj = value = {};
-            for (let i = OPOSₒ; i < OPOS; i += 2)
-                obj[OREP[i]] = OREP[i + 1];
-            break;
-        default:
-            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
-    }
-    OREP[OPOSₒ] = value;
-    OPOS = OPOSₒ + 1;
-    ATYP = ATYPₒ;
-}
 function printValue(rule) {
     const IPOSₒ = IPOS, IREPₒ = IREP, ILENₒ = ILEN, ATYPₒ = ATYP;
     let value = IREP[IPOS];
@@ -194,12 +161,6 @@ function printValue(rule) {
     }
     IPOS += 1;
     return true;
-}
-function printInferValue(infer) {
-    const ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    ATYP = ATYPₒ;
 }
 function assert(value, message) {
     if (!value)
@@ -288,6 +249,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x30;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -303,6 +265,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x30;
+                return true;
             },
         },
     });
@@ -323,6 +286,7 @@ function createStartRule(mode) {
             infer: () => {
                 OREP[OPOS++] = 0x61;
                 ATYP |= STRING_CHARS
+                return true;
             },
         },
         print: {
@@ -338,6 +302,7 @@ function createStartRule(mode) {
             },
             infer: () => {
                 OREP[OPOS++] = 0x61;
+                return true;
             },
         },
     });
@@ -354,6 +319,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚfoo.infer();
                 ꐚresultᱻ1.infer();
+                return true;
             },
         },
         print: {
@@ -366,6 +332,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚfoo.infer();
                 ꐚresultᱻ1.infer();
+                return true;
             },
         },
     });
@@ -382,6 +349,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚbar.infer();
                 ꐚbaz.infer();
+                return true;
             },
         },
         print: {
@@ -394,6 +362,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚbar.infer();
                 ꐚbaz.infer();
+                return true;
             },
         },
     });
@@ -410,10 +379,11 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                parseInferValue(ꐚdigit.infer);
-                parseInferValue(ꐚmyListᱻ1.infer);
-                parseInferValue(ꐚmyListᱻ2.infer);
+                parseValue(ꐚdigit.infer);
+                parseValue(ꐚmyListᱻ1.infer);
+                parseValue(ꐚmyListᱻ2.infer);
                 ATYP |= LIST_ELEMENTS;
+                return true;
             },
         },
         print: {
@@ -426,10 +396,10 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function LST() {
-                if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
-                printInferValue(ꐚdigit.infer);
-                printInferValue(ꐚmyListᱻ1.infer);
-                printInferValue(ꐚmyListᱻ2.infer);
+                ꐚdigit.infer();
+                ꐚmyListᱻ1.infer();
+                ꐚmyListᱻ2.infer();
+                return true;
             },
         },
     });
@@ -446,6 +416,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚdigit.infer();
                 ꐚdigit.infer();
+                return true;
             },
         },
         print: {
@@ -458,6 +429,7 @@ function createStartRule(mode) {
             infer: () => {
                 ꐚdigit.infer();
                 ꐚdigit.infer();
+                return true;
             },
         },
     });
@@ -476,6 +448,7 @@ function createStartRule(mode) {
                 ꐚdigit.infer();
                 ꐚdigit.infer();
                 ꐚdigit.infer();
+                return true;
             },
         },
         print: {
@@ -490,6 +463,7 @@ function createStartRule(mode) {
                 ꐚdigit.infer();
                 ꐚdigit.infer();
                 ꐚdigit.infer();
+                return true;
             },
         },
     });
@@ -517,6 +491,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6e;
                 OREP[OPOS++] = 0x67;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -534,6 +509,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         constant: "b thing",
@@ -562,6 +538,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6e;
                 OREP[OPOS++] = 0x67;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -579,6 +556,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         constant: "d thing",
@@ -643,6 +621,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6f;
                 OREP[OPOS++] = 0x6f;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -662,6 +641,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x66;
                 OREP[OPOS++] = 0x6f;
                 OREP[OPOS++] = 0x6f;
+                return true;
             },
         },
         constant: "foo",
@@ -687,6 +667,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x61;
                 OREP[OPOS++] = 0x72;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -706,6 +687,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x62;
                 OREP[OPOS++] = 0x61;
                 OREP[OPOS++] = 0x72;
+                return true;
             },
         },
         constant: "bar",
@@ -731,6 +713,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x61;
                 OREP[OPOS++] = 0x7a;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -750,6 +733,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x62;
                 OREP[OPOS++] = 0x61;
                 OREP[OPOS++] = 0x7a;
+                return true;
             },
         },
         constant: "baz",
@@ -848,6 +832,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6c;
                 OREP[OPOS++] = 0x31;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -863,6 +848,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         constant: "util1",
@@ -895,6 +881,7 @@ function createStartRule(mode) {
                 OREP[OPOS++] = 0x6c;
                 OREP[OPOS++] = 0x32;
                 ATYP |= STRING_CHARS;
+                return true;
             },
         },
         print: {
@@ -910,6 +897,7 @@ function createStartRule(mode) {
                 return true;
             },
             infer: function STR() {
+                return true;
             },
         },
         constant: "util2",

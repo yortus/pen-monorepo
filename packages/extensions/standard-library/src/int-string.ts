@@ -61,6 +61,7 @@ function intString(mode: 'parse' | 'print'): Func {
                 infer: function ISTR() {
                     OREP[OPOS++] = 0;
                     ATYP |= SCALAR;
+                    return true;
                 },
             },
             print: {
@@ -101,6 +102,7 @@ function intString(mode: 'parse' | 'print'): Func {
                 },
                 infer: function ISTR() {
                     OREP[OPOS++] = CHAR_CODES[0];
+                    return true;
                 },
             },
         });

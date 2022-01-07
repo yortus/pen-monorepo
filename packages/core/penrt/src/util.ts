@@ -1,7 +1,7 @@
 type PenVal = Rule | Func | Module;
 interface Rule {
     (): boolean; // rule
-    infer: () => void;
+    infer: () => true;
     constant?: unknown; // compile-time constant
 }
 interface Func {
@@ -33,11 +33,11 @@ function createRule(mode: 'parse' | 'print', impls: RuleImpls): Rule {
 interface RuleImpls {
     parse: {
         full: () => boolean;
-        infer: () => void;
+        infer: () => true;
     };
     print: {
         full: () => boolean;
-        infer: () => void;
+        infer: () => true;
     };
     constant?: unknown;
 }
@@ -150,38 +150,6 @@ function parseValue(rule: Rule): boolean {
     ATYP = ATYPₒ;
     return true;
 }
-function parseInferValue(infer: () => void): void {
-    const OPOSₒ = OPOS, ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    if (ATYP === NOTHING) return OPOS = OPOSₒ, ATYP = ATYPₒ, undefined;
-
-    let value: unknown;
-    switch (ATYP) {
-        case SCALAR:
-            assert(OPOS === OPOSₒ + 1);
-            value = OREP[OPOSₒ];
-            break;
-        case STRING_CHARS:
-            const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
-            value = internalBuffer.toString('utf8', 0, len);
-            break;
-        case LIST_ELEMENTS:
-            value = OREP.slice(OPOSₒ, OPOS);
-            break;
-        case RECORD_FIELDS:
-            const obj: Record<string, unknown> = value = {};
-            for (let i = OPOSₒ; i < OPOS; i += 2) obj[OREP[i] as string] = OREP[i + 1];
-            break;
-        default:
-            // Ensure all cases have been handled, both at compile time and at runtime.
-            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
-    }
-    OREP[OPOSₒ] = value;
-    OPOS = OPOSₒ + 1;
-    ATYP = ATYPₒ;
-}
 
 // NB: for successful calls: IPOS is incremented, IREP is unchanged, ATYP is unchanged
 function printValue(rule: Rule): boolean {
@@ -247,14 +215,6 @@ function printValue(rule: Rule): boolean {
     IPOS += 1;
     return true;
 }
-
-function printInferValue(infer: () => void): void {
-    const ATYPₒ = ATYP;
-    ATYP = NOTHING;
-    infer();
-    ATYP = ATYPₒ;
-}
-
 
 // TODO: doc... helper...
 function assert(value: unknown, message?: string): asserts value {

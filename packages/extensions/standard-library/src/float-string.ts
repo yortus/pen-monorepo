@@ -77,6 +77,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
             infer: function ISTR() {
                 OREP[OPOS++] = 0;
                 ATYP |= SCALAR;
+                return true;
             },
         },
         print: {
@@ -97,6 +98,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
             },
             infer: function FSTR() {
                 OREP[OPOS++] = ZERO_DIGIT;
+                return true;
             },
         },
     });

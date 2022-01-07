@@ -153,7 +153,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
         case 'AbstractExpression': {
             emit.lines(`
                 parse: {
-                    full: () => (${expr.expression.name}.infer(), true),
+                    full: () => ${expr.expression.name}.infer(),
                     infer: () => ${expr.expression.name}.infer(),
                 },
                 print: {
@@ -163,7 +163,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         OPOS = OPOSₒ;
                         return result;
                     },
-                    infer: () => {},
+                    infer: () => true,
                 },
             `);
             break;
@@ -182,6 +182,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     infer: () => {
                         OREP[OPOS++] = ${JSON.stringify(expr.value)};
                         ATYP != SCALAR;
+                        return true;
                     },
                 },
                 print: {
@@ -191,7 +192,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         IPOS += 1;
                         return true;
                     },
-                    infer: () => {},
+                    infer: () => true,
                 },
                 constant: ${JSON.stringify(expr.value)},
             `);
@@ -236,12 +237,13 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text(`},`);
                 if (!hasOutput) {
-                    emit.down(1).text(`infer: () => {},`);
+                    emit.down(1).text(`infer: () => true,`);
                 }
                 else {
                     emit.down(1).text(`infer: () => {`).indent();
                     emit.down(1).text(`OREP[OPOS++] = 0x${expr.default.toString(16).padStart(2, '0')};`);
                     if (mode === 'parse') emit.down(1).text(`ATYP |= STRING_CHARS`);
+                    emit.down(1).text(`return true;`);
                     emit.dedent().down(1).text('},');
                 }
                 emit.dedent().down(1).text('},');
@@ -258,10 +260,10 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         OPOS = OPOSₒ, ATYP = ATYPₒ;
                         return result;
                     },
-                    infer: () => {},
+                    infer: () => true,
                 },
                 print: {
-                    full: () => (${expr.expression.name}.infer(), true),
+                    full: () => ${expr.expression.name}.infer(),
                     infer: () => ${expr.expression.name}.infer(),
                 },
             `);
@@ -286,10 +288,11 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `${item.expression.name}.infer();`
-                                : `parseInferValue(${item.name}.infer);`)
+                                : `parseValue(${item.name}.infer);`)
                             .join('\n')
                         }
                         ATYP |= LIST_ELEMENTS;
+                        return true;
                     },
                 },
                 print: {
@@ -305,13 +308,13 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         return true;
                     },
                     infer: function LST() {
-                        if (ATYP !== LIST_ELEMENTS && ATYP !== NOTHING) return false;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
                                 ? `${item.expression.name}.infer();`
-                                : `printInferValue(${item.name}.infer);`)
+                                : `${item.name}.infer();`)
                             .join('\n')
                         }
+                        return true;
                     },
                 },
             `);
@@ -329,7 +332,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                             IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
                             return result;
                         },
-                        infer: () => {},
+                        infer: () => true,
                     },
                 `);
             }
@@ -353,7 +356,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
-                emit.down(1).text(`infer: () => {},`);
+                emit.down(1).text(`infer: () => true,`);
                 emit.dedent().down(1).text('},');
             }
             break;
@@ -392,17 +395,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${typeof item.label === 'string' ? `
                                 OREP[OPOS++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    parseInferValue(${item.label.name}.infer);
+                                    parseValue(${item.label.name}.infer);
                                     assert(typeof OREP[OPOS - 1] === 'string');
                                 `}
 
                                 ${/* Parse field value */ ''}
-                                parseInferValue(${item.expression.name}.infer);
+                                parseValue(${item.expression.name}.infer);
                             ` : /* item.kind === 'Splice' */ `
                                 ${item.expression.name}.infer();
                             `}
                         `).join('\n')}
                         ATYP |= RECORD_FIELDS;
+                        return true;
                     },
                 },
                 print: {
@@ -437,18 +441,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                         return true;
                     },
                     infer: function RCD() {
-                        if (ATYP !== RECORD_FIELDS && ATYP !== NOTHING) return false;
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Print field label */ ''}
-                                ${typeof item.label === 'string' ? '' : `printInferValue(${item.label.name}.infer);`}
+                                ${typeof item.label === 'string' ? '' : `${item.label.name}.infer();`}
         
                                 ${/* Print field value */ ''}
-                                printInferValue(${item.expression.name}.infer);
+                                ${item.expression.name}.infer();
                             ` : /* item.kind === 'Splice' */ `
                                 ${item.expression.name}.infer();
                             `}
                         `).join('\n')}
+                        return true;
                     },
                 },
             `);
@@ -462,7 +466,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.lines(`
                     ${mode}: {
                         full: function SEL() { return ${exprVars.map(n => `${n}()`).join(' || ') || 'false'}; },
-                        infer: () => ${arity ? `${exprVars[0]}.infer()` : '{}'},
+                        infer: () => ${arity ? `${exprVars[0]}.infer()` : 'true'},
                     },
                 `);
             }
@@ -483,6 +487,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     },
                     infer: () => {
                         ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
+                        return true;
                     },
                 },
                 print: {
@@ -496,6 +501,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     },
                     infer: () => {
                         ${exprVars.map(ev => `${ev}.infer();`).join('\n')}
+                        return true;
                     },
                 },
             `);
@@ -528,6 +534,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                     for (const byte of bytes) emit.down(1).text(`OREP[OPOS++] = ${byte};`);
                     if (mode === 'parse') emit.down(1).text(`ATYP |= STRING_CHARS;`);
                 }
+                emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
                 emit.dedent().down(1).text('},');
             }
