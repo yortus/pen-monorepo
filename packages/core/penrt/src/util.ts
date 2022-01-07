@@ -45,12 +45,18 @@ interface RuleImpls {
 
 
 // TODO: next:
-// [ ] get rid of arrayish? Or use it more?
+// [ ] ATYP --> CAT_TYP or FRAG, SCALAR --> NON_CAT, STRING_CHARS --> OCTETS, LIST_ELEMENTS --> ELEMENTS, RECORD_FIELDS --> FIELDS or KVPS
+// [ ] add OCAP for output capacity, and check/respect it everywhere output is added
+//     - NB: only needed for Buffer - and can already check that via bug.len
 // [ ] parseValue writes to VALUE, printValue reads from VALUE
 // [ ] restore LEN/CAP (capacity) checking
 // [ ]   printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
 
 
+// TODO: still inaccurate - we cast around this for:
+// - .toString('utf8', start, end);
+// - .write(string, offset);
+// - narrowing element type to number for octet operations
 interface Arrayish<T> {
     [n: number]: T;
     length: number;
@@ -93,6 +99,8 @@ function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
     if (OPOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
     return OREP[0];
 }
+function print(startRule: Rule, value: unknown): string;
+function print(startRule: Rule, value: unknown, buffer: Buffer): number;
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
     IREP = [value];
     IPOS = 0;
@@ -122,7 +130,7 @@ function parseValue(rule: Rule): boolean {
             break;
         case STRING_CHARS:
             const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = (OREP as Buffer)[OPOSₒ + i];
+            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
@@ -156,7 +164,7 @@ function parseInferValue(infer: () => void): void {
             break;
         case STRING_CHARS:
             const len = OPOS - OPOSₒ;
-            for (let i = 0; i < len; ++i) internalBuffer[i] = (OREP as Buffer)[OPOSₒ + i];
+            for (let i = 0; i < len; ++i) internalBuffer[i] = OREP[OPOSₒ + i] as number;
             value = internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
@@ -249,8 +257,8 @@ function printInferValue(infer: () => void): void {
 
 
 // TODO: doc... helper...
-function assert(value: unknown): asserts value {
-    if (!value) throw new Error(`Assertion failed`);
+function assert(value: unknown, message?: string): asserts value {
+    if (!value) throw new Error(`Assertion failed: ${message ?? 'no further details'}`);
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
