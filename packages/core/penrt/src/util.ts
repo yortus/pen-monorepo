@@ -112,3 +112,9 @@ function lazy(init: () => (arg: unknown) => unknown) {
         }
     );
 }
+
+
+
+
+// TODO: lifecycle events
+const onSettled: Array<() => void> = [];

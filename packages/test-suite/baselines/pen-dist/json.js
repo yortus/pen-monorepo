@@ -91,6 +91,7 @@ function lazy(init) {
         }
     });
 }
+const onSettled = [];
 let ICONTENT;
 let IPOINTER = 0;
 let OCONTENT;
@@ -451,8 +452,9 @@ const extensions = {
         const HYPHEN = 0x2d;
         function memoise(mode) {
             return function MEM_function(expr) {
-                // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
                 const memos = new Map();
+                // Clear the memo cache after each parse/print run.
+                onSettled.push(() => memos.clear());
                 return createRule(mode, {
                     parse: {
                         full: function MEM() {

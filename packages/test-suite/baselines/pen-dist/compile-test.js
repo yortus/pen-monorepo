@@ -91,6 +91,7 @@ function lazy(init) {
         }
     });
 }
+const onSettled = [];
 let ICONTENT;
 let IPOINTER = 0;
 let OCONTENT;

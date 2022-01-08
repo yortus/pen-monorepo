@@ -1,6 +1,5 @@
 function memoise(mode: 'parse' | 'print'): Func {
     return function MEM_function(expr) {
-        // TODO: note this never gets cleared between parse/print calls. Would be ideal to be able to clear it somehow.
         const memos = new Map<
             unknown,
             Map<number, {
@@ -12,6 +11,9 @@ function memoise(mode: 'parse' | 'print'): Func {
                 UNITTYPEᐟ: typeof UNITTYPE;
             }>
         >();
+
+        // Clear the memo cache after each parse/print run.
+        onSettled.push(() => memos.clear());
 
         return createRule(mode, {
             parse: {
