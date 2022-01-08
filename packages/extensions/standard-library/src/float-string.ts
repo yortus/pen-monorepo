@@ -6,6 +6,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
             full: function FSTR() {
                 const IPOSₒ = IPOS, OPOSₒ = OPOS;
                 const irep = IREP as Buffer; // IREP is always a Buffer when parsing
+                const ilen = IREP.length;
                 const EOS = 0;
                 let digitCount = 0;
 
@@ -13,7 +14,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
                 let cc = irep[IPOS];
                 if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                    cc = IPOS < ilen ? irep[IPOS] : EOS;
                 }
 
                 // Parse 0..M digits
@@ -21,13 +22,13 @@ function floatString(mode: 'parse' | 'print'): Rule {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     IPOS += 1;
-                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                    cc = IPOS < ilen ? irep[IPOS] : EOS;
                 }
 
                 // Parse optional '.'
                 if (cc === DECIMAL_POINT) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                    cc = IPOS < ilen ? irep[IPOS] : EOS;
                 }
 
                 // Parse 0..M digits
@@ -35,7 +36,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
                     if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                     digitCount += 1;
                     IPOS += 1;
-                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                    cc = IPOS < ilen ? irep[IPOS] : EOS;
                 }
 
                 // Ensure we have parsed at least one significant digit
@@ -44,12 +45,12 @@ function floatString(mode: 'parse' | 'print'): Rule {
                 // Parse optional exponent
                 if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                     IPOS += 1;
-                    cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                    cc = IPOS < ilen ? irep[IPOS] : EOS;
 
                     // Parse optional '+' or '-' sign
                     if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                         IPOS += 1;
-                        cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                        cc = IPOS < ilen ? irep[IPOS] : EOS;
                     }
 
                     // Parse 1..M digits
@@ -58,7 +59,7 @@ function floatString(mode: 'parse' | 'print'): Rule {
                         if (cc < ZERO_DIGIT || cc > NINE_DIGIT) break;
                         digitCount += 1;
                         IPOS += 1;
-                        cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                        cc = IPOS < ilen ? irep[IPOS] : EOS;
                     }
                     if (digitCount === 0) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                 }

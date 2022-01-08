@@ -13,11 +13,12 @@ function intString(mode: 'parse' | 'print'): Func {
                 full: function ISTR() {
                     const IPOSₒ = IPOS, OPOSₒ = OPOS;
                     const irep = IREP as Buffer; // IREP is always a Buffer when parsing
+                    const ilen = IREP.length;
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && IPOS < ILEN && IREP[IPOS] === HYPHEN) {
+                    if (signed && IPOS < ilen && IREP[IPOS] === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
                         IPOS += 1;
@@ -26,7 +27,7 @@ function intString(mode: 'parse' | 'print'): Func {
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let num = 0;
                     let digits = 0;
-                    while (IPOS < ILEN) {
+                    while (IPOS < ilen) {
 
                         // Read a digit.
                         let c = irep[IPOS];

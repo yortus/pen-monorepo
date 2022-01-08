@@ -71,7 +71,6 @@ interface Arrayish<T> {
 // VM REGISTERS - callee updates/restores
 let IREP: Arrayish<unknown>;
 let IPOS: number = 0;
-let ILEN = 0;
 let OREP: Arrayish<unknown>;
 let OPOS: number = 0;
 let ATYP: ATYP = 0; // NB: Parsers _must_ logical-OR this when returning true. Parsers _must not_ change this when returning false.
@@ -91,11 +90,10 @@ const internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make
 function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
     IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     IPOS = 0;
-    ILEN = IREP.length;
     OREP = [];
     OPOS = 0;
     if (!parseValue(startRule)) throw new Error('parse failed');
-    if (IPOS !== ILEN) throw new Error('parse didn\\\'t consume entire input');
+    if (IPOS !== IREP.length) throw new Error('parse didn\\\'t consume entire input');
     if (OPOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
     return OREP[0];
 }
@@ -104,7 +102,6 @@ function print(startRule: Rule, value: unknown, buffer: Buffer): number;
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
     IREP = [value];
     IPOS = 0;
-    ILEN = 1;
     const buf = OREP = buffer ?? Buffer.alloc(2 ** 22); // 4MB
     OPOS = 0;
     if (!printValue(startRule)) throw new Error('print failed');
@@ -153,7 +150,7 @@ function parseValue(rule: Rule): boolean {
 
 // NB: for successful calls: IPOS is incremented, IREP is unchanged, ATYP is unchanged
 function printValue(rule: Rule): boolean {
-    const IPOSₒ = IPOS, IREPₒ = IREP, ILENₒ = ILEN, ATYPₒ = ATYP;
+    const IPOSₒ = IPOS, IREPₒ = IREP, ATYPₒ = ATYP;
     let value = IREP[IPOS];
     let atyp: ATYP;
     let objKeys: string[] | undefined;
@@ -165,22 +162,21 @@ function printValue(rule: Rule): boolean {
 
     // Scalar case
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ILEN = 1, ATYP = SCALAR;
+        ATYP = SCALAR;
         const result = rule();
-        ILEN = ILENₒ, ATYP = ATYPₒ;
+        ATYP = ATYPₒ;
         assert(IPOS === IPOSₒ + 1);
         return result;
     }
 
     // Aggregate cases
     if (typeof value === 'string') {
-        IREP = internalBuffer;
-        ILEN = internalBuffer.write(value, 0, undefined, 'utf8');
+        const len = internalBuffer.write(value, 0, undefined, 'utf8');
+        IREP = internalBuffer.slice(0, len);
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         IREP = value;
-        ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
     else if (isObject(value)) {
@@ -188,7 +184,6 @@ function printValue(rule: Rule): boolean {
         objKeys = Object.keys(value); // TODO: doc reliance on prop order and what this means
         assert(objKeys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
         for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], value[objKeys[i]]);
-        ILEN = arr.length;
         atyp = ATYP = RECORD_FIELDS;
     }
     else {
@@ -199,9 +194,9 @@ function printValue(rule: Rule): boolean {
     IPOS = 0;
     let result = rule();
 
-    // Restore IREP/IPOS/ILEN/ATYP
-    const ipos = IPOS, ilen = ILEN;
-    IREP = IREPₒ, IPOS = IPOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
+    // Restore IREP/IPOS/ATYP
+    const ipos = IPOS, ilen = IREP.length;
+    IREP = IREPₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed

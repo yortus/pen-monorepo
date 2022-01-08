@@ -38,7 +38,6 @@ function createRule(mode, impls) {
 }
 let IREP;
 let IPOS = 0;
-let ILEN = 0;
 let OREP;
 let OPOS = 0;
 let ATYP = 0;
@@ -47,12 +46,11 @@ const internalBuffer = Buffer.alloc(2 ** 16);
 function parse(startRule, stringOrBuffer) {
     IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     IPOS = 0;
-    ILEN = IREP.length;
     OREP = [];
     OPOS = 0;
     if (!parseValue(startRule))
         throw new Error('parse failed');
-    if (IPOS !== ILEN)
+    if (IPOS !== IREP.length)
         throw new Error('parse didn\\\'t consume entire input');
     if (OPOS !== 1)
         throw new Error('parse didn\\\'t produce a singular value');
@@ -61,7 +59,6 @@ function parse(startRule, stringOrBuffer) {
 function print(startRule, value, buffer) {
     IREP = [value];
     IPOS = 0;
-    ILEN = 1;
     const buf = OREP = buffer !== null && buffer !== void 0 ? buffer : Buffer.alloc(2 ** 22);
     OPOS = 0;
     if (!printValue(startRule))
@@ -108,7 +105,7 @@ function parseValue(rule) {
     return true;
 }
 function printValue(rule) {
-    const IPOSₒ = IPOS, IREPₒ = IREP, ILENₒ = ILEN, ATYPₒ = ATYP;
+    const IPOSₒ = IPOS, IREPₒ = IREP, ATYPₒ = ATYP;
     let value = IREP[IPOS];
     let atyp;
     let objKeys;
@@ -116,20 +113,19 @@ function printValue(rule) {
         return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ILEN = 1, ATYP = SCALAR;
+        ATYP = SCALAR;
         const result = rule();
-        ILEN = ILENₒ, ATYP = ATYPₒ;
+        ATYP = ATYPₒ;
         assert(IPOS === IPOSₒ + 1);
         return result;
     }
     if (typeof value === 'string') {
-        IREP = internalBuffer;
-        ILEN = internalBuffer.write(value, 0, undefined, 'utf8');
+        const len = internalBuffer.write(value, 0, undefined, 'utf8');
+        IREP = internalBuffer.slice(0, len);
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
         IREP = value;
-        ILEN = value.length;
         atyp = ATYP = LIST_ELEMENTS;
     }
     else if (isObject(value)) {
@@ -138,7 +134,6 @@ function printValue(rule) {
         assert(objKeys.length < 32);
         for (let i = 0; i < objKeys.length; ++i)
             arr.push(objKeys[i], value[objKeys[i]]);
-        ILEN = arr.length;
         atyp = ATYP = RECORD_FIELDS;
     }
     else {
@@ -146,8 +141,8 @@ function printValue(rule) {
     }
     IPOS = 0;
     let result = rule();
-    const ipos = IPOS, ilen = ILEN;
-    IREP = IREPₒ, IPOS = IPOSₒ, ILEN = ILENₒ, ATYP = ATYPₒ;
+    const ipos = IPOS, ilen = IREP.length;
+    IREP = IREPₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
     if (!result)
         return false;
     if (atyp === RECORD_FIELDS) {
@@ -214,13 +209,14 @@ const extensions = {
                     full: function FSTR() {
                         const IPOSₒ = IPOS, OPOSₒ = OPOS;
                         const irep = IREP; // IREP is always a Buffer when parsing
+                        const ilen = IREP.length;
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
                         let cc = irep[IPOS];
                         if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                            cc = IPOS < ilen ? irep[IPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
@@ -228,12 +224,12 @@ const extensions = {
                                 break;
                             digitCount += 1;
                             IPOS += 1;
-                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                            cc = IPOS < ilen ? irep[IPOS] : EOS;
                         }
                         // Parse optional '.'
                         if (cc === DECIMAL_POINT) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                            cc = IPOS < ilen ? irep[IPOS] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
@@ -241,7 +237,7 @@ const extensions = {
                                 break;
                             digitCount += 1;
                             IPOS += 1;
-                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                            cc = IPOS < ilen ? irep[IPOS] : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
@@ -249,11 +245,11 @@ const extensions = {
                         // Parse optional exponent
                         if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
                             IPOS += 1;
-                            cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                            cc = IPOS < ilen ? irep[IPOS] : EOS;
                             // Parse optional '+' or '-' sign
                             if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
                                 IPOS += 1;
-                                cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                                cc = IPOS < ilen ? irep[IPOS] : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
@@ -262,7 +258,7 @@ const extensions = {
                                     break;
                                 digitCount += 1;
                                 IPOS += 1;
-                                cc = IPOS < ILEN ? irep[IPOS] : EOS;
+                                cc = IPOS < ilen ? irep[IPOS] : EOS;
                             }
                             if (digitCount === 0)
                                 return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
@@ -330,10 +326,11 @@ const extensions = {
                         full: function ISTR() {
                             const IPOSₒ = IPOS, OPOSₒ = OPOS;
                             const irep = IREP; // IREP is always a Buffer when parsing
+                            const ilen = IREP.length;
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && IPOS < ILEN && IREP[IPOS] === HYPHEN) {
+                            if (signed && IPOS < ilen && IREP[IPOS] === HYPHEN) {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
                                 IPOS += 1;
@@ -341,7 +338,7 @@ const extensions = {
                             // ...followed by one or more decimal digits. (NB: no exponents).
                             let num = 0;
                             let digits = 0;
-                            while (IPOS < ILEN) {
+                            while (IPOS < ilen) {
                                 // Read a digit.
                                 let c = irep[IPOS];
                                 if (c >= 256)
@@ -578,10 +575,11 @@ const extensions = {
                         full: function UNI() {
                             const IPOSₒ = IPOS, OPOSₒ = OPOS;
                             const irep = IREP; // IREP is always a Buffer when parsing
+                            const ilen = IREP.length;
                             const EOS = '';
                             let len = 0;
                             let num = ''; // TODO: fix this - should actually keep count
-                            let c = IPOS < ILEN ? String.fromCharCode(irep[IPOS]) : EOS; // TODO: convoluted - simplify whole method
+                            let c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS; // TODO: convoluted - simplify whole method
                             while (true) {
                                 if (!regex.test(c))
                                     break;
@@ -590,7 +588,7 @@ const extensions = {
                                 len += 1;
                                 if (len === maxDigits)
                                     break;
-                                c = IPOS < ILEN ? String.fromCharCode(irep[IPOS]) : EOS;
+                                c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS;
                             }
                             if (len < minDigits)
                                 return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
@@ -608,7 +606,8 @@ const extensions = {
                     },
                     print: {
                         full: function UNI() {
-                            if (ATYP !== STRING_CHARS || IPOS >= ILEN)
+                            const ilen = IREP.length;
+                            if (ATYP !== STRING_CHARS || IPOS >= ilen)
                                 return false;
                             const IPOSₒ = IPOS, OPOSₒ = OPOS;
                             const irep = IREP; // IREP is a Buffer when ATYP === STRING_CHARS
@@ -618,17 +617,17 @@ const extensions = {
                                 // no-op
                             }
                             else if (c > 191 && c < 224) {
-                                if (IPOS >= ILEN)
+                                if (IPOS >= ilen)
                                     return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                                 c = (c & 31) << 6 | irep[IPOS++] & 63;
                             }
                             else if (c > 223 && c < 240) {
-                                if (IPOS + 1 >= ILEN)
+                                if (IPOS + 1 >= ilen)
                                     return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                                 c = (c & 15) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
                             }
                             else if (c > 239 && c < 248) {
-                                if (IPOS + 2 >= ILEN)
+                                if (IPOS + 2 >= ilen)
                                     return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                                 c = (c & 7) << 18 | (irep[IPOS++] & 63) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
                             }
@@ -753,7 +752,7 @@ function createStartRule(mode) {
     const ꐚFalseᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 5 > ILEN) return false;
+                if (IPOS + 5 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x66) return false;
                 if (IREP[IPOS + 1] !== 0x61) return false;
                 if (IREP[IPOS + 2] !== 0x6c) return false;
@@ -847,7 +846,7 @@ function createStartRule(mode) {
     const ꐚNullᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 4 > ILEN) return false;
+                if (IPOS + 4 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x6e) return false;
                 if (IREP[IPOS + 1] !== 0x75) return false;
                 if (IREP[IPOS + 2] !== 0x6c) return false;
@@ -938,7 +937,7 @@ function createStartRule(mode) {
     const ꐚTrueᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 4 > ILEN) return false;
+                if (IPOS + 4 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x74) return false;
                 if (IREP[IPOS + 1] !== 0x72) return false;
                 if (IREP[IPOS + 2] !== 0x75) return false;
@@ -1096,7 +1095,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 for (i = IPOS = 0; (bitmask & (1 << i)) !== 0; ++i, IPOS += 2) ;
@@ -1197,7 +1196,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 for (i = IPOS = 0; (bitmask & (1 << i)) !== 0; ++i, IPOS += 2) ;
@@ -1294,7 +1293,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 IPOS = bitmask;
@@ -1371,7 +1370,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 IPOS = bitmask;
@@ -1410,7 +1409,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 for (i = IPOS = 0; (bitmask & (1 << i)) !== 0; ++i, IPOS += 2) ;
@@ -1523,7 +1522,7 @@ function createStartRule(mode) {
                 if (ATYP !== RECORD_FIELDS) return false;
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 const propList = IREP;
-                const propCount = ILEN >> 1;
+                const propCount = IREP.length >> 1;
                 let bitmask = IPOS;
                 let i;
                 IPOS = bitmask;
@@ -2086,7 +2085,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc === 0x5c) return false;
                 if (cc === 0x22) return false;
@@ -2106,7 +2105,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc === 0x5c) return false;
                 if (cc === 0x22) return false;
@@ -2157,7 +2156,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xc0 || cc > 0xdf)) return false;
                 IPOS += 1;
@@ -2175,7 +2174,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xc0 || cc > 0xdf)) return false;
                 IPOS += 1;
@@ -2194,7 +2193,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2212,7 +2211,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2265,7 +2264,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xe0 || cc > 0xef)) return false;
                 IPOS += 1;
@@ -2283,7 +2282,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xe0 || cc > 0xef)) return false;
                 IPOS += 1;
@@ -2302,7 +2301,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2320,7 +2319,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2339,7 +2338,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2357,7 +2356,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2414,7 +2413,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xf0 || cc > 0xf7)) return false;
                 IPOS += 1;
@@ -2432,7 +2431,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0xf0 || cc > 0xf7)) return false;
                 IPOS += 1;
@@ -2451,7 +2450,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2469,7 +2468,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2488,7 +2487,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2506,7 +2505,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2525,7 +2524,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2543,7 +2542,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if ((cc < 0x80 || cc > 0xbf)) return false;
                 IPOS += 1;
@@ -2591,7 +2590,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ15 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x22) return false;
                 IPOS += 2;
@@ -2636,7 +2635,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x22) return false;
                 IPOS += 1;
@@ -2680,7 +2679,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ18 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x5c) return false;
                 IPOS += 2;
@@ -2725,7 +2724,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x5c) return false;
                 IPOS += 1;
@@ -2769,7 +2768,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ21 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x2f) return false;
                 IPOS += 2;
@@ -2814,7 +2813,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x2f) return false;
                 IPOS += 1;
@@ -2858,7 +2857,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ24 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x62) return false;
                 IPOS += 2;
@@ -2903,7 +2902,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x08) return false;
                 IPOS += 1;
@@ -2947,7 +2946,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ27 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x66) return false;
                 IPOS += 2;
@@ -2992,7 +2991,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x0c) return false;
                 IPOS += 1;
@@ -3036,7 +3035,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ30 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x6e) return false;
                 IPOS += 2;
@@ -3081,7 +3080,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x0a) return false;
                 IPOS += 1;
@@ -3125,7 +3124,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ33 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x72) return false;
                 IPOS += 2;
@@ -3170,7 +3169,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x0d) return false;
                 IPOS += 1;
@@ -3214,7 +3213,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ36 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x74) return false;
                 IPOS += 2;
@@ -3259,7 +3258,7 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x09) return false;
                 IPOS += 1;
@@ -3303,7 +3302,7 @@ function createStartRule(mode) {
     const ꐚCHARᱻ39 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > ILEN) return false;
+                if (IPOS + 2 > IREP.length) return false;
                 if (IREP[IPOS + 0] !== 0x5c) return false;
                 if (IREP[IPOS + 1] !== 0x75) return false;
                 IPOS += 2;
@@ -3380,7 +3379,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x7b) return false;
                 IPOS += 1;
@@ -3441,7 +3440,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x7d) return false;
                 IPOS += 1;
@@ -3502,7 +3501,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x5b) return false;
                 IPOS += 1;
@@ -3563,7 +3562,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x5d) return false;
                 IPOS += 1;
@@ -3624,7 +3623,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x3a) return false;
                 IPOS += 1;
@@ -3685,7 +3684,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x2c) return false;
                 IPOS += 1;
@@ -3712,7 +3711,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x22) return false;
                 IPOS += 1;
@@ -3767,7 +3766,7 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= ILEN) return false;
+                if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
                 if (cc !== 0x20 && cc !== 0x09 && cc !== 0x0a && cc !== 0x0d) return false;
                 IPOS += 1;

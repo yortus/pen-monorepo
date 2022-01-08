@@ -19,18 +19,19 @@ function unicode(mode: 'parse' | 'print'): Func {
                 full: function UNI() {
                     const IPOSₒ = IPOS, OPOSₒ = OPOS;
                     const irep = IREP as Buffer; // IREP is always a Buffer when parsing
+                    const ilen = IREP.length;
                     const EOS = '';
 
                     let len = 0;
                     let num = ''; // TODO: fix this - should actually keep count
-                    let c = IPOS < ILEN ? String.fromCharCode(irep[IPOS]) : EOS; // TODO: convoluted - simplify whole method
+                    let c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS; // TODO: convoluted - simplify whole method
                     while (true) {
                         if (!regex.test(c)) break;
                         num += c;
                         IPOS += 1;
                         len += 1;
                         if (len === maxDigits) break;
-                        c = IPOS < ILEN ? String.fromCharCode(irep[IPOS]) : EOS;
+                        c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS;
                     }
 
                     if (len < minDigits) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
@@ -47,7 +48,8 @@ function unicode(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function UNI() {
-                    if (ATYP !== STRING_CHARS || IPOS >= ILEN) return false;
+                    const ilen = IREP.length; 
+                    if (ATYP !== STRING_CHARS || IPOS >= ilen) return false;
                     const IPOSₒ = IPOS, OPOSₒ = OPOS;
                     const irep = IREP as Buffer; // IREP is a Buffer when ATYP === STRING_CHARS
                     const orep = OREP as Buffer; // OREP is always a Buffer when printing
@@ -56,15 +58,15 @@ function unicode(mode: 'parse' | 'print'): Func {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (IPOS >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        if (IPOS >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         c = (c & 31) << 6 | irep[IPOS++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (IPOS + 1 >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        if (IPOS + 1 >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         c = (c & 15) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (IPOS + 2 >= ILEN) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        if (IPOS + 2 >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
                         c = (c & 7) << 18 | (irep[IPOS++] & 63) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
                     }
                     else return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
