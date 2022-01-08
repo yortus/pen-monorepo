@@ -17,13 +17,13 @@ start = WS   Value   WS
 
 // ---------- Top-Level JSON Values ----------
 Value =
-    |   False
-    |   Null
-    |   True
+    |   String
     |   Object
     |   Array
     |   Number
-    |   String
+    |   False
+    |   Null
+    |   True
 
 // ---------- Primitive values ----------
 False   = "false"   false
@@ -46,24 +46,29 @@ Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-
 Number = floatString
 
 // ---------- Strings ----------
-String = DOUBLE_QUOTE   0..m CHAR   DOUBLE_QUOTE
+// TODO: BUG: this requires strings to have 1..M chars, but *should* allow empty strings too. The problem is that when printing,
+//       the `String` rule always matches any input value. Eg if input value is an array, it matches without consuming anything.
+//       SOLN: Special built-in rule for 'empty string'? Special way of saying (on print) 'we have to have a string DATATYPE here, even if empty'
+//             ...and similar prob/soln for lists and records in a quantified (* or ?) pattern
+String = DOUBLE_QUOTE   CHAR   0..m CHAR   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents? (in NODE)
 //       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
-// TODO: should support wider charset than ascii - this is not full JSON
 CHAR =
     |   not `\\`   not `\"`   `\x20-7F`                             // any ASCII char except '\', '"', or control char
     |   `\xC0-DF\x80-BF`                                            // any 2-byte utf8 char
     |   `\xE0-EF\x80-BF\x80-BF`                                     // any 3-byte utf8 char
     |   `\xF0-F7\x80-BF\x80-BF\x80-BF`                              // any 4-byte utf8 char
-    |   "\\\""   '\"'                                               // quotation mark
-    |   "\\\\"   '\\'                                               // reverse solidus
-    |   "\\/"   '/'                                                 // solidus
-    |   "\\b"   '\b'                                                // backspace
-    |   "\\f"   '\f'                                                // formfeed
-    |   "\\n"   '\n'                                                // newline
-    |   "\\r"   '\r'                                                // carriage return
-    |   "\\t"   '\t'                                                // horizontal tab
-    |   "\\u"   unicode(base=16 minDigits=4 maxDigits=4)            // unicode escape sequence
+    |   "\\" (                                                      // any escape sequence:
+        |   "\""   '\"'                                             // - quotation mark
+        |   "\\"   '\\'                                             // - reverse solidus
+        |   "/"   '/'                                               // - solidus
+        |   "b"   '\b'                                              // - backspace
+        |   "f"   '\f'                                              // - formfeed
+        |   "n"   '\n'                                              // - newline
+        |   "r"   '\r'                                              // - carriage return
+        |   "t"   '\t'                                              // - horizontal tab
+        |   "u"   unicode(base=16 minDigits=4 maxDigits=4)          // - unicode escape sequence
+    )
 
 // ---------- Literal characters ----------
 

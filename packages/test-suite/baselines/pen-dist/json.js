@@ -709,12 +709,12 @@ function createStartRule(mode) {
     // SelectionExpression
     const ꐚValue = createRule(mode, {
         parse: {
-            full: function SEL() { return ꐚFalse() || ꐚNull() || ꐚTrue() || ꐚObject() || ꐚArray() || ꐚNumber() || ꐚString(); },
-            infer: () => ꐚFalse.infer(),
+            full: function SEL() { return ꐚString() || ꐚObject() || ꐚArray() || ꐚNumber() || ꐚFalse() || ꐚNull() || ꐚTrue(); },
+            infer: () => ꐚString.infer(),
         },
         print: {
-            full: function SEL() { return ꐚFalse() || ꐚNull() || ꐚTrue() || ꐚObject() || ꐚArray() || ꐚNumber() || ꐚString(); },
-            infer: () => ꐚFalse.infer(),
+            full: function SEL() { return ꐚString() || ꐚObject() || ꐚArray() || ꐚNumber() || ꐚFalse() || ꐚNull() || ꐚTrue(); },
+            infer: () => ꐚString.infer(),
         },
     });
 
@@ -1934,12 +1934,14 @@ function createStartRule(mode) {
             full: function SEQ() {
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 if (!ꐚDOUBLE_QUOTE()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚCHAR()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 if (!ꐚStringᱻ1()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 if (!ꐚDOUBLE_QUOTE()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
                 ꐚDOUBLE_QUOTE.infer();
+                ꐚCHAR.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
                 return true;
@@ -1949,12 +1951,14 @@ function createStartRule(mode) {
             full: function SEQ() {
                 const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
                 if (!ꐚDOUBLE_QUOTE()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚCHAR()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 if (!ꐚStringᱻ1()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 if (!ꐚDOUBLE_QUOTE()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
                 return true;
             },
             infer: () => {
                 ꐚDOUBLE_QUOTE.infer();
+                ꐚCHAR.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
                 return true;
@@ -2071,11 +2075,11 @@ function createStartRule(mode) {
     // SelectionExpression
     const ꐚCHAR = createRule(mode, {
         parse: {
-            full: function SEL() { return ꐚCHARᱻ1() || ꐚCHARᱻ2() || ꐚCHARᱻ5() || ꐚCHARᱻ9() || ꐚCHARᱻ14() || ꐚCHARᱻ17() || ꐚCHARᱻ20() || ꐚCHARᱻ23() || ꐚCHARᱻ26() || ꐚCHARᱻ29() || ꐚCHARᱻ32() || ꐚCHARᱻ35() || ꐚCHARᱻ38(); },
+            full: function SEL() { return ꐚCHARᱻ1() || ꐚCHARᱻ2() || ꐚCHARᱻ5() || ꐚCHARᱻ9() || ꐚCHARᱻ14(); },
             infer: () => ꐚCHARᱻ1.infer(),
         },
         print: {
-            full: function SEL() { return ꐚCHARᱻ1() || ꐚCHARᱻ2() || ꐚCHARᱻ5() || ꐚCHARᱻ9() || ꐚCHARᱻ14() || ꐚCHARᱻ17() || ꐚCHARᱻ20() || ꐚCHARᱻ23() || ꐚCHARᱻ26() || ꐚCHARᱻ29() || ꐚCHARᱻ32() || ꐚCHARᱻ35() || ꐚCHARᱻ38(); },
+            full: function SEL() { return ꐚCHARᱻ1() || ꐚCHARᱻ2() || ꐚCHARᱻ5() || ꐚCHARᱻ9() || ꐚCHARᱻ14(); },
             infer: () => ꐚCHARᱻ1.infer(),
         },
     });
@@ -2586,62 +2590,42 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ15 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x22) return false;
-                IPOS += 2;
-                return true;
-            },
-            infer: function STR() {
-                return true;
-            },
-        },
-        print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x22;
-                return true;
-            },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x22;
-                return true;
-            },
-        },
-        constant: "\\\"",
-    });
-
-    // ByteExpression
-    const ꐚCHARᱻ16 = createRule(mode, {
-        parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x22;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
-                return true;
-            },
-            infer: () => {
-                OREP[OPOS++] = 0x22;
-                ATYP |= STRING_CHARS
-                return true;
-            },
-        },
-        print: {
-            full: function BYT() {
-                let cc;
-                if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x22) return false;
+                if (cc !== 0x5c) return false;
                 IPOS += 1;
                 return true;
             },
             infer: () => true,
+        },
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x5c;
+                OREP[OPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                OREP[OPOS++] = 0x5c;
+                return true;
+            },
+        },
+    });
+
+    // SelectionExpression
+    const ꐚCHARᱻ16 = createRule(mode, {
+        parse: {
+            full: function SEL() { return ꐚCHARᱻ17() || ꐚCHARᱻ20() || ꐚCHARᱻ23() || ꐚCHARᱻ26() || ꐚCHARᱻ29() || ꐚCHARᱻ32() || ꐚCHARᱻ35() || ꐚCHARᱻ38() || ꐚCHARᱻ41(); },
+            infer: () => ꐚCHARᱻ17.infer(),
+        },
+        print: {
+            full: function SEL() { return ꐚCHARᱻ17() || ꐚCHARᱻ20() || ꐚCHARᱻ23() || ꐚCHARᱻ26() || ꐚCHARᱻ29() || ꐚCHARᱻ32() || ꐚCHARᱻ35() || ꐚCHARᱻ38() || ꐚCHARᱻ41(); },
+            infer: () => ꐚCHARᱻ17.infer(),
         },
     });
 
@@ -2675,33 +2659,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ18 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x5c) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x22) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x5c;
+            full: function BYT() {
+                let cc;
+                cc = 0x22;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x5c;
+            infer: () => {
+                OREP[OPOS++] = 0x22;
                 return true;
             },
         },
-        constant: "\\\\",
     });
 
     // ByteExpression
@@ -2709,13 +2691,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x5c;
+                cc = 0x22;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x5c;
+                OREP[OPOS++] = 0x22;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -2726,7 +2708,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x5c) return false;
+                if (cc !== 0x22) return false;
                 IPOS += 1;
                 return true;
             },
@@ -2764,33 +2746,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ21 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x2f) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x5c) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x2f;
+            full: function BYT() {
+                let cc;
+                cc = 0x5c;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
+            infer: () => {
                 OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x2f;
                 return true;
             },
         },
-        constant: "\\/",
     });
 
     // ByteExpression
@@ -2798,13 +2778,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x2f;
+                cc = 0x5c;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2f;
+                OREP[OPOS++] = 0x5c;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -2815,7 +2795,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x2f) return false;
+                if (cc !== 0x5c) return false;
                 IPOS += 1;
                 return true;
             },
@@ -2853,33 +2833,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ24 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x62) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x2f) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x62;
+            full: function BYT() {
+                let cc;
+                cc = 0x2f;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x62;
+            infer: () => {
+                OREP[OPOS++] = 0x2f;
                 return true;
             },
         },
-        constant: "\\b",
     });
 
     // ByteExpression
@@ -2887,13 +2865,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x08;
+                cc = 0x2f;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x08;
+                OREP[OPOS++] = 0x2f;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -2904,7 +2882,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x08) return false;
+                if (cc !== 0x2f) return false;
                 IPOS += 1;
                 return true;
             },
@@ -2942,33 +2920,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ27 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x66) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x62) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x66;
+            full: function BYT() {
+                let cc;
+                cc = 0x62;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x66;
+            infer: () => {
+                OREP[OPOS++] = 0x62;
                 return true;
             },
         },
-        constant: "\\f",
     });
 
     // ByteExpression
@@ -2976,13 +2952,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x0c;
+                cc = 0x08;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x0c;
+                OREP[OPOS++] = 0x08;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -2993,7 +2969,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x0c) return false;
+                if (cc !== 0x08) return false;
                 IPOS += 1;
                 return true;
             },
@@ -3031,33 +3007,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ30 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x6e) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x66) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x6e;
+            full: function BYT() {
+                let cc;
+                cc = 0x66;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x6e;
+            infer: () => {
+                OREP[OPOS++] = 0x66;
                 return true;
             },
         },
-        constant: "\\n",
     });
 
     // ByteExpression
@@ -3065,13 +3039,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x0a;
+                cc = 0x0c;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x0a;
+                OREP[OPOS++] = 0x0c;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -3082,7 +3056,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x0a) return false;
+                if (cc !== 0x0c) return false;
                 IPOS += 1;
                 return true;
             },
@@ -3120,33 +3094,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ33 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x72) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x6e) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x72;
+            full: function BYT() {
+                let cc;
+                cc = 0x6e;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x72;
+            infer: () => {
+                OREP[OPOS++] = 0x6e;
                 return true;
             },
         },
-        constant: "\\r",
     });
 
     // ByteExpression
@@ -3154,13 +3126,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x0d;
+                cc = 0x0a;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x0d;
+                OREP[OPOS++] = 0x0a;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -3171,7 +3143,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x0d) return false;
+                if (cc !== 0x0a) return false;
                 IPOS += 1;
                 return true;
             },
@@ -3209,33 +3181,31 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ36 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x74) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x72) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                return true;
-            },
+            infer: () => true,
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x74;
+            full: function BYT() {
+                let cc;
+                cc = 0x72;
+                OREP[OPOS++] = cc;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x74;
+            infer: () => {
+                OREP[OPOS++] = 0x72;
                 return true;
             },
         },
-        constant: "\\t",
     });
 
     // ByteExpression
@@ -3243,13 +3213,13 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                cc = 0x09;
+                cc = 0x0d;
                 OREP[OPOS++] = cc;
                 ATYP |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x09;
+                OREP[OPOS++] = 0x0d;
                 ATYP |= STRING_CHARS
                 return true;
             },
@@ -3260,7 +3230,7 @@ function createStartRule(mode) {
                 if (ATYP !== STRING_CHARS) return false;
                 if (IPOS >= IREP.length) return false;
                 cc = IREP[IPOS];
-                if (cc !== 0x09) return false;
+                if (cc !== 0x0d) return false;
                 IPOS += 1;
                 return true;
             },
@@ -3298,40 +3268,125 @@ function createStartRule(mode) {
         },
     });
 
-    // StringLiteral
+    // ByteExpression
     const ꐚCHARᱻ39 = createRule(mode, {
         parse: {
-            full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x5c) return false;
-                if (IREP[IPOS + 1] !== 0x75) return false;
-                IPOS += 2;
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x74) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
+            infer: () => true,
+        },
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x74;
+                OREP[OPOS++] = cc;
+                return true;
+            },
+            infer: () => {
+                OREP[OPOS++] = 0x74;
+                return true;
+            },
+        },
+    });
+
+    // ByteExpression
+    const ꐚCHARᱻ40 = createRule(mode, {
+        parse: {
+            full: function BYT() {
+                let cc;
+                cc = 0x09;
+                OREP[OPOS++] = cc;
+                ATYP |= STRING_CHARS
+                return true;
+            },
+            infer: () => {
+                OREP[OPOS++] = 0x09;
+                ATYP |= STRING_CHARS
                 return true;
             },
         },
         print: {
-            full: function STR() {
-                OREP[OPOS++] = 0x5c;
-                OREP[OPOS++] = 0x75;
+            full: function BYT() {
+                let cc;
+                if (ATYP !== STRING_CHARS) return false;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x09) return false;
+                IPOS += 1;
                 return true;
             },
-            infer: function STR() {
-                OREP[OPOS++] = 0x5c;
+            infer: () => true,
+        },
+    });
+
+    // SequenceExpression
+    const ꐚCHARᱻ41 = createRule(mode, {
+        parse: {
+            full: function SEQ() {
+                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                if (!ꐚCHARᱻ42()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚCHARᱻ43()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                return true;
+            },
+            infer: () => {
+                ꐚCHARᱻ42.infer();
+                ꐚCHARᱻ43.infer();
+                return true;
+            },
+        },
+        print: {
+            full: function SEQ() {
+                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                if (!ꐚCHARᱻ42()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                if (!ꐚCHARᱻ43()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                return true;
+            },
+            infer: () => {
+                ꐚCHARᱻ42.infer();
+                ꐚCHARᱻ43.infer();
+                return true;
+            },
+        },
+    });
+
+    // ByteExpression
+    const ꐚCHARᱻ42 = createRule(mode, {
+        parse: {
+            full: function BYT() {
+                let cc;
+                if (IPOS >= IREP.length) return false;
+                cc = IREP[IPOS];
+                if (cc !== 0x75) return false;
+                IPOS += 1;
+                return true;
+            },
+            infer: () => true,
+        },
+        print: {
+            full: function BYT() {
+                let cc;
+                cc = 0x75;
+                OREP[OPOS++] = cc;
+                return true;
+            },
+            infer: () => {
                 OREP[OPOS++] = 0x75;
                 return true;
             },
         },
-        constant: "\\u",
     });
 
     // ApplicationExpression
-    const ꐚCHARᱻ40 = lazy(() => ꐚunicode(ꐚCHARᱻ41));
+    const ꐚCHARᱻ43 = lazy(() => ꐚunicode(ꐚCHARᱻ44));
 
     // Module
-    const ꐚCHARᱻ41 = (member) => {
+    const ꐚCHARᱻ44 = (member) => {
         switch (member) {
             case 'base': return ꐚbase;
             case 'minDigits': return ꐚminDigits;
