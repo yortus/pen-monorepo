@@ -17,28 +17,28 @@ function unicode(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function UNI() {
-                    const IPOSₒ = IPOS, OPOSₒ = OPOS;
-                    const irep = IREP as Buffer; // IREP is always a Buffer when parsing
-                    const ilen = IREP.length;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
+                    const ibuffer = ICONTENT as Buffer; // ICONTENT is always a Buffer when parsing
+                    const ilen = ICONTENT.length;
                     const EOS = '';
 
                     let len = 0;
                     let num = ''; // TODO: fix this - should actually keep count
-                    let c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS; // TODO: convoluted - simplify whole method
+                    let c = IPOINTER < ilen ? String.fromCharCode(ibuffer[IPOINTER]) : EOS; // TODO: convoluted - simplify whole method
                     while (true) {
                         if (!regex.test(c)) break;
                         num += c;
-                        IPOS += 1;
+                        IPOINTER += 1;
                         len += 1;
                         if (len === maxDigits) break;
-                        c = IPOS < ilen ? String.fromCharCode(irep[IPOS]) : EOS;
+                        c = IPOINTER < ilen ? String.fromCharCode(ibuffer[IPOINTER]) : EOS;
                     }
 
-                    if (len < minDigits) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                    if (len < minDigits) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                     // tslint:disable-next-line: no-eval
                     const buf = Buffer.from(eval(`"\\u{${num}}"`)); // TODO: hacky... fix when we have a charCode
-                    for (let i = 0; i < buf.length; ++i) OREP[OPOS++] = buf[i];
-                    ATYP |= STRING_CHARS;
+                    for (let i = 0; i < buf.length; ++i) OCONTENT[OPOINTER++] = buf[i];
+                    DATATYPE |= STRING_CHARS;
                     return true;
                 },
                 infer: function UNI() {
@@ -48,33 +48,33 @@ function unicode(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function UNI() {
-                    const ilen = IREP.length; 
-                    if (ATYP !== STRING_CHARS || IPOS >= ilen) return false;
-                    const IPOSₒ = IPOS, OPOSₒ = OPOS;
-                    const irep = IREP as Buffer; // IREP is a Buffer when ATYP === STRING_CHARS
-                    const orep = OREP as Buffer; // OREP is always a Buffer when printing
-                    let c = irep[IPOS++];
+                    const ilen = ICONTENT.length; 
+                    if (DATATYPE !== STRING_CHARS || IPOINTER >= ilen) return false;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
+                    const ibuffer = ICONTENT as Buffer; // ICONTENT is a Buffer when DATATYPE === STRING_CHARS
+                    const obuffer = OCONTENT as Buffer; // OCONTENT is always a Buffer when printing
+                    let c = ibuffer[IPOINTER++];
                     if (c < 128) {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (IPOS >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
-                        c = (c & 31) << 6 | irep[IPOS++] & 63;
+                        if (IPOINTER >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        c = (c & 31) << 6 | ibuffer[IPOINTER++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (IPOS + 1 >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
-                        c = (c & 15) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
+                        if (IPOINTER + 1 >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        c = (c & 15) << 12 | (ibuffer[IPOINTER++] & 63) << 6 | ibuffer[IPOINTER++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (IPOS + 2 >= ilen) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
-                        c = (c & 7) << 18 | (irep[IPOS++] & 63) << 12 | (irep[IPOS++] & 63) << 6 | irep[IPOS++] & 63;
+                        if (IPOINTER + 2 >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        c = (c & 7) << 18 | (ibuffer[IPOINTER++] & 63) << 12 | (ibuffer[IPOINTER++] & 63) << 6 | ibuffer[IPOINTER++] & 63;
                     }
-                    else return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                    else return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
 
                     const s = c.toString(base).padStart(minDigits, '0');
                     if (s.length > maxDigits) return false;
-                    orep.write(s, OPOS);
-                    OPOS += s.length;
+                    obuffer.write(s, OPOINTER);
+                    OPOINTER += s.length;
                     return true;
                 },
                 infer: function UNI() {

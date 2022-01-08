@@ -52,25 +52,25 @@ interface RuleImpls {
 // Top-level parse/print functions - these set up the VM for each parse/print run
 // TODO: doc: expects buf to be utf8 encoded
 function parse(startRule: Rule, stringOrBuffer: string | Buffer) {
-    IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
-    IPOS = 0;
-    OREP = [];
-    OPOS = 0;
+    ICONTENT = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
+    IPOINTER = 0;
+    OCONTENT = [];
+    OPOINTER = 0;
     if (!parseValue(startRule)) throw new Error('parse failed');
-    if (IPOS !== IREP.length) throw new Error('parse didn\\\'t consume entire input');
-    if (OPOS !== 1) throw new Error('parse didn\\\'t produce a singular value');
-    return OREP[0];
+    if (IPOINTER !== ICONTENT.length) throw new Error('parse didn\\\'t consume entire input');
+    if (OPOINTER !== 1) throw new Error('parse didn\\\'t produce a singular value');
+    return OCONTENT[0];
 }
 function print(startRule: Rule, value: unknown): string;
 function print(startRule: Rule, value: unknown, buffer: Buffer): number;
 function print(startRule: Rule, value: unknown, buffer?: Buffer) {
-    IREP = [value];
-    IPOS = 0;
-    const buf = OREP = buffer ?? Buffer.alloc(2 ** 22); // 4MB
-    OPOS = 0;
+    ICONTENT = [value];
+    IPOINTER = 0;
+    const buf = OCONTENT = buffer ?? Buffer.alloc(2 ** 22); // 4MB
+    OPOINTER = 0;
     if (!printValue(startRule)) throw new Error('print failed');
-    if (OPOS > OREP.length) throw new Error('output buffer too small');
-    return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
+    if (OPOINTER > OCONTENT.length) throw new Error('output buffer too small');
+    return buffer ? OPOINTER : buf.toString('utf8', 0, OPOINTER);
 }
 
 

@@ -37,28 +37,28 @@ function createRule(mode, impls) {
     return result;
 }
 function parse(startRule, stringOrBuffer) {
-    IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
-    IPOS = 0;
-    OREP = [];
-    OPOS = 0;
+    ICONTENT = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
+    IPOINTER = 0;
+    OCONTENT = [];
+    OPOINTER = 0;
     if (!parseValue(startRule))
         throw new Error('parse failed');
-    if (IPOS !== IREP.length)
+    if (IPOINTER !== ICONTENT.length)
         throw new Error('parse didn\\\'t consume entire input');
-    if (OPOS !== 1)
+    if (OPOINTER !== 1)
         throw new Error('parse didn\\\'t produce a singular value');
-    return OREP[0];
+    return OCONTENT[0];
 }
 function print(startRule, value, buffer) {
-    IREP = [value];
-    IPOS = 0;
-    const buf = OREP = buffer !== null && buffer !== void 0 ? buffer : Buffer.alloc(2 ** 22);
-    OPOS = 0;
+    ICONTENT = [value];
+    IPOINTER = 0;
+    const buf = OCONTENT = buffer !== null && buffer !== void 0 ? buffer : Buffer.alloc(2 ** 22);
+    OPOINTER = 0;
     if (!printValue(startRule))
         throw new Error('print failed');
-    if (OPOS > OREP.length)
+    if (OPOINTER > OCONTENT.length)
         throw new Error('output buffer too small');
-    return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
+    return buffer ? OPOINTER : buf.toString('utf8', 0, OPOINTER);
 }
 function assert(value, message) {
     if (!value)
@@ -91,100 +91,100 @@ function lazy(init) {
         }
     });
 }
-let IREP;
-let IPOS = 0;
-let OREP;
-let OPOS = 0;
-let ATYP = 0;
+let ICONTENT;
+let IPOINTER = 0;
+let OCONTENT;
+let OPOINTER = 0;
+let DATATYPE = 0;
 const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 function parseValue(rule) {
-    const OPOSₒ = OPOS, ATYPₒ = ATYP;
-    ATYP = NOTHING;
+    const OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+    DATATYPE = NOTHING;
     if (!rule())
-        return ATYP = ATYPₒ, false;
-    if (ATYP === NOTHING)
-        return OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+        return DATATYPE = DATATYPEₒ, false;
+    if (DATATYPE === NOTHING)
+        return OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
     let value;
-    switch (ATYP) {
+    switch (DATATYPE) {
         case SCALAR:
-            assert(OPOS === OPOSₒ + 1);
-            value = OREP[OPOSₒ];
+            assert(OPOINTER === OPOINTERₒ + 1);
+            value = OCONTENT[OPOINTERₒ];
             break;
         case STRING_CHARS:
-            const len = OPOS - OPOSₒ;
+            const len = OPOINTER - OPOINTERₒ;
             for (let i = 0; i < len; ++i)
-                _internalBuffer[i] = OREP[OPOSₒ + i];
+                _internalBuffer[i] = OCONTENT[OPOINTERₒ + i];
             value = _internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
-            value = OREP.slice(OPOSₒ, OPOS);
+            value = OCONTENT.slice(OPOINTERₒ, OPOINTER);
             break;
         case RECORD_FIELDS:
             const obj = value = {};
-            for (let i = OPOSₒ; i < OPOS; i += 2)
-                obj[OREP[i]] = OREP[i + 1];
-            if (Object.keys(obj).length * 2 < (OPOS - OPOSₒ))
+            for (let i = OPOINTERₒ; i < OPOINTER; i += 2)
+                obj[OCONTENT[i]] = OCONTENT[i + 1];
+            if (Object.keys(obj).length * 2 < (OPOINTER - OPOINTERₒ))
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
-            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(ATYP);
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(DATATYPE);
     }
-    OREP[OPOSₒ] = value;
-    OPOS = OPOSₒ + 1;
-    ATYP = ATYPₒ;
+    OCONTENT[OPOINTERₒ] = value;
+    OPOINTER = OPOINTERₒ + 1;
+    DATATYPE = DATATYPEₒ;
     return true;
 }
 function printValue(rule) {
-    const IPOSₒ = IPOS, IREPₒ = IREP, ATYPₒ = ATYP;
-    let value = IREP[IPOS];
+    const IPOINTERₒ = IPOINTER, ICONTENTₒ = ICONTENT, DATATYPEₒ = DATATYPE;
+    let value = ICONTENT[IPOINTER];
     let atyp;
     let objKeys;
     if (value === undefined) {
         return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        ATYP = SCALAR;
+        DATATYPE = SCALAR;
         const result = rule();
-        ATYP = ATYPₒ;
-        assert(IPOS === IPOSₒ + 1);
+        DATATYPE = DATATYPEₒ;
+        assert(IPOINTER === IPOINTERₒ + 1);
         return result;
     }
     if (typeof value === 'string') {
         const len = _internalBuffer.write(value, 0, undefined, 'utf8');
-        IREP = _internalBuffer.slice(0, len);
-        atyp = ATYP = STRING_CHARS;
+        ICONTENT = _internalBuffer.slice(0, len);
+        atyp = DATATYPE = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
-        IREP = value;
-        atyp = ATYP = LIST_ELEMENTS;
+        ICONTENT = value;
+        atyp = DATATYPE = LIST_ELEMENTS;
     }
     else if (isObject(value)) {
-        const arr = IREP = [];
+        const arr = ICONTENT = [];
         objKeys = Object.keys(value);
         assert(objKeys.length < 32);
         for (let i = 0; i < objKeys.length; ++i)
             arr.push(objKeys[i], value[objKeys[i]]);
-        atyp = ATYP = RECORD_FIELDS;
+        atyp = DATATYPE = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
     }
-    IPOS = 0;
+    IPOINTER = 0;
     let result = rule();
-    const ipos = IPOS, ilen = IREP.length;
-    IREP = IREPₒ, IPOS = IPOSₒ, ATYP = ATYPₒ;
+    const ICONTENTᐟ = ICONTENT, IPOINTERᐟ = IPOINTER;
+    ICONTENT = ICONTENTₒ, IPOINTER = IPOINTERₒ, DATATYPE = DATATYPEₒ;
     if (!result)
         return false;
     if (atyp === RECORD_FIELDS) {
         const keyCount = objKeys.length;
-        if (keyCount > 0 && (ipos !== -1 >>> (32 - keyCount)))
+        if (keyCount > 0 && (IPOINTERᐟ !== -1 >>> (32 - keyCount)))
             return false;
     }
     else {
-        if (ipos !== ilen)
+        if (IPOINTERᐟ !== ICONTENTᐟ.length)
             return false;
     }
-    IPOS += 1;
+    IPOINTER += 1;
     return true;
 }
 const _internalBuffer = Buffer.alloc(2 ** 16);
@@ -207,49 +207,48 @@ const extensions = {
             return createRule(mode, {
                 parse: {
                     full: function FSTR() {
-                        const IPOSₒ = IPOS, OPOSₒ = OPOS;
-                        const irep = IREP; // IREP is always a Buffer when parsing
-                        const ilen = IREP.length;
+                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
+                        const ibuffer = ICONTENT; // ICONTENT is always a Buffer when parsing
                         const EOS = 0;
                         let digitCount = 0;
                         // Parse optional '+' or '-' sign
-                        let cc = irep[IPOS];
+                        let cc = ibuffer[IPOINTER];
                         if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
-                            IPOS += 1;
-                            cc = IPOS < ilen ? irep[IPOS] : EOS;
+                            IPOINTER += 1;
+                            cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
                             if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IPOS += 1;
-                            cc = IPOS < ilen ? irep[IPOS] : EOS;
+                            IPOINTER += 1;
+                            cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                         }
                         // Parse optional '.'
                         if (cc === DECIMAL_POINT) {
-                            IPOS += 1;
-                            cc = IPOS < ilen ? irep[IPOS] : EOS;
+                            IPOINTER += 1;
+                            cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                         }
                         // Parse 0..M digits
                         while (true) {
                             if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                 break;
                             digitCount += 1;
-                            IPOS += 1;
-                            cc = IPOS < ilen ? irep[IPOS] : EOS;
+                            IPOINTER += 1;
+                            cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                         }
                         // Ensure we have parsed at least one significant digit
                         if (digitCount === 0)
-                            return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                            return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         // Parse optional exponent
                         if (cc === UPPERCASE_E || cc === LOWERCASE_E) {
-                            IPOS += 1;
-                            cc = IPOS < ilen ? irep[IPOS] : EOS;
+                            IPOINTER += 1;
+                            cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                             // Parse optional '+' or '-' sign
                             if (cc === PLUS_SIGN || cc === MINUS_SIGN) {
-                                IPOS += 1;
-                                cc = IPOS < ilen ? irep[IPOS] : EOS;
+                                IPOINTER += 1;
+                                cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                             }
                             // Parse 1..M digits
                             digitCount = 0;
@@ -257,47 +256,47 @@ const extensions = {
                                 if (cc < ZERO_DIGIT || cc > NINE_DIGIT)
                                     break;
                                 digitCount += 1;
-                                IPOS += 1;
-                                cc = IPOS < ilen ? irep[IPOS] : EOS;
+                                IPOINTER += 1;
+                                cc = IPOINTER < ICONTENT.length ? ibuffer[IPOINTER] : EOS;
                             }
                             if (digitCount === 0)
-                                return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                                return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         }
                         // There is a syntactically valid float. Delegate parsing to the JS runtime.
                         // Reject the number if it parses to Infinity or Nan.
                         // TODO: the conversion may still be lossy. Provide a non-lossy mode, like `safenum` does?
-                        const num = Number.parseFloat(irep.toString('utf8', IPOSₒ, IPOS));
+                        const num = Number.parseFloat(ibuffer.toString('utf8', IPOINTERₒ, IPOINTER));
                         if (!Number.isFinite(num))
-                            return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                            return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         // Success
-                        OREP[OPOS++] = num;
-                        ATYP |= SCALAR;
+                        OCONTENT[OPOINTER++] = num;
+                        DATATYPE |= SCALAR;
                         return true;
                     },
                     infer: function ISTR() {
-                        OREP[OPOS++] = 0;
-                        ATYP |= SCALAR;
+                        OCONTENT[OPOINTER++] = 0;
+                        DATATYPE |= SCALAR;
                         return true;
                     },
                 },
                 print: {
                     full: function FSTR() {
-                        if (ATYP !== SCALAR)
+                        if (DATATYPE !== SCALAR)
                             return false;
-                        const orep = OREP; // OREP is always a Buffer when printing
-                        const num = IREP[IPOS];
+                        const obuffer = OCONTENT; // OCONTENT is always a Buffer when printing
+                        const num = ICONTENT[IPOINTER];
                         if (typeof num !== 'number')
                             return false;
-                        IPOS += 1;
+                        IPOINTER += 1;
                         // Delegate unparsing to the JS runtime.
                         // TODO: the conversion may not exactly match the original string. Add this to the lossiness list.
                         const out = String(num);
                         // Success
-                        OPOS += orep.write(out, OPOS, undefined, 'utf8');
+                        OPOINTER += obuffer.write(out, OPOINTER, undefined, 'utf8');
                         return true;
                     },
                     infer: function FSTR() {
-                        OREP[OPOS++] = ZERO_DIGIT;
+                        OCONTENT[OPOINTER++] = ZERO_DIGIT;
                         return true;
                     },
                 },
@@ -324,23 +323,23 @@ const extensions = {
                 return createRule(mode, {
                     parse: {
                         full: function ISTR() {
-                            const IPOSₒ = IPOS, OPOSₒ = OPOS;
-                            const irep = IREP; // IREP is always a Buffer when parsing
-                            const ilen = IREP.length;
+                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
+                            const ibuffer = ICONTENT; // ICONTENT is always a Buffer when parsing
+                            const ilen = ICONTENT.length;
                             // Parse optional leading '-' sign (if signed)...
                             let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                             let isNegative = false;
-                            if (signed && IPOS < ilen && IREP[IPOS] === HYPHEN) {
+                            if (signed && IPOINTER < ilen && ICONTENT[IPOINTER] === HYPHEN) {
                                 isNegative = true;
                                 MAX_NUM = 0x80000000;
-                                IPOS += 1;
+                                IPOINTER += 1;
                             }
                             // ...followed by one or more decimal digits. (NB: no exponents).
                             let num = 0;
                             let digits = 0;
-                            while (IPOS < ilen) {
+                            while (IPOINTER < ilen) {
                                 // Read a digit.
-                                let c = irep[IPOS];
+                                let c = ibuffer[IPOINTER];
                                 if (c >= 256)
                                     break;
                                 const digitValue = DIGIT_VALUES[c];
@@ -351,33 +350,33 @@ const extensions = {
                                 num += digitValue;
                                 // Check for overflow.
                                 if (num > MAX_NUM)
-                                    return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                                    return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                                 // Loop again.
-                                IPOS += 1;
+                                IPOINTER += 1;
                                 digits += 1;
                             }
                             // Check that we parsed at least one digit.
                             if (digits === 0)
-                                return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                                return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                             // Apply the sign.
                             if (isNegative)
                                 num = -num;
                             // Success
-                            OREP[OPOS++] = num;
-                            ATYP |= SCALAR;
+                            OCONTENT[OPOINTER++] = num;
+                            DATATYPE |= SCALAR;
                             return true;
                         },
                         infer: function ISTR() {
-                            OREP[OPOS++] = 0;
-                            ATYP |= SCALAR;
+                            OCONTENT[OPOINTER++] = 0;
+                            DATATYPE |= SCALAR;
                             return true;
                         },
                     },
                     print: {
                         full: function ISTR() {
-                            if (ATYP !== SCALAR)
+                            if (DATATYPE !== SCALAR)
                                 return false;
-                            let num = IREP[IPOS];
+                            let num = ICONTENT[IPOINTER];
                             if (typeof num !== 'number')
                                 return false;
                             // Determine the number's sign and ensure it is in range.
@@ -402,17 +401,17 @@ const extensions = {
                                     break;
                             }
                             // Compute the final string.
-                            IPOS += 1;
+                            IPOINTER += 1;
                             if (isNegative)
                                 digits.push(HYPHEN);
                             // Success
                             for (let i = 0; i < digits.length; ++i) {
-                                OREP[OPOS++] = digits[i];
+                                OCONTENT[OPOINTER++] = digits[i];
                             }
                             return true;
                         },
                         infer: function ISTR() {
-                            OREP[OPOS++] = CHAR_CODES[0];
+                            OCONTENT[OPOINTER++] = CHAR_CODES[0];
                             return true;
                         },
                     },
@@ -456,30 +455,30 @@ const extensions = {
                 return createRule(mode, {
                     parse: {
                         full: function MEM() {
-                            const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                             // Check whether the memo table already has an entry for the given initial state.
-                            let memos2 = memos.get(IREP);
+                            let memos2 = memos.get(ICONTENT);
                             if (memos2 === undefined) {
                                 memos2 = new Map();
-                                memos.set(IREP, memos2);
+                                memos.set(ICONTENT, memos2);
                             }
-                            let memo = memos2.get(IPOS);
+                            let memo = memos2.get(IPOINTER);
                             if (!memo) {
                                 // The memo table does *not* have an entry, so this is the first attempt to apply this rule with
                                 // this initial state. The first thing we do is create a memo table entry, which is marked as
                                 // *unresolved*. All future applications of this rule with the same initial state will find this
                                 // memo. If a future application finds the memo still unresolved, then we know we have encountered
                                 // left-recursion.
-                                memo = { resolved: false, isLeftRecursive: false, result: false, IPOSᐟ: IPOSₒ, OREPᐞ: [], ATYPᐟ: NOTHING };
-                                memos2.set(IPOS, memo);
+                                memo = { resolved: false, isLeftRecursive: false, result: false, IPOINTERᐟ: IPOINTERₒ, OCONTENTᐞ: [], DATATYPEᐟ: NOTHING };
+                                memos2.set(IPOINTER, memo);
                                 // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
                                 // At this point, any left-recursive paths encountered during application are guaranteed to have
                                 // been noted and aborted (see below).
                                 if (expr()) { // TODO: fix cast
                                     memo.result = true;
-                                    memo.IPOSᐟ = IPOS;
-                                    memo.OREPᐞ = OREP.slice(OPOSₒ, OPOS);
-                                    memo.ATYPᐟ = ATYP;
+                                    memo.IPOINTERᐟ = IPOINTER;
+                                    memo.OCONTENTᐞ = OCONTENT.slice(OPOINTERₒ, OPOINTER);
+                                    memo.DATATYPEᐟ = DATATYPE;
                                 }
                                 memo.resolved = true;
                                 // If we did *not* encounter left-recursion, then we have simple memoisation, and the result is
@@ -496,19 +495,19 @@ const extensions = {
                                 // does not consume more input, at which point we take the result of the previous iteration as
                                 // final.
                                 while (memo.result === true) {
-                                    IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
+                                    IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                                     // TODO: break cases for UNPARSING:
                                     // anything --> same thing (covers all string cases, since they can only be same or shorter)
                                     // some node --> some different non-empty node (assert: should never happen!)
                                     if (!expr())
                                         break; // TODO: fix cast
-                                    if (IPOS <= memo.IPOSᐟ)
+                                    if (IPOINTER <= memo.IPOINTERᐟ)
                                         break;
                                     // TODO: was for unparse... comment above says should never happen...
                                     // if (!isInputFullyConsumed()) break;
-                                    memo.IPOSᐟ = IPOS;
-                                    memo.OREPᐞ = OREP.slice(OPOSₒ, OPOS);
-                                    memo.ATYPᐟ = ATYP;
+                                    memo.IPOINTERᐟ = IPOINTER;
+                                    memo.OCONTENTᐞ = OCONTENT.slice(OPOINTERₒ, OPOINTER);
+                                    memo.DATATYPEᐟ = DATATYPE;
                                 }
                             }
                             else if (!memo.resolved) {
@@ -523,11 +522,11 @@ const extensions = {
                             }
                             // We have a resolved memo, so the result of the rule application for the given initial state has
                             // already been computed. Return it from the memo.
-                            ATYP = memo.ATYPᐟ;
-                            OPOS = OPOSₒ;
-                            IPOS = memo.IPOSᐟ;
-                            for (let i = 0; i < memo.OREPᐞ.length; ++i)
-                                OREP[OPOS++] = memo.OREPᐞ[i];
+                            DATATYPE = memo.DATATYPEᐟ;
+                            OPOINTER = OPOINTERₒ;
+                            IPOINTER = memo.IPOINTERᐟ;
+                            for (let i = 0; i < memo.OCONTENTᐞ.length; ++i)
+                                OCONTENT[OPOINTER++] = memo.OCONTENTᐞ[i];
                             return memo.result;
                         },
                         infer: function MEM() {
@@ -604,49 +603,49 @@ function createStartRule(mode) {
     const ꐚadd = createRule(mode, {
         parse: {
             full: function RCD() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                OREP[OPOS++] = "type";
-                if (!parseValue(ꐚaddᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "rhs";
-                if (!parseValue(ꐚaddᱻ2)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                ATYP |= RECORD_FIELDS;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                OCONTENT[OPOINTER++] = "type";
+                if (!parseValue(ꐚaddᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "lhs";
+                if (!parseValue(ꐚexpr)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "rhs";
+                if (!parseValue(ꐚaddᱻ2)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
-                const OPOSₒ = OPOS;
-                OREP[OPOS++] = "type";
+                const OPOINTERₒ = OPOINTER;
+                OCONTENT[OPOINTER++] = "type";
                 parseValue(ꐚaddᱻ1.infer);
-                OREP[OPOS++] = "lhs";
+                OCONTENT[OPOINTER++] = "lhs";
                 parseValue(ꐚexpr.infer);
-                OREP[OPOS++] = "rhs";
+                OCONTENT[OPOINTER++] = "rhs";
                 parseValue(ꐚaddᱻ2.infer);
-                ATYP |= RECORD_FIELDS;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD_FIELDS) return false;
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                const propList = IREP;
-                const propCount = IREP.length >> 1;
-                let bitmask = IPOS;
+                if (DATATYPE !== RECORD_FIELDS) return false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                const propList = ICONTENT;
+                const propCount = ICONTENT.length >> 1;
+                let bitmask = IPOINTER;
                 let i;
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚaddᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚaddᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚexpr)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚexpr)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚaddᱻ2)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚaddᱻ2)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                IPOS = bitmask;
+                IPOINTER = bitmask;
                 return true;
             },
             infer: function RCD() {
@@ -662,28 +661,28 @@ function createStartRule(mode) {
     const ꐚaddᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                OREP[OPOS++] = 0x61;
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x64;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x61;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x64;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x61;
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x64;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x61;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x64;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x61) return false;
-                if (IREP[IPOS + 1] !== 0x64) return false;
-                if (IREP[IPOS + 2] !== 0x64) return false;
-                IPOS += 3;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x61) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x64) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x64) return false;
+                IPOINTER += 3;
                 return true;
             },
             infer: function STR() {
@@ -697,9 +696,9 @@ function createStartRule(mode) {
     const ꐚaddᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚaddᱻ3()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚterm()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚaddᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚterm()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -710,9 +709,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚaddᱻ3()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚterm()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚaddᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚterm()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -728,10 +727,10 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2b) return false;
-                IPOS += 1;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -740,11 +739,11 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x2b;
-                OREP[OPOS++] = cc;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2b;
+                OCONTENT[OPOINTER++] = 0x2b;
                 return true;
             },
         },
@@ -754,49 +753,49 @@ function createStartRule(mode) {
     const ꐚsub = createRule(mode, {
         parse: {
             full: function RCD() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                OREP[OPOS++] = "type";
-                if (!parseValue(ꐚsubᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "lhs";
-                if (!parseValue(ꐚexpr)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "rhs";
-                if (!parseValue(ꐚsubᱻ2)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                ATYP |= RECORD_FIELDS;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                OCONTENT[OPOINTER++] = "type";
+                if (!parseValue(ꐚsubᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "lhs";
+                if (!parseValue(ꐚexpr)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "rhs";
+                if (!parseValue(ꐚsubᱻ2)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
-                const OPOSₒ = OPOS;
-                OREP[OPOS++] = "type";
+                const OPOINTERₒ = OPOINTER;
+                OCONTENT[OPOINTER++] = "type";
                 parseValue(ꐚsubᱻ1.infer);
-                OREP[OPOS++] = "lhs";
+                OCONTENT[OPOINTER++] = "lhs";
                 parseValue(ꐚexpr.infer);
-                OREP[OPOS++] = "rhs";
+                OCONTENT[OPOINTER++] = "rhs";
                 parseValue(ꐚsubᱻ2.infer);
-                ATYP |= RECORD_FIELDS;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD_FIELDS) return false;
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                const propList = IREP;
-                const propCount = IREP.length >> 1;
-                let bitmask = IPOS;
+                if (DATATYPE !== RECORD_FIELDS) return false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                const propList = ICONTENT;
+                const propCount = ICONTENT.length >> 1;
+                let bitmask = IPOINTER;
                 let i;
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚsubᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚsubᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚexpr)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚexpr)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚsubᱻ2)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚsubᱻ2)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                IPOS = bitmask;
+                IPOINTER = bitmask;
                 return true;
             },
             infer: function RCD() {
@@ -812,28 +811,28 @@ function createStartRule(mode) {
     const ꐚsubᱻ1 = createRule(mode, {
         parse: {
             full: function STR() {
-                OREP[OPOS++] = 0x73;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x73;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x73;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x73;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x73) return false;
-                if (IREP[IPOS + 1] !== 0x75) return false;
-                if (IREP[IPOS + 2] !== 0x62) return false;
-                IPOS += 3;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x73) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x75) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x62) return false;
+                IPOINTER += 3;
                 return true;
             },
             infer: function STR() {
@@ -847,9 +846,9 @@ function createStartRule(mode) {
     const ꐚsubᱻ2 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚsubᱻ3()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚterm()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚsubᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚterm()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -860,9 +859,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚsubᱻ3()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚterm()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚsubᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚterm()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -878,10 +877,10 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2d) return false;
-                IPOS += 1;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -890,11 +889,11 @@ function createStartRule(mode) {
             full: function BYT() {
                 let cc;
                 cc = 0x2d;
-                OREP[OPOS++] = cc;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2d;
+                OCONTENT[OPOINTER++] = 0x2d;
                 return true;
             },
         },
@@ -919,53 +918,53 @@ function createStartRule(mode) {
     const ꐚmul = createRule(mode, {
         parse: {
             full: function RCD() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!parseValue(ꐚmulᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                assert(typeof OREP[OPOS - 1] === 'string');
-                if (!parseValue(ꐚmulᱻ3)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!parseValue(ꐚmulᱻ5)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                assert(typeof OREP[OPOS - 1] === 'string');
-                if (!parseValue(ꐚmulᱻ7)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                ATYP |= RECORD_FIELDS;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!parseValue(ꐚmulᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                assert(typeof OCONTENT[OPOINTER - 1] === 'string');
+                if (!parseValue(ꐚmulᱻ3)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "lhs";
+                if (!parseValue(ꐚterm)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!parseValue(ꐚmulᱻ5)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                assert(typeof OCONTENT[OPOINTER - 1] === 'string');
+                if (!parseValue(ꐚmulᱻ7)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
-                const OPOSₒ = OPOS;
+                const OPOINTERₒ = OPOINTER;
                 parseValue(ꐚmulᱻ1.infer);
-                assert(typeof OREP[OPOS - 1] === 'string');
+                assert(typeof OCONTENT[OPOINTER - 1] === 'string');
                 parseValue(ꐚmulᱻ3.infer);
-                OREP[OPOS++] = "lhs";
+                OCONTENT[OPOINTER++] = "lhs";
                 parseValue(ꐚterm.infer);
                 parseValue(ꐚmulᱻ5.infer);
-                assert(typeof OREP[OPOS - 1] === 'string');
+                assert(typeof OCONTENT[OPOINTER - 1] === 'string');
                 parseValue(ꐚmulᱻ7.infer);
-                ATYP |= RECORD_FIELDS;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD_FIELDS) return false;
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                const propList = IREP;
-                const propCount = IREP.length >> 1;
-                let bitmask = IPOS;
+                if (DATATYPE !== RECORD_FIELDS) return false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                const propList = ICONTENT;
+                const propCount = ICONTENT.length >> 1;
+                let bitmask = IPOINTER;
                 let i;
-                for (i = IPOS = 0; (bitmask & (1 << i)) !== 0; ++i, IPOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚmulᱻ3)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = IPOINTER = 0; (bitmask & (1 << i)) !== 0; ++i, IPOINTER += 2) ;
+                if (i >= propCount || !printValue(ꐚmulᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚmulᱻ3)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚterm)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚterm)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = IPOS = 0; (bitmask & (1 << i)) !== 0; ++i, IPOS += 2) ;
-                if (i >= propCount || !printValue(ꐚmulᱻ5)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚmulᱻ7)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = IPOINTER = 0; (bitmask & (1 << i)) !== 0; ++i, IPOINTER += 2) ;
+                if (i >= propCount || !printValue(ꐚmulᱻ5)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚmulᱻ7)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                IPOS = bitmask;
+                IPOINTER = bitmask;
                 return true;
             },
             infer: function RCD() {
@@ -986,48 +985,48 @@ function createStartRule(mode) {
     const ꐚmulᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 4 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x74) return false;
-                if (IREP[IPOS + 1] !== 0x79) return false;
-                if (IREP[IPOS + 2] !== 0x70) return false;
-                if (IREP[IPOS + 3] !== 0x65) return false;
-                IPOS += 4;
-                OREP[OPOS++] = 0x74;
-                OREP[OPOS++] = 0x79;
-                OREP[OPOS++] = 0x70;
-                OREP[OPOS++] = 0x65;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 4 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x74) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x79) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x70) return false;
+                if (ICONTENT[IPOINTER + 3] !== 0x65) return false;
+                IPOINTER += 4;
+                OCONTENT[OPOINTER++] = 0x74;
+                OCONTENT[OPOINTER++] = 0x79;
+                OCONTENT[OPOINTER++] = 0x70;
+                OCONTENT[OPOINTER++] = 0x65;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x74;
-                OREP[OPOS++] = 0x79;
-                OREP[OPOS++] = 0x70;
-                OREP[OPOS++] = 0x65;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x74;
+                OCONTENT[OPOINTER++] = 0x79;
+                OCONTENT[OPOINTER++] = 0x70;
+                OCONTENT[OPOINTER++] = 0x65;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 4 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x74) return false;
-                if (IREP[IPOS + 1] !== 0x79) return false;
-                if (IREP[IPOS + 2] !== 0x70) return false;
-                if (IREP[IPOS + 3] !== 0x65) return false;
-                IPOS += 4;
-                OREP[OPOS++] = 0x74;
-                OREP[OPOS++] = 0x79;
-                OREP[OPOS++] = 0x70;
-                OREP[OPOS++] = 0x65;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 4 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x74) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x79) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x70) return false;
+                if (ICONTENT[IPOINTER + 3] !== 0x65) return false;
+                IPOINTER += 4;
+                OCONTENT[OPOINTER++] = 0x74;
+                OCONTENT[OPOINTER++] = 0x79;
+                OCONTENT[OPOINTER++] = 0x70;
+                OCONTENT[OPOINTER++] = 0x65;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x74;
-                OREP[OPOS++] = 0x79;
-                OREP[OPOS++] = 0x70;
-                OREP[OPOS++] = 0x65;
+                OCONTENT[OPOINTER++] = 0x74;
+                OCONTENT[OPOINTER++] = 0x79;
+                OCONTENT[OPOINTER++] = 0x70;
+                OCONTENT[OPOINTER++] = 0x65;
                 return true;
             },
         },
@@ -1041,42 +1040,42 @@ function createStartRule(mode) {
     const ꐚmulᱻ4 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x6d) return false;
-                if (IREP[IPOS + 1] !== 0x75) return false;
-                if (IREP[IPOS + 2] !== 0x6c) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x6d;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x6c;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x6d) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x75) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x6c) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x6d;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x6c;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x6d;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x6c;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x6d;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x6c;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x6d) return false;
-                if (IREP[IPOS + 1] !== 0x75) return false;
-                if (IREP[IPOS + 2] !== 0x6c) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x6d;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x6c;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x6d) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x75) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x6c) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x6d;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x6c;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x6d;
-                OREP[OPOS++] = 0x75;
-                OREP[OPOS++] = 0x6c;
+                OCONTENT[OPOINTER++] = 0x6d;
+                OCONTENT[OPOINTER++] = 0x75;
+                OCONTENT[OPOINTER++] = 0x6c;
                 return true;
             },
         },
@@ -1090,42 +1089,42 @@ function createStartRule(mode) {
     const ꐚmulᱻ6 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x72) return false;
-                if (IREP[IPOS + 1] !== 0x68) return false;
-                if (IREP[IPOS + 2] !== 0x73) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x72;
-                OREP[OPOS++] = 0x68;
-                OREP[OPOS++] = 0x73;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x72) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x68) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x73) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x72;
+                OCONTENT[OPOINTER++] = 0x68;
+                OCONTENT[OPOINTER++] = 0x73;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x72;
-                OREP[OPOS++] = 0x68;
-                OREP[OPOS++] = 0x73;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x72;
+                OCONTENT[OPOINTER++] = 0x68;
+                OCONTENT[OPOINTER++] = 0x73;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x72) return false;
-                if (IREP[IPOS + 1] !== 0x68) return false;
-                if (IREP[IPOS + 2] !== 0x73) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x72;
-                OREP[OPOS++] = 0x68;
-                OREP[OPOS++] = 0x73;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x72) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x68) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x73) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x72;
+                OCONTENT[OPOINTER++] = 0x68;
+                OCONTENT[OPOINTER++] = 0x73;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x72;
-                OREP[OPOS++] = 0x68;
-                OREP[OPOS++] = 0x73;
+                OCONTENT[OPOINTER++] = 0x72;
+                OCONTENT[OPOINTER++] = 0x68;
+                OCONTENT[OPOINTER++] = 0x73;
                 return true;
             },
         },
@@ -1136,9 +1135,9 @@ function createStartRule(mode) {
     const ꐚmulᱻ7 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚmulᱻ8()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactor()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚmulᱻ8()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactor()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1149,9 +1148,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚmulᱻ8()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactor()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚmulᱻ8()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactor()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1170,33 +1169,33 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2a) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2a;
-                ATYP |= STRING_CHARS
+                OCONTENT[OPOINTER++] = 0x2a;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2a) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2a;
+                OCONTENT[OPOINTER++] = 0x2a;
                 return true;
             },
         },
@@ -1206,49 +1205,49 @@ function createStartRule(mode) {
     const ꐚdiv = createRule(mode, {
         parse: {
             full: function RCD() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                OREP[OPOS++] = "type";
-                if (!parseValue(ꐚdivᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "lhs";
-                if (!parseValue(ꐚterm)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                OREP[OPOS++] = "rhs";
-                if (!parseValue(ꐚdivᱻ3)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                ATYP |= RECORD_FIELDS;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                OCONTENT[OPOINTER++] = "type";
+                if (!parseValue(ꐚdivᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "lhs";
+                if (!parseValue(ꐚterm)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                OCONTENT[OPOINTER++] = "rhs";
+                if (!parseValue(ꐚdivᱻ3)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
             infer: function RCD() {
-                const OPOSₒ = OPOS;
-                OREP[OPOS++] = "type";
+                const OPOINTERₒ = OPOINTER;
+                OCONTENT[OPOINTER++] = "type";
                 parseValue(ꐚdivᱻ1.infer);
-                OREP[OPOS++] = "lhs";
+                OCONTENT[OPOINTER++] = "lhs";
                 parseValue(ꐚterm.infer);
-                OREP[OPOS++] = "rhs";
+                OCONTENT[OPOINTER++] = "rhs";
                 parseValue(ꐚdivᱻ3.infer);
-                ATYP |= RECORD_FIELDS;
+                DATATYPE |= RECORD_FIELDS;
                 return true;
             },
         },
         print: {
             full: function RCD() {
-                if (ATYP !== RECORD_FIELDS) return false;
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                const propList = IREP;
-                const propCount = IREP.length >> 1;
-                let bitmask = IPOS;
+                if (DATATYPE !== RECORD_FIELDS) return false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                const propList = ICONTENT;
+                const propCount = ICONTENT.length >> 1;
+                let bitmask = IPOINTER;
                 let i;
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚdivᱻ1)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "type"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚdivᱻ1)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚterm)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "lhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚterm)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                for (i = 0, IPOS = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOS += 2) ;
-                if (i >= propCount) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!printValue(ꐚdivᱻ3)) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== "rhs"; ++i, IPOINTER += 2) ;
+                if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!printValue(ꐚdivᱻ3)) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 bitmask += (1 << i);
-                IPOS = bitmask;
+                IPOINTER = bitmask;
                 return true;
             },
             infer: function RCD() {
@@ -1267,42 +1266,42 @@ function createStartRule(mode) {
     const ꐚdivᱻ2 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x64) return false;
-                if (IREP[IPOS + 1] !== 0x69) return false;
-                if (IREP[IPOS + 2] !== 0x76) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x69;
-                OREP[OPOS++] = 0x76;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x64) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x69) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x76) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x69;
+                OCONTENT[OPOINTER++] = 0x76;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x69;
-                OREP[OPOS++] = 0x76;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x69;
+                OCONTENT[OPOINTER++] = 0x76;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 3 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x64) return false;
-                if (IREP[IPOS + 1] !== 0x69) return false;
-                if (IREP[IPOS + 2] !== 0x76) return false;
-                IPOS += 3;
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x69;
-                OREP[OPOS++] = 0x76;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 3 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x64) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x69) return false;
+                if (ICONTENT[IPOINTER + 2] !== 0x76) return false;
+                IPOINTER += 3;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x69;
+                OCONTENT[OPOINTER++] = 0x76;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x64;
-                OREP[OPOS++] = 0x69;
-                OREP[OPOS++] = 0x76;
+                OCONTENT[OPOINTER++] = 0x64;
+                OCONTENT[OPOINTER++] = 0x69;
+                OCONTENT[OPOINTER++] = 0x76;
                 return true;
             },
         },
@@ -1313,9 +1312,9 @@ function createStartRule(mode) {
     const ꐚdivᱻ3 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚdivᱻ4()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactor()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚdivᱻ4()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactor()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1326,9 +1325,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚdivᱻ4()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactor()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚdivᱻ4()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactor()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1347,33 +1346,33 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2f) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2f;
-                ATYP |= STRING_CHARS
+                OCONTENT[OPOINTER++] = 0x2f;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2f) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x2f;
+                OCONTENT[OPOINTER++] = 0x2f;
                 return true;
             },
         },
@@ -1383,21 +1382,21 @@ function createStartRule(mode) {
     const ꐚbase = createRule(mode, {
         parse: {
             full: () => {
-                OREP[OPOS++] = 16;
-                ATYP |= SCALAR;
+                OCONTENT[OPOINTER++] = 16;
+                DATATYPE |= SCALAR;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 16;
-                ATYP != SCALAR;
+                OCONTENT[OPOINTER++] = 16;
+                DATATYPE != SCALAR;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (ATYP !== SCALAR) return false;
-                if (IREP[IPOS] !== 16) return false;
-                IPOS += 1;
+                if (DATATYPE !== SCALAR) return false;
+                if (ICONTENT[IPOINTER] !== 16) return false;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -1409,21 +1408,21 @@ function createStartRule(mode) {
     const ꐚsigned = createRule(mode, {
         parse: {
             full: () => {
-                OREP[OPOS++] = false;
-                ATYP |= SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE |= SCALAR;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = false;
-                ATYP != SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE != SCALAR;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (ATYP !== SCALAR) return false;
-                if (IREP[IPOS] !== false) return false;
-                IPOS += 1;
+                if (DATATYPE !== SCALAR) return false;
+                if (ICONTENT[IPOINTER] !== false) return false;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -1435,21 +1434,21 @@ function createStartRule(mode) {
     const ꐚbaseᱻ2 = createRule(mode, {
         parse: {
             full: () => {
-                OREP[OPOS++] = 2;
-                ATYP |= SCALAR;
+                OCONTENT[OPOINTER++] = 2;
+                DATATYPE |= SCALAR;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 2;
-                ATYP != SCALAR;
+                OCONTENT[OPOINTER++] = 2;
+                DATATYPE != SCALAR;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (ATYP !== SCALAR) return false;
-                if (IREP[IPOS] !== 2) return false;
-                IPOS += 1;
+                if (DATATYPE !== SCALAR) return false;
+                if (ICONTENT[IPOINTER] !== 2) return false;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -1461,21 +1460,21 @@ function createStartRule(mode) {
     const ꐚsignedᱻ2 = createRule(mode, {
         parse: {
             full: () => {
-                OREP[OPOS++] = false;
-                ATYP |= SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE |= SCALAR;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = false;
-                ATYP != SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE != SCALAR;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (ATYP !== SCALAR) return false;
-                if (IREP[IPOS] !== false) return false;
-                IPOS += 1;
+                if (DATATYPE !== SCALAR) return false;
+                if (ICONTENT[IPOINTER] !== false) return false;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -1487,21 +1486,21 @@ function createStartRule(mode) {
     const ꐚsignedᱻ3 = createRule(mode, {
         parse: {
             full: () => {
-                OREP[OPOS++] = false;
-                ATYP |= SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE |= SCALAR;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = false;
-                ATYP != SCALAR;
+                OCONTENT[OPOINTER++] = false;
+                DATATYPE != SCALAR;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (ATYP !== SCALAR) return false;
-                if (IREP[IPOS] !== false) return false;
-                IPOS += 1;
+                if (DATATYPE !== SCALAR) return false;
+                if (ICONTENT[IPOINTER] !== false) return false;
+                IPOINTER += 1;
                 return true;
             },
             infer: () => true,
@@ -1525,10 +1524,10 @@ function createStartRule(mode) {
     const ꐚfactorᱻ1 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ2()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ4()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfloat()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ4()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfloat()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1540,10 +1539,10 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ2()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ4()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfloat()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ4()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfloat()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1559,18 +1558,18 @@ function createStartRule(mode) {
     const ꐚfactorᱻ2 = createRule(mode, {
         parse: {
             full: function NOT() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 const result = !ꐚfactorᱻ3();
-                IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
+                IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                 return result;
             },
             infer: () => true,
         },
         print: {
             full: function NOT() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 const result = !ꐚfactorᱻ3();
-                IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
+                IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                 return result;
             },
             infer: () => true,
@@ -1581,36 +1580,36 @@ function createStartRule(mode) {
     const ꐚfactorᱻ3 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x78) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x78) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x78) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x78) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
                 return true;
             },
         },
@@ -1621,18 +1620,18 @@ function createStartRule(mode) {
     const ꐚfactorᱻ4 = createRule(mode, {
         parse: {
             full: function NOT() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 const result = !ꐚfactorᱻ5();
-                IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
+                IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                 return result;
             },
             infer: () => true,
         },
         print: {
             full: function NOT() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 const result = !ꐚfactorᱻ5();
-                IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ;
+                IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                 return result;
             },
             infer: () => true,
@@ -1643,36 +1642,36 @@ function createStartRule(mode) {
     const ꐚfactorᱻ5 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x62) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x62) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x62) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x62) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
                 return true;
             },
         },
@@ -1683,9 +1682,9 @@ function createStartRule(mode) {
     const ꐚfactorᱻ6 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ7()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ9()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ7()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ9()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1696,9 +1695,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ7()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ9()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ7()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ9()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1716,36 +1715,36 @@ function createStartRule(mode) {
     const ꐚfactorᱻ8 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x78) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x78) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x78) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x78) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x78;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x78;
                 return true;
             },
         },
@@ -1768,9 +1767,9 @@ function createStartRule(mode) {
     const ꐚfactorᱻ11 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ12()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ14()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ12()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ14()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1781,9 +1780,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ12()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ14()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ12()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ14()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1801,36 +1800,36 @@ function createStartRule(mode) {
     const ꐚfactorᱻ13 = createRule(mode, {
         parse: {
             full: function STR() {
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x62) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x62) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
-                ATYP |= STRING_CHARS;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
+                DATATYPE |= STRING_CHARS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS + 2 > IREP.length) return false;
-                if (IREP[IPOS + 0] !== 0x30) return false;
-                if (IREP[IPOS + 1] !== 0x62) return false;
-                IPOS += 2;
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 2 > ICONTENT.length) return false;
+                if (ICONTENT[IPOINTER + 0] !== 0x30) return false;
+                if (ICONTENT[IPOINTER + 1] !== 0x62) return false;
+                IPOINTER += 2;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
                 return true;
             },
             infer: function STR() {
-                OREP[OPOS++] = 0x30;
-                OREP[OPOS++] = 0x62;
+                OCONTENT[OPOINTER++] = 0x30;
+                OCONTENT[OPOINTER++] = 0x62;
                 return true;
             },
         },
@@ -1853,9 +1852,9 @@ function createStartRule(mode) {
     const ꐚfactorᱻ16 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ17()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ19()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ17()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ19()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1866,9 +1865,9 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ17()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ19()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ17()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ19()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1887,33 +1886,33 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x69) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x69;
-                ATYP |= STRING_CHARS
+                OCONTENT[OPOINTER++] = 0x69;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x69) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x69;
+                OCONTENT[OPOINTER++] = 0x69;
                 return true;
             },
         },
@@ -1934,10 +1933,10 @@ function createStartRule(mode) {
     const ꐚfactorᱻ21 = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ22()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚexpr()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ24()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ22()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚexpr()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ24()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1949,10 +1948,10 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOSₒ = IPOS, OPOSₒ = OPOS, ATYPₒ = ATYP;
-                if (!ꐚfactorᱻ22()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚexpr()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
-                if (!ꐚfactorᱻ24()) return IPOS = IPOSₒ, OPOS = OPOSₒ, ATYP = ATYPₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚfactorᱻ22()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚexpr()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚfactorᱻ24()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -1972,33 +1971,33 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x28) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x28;
-                ATYP |= STRING_CHARS
+                OCONTENT[OPOINTER++] = 0x28;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x28) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x28;
+                OCONTENT[OPOINTER++] = 0x28;
                 return true;
             },
         },
@@ -2012,33 +2011,33 @@ function createStartRule(mode) {
         parse: {
             full: function BYT() {
                 let cc;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x29) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
-                ATYP |= STRING_CHARS
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x29;
-                ATYP |= STRING_CHARS
+                OCONTENT[OPOINTER++] = 0x29;
+                DATATYPE |= STRING_CHARS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (ATYP !== STRING_CHARS) return false;
-                if (IPOS >= IREP.length) return false;
-                cc = IREP[IPOS];
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
+                cc = ICONTENT[IPOINTER];
                 if (cc !== 0x29) return false;
-                IPOS += 1;
-                OREP[OPOS++] = cc;
+                IPOINTER += 1;
+                OCONTENT[OPOINTER++] = cc;
                 return true;
             },
             infer: () => {
-                OREP[OPOS++] = 0x29;
+                OCONTENT[OPOINTER++] = 0x29;
                 return true;
             },
         },
@@ -2061,9 +2060,9 @@ function createStartRule(mode) {
             },
             print: {
                 full: () => {
-                    const OPOSₒ = OPOS;
+                    const OPOINTERₒ = OPOINTER;
                     const result = ꐚexprᱻ2();
-                    OPOS = OPOSₒ;
+                    OPOINTER = OPOINTERₒ;
                     return result;
                 },
                 infer: () => true,
@@ -2086,9 +2085,9 @@ function createStartRule(mode) {
         const ꐚLET = createRule(mode, {
             parse: {
                 full: () => {
-                    const OPOSₒ = OPOS, ATYPₒ = ATYP;
+                    const OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                     const result = ꐚexprᱻ3();
-                    OPOS = OPOSₒ, ATYP = ATYPₒ;
+                    OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
                     return result;
                 },
                 infer: () => true,

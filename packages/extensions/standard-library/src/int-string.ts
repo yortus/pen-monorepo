@@ -11,26 +11,26 @@ function intString(mode: 'parse' | 'print'): Func {
         return createRule(mode, {
             parse: {
                 full: function ISTR() {
-                    const IPOSₒ = IPOS, OPOSₒ = OPOS;
-                    const irep = IREP as Buffer; // IREP is always a Buffer when parsing
-                    const ilen = IREP.length;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
+                    const ibuffer = ICONTENT as Buffer; // ICONTENT is always a Buffer when parsing
+                    const ilen = ICONTENT.length;
 
                     // Parse optional leading '-' sign (if signed)...
                     let MAX_NUM = signed ? 0x7FFFFFFF : 0xFFFFFFFF;
                     let isNegative = false;
-                    if (signed && IPOS < ilen && IREP[IPOS] === HYPHEN) {
+                    if (signed && IPOINTER < ilen && ICONTENT[IPOINTER] === HYPHEN) {
                         isNegative = true;
                         MAX_NUM = 0x80000000;
-                        IPOS += 1;
+                        IPOINTER += 1;
                     }
 
                     // ...followed by one or more decimal digits. (NB: no exponents).
                     let num = 0;
                     let digits = 0;
-                    while (IPOS < ilen) {
+                    while (IPOINTER < ilen) {
 
                         // Read a digit.
-                        let c = irep[IPOS];
+                        let c = ibuffer[IPOINTER];
                         if (c >= 256) break;
                         const digitValue = DIGIT_VALUES[c];
                         if (digitValue >= base) break;
@@ -40,35 +40,35 @@ function intString(mode: 'parse' | 'print'): Func {
                         num += digitValue;
 
                         // Check for overflow.
-                        if (num > MAX_NUM) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                        if (num > MAX_NUM) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
 
                         // Loop again.
-                        IPOS += 1;
+                        IPOINTER += 1;
                         digits += 1;
                     }
 
                     // Check that we parsed at least one digit.
-                    if (digits === 0) return IPOS = IPOSₒ, OPOS = OPOSₒ, false;
+                    if (digits === 0) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
 
                     // Apply the sign.
                     if (isNegative) num = -num;
 
                     // Success
-                    OREP[OPOS++] = num;
-                    ATYP |= SCALAR;
+                    OCONTENT[OPOINTER++] = num;
+                    DATATYPE |= SCALAR;
                     return true;
                 },
 
                 infer: function ISTR() {
-                    OREP[OPOS++] = 0;
-                    ATYP |= SCALAR;
+                    OCONTENT[OPOINTER++] = 0;
+                    DATATYPE |= SCALAR;
                     return true;
                 },
             },
             print: {
                 full: function ISTR() {
-                    if (ATYP !== SCALAR) return false;
-                    let num = IREP[IPOS] as number;
+                    if (DATATYPE !== SCALAR) return false;
+                    let num = ICONTENT[IPOINTER] as number;
                     if (typeof num !== 'number') return false;
 
                     // Determine the number's sign and ensure it is in range.
@@ -92,17 +92,17 @@ function intString(mode: 'parse' | 'print'): Func {
                     }
 
                     // Compute the final string.
-                    IPOS += 1;
+                    IPOINTER += 1;
                     if (isNegative) digits.push(HYPHEN);
 
                     // Success
                     for (let i = 0; i < digits.length; ++i) {
-                        OREP[OPOS++] = digits[i];
+                        OCONTENT[OPOINTER++] = digits[i];
                     }
                     return true;
                 },
                 infer: function ISTR() {
-                    OREP[OPOS++] = CHAR_CODES[0];
+                    OCONTENT[OPOINTER++] = CHAR_CODES[0];
                     return true;
                 },
             },
