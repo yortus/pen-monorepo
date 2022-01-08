@@ -38,7 +38,7 @@ function unicode(mode: 'parse' | 'print'): Func {
                     // tslint:disable-next-line: no-eval
                     const buf = Buffer.from(eval(`"\\u{${num}}"`)); // TODO: hacky... fix when we have a charCode
                     for (let i = 0; i < buf.length; ++i) OCONTENT[OPOINTER++] = buf[i];
-                    DATATYPE |= STRING_CHARS;
+                    UNITTYPE |= STRING_OCTETS;
                     return true;
                 },
                 infer: function UNI() {
@@ -48,25 +48,24 @@ function unicode(mode: 'parse' | 'print'): Func {
             },
             print: {
                 full: function UNI() {
-                    const ilen = ICONTENT.length; 
-                    if (DATATYPE !== STRING_CHARS || IPOINTER >= ilen) return false;
+                    if (UNITTYPE !== STRING_OCTETS || IPOINTER >= ICONTENT.length) return false;
                     const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER;
-                    const ibuffer = ICONTENT as Buffer; // ICONTENT is a Buffer when DATATYPE === STRING_CHARS
+                    const ibuffer = ICONTENT as Buffer; // ICONTENT is a Buffer when UNITTYPE === STRING_OCTETS
                     const obuffer = OCONTENT as Buffer; // OCONTENT is always a Buffer when printing
                     let c = ibuffer[IPOINTER++];
                     if (c < 128) {
                         // no-op
                     }
                     else if (c > 191 && c < 224) {
-                        if (IPOINTER >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        if (IPOINTER >= ICONTENT.length) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         c = (c & 31) << 6 | ibuffer[IPOINTER++] & 63;
                     }
                     else if (c > 223 && c < 240) {
-                        if (IPOINTER + 1 >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        if (IPOINTER + 1 >= ICONTENT.length) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         c = (c & 15) << 12 | (ibuffer[IPOINTER++] & 63) << 6 | ibuffer[IPOINTER++] & 63;
                     }
                     else if (c > 239 && c < 248) {
-                        if (IPOINTER + 2 >= ilen) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
+                        if (IPOINTER + 2 >= ICONTENT.length) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;
                         c = (c & 7) << 18 | (ibuffer[IPOINTER++] & 63) << 12 | (ibuffer[IPOINTER++] & 63) << 6 | ibuffer[IPOINTER++] & 63;
                     }
                     else return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, false;

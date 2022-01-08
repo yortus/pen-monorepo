@@ -8,15 +8,15 @@ function memoise(mode: 'parse' | 'print'): Func {
                 isLeftRecursive: boolean,
                 result: boolean;
                 IPOINTERᐟ: number;
-                OCONTENTᐞ: Arrayish<unknown>;
-                DATATYPEᐟ: DATATYPE;
+                OCONTENTᐞ: typeof OCONTENT;
+                UNITTYPEᐟ: typeof UNITTYPE;
             }>
         >();
 
         return createRule(mode, {
             parse: {
                 full: function MEM() {
-                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
 
                     // Check whether the memo table already has an entry for the given initial state.
                     let memos2 = memos.get(ICONTENT);
@@ -31,7 +31,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                         // *unresolved*. All future applications of this rule with the same initial state will find this
                         // memo. If a future application finds the memo still unresolved, then we know we have encountered
                         // left-recursion.
-                        memo = {resolved: false, isLeftRecursive: false, result: false, IPOINTERᐟ: IPOINTERₒ, OCONTENTᐞ: [], DATATYPEᐟ: NOTHING};
+                        memo = {resolved: false, isLeftRecursive: false, result: false, IPOINTERᐟ: IPOINTERₒ, OCONTENTᐞ: [], UNITTYPEᐟ: NO_UNIT};
                         memos2.set(IPOINTER, memo);
 
                         // Now that the unresolved memo is in place, apply the rule, and resolve the memo with the result.
@@ -41,7 +41,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             memo.result = true;
                             memo.IPOINTERᐟ = IPOINTER;
                             memo.OCONTENTᐞ = OCONTENT.slice(OPOINTERₒ, OPOINTER);
-                            memo.DATATYPEᐟ = DATATYPE;
+                            memo.UNITTYPEᐟ = UNITTYPE;
                         }
                         memo.resolved = true;
 
@@ -60,7 +60,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                         // does not consume more input, at which point we take the result of the previous iteration as
                         // final.
                         while (memo.result === true) {
-                            IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
+                            IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ;
 
                             // TODO: break cases for UNPARSING:
                             // anything --> same thing (covers all string cases, since they can only be same or shorter)
@@ -71,7 +71,7 @@ function memoise(mode: 'parse' | 'print'): Func {
                             // if (!isInputFullyConsumed()) break;
                             memo.IPOINTERᐟ = IPOINTER;
                             memo.OCONTENTᐞ = OCONTENT.slice(OPOINTERₒ, OPOINTER);
-                            memo.DATATYPEᐟ = DATATYPE;
+                            memo.UNITTYPEᐟ = UNITTYPE;
                         }
                     }
                     else if (!memo.resolved) {
@@ -87,7 +87,7 @@ function memoise(mode: 'parse' | 'print'): Func {
 
                     // We have a resolved memo, so the result of the rule application for the given initial state has
                     // already been computed. Return it from the memo.
-                    DATATYPE = memo.DATATYPEᐟ;
+                    UNITTYPE = memo.UNITTYPEᐟ;
                     OPOINTER = OPOINTERₒ;
                     IPOINTER = memo.IPOINTERᐟ;
                     for (let i = 0; i < memo.OCONTENTᐞ.length; ++i) OCONTENT[OPOINTER++] = memo.OCONTENTᐞ[i];

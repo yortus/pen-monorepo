@@ -95,22 +95,22 @@ let ICONTENT;
 let IPOINTER = 0;
 let OCONTENT;
 let OPOINTER = 0;
-let DATATYPE = 0;
-const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
+let UNITTYPE = 0;
+const [NO_UNIT, SCALAR_VALUE, STRING_OCTETS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 function parseValue(rule) {
-    const OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-    DATATYPE = NOTHING;
+    const OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+    UNITTYPE = NO_UNIT;
     if (!rule())
-        return DATATYPE = DATATYPEₒ, false;
-    if (DATATYPE === NOTHING)
-        return OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+        return UNITTYPE = UNITTYPEₒ, false;
+    if (UNITTYPE === NO_UNIT)
+        return OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
     let value;
-    switch (DATATYPE) {
-        case SCALAR:
+    switch (UNITTYPE) {
+        case SCALAR_VALUE:
             assert(OPOINTER === OPOINTERₒ + 1);
             value = OCONTENT[OPOINTERₒ];
             break;
-        case STRING_CHARS:
+        case STRING_OCTETS:
             const len = OPOINTER - OPOINTERₒ;
             for (let i = 0; i < len; ++i)
                 _internalBuffer[i] = OCONTENT[OPOINTERₒ + i];
@@ -127,36 +127,35 @@ function parseValue(rule) {
                 throw new Error(`Duplicate labels in record`);
             break;
         default:
-            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(DATATYPE);
+            ((atyp) => { throw new Error(`Unhandled abstract type ${atyp}`); })(UNITTYPE);
     }
     OCONTENT[OPOINTERₒ] = value;
     OPOINTER = OPOINTERₒ + 1;
-    DATATYPE = DATATYPEₒ;
+    UNITTYPE = UNITTYPEₒ;
     return true;
 }
 function printValue(rule) {
-    const IPOINTERₒ = IPOINTER, ICONTENTₒ = ICONTENT, DATATYPEₒ = DATATYPE;
-    let value = ICONTENT[IPOINTER];
-    let atyp;
+    const IPOINTERₒ = IPOINTER, ICONTENTₒ = ICONTENT, UNITTYPEₒ = UNITTYPE;
+    const value = ICONTENT[IPOINTER];
     let objKeys;
     if (value === undefined) {
         return false;
     }
     if (value === null || value === true || value === false || typeof value === 'number') {
-        DATATYPE = SCALAR;
+        UNITTYPE = SCALAR_VALUE;
         const result = rule();
-        DATATYPE = DATATYPEₒ;
+        UNITTYPE = UNITTYPEₒ;
         assert(IPOINTER === IPOINTERₒ + 1);
         return result;
     }
     if (typeof value === 'string') {
         const len = _internalBuffer.write(value, 0, undefined, 'utf8');
         ICONTENT = _internalBuffer.slice(0, len);
-        atyp = DATATYPE = STRING_CHARS;
+        UNITTYPE = STRING_OCTETS;
     }
     else if (Array.isArray(value)) {
         ICONTENT = value;
-        atyp = DATATYPE = LIST_ELEMENTS;
+        UNITTYPE = LIST_ELEMENTS;
     }
     else if (isObject(value)) {
         const arr = ICONTENT = [];
@@ -164,18 +163,18 @@ function printValue(rule) {
         assert(objKeys.length < 32);
         for (let i = 0; i < objKeys.length; ++i)
             arr.push(objKeys[i], value[objKeys[i]]);
-        atyp = DATATYPE = RECORD_FIELDS;
+        UNITTYPE = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
     }
     IPOINTER = 0;
     let result = rule();
-    const ICONTENTᐟ = ICONTENT, IPOINTERᐟ = IPOINTER;
-    ICONTENT = ICONTENTₒ, IPOINTER = IPOINTERₒ, DATATYPE = DATATYPEₒ;
+    const ICONTENTᐟ = ICONTENT, IPOINTERᐟ = IPOINTER, UNITTYPEᐟ = UNITTYPE;
+    ICONTENT = ICONTENTₒ, IPOINTER = IPOINTERₒ, UNITTYPE = UNITTYPEₒ;
     if (!result)
         return false;
-    if (atyp === RECORD_FIELDS) {
+    if (UNITTYPEᐟ === RECORD_FIELDS) {
         const keyCount = objKeys.length;
         if (keyCount > 0 && (IPOINTERᐟ !== -1 >>> (32 - keyCount)))
             return false;
@@ -224,7 +223,7 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
             infer: function STR() {
@@ -235,13 +234,13 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (DATATYPE !== STRING_CHARS) return false;
+                if (UNITTYPE !== STRING_OCTETS) return false;
                 if (IPOINTER + 7 > ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER + 0] !== 0x6f) return false;
                 if (ICONTENT[IPOINTER + 1] !== 0x75) return false;
@@ -284,10 +283,10 @@ function createStartRule(mode) {
         const ꐚLET = createRule(mode, {
             parse: {
                 full: function SEQ() {
-                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚxᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚxᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                     return true;
                 },
                 infer: () => {
@@ -299,10 +298,10 @@ function createStartRule(mode) {
             },
             print: {
                 full: function SEQ() {
-                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚxᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚxᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚa()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                     return true;
                 },
                 infer: () => {
@@ -330,9 +329,9 @@ function createStartRule(mode) {
         const ꐚLET = createRule(mode, {
             parse: {
                 full: function SEQ() {
-                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                     return true;
                 },
                 infer: () => {
@@ -343,9 +342,9 @@ function createStartRule(mode) {
             },
             print: {
                 full: function SEQ() {
-                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                    const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                    if (!ꐚxᱻ2()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                     return true;
                 },
                 infer: () => {
@@ -379,7 +378,7 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
             infer: function STR() {
@@ -390,13 +389,13 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (DATATYPE !== STRING_CHARS) return false;
+                if (UNITTYPE !== STRING_OCTETS) return false;
                 if (IPOINTER + 7 > ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER + 0] !== 0x69) return false;
                 if (ICONTENT[IPOINTER + 1] !== 0x6e) return false;
@@ -434,18 +433,18 @@ function createStartRule(mode) {
         parse: {
             full: () => {
                 OCONTENT[OPOINTER++] = 42;
-                DATATYPE |= SCALAR;
+                UNITTYPE |= SCALAR_VALUE;
                 return true;
             },
             infer: () => {
                 OCONTENT[OPOINTER++] = 42;
-                DATATYPE != SCALAR;
+                UNITTYPE != SCALAR_VALUE;
                 return true;
             },
         },
         print: {
             full: function LIT() {
-                if (DATATYPE !== SCALAR) return false;
+                if (UNITTYPE !== SCALAR_VALUE) return false;
                 if (ICONTENT[IPOINTER] !== 42) return false;
                 IPOINTER += 1;
                 return true;
@@ -486,7 +485,7 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
             infer: function STR() {
@@ -497,13 +496,13 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x72;
                 OCONTENT[OPOINTER++] = 0x20;
                 OCONTENT[OPOINTER++] = 0x78;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (DATATYPE !== STRING_CHARS) return false;
+                if (UNITTYPE !== STRING_OCTETS) return false;
                 if (IPOINTER + 7 > ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER + 0] !== 0x69) return false;
                 if (ICONTENT[IPOINTER + 1] !== 0x6e) return false;
@@ -548,20 +547,20 @@ function createStartRule(mode) {
                 OCONTENT[OPOINTER++] = 0x2a;
                 OCONTENT[OPOINTER++] = 0x2a;
                 OCONTENT[OPOINTER++] = 0x2a;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
             infer: function STR() {
                 OCONTENT[OPOINTER++] = 0x2a;
                 OCONTENT[OPOINTER++] = 0x2a;
                 OCONTENT[OPOINTER++] = 0x2a;
-                DATATYPE |= STRING_CHARS;
+                UNITTYPE |= STRING_OCTETS;
                 return true;
             },
         },
         print: {
             full: function STR() {
-                if (DATATYPE !== STRING_CHARS) return false;
+                if (UNITTYPE !== STRING_OCTETS) return false;
                 if (IPOINTER + 3 > ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER + 0] !== 0x2a) return false;
                 if (ICONTENT[IPOINTER + 1] !== 0x2a) return false;
@@ -586,10 +585,10 @@ function createStartRule(mode) {
     const ꐚletexpr = createRule(mode, {
         parse: {
             full: function SEQ() {
-                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚletexprᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                if (!ꐚletexprᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -601,10 +600,10 @@ function createStartRule(mode) {
         },
         print: {
             full: function SEQ() {
-                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚletexprᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                if (!ꐚletexprᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
+                if (!ꐚlx()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                 return true;
             },
             infer: () => {
@@ -626,19 +625,19 @@ function createStartRule(mode) {
                 if (cc !== 0x2d) return false;
                 IPOINTER += 1;
                 OCONTENT[OPOINTER++] = cc;
-                DATATYPE |= STRING_CHARS
+                UNITTYPE |= STRING_OCTETS
                 return true;
             },
             infer: () => {
                 OCONTENT[OPOINTER++] = 0x2d;
-                DATATYPE |= STRING_CHARS
+                UNITTYPE |= STRING_OCTETS
                 return true;
             },
         },
         print: {
             full: function BYT() {
                 let cc;
-                if (DATATYPE !== STRING_CHARS) return false;
+                if (UNITTYPE !== STRING_OCTETS) return false;
                 if (IPOINTER >= ICONTENT.length) return false;
                 cc = ICONTENT[IPOINTER];
                 if (cc !== 0x2d) return false;

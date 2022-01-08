@@ -176,18 +176,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 parse: {
                     full: () => {
                         OCONTENT[OPOINTER++] = ${JSON.stringify(expr.value)};
-                        DATATYPE |= SCALAR;
+                        UNITTYPE |= SCALAR_VALUE;
                         return true;
                     },
                     infer: () => {
                         OCONTENT[OPOINTER++] = ${JSON.stringify(expr.value)};
-                        DATATYPE != SCALAR;
+                        UNITTYPE != SCALAR_VALUE;
                         return true;
                     },
                 },
                 print: {
                     full: function LIT() {
-                        if (DATATYPE !== SCALAR) return false;
+                        if (UNITTYPE !== SCALAR_VALUE) return false;
                         if (ICONTENT[IPOINTER] !== ${JSON.stringify(expr.value)}) return false; ${/* TODO: need to ensure IPOINTER<ILEN too, also elsewhere similar... */''}
                         IPOINTER += 1;
                         return true;
@@ -207,7 +207,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`full: function BYT() {`).indent();
                 emit.down(1).text(`let cc;`);
                 if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (DATATYPE !== STRING_CHARS) return false;`);
+                    if (mode === 'print') emit.down(1).text(`if (UNITTYPE !== STRING_OCTETS) return false;`);
                     emit.down(1).text(`if (IPOINTER >= ICONTENT.length) return false;`);
                     emit.down(1).text(`cc = ICONTENT[IPOINTER];`);
                     for (const excl of expr.exclude || []) {
@@ -232,7 +232,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 }
                 if (hasOutput) {
                     emit.down(1).text(`OCONTENT[OPOINTER++] = cc;`);
-                    if (mode === 'parse') emit.down(1).text(`DATATYPE |= STRING_CHARS`);
+                    if (mode === 'parse') emit.down(1).text(`UNITTYPE |= STRING_OCTETS`);
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text(`},`);
@@ -242,7 +242,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 else {
                     emit.down(1).text(`infer: () => {`).indent();
                     emit.down(1).text(`OCONTENT[OPOINTER++] = 0x${expr.default.toString(16).padStart(2, '0')};`);
-                    if (mode === 'parse') emit.down(1).text(`DATATYPE |= STRING_CHARS`);
+                    if (mode === 'parse') emit.down(1).text(`UNITTYPE |= STRING_OCTETS`);
                     emit.down(1).text(`return true;`);
                     emit.dedent().down(1).text('},');
                 }
@@ -255,9 +255,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: () => {
-                        const OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                        const OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                         const result = ${expr.expression.name}();
-                        OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
+                        OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ;
                         return result;
                     },
                     infer: () => true,
@@ -274,14 +274,14 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: function LST() {
-                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;`
-                                : `if (!parseValue(${item.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;`)
+                                ? `if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;`
+                                : `if (!parseValue(${item.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;`)
                             .join('\n')
                         }
-                        DATATYPE |= LIST_ELEMENTS;
+                        UNITTYPE |= LIST_ELEMENTS;
                         return true;
                     },
                     infer: function LST() {
@@ -291,18 +291,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 : `parseValue(${item.name}.infer);`)
                             .join('\n')
                         }
-                        DATATYPE |= LIST_ELEMENTS;
+                        UNITTYPE |= LIST_ELEMENTS;
                         return true;
                     },
                 },
                 print: {
                     full: function LST() {
-                        if (DATATYPE !== LIST_ELEMENTS) return false;
-                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                        if (UNITTYPE !== LIST_ELEMENTS) return false;
+                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                         ${expr.items
                             .map(item => item.kind === 'Splice'
-                                ? `if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;`
-                                : `if (!printValue(${item.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;`)
+                                ? `if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;`
+                                : `if (!printValue(${item.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;`)
                             .join('\n')
                         }
                         return true;
@@ -327,9 +327,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.lines(`
                     ${mode}: {
                         full: function NOT() {
-                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                             const result = !${expr.expression.name}();
-                            IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ;
+                            IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ;
                             return result;
                         },
                         infer: () => true,
@@ -367,24 +367,24 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             emit.lines(`
                 parse: {
                     full: function RCD() {
-                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                         ${expr.items.map(item => `
                             ${item.kind === 'Field' ? `
                                 ${/* Parse field label */ ''}
                                 ${typeof item.label === 'string' ? `
                                     OCONTENT[OPOINTER++] = ${JSON.stringify(item.label)};
                                 ` : `
-                                    if (!parseValue(${item.label.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                    if (!parseValue(${item.label.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                                     assert(typeof OCONTENT[OPOINTER - 1] === 'string');
                                 `}
 
                                 ${/* Parse field value */''}
-                                if (!parseValue(${item.expression.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                if (!parseValue(${item.expression.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                             ` : /* item.kind === 'Splice' */ `
-                                if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                             `}
                         `).join('\n')}
-                        DATATYPE |= RECORD_FIELDS;
+                        UNITTYPE |= RECORD_FIELDS;
                         return true;
                     },
                     infer: function RCD() {
@@ -405,14 +405,14 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${item.expression.name}.infer();
                             `}
                         `).join('\n')}
-                        DATATYPE |= RECORD_FIELDS;
+                        UNITTYPE |= RECORD_FIELDS;
                         return true;
                     },
                 },
                 print: {
                     full: function RCD() {
-                        if (DATATYPE !== RECORD_FIELDS) return false;
-                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                        if (UNITTYPE !== RECORD_FIELDS) return false;
+                        const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                         const propList = ICONTENT;
                         const propCount = ICONTENT.length >> 1;
                         let bitmask = IPOINTER;
@@ -422,18 +422,18 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                                 ${/* Print field label */ ''}
                                 ${typeof item.label === 'string' ? `
                                     for (i = 0, IPOINTER = 1; (bitmask & (1 << i)) !== 0 && propList[i << 1] !== ${JSON.stringify(item.label)}; ++i, IPOINTER += 2) ;
-                                    if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                    if (i >= propCount) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                                 ` : `
                                     for (i = IPOINTER = 0; (bitmask & (1 << i)) !== 0; ++i, IPOINTER += 2) ;
-                                    if (i >= propCount || !printValue(${item.label.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                    if (i >= propCount || !printValue(${item.label.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                                 `}
         
                                 ${/* Print field value */ ''}
-                                if (!printValue(${item.expression.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                if (!printValue(${item.expression.name})) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                                 bitmask += (1 << i);
                             ` : /* item.kind === 'Splice' */ `
                                 IPOINTER = bitmask;
-                                if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                                if (!${item.expression.name}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
                                 bitmask = IPOINTER;
                             `}
                         `).join('\n')}
@@ -479,9 +479,9 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.lines(`
                     ${mode}: {
                         full: function SEQ() {
-                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                            const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
                             ${exprVars
-                                .map(ev => `if (!${ev}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;`)
+                                .map(ev => `if (!${ev}()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;`)
                                 .join('\n')
                             }
                             return true;
@@ -504,7 +504,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 emit.down(1).text(`${mode}: {`).indent();
                 emit.down(1).text(`full: function STR() {`).indent();
                 if (hasInput) {
-                    if (mode === 'print') emit.down(1).text(`if (DATATYPE !== STRING_CHARS) return false;`);
+                    if (mode === 'print') emit.down(1).text(`if (UNITTYPE !== STRING_OCTETS) return false;`);
                     emit.down(1).text(`if (IPOINTER + ${bytes.length} > ICONTENT.length) return false;`);
                     for (let i = 0; i < bytes.length; ++i) {
                         emit.down(1).text(`if (ICONTENT[IPOINTER + ${i}] !== ${bytes[i]}) return false;`);
@@ -513,14 +513,14 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 }
                 if (hasOutput) {
                     for (const byte of bytes) emit.down(1).text(`OCONTENT[OPOINTER++] = ${byte};`);
-                    if (mode === 'parse') emit.down(1).text(`DATATYPE |= STRING_CHARS;`);
+                    if (mode === 'parse') emit.down(1).text(`UNITTYPE |= STRING_OCTETS;`);
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');
                 emit.down(1).text(`infer: function STR() {`).indent();
                 if (hasOutput) {
                     for (const byte of bytes) emit.down(1).text(`OCONTENT[OPOINTER++] = ${byte};`);
-                    if (mode === 'parse') emit.down(1).text(`DATATYPE |= STRING_CHARS;`);
+                    if (mode === 'parse') emit.down(1).text(`UNITTYPE |= STRING_OCTETS;`);
                 }
                 emit.down(1).text(`return true;`);
                 emit.dedent().down(1).text('},');

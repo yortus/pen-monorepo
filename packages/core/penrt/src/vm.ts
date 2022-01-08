@@ -1,55 +1,37 @@
 // TODO: next:
-// [ ] DATATYPE --> CAT_TYP or FRAG, SCALAR --> NON_CAT, STRING_CHARS --> OCTETS, LIST_ELEMENTS --> ELEMENTS, RECORD_FIELDS --> FIELDS or KVPS
-// [ ] add OCAP for output capacity, and check/respect it everywhere output is added
-//     - NB: only needed for Buffer - and can already check that via bug.len
-// [ ] parseValue writes to VALUE, printValue reads from VALUE
 // [ ] restore LEN/CAP (capacity) checking
-// [ ]   printValue for STRING_CHARS always slices a new Buffer, could just set LEN/CAP instead if it was respected/checked everywhere
-
-
-
-
-// TODO: still inaccurate - we cast around this for:
-// - .toString('utf8', start, end);
-// - .write(string, offset);
-// - narrowing element type to number for octet operations
-interface Arrayish<T> {
-    [n: number]: T;
-    length: number;
-    slice(start?: number, end?: number): Arrayish<T>;
-}
 
 
 
 
 // VM REGISTERS - callee updates/restores
-let ICONTENT: Arrayish<unknown>;
+let ICONTENT: unknown[] | Buffer;
 let IPOINTER: number = 0;
-let OCONTENT: Arrayish<unknown>;
+let OCONTENT: unknown[] | Buffer;
 let OPOINTER: number = 0;
-let DATATYPE: DATATYPE = 0; // NB: Parsers _must_ logical-OR this when returning true. Parsers _must not_ change this when returning false.
-                            // NB: Printers _may_ check/validate this on entry. Printers _must_ return with the same value in DATATYPE.
 
-type DATATYPE = typeof NOTHING | typeof SCALAR | typeof STRING_CHARS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS;
-const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
-
-
+// NB: Parsers _must_ logical-OR UNITTYPE when returning true. Parsers _must not_ modify UNITTYPE when returning false.
+// NB: Printers _must_ validate UNITTYPE on entry. Printers _must not_ modify UNITTYPE.
+let UNITTYPE: typeof NO_UNIT | typeof SCALAR_VALUE | typeof STRING_OCTETS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS = 0;
+const [NO_UNIT, SCALAR_VALUE, STRING_OCTETS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
 
 
-// NB: for successful calls: OPOINTER is incremented, OCONTENT[OPOINTER-1] contains the new value, DATATYPE is unchanged
+
+
+// NB: for successful calls: OPOINTER is incremented, OCONTENT[OPOINTER-1] contains the new value, UNITTYPE is unchanged
 function parseValue(rule: Rule): boolean {
-    const OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
-    DATATYPE = NOTHING;
-    if (!rule()) return DATATYPE = DATATYPEₒ, false;
-    if (DATATYPE === NOTHING) return OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+    const OPOINTERₒ = OPOINTER, UNITTYPEₒ = UNITTYPE;
+    UNITTYPE = NO_UNIT;
+    if (!rule()) return UNITTYPE = UNITTYPEₒ, false;
+    if (UNITTYPE === NO_UNIT) return OPOINTER = OPOINTERₒ, UNITTYPE = UNITTYPEₒ, false;
 
     let value: unknown;
-    switch (DATATYPE) {
-        case SCALAR:
+    switch (UNITTYPE) {
+        case SCALAR_VALUE:
             assert(OPOINTER === OPOINTERₒ + 1);
             value = OCONTENT[OPOINTERₒ];
             break;
-        case STRING_CHARS:
+        case STRING_OCTETS:
             const len = OPOINTER - OPOINTERₒ;
             for (let i = 0; i < len; ++i) _internalBuffer[i] = OCONTENT[OPOINTERₒ + i] as number;
             value = _internalBuffer.toString('utf8', 0, len);
@@ -64,22 +46,21 @@ function parseValue(rule: Rule): boolean {
             break;
         default:
             // Ensure all cases have been handled, both at compile time and at runtime.
-            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(DATATYPE);
+            ((atyp: never): never => { throw new Error(`Unhandled abstract type ${atyp}`); })(UNITTYPE);
     }
     OCONTENT[OPOINTERₒ] = value;
     OPOINTER = OPOINTERₒ + 1;
-    DATATYPE = DATATYPEₒ;
+    UNITTYPE = UNITTYPEₒ;
     return true;
 }
 
 
 
 
-// NB: for successful calls: IPOINTER is incremented, ICONTENT is unchanged, DATATYPE is unchanged
+// NB: for successful calls: IPOINTER is incremented, ICONTENT is unchanged, UNITTYPE is unchanged
 function printValue(rule: Rule): boolean {
-    const IPOINTERₒ = IPOINTER, ICONTENTₒ = ICONTENT, DATATYPEₒ = DATATYPE;
-    let value = ICONTENT[IPOINTER];
-    let atyp: DATATYPE;
+    const IPOINTERₒ = IPOINTER, ICONTENTₒ = ICONTENT, UNITTYPEₒ = UNITTYPE;
+    const value = ICONTENT[IPOINTER];
     let objKeys: string[] | undefined;
 
     // Nothing case
@@ -89,9 +70,9 @@ function printValue(rule: Rule): boolean {
 
     // Scalar case
     if (value === null || value === true || value === false || typeof value === 'number') {
-        DATATYPE = SCALAR;
+        UNITTYPE = SCALAR_VALUE;
         const result = rule();
-        DATATYPE = DATATYPEₒ;
+        UNITTYPE = UNITTYPEₒ;
         assert(IPOINTER === IPOINTERₒ + 1);
         return result;
     }
@@ -100,18 +81,18 @@ function printValue(rule: Rule): boolean {
     if (typeof value === 'string') {
         const len = _internalBuffer.write(value, 0, undefined, 'utf8');
         ICONTENT = _internalBuffer.slice(0, len);
-        atyp = DATATYPE = STRING_CHARS;
+        UNITTYPE = STRING_OCTETS;
     }
     else if (Array.isArray(value)) {
         ICONTENT = value;
-        atyp = DATATYPE = LIST_ELEMENTS;
+        UNITTYPE = LIST_ELEMENTS;
     }
     else if (isObject(value)) {
         const arr: unknown[] = ICONTENT = [];
         objKeys = Object.keys(value); // TODO: doc reliance on prop order and what this means
         assert(objKeys.length < 32); // TODO: document this limit, move to constant, consider how to remove it
         for (let i = 0; i < objKeys.length; ++i) arr.push(objKeys[i], value[objKeys[i]]);
-        atyp = DATATYPE = RECORD_FIELDS;
+        UNITTYPE = RECORD_FIELDS;
     }
     else {
         throw new Error(`Unsupported value type for value ${value}`);
@@ -121,17 +102,17 @@ function printValue(rule: Rule): boolean {
     IPOINTER = 0;
     let result = rule();
 
-    // Restore ICONTENT/IPOINTER/DATATYPE
-    const ICONTENTᐟ = ICONTENT, IPOINTERᐟ = IPOINTER;
-    ICONTENT = ICONTENTₒ, IPOINTER = IPOINTERₒ, DATATYPE = DATATYPEₒ;
+    // Restore ICONTENT/IPOINTER/UNITTYPE
+    const ICONTENTᐟ = ICONTENT, IPOINTERᐟ = IPOINTER, UNITTYPEᐟ = UNITTYPE;
+    ICONTENT = ICONTENTₒ, IPOINTER = IPOINTERₒ, UNITTYPE = UNITTYPEₒ;
     if (!result) return false;
 
     // Ensure input was fully consumed
-    if (atyp === RECORD_FIELDS) {
+    if (UNITTYPEᐟ === RECORD_FIELDS) {
         const keyCount = objKeys!.length;
         if (keyCount > 0 && (IPOINTERᐟ !== -1 >>> (32 - keyCount))) return false;
     }
-    else /* STRING_CHARS | LIST_ELEMENTS */ {
+    else /* STRING_OCTETS | LIST_ELEMENTS */ {
         if (IPOINTERᐟ !== ICONTENTᐟ.length) return false;
     }
     IPOINTER += 1;

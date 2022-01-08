@@ -55,19 +55,19 @@ function intString(mode: 'parse' | 'print'): Func {
 
                     // Success
                     OCONTENT[OPOINTER++] = num;
-                    DATATYPE |= SCALAR;
+                    UNITTYPE |= SCALAR_VALUE;
                     return true;
                 },
 
                 infer: function ISTR() {
                     OCONTENT[OPOINTER++] = 0;
-                    DATATYPE |= SCALAR;
+                    UNITTYPE |= SCALAR_VALUE;
                     return true;
                 },
             },
             print: {
                 full: function ISTR() {
-                    if (DATATYPE !== SCALAR) return false;
+                    if (UNITTYPE !== SCALAR_VALUE) return false;
                     let num = ICONTENT[IPOINTER] as number;
                     if (typeof num !== 'number') return false;
 

@@ -71,18 +71,18 @@ function floatString(mode: 'parse' | 'print'): Rule {
 
                 // Success
                 OCONTENT[OPOINTER++] = num;
-                DATATYPE |= SCALAR;
+                UNITTYPE |= SCALAR_VALUE;
                 return true;
             },
             infer: function ISTR() {
                 OCONTENT[OPOINTER++] = 0;
-                DATATYPE |= SCALAR;
+                UNITTYPE |= SCALAR_VALUE;
                 return true;
             },
         },
         print: {
             full: function FSTR() {
-                if (DATATYPE !== SCALAR) return false;
+                if (UNITTYPE !== SCALAR_VALUE) return false;
                 const obuffer = OCONTENT as Buffer; // OCONTENT is always a Buffer when printing
                 const num = ICONTENT[IPOINTER];
                 if (typeof num !== 'number') return false;
