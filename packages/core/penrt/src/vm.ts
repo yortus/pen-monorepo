@@ -1,9 +1,3 @@
-// TODO: next:
-// [ ] restore LEN/CAP (capacity) checking
-
-
-
-
 // VM REGISTERS - callee updates/restores
 let ICONTENT: unknown[] | Buffer;
 let IPOINTER: number = 0;
@@ -33,6 +27,7 @@ function parseValue(rule: Rule): boolean {
             break;
         case STRING_OCTETS:
             const len = OPOINTER - OPOINTERₒ;
+            assert(len < _internalBuffer.length, 'internal buffer too small');
             for (let i = 0; i < len; ++i) _internalBuffer[i] = OCONTENT[OPOINTERₒ + i] as number;
             value = _internalBuffer.toString('utf8', 0, len);
             break;
@@ -80,6 +75,7 @@ function printValue(rule: Rule): boolean {
     // Aggregate cases
     if (typeof value === 'string') {
         const len = _internalBuffer.write(value, 0, undefined, 'utf8');
+        assert(len < _internalBuffer.length, 'internal buffer too small');
         ICONTENT = _internalBuffer.slice(0, len);
         UNITTYPE = STRING_OCTETS;
     }
@@ -123,4 +119,4 @@ function printValue(rule: Rule): boolean {
 
 
 // Used internally by the VM
-const _internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? What if it's ever too small?
+const _internalBuffer = Buffer.alloc(2 ** 16); // TODO: now 64K - how big to make this? Can it be dynamic?

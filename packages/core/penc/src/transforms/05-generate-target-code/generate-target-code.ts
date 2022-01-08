@@ -188,7 +188,8 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
                 print: {
                     full: function LIT() {
                         if (UNITTYPE !== SCALAR_VALUE) return false;
-                        if (ICONTENT[IPOINTER] !== ${JSON.stringify(expr.value)}) return false; ${/* TODO: need to ensure IPOINTER<ILEN too, also elsewhere similar... */''}
+                        if (IPOINTER >= ICONTENT.length) return false;
+                        if (ICONTENT[IPOINTER] !== ${JSON.stringify(expr.value)}) return false;
                         IPOINTER += 1;
                         return true;
                     },
@@ -363,7 +364,6 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
         }
 
         case 'RecordExpression': {
-            // TODO: restore the duplication detection logic below (`fieldLabels` checks)
             emit.lines(`
                 parse: {
                     full: function RCD() {
@@ -534,7 +534,7 @@ function emitBinding(emit: Emitter, name: string, expr: V.Expression<400>) {
             // TODO: add exhaustiveness check...
             emit.down(1).text(`// NOT HANDLED: ${name}`);
             // TODO: was... restore...
-            // throw new Error('Internal Error'); // TODO...
+            // throw new Error('Internal Error');
     }
     emit.dedent().down(1).text(`});`);
 }

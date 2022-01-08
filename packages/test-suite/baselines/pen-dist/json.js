@@ -112,6 +112,7 @@ function parseValue(rule) {
             break;
         case STRING_OCTETS:
             const len = OPOINTER - OPOINTERₒ;
+            assert(len < _internalBuffer.length, 'internal buffer too small');
             for (let i = 0; i < len; ++i)
                 _internalBuffer[i] = OCONTENT[OPOINTERₒ + i];
             value = _internalBuffer.toString('utf8', 0, len);
@@ -150,6 +151,7 @@ function printValue(rule) {
     }
     if (typeof value === 'string') {
         const len = _internalBuffer.write(value, 0, undefined, 'utf8');
+        assert(len < _internalBuffer.length, 'internal buffer too small');
         ICONTENT = _internalBuffer.slice(0, len);
         UNITTYPE = STRING_OCTETS;
     }
@@ -800,6 +802,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== false) return false;
                 IPOINTER += 1;
                 return true;
@@ -891,6 +894,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== null) return false;
                 IPOINTER += 1;
                 return true;
@@ -982,6 +986,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== true) return false;
                 IPOINTER += 1;
                 return true;
@@ -2074,6 +2079,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== 16) return false;
                 IPOINTER += 1;
                 return true;
@@ -2100,6 +2106,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== 4) return false;
                 IPOINTER += 1;
                 return true;
@@ -2126,6 +2133,7 @@ function createStartRule(mode) {
         print: {
             full: function LIT() {
                 if (UNITTYPE !== SCALAR_VALUE) return false;
+                if (IPOINTER >= ICONTENT.length) return false;
                 if (ICONTENT[IPOINTER] !== 4) return false;
                 IPOINTER += 1;
                 return true;
