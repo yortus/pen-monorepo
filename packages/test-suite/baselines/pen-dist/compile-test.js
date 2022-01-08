@@ -93,8 +93,8 @@ function lazy(init) {
 }
 const onSettled = [];
 let ICONTENT;
-let IPOINTER = 0;
 let OCONTENT;
+let IPOINTER = 0;
 let OPOINTER = 0;
 let UNITTYPE = 0;
 const [NO_UNIT, SCALAR_VALUE, STRING_OCTETS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];

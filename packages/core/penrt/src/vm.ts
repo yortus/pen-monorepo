@@ -1,11 +1,15 @@
 // VM REGISTERS - callee updates/restores
+
+// NB: Parse/print rules _must not_ reassign ICONTENT or OCONTENT, or modify any input content, or modify any output content before IPOINTER
 let ICONTENT: unknown[] | Buffer;
-let IPOINTER: number = 0;
 let OCONTENT: unknown[] | Buffer;
+
+// NB: Parse/print rules _may_ advance these registers when returning true. Parse/print rules _must not_ modify these registers when returning false.
+let IPOINTER: number = 0;
 let OPOINTER: number = 0;
 
-// NB: Parsers _must_ logical-OR UNITTYPE when returning true. Parsers _must not_ modify UNITTYPE when returning false.
-// NB: Printers _must_ validate UNITTYPE on entry. Printers _must not_ modify UNITTYPE.
+// NB: Parse rules _must_ logical-OR UNITTYPE when returning true. Parse rules _must not_ modify UNITTYPE when returning false.
+// NB: Print rules _must_ validate UNITTYPE on entry. Print rules _must not_ modify UNITTYPE.
 let UNITTYPE: typeof NO_UNIT | typeof SCALAR_VALUE | typeof STRING_OCTETS | typeof LIST_ELEMENTS | typeof RECORD_FIELDS = 0;
 const [NO_UNIT, SCALAR_VALUE, STRING_OCTETS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8] as const;
 
