@@ -36,13 +36,6 @@ function createRule(mode, impls) {
         result.constant = impls.constant;
     return result;
 }
-let IREP;
-let IPOS = 0;
-let OREP;
-let OPOS = 0;
-let ATYP = 0;
-const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
-const internalBuffer = Buffer.alloc(2 ** 16);
 function parse(startRule, stringOrBuffer) {
     IREP = Buffer.isBuffer(stringOrBuffer) ? stringOrBuffer : Buffer.from(stringOrBuffer, 'utf8');
     IPOS = 0;
@@ -67,6 +60,43 @@ function print(startRule, value, buffer) {
         throw new Error('output buffer too small');
     return buffer ? OPOS : buf.toString('utf8', 0, OPOS);
 }
+function assert(value, message) {
+    if (!value)
+        throw new Error(`Assertion failed: ${message !== null && message !== void 0 ? message : 'no further details'}`);
+}
+function isObject(value) {
+    return value !== null && typeof value === 'object';
+}
+function lazy(init) {
+    let f;
+    return Object.assign(function LAZ(arg) {
+        try {
+            return f(arg);
+        }
+        catch (err) {
+            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
+                throw err;
+            f = init();
+            return f(arg);
+        }
+    }, {
+        infer(arg) {
+            try {
+                return f.infer(arg);
+            }
+            catch (err) {
+                f = init();
+                return f.infer(arg);
+            }
+        }
+    });
+}
+let IREP;
+let IPOS = 0;
+let OREP;
+let OPOS = 0;
+let ATYP = 0;
+const [NOTHING, SCALAR, STRING_CHARS, LIST_ELEMENTS, RECORD_FIELDS] = [0, 1, 2, 4, 8];
 function parseValue(rule) {
     const OPOSₒ = OPOS, ATYPₒ = ATYP;
     ATYP = NOTHING;
@@ -83,8 +113,8 @@ function parseValue(rule) {
         case STRING_CHARS:
             const len = OPOS - OPOSₒ;
             for (let i = 0; i < len; ++i)
-                internalBuffer[i] = OREP[OPOSₒ + i];
-            value = internalBuffer.toString('utf8', 0, len);
+                _internalBuffer[i] = OREP[OPOSₒ + i];
+            value = _internalBuffer.toString('utf8', 0, len);
             break;
         case LIST_ELEMENTS:
             value = OREP.slice(OPOSₒ, OPOS);
@@ -120,8 +150,8 @@ function printValue(rule) {
         return result;
     }
     if (typeof value === 'string') {
-        const len = internalBuffer.write(value, 0, undefined, 'utf8');
-        IREP = internalBuffer.slice(0, len);
+        const len = _internalBuffer.write(value, 0, undefined, 'utf8');
+        IREP = _internalBuffer.slice(0, len);
         atyp = ATYP = STRING_CHARS;
     }
     else if (Array.isArray(value)) {
@@ -157,37 +187,7 @@ function printValue(rule) {
     IPOS += 1;
     return true;
 }
-function assert(value, message) {
-    if (!value)
-        throw new Error(`Assertion failed: ${message !== null && message !== void 0 ? message : 'no further details'}`);
-}
-function isObject(value) {
-    return value !== null && typeof value === 'object';
-}
-function lazy(init) {
-    let f;
-    return Object.assign(function LAZ(arg) {
-        try {
-            return f(arg);
-        }
-        catch (err) {
-            if (!(err instanceof TypeError) || !err.message.includes('f is not a function'))
-                throw err;
-            f = init();
-            return f(arg);
-        }
-    }, {
-        infer(arg) {
-            try {
-                return f.infer(arg);
-            }
-            catch (err) {
-                f = init();
-                return f.infer(arg);
-            }
-        }
-    });
-}
+const _internalBuffer = Buffer.alloc(2 ** 16);
 
 
 
