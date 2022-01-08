@@ -46,11 +46,7 @@ Elements    = [Value, ...(COMMA Elements | [])]                     // NB: tail-
 Number = floatString
 
 // ---------- Strings ----------
-// TODO: BUG: this requires strings to have 1..M chars, but *should* allow empty strings too. The problem is that when printing,
-//       the `String` rule always matches any input value. Eg if input value is an array, it matches without consuming anything.
-//       SOLN: Special built-in rule for 'empty string'? Special way of saying (on print) 'we have to have a string DATATYPE here, even if empty'
-//             ...and similar prob/soln for lists and records in a quantified (* or ?) pattern
-String = DOUBLE_QUOTE   CHAR   0..m CHAR   DOUBLE_QUOTE
+String = DOUBLE_QUOTE   (CHAR 0..m CHAR   |   ``)   DOUBLE_QUOTE
 // TODO: how is string of escape sequence chars (in SPAN) mapped to/from the single char it represents? (in NODE)
 //       - something akin to `intString` which parses a number from the input span, call it `char`. Understands common escape sequences
 CHAR =

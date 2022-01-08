@@ -225,7 +225,8 @@ Splice
     { return {kind: 'Splice', expression}; }
 
 StringItems
-    = items:StringItem*
+    = items:StringItem+
+    / !StringItem   { return ['']; }
 
 StringItem
     = chars:CHARACTER+   { return chars.join(''); }

@@ -1933,14 +1933,12 @@ function createStartRule(mode) {
             full: function SEQ() {
                 const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 if (!ꐚDOUBLE_QUOTE()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚCHAR()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 if (!ꐚStringᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 if (!ꐚDOUBLE_QUOTE()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
                 ꐚDOUBLE_QUOTE.infer();
-                ꐚCHAR.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
                 return true;
@@ -1950,14 +1948,12 @@ function createStartRule(mode) {
             full: function SEQ() {
                 const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
                 if (!ꐚDOUBLE_QUOTE()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
-                if (!ꐚCHAR()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 if (!ꐚStringᱻ1()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 if (!ꐚDOUBLE_QUOTE()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
                 return true;
             },
             infer: () => {
                 ꐚDOUBLE_QUOTE.infer();
-                ꐚCHAR.infer();
                 ꐚStringᱻ1.infer();
                 ꐚDOUBLE_QUOTE.infer();
                 return true;
@@ -1965,8 +1961,50 @@ function createStartRule(mode) {
         },
     });
 
-    // QuantifiedExpression
+    // SelectionExpression
     const ꐚStringᱻ1 = createRule(mode, {
+        parse: {
+            full: function SEL() { return ꐚStringᱻ2() || ꐚStringᱻ4(); },
+            infer: () => ꐚStringᱻ2.infer(),
+        },
+        print: {
+            full: function SEL() { return ꐚStringᱻ2() || ꐚStringᱻ4(); },
+            infer: () => ꐚStringᱻ2.infer(),
+        },
+    });
+
+    // SequenceExpression
+    const ꐚStringᱻ2 = createRule(mode, {
+        parse: {
+            full: function SEQ() {
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚCHAR()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚStringᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                return true;
+            },
+            infer: () => {
+                ꐚCHAR.infer();
+                ꐚStringᱻ3.infer();
+                return true;
+            },
+        },
+        print: {
+            full: function SEQ() {
+                const IPOINTERₒ = IPOINTER, OPOINTERₒ = OPOINTER, DATATYPEₒ = DATATYPE;
+                if (!ꐚCHAR()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                if (!ꐚStringᱻ3()) return IPOINTER = IPOINTERₒ, OPOINTER = OPOINTERₒ, DATATYPE = DATATYPEₒ, false;
+                return true;
+            },
+            infer: () => {
+                ꐚCHAR.infer();
+                ꐚStringᱻ3.infer();
+                return true;
+            },
+        },
+    });
+
+    // QuantifiedExpression
+    const ꐚStringᱻ3 = createRule(mode, {
         parse: {
             full: function QUA() {
                 let IPOINTERᐟ = IPOINTER, OPOINTERᐟ = OPOINTER;
@@ -1991,6 +2029,34 @@ function createStartRule(mode) {
             },
             infer: () => true,
         },
+    });
+
+    // StringLiteral
+    const ꐚStringᱻ4 = createRule(mode, {
+        parse: {
+            full: function STR() {
+                if (IPOINTER + 0 > ICONTENT.length) return false;
+                IPOINTER += 0;
+                DATATYPE |= STRING_CHARS;
+                return true;
+            },
+            infer: function STR() {
+                DATATYPE |= STRING_CHARS;
+                return true;
+            },
+        },
+        print: {
+            full: function STR() {
+                if (DATATYPE !== STRING_CHARS) return false;
+                if (IPOINTER + 0 > ICONTENT.length) return false;
+                IPOINTER += 0;
+                return true;
+            },
+            infer: function STR() {
+                return true;
+            },
+        },
+        constant: "",
     });
 
     // NumericLiteral

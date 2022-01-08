@@ -36,7 +36,7 @@ export function optimiseByteExpressions(ast: V.AST<300>): V.AST<300> {
         // One-byte string literals: convert to equivalent ByteExpression.
         StringLiteral: (str): V.StringLiteral<300> | V.ByteExpression<300> => {
             const buf = Buffer.from(str.value);
-            if (buf.length > 1) return str;
+            if (buf.length !== 1) return str;
             return {
                 kind: 'ByteExpression',
                 subkind: str.subkind,
